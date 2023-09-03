@@ -22,7 +22,12 @@
     <li> ...and so much more...
     </ul>
 <li>Monsters can have multiple tokens
-<li>Duplication of monsters or effects in a battle
+<li>Duplication of monsters or effects in a battle - look for a button called... "Duplicate"
+<li>Dynamic entry icons in the campaign tree
+    <ul>
+    <li> PC icons are now their own token
+    <li> You can apply a custom icon to any entry in the tree
+    </ul>
 </ul>
 
 <p>

@@ -47,6 +47,7 @@ protected slots:
 
     void handlePreviousToken();
     void handleAddToken();
+    void handleSearchToken();
     void handleReloadImage();
     void handleClearImage();
     void handleNextToken();

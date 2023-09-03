@@ -28,7 +28,11 @@ void CharacterImportHeroForge::runImport(const QString& token)
     qDeleteAll(_importData);
     _importData.clear();
 
-    QUrl serviceUrl = QUrl("https://api.dmhh.net/heroforge?version=2.6&debug=true");
+#ifdef DEBUG_HEROFORGE_IMPORT
+    QUrl serviceUrl = QUrl("https://api.dmhh.net/heroforge?version=3.0&debug=true");
+#else
+    QUrl serviceUrl = QUrl("https://api.dmhh.net/heroforge?version=3.0");
+#endif
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 

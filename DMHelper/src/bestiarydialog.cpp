@@ -7,6 +7,7 @@
 #include "monsteractionframe.h"
 #include "monsteractioneditdialog.h"
 #include "publishbuttonframe.h"
+#include "bestiaryfindtokendialog.h"
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QInputDialog>
@@ -43,6 +44,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     connect(ui->btnPreviousToken, &QPushButton::clicked, this, &BestiaryDialog::handlePreviousToken);
     connect(ui->btnAddToken, &QPushButton::clicked, this, &BestiaryDialog::handleAddToken);
+    connect(ui->btnSearchToken, &QPushButton::clicked, this, &BestiaryDialog::handleSearchToken);
     connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
     connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
     connect(ui->btnNextToken, &QPushButton::clicked, this, &BestiaryDialog::handleNextToken);
@@ -451,6 +453,15 @@ void BestiaryDialog::handleAddToken()
         _monster->addIcon(filename);
         setTokenIndex(_monster->getIconList().indexOf(filename));
     }
+}
+
+void BestiaryDialog::handleSearchToken()
+{
+    if(!_monster)
+        return;
+
+    BestiaryFindTokenDialog dlg(_monster->getName());
+    dlg.exec();
 }
 
 void BestiaryDialog::handleReloadImage()

@@ -74,6 +74,7 @@ SOURCES += main.cpp\
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
+    bestiaryfindtokendialog.cpp \
     discordposter.cpp \
     dmh_vlc.cpp \
     dmhcache.cpp \
@@ -330,6 +331,7 @@ HEADERS  += mainwindow.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
+    bestiaryfindtokendialog.h \
     discordposter.h \
     dmh_vlc.h \
     dmhcache.h \
@@ -545,6 +547,7 @@ FORMS    += mainwindow.ui \
     conditionseditdialog.ui \
     configurelockedgriddialog.ui \
     customtableframe.ui \
+    bestiaryfindtokendialog.ui \
     dicerolldialog.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
