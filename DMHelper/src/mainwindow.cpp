@@ -899,6 +899,9 @@ bool MainWindow::closeCampaign()
 
     qDebug() << "[MainWindow] Closing Campaign: " << _campaignFileName;
 
+    if((_ribbon) && (_ribbon->getPublishRibbon()))
+        _ribbon->getPublishRibbon()->cancelPublish();
+
     if(_dirty)
     {
         QMessageBox::StandardButton result = QMessageBox::question(this,
@@ -1368,6 +1371,26 @@ void MainWindow::removeCurrentItem()
                              QString("Are you sure you would like to delete the entry ") + removeObject->getName() + QString("?")) != QMessageBox::Yes)
         return;
 
+    // Check that the object to be removed is not being published
+    if(_pubWindow)
+    {
+        QUuid publishId = _pubWindow->getObjectId();
+        if((!publishId.isNull()) && (publishId == removeObject->getID()))
+        {
+            if((!_ribbon) || (!_ribbon->getPublishRibbon()))
+                return;
+
+            _ribbon->getPublishRibbon()->cancelPublish();
+        }
+            /*
+        {
+            CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+            if(objectFrame)
+                objectFrame->publishClicked(false);
+        }
+        */
+    }
+
     QUuid nextObjectId;
     if(parentObject->getObjectType() != DMHelper::CampaignType_Campaign)
     {
@@ -1392,7 +1415,9 @@ void MainWindow::removeCurrentItem()
 
     qDebug() << "[MainWindow] Removed object from the campaign tree: " << removeObject->getName() << ", ID: " << removeObject->getID();
 
-    delete _campaign->removeObject(removeObject->getID());
+//    delete _campaign->removeObject(removeObject->getID());
+    _campaign->removeObject(removeObject->getID());
+    removeObject->deleteLater();
     updateCampaignTree();
 }
 

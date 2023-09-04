@@ -460,8 +460,10 @@ void BestiaryDialog::handleSearchToken()
     if(!_monster)
         return;
 
-    BestiaryFindTokenDialog dlg(_monster->getName());
-    dlg.exec();
+    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName());
+    dlg->resize(width() * 9 / 10, height() * 9 / 10);
+    dlg->exec();
+    dlg->deleteLater();
 }
 
 void BestiaryDialog::handleReloadImage()

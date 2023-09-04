@@ -1148,7 +1148,7 @@ void BattleFrame::addNPC()
 
 void BattleFrame::addEffectObject()
 {
-    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."));
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file..."));
     if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
         return;
 

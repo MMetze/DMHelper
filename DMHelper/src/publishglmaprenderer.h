@@ -26,6 +26,7 @@ public:
     virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
+    virtual void rendererDeactivated();
     virtual bool deleteOnDeactivation() override;
     virtual QRect getScissorRect() override;
 
