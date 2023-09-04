@@ -20,6 +20,8 @@ public:
     explicit BestiaryFindTokenDialog(const QString& monsterName, QWidget *parent = nullptr);
     ~BestiaryFindTokenDialog();
 
+    QList<QImage> retrieveSelection();
+
 protected slots:
     void urlRequestFinished(QNetworkReply *reply);
     void imageRequestFinished(QNetworkReply *reply);
@@ -27,12 +29,17 @@ protected slots:
     void browseMask();
 
 protected:
+    void startSearch(const QString& searchString);
+    void abortSearches();
+
+    void customizeSearch();
     void updateLayout();
     void updateLayoutImages();
     void updateFrameMaskImages();
     void clearGrid();
     TokenData* getDataForReply(QNetworkReply *reply);
     QPixmap decoratePixmap(QPixmap pixmap, const QColor& background);
+    QImage decorateFullImage(QPixmap pixmap, const QColor& background);
     bool fuzzyColorMatch(QRgb first, QRgb second);
 
 private:
@@ -40,6 +47,7 @@ private:
 
     QString _monsterName;
     QNetworkAccessManager* _manager;
+    QNetworkReply* _urlReply;
     QImage _maskImage;
     QImage _frameImage;
     QGridLayout* _tokenGrid;

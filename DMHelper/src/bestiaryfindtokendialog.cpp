@@ -9,6 +9,7 @@
 #include <QDomElement>
 #include <QPainter>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QImageReader>
 
 //#define DEBUG_FINDTOKEN_IMPORT
@@ -22,6 +23,7 @@ BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, QWi
     ui(new Ui::BestiaryFindTokenDialog),
     _monsterName(monsterName),
     _manager(nullptr),
+    _urlReply(nullptr),
     _maskImage(),
     _frameImage(),
     _tokenGrid(nullptr),
@@ -49,25 +51,9 @@ BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, QWi
     connect(ui->edtFrameImage, &QLineEdit::textChanged, this, &BestiaryFindTokenDialog::updateFrameMaskImages);
     connect(ui->edtMaskImage, &QLineEdit::textChanged, this, &BestiaryFindTokenDialog::updateFrameMaskImages);
 
-    _manager = new QNetworkAccessManager(this);
-    connect(_manager, &QNetworkAccessManager::finished, this, &BestiaryFindTokenDialog::urlRequestFinished);
+    connect(ui->btnCustomize, &QAbstractButton::clicked, this, &BestiaryFindTokenDialog::customizeSearch);
 
-#ifdef DEBUG_FINDTOKEN_IMPORT
-    QUrl serviceUrl = QUrl("https://api.dmhh.net/searchimage?version=3.0&debug=true");
-#else
-    QUrl serviceUrl = QUrl("https://api.dmhh.net/searchimage?version=3.0");
-#endif
-    QNetworkRequest request(serviceUrl);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-    QUrlQuery postData;
-    postData.addQueryItem("searchString", QString("dnd 5e") + monsterName);
-
-#ifdef DEBUG_FINDTOKEN_IMPORT
-    qDebug() << "[BestiaryFindTokenDialog] Posting search request: " << postData.toString(QUrl::FullyEncoded).toUtf8();
-#endif
-
-    _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    startSearch(QString("dnd 5e ") + monsterName);
 }
 
 BestiaryFindTokenDialog::~BestiaryFindTokenDialog()
@@ -77,6 +63,23 @@ BestiaryFindTokenDialog::~BestiaryFindTokenDialog()
     qDeleteAll(_tokenList);
     delete _manager;
     delete ui;
+}
+
+QList<QImage> BestiaryFindTokenDialog::retrieveSelection()
+{
+    QList<QImage> resultList;
+
+    foreach(TokenData* data, _tokenList)
+    {
+        if((data) && (!data->_pixmap.isNull()) && (data->_button) && (data->_button->isChecked()))
+        {
+            QImage resultImage = decorateFullImage(data->_pixmap, data->_background);
+            if(!resultImage.isNull())
+                resultList.append(resultImage);
+        }
+    }
+
+    return resultList;
 }
 
 void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
@@ -191,6 +194,70 @@ void BestiaryFindTokenDialog::browseMask()
         return;
 
     ui->edtMaskImage->setText(filename);
+}
+
+void BestiaryFindTokenDialog::startSearch(const QString& searchString)
+{
+    if(!_manager)
+        _manager = new QNetworkAccessManager(this);
+
+    connect(_manager, &QNetworkAccessManager::finished, this, &BestiaryFindTokenDialog::urlRequestFinished);
+
+#ifdef DEBUG_FINDTOKEN_IMPORT
+    QUrl serviceUrl = QUrl("https://api.dmhh.net/searchimage?version=3.0&debug=true");
+#else
+    QUrl serviceUrl = QUrl("https://api.dmhh.net/searchimage?version=3.0");
+#endif
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    postData.addQueryItem("searchString", searchString);
+
+#ifdef DEBUG_FINDTOKEN_IMPORT
+    qDebug() << "[BestiaryFindTokenDialog] Posting search request: " << postData.toString(QUrl::FullyEncoded).toUtf8();
+#endif
+
+    _urlReply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+}
+
+void BestiaryFindTokenDialog::abortSearches()
+{
+    disconnect(_manager, &QNetworkAccessManager::finished, this, &BestiaryFindTokenDialog::urlRequestFinished);
+    disconnect(_manager, &QNetworkAccessManager::finished, this, &BestiaryFindTokenDialog::imageRequestFinished);
+
+    if(_urlReply)
+    {
+        if(!_urlReply->isFinished())
+            _urlReply->abort();
+        _urlReply->deleteLater();
+        _urlReply = nullptr;
+    }
+
+    foreach(TokenData* data, _tokenList)
+    {
+        if((data) && (data->_reply))
+        {
+            if(!data->_reply->isFinished())
+                data->_reply->abort();
+            data->_reply->deleteLater();
+            data->_reply = nullptr;
+        }
+    }
+
+    qDeleteAll(_tokenList);
+    _tokenList.clear();
+}
+
+void BestiaryFindTokenDialog::customizeSearch()
+{
+    QString newSearch = QInputDialog::getText(nullptr, QString("Custom Search String"), QString("Search: "), QLineEdit::Normal, QString("dnd 5e ") + _monsterName);
+    if(newSearch.isEmpty())
+        return;
+
+    abortSearches();
+    clearGrid();
+    startSearch(newSearch);
 }
 
 void BestiaryFindTokenDialog::updateLayout()
@@ -322,6 +389,61 @@ QPixmap BestiaryFindTokenDialog::decoratePixmap(QPixmap pixmap, const QColor& ba
     }
 
     return pixmap;
+}
+
+QImage BestiaryFindTokenDialog::decorateFullImage(QPixmap pixmap, const QColor& background)
+{
+    if(ui->btnOriginalImage->isChecked())
+    {
+        return pixmap.toImage();
+    }
+    else if(ui->btnTransparentColor->isChecked())
+    {
+        QImage inputImage = pixmap.toImage();
+        QImage transparentImage(inputImage.size(), QImage::Format_ARGB32_Premultiplied);
+
+        QRgb transparentColor = ui->btnColor->getColor().rgb();
+        QRgb outputColor = qRgba(qRed(transparentColor), qGreen(transparentColor), qBlue(transparentColor), 0);
+
+        for (int y = 0; y < inputImage.height(); y++)
+        {
+            const QRgb* inputLine = reinterpret_cast<const QRgb *>(inputImage.scanLine(y));
+            QRgb* outputLine = reinterpret_cast<QRgb *>(transparentImage.scanLine(y));
+            for(int x = 0; x < inputImage.width(); x++)
+            {
+                if(fuzzyColorMatch(inputLine[x], transparentColor))
+                    outputLine[x] = outputColor;
+                else
+                    outputLine[x] = inputLine[x];
+            }
+        }
+
+        return transparentImage;
+    }
+    else if(ui->btnFrameAndMask->isChecked())
+    {
+        int maxSize = qMax(pixmap.width(), pixmap.height());
+        QImage frameImage = QImage(ui->edtFrameImage->text()).scaled(maxSize, maxSize, Qt::KeepAspectRatio);
+        QImage maskImage = QImage(ui->edtMaskImage->text()).scaled(maxSize, maxSize, Qt::KeepAspectRatio);
+        if((!frameImage.isNull()) && (!maskImage.isNull()))
+        {
+            QImage resultImage(maxSize, maxSize, QImage::Format_ARGB32_Premultiplied);
+            resultImage.fill(background);
+
+            QPainter p;
+            p.begin(&resultImage);
+                p.drawPixmap((maxSize - pixmap.width())/2, (maxSize - pixmap.height()) / 2, pixmap);
+                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+                p.drawImage((maxSize - maskImage.width())/2, (maxSize - maskImage.height()) / 2, maskImage);
+                p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+                p.drawImage((maxSize - frameImage.width())/2, (maxSize - frameImage.height()) / 2, frameImage);
+            p.end();
+
+            return resultImage;
+        }
+    }
+
+    return pixmap.toImage();
 }
 
 void BestiaryFindTokenDialog::updateFrameMaskImages()

@@ -462,8 +462,29 @@ void BestiaryDialog::handleSearchToken()
 
     BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName());
     dlg->resize(width() * 9 / 10, height() * 9 / 10);
-    dlg->exec();
+    if(dlg->exec() == QDialog::Accepted)
+    {
+        QList<QImage> resultList = dlg->retrieveSelection();
+        int fileIndex = 1;
+        QDir directory = Bestiary::Instance()->getDirectory();
+        QString tokenFile = QString("Images/") + _monster->getName() + QString(".png");
+        foreach(QImage image, resultList)
+        {
+            if(!image.isNull())
+            {
+                while(directory.exists(tokenFile))
+                    tokenFile = QString("Images/") + _monster->getName() + QString::number(fileIndex++) + QString(".png");
+
+                image.save(directory.absoluteFilePath(tokenFile));
+            }
+        }
+
+        _monster->searchForIcons();
+        setTokenIndex(_monster->getIconList().indexOf(tokenFile));
+    }
     dlg->deleteLater();
+
+    update();
 }
 
 void BestiaryDialog::handleReloadImage()
