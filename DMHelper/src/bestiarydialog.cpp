@@ -747,7 +747,12 @@ void BestiaryDialog::setTokenIndex(int index)
     }
 
     if((index < 0) || (index >= _monster->getIconCount()))
+    {
+        ui->lblIcon->setPixmap(QPixmap());
+        ui->btnPreviousToken->setVisible(false);
+        ui->btnNextToken->setVisible(false);
         return;
+    }
 
     _currentToken = index;
     loadMonsterImage();
