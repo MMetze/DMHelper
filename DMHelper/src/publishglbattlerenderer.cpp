@@ -90,12 +90,6 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
 
 PublishGLBattleRenderer::~PublishGLBattleRenderer()
 {
-    if(_model)
-    {
-        disconnect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
-        disconnect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLBattleRenderer::layerRemoved);
-        disconnect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
-    }
 }
 
 CampaignObjectBase* PublishGLBattleRenderer::getObject()
@@ -106,6 +100,18 @@ CampaignObjectBase* PublishGLBattleRenderer::getObject()
 QColor PublishGLBattleRenderer::getBackgroundColor()
 {
     return _model ? _model->getBackgroundColor() : QColor();
+}
+
+void PublishGLBattleRenderer::rendererDeactivated()
+{
+    if(_model)
+    {
+        disconnect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
+        disconnect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLBattleRenderer::layerRemoved);
+        disconnect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+    }
+
+    PublishGLRenderer::rendererDeactivated();
 }
 
 bool PublishGLBattleRenderer::deleteOnDeactivation()

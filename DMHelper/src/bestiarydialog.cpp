@@ -7,6 +7,7 @@
 #include "monsteractionframe.h"
 #include "monsteractioneditdialog.h"
 #include "publishbuttonframe.h"
+#include "bestiaryfindtokendialog.h"
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QInputDialog>
@@ -43,6 +44,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     connect(ui->btnPreviousToken, &QPushButton::clicked, this, &BestiaryDialog::handlePreviousToken);
     connect(ui->btnAddToken, &QPushButton::clicked, this, &BestiaryDialog::handleAddToken);
+    connect(ui->btnSearchToken, &QPushButton::clicked, this, &BestiaryDialog::handleSearchToken);
     connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
     connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
     connect(ui->btnNextToken, &QPushButton::clicked, this, &BestiaryDialog::handleNextToken);
@@ -453,6 +455,38 @@ void BestiaryDialog::handleAddToken()
     }
 }
 
+void BestiaryDialog::handleSearchToken()
+{
+    if(!_monster)
+        return;
+
+    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName());
+    dlg->resize(width() * 9 / 10, height() * 9 / 10);
+    if(dlg->exec() == QDialog::Accepted)
+    {
+        QList<QImage> resultList = dlg->retrieveSelection();
+        int fileIndex = 1;
+        QDir directory = Bestiary::Instance()->getDirectory();
+        QString tokenFile = QString("Images/") + _monster->getName() + QString(".png");
+        foreach(QImage image, resultList)
+        {
+            if(!image.isNull())
+            {
+                while(directory.exists(tokenFile))
+                    tokenFile = QString("Images/") + _monster->getName() + QString::number(fileIndex++) + QString(".png");
+
+                image.save(directory.absoluteFilePath(tokenFile));
+            }
+        }
+
+        _monster->searchForIcons();
+        setTokenIndex(_monster->getIconList().indexOf(tokenFile));
+    }
+    dlg->deleteLater();
+
+    update();
+}
+
 void BestiaryDialog::handleReloadImage()
 {
     if(!_monster)
@@ -713,7 +747,12 @@ void BestiaryDialog::setTokenIndex(int index)
     }
 
     if((index < 0) || (index >= _monster->getIconCount()))
+    {
+        ui->lblIcon->setPixmap(QPixmap());
+        ui->btnPreviousToken->setVisible(false);
+        ui->btnNextToken->setVisible(false);
         return;
+    }
 
     _currentToken = index;
     loadMonsterImage();

@@ -36,6 +36,7 @@ Next version
 * Remove dead code (e.g. battleframe, map, layerfow)
 * Add new item dialog instead of pseudo-wizards / clean up mainwindow: newbattle function
 * Switch between party icon and players on a battle (aka toggle initiative)
+* Backend queries as a class to automate the versioning and debug query
 
 v2.5.7
 fixed * Crashes when adding an FOW layer
