@@ -1147,10 +1147,11 @@ void OptionsContainer::copy(OptionsContainer* other)
         _statisticsAccepted = other->_statisticsAccepted;
         _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
         _lastUpdateDate = other->_lastUpdateDate;
-        _heroForgeToken = other->_heroForgeToken;
-        _tokenSearchString = other->_tokenSearchString;
-        _tokenFrameFile = other->_tokenFrameFile;
-        _tokenMaskFile = other->_tokenMaskFile;
+
+        setHeroForgeToken(other->_heroForgeToken);
+        setTokenSearchString(other->_tokenSearchString);
+        setTokenFrameFile(other->_tokenFrameFile);
+        setTokenMaskFile(other->_tokenMaskFile);
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);
