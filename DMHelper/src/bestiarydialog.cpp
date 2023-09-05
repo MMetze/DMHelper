@@ -31,7 +31,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     _edit(false),
     _mouseDown(false),
     _searchString(),
-    _tokenMode(BestiaryFindTokenDialog::TokenDetailMode_Original),
+    _tokenMode(BestiaryFindTokenDialog::TokenDetailMode_FrameAndMask),
     _tokenBackground(Qt::white),
     _tokenBackgroundLevel(15),
     _tokenFrameFile(),

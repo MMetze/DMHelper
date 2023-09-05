@@ -402,8 +402,10 @@ void OptionsContainer::readSettings()
     setHeroForgeToken(settings.value("heroforgeToken").toString());
 
     setTokenSearchString(settings.value("tokenSearchString", QVariant(QString("dnd 5e"))).toString());
-    setTokenFrameFile(settings.value("tokenFrame").toString());
-    setTokenMaskFile(settings.value("tokenMask").toString());
+    //setTokenFrameFile(settings.value("tokenFrame").toString());
+    //setTokenMaskFile(settings.value("tokenMask").toString());
+    setTokenFrameFile(getSettingsFile(settings, QString("tokenFrame"), QString("dmh_default_frame.png")));
+    setTokenMaskFile(getSettingsFile(settings, QString("tokenMask"), QString("dmh_default_mask.png")));
 
     QString uuidString = settings.value("instanceUuid").toString();
     if(uuidString.isEmpty())
