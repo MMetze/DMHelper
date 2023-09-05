@@ -2,6 +2,7 @@
 #define BESTIARYDIALOG_H
 
 #include <QDialog>
+#include "bestiaryfindtokendialog.h"
 
 class MonsterClass;
 class MonsterAction;
@@ -27,6 +28,9 @@ signals:
     void publishMonsterImage(QImage img, const QColor& color);
     void dialogClosed();
 
+    void tokenFrameFileChanged(const QString& tokenFrameFile);
+    void tokenMaskFileChanged(const QString& tokenMaskFile);
+
 public slots:
     void setMonster(MonsterClass* monster, bool edit = true);
     void setMonster(const QString& monsterName, bool edit = true);
@@ -37,6 +41,10 @@ public slots:
     void nextMonster();
 
     void dataChanged();
+
+    void setTokenSearchString(const QString& searchString);
+    void setTokenFrameFile(const QString& tokenFrameFile);
+    void setTokenMaskFile(const QString& tokenMaskFile);
 
 protected slots:
     void hitDiceChanged();
@@ -94,6 +102,14 @@ private:
     int _currentToken;
     bool _edit;
     bool _mouseDown;
+
+    // Token search data
+    QString _searchString;
+    BestiaryFindTokenDialog::TokenDetailMode _tokenMode;
+    QColor _tokenBackground;
+    int _tokenBackgroundLevel;
+    QString _tokenFrameFile;
+    QString _tokenMaskFile;
 };
 
 #endif // BESTIARYDIALOG_H

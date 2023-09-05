@@ -18,10 +18,11 @@ const int TOKEN_FRAME_SPACING = 16;
 const int TOKEN_ICON_SIZE = 256;
 const int TOKEN_FRAME_SIZE = TOKEN_ICON_SIZE + (TOKEN_ICON_SIZE / 10);
 
-BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, QWidget *parent) :
+BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryFindTokenDialog),
     _monsterName(monsterName),
+    _searchString(searchString),
     _manager(nullptr),
     _urlReply(nullptr),
     _maskImage(),
@@ -37,9 +38,23 @@ BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, QWi
     _tokenGrid->setSpacing(TOKEN_FRAME_SPACING);
     ui->scrollAreaWidgetContents->setLayout(_tokenGrid);
 
-    ui->btnOriginalImage->setChecked(true);
-    ui->btnColor->setColor(Qt::white);
+    switch(mode)
+    {
+        case TokenDetailMode_TransparentColor:
+            ui->btnTransparentColor->setChecked(true);
+            break;
+        case TokenDetailMode_FrameAndMask:
+            ui->btnFrameAndMask->setChecked(true);
+            break;
+        case TokenDetailMode_Original:
+        default:
+            ui->btnOriginalImage->setChecked(true);
+            break;
+    };
+
+    ui->btnColor->setColor(background);
     ui->btnColor->setRotationVisible(false);
+    ui->sliderFuzzy->setValue(backgroundLevel);
 
     connect(ui->btnOriginalImage, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
     connect(ui->btnTransparentColor, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
@@ -53,7 +68,10 @@ BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, QWi
 
     connect(ui->btnCustomize, &QAbstractButton::clicked, this, &BestiaryFindTokenDialog::customizeSearch);
 
-    startSearch(QString("dnd 5e ") + monsterName);
+    ui->edtFrameImage->setText(frameFile);
+    ui->edtMaskImage->setText(maskFile);
+
+    startSearch(_searchString + QString(" ") + monsterName);
 }
 
 BestiaryFindTokenDialog::~BestiaryFindTokenDialog()
@@ -80,6 +98,36 @@ QList<QImage> BestiaryFindTokenDialog::retrieveSelection()
     }
 
     return resultList;
+}
+
+BestiaryFindTokenDialog::TokenDetailMode BestiaryFindTokenDialog::getTokenDetailMode() const
+{
+    if(ui->btnTransparentColor->isChecked())
+        return TokenDetailMode_TransparentColor;
+    else if (ui->btnFrameAndMask->isChecked())
+        return TokenDetailMode_FrameAndMask;
+    else
+        return TokenDetailMode_Original;
+}
+
+QColor BestiaryFindTokenDialog::getTokenBackgroundColor() const
+{
+    return ui->btnColor->getColor();
+}
+
+int BestiaryFindTokenDialog::getTokenBackgroundLevel() const
+{
+    return ui->sliderFuzzy->value();
+}
+
+QString BestiaryFindTokenDialog::getTokenFrameFile() const
+{
+    return ui->edtFrameImage->text();
+}
+
+QString BestiaryFindTokenDialog::getTokenMaskFile() const
+{
+    return ui->edtMaskImage->text();
 }
 
 void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
@@ -251,7 +299,7 @@ void BestiaryFindTokenDialog::abortSearches()
 
 void BestiaryFindTokenDialog::customizeSearch()
 {
-    QString newSearch = QInputDialog::getText(nullptr, QString("Custom Search String"), QString("Search: "), QLineEdit::Normal, QString("dnd 5e ") + _monsterName);
+    QString newSearch = QInputDialog::getText(nullptr, QString("Custom Search String"), QString("Search: "), QLineEdit::Normal, _searchString + QString(" ") + _monsterName);
     if(newSearch.isEmpty())
         return;
 

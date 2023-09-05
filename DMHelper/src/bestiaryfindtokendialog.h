@@ -17,10 +17,24 @@ class BestiaryFindTokenDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BestiaryFindTokenDialog(const QString& monsterName, QWidget *parent = nullptr);
+
+    enum TokenDetailMode
+    {
+        TokenDetailMode_Original = 0,
+        TokenDetailMode_TransparentColor,
+        TokenDetailMode_FrameAndMask
+    };
+
+    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, QWidget *parent = nullptr);
     ~BestiaryFindTokenDialog();
 
     QList<QImage> retrieveSelection();
+
+    TokenDetailMode getTokenDetailMode() const;
+    QColor getTokenBackgroundColor() const;
+    int getTokenBackgroundLevel() const;
+    QString getTokenFrameFile() const;
+    QString getTokenMaskFile() const;
 
 protected slots:
     void urlRequestFinished(QNetworkReply *reply);
@@ -46,10 +60,14 @@ private:
     Ui::BestiaryFindTokenDialog *ui;
 
     QString _monsterName;
+    QString _searchString;
+
     QNetworkAccessManager* _manager;
     QNetworkReply* _urlReply;
+
     QImage _maskImage;
     QImage _frameImage;
+
     QGridLayout* _tokenGrid;
     QList<TokenData*> _tokenList;
 };

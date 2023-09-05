@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QIntValidator>
+#include <QImageReader>
 
 OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
     QDialog(parent),
@@ -56,6 +57,9 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtCombatantFrame->setText(_options->getCombatantFrame());
         ui->edtCountdownFrame->setText(_options->getCountdownFrame());
         ui->edtHeroForgeAccessKey->setText(_options->getHeroForgeToken());
+        ui->edtTokenSearchString->setText(_options->getTokenSearchString());
+        ui->edtTokenFrame->setText(_options->getTokenFrameFile());
+        ui->edtTokenMask->setText(_options->getTokenMaskFile());
 #ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
@@ -101,6 +105,12 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->btnCountdownFrame, &QAbstractButton::clicked, this, &OptionsDialog::browseCountdownFrame);
         connect(ui->edtCountdownFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editCountdownFrame);
         connect(ui->edtHeroForgeAccessKey, &QLineEdit::editingFinished, this, &OptionsDialog::heroForgeTokenEdited);
+
+        connect(ui->edtTokenSearchString, &QLineEdit::editingFinished, this, &OptionsDialog::tokenSearchEdited);
+        connect(ui->btnBrowseTokenFrame, &QAbstractButton::clicked, this, &OptionsDialog::browseTokenFrame);
+        connect(ui->edtTokenFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editTokenFrame);
+        connect(ui->btnBrowseTokenMask, &QAbstractButton::clicked, this, &OptionsDialog::browseTokenMask);
+        connect(ui->edtTokenMask, &QLineEdit::editingFinished, this, &OptionsDialog::editTokenMask);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
@@ -159,6 +169,7 @@ void OptionsDialog::setBestiary(const QString& bestiaryFile)
     if(!QFile::exists(bestiaryFile))
     {
         QMessageBox::critical(this, QString("Bestiary file not found"), QString("The selected bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected bestiary file could not be found: " << bestiaryFile;
         return;
     }
 
@@ -184,6 +195,7 @@ void OptionsDialog::setSpellbook(const QString& spellbookFile)
     if(!QFile::exists(spellbookFile))
     {
         QMessageBox::critical(this, QString("Spellbook file not found"), QString("The selected spellbook file could not be found!") + QChar::LineFeed + spellbookFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected spellbook file could not be found: " << spellbookFile;
         return;
     }
 
@@ -209,6 +221,7 @@ void OptionsDialog::setQuickReference(const QString& quickRefFile)
     if(!QFile::exists(quickRefFile))
     {
         QMessageBox::critical(this, QString("Quick Reference file not found"), QString("The selected quick reference file could not be found!") + QChar::LineFeed + quickRefFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected quick reference file could not be found: " << quickRefFile;
         return;
     }
 
@@ -234,6 +247,7 @@ void OptionsDialog::setCalendar(const QString& calendarFile)
     if(!QFile::exists(calendarFile))
     {
         QMessageBox::critical(this, QString("Calendar file not found"), QString("The selected calendar file could not be found!") + QChar::LineFeed + calendarFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected calendar file could not be found: " << calendarFile;
         return;
     }
 
@@ -259,6 +273,7 @@ void OptionsDialog::setEquipment(const QString& equipmentFile)
     if(!QFile::exists(equipmentFile))
     {
         QMessageBox::critical(this, QString("Equipment file not found"), QString("The selected equipment file could not be found!") + QChar::LineFeed + equipmentFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected equipment file could not be found: " << equipmentFile;
         return;
     }
 
@@ -285,6 +300,7 @@ void OptionsDialog::setShops(const QString& shopsFile)
     if(!QFile::exists(shopsFile))
     {
         QMessageBox::critical(this, QString("Shops file not found"), QString("The selected shops file could not be found!") + QChar::LineFeed + shopsFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected shops file could not be found: " << shopsFile;
         return;
     }
 
@@ -310,6 +326,7 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
     if(!QDir(tablesDirectory).exists())
     {
         QMessageBox::critical(this, QString("Tables directory not found"), QString("The selected tables directory could not be found!") + QChar::LineFeed + tablesDirectory);
+        qDebug() << "[OptionsDialog] ERROR: The selected tables directory could not be found: " << tablesDirectory;
         return;
     }
 
@@ -426,6 +443,74 @@ void OptionsDialog::heroForgeTokenEdited()
     }
 
     _options->setHeroForgeToken(newToken);
+}
+
+void OptionsDialog::tokenSearchEdited()
+{
+    if(_options->getTokenSearchString() != ui->edtTokenSearchString->text())
+        _options->setTokenSearchString(ui->edtTokenSearchString->text());
+}
+
+void OptionsDialog::browseTokenFrame()
+{
+    QString newFrameFile = QFileDialog::getOpenFileName(this, QString("Select Token Frame Image"));
+    if(newFrameFile.isEmpty())
+        return;
+
+    setTokenFrame(newFrameFile);
+}
+
+void OptionsDialog::editTokenFrame()
+{
+    setTokenFrame(ui->edtTokenFrame->text());
+}
+
+void OptionsDialog::setTokenFrame(const QString& tokenFrame)
+{
+    if(!tokenFrame.isEmpty())
+    {
+        QImageReader reader(tokenFrame);
+        if(!reader.canRead())
+        {
+            QMessageBox::critical(this, QString("Token Frame image not valid"), QString("Not able to read the selected token frame image!") + QChar::LineFeed + tokenFrame);
+            qDebug() << "[OptionsDialog] ERROR: Not able to read the selected token frame image: " << tokenFrame;
+            return;
+        }
+    }
+
+    ui->edtTokenFrame->setText(tokenFrame);
+    _options->setTokenFrameFile(tokenFrame);
+}
+
+void OptionsDialog::browseTokenMask()
+{
+    QString newMaskFile = QFileDialog::getOpenFileName(this, QString("Select Token Mask Image"));
+    if(newMaskFile.isEmpty())
+        return;
+
+    setTokenMask(newMaskFile);
+}
+
+void OptionsDialog::editTokenMask()
+{
+    setTokenMask(ui->edtTokenMask->text());
+}
+
+void OptionsDialog::setTokenMask(const QString& tokenMask)
+{
+    if(!tokenMask.isEmpty())
+    {
+        QImageReader reader(tokenMask);
+        if(!reader.canRead())
+        {
+            QMessageBox::critical(this, QString("Token Mask image not valid"), QString("Not able to read the selected token mask image!") + QChar::LineFeed + tokenMask);
+            qDebug() << "[OptionsDialog] ERROR: Not able to read the selected token mask image: " << tokenMask;
+            return;
+        }
+    }
+
+    ui->edtTokenMask->setText(tokenMask);
+    _options->setTokenMaskFile(tokenMask);
 }
 
 void OptionsDialog::updateFileLocations()

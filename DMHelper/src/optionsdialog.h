@@ -72,6 +72,16 @@ private slots:
 
     void heroForgeTokenEdited();
 
+    void tokenSearchEdited();
+
+    void browseTokenFrame();
+    void editTokenFrame();
+    void setTokenFrame(const QString& tokenFrame);
+
+    void browseTokenMask();
+    void editTokenMask();
+    void setTokenMask(const QString& tokenMask);
+
     void updateFileLocations();
     void resetFileLocations();
 

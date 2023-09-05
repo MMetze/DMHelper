@@ -46,6 +46,9 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _instanceUuid(),
     _lastUpdateDate(),
     _heroForgeToken(),
+    _tokenSearchString(),
+    _tokenFrameFile(),
+    _tokenMaskFile(),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -239,6 +242,21 @@ QString OptionsContainer::getHeroForgeToken() const
     return _heroForgeToken;
 }
 
+QString OptionsContainer::getTokenSearchString() const
+{
+    return _tokenSearchString;
+}
+
+QString OptionsContainer::getTokenFrameFile() const
+{
+    return _tokenFrameFile;
+}
+
+QString OptionsContainer::getTokenMaskFile() const
+{
+    return _tokenMaskFile;
+}
+
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 bool OptionsContainer::getNetworkEnabled() const
@@ -383,6 +401,10 @@ void OptionsContainer::readSettings()
 
     setHeroForgeToken(settings.value("heroforgeToken").toString());
 
+    setTokenSearchString(settings.value("tokenSearchString", QVariant(QString("dnd 5e"))).toString());
+    setTokenFrameFile(settings.value("tokenFrame").toString());
+    setTokenMaskFile(settings.value("tokenMask").toString());
+
     QString uuidString = settings.value("instanceUuid").toString();
     if(uuidString.isEmpty())
         _instanceUuid = QUuid();
@@ -461,10 +483,21 @@ void OptionsContainer::writeSettings()
             settings.setValue("lastUpdateCheck", _lastUpdateDate);
     }
 
-    if(_heroForgeToken == QString())
+    if(_heroForgeToken.isEmpty())
         settings.remove("heroforgeToken");
     else
         settings.setValue("heroforgeToken", _heroForgeToken);
+
+    settings.setValue("tokenSearchString", getTokenSearchString());
+    if(_tokenFrameFile.isEmpty())
+        settings.remove("tokenFrame");
+    else
+        settings.setValue("tokenFrame", getTokenFrameFile());
+    if(_tokenMaskFile.isEmpty())
+        settings.remove("tokenMask");
+    else
+        settings.setValue("tokenMask", getTokenMaskFile());
+
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
@@ -972,6 +1005,35 @@ void OptionsContainer::setHeroForgeToken(const QString& token)
     }
 }
 
+void OptionsContainer::setTokenSearchString(const QString& tokenSearchString)
+{
+    if(_tokenSearchString != tokenSearchString)
+    {
+        _tokenSearchString = tokenSearchString;
+        qDebug() << "[OptionsContainer] Token search string set to: " << _tokenSearchString;
+        emit tokenSearchStringChanged(_tokenSearchString);
+    }
+}
+
+void OptionsContainer::setTokenFrameFile(const QString& tokenFrameFile)
+{
+    if(_tokenFrameFile != tokenFrameFile)
+    {
+        _tokenFrameFile = tokenFrameFile;
+        qDebug() << "[OptionsContainer] Token frame file set to: " << _tokenFrameFile;
+        emit tokenFrameFileChanged(_tokenFrameFile);
+    }
+}
+
+void OptionsContainer::setTokenMaskFile(const QString& tokenMaskFile)
+{
+    if(_tokenMaskFile != tokenMaskFile)
+    {
+        _tokenMaskFile = tokenMaskFile;
+        qDebug() << "[OptionsContainer] Token mask file set to: " << _tokenMaskFile;
+        emit tokenMaskFileChanged(_tokenMaskFile);
+    }
+}
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 
@@ -1084,6 +1146,9 @@ void OptionsContainer::copy(OptionsContainer* other)
         _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
         _lastUpdateDate = other->_lastUpdateDate;
         _heroForgeToken = other->_heroForgeToken;
+        _tokenSearchString = other->_tokenSearchString;
+        _tokenFrameFile = other->_tokenFrameFile;
+        _tokenMaskFile = other->_tokenMaskFile;
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);

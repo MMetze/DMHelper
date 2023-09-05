@@ -398,6 +398,9 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->processEvents();
     readBestiary();
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    _bestiaryDlg.setTokenSearchString(_options->getTokenSearchString());
+    _bestiaryDlg.setTokenFrameFile(_options->getTokenFrameFile());
+    _bestiaryDlg.setTokenMaskFile(_options->getTokenMaskFile());
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
@@ -408,6 +411,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
     connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
+    connect(_options, &OptionsContainer::tokenSearchStringChanged, &_bestiaryDlg, &BestiaryDialog::setTokenSearchString);
+    connect(_options, &OptionsContainer::tokenFrameFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameFile);
+    connect(_options, &OptionsContainer::tokenMaskFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenMaskFile);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameFileChanged, _options, &OptionsContainer::setTokenFrameFile);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskFileChanged, _options, &OptionsContainer::setTokenMaskFile);
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
