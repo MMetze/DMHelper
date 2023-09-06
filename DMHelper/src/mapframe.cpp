@@ -661,7 +661,7 @@ void MapFrame::setCameraVisible()
     QList<Layer*> fowLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
     foreach(Layer* layer, fowLayers)
     {
-        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer->getFinalLayer());
         if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
         {
             QRectF newRect = fowLayer->getFoWVisibleRect();

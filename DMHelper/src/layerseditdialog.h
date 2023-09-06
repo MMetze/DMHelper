@@ -7,6 +7,7 @@ namespace Ui {
 class LayersEditDialog;
 }
 
+class Layer;
 class LayerFrame;
 class LayerScene;
 class BattleDialogModel;
@@ -27,6 +28,8 @@ protected slots:
     void addLayer();
     void removeLayer();
     void updateSceneSize();
+    void updateVisibility(LayerFrame* frame);
+    void linkedUp(LayerFrame* frame);
 
     void updateRenderer();
 

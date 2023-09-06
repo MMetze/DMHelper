@@ -325,11 +325,11 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
 
+#ifdef DEBUG_MAP_RENDERER
     int l = cameraMiddle.x() - backgroundMiddle.width() - halfRect.width();
     int r = cameraMiddle.x() - backgroundMiddle.width() + halfRect.width();
     int t = backgroundMiddle.height() - cameraMiddle.y() - halfRect.height();
     int b = backgroundMiddle.height() - cameraMiddle.y() + halfRect.height();
-#ifdef DEBUG_MAP_RENDERER
     qDebug() << "[PublishGLMapRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
 #endif
 

@@ -1163,24 +1163,27 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("cameraRectWidth", _cameraRect.width());
     element.setAttribute("cameraRectHeight", _cameraRect.height());
 
-    QDomElement markersElement = doc.createElement("markers");
-    foreach(UndoMarker* marker, _markerList)
+    if(_markerList.count() > 0)
     {
-        if(marker)
+        QDomElement markersElement = doc.createElement("markers");
+        foreach(UndoMarker* marker, _markerList)
         {
-            QDomElement markerElement = doc.createElement("marker");
-            marker->outputXML(doc, markerElement, targetDirectory, isExport);
-            markersElement.appendChild(markerElement);
+            if(marker)
+            {
+                QDomElement markerElement = doc.createElement("marker");
+                marker->outputXML(doc, markerElement, targetDirectory, isExport);
+                markersElement.appendChild(markerElement);
+            }
         }
+        element.appendChild(markersElement);
     }
-    element.appendChild(markersElement);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool Map::belongsToObject(QDomElement& element)
 {
-    if((element.tagName() == QString("actions")) || (element.tagName() == QString("layer-scene")))
+    if((element.tagName() == QString("actions")) || (element.tagName() == QString("layer-scene")) || (element.tagName() == QString("markers")))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);

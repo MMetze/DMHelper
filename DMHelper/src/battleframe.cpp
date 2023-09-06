@@ -1407,7 +1407,7 @@ void BattleFrame::setCameraMap()
 
 void BattleFrame::setCameraVisible()
 {
-    if((!_cameraRect) || (!_model) || (!_model->getMap()))
+    if((!_cameraRect) || (!_model))
         return;
 
     QRectF visibleRect = _model->getLayerScene().boundingRect();
@@ -1415,7 +1415,7 @@ void BattleFrame::setCameraVisible()
     QList<Layer*> fowLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
     foreach(Layer* layer, fowLayers)
     {
-        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer->getFinalLayer());
         if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
         {
             QRectF newRect = fowLayer->getFoWVisibleRect();

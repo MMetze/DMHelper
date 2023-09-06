@@ -629,6 +629,7 @@ void LayerFow::initialize(const QSize& sceneSize)
         setSize(sceneSize);
 
     _imageFow = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
+    _imageFow.fill(Qt::black);
     //_imgFow.fill(Qt::black);
     //_pixmapFow.fill(Qt::black);
 

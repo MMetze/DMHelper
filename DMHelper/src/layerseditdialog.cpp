@@ -157,6 +157,46 @@ void LayersEditDialog::updateSceneSize()
     ui->edtSceneHeight->setText(QString::number(currentSize.height()));
 }
 
+void LayersEditDialog::updateVisibility(LayerFrame* frame)
+{
+    if((!frame) || (!_layerLayout))
+        return;
+
+    int frameIndex = _layerLayout->indexOf(frame);
+    if(frameIndex + 1 >= _layerLayout->count())
+        return;
+
+    QLayoutItem* nextItem = _layerLayout->itemAt(frameIndex + 1);
+    LayerFrame* nextFrame = dynamic_cast<LayerFrame*>(nextItem->widget());
+
+    if((!nextFrame) || (!nextFrame->isLinkedUp()))
+        return;
+
+    nextFrame->setLayerVisible(frame->isLayerVisible());
+    nextFrame->setLayerVisibleDM(frame->isLayerVisibleDM());
+    nextFrame->setLayerVisiblePlayer(frame->isLayerVisiblePlayer());
+}
+
+void LayersEditDialog::linkedUp(LayerFrame* frame)
+{
+    if((!frame) || (!_layerLayout))
+        return;
+
+    int frameIndex = _layerLayout->indexOf(frame);
+    if(frameIndex == 0 )
+        return;
+
+    QLayoutItem* previousItem = _layerLayout->itemAt(frameIndex - 1);
+    LayerFrame* previousFrame = dynamic_cast<LayerFrame*>(previousItem->widget());
+
+    if(!previousFrame)
+        return;
+
+    frame->setLayerVisible(previousFrame->isLayerVisible());
+    frame->setLayerVisibleDM(previousFrame->isLayerVisibleDM());
+    frame->setLayerVisiblePlayer(previousFrame->isLayerVisiblePlayer());
+}
+
 void LayersEditDialog::updateRenderer()
 {
     if(_scene.getRenderer())
@@ -242,6 +282,8 @@ void LayersEditDialog::readScene()
             connect(newFrame, &LayerFrame::refreshPlayer, this, &LayersEditDialog::updateRenderer);
             connect(newFrame, &LayerFrame::positionChanged, this, &LayersEditDialog::updateSceneSize);
             connect(newFrame, &LayerFrame::sizeChanged, this, &LayersEditDialog::updateSceneSize);
+            connect(newFrame, &LayerFrame::linkedUp, this, &LayersEditDialog::linkedUp);
+            connect(newFrame, &LayerFrame::visibilityChanged, this, &LayersEditDialog::updateVisibility);
             _layerLayout->insertWidget(0, newFrame);
         }
     }
@@ -255,7 +297,7 @@ void LayersEditDialog::clearLayout()
         return;
 
     QLayoutItem *child;
-    while ((child = _layerLayout->takeAt(0)) != nullptr)
+    while((child = _layerLayout->takeAt(0)) != nullptr)
     {
         if(child->widget())
             child->widget()->deleteLater();

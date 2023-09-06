@@ -3,7 +3,20 @@ fixed * old scrolling text doesn't scroll
 fixed * old videos are not recognized, leads to broken mapframe
 fixed * party icon not visible
 fixed * markers (neverwinter region) seem to not work
+
 Fog of war from old to new
+
+* Saving a combat with FOW reference doesn't refer to the fow but the map
+* Layers list in the wrong order
+* Tie layers together
+* One button for layer visibility
+* Layer titles from references
+* Layer icon for references
+Multiple FOW zoom not working - doesn't like reference FOWs
+FOW edit doesn't scale with zoom
+Save As should add the current file name to the dialog
+* Markers add unknown elements to maps
+
 
 feature * Scale the initiative list freely
 feature * Change layer with multiple selections

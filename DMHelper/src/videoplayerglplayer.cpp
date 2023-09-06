@@ -549,6 +549,8 @@ bool VideoPlayerGLPlayer::startPlayer()
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Player callback result: " << callbackResult;
+#else
+    Q_UNUSED(callbackResult);
 #endif
 
     // And start playback

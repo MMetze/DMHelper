@@ -117,7 +117,7 @@ void LayerScene::postProcessXML(const QDomElement &element, bool isImport)
                 {
                     LayerReference* referenceLayer = dynamic_cast<LayerReference*>(_layers[i]);
                     if(referenceLayer)
-                        connect(referenceLayer, &LayerReference::referenceDestroyed, this, QOverload<Layer*>::of(&LayerScene::removeLayer));
+                        connect(referenceLayer, &LayerReference::referenceDestroyed, this, &LayerScene::handleReferenceDestroyed);
                 }
             }
         }
@@ -726,6 +726,21 @@ void LayerScene::layerResized(const QSize& size)
 
     emit sceneChanged();
     emit sceneSizeChanged();
+}
+
+void LayerScene::handleReferenceDestroyed(Layer* source, Layer* reference)
+{
+    foreach(Layer* layer, _layers)
+    {
+        if((layer) && (layer != source) && (layer->getType() == DMHelper::LayerType_Reference))
+        {
+            LayerReference* layerReference = dynamic_cast<LayerReference*>(layer);
+            if(layerReference->getReferenceLayer() == reference)
+                layerReference->clearReference();
+        }
+    }
+
+    removeLayer(source);
 }
 
 QDomElement LayerScene::createOutputXML(QDomDocument &doc)

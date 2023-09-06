@@ -17,6 +17,7 @@ public:
     explicit LayerFrame(Layer& layer, QWidget *parent = nullptr);
     ~LayerFrame();
 
+    void setLayerVisible(bool visible);
     void setLayerVisibleDM(bool visible);
     void setLayerVisiblePlayer(bool visible);
     void setIcon(const QImage& image);
@@ -33,6 +34,11 @@ public:
     const Layer& getLayer() const;
     Layer& getLayer();
 
+    bool isLinkedUp() const;
+    bool isLayerVisible() const;
+    bool isLayerVisibleDM() const;
+    bool isLayerVisiblePlayer() const;
+
 signals:
     void visibleDMChanged(bool visible);
     void visiblePlayerChanged(bool visible);
@@ -41,10 +47,16 @@ signals:
     void positionChanged(const QPoint& position);
     void sizeChanged(const QSize& size);
 
+    void linkedUp(LayerFrame* layerFrame);
+    void visibilityChanged(LayerFrame* layerFrame);
+
     void selectMe(LayerFrame* me);
     void refreshPlayer();
 
 protected slots:
+    void handleLinkUp(bool checked);
+    void handleVisibleClicked(bool checked);
+    void handleVisibleChanged();
     void handleNameChanged();
     void handleOpacityChanged();
     void handleXChanged();
