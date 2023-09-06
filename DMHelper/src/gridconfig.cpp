@@ -22,16 +22,20 @@ void GridConfig::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _gridType = element.attribute("gridType", QString::number(0)).toInt();
-    if(element.hasAttribute("gridScale"))
-        _gridScale = element.attribute("gridScale").toInt();
-    _gridAngle = element.attribute("gridAngle", QString::number(50)).toInt();
-    _gridOffsetX = element.attribute("gridOffsetX", QString::number(0)).toInt();
-    _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();
-    int gridWidth = element.attribute("gridWidth", QString::number(1)).toInt();
-    QColor gridColor = element.attribute("gridColor", QString("#000000"));
+    QDomElement gridElement = element.firstChildElement(QString("grid"));
+    if(gridElement.isNull())
+        return;
+
+    _gridType = gridElement.attribute("gridType", QString::number(0)).toInt();
+    if(gridElement.hasAttribute("gridScale"))
+        _gridScale = gridElement.attribute("gridScale").toInt();
+    _gridAngle = gridElement.attribute("gridAngle", QString::number(50)).toInt();
+    _gridOffsetX = gridElement.attribute("gridOffsetX", QString::number(0)).toInt();
+    _gridOffsetY = gridElement.attribute("gridOffsetY", QString::number(0)).toInt();
+    int gridWidth = gridElement.attribute("gridWidth", QString::number(1)).toInt();
+    QColor gridColor = gridElement.attribute("gridColor", QString("#000000"));
     _gridPen = QPen(QBrush(gridColor), gridWidth);
-    _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();
+    _gridOffsetY = gridElement.attribute("gridOffsetY", QString::number(0)).toInt();
 }
 
 void GridConfig::outputXML(QDomDocument &doc, QDomElement &parentElement, bool isExport) const
