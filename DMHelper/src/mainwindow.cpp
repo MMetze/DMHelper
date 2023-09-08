@@ -290,9 +290,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(openClicked()), this, SLOT(openFileDialog()));
     QShortcut* openShortcut = new QShortcut(QKeySequence(tr("Ctrl+O", "Open")), this);
     connect(openShortcut, SIGNAL(activated()), this, SLOT(openFileDialog()));
-    connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
+    //connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
+    connect(_ribbonTabFile, &RibbonTabFile::saveClicked, this, &MainWindow::saveCampaign);
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
-    connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
+    //connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
+    connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveCampaign);
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
     connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
@@ -787,98 +789,7 @@ void MainWindow::newCampaign()
 
 bool MainWindow::saveCampaign()
 {
-    if(!_campaign)
-        return true;
-
-    _campaign->validateCampaignIds();
-    if(!_campaign->isValid())
-    {
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
-                                                                   QString("Invalid Campaign"),
-                                                                   QString("An invalid structure has been detected in the open campaign. Saving may corrupt the file and lead to data loss.\n\nIt is strongly recommended to back up your campaign file before saving!\n\nDo you wish to save now?"),
-                                                                   QMessageBox::Yes | QMessageBox::No);
-        if(result == QMessageBox::No)
-        {
-            qDebug() << "[MainWindow] Invalid campaign not saved";
-            return false;
-        }
-        else
-        {
-            qDebug() << "[MainWindow] Invalid campaign saved despite warning!";
-        }
-    }
-
-    if(_campaignFileName.isEmpty())
-    {
-        _campaignFileName = QFileDialog::getSaveFileName(this, QString("Save Campaign"), QString(), QString("XML files (*.xml)"));
-        if(_campaignFileName.isEmpty())
-            return false;
-    }
-
-    qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
-
-    QDomDocument doc("DMHelperXML");
-
-    QDomElement root = doc.createElement("root");
-    doc.appendChild(root);
-
-    QFileInfo fileInfo(_campaignFileName);
-    QDir targetDir(fileInfo.absoluteDir());
-    _campaign->outputXML(doc, root, targetDir, false);
-
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(currentObject)
-    {
-        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
-        if(!campaignElement.isNull())
-            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
-    }
-
-    QFile file(_campaignFileName);
-    if(!file.open(QIODevice::WriteOnly))
-    {
-        qDebug() << "[MainWindow] Unable to open campaign file for writing: " << _campaignFileName;
-        qDebug() << "       Error " << file.error() << ": " << file.errorString();
-        QFileInfo info(file);
-        qDebug() << "       Full filename: " << info.absoluteFilePath();
-
-        _campaignFileName.clear();
-        return false;
-    }
-
-    QTextStream ts(&file);
-    ts.setCodec("UTF-8");
-    ts << doc.toString();
-
-    file.close();
-
-    clearDirty();
-
-    qDebug() << "[MainWindow] Campaign saved: " << _campaignFileName;
-
-    if(_options->getMRUHandler())
-        _options->getMRUHandler()->addMRUFile(_campaignFileName);
-
-    // Optionally save Bestiary and Spellbook here
-    if((Bestiary::Instance()) && (Bestiary::Instance()->isDirty()))
-    {
-        if(QMessageBox::critical(this,
-                                 QString("Save Bestiary"),
-                                 QString("The Bestiary has been changed. Would you like to save it as well?"),
-                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-            writeBestiary();
-    }
-
-    if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
-    {
-        if(QMessageBox::critical(this,
-                                 QString("Save Spellbook"),
-                                 QString("The Spellbook has been changed. Would you like to save it as well?"),
-                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-            writeSpellbook();
-    }
-
-    return true;
+    return doSaveCampaign(QString());
 }
 
 void MainWindow::saveCampaignAs()
@@ -887,10 +798,8 @@ void MainWindow::saveCampaignAs()
 
     _campaignFileName.clear();
 
-    if(saveCampaign() == false)
-    {
+    if(doSaveCampaign(previousCampaignFileName) == false)
         _campaignFileName = previousCampaignFileName;
-    }
 }
 
 void MainWindow::openFileDialog()
@@ -2055,6 +1964,102 @@ void MainWindow::connectBattleView(bool toBattle)
         connect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
         connect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
     }
+}
+
+bool MainWindow::doSaveCampaign(QString defaultFile)
+{
+    if(!_campaign)
+        return true;
+
+    _campaign->validateCampaignIds();
+    if(!_campaign->isValid())
+    {
+        QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                                   QString("Invalid Campaign"),
+                                                                   QString("An invalid structure has been detected in the open campaign. Saving may corrupt the file and lead to data loss.\n\nIt is strongly recommended to back up your campaign file before saving!\n\nDo you wish to save now?"),
+                                                                   QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[MainWindow] Invalid campaign not saved";
+            return false;
+        }
+        else
+        {
+            qDebug() << "[MainWindow] Invalid campaign saved despite warning!";
+        }
+    }
+
+    if(_campaignFileName.isEmpty())
+    {
+        _campaignFileName = QFileDialog::getSaveFileName(this, QString("Save Campaign"), defaultFile, QString("XML files (*.xml)"));
+        if(_campaignFileName.isEmpty())
+            return false;
+    }
+
+    qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
+
+    QDomDocument doc("DMHelperXML");
+
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
+
+    QFileInfo fileInfo(_campaignFileName);
+    QDir targetDir(fileInfo.absoluteDir());
+    _campaign->outputXML(doc, root, targetDir, false);
+
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(currentObject)
+    {
+        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+        if(!campaignElement.isNull())
+            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+    }
+
+    QFile file(_campaignFileName);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "[MainWindow] Unable to open campaign file for writing: " << _campaignFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
+
+        _campaignFileName.clear();
+        return false;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec("UTF-8");
+    ts << doc.toString();
+
+    file.close();
+
+    clearDirty();
+
+    qDebug() << "[MainWindow] Campaign saved: " << _campaignFileName;
+
+    if(_options->getMRUHandler())
+        _options->getMRUHandler()->addMRUFile(_campaignFileName);
+
+    // Optionally save Bestiary and Spellbook here
+    if((Bestiary::Instance()) && (Bestiary::Instance()->isDirty()))
+    {
+        if(QMessageBox::critical(this,
+                                 QString("Save Bestiary"),
+                                 QString("The Bestiary has been changed. Would you like to save it as well?"),
+                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+            writeBestiary();
+    }
+
+    if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
+    {
+        if(QMessageBox::critical(this,
+                                 QString("Save Spellbook"),
+                                 QString("The Spellbook has been changed. Would you like to save it as well?"),
+                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+            writeSpellbook();
+    }
+
+    return true;
 }
 
 void MainWindow::deleteCampaign()

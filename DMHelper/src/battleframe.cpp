@@ -2897,7 +2897,9 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
 }
 
 void BattleFrame::setMapCursor()
-{
+{    
+    if((_mapDrawer) && (_model))
+        _mapDrawer->setScale(_model->getGridScale(), _scale);
 }
 
 void BattleFrame::setCameraSelectable(bool selectable)
@@ -3080,11 +3082,14 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(battleMouseMove(const QPointF&)), _mapDrawer, SLOT(handleMouseMoved(const QPointF&)));
         connect(_scene, SIGNAL(battleMouseRelease(const QPointF&)), _mapDrawer, SLOT(handleMouseUp(const QPointF&)));
 
-        if(_model)
+        if((_mapDrawer) && (_model))
+            _mapDrawer->setScale(_model->getGridScale(), _scale);
+            /*
         {
             QRect viewSize = ui->graphicsView->mapFromScene(QRect(0, 0, _model->getGridScale(), _model->getGridScale())).boundingRect();
-            _mapDrawer->setScale(_model->getGridScale(), viewSize.width());
+            _mapDrawer->setScale(_model->getGridScale() * _scale, viewSize.width());
         }
+        */
     }
     else
     {

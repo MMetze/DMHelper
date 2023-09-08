@@ -141,6 +141,7 @@ protected:
     void setupRibbonBar();
     void connectBattleView(bool toBattle);
 
+    bool doSaveCampaign(QString defaultFile);
     void deleteCampaign();
     void enableCampaignMenu();
 

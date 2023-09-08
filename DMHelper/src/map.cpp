@@ -93,7 +93,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     _partyAltIcon = element.attribute("partyalticon");
     _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
                            element.attribute("partyPosY", QString::number(-1)).toInt());
-    _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
+    _mapScale = element.attribute("mapScale").toInt();
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     // Load the markers
