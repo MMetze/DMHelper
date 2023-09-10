@@ -20,6 +20,7 @@ public:
     void setLayerVisible(bool visible);
     void setLayerVisibleDM(bool visible);
     void setLayerVisiblePlayer(bool visible);
+    void setLinkedUp(bool linkUp);
     void setIcon(const QImage& image);
     void setName(const QString& name);
     void setOpacity(int opacity);
@@ -42,6 +43,7 @@ public:
 signals:
     void visibleDMChanged(bool visible);
     void visiblePlayerChanged(bool visible);
+    void linkedUpChanged(bool linkedUp);
     void nameChanged(const QString& name);
     void opacityChanged(qreal opacity);
     void positionChanged(const QPoint& position);

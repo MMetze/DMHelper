@@ -12,7 +12,7 @@
 #include <QInputDialog>
 #include <QImageReader>
 
-//#define DEBUG_FINDTOKEN_IMPORT
+#define DEBUG_FINDTOKEN_IMPORT
 
 const int TOKEN_FRAME_SPACING = 16;
 const int TOKEN_ICON_SIZE = 256;
@@ -170,28 +170,37 @@ void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
         return;
     }
 
-    QDomElement urlsElement = root.firstChildElement(QString("imageUrls"));
-    if(urlsElement.isNull())
+    QDomElement imageSetElement = root.firstChildElement(QString("imageSet"));
+    while(!imageSetElement.isNull())
     {
-        qDebug() << "[BestiaryFindTokenDialog] ERROR identified reading data: unable to find the URLs element: " << doc.toString();
-        return;
-    }
+#ifdef DEBUG_FINDTOKEN_IMPORT
+        qDebug() << "[BestiaryFindTokenDialog] Image Source: " << imageSetElement.attribute(QString("sourceName")) << ", URL: " << imageSetElement.attribute(QString("sourceURL"));
+#endif
 
-    QDomElement urlElement = urlsElement.firstChildElement(QString("url"));
-    while(!urlElement.isNull())
-    {
-        QString urlText = urlElement.text();
-        if(!urlText.isEmpty())
+        QDomElement imageElement = imageSetElement.firstChildElement(QString("image"));
+        while(!imageElement.isNull())
         {
-            TokenData* tokenData = new TokenData(urlText);
-    #ifdef DEBUG_FINDTOKEN_IMPORT
-            qDebug() << "[BestiaryFindTokenDialog] Found URL data for address; " << tokenData->_tokenAddress;
-    #endif
-            _tokenList.append(tokenData);
-            tokenData->_reply = _manager->get(QNetworkRequest(QUrl(tokenData->_tokenAddress)));
+            QDomElement imageURLListElement = imageElement.firstChildElement(QString("imageURLList"));
+            if(!imageURLListElement.isNull())
+            {
+                QDomElement urlElement = imageURLListElement.firstChildElement(QString("url"));
+                if(!urlElement.isNull())
+                {
+                    QString urlText = urlElement.text();
+                    if(!urlText.isEmpty())
+                    {
+                        TokenData* tokenData = new TokenData(urlText);
+                #ifdef DEBUG_FINDTOKEN_IMPORT
+                        qDebug() << "[BestiaryFindTokenDialog] Found URL data for address; " << tokenData->_tokenAddress;
+                #endif
+                        _tokenList.append(tokenData);
+                        tokenData->_reply = _manager->get(QNetworkRequest(QUrl(tokenData->_tokenAddress)));
+                    }
+                }
+            }
+            imageElement = imageElement.nextSiblingElement(QString("image"));
         }
-
-        urlElement = urlElement.nextSiblingElement(QString("url"));
+        imageSetElement = imageSetElement.nextSiblingElement(QString("imageSet"));
     }
 }
 

@@ -288,6 +288,18 @@ void LayersEditDialog::readScene()
         }
     }
 
+    // Update the linked status
+    for(int i = 0; i < _layerLayout->count(); ++i)
+    {
+        QLayoutItem* item = _layerLayout->itemAt(i);
+        if(item)
+        {
+            LayerFrame* frame = dynamic_cast<LayerFrame*>(item->widget());
+            if((frame) && (frame->getLayer().getLinkedUp()))
+                linkedUp(frame);
+        }
+    }
+
     updateSceneSize();
 }
 

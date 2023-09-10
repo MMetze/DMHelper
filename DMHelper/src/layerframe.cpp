@@ -13,6 +13,8 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     setLayerVisibleDM(layer.getLayerVisibleDM());
     setLayerVisiblePlayer(layer.getLayerVisiblePlayer());
     handleVisibleChanged();
+    setLinkedUp(layer.getLinkedUp());
+    handleLinkUp(layer.getLinkedUp());
     setIcon(layer.getLayerIcon());
     setName(layer.getName());
     setOpacity(layer.getOpacity() * 100.0);
@@ -21,9 +23,11 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 
     connect(ui->chkVisibleDM, &QAbstractButton::toggled, this, &LayerFrame::visibleDMChanged);
     connect(ui->chkVisiblePlayer, &QAbstractButton::toggled, this, &LayerFrame::visiblePlayerChanged);
+    connect(ui->chkLinkUp, &QAbstractButton::toggled, this, &LayerFrame::linkedUpChanged);
     connect(ui->chkVisibleDM, &QAbstractButton::clicked, this, &LayerFrame::handleVisibleChanged);
     connect(ui->chkVisiblePlayer, &QAbstractButton::clicked, this, &LayerFrame::handleVisibleChanged);
     connect(ui->chkVisible, &QAbstractButton::clicked, this, &LayerFrame::handleVisibleClicked);
+    connect(ui->chkLinkUp, &QAbstractButton::clicked, this, &LayerFrame::handleLinkUp);
     connect(ui->edtName, &QLineEdit::editingFinished, this, &LayerFrame::handleNameChanged);
 
     connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
@@ -31,11 +35,10 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(this, &LayerFrame::visiblePlayerChanged, &layer, &Layer::setLayerVisiblePlayer);
     connect(this, &LayerFrame::visibleDMChanged, [=](){ emit visibilityChanged(this); });
     connect(this, &LayerFrame::visiblePlayerChanged, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::linkedUpChanged, &layer, &Layer::setLinkedUp);
     connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
     connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));
     connect(this, &LayerFrame::sizeChanged, &layer, QOverload<const QSize&>::of(&Layer::setSize));
-
-    connect(ui->chkLinkUp, &QAbstractButton::clicked, this, &LayerFrame::handleLinkUp);
 
     connect(ui->sliderOpacity, &QSlider::valueChanged, this, &LayerFrame::handleOpacityChanged);
     connect(ui->spinOpacity, &QSpinBox::editingFinished, this, &LayerFrame::handleOpacityChanged);
@@ -91,6 +94,12 @@ void LayerFrame::setLayerVisiblePlayer(bool visible)
 void LayerFrame::setIcon(const QImage& image)
 {
     ui->lblIcon->setPixmap(QPixmap::fromImage(image));
+}
+
+void LayerFrame::setLinkedUp(bool linkUp)
+{
+    if(ui->chkLinkUp->isChecked() != linkUp)
+        ui->chkLinkUp->setChecked(linkUp);
 }
 
 void LayerFrame::setName(const QString& name)
