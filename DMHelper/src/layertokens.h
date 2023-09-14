@@ -115,7 +115,7 @@ protected:
     qreal getTotalScale(QGraphicsItem& item);
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
     bool isItemInEffectArea(QGraphicsPixmapItem* item, QGraphicsItem* collisionEffect);
-    void removeAllEffectsFromItem(QGraphicsPixmapItem* item);
+    //void removeAllEffectsFromItem(QGraphicsPixmapItem* item);
     void removeSpecificEffectFromItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyEffectToToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect);

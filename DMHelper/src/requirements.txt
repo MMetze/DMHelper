@@ -5,6 +5,15 @@ fixed * party icon not visible
 fixed * markers (neverwinter region) seem to not work
 
 Fog of war from old to new
+Use screenshot until video shows up
+
+
+Video requirements
+Audio by Michael Ghelfi Studios
+https://michaelghelfistudios.com/
+Sound effects from https://quicksounds.com
+If they are just being shown in videos you can absolutely use them. Just make sure you are including a credit for me, with a link to my website or Patreon, and a credit for Splattered Ink Games for the token artwork and a link to their website - splatteredink.com
+
 
 * Saving a combat with FOW reference doesn't refer to the fow but the map
 * Layers list in the wrong order

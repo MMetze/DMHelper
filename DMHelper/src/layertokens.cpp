@@ -1276,6 +1276,7 @@ bool LayerTokens::isItemInEffectArea(QGraphicsPixmapItem* item, QGraphicsItem* c
     return item->collidesWithItem(collisionEffect);
 }
 
+/*
 void LayerTokens::removeAllEffectsFromItem(QGraphicsPixmapItem* item)
 {
     if(!item)
@@ -1291,6 +1292,7 @@ void LayerTokens::removeAllEffectsFromItem(QGraphicsPixmapItem* item)
         }
     }
 }
+*/
 
 void LayerTokens::removeSpecificEffectFromItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect)
 {
