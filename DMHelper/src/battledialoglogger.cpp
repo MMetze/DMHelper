@@ -41,6 +41,9 @@ BattleDialogLogger& BattleDialogLogger::operator=(const BattleDialogLogger& othe
 
 QDomElement BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
+    if(_battleEvents.count() == 0)
+        return QDomElement();
+
     QDomElement loggerElement = doc.createElement("battlelogger");
 
     DMHObjectBase::outputXML(doc, loggerElement, targetDirectory, isExport);

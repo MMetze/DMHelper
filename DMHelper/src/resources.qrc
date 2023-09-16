@@ -261,6 +261,8 @@
         <file>data/icon_duplicate.png</file>
         <file>data/icon_rectangle.png</file>
         <file>data/icon_search.png</file>
+        <file>data/icon_linkup.png</file>
+        <file>data/icon_linkglow.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

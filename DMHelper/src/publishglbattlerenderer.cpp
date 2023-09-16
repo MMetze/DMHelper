@@ -661,8 +661,7 @@ void PublishGLBattleRenderer::updateTokens()
     QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
     foreach(Layer* layer, tokenLayers)
     {
-        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
-        if(tokenLayer)
+        if(LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer))
         {
             tokenLayer->playerGLUninitialize();
             tokenLayer->playerGLInitialize(this, &_scene);
@@ -680,9 +679,13 @@ void PublishGLBattleRenderer::updateTokens()
                     }
                 }
             }
-
-            tokenLayer->refreshEffects();
         }
+    }
+
+    foreach(Layer* layer, tokenLayers)
+    {
+        if(LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer))
+            tokenLayer->refreshEffects();
     }
 
     _updateTokens = false;
@@ -1245,7 +1248,8 @@ void PublishGLBattleRenderer::activeCombatantMoved()
         return;
 
     QSize textureSize = _activeToken->getImageSize();
-    qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * _activeCombatant->getSizeFactor() / qMax(textureSize.width(), textureSize.height());
+    qreal combatantScale = static_cast<qreal>(_activeCombatant->getLayer() ? _activeCombatant->getLayer()->getScale() : DMHelper::STARTING_GRID_SCALE);
+    qreal scaleFactor = (combatantScale - 2.0) * _activeCombatant->getSizeFactor() / qMax(textureSize.width(), textureSize.height());
 
     _activeToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), _activeCombatant->getPosition()), scaleFactor);
     emit updateWidget();

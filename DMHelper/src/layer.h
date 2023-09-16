@@ -32,6 +32,7 @@ public:
     virtual int getOrder() const;
     virtual bool getLayerVisibleDM() const;
     virtual bool getLayerVisiblePlayer() const;
+    virtual bool getLinkedUp() const;
     virtual qreal getOpacity() const;
     virtual QPoint getPosition() const;
     virtual QSize getSize() const;
@@ -79,6 +80,7 @@ public slots:
     virtual void setOrder(int order);
     virtual void setLayerVisibleDM(bool layerVisible);
     virtual void setLayerVisiblePlayer(bool layerVisible);
+    virtual void setLinkedUp(bool linkedUp);
     virtual void setOpacity(qreal opacity);
     virtual void setPosition(const QPoint& position);
     virtual void setPosition(int x, int y);
@@ -103,6 +105,7 @@ protected:
     int _order;
     bool _layerVisibleDM;
     bool _layerVisiblePlayer;
+    bool _linkedUp;
     qreal _layerOpacity;
     qreal _opacityReference;
     QPoint _position;

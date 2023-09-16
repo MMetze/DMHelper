@@ -339,7 +339,7 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     createTextNode(doc, element, targetDirectory, isExport);
 
     // Check to only write really translated text, correcting also for a previous error that has created a lot of duplicate entries!
-    if((_translatedText.isEmpty()) || (_translatedText != _text))
+    if((!_translatedText.isEmpty()) && (_translatedText != _text))
     {
         QDomElement translatedTextElement = doc.createElement("translated-text-data");
             QDomCDATASection translatedTextData = doc.createCDATASection(getTranslatedText());
@@ -400,10 +400,14 @@ void EncounterText::createTextNode(QDomDocument &doc, QDomElement &element, QDir
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
-    QDomElement textElement = doc.createElement("text-data");
-        QDomCDATASection textData = doc.createCDATASection(getText());
-        textElement.appendChild(textData);
-    element.appendChild(textElement);
+    QString textString = getText();
+    if(!textString.isEmpty())
+    {
+        QDomElement textElement = doc.createElement("text-data");
+            QDomCDATASection textData = doc.createCDATASection(textString);
+            textElement.appendChild(textData);
+        element.appendChild(textElement);
+    }
 }
 
 void EncounterText::extractTextNode(const QDomElement &element, bool isImport)

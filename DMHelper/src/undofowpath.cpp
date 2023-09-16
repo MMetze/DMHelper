@@ -30,15 +30,16 @@ QDomElement UndoFowPath::outputXML(QDomDocument &doc, QDomElement &element, QDir
     element.setAttribute("brushtype", _mapDrawPath.brushType());
     element.setAttribute("erase", static_cast<int>(_mapDrawPath.erase()));
     element.setAttribute("smooth", static_cast<int>(_mapDrawPath.smooth()));
-    QDomElement pointsElement = doc.createElement("points");
+    //QDomElement pointsElement = doc.createElement("points");
     for(int i = 0; i < _mapDrawPath.points().count(); ++i)
     {
         QDomElement pointElement = doc.createElement("point");
         pointElement.setAttribute("x", _mapDrawPath.points().at(i).x());
         pointElement.setAttribute("y", _mapDrawPath.points().at(i).y());
-        pointsElement.appendChild(pointElement);
+        //pointsElement.appendChild(pointElement);
+        element.appendChild(pointElement);
     }
-    element.appendChild(pointsElement);
+    //element.appendChild(pointsElement);
 
     return element;
 }
@@ -52,6 +53,17 @@ void UndoFowPath::inputXML(const QDomElement &element, bool isImport)
     _mapDrawPath.setErase(static_cast<bool>(element.attribute("erase", QString::number(1)).toInt()));
     _mapDrawPath.setSmooth(static_cast<bool>(element.attribute("smooth", QString::number(1)).toInt()));
 
+    QDomElement pointElement = element.firstChildElement(QString("point"));
+    while(!pointElement.isNull())
+    {
+        QPoint newPoint;
+        newPoint.setX(pointElement.attribute(QString("x")).toInt());
+        newPoint.setY(pointElement.attribute(QString("y")).toInt());
+        addPoint(newPoint);
+        pointElement = pointElement.nextSiblingElement(QString("point"));
+    }
+
+    // Deprecated: maintain "points" entry for now
     QDomElement pointsElement = element.firstChildElement(QString("points"));
     if(!pointsElement.isNull())
     {

@@ -10,6 +10,7 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
     _order(order),
     _layerVisibleDM(true),
     _layerVisiblePlayer(true),
+    _linkedUp(false),
     _layerOpacity(1.0),
     _opacityReference(1.0),
     _position(),
@@ -43,6 +44,7 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
     _order = element.attribute("order", QString::number(0)).toInt();
     _layerVisibleDM = static_cast<bool>(element.attribute("visibleDM", QString::number(1)).toInt());
     _layerVisiblePlayer = static_cast<bool>(element.attribute("visiblePlayer", QString::number(1)).toInt());
+    _linkedUp = static_cast<bool>(element.attribute("linkedUp", QString::number(0)).toInt());
     _layerOpacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
     _opacityReference = 1.0;
     _position = QPoint(element.attribute("x", QString::number(0)).toInt(),
@@ -90,6 +92,11 @@ bool Layer::getLayerVisiblePlayer() const
     return _layerVisiblePlayer;
 }
 
+bool Layer::getLinkedUp() const
+{
+    return _linkedUp;
+}
+
 qreal Layer::getOpacity() const
 {
     return _layerOpacity;
@@ -131,6 +138,7 @@ void Layer::copyBaseValues(Layer *other) const
     other->_order = _order;
     other->_layerVisibleDM = _layerVisibleDM;
     other->_layerVisiblePlayer = _layerVisiblePlayer;
+    other->_linkedUp = _linkedUp;
     other->_layerOpacity = _layerOpacity;
     other->_opacityReference = _opacityReference;
     other->_position = _position;
@@ -239,6 +247,15 @@ void Layer::setLayerVisiblePlayer(bool layerVisible)
     emit dirty();
 }
 
+void Layer::setLinkedUp(bool linkedUp)
+{
+    if(_linkedUp == linkedUp)
+        return;
+
+    _linkedUp = linkedUp;
+    emit dirty();
+}
+
 void Layer::setOpacity(qreal opacity)
 {
     if(_layerOpacity == opacity)
@@ -292,6 +309,8 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
         element.setAttribute("visibleDM", _layerVisibleDM);
     if(!_layerVisiblePlayer)
         element.setAttribute("visiblePlayer", _layerVisiblePlayer);
+    if(_linkedUp)
+        element.setAttribute("linkedUp", _linkedUp);
     if(_layerOpacity < 1.0)
         element.setAttribute("opacity", _layerOpacity);
 

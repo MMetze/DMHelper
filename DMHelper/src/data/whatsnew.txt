@@ -21,8 +21,12 @@
     <li> scale and shift layers relative to one another
     <li> ...and so much more...
     </ul>
-<li>Monsters can have multiple tokens
-<li>Duplication of monsters or effects in a battle - look for a button called... "Duplicate"
+<li>Upgraded monster tokens
+    <ul>
+    <li> Monsters can have multiple tokens
+    <li> Search and grab tokens from the Internet, applying effects and adding them directly to your Bestiary!
+    </ul>
+<li>Duplication (ie copy/paste) of monsters or effects in a battle - look for a button called... "Duplicate"
 <li>Dynamic entry icons in the campaign tree
     <ul>
     <li> PC icons are now their own token

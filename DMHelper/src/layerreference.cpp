@@ -3,6 +3,7 @@
 #include "map.h"
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
+#include <QPainter>
 #include <QDebug>
 
 LayerReference::LayerReference(CampaignObjectBase* referenceObject, Layer* referenceLayer, int order, QObject *parent) :
@@ -102,7 +103,18 @@ QString LayerReference::getName() const
 
 QImage LayerReference::getLayerIcon() const
 {
-    return QImage(":/img/data/icon_link.png");
+    QImage linkImage(":/img/data/icon_linkglow.png");
+
+    if(!_referenceLayer)
+        return linkImage;
+
+    QImage layerIcon = _referenceLayer->getLayerIcon().scaled(linkImage.size());
+    QPainter p;
+    p.begin(&layerIcon);
+        p.drawImage(0, 0, linkImage);
+    p.end();
+
+    return layerIcon;
 }
 
 bool LayerReference::defaultShader() const
@@ -185,6 +197,13 @@ Layer* LayerReference::getReferenceLayer() const
 CampaignObjectBase* LayerReference::getReferenceObject() const
 {
     return _referenceObject;
+}
+
+void LayerReference::clearReference()
+{
+    disconnect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
+    _referenceLayer = nullptr;
+    _referenceObject = nullptr;
 }
 
 void LayerReference::dmInitialize(QGraphicsScene* scene)
@@ -279,10 +298,8 @@ void LayerReference::handleReferenceDestroyed(Layer *layer)
 {
     if((layer) && (layer == _referenceLayer))
     {
-        disconnect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
-        _referenceLayer = nullptr;
-        _referenceObject = nullptr;
-        emit referenceDestroyed(this);
+        clearReference();
+        emit referenceDestroyed(this, layer);
     }
 }
 

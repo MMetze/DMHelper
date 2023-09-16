@@ -661,7 +661,7 @@ void MapFrame::setCameraVisible()
     QList<Layer*> fowLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
     foreach(Layer* layer, fowLayers)
     {
-        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer->getFinalLayer());
         if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
         {
             QRectF newRect = fowLayer->getFoWVisibleRect();
@@ -1389,7 +1389,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             if(layer)
             {
                 drawPoint -= layer->getPosition();
-                _undoPath = new UndoFowPath(layer, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
+                _undoPath = new UndoFowPath(layer, MapDrawPath(_mapSource->getPartyScale() * _brushSize / 10, _brushMode, _erase, _smooth, drawPoint));
                 layer->getUndoStack()->push(_undoPath);
                 emit dirty();
             }
@@ -1508,7 +1508,7 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
     }
     else if(event->type() == QEvent::MouseMove)
     {
-        if((!_distanceLine) || (!_distanceText) || (!_scene) || (_mapSource->getMapScale() <= 0.0) || (mouseEvent->buttons() == Qt::NoButton))
+        if((!_distanceLine) || (!_distanceText) || (!_scene) || (mouseEvent->buttons() == Qt::NoButton))
             return false;
 
         QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
@@ -1516,7 +1516,7 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         QLineF line = _distanceLine->line();
         line.setP2(scenePos);
         _distanceLine->setLine(line);
-        qreal lineDistance = line.length() * _mapSource->getMapScale() / 1000.0;
+        qreal lineDistance = line.length() * ((_mapSource->getMapScale() > 0.0) ? _mapSource->getMapScale() : _mapSource->getPartyScale()) / 1000.0;
         QString distanceText;
         distanceText = QString::number(lineDistance, 'f', 1);
         _distanceText->setText(distanceText);
@@ -1595,7 +1595,8 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
                                                               static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
             _distancePath->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
         }
-        qreal lineDistance = _distancePath->path().length() * _mapSource->getMapScale() / 1000.0;
+        //qreal lineDistance = _distancePath->path().length() * _mapSource->getMapScale() / 1000.0;
+        qreal lineDistance = _distancePath->path().length() * ((_mapSource->getMapScale() > 0.0) ? _mapSource->getMapScale() : _mapSource->getPartyScale()) / 1000.0;
         QString distanceText;
         distanceText = QString::number(lineDistance, 'f', 1);
         _distanceText->setText(distanceText);
@@ -1836,9 +1837,7 @@ void MapFrame::setMapCursor()
             case DMHelper::EditMode_FoW:
             case DMHelper::EditMode_Edit:
             default:
-                if(_brushMode == DMHelper::BrushType_Circle)
-                    drawEditCursor();
-                else if(_brushMode == DMHelper::BrushType_Square)
+                if((_brushMode == DMHelper::BrushType_Circle) || (_brushMode == DMHelper::BrushType_Square))
                     drawEditCursor();
                 else
                     ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
@@ -1849,7 +1848,12 @@ void MapFrame::setMapCursor()
 
 void MapFrame::drawEditCursor()
 {
-    int cursorSize = _scale * _brushSize * 2;
+    if(!_mapSource)
+        return;
+
+    //qreal scaleFactor = (static_cast<qreal>(_mapSource->getPartyScale()-2)) / static_cast<qreal>(qMax(partyPixmap.width(), partyPixmap.height()));
+    //int cursorSize = _scale * _mapSource->getPartyScale() * _brushSize * 2;
+    int cursorSize = _scale * _mapSource->getPartyScale() * _brushSize / 5;
     QPixmap cursorPixmap(QSize(cursorSize, cursorSize));
     cursorPixmap.fill(Qt::transparent);
     QPainter painter;

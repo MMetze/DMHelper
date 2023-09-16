@@ -77,12 +77,14 @@ void ConfigureLockedGridDialog::toggleFullscreen()
 
 void ConfigureLockedGridDialog::gridScaleChanged(int value)
 {
+    Q_UNUSED(value);
+
     if(_model)
-    {
+    //{
         // TODO: Layers
         //_model->setGridScale(value);
         rebuildGrid();
-    }
+    //}
 }
 
 void ConfigureLockedGridDialog::autoFit()

@@ -10,7 +10,7 @@ class LayerReference : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerReference(CampaignObjectBase* referenceObject= nullptr, Layer* referenceLayer = nullptr, int order = 0, QObject *parent = nullptr);
+    explicit LayerReference(CampaignObjectBase* referenceObject = nullptr, Layer* referenceLayer = nullptr, int order = 0, QObject *parent = nullptr);
     virtual ~LayerReference();
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -38,6 +38,7 @@ public:
     DMHelper::LayerType getReferencedType() const;
     Layer* getReferenceLayer() const;
     CampaignObjectBase* getReferenceObject() const;
+    virtual void clearReference();
 
 public slots:
     // DM Window Generic Interface
@@ -61,7 +62,7 @@ public slots:
     virtual void setScale(int scale) override;
 
 signals:
-    void referenceDestroyed(Layer* reference);
+    void referenceDestroyed(Layer* layer, Layer* reference);
 
 protected slots:
     void handleReferenceDestroyed(Layer *layer);

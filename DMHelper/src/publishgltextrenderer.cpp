@@ -60,6 +60,18 @@ QColor PublishGLTextRenderer::getBackgroundColor()
     return _color;
 }
 
+void PublishGLTextRenderer::rendererDeactivated()
+{
+    if(_encounter)
+    {
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLTextRenderer::layerAdded);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
+    }
+
+    PublishGLRenderer::rendererDeactivated();
+}
+
 bool PublishGLTextRenderer::deleteOnDeactivation()
 {
     return true;

@@ -118,7 +118,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _publishEffectItem(nullptr),
     _scene(nullptr),
     _activePixmap(nullptr),
-    _activeScale(1.0),
+//    _activeScale(1.0),
     _selectedScale(1.0),
     _movementPixmap(nullptr),
     _cameraRect(nullptr),
@@ -869,7 +869,7 @@ void BattleFrame::createActiveIcon()
 
     _activePixmap = _scene->addPixmap(activePmp);
     _activePixmap->setTransformationMode(Qt::SmoothTransformation);
-    _activePixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _activeScale / ACTIVE_PIXMAP_SIZE);
+//    _activePixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _activeScale / ACTIVE_PIXMAP_SIZE);
     _activePixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _activePixmap->hide();
 }
@@ -1407,7 +1407,7 @@ void BattleFrame::setCameraMap()
 
 void BattleFrame::setCameraVisible()
 {
-    if((!_cameraRect) || (!_model) || (!_model->getMap()))
+    if((!_cameraRect) || (!_model))
         return;
 
     QRectF visibleRect = _model->getLayerScene().boundingRect();
@@ -1415,7 +1415,7 @@ void BattleFrame::setCameraVisible()
     QList<Layer*> fowLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
     foreach(Layer* layer, fowLayers)
     {
-        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer->getFinalLayer());
         if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
         {
             QRectF newRect = fowLayer->getFoWVisibleRect();
@@ -2268,35 +2268,39 @@ void BattleFrame::handleCombatantChangeLayer(BattleDialogModelCombatant* combata
         return;
 
     int currentLayerIndex = 0;
+    QGraphicsItem* currentItem = nullptr;
     QStringList tokenLayerNames;
     for(int i = 0; i < tokenLayers.count(); ++i)
     {
         LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
         tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
         if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
+        {
             currentLayerIndex = i;
+            currentItem = tokenLayer->getCombatantItem(combatant);
+        }
     }
 
     SelectItemDialog dlg(tokenLayerNames);
     dlg.setSelectedItem(currentLayerIndex);
-    if(dlg.exec() == QDialog::Accepted)
-    {
-        LayerTokens* newLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
-        if(!newLayer)
-            return;
+    if(dlg.exec() != QDialog::Accepted)
+        return;
 
-        QList<QGraphicsItem*> selected = _scene->selectedItems();
-        if(selected.count() == 0)
-        {
-            moveCombatantToLayer(combatant, newLayer);
-        }
-        else
-        {
-            foreach(QGraphicsItem* graphicsItem, selected)
-            {
-                moveCombatantToLayer(getCombatantFromItem(graphicsItem), newLayer);
-            }
-        }
+    LayerTokens* newLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
+    if(!newLayer)
+        return;
+
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        moveCombatantToLayer(combatant, newLayer);
+        return;
+    }
+
+    foreach(QGraphicsItem* graphicsItem, selected)
+    {
+        moveCombatantToLayer(getCombatantFromItem(graphicsItem), newLayer);
     }
 }
 
@@ -2765,11 +2769,17 @@ void BattleFrame::updateHighlights()
 
     if(_activePixmap)
     {
-        QGraphicsPixmapItem* item = getItemFromCombatant(_model->getActiveCombatant());
-        if(item)
+        BattleDialogModelCombatant* active = _model->getActiveCombatant();
+        if(QGraphicsPixmapItem* item = getItemFromCombatant(active))
         {
+            if(active)
+            {
+                qreal combatantScale = static_cast<qreal>(active->getLayer() ? active->getLayer()->getScale() : DMHelper::STARTING_GRID_SCALE);
+                _activePixmap->setScale(combatantScale * active->getSizeFactor() / ACTIVE_PIXMAP_SIZE);
+            }
+
             moveRectToPixmap(_activePixmap, item);
-            _activePixmap->show();
+            _activePixmap->setVisible(item->isVisible());
         }
         else
         {
@@ -2897,7 +2907,9 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
 }
 
 void BattleFrame::setMapCursor()
-{
+{    
+    if((_mapDrawer) && (_model))
+        _mapDrawer->setScale(_model->getGridScale(), _scale);
 }
 
 void BattleFrame::setCameraSelectable(bool selectable)
@@ -3080,11 +3092,14 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(battleMouseMove(const QPointF&)), _mapDrawer, SLOT(handleMouseMoved(const QPointF&)));
         connect(_scene, SIGNAL(battleMouseRelease(const QPointF&)), _mapDrawer, SLOT(handleMouseUp(const QPointF&)));
 
-        if(_model)
+        if((_mapDrawer) && (_model))
+            _mapDrawer->setScale(_model->getGridScale(), _scale);
+            /*
         {
             QRect viewSize = ui->graphicsView->mapFromScene(QRect(0, 0, _model->getGridScale(), _model->getGridScale())).boundingRect();
-            _mapDrawer->setScale(_model->getGridScale(), viewSize.width());
+            _mapDrawer->setScale(_model->getGridScale() * _scale, viewSize.width());
         }
+        */
     }
     else
     {
@@ -3404,17 +3419,27 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
     if(active)
     {
-        _activeScale = active->getSizeFactor();
+//        _activeScale = active->getSizeFactor();
         ui->frameCombatant->setCombatant(active);
         active->resetMoved();
     }
 
+    if((_countdownTimer) && (_showCountdown))
+    {
+        _countdownTimer->start(static_cast<int>(COUNTDOWN_TIMER * 1000));
+        _countdown = static_cast<qreal>(_countdownFrame.height() - 10);
+        updateCountdownText();
+    }
+
+/*
     if(_activePixmap)
     {
         QGraphicsPixmapItem* item = getItemFromCombatant(active);
-        if(item)
+        if((active) && (item))
         {
-            _activePixmap->setScale(_model->getGridScale() * _activeScale / ACTIVE_PIXMAP_SIZE);
+            qreal combatantScale = static_cast<qreal>(active->getLayer() ? active->getLayer()->getScale() : DMHelper::STARTING_GRID_SCALE);
+//            _activePixmap->setScale(_model->getGridScale() * _activeScale / ACTIVE_PIXMAP_SIZE);
+            _activePixmap->setScale(combatantScale * active->getSizeFactor() / ACTIVE_PIXMAP_SIZE);
 
             moveRectToPixmap(_activePixmap, item);
             _activePixmap->setVisible(item->isVisible());
@@ -3428,9 +3453,11 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
             _activePixmap->hide();
         }
     }
+*/
 
     _model->setActiveCombatant(active);
     connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    updateHighlights();
 }
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
@@ -3643,6 +3670,9 @@ void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, La
     {
         currentLayer->removeCombatant(combatant);
         newLayer->addCombatant(combatant);
+        updateHighlights();
+        if(QGraphicsPixmapItem* newItem = dynamic_cast<QGraphicsPixmapItem*>(newLayer->getCombatantItem(combatant)))
+            newItem->setSelected(combatant->getSelected());
     }
 }
 
@@ -3687,7 +3717,7 @@ void BattleFrame::clearBattleFrame()
     _mouseDown = false;
     _mouseDownPos = QPoint();
 
-    _activeScale = 1.0;
+    //_activeScale = 1.0;
     _selectedScale = 1.0;
 
     if(_countdownTimer)

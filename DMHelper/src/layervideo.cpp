@@ -208,6 +208,7 @@ bool LayerVideo::playerGLUpdate()
 
 void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(defaultModelMatrix);
     Q_UNUSED(projectionMatrix);
 
     if(!functions)

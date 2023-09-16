@@ -29,7 +29,13 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     _monster(nullptr),
     _currentToken(0),
     _edit(false),
-    _mouseDown(false)
+    _mouseDown(false),
+    _searchString(),
+    _tokenMode(BestiaryFindTokenDialog::TokenDetailMode_FrameAndMask),
+    _tokenBackground(Qt::white),
+    _tokenBackgroundLevel(15),
+    _tokenFrameFile(),
+    _tokenMaskFile()
 {
     ui->setupUi(this);
 
@@ -376,6 +382,21 @@ void BestiaryDialog::dataChanged()
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
 }
 
+void BestiaryDialog::setTokenSearchString(const QString& searchString)
+{
+    _searchString = searchString;
+}
+
+void BestiaryDialog::setTokenFrameFile(const QString& tokenFrameFile)
+{
+    _tokenFrameFile = tokenFrameFile;
+}
+
+void BestiaryDialog::setTokenMaskFile(const QString& tokenMaskFile)
+{
+    _tokenMaskFile = tokenMaskFile;
+}
+
 void BestiaryDialog::hitDiceChanged()
 {
     Dice newHitDice(ui->edtHitDice->text());
@@ -424,14 +445,12 @@ void BestiaryDialog::handlePublishButton()
         return;
 
     QImage iconImg;
-    QString iconFile = _monster->getIcon();
+    QString iconFile = _monster->getIcon(_currentToken);
     QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
     if((!iconPath.isEmpty()) && (iconImg.load(iconPath) == true))
     {
         if(ui->framePublish->getRotation() != 0)
-        {
             iconImg = iconImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
-        }
 
         emit publishMonsterImage(iconImg, ui->framePublish->getColor());
     }
@@ -460,7 +479,7 @@ void BestiaryDialog::handleSearchToken()
     if(!_monster)
         return;
 
-    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName());
+    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName(), _searchString, _tokenMode, _tokenBackground, _tokenBackgroundLevel, _tokenFrameFile, _tokenMaskFile);
     dlg->resize(width() * 9 / 10, height() * 9 / 10);
     if(dlg->exec() == QDialog::Accepted)
     {
@@ -481,6 +500,22 @@ void BestiaryDialog::handleSearchToken()
 
         _monster->searchForIcons();
         setTokenIndex(_monster->getIconList().indexOf(tokenFile));
+
+        if(_tokenFrameFile != dlg->getTokenFrameFile())
+        {
+            _tokenFrameFile = dlg->getTokenFrameFile();
+            emit tokenFrameFileChanged(_tokenFrameFile);
+        }
+
+        if(_tokenMaskFile != dlg->getTokenMaskFile())
+        {
+            _tokenMaskFile = dlg->getTokenMaskFile();
+            emit tokenMaskFileChanged(_tokenMaskFile);
+        }
+
+        _tokenMode = dlg->getTokenDetailMode();
+        _tokenBackground = dlg->getTokenBackgroundColor();
+        _tokenBackgroundLevel = dlg->getTokenBackgroundLevel();
     }
     dlg->deleteLater();
 

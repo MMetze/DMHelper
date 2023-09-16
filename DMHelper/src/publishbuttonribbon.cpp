@@ -119,15 +119,14 @@ void PublishButtonRibbon::setLayers(QList<Layer*> layers, int selected)
         oldMenu->deleteLater();
     }
 
-    //ui->btnLayerTool->setEnabled(layers.count() > 0);
-
     QAction* newDefaultAction = nullptr;
     if(layers.count() > 0)
     {
         QMenu* newMenu = new QMenu(this);
         QAction* newAction = nullptr;
 
-        for(int i = 0; i < layers.count(); ++i)
+        // Layers to be added in reverse order to put top-level layer at the top of the list
+        for(int i = layers.count() - 1; i >= 0; --i)
         {
             if(layers.at(i))
             {

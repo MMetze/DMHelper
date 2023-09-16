@@ -97,6 +97,8 @@ protected slots:
     void layerMoved(const QPoint& position);
     void layerResized(const QSize& size);
 
+    void handleReferenceDestroyed(Layer* source, Layer* reference);
+
 protected:
     // From CampaignObjectBase
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

@@ -1,4 +1,4 @@
-#include "layerframe.h"
+    #include "layerframe.h"
 #include "ui_layerframe.h"
 #include "layer.h"
 
@@ -12,19 +12,30 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 
     setLayerVisibleDM(layer.getLayerVisibleDM());
     setLayerVisiblePlayer(layer.getLayerVisiblePlayer());
+    handleVisibleChanged();
+    setLinkedUp(layer.getLinkedUp());
+    handleLinkUp(layer.getLinkedUp());
     setIcon(layer.getLayerIcon());
     setName(layer.getName());
     setOpacity(layer.getOpacity() * 100.0);
     setPosition(layer.getPosition());
     setSize(layer.getSize());
 
-    connect(ui->chkVisibleDM, &QAbstractButton::clicked, this, &LayerFrame::visibleDMChanged);
-    connect(ui->chkVisiblePlayer, &QAbstractButton::clicked, this, &LayerFrame::visiblePlayerChanged);
+    connect(ui->chkVisibleDM, &QAbstractButton::toggled, this, &LayerFrame::visibleDMChanged);
+    connect(ui->chkVisiblePlayer, &QAbstractButton::toggled, this, &LayerFrame::visiblePlayerChanged);
+    connect(ui->chkLinkUp, &QAbstractButton::toggled, this, &LayerFrame::linkedUpChanged);
+    connect(ui->chkVisibleDM, &QAbstractButton::clicked, this, &LayerFrame::handleVisibleChanged);
+    connect(ui->chkVisiblePlayer, &QAbstractButton::clicked, this, &LayerFrame::handleVisibleChanged);
+    connect(ui->chkVisible, &QAbstractButton::clicked, this, &LayerFrame::handleVisibleClicked);
+    connect(ui->chkLinkUp, &QAbstractButton::clicked, this, &LayerFrame::handleLinkUp);
     connect(ui->edtName, &QLineEdit::editingFinished, this, &LayerFrame::handleNameChanged);
 
     connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
     connect(this, &LayerFrame::visibleDMChanged, &layer, &Layer::setLayerVisibleDM);
     connect(this, &LayerFrame::visiblePlayerChanged, &layer, &Layer::setLayerVisiblePlayer);
+    connect(this, &LayerFrame::visibleDMChanged, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::visiblePlayerChanged, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::linkedUpChanged, &layer, &Layer::setLinkedUp);
     connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
     connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));
     connect(this, &LayerFrame::sizeChanged, &layer, QOverload<const QSize&>::of(&Layer::setSize));
@@ -62,6 +73,12 @@ LayerFrame::~LayerFrame()
     delete ui;
 }
 
+void LayerFrame::setLayerVisible(bool visible)
+{
+    if(ui->chkVisible->isChecked() != visible)
+        ui->chkVisible->setChecked(visible);
+}
+
 void LayerFrame::setLayerVisibleDM(bool visible)
 {
     if(ui->chkVisibleDM->isChecked() != visible)
@@ -77,6 +94,12 @@ void LayerFrame::setLayerVisiblePlayer(bool visible)
 void LayerFrame::setIcon(const QImage& image)
 {
     ui->lblIcon->setPixmap(QPixmap::fromImage(image));
+}
+
+void LayerFrame::setLinkedUp(bool linkUp)
+{
+    if(ui->chkLinkUp->isChecked() != linkUp)
+        ui->chkLinkUp->setChecked(linkUp);
 }
 
 void LayerFrame::setName(const QString& name)
@@ -154,6 +177,47 @@ const Layer& LayerFrame::getLayer() const
 Layer& LayerFrame::getLayer()
 {
     return _layer;
+}
+
+bool LayerFrame::isLinkedUp() const
+{
+    return ui->chkLinkUp->isChecked();
+}
+
+bool LayerFrame::isLayerVisible() const
+{
+    return ui->chkVisible->isChecked();
+}
+
+bool LayerFrame::isLayerVisibleDM() const
+{
+    return ui->chkVisibleDM->isChecked();
+}
+
+bool LayerFrame::isLayerVisiblePlayer() const
+{
+    return ui->chkVisiblePlayer->isChecked();
+}
+
+void LayerFrame::handleLinkUp(bool checked)
+{
+    ui->chkVisible->setEnabled(!checked);
+    ui->chkVisibleDM->setEnabled(!checked);
+    ui->chkVisiblePlayer->setEnabled(!checked);
+
+    if(checked)
+        emit linkedUp(this);
+}
+
+void LayerFrame::handleVisibleClicked(bool checked)
+{
+    ui->chkVisibleDM->setChecked(checked);
+    ui->chkVisiblePlayer->setChecked(checked);
+}
+
+void LayerFrame::handleVisibleChanged()
+{
+    ui->chkVisible->setChecked(_layer.getLayerVisibleDM() && _layer.getLayerVisiblePlayer());
 }
 
 void LayerFrame::handleNameChanged()

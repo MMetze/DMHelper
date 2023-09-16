@@ -957,21 +957,27 @@ void LayerTokens::linkedObjectMoved(BattleDialogModelObject* object)
 
 void LayerTokens::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    QDomElement combatantsElement = doc.createElement("combatants");
-    foreach(BattleDialogModelCombatant* combatant, _combatants)
+    if(_combatants.count() > 0)
     {
-        if(combatant)
-            combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
+        QDomElement combatantsElement = doc.createElement("combatants");
+        foreach(BattleDialogModelCombatant* combatant, _combatants)
+        {
+            if(combatant)
+                combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
+        }
+        element.appendChild(combatantsElement);
     }
-    element.appendChild(combatantsElement);
 
-    QDomElement effectsElement = doc.createElement("effects");
-    foreach(BattleDialogModelEffect* effect, _effects)
+    if(_effects.count() > 0)
     {
-        if(effect)
-            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
+        QDomElement effectsElement = doc.createElement("effects");
+        foreach(BattleDialogModelEffect* effect, _effects)
+        {
+            if(effect)
+                effect->outputXML(doc, effectsElement, targetDirectory, isExport);
+        }
+        element.appendChild(effectsElement);
     }
-    element.appendChild(effectsElement);
 
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
@@ -1270,6 +1276,7 @@ bool LayerTokens::isItemInEffectArea(QGraphicsPixmapItem* item, QGraphicsItem* c
     return item->collidesWithItem(collisionEffect);
 }
 
+/*
 void LayerTokens::removeAllEffectsFromItem(QGraphicsPixmapItem* item)
 {
     if(!item)
@@ -1285,6 +1292,7 @@ void LayerTokens::removeAllEffectsFromItem(QGraphicsPixmapItem* item)
         }
     }
 }
+*/
 
 void LayerTokens::removeSpecificEffectFromItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect)
 {

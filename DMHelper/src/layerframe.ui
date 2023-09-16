@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>588</width>
+    <width>695</width>
     <height>69</height>
    </rect>
   </property>
@@ -45,50 +45,6 @@
     <number>3</number>
    </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="spacing">
-      <number>1</number>
-     </property>
-     <property name="leftMargin">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QCheckBox" name="chkVisibleDM">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_dmscreen.png</normaloff>:/img/data/icon_dmscreen.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="chkVisiblePlayer">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/img/data/small_icon_eye.png</normaloff>:/img/data/small_icon_eye.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="QLabel" name="lblIcon">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -98,14 +54,14 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>58</width>
-       <height>58</height>
+       <width>61</width>
+       <height>61</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>58</width>
-       <height>58</height>
+       <width>61</width>
+       <height>61</height>
       </size>
      </property>
      <property name="frameShape">
@@ -117,6 +73,129 @@
      <property name="scaledContents">
       <bool>true</bool>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>3</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>3</number>
+      </property>
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="chkVisible">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Combined DM/Player Visibility</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/small_icon_eye.png</normaloff>:/img/data/small_icon_eye.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>1</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="QCheckBox" name="chkVisibleDM">
+          <property name="toolTip">
+           <string>DM Visibility</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/img/data/icon_dmscreen.png</normaloff>:/img/data/icon_dmscreen.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkVisiblePlayer">
+          <property name="toolTip">
+           <string>Player Visibility</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/img/data/icon_playerswindow.png</normaloff>:/img/data/icon_playerswindow.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkLinkUp">
+        <property name="toolTip">
+         <string>Link Visibilty to previous layer</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/icon_linkup.png</normaloff>:/img/data/icon_linkup.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

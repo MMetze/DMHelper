@@ -381,7 +381,7 @@ private:
 
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _activePixmap;
-    qreal _activeScale;
+//    qreal _activeScale;
     qreal _selectedScale;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;

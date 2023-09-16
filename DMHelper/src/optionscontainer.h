@@ -63,6 +63,11 @@ public:
     QDate getLastUpdateCheck() const;
     QString getHeroForgeToken() const;
 
+    // Token search settings
+    QString getTokenSearchString() const;
+    QString getTokenFrameFile() const;
+    QString getTokenMaskFile() const;
+
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
     bool getNetworkEnabled() const;
@@ -113,6 +118,11 @@ signals:
 
     // Data settings
     void heroForgeTokenChanged(const QString& token);
+
+    // Token search settings
+    void tokenSearchStringChanged(const QString& tokenSearchString);
+    void tokenFrameFileChanged(const QString& tokenFrameFile);
+    void tokenMaskFileChanged(const QString& tokenMaskFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -184,6 +194,11 @@ public slots:
     void setLastUpdateDate(const QDate& date);
     void setHeroForgeToken(const QString& token);
 
+    // Token search settings
+    void setTokenSearchString(const QString& tokenSearchString);
+    void setTokenFrameFile(const QString& tokenFrameFile);
+    void setTokenMaskFile(const QString& tokenMaskFile);
+
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
     void setNetworkEnabled(bool enabled);
@@ -248,6 +263,11 @@ private:
     QUuid _instanceUuid;
     QDate _lastUpdateDate;
     QString _heroForgeToken;
+
+    // Token search settings
+    QString _tokenSearchString;
+    QString _tokenFrameFile;
+    QString _tokenMaskFile;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
