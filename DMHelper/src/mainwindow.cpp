@@ -1187,7 +1187,7 @@ void MainWindow::newMedia()
     QImageReader reader(filename);
     if(reader.canRead())
     {
-        mediaLayer = new LayerImage(QString("Media Image"), filename);
+        mediaLayer = new LayerImage(QString("Media Image: ") + filename, filename);
     }
     else
     {
@@ -1195,7 +1195,7 @@ void MainWindow::newMedia()
         if(result != QMessageBox::Yes)
             return;
 
-        mediaLayer = new LayerVideo(QString("Media Video"), filename);
+        mediaLayer = new LayerVideo(QString("Media Video: ") + filename, filename);
     }
 
     Map* mediaMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mediaName, false));
@@ -2249,11 +2249,11 @@ Layer* MainWindow::selectMapFile()
 
     QImageReader reader(filename);
     if(reader.canRead())
-        return new LayerImage(QString("Map Image"), filename);
+        return new LayerImage(QString("Map Image: ") + filename, filename);
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
     if(result == QMessageBox::Yes)
-        return new LayerVideo(QString("Map Video"), filename);
+        return new LayerVideo(QString("Map Video: ") + filename, filename);
 
     return nullptr;
 }

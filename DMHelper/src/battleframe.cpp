@@ -318,7 +318,7 @@ void BattleFrame::setBattleMap()
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 }
 
-void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant)
+void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant, LayerTokens* targetLayer)
 {
     qDebug() << "[Battle Frame] combatant added, type " << combatant->getCombatantType() << ", init " << combatant->getInitiative() << ", pos " << combatant->getPosition();
 
@@ -328,7 +328,7 @@ void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant)
         return;
     }
 
-    _model->appendCombatant(combatant);
+    _model->appendCombatant(combatant, targetLayer);
     createCombatantWidget(combatant);
     //createCombatantIcon(combatant);
 }
@@ -1030,14 +1030,17 @@ void BattleFrame::reloadMap()
 
 void BattleFrame::addMonsters()
 {
-    if(!_battle)
+    if((!_battle) || (!_model))
+        return;
+
+    QPointF combatantPos = viewportCenter();
+
+    if(_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) <= 0)
         return;
 
     qDebug() << "[Battle Frame] Adding monsters ...";
 
-    QPointF combatantPos = viewportCenter();
-
-    CombatantDialog combatantDlg(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    CombatantDialog combatantDlg(_model->getLayerScene(), QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(&combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
 
     int result = combatantDlg.exec();
@@ -1075,7 +1078,7 @@ void BattleFrame::addMonsters()
             monster->setSizeFactor(sizeFactor);
             monster->setPosition(combatantPos + (multiplePos * i));
             monster->setIconIndex(combatantDlg.getIconIndex());
-            addCombatant(monster);
+            addCombatant(monster, combatantDlg.getLayer());
         }
 
         recreateCombatantWidgets();
@@ -1849,7 +1852,7 @@ void BattleFrame::updateCombatantVisibility()
         return;
     }
 
-    qDebug() << "[Battle Frame] show alive/dead checked updated: Alive=" << _model->getShowAlive() << ", Dead=" << _model->getShowDead();
+    // qDebug() << "[Battle Frame] show alive/dead checked updated: Alive=" << _model->getShowAlive() << ", Dead=" << _model->getShowDead();
     setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
 }
 

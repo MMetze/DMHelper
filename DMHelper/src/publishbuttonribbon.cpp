@@ -217,6 +217,8 @@ void PublishButtonRibbon::selectLayerAction(QAction* action)
     }
 
     ui->btnLayerTool->setIcon(action ? action->icon() : QIcon(":/img/data/icon_layers.png"));
+    ui->btnLayerTool->setToolTip(action ? action->text() : QString("Select the active layer"));
+
     if(ui->btnLayerTool->menu())
         ui->btnLayerTool->menu()->setDefaultAction(action);
 

@@ -53,7 +53,7 @@ public:
 
     void setBattleMap();
 
-    void addCombatant(BattleDialogModelCombatant* combatant);
+    void addCombatant(BattleDialogModelCombatant* combatant, LayerTokens* targetLayer = nullptr);
     void addCombatants(QList<BattleDialogModelCombatant*> combatants);
     QList<BattleDialogModelCombatant*> getCombatants() const;
     QList<BattleDialogModelCombatant*> getLivingCombatants() const;

@@ -52,6 +52,7 @@ public:
     int getLayerIndex(Layer* layer) const;
     Layer* getPriority(DMHelper::LayerType type) const;
     Layer* getFirst(DMHelper::LayerType type) const;
+    Layer* getFirstVisible(DMHelper::LayerType type, bool dmVisible) const;
     Layer* getPrevious(Layer* layer, DMHelper::LayerType type) const;
     Layer* getNext(Layer* layer, DMHelper::LayerType type) const;
     Layer* getNearest(Layer* layer, DMHelper::LayerType type) const;

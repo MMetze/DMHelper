@@ -17,7 +17,10 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QKeyEvent>
 #include <QDebug>
+
+//#define DEBUG_LAYERSEDITDIALOG
 
 LayersEditDialog::LayersEditDialog(LayerScene& scene, BattleDialogModel* model, QWidget *parent) :
     QDialog(parent),
@@ -49,14 +52,28 @@ void LayersEditDialog::selectFrame(LayerFrame* frame)
         return;
 
     int currentSelected = _scene.getSelectedLayerIndex();
-    if((currentSelected >= 0) && (currentSelected < _layerLayout->count()) &&
-       (frame->getLayer().getOrder() != currentSelected) && (_layerLayout->itemAt(currentSelected)))
+    int currentSelectedIndex = _layerLayout->count() - 1 - currentSelected;
+    int newFrameOrder = frame->getLayer().getOrder();
+
+    if(newFrameOrder == currentSelected)
+        return;
+
+#ifdef DEBUG_LAYERSEDITDIALOG
+    qDebug() << "[LayersEditDialog] Current selected: " << currentSelected << " of " << _layerLayout->count() << ", new selection order: " << newFrameOrder;
+#endif
+
+    if((currentSelectedIndex >= 0) && (currentSelectedIndex < _layerLayout->count()) && (_layerLayout->itemAt(currentSelectedIndex)))
     {
-        LayerFrame* currentFrame = dynamic_cast<LayerFrame*>(_layerLayout->itemAt(currentSelected)->widget());
-        if(currentFrame)
+        if(LayerFrame* currentFrame = dynamic_cast<LayerFrame*>(_layerLayout->itemAt(currentSelectedIndex)->widget()))
+        {
             currentFrame->setSelected(false);
+#ifdef DEBUG_LAYERSEDITDIALOG
+            qDebug() << "[LayersEditDialog] Deactivating item " << currentSelectedIndex << ", with order " << currentFrame->getLayer().getOrder();
+#endif
+        }
     }
-    _scene.setSelectedLayerIndex(frame->getLayer().getOrder());
+
+    _scene.setSelectedLayerIndex(newFrameOrder);
     frame->setSelected(true);
 }
 
@@ -94,7 +111,7 @@ void LayersEditDialog::addLayer()
         if(newFileName.isEmpty())
             return;
 
-        newLayer = new LayerImage(QString("Image"), newFileName);
+        newLayer = new LayerImage(QString("Image: ") + newFileName, newFileName);
     }
     else if(selectedItem == tr("Video"))
     {
@@ -102,7 +119,7 @@ void LayersEditDialog::addLayer()
         if(newFileName.isEmpty())
             return;
 
-        newLayer = new LayerVideo(QString("Video"), newFileName);
+        newLayer = new LayerVideo(QString("Video: ") + newFileName, newFileName);
     }
     else if(selectedItem == tr("FoW"))
     {
@@ -155,6 +172,35 @@ void LayersEditDialog::updateSceneSize()
     QSizeF currentSize = _scene.sceneSize();
     ui->edtSceneWidth->setText(QString::number(currentSize.width()));
     ui->edtSceneHeight->setText(QString::number(currentSize.height()));
+}
+
+void LayersEditDialog::updateDMVisibility(LayerFrame* frame)
+{
+    if(!frame)
+        return;
+
+    if(frame->isLayerVisibleDM())
+    {
+        selectFrame(frame);
+    }
+    else
+    {
+        int currentIndex = _layerLayout->indexOf(frame);
+        int nextFrameIndex = (currentIndex == (_layerLayout->count() - 1)) ? 0 : currentIndex + 1;
+        LayerFrame* nextFrame = nullptr;
+        while(((!nextFrame) || (!nextFrame->isLayerVisibleDM())) &&
+              (nextFrameIndex != currentIndex))
+        {
+            QLayoutItem* nextItem = _layerLayout->itemAt(nextFrameIndex);
+            nextFrame = dynamic_cast<LayerFrame*>(nextItem->widget());
+
+            if(++nextFrameIndex >= _layerLayout->count())
+                nextFrameIndex = 0;
+        }
+
+        if((nextFrame) && (nextFrame->isLayerVisibleDM()))
+            selectFrame(nextFrame);
+    }
 }
 
 void LayersEditDialog::updateVisibility(LayerFrame* frame)
@@ -258,6 +304,15 @@ bool LayersEditDialog::eventFilter(QObject *obj, QEvent *event)
     if((event->type() == QEvent::MouseButtonRelease) && (_layerLayout))
         selectFrame(dynamic_cast<LayerFrame*>(obj));
 
+    if(event->type() == QEvent::KeyPress)
+    {
+        if(QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(event))
+        {
+            if((keyEvent->key() == Qt::Key_Return) || (keyEvent->key() == Qt::Key_Enter))
+                return true;
+        }
+    }
+
     return QDialog::eventFilter(obj, event);
 }
 
@@ -284,9 +339,14 @@ void LayersEditDialog::readScene()
             connect(newFrame, &LayerFrame::sizeChanged, this, &LayersEditDialog::updateSceneSize);
             connect(newFrame, &LayerFrame::linkedUp, this, &LayersEditDialog::linkedUp);
             connect(newFrame, &LayerFrame::visibilityChanged, this, &LayersEditDialog::updateVisibility);
+            connect(newFrame, &LayerFrame::dmVisibilityChanged, this, &LayersEditDialog::updateDMVisibility);
             _layerLayout->insertWidget(0, newFrame);
         }
     }
+
+#ifdef DEBUG_LAYERSEDITDIALOG
+    qDebug() << "[LayersEditDialog] Layer Frame overview:";
+#endif
 
     // Update the linked status
     for(int i = 0; i < _layerLayout->count(); ++i)
@@ -297,6 +357,11 @@ void LayersEditDialog::readScene()
             LayerFrame* frame = dynamic_cast<LayerFrame*>(item->widget());
             if((frame) && (frame->getLayer().getLinkedUp()))
                 linkedUp(frame);
+
+#ifdef DEBUG_LAYERSEDITDIALOG
+            if(frame)
+                qDebug() << "[LayersEditDialog]     Layer layout entry " << i << ": order = " << frame->getLayer().getOrder() << ", name = " << frame->getLayer().getName();
+#endif
         }
     }
 

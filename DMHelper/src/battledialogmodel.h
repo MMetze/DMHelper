@@ -41,7 +41,7 @@ public:
     BattleDialogModelCombatant* getCombatantById(QUuid combatantId) const;
     void moveCombatant(int fromIndex, int toIndex);
     void removeCombatant(BattleDialogModelCombatant* combatant);
-    void appendCombatant(BattleDialogModelCombatant* combatant);
+    void appendCombatant(BattleDialogModelCombatant* combatant, LayerTokens* targetLayer = nullptr);
     void appendCombatantToList(BattleDialogModelCombatant* combatant);
     void removeCombatantFromList(BattleDialogModelCombatant* combatant);
     bool isCombatantInList(Combatant* combatant) const;

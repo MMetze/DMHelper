@@ -125,15 +125,15 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         QString filename = element.attribute("filename");
         if((filename.isEmpty()) || (filename == QString(".")))
         {
-            imageLayer = new LayerImage(QString("Map"), QString());
+            imageLayer = new LayerImage(QString("Map Image"), QString());
         }
         else
         {
             QImageReader reader(filename);
             if(reader.canRead())
-                imageLayer = new LayerImage(QString("Map"), filename);
+                imageLayer = new LayerImage(QString("Map Image: ") + filename, filename);
             else
-                imageLayer = new LayerVideo(QString("Map"), filename);
+                imageLayer = new LayerVideo(QString("Map Video: ") + filename, filename);
         }
 
         if(imageLayer)

@@ -361,12 +361,12 @@ void BattleDialogModel::removeCombatant(BattleDialogModelCombatant* combatant)
     }
 }
 
-void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
+void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant, LayerTokens* targetLayer)
 {
     if(!combatant)
         return;
 
-    LayerTokens* layer = dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens));
+    LayerTokens* layer = (targetLayer ? targetLayer : dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens)));
     if(!layer)
         return;
 
