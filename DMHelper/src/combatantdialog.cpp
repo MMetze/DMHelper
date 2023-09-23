@@ -4,12 +4,15 @@
 #include "bestiary.h"
 #include "dmconstants.h"
 #include "dice.h"
+#include "layer.h"
+#include "layertokens.h"
+#include "layerscene.h"
 #include "ui_combatantdialog.h"
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QDebug>
 
-CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
+CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
     //_combatant(nullptr),
@@ -37,6 +40,23 @@ CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWid
     fillSizeCombo();
 
     ui->cmbMonsterClass->addItems(Bestiary::Instance()->getMonsterList());
+
+    Layer* currentLayer = layerScene.getPriority(DMHelper::LayerType_Tokens);
+    int currentLayerIndex = -1;
+    QList<Layer*> layers = layerScene.getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, layers)
+    {
+        LayerTokens* layerToken = dynamic_cast<LayerTokens*>(layer);
+        if(layerToken)
+        {
+            ui->cmbLayer->addItem(layerToken->getName(), QVariant::fromValue(reinterpret_cast<quint64>(layerToken)));
+            if(layer == currentLayer)
+                currentLayerIndex = ui->cmbLayer->count() - 1;
+        }
+    }
+
+    if((currentLayerIndex >= 0) && (currentLayerIndex < ui->cmbLayer->count()))
+        ui->cmbLayer->setCurrentIndex(currentLayerIndex);
 }
 
 CombatantDialog::~CombatantDialog()
@@ -55,6 +75,11 @@ QString CombatantDialog::getName() const
         return ui->edtNameLocal->text();
     else
         return ui->edtName->text();
+}
+
+LayerTokens* CombatantDialog::getLayer() const
+{
+    return reinterpret_cast<LayerTokens*>(ui->cmbLayer->currentData().value<quint64>());
 }
 
 int CombatantDialog::getCombatantHitPoints() const

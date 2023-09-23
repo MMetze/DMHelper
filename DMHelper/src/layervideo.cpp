@@ -234,10 +234,10 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
     if(!_videoObject)
     {
-        if(!_videoPlayer->isNewImage())
+        if((!_videoPlayer->isNewImage()) && (_layerScreenshot.isNull()))
             return;
 
-        _videoObject = new PublishGLBattleBackground(nullptr, *(_videoPlayer->getImage()), GL_NEAREST);
+        _videoObject = new PublishGLBattleBackground(nullptr, (_videoPlayer->getImage() ? *(_videoPlayer->getImage()) : _layerScreenshot), GL_NEAREST);
         QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
         _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
         _videoObject->setTargetSize(_size);
@@ -245,6 +245,10 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     else if(_videoPlayer->isNewImage())
     {
         _videoObject->updateImage(*(_videoPlayer->getImage()));
+    }
+    else
+    {
+        int x = 0;
     }
 
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);

@@ -375,9 +375,12 @@ int LayerScene::getSelectedLayerIndex() const
 
 void LayerScene::setSelectedLayerIndex(int selected)
 {
-    if((_selected == selected) || (_selected < 0) || (_selected >= _layers.count()))
+    if(_selected == selected)
+        return;
+
+    if((selected < 0) || (selected >= _layers.count()))
     {
-        qDebug() << "[LayerScene] ERROR: invalid layer selection, selected: " << selected;
+        qDebug() << "[LayerScene] ERROR: invalid layer selection, current selected: " << _selected << ", new selected: " << selected << ", count: " << _layers.count();
         return;
     }
 
@@ -419,7 +422,7 @@ Layer* LayerScene::getPriority(DMHelper::LayerType type) const
     if((result) && (result->getFinalType() == type))
         return result->getFinalLayer();
     else
-        return getFirst(type);
+        return getFirstVisible(type, true);
 }
 
 Layer* LayerScene::getFirst(DMHelper::LayerType type) const
@@ -427,6 +430,17 @@ Layer* LayerScene::getFirst(DMHelper::LayerType type) const
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
+            return _layers.at(i)->getFinalLayer();
+    }
+
+    return nullptr;
+}
+
+Layer* LayerScene::getFirstVisible(DMHelper::LayerType type, bool dmVisible) const
+{
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type) && (_layers.at(i)->getLayerVisibleDM() == dmVisible))
             return _layers.at(i)->getFinalLayer();
     }
 

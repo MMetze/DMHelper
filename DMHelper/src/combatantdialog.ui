@@ -55,6 +55,19 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Layer:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cmbLayer"/>
+     </item>
     </layout>
    </item>
    <item>

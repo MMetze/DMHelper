@@ -51,6 +51,7 @@ signals:
 
     void linkedUp(LayerFrame* layerFrame);
     void visibilityChanged(LayerFrame* layerFrame);
+    void dmVisibilityChanged(LayerFrame* layerFrame);
 
     void selectMe(LayerFrame* me);
     void refreshPlayer();

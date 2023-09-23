@@ -6,6 +6,8 @@
 #include "combatant.h"
 
 class MonsterClass;
+class LayerScene;
+class LayerTokens;
 
 namespace Ui {
 class CombatantDialog;
@@ -16,12 +18,13 @@ class CombatantDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CombatantDialog(QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
+    explicit CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
     ~CombatantDialog();
 
     //void setCombatant(int combatantCount, Combatant* combatant);
     int getCount() const;
     QString getName() const;
+    LayerTokens* getLayer() const;
     int getCombatantHitPoints() const;
     bool isRandomInitiative() const;
     QString getInitiative() const;

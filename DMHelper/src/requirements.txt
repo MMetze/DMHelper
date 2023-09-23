@@ -1,11 +1,11 @@
-v2.5.8
-fixed * old scrolling text doesn't scroll
-fixed * old videos are not recognized, leads to broken mapframe
-fixed * party icon not visible
-fixed * markers (neverwinter region) seem to not work
-
-Fog of war from old to new
-Use screenshot until video shows up
+v2.5.11
+done * Add choice of Layer to add monsters to monster selection dialog
+done * Select priority only returns visible alternative layers (allows an explicitly selected layer if invisible)
+done * Making a layer invisible could deselect it
+done * Mouse over layers button shows name of currently active layer
+done? * Use screenshot until video shows up
+done * Use name of file for layer name in image/video
+done * Renaming a layer moves it in the order
 
 
 Video requirements
@@ -47,7 +47,12 @@ fixed * Editing FoW has an offset based on negative position of scene rect
 fixed * Editing area on battle doesn't work
 fixed * edit dialog: create new text layer
 fixed * invisible player video should not start the video playback
+fixed * old scrolling text doesn't scroll
+fixed * old videos are not recognized, leads to broken mapframe
+fixed * party icon not visible
+fixed * markers (neverwinter region) seem to not work
 Not reproducible * resize camera view
+Not reproducible * Fog of war from old to new
 
 Next version
 * upgrade to latest Qt, activate Copilot for Qt

@@ -28,6 +28,7 @@ protected slots:
     void addLayer();
     void removeLayer();
     void updateSceneSize();
+    void updateDMVisibility(LayerFrame* frame);
     void updateVisibility(LayerFrame* frame);
     void linkedUp(LayerFrame* frame);
 
