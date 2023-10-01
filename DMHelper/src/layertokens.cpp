@@ -160,6 +160,11 @@ QRectF LayerTokens::boundingRect() const
     return QRectF();
 }
 
+bool LayerTokens::defaultShader() const
+{
+    return false;
+}
+
 QImage LayerTokens::getLayerIcon() const
 {
     return QImage(":/img/data/icon_contentcharacter.png");
@@ -399,13 +404,12 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
 
     functions->glUseProgram(_shaderProgramRGBA);
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+    functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     // Draw Effects first
     if(_model->getShowEffects())
     {
-        functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
-        functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-
         foreach(BattleDialogModelEffect* effect, _effects)
         {
             if((effect) && (effect->getEffectVisible()))
@@ -442,9 +446,12 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
 
             localMatrix = combatantToken->getMatrix();
             localMatrix.translate(_position.x(), _position.y());
-            functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, localMatrix.constData());
+//            functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, localMatrix.constData());
+            functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+            functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
             combatantToken->paintGL();
-            combatantToken->paintEffects(defaultModelMatrix);
+//            combatantToken->paintEffects(defaultModelMatrix);
+            combatantToken->paintEffects(_shaderModelMatrixRGBA);
 
             emit postCombatantDrawGL(functions, combatant, combatantToken);
         }

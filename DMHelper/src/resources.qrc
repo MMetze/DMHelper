@@ -263,6 +263,7 @@
         <file>data/icon_search.png</file>
         <file>data/icon_linkup.png</file>
         <file>data/icon_linkglow.png</file>
+        <file>data/firststart.txt</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

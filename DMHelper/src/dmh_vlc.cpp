@@ -4,7 +4,7 @@
 #include <QTimerEvent>
 #include <QDebug>
 
-#define VIDEO_DEBUG_MESSAGES
+//#define VIDEO_DEBUG_MESSAGES
 //#define VIDEO_CREATE_CACHE
 
 DMH_VLC* DMH_VLC::_instance = nullptr;

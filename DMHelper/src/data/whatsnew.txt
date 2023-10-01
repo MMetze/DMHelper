@@ -55,6 +55,8 @@
 <h3>And don't forget</h3>
 <ul>
 <li><b>Press the magical "F" key on the Player's Window for Fullscreen mode</b>
+<br>
+<li>If you like the app, consider supporting our Patreon here: <a href="www.patreon.com/dmhelper">www.patreon.com/dmhelper</a>
 </ul>
 </div>
 </body>

@@ -713,7 +713,10 @@ void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
             QString filename = selectToken();
             if(!filename.isEmpty())
             {
-                _monster->setIcon(_currentToken, filename);
+                if(_monster->getIconCount() == 0)
+                    _monster->addIcon(filename);
+                else
+                    _monster->setIcon(_currentToken, filename);
                 loadMonsterImage();
             }
         }

@@ -1626,7 +1626,8 @@ void MainWindow::showEvent(QShowEvent * event)
         if(_options)
         {
             // Implement any one-time initialization here
-            if(!_options->doDataSettingsExist())
+            bool firstStart = !_options->doDataSettingsExist();
+            if(firstStart)
             {
                 LegalDialog dlg;
                 dlg.exec();
@@ -1644,9 +1645,16 @@ void MainWindow::showEvent(QShowEvent * event)
                                                        .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
             if(_options->getLastAppVersion() != versionString)
             {
-                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(this);
+                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
                 whatsNewDlg->show();
-                whatsNewDlg->move(geometry().center() - whatsNewDlg->rect().center());
+                whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
+            }
+
+            //if(firstStart)
+            {
+                WhatsNewDialog* firstStartDlg = new WhatsNewDialog(QString(":/img/data/firststart.txt"), QString("Welcome to DMHelper!"), this);
+                firstStartDlg->show();
+                firstStartDlg->move((frameGeometry().center() - firstStartDlg->rect().center()) / 2);
             }
         }
 

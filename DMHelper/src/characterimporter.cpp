@@ -18,8 +18,8 @@
 #include <QDebug>
 
 //#define IMPORTER_LOCAL_TEST
-#define IMPORTER_LOG_AC
-#define IMPORTER_LOG_HP
+//#define IMPORTER_LOG_AC
+//#define IMPORTER_LOG_HP
 
 const int MulticlassSpellslots[20][9] = {
     {2, 0, 0, 0, 0, 0, 0, 0, 0},

@@ -12,7 +12,7 @@
 #include <QInputDialog>
 #include <QImageReader>
 
-#define DEBUG_FINDTOKEN_IMPORT
+//#define DEBUG_FINDTOKEN_IMPORT
 
 const int TOKEN_FRAME_SPACING = 16;
 const int TOKEN_ICON_SIZE = 256;
