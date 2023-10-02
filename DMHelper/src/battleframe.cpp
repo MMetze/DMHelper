@@ -197,15 +197,15 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
-    connect(_scene, &BattleDialogGraphicsScene::effectChangeLayer, this, &BattleFrame::handleEffectChangeLayer);
+    connect(_scene, &BattleDialogGraphicsScene::itemChangeLayer, this, &BattleFrame::handleItemChangeLayer);
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
     connect(_scene, SIGNAL(combatantHover(BattleDialogModelCombatant*, bool)), this, SLOT(handleCombatantHover(BattleDialogModelCombatant*, bool)));
     connect(_scene, SIGNAL(combatantActivate(BattleDialogModelCombatant*)), this, SLOT(handleCombatantActivate(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
-    connect(_scene, SIGNAL(combatantChangeLayer(BattleDialogModelCombatant*)), this, SLOT(handleCombatantChangeLayer(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(monsterChangeToken(BattleDialogModelMonsterClass*, int)), this, SLOT(handleChangeMonsterToken(BattleDialogModelMonsterClass*, int)));
     connect(_scene, SIGNAL(itemLink(BattleDialogModelObject*)), this, SLOT(handleItemLink(BattleDialogModelObject*)));
     connect(_scene, SIGNAL(itemUnlink(BattleDialogModelObject*)), this, SLOT(handleItemUnlink(BattleDialogModelObject*)));
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
@@ -2076,48 +2076,6 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
     */
 }
 
-void BattleFrame::handleEffectChangeLayer(BattleDialogModelEffect* effect)
-{
-    if((!effect) || (!_model))
-        return;
-
-    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
-    if(tokenLayers.count() <= 1)
-        return;
-
-    int currentLayerIndex = 0;
-    QStringList tokenLayerNames;
-    for(int i = 0; i < tokenLayers.count(); ++i)
-    {
-        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
-        tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
-        if((tokenLayer) && (tokenLayer->containsEffect(effect)))
-            currentLayerIndex = i;
-    }
-
-    SelectItemDialog dlg(tokenLayerNames);
-    dlg.setSelectedItem(currentLayerIndex);
-    if(dlg.exec() == QDialog::Accepted)
-    {
-        LayerTokens* newLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
-        if(!newLayer)
-            return;
-
-        QList<QGraphicsItem*> selected = _scene->selectedItems();
-        if(selected.count() == 0)
-        {
-            moveEffectToLayer(effect, newLayer, tokenLayers);
-        }
-        else
-        {
-            foreach(QGraphicsItem* graphicsItem, selected)
-            {
-                moveEffectToLayer(BattleDialogModelEffect::getEffectFromItem(graphicsItem), newLayer, tokenLayers);
-            }
-        }
-    }
-}
-
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
     return;
@@ -2199,50 +2157,25 @@ void BattleFrame::handleCombatantActivate(BattleDialogModelCombatant* combatant)
 
 void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
 {
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to remove combatant, no battle model is set!";
-        return;
-    }
-
-    if(!combatant)
+    if((!_model) || (!combatant))
         return;
 
-    qDebug() << "[Battle Frame] removing combatant " << combatant->getName();
     removeRollover();
 
-    // Check the active combatant highlight
-    if(combatant == _model->getActiveCombatant())
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
     {
-        if(_model->getCombatantCount() <= 1)
+        removeSingleCombatant(combatant);
+    }
+    else
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
         {
-            _model->setActiveCombatant(nullptr);
-            qDebug() << "[Battle Frame] removed combatant has highlight, highlight removed";
-        }
-        else
-        {
-            next();
+            removeSingleCombatant(getCombatantFromItem(graphicsItem));
         }
     }
-    else if(combatant == ui->frameCombatant->getCombatant())
-    {
-        ui->frameCombatant->setCombatant(nullptr);
-    }
-
-    // Find the index of the removed item
-    int index = _model->getCombatantList().indexOf(combatant);
-
-    // Delete the widget for the combatant
-    _combatantWidgets.remove(combatant);
-    QLayoutItem *child = _combatantLayout->takeAt(index);
-    if(child != nullptr)
-    {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
-        child->widget()->deleteLater();
-        delete child;
-    }
-
-    _model->removeCombatant(combatant);
 }
 
 void BattleFrame::handleCombatantAdded(BattleDialogModelCombatant* combatant)
@@ -2261,59 +2194,27 @@ void BattleFrame::handleCombatantRemoved(BattleDialogModelCombatant* combatant)
     disconnect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &BattleFrame::handleCombatantSelected);
 }
 
-void BattleFrame::handleCombatantChangeLayer(BattleDialogModelCombatant* combatant)
-{
-    if((!combatant) || (!_model))
-        return;
-
-    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
-    if(tokenLayers.count() <= 1)
-        return;
-
-    int currentLayerIndex = 0;
-    QGraphicsItem* currentItem = nullptr;
-    QStringList tokenLayerNames;
-    for(int i = 0; i < tokenLayers.count(); ++i)
-    {
-        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
-        tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
-        if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
-        {
-            currentLayerIndex = i;
-            currentItem = tokenLayer->getCombatantItem(combatant);
-        }
-    }
-
-    SelectItemDialog dlg(tokenLayerNames);
-    dlg.setSelectedItem(currentLayerIndex);
-    if(dlg.exec() != QDialog::Accepted)
-        return;
-
-    LayerTokens* newLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
-    if(!newLayer)
-        return;
-
-    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
-    QList<QGraphicsItem*> selected = _scene->selectedItems();
-    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
-    {
-        moveCombatantToLayer(combatant, newLayer);
-        return;
-    }
-
-    foreach(QGraphicsItem* graphicsItem, selected)
-    {
-        moveCombatantToLayer(getCombatantFromItem(graphicsItem), newLayer);
-    }
-}
-
 void BattleFrame::handleCombatantDamage(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
         return;
 
-    int damage = QInputDialog::getInt(this, QString("Damage Combatant: ") + combatant->getName(), QString("Please enter the amount of damage to be done: "));
-    applyCombatantHPChange(combatant, -damage);
+    int damage = QInputDialog::getInt(this, QString("Damage Combatant(s)"), QString("Please enter the amount of damage to be done: "));
+
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        applyCombatantHPChange(combatant, -damage);
+    }
+    else
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            applyCombatantHPChange(getCombatantFromItem(graphicsItem), -damage);
+        }
+    }
 }
 
 void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
@@ -2321,8 +2222,46 @@ void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    int heal = QInputDialog::getInt(this, QString("Heal Combatant: ") + combatant->getName(), QString("Please enter the amount of healing to be applied: "));
-    applyCombatantHPChange(combatant, heal);
+    int heal = QInputDialog::getInt(this, QString("Heal Combatant(s)"), QString("Please enter the amount of healing to be applied: "));
+
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        applyCombatantHPChange(combatant, heal);
+    }
+    else
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            applyCombatantHPChange(getCombatantFromItem(graphicsItem), heal);
+        }
+    }
+}
+
+void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex)
+{
+    if(!monster)
+        return;
+
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(monster);
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        monster->setIconIndex(iconIndex);
+    }
+    else
+    {
+        MonsterClass* selectedClass = monster->getMonsterClass();
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            BattleDialogModelMonsterClass* itemMonster = dynamic_cast<BattleDialogModelMonsterClass*>(getCombatantFromItem(graphicsItem));
+            if((itemMonster) && (itemMonster->getMonsterClass() == selectedClass))
+                itemMonster->setIconIndex(iconIndex);
+        }
+    }
 }
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
@@ -2365,11 +2304,21 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 
 void BattleFrame::handleItemLink(BattleDialogModelObject* item)
 {
-    if(!_model)
+    if((!_model) || (!_scene))
         return;
 
     SelectCombatantDialog dlg(*_model, item);
     dlg.resize(width() / 2, height() / 2);
+
+    QGraphicsItem* currentItem = _model->getObjectItem(item);
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    if((selected.count() >= 0) && (selected.contains(currentItem)))
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            dlg.addObject(getObjectFromItem(graphicsItem));
+        }
+    }
 
     int result = dlg.exec();
     if(result != QDialog::Accepted)
@@ -2379,23 +2328,109 @@ void BattleFrame::handleItemLink(BattleDialogModelObject* item)
     if(!selectedObject)
         return;
 
-    if(dlg.isCentered())
-    {
-        QGraphicsItem* linkedItem = _model->getObjectItem(item);
-        QGraphicsItem* selectedItem = _model->getObjectItem(selectedObject);
+    QGraphicsItem* selectedItem = _model->getObjectItem(selectedObject);
 
-        if((linkedItem) && (selectedItem))
-            linkedItem->setPos(selectedItem->scenePos());
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        if((dlg.isCentered()) && (currentItem) && (selectedItem))
+            currentItem->setPos(selectedItem->scenePos());
+
+        item->setLinkedObject(selectedObject);
     }
-    item->setLinkedObject(selectedObject);
+    else
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            BattleDialogModelObject* itemObject = _scene->getFinalObjectFromItem(graphicsItem);
+            if((graphicsItem) && (itemObject))
+            {
+                if((dlg.isCentered()) && (graphicsItem) && (selectedItem))
+                    graphicsItem->setPos(selectedItem->scenePos());
+
+                itemObject->setLinkedObject(selectedObject);
+            }
+        }
+    }
+
+}
+
+void BattleFrame::handleItemChangeLayer(BattleDialogModelObject* battleObject)
+{
+    if((!battleObject) || (!_model))
+        return;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    if(tokenLayers.count() <= 1)
+        return;
+
+    int currentLayerIndex = 0;
+    QGraphicsItem* currentItem = nullptr;
+    QStringList tokenLayerNames;
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
+        if((tokenLayer) && (tokenLayer->containsObject(battleObject)))
+        {
+            currentLayerIndex = i;
+            currentItem = tokenLayer->getObjectItem(battleObject);
+        }
+    }
+
+    SelectItemDialog dlg(tokenLayerNames);
+    dlg.setSelectedItem(currentLayerIndex);
+    if(dlg.exec() != QDialog::Accepted)
+        return;
+
+    LayerTokens* newLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
+    if(!newLayer)
+        return;
+
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(battleObject);
+        if(combatant)
+            moveCombatantToLayer(combatant, newLayer);
+        else
+            moveEffectToLayer(dynamic_cast<BattleDialogModelEffect*>(battleObject), newLayer, tokenLayers);
+    }
+    else
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            BattleDialogModelCombatant* combatant = getCombatantFromItem(graphicsItem);
+            if(combatant)
+                moveCombatantToLayer(combatant, newLayer);
+            else
+                moveEffectToLayer(BattleDialogModelEffect::getFinalEffect(BattleDialogModelEffect::getEffectFromItem(graphicsItem)), newLayer, tokenLayers);
+        }
+    }
 }
 
 void BattleFrame::handleItemUnlink(BattleDialogModelObject* item)
 {
-    if(!item)
+    if((!_model) || (!item))
         return;
 
-    item->setLinkedObject(nullptr);
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = _model->getObjectItem(item);
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        item->setLinkedObject(nullptr);
+    }
+    else
+    {
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            BattleDialogModelObject* itemObject = getObjectFromItem(graphicsItem);
+            if(itemObject)
+                itemObject->setLinkedObject(nullptr);
+        }
+    }
 }
 
 void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
@@ -2558,7 +2593,7 @@ void BattleFrame::activateCombatant()
 
 void BattleFrame::changeCombatantLayer()
 {
-    handleCombatantChangeLayer(_contextMenuCombatant);
+    handleItemChangeLayer(_contextMenuCombatant);
 }
 
 void BattleFrame::damageCombatant()
@@ -2657,7 +2692,6 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    /*
     QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
     if(!item)
         return;
@@ -2679,7 +2713,6 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(conditionString.count() > 0)
         itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
     item->setToolTip(itemTooltip);
-    */
 }
 
 void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage)
@@ -3582,6 +3615,33 @@ QGraphicsPixmapItem* BattleFrame::getItemFromCombatant(BattleDialogModelCombatan
     return nullptr;
 }
 
+BattleDialogModelObject* BattleFrame::getObjectFromItem(QGraphicsItem* item) const
+{
+    if((!_model) || (!item))
+        return nullptr;
+
+    BattleDialogModelObject* result = nullptr;
+    QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            if(pixmapItem)
+                result = tokenLayer->getCombatantFromItem(pixmapItem);
+            else
+                result = tokenLayer->getEffectFromItem(item);
+
+            if(result)
+                return result;
+        }
+    }
+
+    return nullptr;
+}
+
 BattleDialogModelCombatant* BattleFrame::getCombatantFromItem(QGraphicsItem* item) const
 {
     return getCombatantFromItem(dynamic_cast<QGraphicsPixmapItem*>(item));
@@ -3661,6 +3721,42 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
             (_model->getCombatant(nextHighlight) != _model->getActiveCombatant()));
 
     return _model->getCombatant(nextHighlight);
+}
+
+void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
+{
+    if((!_model) || (!combatant))
+        return;
+
+    qDebug() << "[Battle Frame] removing combatant " << combatant->getName();
+
+    // Check the active combatant highlight
+    if(combatant == _model->getActiveCombatant())
+    {
+        if(_model->getCombatantCount() <= 1)
+            _model->setActiveCombatant(nullptr);
+        else
+            next();
+    }
+    else if(combatant == ui->frameCombatant->getCombatant())
+    {
+        ui->frameCombatant->setCombatant(nullptr);
+    }
+
+    // Find the index of the removed item
+    int index = _model->getCombatantList().indexOf(combatant);
+
+    // Delete the widget for the combatant
+    _combatantWidgets.remove(combatant);
+    QLayoutItem *child = _combatantLayout->takeAt(index);
+    if(child != nullptr)
+    {
+        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
+        child->widget()->deleteLater();
+        delete child;
+    }
+
+    _model->removeCombatant(combatant);
 }
 
 void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer)

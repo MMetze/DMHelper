@@ -9,12 +9,13 @@ SelectCombatantDialog::SelectCombatantDialog(BattleDialogModel& model, BattleDia
     QDialog(parent),
     ui(new Ui::SelectCombatantDialog),
     _model(model),
-    _thisItem(thisItem),
+    _thisItemList(),
     _includeParents(includeParents),
     _includeChildren(includeChildren)
 {
     ui->setupUi(this);
-    readModel();
+    if(thisItem)
+        _thisItemList.append(thisItem);
 
     connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &QDialog::accept);
 }
@@ -22,6 +23,14 @@ SelectCombatantDialog::SelectCombatantDialog(BattleDialogModel& model, BattleDia
 SelectCombatantDialog::~SelectCombatantDialog()
 {
     delete ui;
+}
+
+void SelectCombatantDialog::addObject(BattleDialogModelObject* itemObject)
+{
+    if((!itemObject) || (_thisItemList.contains(itemObject)))
+        return;
+
+    _thisItemList.append(itemObject);
 }
 
 BattleDialogModelObject* SelectCombatantDialog::getSelectedObject() const
@@ -35,6 +44,12 @@ BattleDialogModelObject* SelectCombatantDialog::getSelectedObject() const
 bool SelectCombatantDialog::isCentered() const
 {
     return ui->chkCentered->isChecked();
+}
+
+void SelectCombatantDialog::showEvent(QShowEvent *event)
+{
+    readModel();
+    QDialog::showEvent(event);
 }
 
 void SelectCombatantDialog::readModel()
@@ -101,7 +116,7 @@ void SelectCombatantDialog::readModel()
 
 void SelectCombatantDialog::addCombatant(BattleDialogModelCombatant* combatant)
 {
-    if((!combatant) || (dynamic_cast<BattleDialogModelObject*>(combatant) == _thisItem))
+    if((!combatant) || (_thisItemList.contains(dynamic_cast<BattleDialogModelObject*>(combatant))))
         return;
     
     if((!_includeChildren) && (isChild(combatant)))
@@ -114,7 +129,7 @@ void SelectCombatantDialog::addCombatant(BattleDialogModelCombatant* combatant)
 
 void SelectCombatantDialog::addEffect(BattleDialogModelEffect* effect, BattleDialogModelEffect* childEffect, QGraphicsItem* effectItem)
 {
-    if((!effect) || (!effectItem) || (dynamic_cast<BattleDialogModelObject*>(effect) == _thisItem))
+    if((!effect) || (!effectItem) || (_thisItemList.contains(dynamic_cast<BattleDialogModelObject*>(effect))))
         return;
 
     if((!_includeChildren) && (isChild(effect) || isChild(childEffect)))
@@ -150,13 +165,13 @@ void SelectCombatantDialog::addEffect(BattleDialogModelEffect* effect, BattleDia
 
 bool SelectCombatantDialog::isChild(BattleDialogModelObject* item)
 {
-    if((!item) || (!_thisItem) || (item == _thisItem))
+    if((!item) || (_thisItemList.contains(item)))
         return false;
 
     BattleDialogModelObject* parentItem = item->getLinkedObject();
     while(parentItem)
     {
-        if(parentItem == _thisItem)
+        if(_thisItemList.contains(parentItem))
             return true;
 
         parentItem = parentItem->getLinkedObject();
@@ -167,18 +182,21 @@ bool SelectCombatantDialog::isChild(BattleDialogModelObject* item)
 
 void SelectCombatantDialog::removeParents()
 {
-    if(!_thisItem)
-        return;
-
-    BattleDialogModelObject* parentItem = _thisItem->getLinkedObject();
-    while(parentItem)
+    foreach(BattleDialogModelObject* thisItem, _thisItemList)
     {
-        for(int i = 0; i < ui->listWidget->count(); ++i)
+        if(thisItem)
         {
-            QListWidgetItem* item = ui->listWidget->item(i);
-            if((item) && (item->data(Qt::UserRole).value<BattleDialogModelObject*>() == parentItem))
-                delete item;
+            BattleDialogModelObject* parentItem = thisItem->getLinkedObject();
+            while(parentItem)
+            {
+                for(int i = 0; i < ui->listWidget->count(); ++i)
+                {
+                    QListWidgetItem* item = ui->listWidget->item(i);
+                    if((item) && (item->data(Qt::UserRole).value<BattleDialogModelObject*>() == parentItem))
+                        delete item;
+                }
+                parentItem = parentItem->getLinkedObject();
+            }
         }
-        parentItem = parentItem->getLinkedObject();
     }
 }

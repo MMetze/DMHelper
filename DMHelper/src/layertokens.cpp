@@ -310,6 +310,17 @@ BattleDialogModelObject* LayerTokens::getObjectById(QUuid id)
     return nullptr;
 }
 
+bool LayerTokens::containsObject(BattleDialogModelObject* battleObject)
+{
+    return ((containsEffect(dynamic_cast<BattleDialogModelEffect*>(battleObject))) ||
+            (containsCombatant(dynamic_cast<BattleDialogModelCombatant*>(battleObject))));
+}
+
+QGraphicsItem* LayerTokens::getObjectItem(BattleDialogModelObject* battleObject)
+{
+    return findGraphicsItem(battleObject);
+}
+
 int LayerTokens::getScale() const
 {
     return _scale;

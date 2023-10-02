@@ -219,7 +219,6 @@ private slots:
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleEffectChanged(QGraphicsItem* effectItem);
     void handleEffectRemoved(QGraphicsItem* effectItem);
-    void handleEffectChangeLayer(BattleDialogModelEffect* effect);
     void handleCombatantMoved(BattleDialogModelObject* object);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
@@ -227,11 +226,12 @@ private slots:
     void handleCombatantRemove(BattleDialogModelCombatant* combatant);
     void handleCombatantAdded(BattleDialogModelCombatant* combatant);
     void handleCombatantRemoved(BattleDialogModelCombatant* combatant);
-    void handleCombatantChangeLayer(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
+    void handleChangeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex);
     void handleApplyEffect(QGraphicsItem* effect);
 
+    void handleItemChangeLayer(BattleDialogModelObject* battleObject);
     void handleItemLink(BattleDialogModelObject* item);
     void handleItemUnlink(BattleDialogModelObject* item);
 
@@ -308,11 +308,13 @@ private:
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
+    BattleDialogModelObject* getObjectFromItem(QGraphicsItem* item) const;
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsItem* item) const;
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item) const;
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
+    void removeSingleCombatant(BattleDialogModelCombatant* combatant);
 
     void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);
     void moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers);

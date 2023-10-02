@@ -1,7 +1,16 @@
 * edit FOW icon in combat is the wrong size
 * can't add an image to a new monster in the bestiary
 * maybe selection icons aren't always rightly sized?
+fixed * select many and delete doesn't delete them all
+* select many and link doesn't link them all
+fixed * select many and heal/damage doesn't heal/damage them all
+fixed * select many and change token doesn't change them all
+fixed * change token doesn't change how it looks on the DM View - need to recreate the icon
+* delete key to remove a combatant or effect
+fixed * shift magic effects to other layer doesnt work
+* edit effect sets the size wrong
 
+Move updatecombatanticon from battleframe to layertokens
 
 v2.5.11
 done * Add choice of Layer to add monsters to monster selection dialog

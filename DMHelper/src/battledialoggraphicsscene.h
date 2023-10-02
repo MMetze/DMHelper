@@ -9,6 +9,7 @@ class BattleDialogModel;
 class BattleDialogModelObject;
 class BattleDialogModelEffect;
 class BattleDialogModelCombatant;
+class BattleDialogModelMonsterClass;
 class Grid;
 class QAbstractGraphicsShapeItem;
 
@@ -48,6 +49,7 @@ public:
 //    bool isSceneEmpty() const;
 
     QGraphicsItem* findTopObject(const QPointF &pos);
+    BattleDialogModelObject* getFinalObjectFromItem(QGraphicsItem* item);
 
     bool handleMouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
     bool handleMouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -80,7 +82,6 @@ signals:
 
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);
-    void effectChangeLayer(BattleDialogModelEffect* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
@@ -102,14 +103,15 @@ signals:
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 
+    void itemChangeLayer(BattleDialogModelObject* effect);
     void itemLink(BattleDialogModelObject* item);
     void itemUnlink(BattleDialogModelObject* item);
 
     void combatantActivate(BattleDialogModelCombatant* combatant);
     void combatantRemove(BattleDialogModelCombatant* combatant);
-    void combatantChangeLayer(BattleDialogModelCombatant* combatant);
     void combatantDamage(BattleDialogModelCombatant* combatant);
     void combatantHeal(BattleDialogModelCombatant* combatant);
+    void monsterChangeToken(BattleDialogModelMonsterClass* monster, int iconIndex);
 
     void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 
@@ -126,6 +128,7 @@ protected slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void changeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex);
 
     void changeEffectLayer();
     void handleSelectionChanged();
@@ -140,7 +143,6 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
-    BattleDialogModelObject* getFinalObjectFromItem(QGraphicsItem* item);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
 

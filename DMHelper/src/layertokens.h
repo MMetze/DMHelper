@@ -45,6 +45,8 @@ public:
     QList<BattleDialogModelEffect*> getEffects();
     QList<QGraphicsItem*> getEffectItems();
     BattleDialogModelObject* getObjectById(QUuid id);
+    bool containsObject(BattleDialogModelObject* battleObject);
+    QGraphicsItem* getObjectItem(BattleDialogModelObject* battleObject);
 
     int getScale() const;
 

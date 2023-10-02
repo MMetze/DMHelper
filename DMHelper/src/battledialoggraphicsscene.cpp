@@ -365,6 +365,23 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
     return nullptr;
 }
 
+BattleDialogModelObject* BattleDialogGraphicsScene::getFinalObjectFromItem(QGraphicsItem* item)
+{
+    if(!item)
+        return nullptr;
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+    if(effect)
+    {
+        return BattleDialogModelEffect::getFinalEffect(effect);
+    }
+    else
+    {
+        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(item);
+        return pixmap ? pixmap->getObject() : nullptr;
+    }
+}
+
 bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
@@ -717,7 +734,8 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                             for(int i = 0; i < iconList.count(); ++i)
                             {
                                 QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
-                                connect(tokenAction, &QAction::triggered, [i, monster](){monster->setIconIndex(i);});
+                                //connect(tokenAction, &QAction::triggered, [i, monster](){monster->setIconIndex(i);});
+                                connect(tokenAction, &QAction::triggered, [this, i, monster](){this->changeMonsterToken(monster, i);});
                                 tokenMenu->addAction(tokenAction);
                             }
                             menu.addMenu(tokenMenu);
@@ -1156,7 +1174,7 @@ void BattleDialogGraphicsScene::changeCombatantLayer()
 
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
-        emit combatantChangeLayer(combatant);
+        emit itemChangeLayer(combatant);
 }
 
 void BattleDialogGraphicsScene::damageCombatant()
@@ -1181,11 +1199,17 @@ void BattleDialogGraphicsScene::healCombatant()
         emit combatantHeal(combatant);
 }
 
+void BattleDialogGraphicsScene::changeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex)
+{
+    if(monster)
+        emit monsterChangeToken(monster, iconIndex);
+}
+
 void BattleDialogGraphicsScene::changeEffectLayer()
 {
     BattleDialogModelEffect* effect = dynamic_cast<BattleDialogModelEffect*>(getFinalObjectFromItem(_contextMenuItem));
     if(effect)
-        emit effectChangeLayer(effect);
+        emit itemChangeLayer(effect);
 }
 
 void BattleDialogGraphicsScene::handleSelectionChanged()
@@ -1329,23 +1353,6 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
     }
 
     return result;
-}
-
-BattleDialogModelObject* BattleDialogGraphicsScene::getFinalObjectFromItem(QGraphicsItem* item)
-{
-    if(!item)
-        return nullptr;
-
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
-    if(effect)
-    {
-        return BattleDialogModelEffect::getFinalEffect(effect);
-    }
-    else
-    {
-        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(item);
-        return pixmap ? pixmap->getObject() : nullptr;
-    }
 }
 
 BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)

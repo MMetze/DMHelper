@@ -1650,7 +1650,7 @@ void MainWindow::showEvent(QShowEvent * event)
                 whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
             }
 
-            //if(firstStart)
+            if(firstStart)
             {
                 WhatsNewDialog* firstStartDlg = new WhatsNewDialog(QString(":/img/data/firststart.txt"), QString("Welcome to DMHelper!"), this);
                 firstStartDlg->show();
