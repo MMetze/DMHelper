@@ -8,6 +8,7 @@
 #include "monsterclass.h"
 #include "unselectedpixmap.h"
 #include "grid.h"
+#include "layertokens.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
@@ -1047,13 +1048,16 @@ void BattleDialogGraphicsScene::editItem()
     settings->exec();
     if(settings->result() == QDialog::Accepted)
     {
+        QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+
         foreach(QGraphicsItem* effectItem, selected)
         {
             BattleDialogModelEffect* selectedEffect = BattleDialogModelEffect::getEffectFromItem(effectItem);
             if((selectedEffect) && (selectedEffect->getEffectType() == effect->getEffectType()))
             {
                 settings->copyValuesFromSettings(*selectedEffect);
-                selectedEffect->applyEffectValues(*effectItem, _model->getGridScale());
+                LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(_model->getLayerFromEffect(tokenLayers, selectedEffect));
+                selectedEffect->applyEffectValues(*effectItem, tokenLayer->getScale());
                 emit effectChanged(effectItem);
             }
         }

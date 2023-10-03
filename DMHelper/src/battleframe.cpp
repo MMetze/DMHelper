@@ -3777,10 +3777,10 @@ void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, La
 
 void BattleFrame::moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers)
 {
-    if((!effect) || (!newLayer))
+    if((!effect) || (!newLayer) || (!_model))
         return;
 
-    LayerTokens* currentLayer = getLayerFromEffect(tokenLayers, effect);
+    LayerTokens* currentLayer = _model->getLayerFromEffect(tokenLayers, effect);
     if((currentLayer) && (currentLayer != newLayer))
     {
         currentLayer->removeEffect(effect);
@@ -4182,21 +4182,6 @@ bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effec
     }
 
     return item->collidesWithItem(collisionEffect);
-}
-
-LayerTokens* BattleFrame::getLayerFromEffect(QList<Layer*> tokenLayers, BattleDialogModelEffect* effect)
-{
-    if((tokenLayers.isEmpty()) || (!effect))
-        return nullptr;
-
-    foreach(Layer* layer, tokenLayers)
-    {
-        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
-        if((tokenLayer) && (tokenLayer->containsEffect(effect)))
-            return tokenLayer;
-    }
-
-    return nullptr;
 }
 
 void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)

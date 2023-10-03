@@ -518,6 +518,26 @@ void BattleDialogModel::removeEffectFromList(BattleDialogModelEffect* effect)
     emit dirty();
 }
 
+LayerTokens* BattleDialogModel::getLayerFromEffect(BattleDialogModelEffect* effect)
+{
+    return getLayerFromEffect(_layerScene.getLayers(DMHelper::LayerType_Tokens), effect);
+}
+
+LayerTokens* BattleDialogModel::getLayerFromEffect(QList<Layer*> tokenLayers, BattleDialogModelEffect* effect)
+{
+    if((tokenLayers.isEmpty()) || (!effect))
+        return nullptr;
+
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if((tokenLayer) && (tokenLayer->containsEffect(effect)))
+            return tokenLayer;
+    }
+
+    return nullptr;
+}
+
 int BattleDialogModel::getGridScale() const
 {
     // TODO: Layers - need to make this complete

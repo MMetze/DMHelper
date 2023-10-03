@@ -55,6 +55,9 @@ public:
     void appendEffectToList(BattleDialogModelEffect* effect);
     void removeEffectFromList(BattleDialogModelEffect* effect);
 
+    LayerTokens* getLayerFromEffect(BattleDialogModelEffect* effect);
+    LayerTokens* getLayerFromEffect(QList<Layer*> tokenLayers, BattleDialogModelEffect* effect);
+
     int getGridScale() const;
 
     Map* getMap() const;

@@ -349,7 +349,6 @@ private:
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
-    LayerTokens* getLayerFromEffect(QList<Layer*> tokenLayers, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
     void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
