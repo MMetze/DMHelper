@@ -13,6 +13,7 @@
 #include <QImage>
 #include <QPainter>
 #include <QDomElement>
+#include <QGraphicsScene>
 #include <QDebug>
 
 //#define DEBUG_LAYERSCENE
@@ -545,6 +546,7 @@ void LayerScene::initializeLayers()
         return;
 
     // First initialize images to find the size of the scene
+    // TODO: should this also do videos early?
     for(int i = 0; i < _layers.count(); ++i)
     {
         if(_layers[i]->getFinalType() == DMHelper::LayerType_Image)
@@ -584,8 +586,26 @@ void LayerScene::dmInitialize(QGraphicsScene* scene)
     _dmScene = scene;
 
     initializeLayers();
+
+    // First initialize images and videos to make sure the scene rect is set before placing tokens on it
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->dmInitialize(scene);
+    {
+        if(_layers[i]->getFinalType() != DMHelper::LayerType_Tokens)
+            _layers[i]->dmInitialize(scene);
+    }
+
+    // Need to reset the scene rect for the scene
+    QRectF sceneRect = scene->sceneRect();
+    QRectF boundingRect = scene->itemsBoundingRect();
+    if(sceneRect != boundingRect)
+        scene->setSceneRect(boundingRect);
+
+    // Initialize other layers
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if(_layers[i]->getFinalType() == DMHelper::LayerType_Tokens)
+            _layers[i]->dmInitialize(scene);
+    }
 }
 
 void LayerScene::dmUninitialize()
