@@ -4218,6 +4218,9 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
 
     int speedSquares = 2 * (speed / 5) + 1;
     _moveRadius = tokenLayer->getScale() * speedSquares;
+    if(_moveRadius <= tokenLayer->getScale())
+        return;
+
     _moveStart = item->scenePos();
     _movementPixmap->setPos(_moveStart);
     _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);

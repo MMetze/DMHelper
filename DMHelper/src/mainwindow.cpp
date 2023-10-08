@@ -2255,13 +2255,15 @@ Layer* MainWindow::selectMapFile()
     if(filename.isEmpty())
         return nullptr;
 
+    QFileInfo fileInfo(filename);
+
     QImageReader reader(filename);
     if(reader.canRead())
-        return new LayerImage(QString("Map Image: ") + filename, filename);
+        return new LayerImage(QString("Map Image: ") + fileInfo.fileName(), filename);
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
     if(result == QMessageBox::Yes)
-        return new LayerVideo(QString("Map Video: ") + filename, filename);
+        return new LayerVideo(QString("Map Video: ") + fileInfo.fileName(), filename);
 
     return nullptr;
 }

@@ -474,10 +474,13 @@ Layer* LayerScene::getNext(Layer* layer, DMHelper::LayerType type) const
     if(!layer)
         return getPriority(type);
 
-    for(int i = getLayerIndex(layer); i < _layers.count(); ++i)
+    if(getLayerIndex(layer) >= 0)
     {
-        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
-            return _layers.at(i)->getFinalLayer();
+        for(int i = getLayerIndex(layer); i < _layers.count(); ++i)
+        {
+            if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
+                return _layers.at(i)->getFinalLayer();
+        }
     }
 
     return nullptr;
