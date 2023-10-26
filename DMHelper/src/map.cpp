@@ -27,8 +27,6 @@
 
 Map::Map(const QString& mapName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
-    //_filename(), // for compatibility only
-    //_undoStack(nullptr),
     _audioTrackId(),
     _playAudio(false),
     _mapRect(),
@@ -36,20 +34,13 @@ Map::Map(const QString& mapName, QObject *parent) :
     _showPartyIcon(false),
     _partyId(),
     _partyIconPos(-1, -1),
-    //_partyScale(DMHelper::STARTING_GRID_SCALE),
     _mapScale(0),
     _gridCount(0),
     _showMarkers(true),
     _mapItems(),
     _initialized(false),
     _layerScene(this),
-    //_imgBackground(),
-    //_imgFow(),
     _undoItems(),
-    //_imgBWFow(),
-    //_indexBWFow(0),
-    //_filterApplied(false),
-    //_filter(),
     _lineType(Qt::SolidLine),
     _lineColor(Qt::yellow),
     _lineWidth(1),
@@ -57,8 +48,6 @@ Map::Map(const QString& mapName, QObject *parent) :
     _mapSize(),
     _markerList()
 {
-//    _undoStack = new QUndoStack(this);
-    //_markerStack = new QUndoStack(); // TODO: why does not leaking this avoid a crash at shutdown?
     connect(&_layerScene, &LayerScene::dirty, this, &Map::dirty);
 }
 
@@ -174,7 +163,6 @@ void Map::copyValues(const CampaignObjectBase* other)
     if(!otherMap)
         return;
 
-    //_filename = otherMap->_filename;
     _audioTrackId = otherMap->getAudioTrackId();
     _playAudio = otherMap->getPlayAudio();
     _mapRect = otherMap->getMapRect();
@@ -183,7 +171,6 @@ void Map::copyValues(const CampaignObjectBase* other)
     _partyId = otherMap->getPartyId();
     _partyAltIcon = otherMap->getPartyAltIcon();
     _partyIconPos = otherMap->getPartyIconPos();
-    //_partyScale = otherMap->getPartyScale();
     _mapScale = otherMap->getMapScale();
 
     // TODO: Layers - need a markers layer
@@ -210,20 +197,6 @@ QIcon Map::getDefaultIcon()
 {
     return QIcon(":/img/data/icon_contentmap.png");
 }
-
-/*
-const QImage& Map::getImage() const
-{
-    return _imgBackground;
-}
-*/
-
-/*
-QUndoStack* Map::getMarkerStack()
-{
-    return _markerStack;
-}
-*/
 
 QString Map::getFileName() const
 {
@@ -370,7 +343,6 @@ const QPoint& Map::getPartyIconPos() const
 
 int Map::getPartyScale() const
 {
-    //return _partyScale;
     return _layerScene.getScale();
 }
 
@@ -454,19 +426,6 @@ void Map::cleanupMarkers()
     }
 }
 
-/*
-UndoMarker* Map::getMapMarker(int id)
-{
-    foreach(UndoMarker* marker, _markerList)
-    {
-        if((marker) && (marker->getMarker().getID() == id))
-            return marker;
-    }
-
-    return nullptr;
-}
-*/
-
 bool Map::getShowMarkers() const
 {
     return _showMarkers;
@@ -517,28 +476,6 @@ bool Map::isValid()
     if(isInitialized())
         return true;
 
-    /*
-    // If the filename is empty, it's invalid
-    if(_filename.isEmpty())
-        return false;
-
-    // If the file does not exist, it's invalid
-    if(!QFile::exists(_filename))
-        return false;
-
-    // If the file is not a file (ie it's a directory), it's invalid
-    QFileInfo fileInfo(_filename);
-    if(!fileInfo.isFile())
-        return false;
-
-#if !defined(Q_OS_MAC)
-    // If the file is otherwise OK and the format is a known image, it's invalid because it should have been loaded!
-    QImageReader reader(_filename);
-    if(!reader.format().isEmpty())
-        return false;
-#endif
-*/
-
     return true;
 }
 
@@ -554,10 +491,7 @@ const LayerScene& Map::getLayerScene() const
 
 void Map::setExternalFoWImage(QImage externalImage)
 {
-    /*
-    _imgFow = externalImage;
-    applyPaintTo(nullptr, QColor(0, 0, 0, 128), _undoStack->index());
-    */
+    // TODO: Layers
 }
 
 QImage Map::getUnfilteredBackgroundImage()
@@ -592,7 +526,6 @@ QImage Map::getFoWImage()
 {
     LayerFow* layer = dynamic_cast<LayerFow*>(_layerScene.getFirst(DMHelper::LayerType_Fow));
     return layer ? layer->getImage() : QImage();
-    //return _imgFow;
 }
 
 bool Map::isCleared()
@@ -616,44 +549,6 @@ bool Map::isCleared()
     return false;
 }
 
-/*
-QImage Map::getPublishImage()
-{
-    QImage result(getBackgroundImage());
-
-    QImage bwFoWImage = getBWFoWImage(_imgBackground);
-    QPainter p;
-    p.begin(&result);
-        p.drawImage(0, 0, bwFoWImage);
-    p.end();
-
-    return result;
-}
-
-QImage Map::getPublishImage(const QRect& rect)
-{
-    QRect targetRect(rect);
-    if(targetRect.left() < 0)
-        targetRect.setLeft(0);
-    if(targetRect.top() < 0)
-        targetRect.setTop(0);
-    if(targetRect.right() > _imgBackground.rect().right())
-        targetRect.setRight(_imgBackground.rect().right());
-    if(targetRect.bottom() > _imgBackground.rect().bottom())
-        targetRect.setBottom(_imgBackground.rect().bottom());
-
-    QImage result = QImage(targetRect.size(), _imgBackground.format());
-    QImage bwFoWImage = getBWFoWImage(_imgBackground);
-    QPainter p;
-    p.begin(&result);
-        p.drawImage(0, 0, getBackgroundImage(), targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
-        p.drawImage(0, 0, bwFoWImage, targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
-    p.end();
-
-    return result;
-}
-*/
-
 QImage Map::getGrayImage()
 {
     QImage result(getPreviewImage());
@@ -671,138 +566,6 @@ QImage Map::getGrayImage()
 
     return result;
 }
-
-/*
-QImage Map::getShrunkPublishImage(QRect* targetRect)
-{
-    QImage bwFoWImage = getBWFoWImage(_imgBackground);
-
-    int top, bottom, left, right;
-    top = bottom = left = right = -1;
-    int i, j;
-    for(j = 0; (j < bwFoWImage.height()) && (top == -1); ++j)
-    {
-        for(i = 0; (i < bwFoWImage.width()) && (top == -1); ++i)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                top = j;
-            }
-        }
-    }
-
-    for(j = bwFoWImage.height() - 1; (j > top) && (bottom == -1); --j)
-    {
-        for(i = 0; (i < bwFoWImage.width()) && (bottom == -1); ++i)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                bottom = j;
-            }
-        }
-    }
-
-    for(i = 0; (i < bwFoWImage.width()) && (left == -1); ++i)
-    {
-        for(j = top; (j < bottom) && (left == -1); ++j)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                left = i;
-            }
-        }
-    }
-
-    for(i = bwFoWImage.width() - 1; (i > left) && (right == -1); --i)
-    {
-        for(j = top; (j < bottom) && (right == -1); ++j)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                right = i;
-            }
-        }
-    }
-
-    QImage result;
-    if((right == left) || (top == bottom))
-    {
-        result = bwFoWImage;
-    }
-    else
-    {
-        result = QImage(right - left, bottom - top, _imgBackground.format());
-        QPainter p;
-        p.begin(&result);
-            p.drawImage(0, 0, getBackgroundImage(), left, top, right - left, bottom - top);
-            p.drawImage(0, 0, bwFoWImage, left, top, right - left, bottom - top);
-        p.end();
-    }
-
-    if(targetRect)
-        *targetRect = QRect(left, top, right - left, bottom - top);
-
-    return result;
-}
-*/
-
-/*
-QRect Map::getShrunkPublishRect()
-{
-    // TODO: Layers
-    //QImage bwFoWImage = getBWFoWImage(_imgBackground);
-    QImage bwFoWImage;// = getBWFoWImage();
-
-    int top, bottom, left, right;
-    top = bottom = left = right = -1;
-    int i, j;
-    for(j = 0; (j < bwFoWImage.height()) && (top == -1); ++j)
-    {
-        for(i = 0; (i < bwFoWImage.width()) && (top == -1); ++i)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                top = j;
-            }
-        }
-    }
-
-    for(j = bwFoWImage.height() - 1; (j > top) && (bottom == -1); --j)
-    {
-        for(i = 0; (i < bwFoWImage.width()) && (bottom == -1); ++i)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                bottom = j;
-            }
-        }
-    }
-
-    for(i = 0; (i < bwFoWImage.width()) && (left == -1); ++i)
-    {
-        for(j = top; (j < bottom) && (left == -1); ++j)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                left = i;
-            }
-        }
-    }
-
-    for(i = bwFoWImage.width() - 1; (i > left) && (right == -1); --i)
-    {
-        for(j = top; (j < bottom) && (right == -1); ++j)
-        {
-            if(bwFoWImage.pixelColor(i, j) != Qt::black)
-            {
-                right = i;
-            }
-        }
-    }
-
-    return QRect(left, top, right - left, bottom - top);
-}
-*/
 
 bool Map::isFilterApplied() const
 {
@@ -875,58 +638,10 @@ bool Map::initialize()
     if(_initialized)
         return true;
 
-    //QImage imgBackground;
-
-    /*
-    else if(_mapColor.isValid() && _mapSize.isValid())
-    {
-        imgBackground = QImage(_mapSize, QImage::Format_ARGB32_Premultiplied);
-        imgBackground.fill(_mapColor);
-    }
-    else
-    {
-        qDebug() << "[Map] ERROR: Unable to initialize map with neither a file nor a color & size";
-        return true;
-    }
-    */
-
-    //emitSignal(_imgBackground);
-
     if(_layerScene.getScale() <= 0)
         connect(&_layerScene, &LayerScene::sceneSizeChanged, this, &Map::initializePartyScale);
 
     _layerScene.initializeLayers();
-
-    /*
-    Todo: create a basic color layer, move image loading into the layer
-
-    LayerImage* backgroundLayer = new LayerImage(QString("Background"), imgBackground, -2);
-    // TODO: These are needed in the layers...
-    backgroundLayer->setApplyFilter(_filterApplied);
-    backgroundLayer->setFilter(_filter);
-    */
-//    connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
-    //_layerScene.appendLayer(backgroundLayer);
-
-    /*
-    QImage cloudsImage("C:/Users/turne/Documents/DnD/DM Helper/testdata/CloudsSquare.png");
-    LayerImage* cloudsLayer = new LayerImage(cloudsImage, 20);
-    _layerScene.appendLayer(cloudsLayer);
-    */
-
-    //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
-    //applyPaintTo(nullptr, QColor(0, 0, 0, 128), _undoStack->index());
-
-    //LayerFow* fowLayer = new LayerFow(QString("FoW"), imgBackground.size(), -1);
-    /*
-    for(int i = 0; i < _undoItems.count(); ++i)
-    {
-        UndoFowBase* undoItem = _undoItems[i];
-        undoItem->setLayer(fowLayer);
-        fowLayer->getUndoStack()->push(undoItem);
-    }
-    */
-    //_layerScene.appendLayer(fowLayer);
 
     if(!_cameraRect.isValid())
     {
@@ -940,9 +655,6 @@ bool Map::initialize()
 
 void Map::uninitialize()
 {
-//    _imgBackground = QImage();
-//    _imgBWFow = QImage();
-//    _imgFow = QImage();
     _layerScene.uninitializeLayers();
     _initialized = false;
 }
@@ -956,13 +668,6 @@ void Map::updateFoW()
 {
     //emit requestFoWUpdate();
 }
-
-/*
-void Map::addMapMarker(UndoMarker* undoEntry, MapMarker* marker)
-{
-    emit requestMapMarker(undoEntry, marker);
-}
-*/
 
 void Map::setParty(Party* party)
 {
@@ -1010,9 +715,7 @@ void Map::setPartyIconPos(const QPoint& pos)
 void Map::setPartyScale(int partyScale)
 {
     if(_layerScene.getScale() != partyScale)
-    //if(_partyScale != partyScale)
     {
-        //_partyScale = partyScale;
         _layerScene.setScale(partyScale);
         emit partyScaleChanged(partyScale);
         emit dirty();
@@ -1074,15 +777,6 @@ void Map::setApplyFilter(bool applyFilter)
     LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
     if(layer)
         layer->setApplyFilter(applyFilter);
-
-/*
-    if(_filterApplied != applyFilter)
-    {
-        _filterApplied = applyFilter;
-        emit dirty();
-        emit mapImageChanged(getBackgroundImage());
-    }
-    */
 }
 
 void Map::setFilter(const MapColorizeFilter& filter)
@@ -1090,12 +784,6 @@ void Map::setFilter(const MapColorizeFilter& filter)
     LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
     if(layer)
         layer->setFilter(filter);
-
-    /*
-    _filter = filter;
-    emit dirty();
-    emit mapImageChanged(getBackgroundImage());
-    */
 }
 
 void Map::setCameraRect(const QRect& cameraRect)
@@ -1137,7 +825,6 @@ QDomElement Map::createOutputXML(QDomDocument &doc)
 
 void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    //element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
     element.setAttribute("lineColor", _lineColor.name());
     element.setAttribute("lineType", _lineType);
     element.setAttribute("lineWidth", _lineWidth);
@@ -1151,7 +838,6 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("partyalticon", _partyAltIcon);
     element.setAttribute("partyPosX", _partyIconPos.x());
     element.setAttribute("partyPosY", _partyIconPos.y());
-    //element.setAttribute("partyScale", _partyScale);
     element.setAttribute("mapScale", _mapScale);
     element.setAttribute("showMarkers", _showMarkers);
     element.setAttribute("mapRectX", _mapRect.x());

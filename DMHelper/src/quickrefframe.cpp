@@ -33,7 +33,7 @@ void QuickRefFrame::refreshQuickRef()
     ui->cmbQuickRef->clear();
 
     QStringList sectionNames = QuickRef::Instance()->getSectionList();
-    for(const QString& section : qAsConst(sectionNames))
+    for(const QString& section : std::as_const(sectionNames))
     {
         ui->cmbQuickRef->addItem(section);
     }
@@ -87,7 +87,7 @@ void QuickRefFrame::handleQuickRefChange(int selection)
 
             //use subsection description
             QStringList dataTitles = subsection->getDataTitles();
-            for(const QString& dataTitle : qAsConst(dataTitles))
+            for(const QString& dataTitle : std::as_const(dataTitles))
             {
                 QuickRefData* data = subsection->getData(dataTitle);
                 if(data)

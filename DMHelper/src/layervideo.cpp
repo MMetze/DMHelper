@@ -246,10 +246,6 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     {
         _videoObject->updateImage(*(_videoPlayer->getImage()));
     }
-    else
-    {
-        int x = 0;
-    }
 
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture

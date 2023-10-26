@@ -2024,6 +2024,7 @@ void BattleFrame::editLayers()
 
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 {
+    Q_UNUSED(effectItem);
     /*
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Frame] Handle effect changed for " << effectItem;
@@ -2078,6 +2079,7 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
 
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
+    Q_UNUSED(object);
     return;
     /*
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
@@ -2266,6 +2268,7 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    Q_UNUSED(effect);
     return;
     /*
     if(!effect)
@@ -3152,6 +3155,7 @@ void BattleFrame::setEditMode()
 
 void BattleFrame::updateFowImage(const QPixmap& fow)
 {
+    Q_UNUSED(fow);
     // TODO: Layers
     // This probably can disappear? Make sure connections between drawer and scene are done
     //if(_fow)
@@ -3498,6 +3502,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
 {
+    Q_UNUSED(combatant);
 
     /*
     if(!_model)

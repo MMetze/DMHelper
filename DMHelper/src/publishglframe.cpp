@@ -16,6 +16,9 @@ PublishGLFrame::PublishGLFrame(QWidget *parent) :
 
 PublishGLFrame::~PublishGLFrame()
 {
+//    if(QOpenGLContext::currentContext())
+//        disconnect(QOpenGLContext::currentContext(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLFrame::cleanup);
+
     cleanup();
     setRenderer(nullptr);
 }

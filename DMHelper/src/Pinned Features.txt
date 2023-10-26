@@ -1,0 +1,284 @@
+rather than a bestiary file - having a bestiary folder with multiple files.... that way i could keep keep vanilla monsters seperate from third party monsters.... helps immensely if somebody does the work of generating a new vanilla bestiary if WotC comes out with new materials (hint - i was on vacation but will pick up work again soon on a new file) and i can keep stuff i added from third parties or myself in a different file and it will still get added to the bestiary 
+
+Hey! sorry If someone's already suggested this, but would it be possible to reorganize (and possibly add more categories) the order of monster actions in their stat block to be:
+
+Special Abilities
+Actions
+Bonus Actions
+Reactions
+Legendary Actions
+Lair Actions
+
+To match the new layout in MoM?
+
+
+Instead of a direct option to track Hit Dice, how about another tab where we can use the same method as spell slots, but allow us to enter what is being tracked?  That could be used for Hit Dice, but could then be anything like Sorcery Points or even an item that has X uses.
+mybigfriendjo — 08/25/2022 7:34 PM
+essentially "counters" that you can label yourself - with a min and max value?
+Loki — 08/25/2022 7:37 PM
+Yes, but just use the same functionality as spell slots (has the 3 dots to add slots, button to add level)
+Heya - counters as a tab is brilliant! Code reuse is guaranteed... I can pretty easily make it a 1-10 dots or number counter.
+
+
+RubberRobot — 06/29/2022 12:29 AM
+The ability to add a map using a url would be handy. That way you don't have to save it to disk somewhere first
+DMHelper — 06/29/2022 12:36 AM
+Good call, easy enough now that we already have a local cache
+
+
+Soo feature request based on the discussion on the ???-general general .
+
+Map Search and auto-import to dmh and battle, based on local folder of maps 
+
+Search features ( since it doesn't assume embedded metadata );
+- overall colour search
+- filename
+- custom dmh tags
+- other relevant simple image processing filters
+- kNN ranking to find similar maps to a reference one
+( This not to go to more feature engineering of machine learning models )
+DMHelper — 06/29/2022 12:23 AM
+Totally for sure. Good news - already got a prototype because I need this too!
+ — 06/29/2022 12:23 AM
+DMHelper — 06/29/2022 12:23 AM
+What is a kNN Ranking @texmex42?
+ongakugainochi — 06/29/2022 12:25 AM
+K-nearest neighbors.
+It’s an unsupervised classification technique.
+But I’m curious what the dimensions would be for the proximity calculation.
+For maps.
+DMHelper — 06/29/2022 12:27 AM
+Right ok. Here's a challenge I've faced with my maps: I find everything and can match on names, but most map makers provide multiple versions of the same map (animated/still, multiple resolutions, night/day, special effects). I find the search results get clogged with 15+ variants of each map.
+texmex42 — 06/29/2022 12:40 AM
+My main immediate choice would be colour, or gross histogram of colours ( maybe HSV would be a better measure of colour than RGB).
+
+I know several other features can be used but my lack of sleep is preventing me of naming another classical, low effort feature that could be helpful here
+mybigfriendjo — 06/29/2022 12:46 AM
+low effort feature - "manual entering of additional tags and/or description" ^^
+it's been mentioned already indirectly - just thought i'd write it out
+
+
+buffonturtle — 06/25/2022 8:53 AM
+Would it be possible to automatically adjust dmh to  screensize? I am running a 13inch macbook and the window does not automatically adjust to the screen size. Not really a major issue though
+
+
+And second thought: the stat blocks for monsters and players, would it be possible to make it into "one" scrollable document (perhaps a Mac/display size issue)?  Rather than having all these individual boxes ?
+
+
+A request (sorry if it's already been requested). Can a text box be placed to the right of Armor Class so that I can enter the type of armor? i.e. leather and shield, +1 plate, etc. Currently having to add this under Special Abilities so that I know what the party are going to be scavenging after the combat.
+
+
+The ability for a entry to show up under multiple entries. This is useful for having a list of session entries with everything you plan on using that session linked there while allowing for a npc or a map to show up in multiple sessions
+
+
+mybigfriendjo — 03/19/2022 7:10 PM
+for things like bestiary and spellbook an option without the path to campaign file might also be good
+and seperately to make some more windows non-modal
+example: "Tables", "Bestiary" and "Spellbook" can be opened and i can still interact with the main app. For "DM Screen" and "Reference" this doesn't work.
+(Also would be nice if clicking the button would bring the already open window back to front)
+
+
+
+mybigfriendjo — 03/19/2022 7:09 PM
+A Way for DMHelper to be opened at a certain "location" would be interesting.
+I think the most straight-forward way would probably be a custom url handler (eg. "dmhelper://<path to campaignFile>&<type>=<value>")
+
+it would either start up the app, load the campaign file and jump to that entry - or if the campaign file is already loaded bring the app to front and show it
+
+For people that still have their notes seperate from the Main App (coughmecough) this would introduce a way to
+
+*) open a specific monster in the DMHelper Bestiary ("dmhelper://<path to campaignFile>&monster=<name of Monster>")
+*) open a spell ("dmhelper://<path to campaignFile>&spell=<name of Spell>")
+*) open an entry from the menu ("dmhelper://<path to campaignFile>&entry=<GUID of entry>")
+*) open a map / combat ("dmhelper://<path to campaignFile>&entry=<GUID of entry>")
+*) open a table for rolling ("dmhelper://<path to campaignFile>&entry=<name/ID of table>")
+
+etc. etc.
+
+this is surely something more involved as depending on what should be displayed different windows might need to come into focus.
+also an option for right-click "copy URL to this location" would be nice to make it easy to get the url needed.
+
+it would make jumping from notes into action a no brainer though. 
+
+
+
+
+Loki — 02/26/2022 10:35 PM
+I've already setup lots of combat with maps for the next chapters of Decent into Avernus.  Since that was before it contained any PC's, I now have to add them one by one to each combat.  Could there be an 'Add All PC's' option
+
+
+
+
+
+MelcorScarr — 01/17/2022 10:08 AM
+I think dragndrop dnd'ing a image into dmh should, in the long run but not eight away, be aware of the kind of the entry  type currently opened
+As in use it as.token or portrait image if an npc is open, object if a combat or map is open, etc
+Popup where you can select if ambiguous
+
+
+mybigfriendjo — 01/17/2022 12:51 AM
+enhanced import functionality
+ - auto import xmls from a certain folder and sort them depending on what they are (NPCs, text entries, beastiary-entry, etc.)
+ - option to activate / deactivate this behavior (default should be "off")
+ - option for default entry to put imported stuff into / under if it's elements that would import into the campaign
+ - non-campaign stuff like tables, spells, bestiary-entries would be imported into the respective areas
+ - this could then also be used as a bridge for other apps to send content / elements over to DMH
+
+drag and drop functionality:
+ - images from file explorer into dmhelper and add them automatically as map
+ - NPCs to Combat - create Token where Drop happens (idea from @MelcorScarr - just put it here because it fit)
+ 
+creating a combat as child of a map automatically selects that map for combat
+
+
+Dynamik — 01/07/2022 3:39 PM
+a button to auto generate an NPC, and then add it to a specified NPC directory would be amazing
+
+
+Dynamik — 01/07/2022 2:46 PM
+A couple things I noticed in my recent dive into DMH.
+It would be nice if when it opens, it automatically opens your last used project.
+Second, an option to enable that any media imported moves it to a directory where you store the xml would be good. 
+
+Dynamik — 01/07/2022 3:05 PM
+but normal little media files would be nice to have it copied so it doesn't get lost whenever my desktop hits 150 icons and i go on a deleting rampage ??
+
+
+
+
+
+Adamsauce — 06/19/2021 5:24 AM
+would it be poseble to add a way to make costume skills for character sheets? i ask this bc im running a darkmatter game and wouldn't mind adding it to the regular menu [i love this program thank you so much]
+
+
+
+Loki — 05/07/2021 4:26 AM
+Starting to use the Spellbook more instead of web pages and noticed a few trivial updates that have no bearing on its use!  The "Casting Time" text is missing (the field is there, but without text underneath).  It would also be helpful if the tab order was left to right instead of skipping around.
+
+
+
+Loki — 04/25/2021 3:06 AM
+Another super silly request.  The tool bar and right-click menu are "New Combat", but the screen that comes up shows "New Battle" and "Enter new battle name".  Not sure it matters which text is used, but it would be great if they matched.  I found myself naming some combat and others battle and didn't know why until I noticed that.
+
+
+Mystra — 04/24/2021 7:13 PM
+While we’re talking about a search function, I would love a filter system. When I’m designing encounters I’m really big on filtering by environment/CR/etc. The best implementation of a filter system I’ve seen is the advanced search on ravelry.com. It’s a knitting and crochet pattern website so completely nonaplicable to dnd, but the way it functions is just chefs kiss
+
+
+
+mybigfriendjo — 04/24/2021 3:58 PM
+And all integrated into one search bar with little prefixes or symbols to distinguish which entry is what
+texmex42 — 04/24/2021 3:23 AM
+finished another great session. Thx @DMHelper  and team.
+As it was a RP heavy and shopping episode I just needed one thing: search bar on the DMscreen. Even if it is tab specific and not searching the whole screen.
+Can we pleeeeeeeeasssseeeeeee have one @DMHelper , preeeety pls?
+
+
+
+
+Crazy_Texan — 04/16/2021 8:33 PM
+Can we get a scroll bar on the character sheet screen.
+My small laptop screen struggles to show me the (Features/Equipment/Spells/Notes) unless i shrink the font size
+
+
+
+Loki — 03/29/2021 7:07 PM
+Posted earlier about redesigning the PC page.  For the same main reason (small text), it would be great if the bestiary could use tabs as well.  That would give more room for text.  If the + button can't be on a tab, they all use the same form so maybe it just adds to the current tab
+
+
+
+
+texmex42 — 03/19/2021 12:15 AM
+Anything planned for moving tokens up and down (fly , dive, burrow )? There could be something that at least sets a small token tag saying height at 5ft increments. Almost like the token is carrying a flag...
+mybigfriendjo — 03/19/2021 12:16 AM
+there is a little thing where the distance measurements are where you can enter a height of a character to be taken into account for the measurements
+but not really something that tracks it yet afaik
+Brian — 03/19/2021 12:17 AM
+That is a cool idea
+Just a height indicator like a small toast at the bottom right of the character avatar, which isn't there if the height is 0, but shows a number if it's any other number + or - to indicate height difference
+
+
+
+
+
+Loki — 03/13/2021 6:17 AM
+I keep forgetting to ask about this.  Any plans to support Temporary HP?  It was a huge amount of work to get it right on my spreadsheet (which I used before finding DMH) so maybe it isn't something to tackle for simply adding basic HP instead.
+
+
+
+Loki — 03/06/2021 11:01 PM
+Maybe these are the 'candy' you mentioned in the patreon email, but would love to see these ideas added:  Double-click on PC (on map or list) opens to separate window (like Monsters) rather than losing focus on combat.  Right-click menus for PC's and monsters are expanded (damage, condition, cast spell, etc) and are the same on map or list.  Adding a map to combat can also be from a file (instead of having to use +Map and then select from a list for combat)
+
+
+Harlack — 03/02/2021 11:16 PM
+Good to know, thanks for your help everyone.
+Than yes, my feature request is the ability to move monsters between "combat" sections.
+
+
+Loki — 03/02/2021 6:47 PM
+Has it been suggested to add functionality to search text in DMH?  So far most of my DMH use has been side quests as backup DM.  I'm building a full campaign now and finding it would be nice to have a search option.
+
+
+
+mybigfriendjo — 02/19/2021 12:20 AM
+right click -> damage -> enter value -> done
+@texmex42
+though i wouldn't say no to a directly integrated textfield if that has room somewhere on the initiative bar for entities as well with a +/- for heal/damage and an auto clear after button press
+
+
+
+Grouped Initiatives. It's an often recommendation to speed up combat to have several enemies/enemy classes act together in combat. Not highly needed, but it would be nice to group combat monsters together in iniative tracking
+
+
+ellecee — 01/23/2021 5:56 PM
+Request: it would be useful if hovering or clicking on the action/special abilities (which shows up as "special actions") in the pop up gave you the full description - knowing the dice is helpful but I'd like to see range/damage type/descriptions if possible
+
+
+DMHelper — 01/21/2021 10:02 PM
+@sherv - generally Copy & Paste for campaign items
+
+
+texmex42 — 01/16/2021 3:38 AM
+Hi 2 requests @DMHelper 
+- Custom conditions (during game) - pretty cool UI, but I'd like to insert further in-game quick notes for condition-similar stuff
+- Manual decrease turn timer for conditions that have # of turns of effect. - i keep forgetting how many turns have been since an effect is activated.
+
+
+delecti — 01/11/2021 5:21 PM
+not sure if this is on the radar already, but the dialog box when syncing from dnd beyond is a bit unintuitive, the first several times i tried to sync a character I thought it was an error when that dialog popped up, and didn't realize it was a "syncing in progress" box
+a dummy progress bar (something like [this](https://lh3.googleusercontent.com/proxy/BqBgHw-W4Mnxq77bB4WF6zaiLxv-rVm0TgLiSmLQ0R3Rzs81mRBcviRv21ns1NZNmAPTj-JQuZ9Avqun-CjTROXYr3fLHZOtVFpvi-0wuYcMEheZefVUUKANlfVvzP54tNsBmbWnn3g) ) would help other people avoid my mistake
+
+
+
+
+Dety — 01/09/2021 10:42 PM
+Feature request II : To be able to modify the shortcuts and to have more. For example : To be able to toggle the FOW option without having to quit the combat tab. Also, to be able to publish using right-ctrl + p instead of left-ctrl + p so I can click it with one hand only
+
+
+
+Rufus Loacker — 01/04/2021 11:26 PM
+Feature request: a simple hit dice and max hp indicator for the party page (so I don't have to open the actual character sheet to look at them if I need to reset eg after a long rest
+
+
+
+
+GasMaskTony — 01/01/2021 10:35 AM
+Feature request: What about setting the token as a kind of "light source" so it erases the fog of war as it moves thru? Also square grid as well as a hex setting for world maps?
+
+
+Brian — 03/14/2020 2:37 AM
+But as I said in the tables forum (I'll repeat here since this is FR), can there please be a flag to hide subtables from the list if I don't need to be able to refer to them directly? If they'll only ever be called as a subtable, I don't want it cluttering the list view up.
+
+
+Mittens — 10/17/2023 8:30 AM
+Apparently there's no visual feedback when combat objects are selected yet.  That'd be a nice feature.  n.n
+
+
+DMHelper — 10/17/2023 8:21 AM
+On a map entry (not combat yet), you can add Markers that do pretty much what you need. In a future version they will certainly also be available in combats and I like the idea of adding a generic "DM Notes" layer where you could have markers, tokens and text blocks that can be made only visible to the DM.
+
+
+Loki — 01/15/2021 1:20 AM
+Has adding an option for temp HP been suggested yet?  I know we can add negative numbers to simulate, but just curious.  Also, instead of using 'Damage' with negative numbers to heal, what about having a Heal option in the same right-click menu?
+
+

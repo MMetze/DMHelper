@@ -18,7 +18,7 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     //setAutoFillBackground(true);
     //setStyleSheet("background-color: rgba(0, 0, 0, 255);");
 
-    _publishFrame = new PublishGLFrame(this);
+    _publishFrame = new PublishGLFrame();
     setCentralWidget(_publishFrame);
     //_publishFrame->setAutoFillBackground(true);
 

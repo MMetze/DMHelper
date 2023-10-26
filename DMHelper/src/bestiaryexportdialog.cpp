@@ -121,7 +121,7 @@ void BestiaryExportDialog::exportSelected()
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+    ts.setEncoding(QStringConverter::Utf8);
     ts << xmlString;
 
     file.close();

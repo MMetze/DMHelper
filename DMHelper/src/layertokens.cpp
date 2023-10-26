@@ -408,6 +408,8 @@ void LayerTokens::playerGLUninitialize()
 
 void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(defaultModelMatrix);
+
     if(!_model)
         return;
 

@@ -753,7 +753,7 @@ void OptionsContainer::backupFile(const QString& filename)
         QDir backupDir(backupPath);
         QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
         QFileInfo backupFileInfo(previousBackup);
-        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
         if((!backupFileInfo.exists()) || (backupFileInfo.size() != fileInfo.size()))
         {
             if(backupFileInfo.exists())

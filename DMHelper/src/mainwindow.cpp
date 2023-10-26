@@ -196,7 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     LibraryExecutablesPath: " << QLibraryInfo::location(QLibraryInfo::LibraryExecutablesPath);
     qDebug() << "[MainWindow]     BinariesPath: " << QLibraryInfo::location(QLibraryInfo::BinariesPath);
     qDebug() << "[MainWindow]     PluginsPath: " << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-    qDebug() << "[MainWindow]     ImportsPath: " << QLibraryInfo::location(QLibraryInfo::ImportsPath);
+    qDebug() << "[MainWindow]     QmlImportsPath: " << QLibraryInfo::location(QLibraryInfo::QmlImportsPath);
     qDebug() << "[MainWindow]     Qml2ImportsPath: " << QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
     qDebug() << "[MainWindow]     ArchDataPath: " << QLibraryInfo::location(QLibraryInfo::ArchDataPath);
     qDebug() << "[MainWindow]     DataPath: " << QLibraryInfo::location(QLibraryInfo::DataPath);
@@ -755,7 +755,6 @@ MainWindow::~MainWindow()
 {
     deleteCampaign();
 
-    delete _pubWindow;
     delete ui;
 
     Bestiary::Shutdown();
@@ -2036,7 +2035,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+    ts.setEncoding(QStringConverter::Utf8);
     ts << doc.toString();
 
     file.close();
@@ -2284,7 +2283,7 @@ void MainWindow::openCampaign(const QString& filename)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString contentError;
     int contentErrorLine = 0;
     int contentErrorColumn = 0;
@@ -2717,7 +2716,7 @@ void MainWindow::importBestiary()
         }
 
         QTextStream in(&file);
-        in.setCodec("UTF-8");
+        in.setEncoding(QStringConverter::Utf8);
         QString errMsg;
         int errRow;
         int errColumn;

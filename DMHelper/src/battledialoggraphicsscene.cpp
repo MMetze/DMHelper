@@ -111,7 +111,7 @@ void BattleDialogGraphicsScene::createBattleContents()
 
     /*
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
-    for(BattleDialogModelEffect* effect : qAsConst(effects))
+    for(BattleDialogModelEffect* effect : std::as_const(effects))
     {
         if(effect)
         {
@@ -156,7 +156,7 @@ void BattleDialogGraphicsScene::resizeBattleContents()
         //_grid->rebuildGrid(*_model);
     }
 
-    for(QGraphicsItem* item : qAsConst(_itemList))
+    for(QGraphicsItem* item : std::as_const(_itemList))
     {
         if(item)
         {
@@ -187,7 +187,7 @@ void BattleDialogGraphicsScene::updateBattleContents()
         //_grid->rebuildGrid(*_model);
     }
 
-    for(QGraphicsItem* item : qAsConst(_itemList))
+    for(QGraphicsItem* item : std::as_const(_itemList))
     {
         if(item)
         {
@@ -241,7 +241,7 @@ void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffect
 {
     bool newVisible = visible;
 
-    for(QGraphicsItem* item : qAsConst(_itemList))
+    for(QGraphicsItem* item : std::as_const(_itemList))
     {
         if(item)
         {
@@ -356,7 +356,7 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
         return nullptr;
 
     // Search for the first selectable item
-    for(QGraphicsItem* item : qAsConst(itemList))
+    for(QGraphicsItem* item : std::as_const(itemList))
     {
         if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
             return dynamic_cast<QGraphicsItem*>(item);
