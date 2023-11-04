@@ -2,7 +2,6 @@
 #include "bestiary.h"
 #include "monsterclass.h"
 #include "combatant.h"
-#include "dmconstants.h"
 #include "monsteraction.h"
 #include "monsteractionframe.h"
 #include "monsteractioneditdialog.h"
@@ -43,7 +42,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->btnRight, SIGNAL(clicked()), this, SLOT(nextMonster()));
     connect(ui->btnNewMonster, SIGNAL(clicked()), this, SLOT(createNewMonster()));
     connect(ui->btnDeleteMonster, SIGNAL(clicked()), this, SLOT(deleteCurrentMonster()));
-    connect(ui->cmbSearch, SIGNAL(activated(QString)), this, SLOT(setMonster(QString)));
+    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setMonster(newValue);});
     connect(ui->framePublish, SIGNAL(clicked()), this, SLOT(handlePublishButton()));
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
     connect(publishShortcut, SIGNAL(activated()), ui->framePublish, SLOT(clickPublish()));
@@ -704,23 +703,26 @@ void BestiaryDialog::mousePressEvent(QMouseEvent * event)
 
 void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
 {
-    if(_edit && _mouseDown && _monster)
-    {
-        if(ui->lblIcon->frameGeometry().contains(event->pos()))
-        {
-            ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
-            _mouseDown = false;
-            QString filename = selectToken();
-            if(!filename.isEmpty())
-            {
-                if(_monster->getIconCount() == 0)
-                    _monster->addIcon(filename);
-                else
-                    _monster->setIcon(_currentToken, filename);
-                loadMonsterImage();
-            }
-        }
-    }
+    if((!_edit) || (!_mouseDown) || (!_monster))
+        return;
+
+    if(!ui->lblIcon->frameGeometry().contains(event->pos()))
+        return;
+
+    ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    _mouseDown = false;
+    QString filename = selectToken();
+    if(filename.isEmpty())
+        return;
+
+
+
+    if(_monster->getIconCount() == 0)
+        _monster->addIcon(filename);
+    else
+        _monster->setIcon(_currentToken, filename);
+
+    loadMonsterImage();
 }
 
 void BestiaryDialog::showEvent(QShowEvent * event)

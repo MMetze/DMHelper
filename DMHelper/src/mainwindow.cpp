@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "dmversion.h"
 #include "publishwindow.h"
-#include "publishframe.h"
 #include "dicerolldialog.h"
 #include "countdownframe.h"
 #include "party.h"
@@ -24,13 +23,11 @@
 #include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "campaignobjectframe.h"
-#include "combatant.h"
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
-#include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
 #include "spell.h"
@@ -39,12 +36,7 @@
 #include "bestiaryexportdialog.h"
 #include "exportdialog.h"
 #include "equipmentserver.h"
-#include "textpublishdialog.h"
-#include "texttranslatedialog.h"
 #include "randommarketdialog.h"
-#include "combatantselectdialog.h"
-#include "optionsdialog.h"
-#include "selectzoom.h"
 #include "quickref.h"
 #include "quickrefframe.h"
 #include "dmscreentabwidget.h"
@@ -59,7 +51,6 @@
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"
-#include "discordposter.h"
 #include "legaldialog.h"
 #include "updatechecker.h"
 #include "ribbonmain.h"
@@ -74,12 +65,10 @@
 #include "ribbontabmap.h"
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
-#include "publishbuttonribbon.h"
 #include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
-#include "dmhwaitingdialog.h"
 #include "layerimage.h"
 #include "layerfow.h"
 #include "layervideo.h"
@@ -389,9 +378,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
     connect(_treeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
-
-    connect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
-    connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
@@ -1539,6 +1525,8 @@ void MainWindow::readBestiary()
         }
     }
 
+    disconnect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
+
     QString bestiaryFileName = _options->getBestiaryFileName();
     if(!Bestiary::Instance()->readBestiary(bestiaryFileName))
     {
@@ -1549,10 +1537,13 @@ void MainWindow::readBestiary()
     // Bestiary file seems ok, make a backup
     _options->backupFile(bestiaryFileName);
 
+    _bestiaryDlg.dataChanged();
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
         _bestiaryDlg.setMonster(_options->getLastMonster());
     else
         _bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
+
+    connect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Bestiary reading complete.";
 }
@@ -1587,6 +1578,8 @@ void MainWindow::readSpellbook()
         }
     }
 
+    disconnect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
+
     QString spellbookFileName = _options->getSpellbookFileName();
     if(!Spellbook::Instance()->readSpellbook(spellbookFileName))
     {
@@ -1597,10 +1590,13 @@ void MainWindow::readSpellbook()
     // Spellbook file seems ok, make a backup
     _options->backupFile(spellbookFileName);
 
+    _spellDlg.dataChanged();
     if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
         _spellDlg.setSpell(_options->getLastSpell());
     else
         _spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
+
+    connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Spellbook reading complete.";
 }

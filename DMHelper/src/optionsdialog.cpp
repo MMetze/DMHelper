@@ -89,9 +89,9 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
         connect(ui->cmbInitiativeType, SIGNAL(currentIndexChanged(int)), _options, SLOT(setInitiativeType(int)));
         connect(ui->sliderInitiativeScale, &QAbstractSlider::valueChanged,
-                [=](int newValue) { this->handleInitiativeScaleChanged(static_cast<qreal>(newValue) / 100.0); });
+                this, [=](int newValue) { this->handleInitiativeScaleChanged(static_cast<qreal>(newValue) / 100.0); });
         connect(ui->edtInitiativeScale, &QLineEdit::editingFinished,
-                [=]() { this->handleInitiativeScaleChanged(ui->edtInitiativeScale->text().toDouble()); });
+                this, [=]() { this->handleInitiativeScaleChanged(ui->edtInitiativeScale->text().toDouble()); });
         connect(ui->chkShowCountdown, SIGNAL(clicked(bool)), _options, SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);

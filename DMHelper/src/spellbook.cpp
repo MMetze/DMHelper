@@ -416,6 +416,9 @@ bool Spellbook::isDirty()
 
 Spell* Spellbook::getSpell(const QString& name)
 {
+    if(name.isEmpty())
+        return nullptr;
+
     if(!_spellbookMap.contains(name))
         showSpellWarning(name);
 

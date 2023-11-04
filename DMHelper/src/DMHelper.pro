@@ -169,6 +169,7 @@ SOURCES += main.cpp\
     spellslotradiobutton.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
+    tokeneditdialog.cpp \
     undofowbase.cpp \
     undofowfill.cpp \
     undofowpath.cpp \
@@ -427,6 +428,7 @@ HEADERS  += mainwindow.h \
     spellslotradiobutton.h \
     textbrowsermargins.h \
     texteditmargins.h \
+    tokeneditdialog.h \
     undofowbase.h \
     undofowfill.h \
     undofowpath.h \
@@ -600,6 +602,7 @@ FORMS    += mainwindow.ui \
     dmscreentabwidget.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
+    tokeneditdialog.ui \
     welcomeframe.ui \
     whatsnewdialog.ui \
     widgetbattlecombatant.ui \

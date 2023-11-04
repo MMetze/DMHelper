@@ -316,6 +316,7 @@ private:
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
     void removeSingleCombatant(BattleDialogModelCombatant* combatant);
 
+    bool validateTokenLayerExists();
     void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);
     void moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers);
 

@@ -277,6 +277,9 @@ bool Bestiary::isDirty()
 
 MonsterClass* Bestiary::getMonsterClass(const QString& name)
 {
+    if(name.isEmpty())
+        return nullptr;
+
     if(!_bestiaryMap.contains(name))
         showMonsterClassWarning(name);
 
