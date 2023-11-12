@@ -170,6 +170,7 @@ SOURCES += main.cpp\
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     tokeneditdialog.cpp \
+    tokeneditor.cpp \
     undofowbase.cpp \
     undofowfill.cpp \
     undofowpath.cpp \
@@ -429,6 +430,7 @@ HEADERS  += mainwindow.h \
     textbrowsermargins.h \
     texteditmargins.h \
     tokeneditdialog.h \
+    tokeneditor.h \
     undofowbase.h \
     undofowfill.h \
     undofowpath.h \

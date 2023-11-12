@@ -1,6 +1,7 @@
 #ifndef BESTIARYFINDTOKENDIALOG_H
 #define BESTIARYFINDTOKENDIALOG_H
 
+#include "tokeneditor.h"
 #include <QDialog>
 
 namespace Ui {
@@ -18,23 +19,22 @@ class BestiaryFindTokenDialog : public QDialog
 
 public:
 
-    enum TokenDetailMode
-    {
-        TokenDetailMode_Original = 0,
-        TokenDetailMode_TransparentColor,
-        TokenDetailMode_FrameAndMask
-    };
-
-    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, QWidget *parent = nullptr);
+    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, bool backgroundFill = false, bool transparent = false, const QColor& transparentColor = Qt::white, int transparentLevel = TokenEditor::TRANSPARENT_LEVEL_DEFAULT, bool maskApplied = false, const QString& maskFile = QString(), bool frameApplied = false, const QString& frameFile = QString(), QWidget *parent = nullptr);
     ~BestiaryFindTokenDialog();
 
-    QList<QImage> retrieveSelection();
+    QList<QImage> retrieveSelection(bool decorated = true);
 
-    TokenDetailMode getTokenDetailMode() const;
-    QColor getTokenBackgroundColor() const;
-    int getTokenBackgroundLevel() const;
-    QString getTokenFrameFile() const;
-    QString getTokenMaskFile() const;
+    bool isBackgroundFill() const;
+    QColor getBackgroundFillColor() const;
+    bool isTransparent() const;
+    QColor getTransparentColor() const;
+    int getTransparentLevel() const;
+    bool isMaskApplied() const;
+    QString getMaskFile() const;
+    bool isFrameApplied() const;
+    QString getFrameFile() const;
+
+    bool isEditingToken() const;
 
 protected slots:
     void urlRequestFinished(QNetworkReply *reply);
@@ -43,14 +43,16 @@ protected slots:
     void browseMask();
 
 protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
+
     void startSearch(const QString& searchString);
     void abortSearches();
 
     void customizeSearch();
     void updateLayout();
     void updateLayoutImages();
-    void updateFrameMaskImages();
     void clearGrid();
+    void rescaleData();
     TokenData* getDataForReply(QNetworkReply *reply);
     QPixmap decoratePixmap(QPixmap pixmap, const QColor& background);
     QImage decorateFullImage(QPixmap pixmap, const QColor& background);
@@ -65,8 +67,7 @@ private:
     QNetworkAccessManager* _manager;
     QNetworkReply* _urlReply;
 
-    QImage _maskImage;
-    QImage _frameImage;
+    TokenEditor* _editor;
 
     QGridLayout* _tokenGrid;
     QList<TokenData*> _tokenList;

@@ -1,63 +1,42 @@
 #include "tokeneditdialog.h"
 #include "ui_tokeneditdialog.h"
 #include <QPainter>
+#include <QFileDialog>
+#include <QImageReader>
+#include <QMouseEvent>
+#include <QMessageBox>
+#include <QDebug>
 
-TokenEditDialog::TokenEditDialog(const QString& tokenFilename, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, bool fill, QColor fillColor, QWidget *parent) :
+TokenEditDialog::TokenEditDialog(const QString& tokenFilename, bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::TokenEditDialog),
-    _maskImage(),
-    _frameImage(),
-    _sourceImage(),
-    _finalImage()
+    _editor(nullptr),
+    _mouseDownPos()
 {
     ui->setupUi(this);
 
-    _sourceImage.load(tokenFilename);
-    if(_sourceImage.isNull())
+    initialize(backgroundFill, backgroundFillColor, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, zoom, offset, browsable);
+    if(_editor)
     {
-        qDebug() << "[TokenEditDialog] ERROR: Unabled to load source image from: " << tokenFilename;
+        _editor->setSourceFile(tokenFilename);
+        updateImage();
     }
-    else
+}
+
+TokenEditDialog::TokenEditDialog(const QImage& sourceImage, bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::TokenEditDialog),
+    _editor(nullptr),
+    _mouseDownPos()
+{
+    ui->setupUi(this);
+
+    initialize(backgroundFill, backgroundFillColor, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, zoom, offset, browsable);
+    if(_editor)
     {
-        int maxDim = qMax(_sourceImage.width(), _sourceImage.height());
-        _finalImage = QImage(QSize(maxDim, maxDim), _sourceImage.format());
+        _editor->setSourceImage(sourceImage);
+        updateImage();
     }
-
-    switch(mode)
-    {
-    case TokenDetailMode_TransparentColor:
-        ui->btnTransparentColor->setChecked(true);
-        break;
-    case TokenDetailMode_FrameAndMask:
-        ui->btnFrameAndMask->setChecked(true);
-        break;
-    case TokenDetailMode_Original:
-    default:
-        ui->btnOriginalImage->setChecked(true);
-        break;
-    };
-
-    ui->btnColor->setColor(background);
-    ui->btnColor->setRotationVisible(false);
-    ui->sliderFuzzy->setValue(backgroundLevel);
-
-    ui->edtFrameImage->setText(frameFile);
-    ui->edtMaskImage->setText(maskFile);
-
-    ui->chkFill->setChecked(fill);
-    ui->btnFillColor->setColor(fillColor);
-
-    connect(ui->btnOriginalImage, &QAbstractButton::toggled, this, &TokenEditDialog::updateImage);
-    connect(ui->btnTransparentColor, &QAbstractButton::toggled, this, &TokenEditDialog::updateImage);
-    connect(ui->btnColor, &ColorPushButton::colorChanged, this, &TokenEditDialog::updateImage);
-    connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, this, &TokenEditDialog::updateImage);
-    connect(ui->btnFrameAndMask, &QAbstractButton::toggled, this, &TokenEditDialog::updateImage);
-    connect(ui->btnBrowseFrameImage, &QAbstractButton::clicked, this, &TokenEditDialog::browseFrame);
-    connect(ui->btnBrowseMaskImage, &QAbstractButton::clicked, this, &TokenEditDialog::browseMask);
-    connect(ui->edtFrameImage, &QLineEdit::textChanged, this, &TokenEditDialog::updateFrameMaskImages);
-    connect(ui->edtMaskImage, &QLineEdit::textChanged, this, &TokenEditDialog::updateFrameMaskImages);
-
-    updateFrameMaskImages();
 }
 
 TokenEditDialog::~TokenEditDialog()
@@ -65,89 +44,156 @@ TokenEditDialog::~TokenEditDialog()
     delete ui;
 }
 
+void TokenEditDialog::setSourceImage(const QImage& sourceImage)
+{
+    if(_editor)
+        _editor->setSourceImage(sourceImage);
+}
+
+QImage TokenEditDialog::getFinalImage()
+{
+    return _editor ? _editor->getFinalImage() : QImage();
+}
+
+bool TokenEditDialog::eventFilter(QObject *o, QEvent *e)
+{
+    if(o == ui->lblToken)
+    {
+        if(e->type() == QEvent::Wheel)
+        {
+            QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(e);
+            if(wheelEvent->angleDelta().y() > 0)
+                zoomIn();
+            else
+                zoomOut();
+
+            return true;
+        }
+        else if(e->type() == QEvent::MouseMove)
+        {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(e);
+            if(mouseEvent->buttons() & Qt::LeftButton)
+            {
+                if(_editor)
+                    _editor->moveOffset((mouseEvent->position() - _mouseDownPos).toPoint());
+                _mouseDownPos = mouseEvent->position();
+                updateImage();
+            }
+
+            return true;
+        }
+        else if(e->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(e);
+            if(mouseEvent->button() == Qt::LeftButton)
+                _mouseDownPos = mouseEvent->position();
+
+            return true;
+        }
+    }
+
+    return QDialog::eventFilter(o, e);
+}
+
 void TokenEditDialog::updateImage()
 {
-    _finalImage.fill(ui->chkFill->isChecked() ? ui->btnFillColor->getColor() : Qt::transparent);
-    int xOffset = (_finalImage.width() - _sourceImage.width()) / 2;
-    int yOffset = (_finalImage.height() - _sourceImage.height()) / 2;
-
-    if(ui->btnOriginalImage->isChecked())
-    {
-        QPainter p(&_finalImage);
-        p.drawImage(xOffset, yOffset, _sourceImage);
-    }
-    else if(ui->btnTransparentColor->isChecked())
-    {
-        QRgb transparentColor = ui->btnColor->getColor().rgb();
-
-        for (int y = 0; y < _sourceImage.height(); y++)
-        {
-            const QRgb* inputLine = reinterpret_cast<const QRgb *>(_sourceImage.scanLine(y));
-            QRgb* outputLine = reinterpret_cast<QRgb *>(_finalImage.scanLine(y + yOffset));
-            for(int x = 0; x < _sourceImage.width(); x++)
-            {
-                if(!fuzzyColorMatch(inputLine[x], transparentColor))
-                    outputLine[x + xOffset] = inputLine[x];
-            }
-        }
-    }
-    else if(ui->btnFrameAndMask->isChecked())
-    {
-        if((_frameImage.isNull()) || (_maskImage.isNull()))
-        {
-            qDebug() << "[TokenEditDialog] ERROR: Unable to load expected frame and masks, no image able to be set!";
-            return;
-        }
-
-        QImage frameImage = _frameImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
-        QImage maskImage = _frameImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
-
-        QImage interimSource = _sourceImage;
-        QPainter pInt;
-        pInt.begin(&interimSource);
-            pInt.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-            pInt.drawImage((_finalImage.width() - maskImage.width())/2, (_finalImage.height() - maskImage.height()) / 2, maskImage);
-        pInt.end();
-
-        QPainter p(&_finalImage);
-        p.drawImage((_finalImage.width() - interimSource.width())/2, (_finalImage.height() - interimSource.height()) / 2, interimSource);
-        p.drawImage((_finalImage.width() - frameImage.width())/2, (_finalImage.height() - frameImage.height()) / 2, frameImage);
-    }
-    else
-    {
-        qDebug() << "[TokenEditDialog] ERROR: Unexpected token state, no image able to be set!";
+    if(!_editor)
         return;
+
+    ui->lblToken->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
+}
+
+void TokenEditDialog::zoomIn()
+{
+    if(_editor)
+        _editor->zoomIn();
+}
+
+void TokenEditDialog::zoomOut()
+{
+    if(_editor)
+        _editor->zoomOut();
+}
+
+void TokenEditDialog::zoomReset()
+{
+    if(_editor)
+        _editor->setZoom(1.0);
+}
+
+void TokenEditDialog::browseImage()
+{
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select Image..."));
+    if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
+        return;
+
+    QImage newImage(filename);
+    if(newImage.isNull())
+    {
+        QMessageBox::critical(nullptr, QString("Error"), QString("Unable to load image from: ") + filename);
+        qDebug() << "[TokenEditDialog] ERROR: Unable to load source image from: " << filename;
     }
 
-    ui->lblToken->setPixmap(QPixmap::fromImage(_finalImage));
+    setSourceImage(newImage);
 }
 
 void TokenEditDialog::browseFrame()
 {
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select image frame..."));
+    if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
+        return;
 
+    ui->edtFrameImage->setText(filename);
 }
 
 void TokenEditDialog::browseMask()
 {
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select image mask..."));
+    if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
+        return;
 
+    ui->edtMaskImage->setText(filename);
 }
 
-void TokenEditDialog::updateFrameMaskImages()
+void TokenEditDialog::initialize(bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable)
 {
-    _frameImage = QImage(ui->edtFrameImage->text());
-    if(_frameImage.isNull())
-        qDebug() << "[TokenEditDialog] ERROR: Unable to load frame image from: " << ui->edtFrameImage->text();
+    ui->lblToken->installEventFilter(this);
+    ui->btnBrowse->setVisible(browsable);
 
-    _maskImage = QImage(ui->edtMaskImage->text());
-    if(_maskImage.isNull())
-        qDebug() << "[TokenEditDialog] ERROR: Unable to load frame image from: " << ui->edtMaskImage->text();
+    connect(ui->btnZoomIn, &QAbstractButton::clicked, this, &TokenEditDialog::zoomIn);
+    connect(ui->btnZoomOut, &QAbstractButton::clicked, this, &TokenEditDialog::zoomOut);
+    connect(ui->btnZoomReset, &QAbstractButton::clicked, this, &TokenEditDialog::zoomReset);
+    connect(ui->btnBrowse, &QAbstractButton::clicked, this, &TokenEditDialog::browseImage);
 
-    updateImage();
+    ui->chkFill->setChecked(backgroundFill);
+    ui->btnFillColor->setColor(backgroundFillColor);
+    ui->btnFillColor->setRotationVisible(false);
+
+    ui->grpTransparent->setChecked(transparent);
+    ui->btnTransparentColor->setColor(transparentColor);
+    ui->btnTransparentColor->setRotationVisible(false);
+    ui->sliderFuzzy->setValue(transparentLevel);
+
+    ui->grpMask->setChecked(maskApplied);
+    ui->edtMaskImage->setText(maskFile);
+
+    ui->grpFrame->setChecked(frameApplied);
+    ui->edtFrameImage->setText(frameFile);
+
+    _editor = new TokenEditor(QString(), backgroundFill, backgroundFillColor, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, zoom, offset, this);
+
+    connect(ui->chkFill, &QAbstractButton::toggled, _editor, &TokenEditor::setBackgroundFill);
+    connect(ui->btnFillColor, &ColorPushButton::colorChanged, _editor, &TokenEditor::setBackgroundFillColor);
+    connect(ui->grpTransparent, &QGroupBox::toggled, _editor, &TokenEditor::setTransparent);
+    connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, _editor, &TokenEditor::setTransparentColor);
+    connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, _editor, &TokenEditor::setTransparentLevel);
+    connect(ui->grpMask, &QGroupBox::toggled, _editor, &TokenEditor::setMaskApplied);
+    connect(ui->edtMaskImage, &QLineEdit::textChanged, _editor, &TokenEditor::setMaskFile);
+    connect(ui->btnBrowseMaskImage, &QAbstractButton::clicked, this, &TokenEditDialog::browseMask);
+    connect(ui->grpFrame, &QGroupBox::toggled, _editor, &TokenEditor::setFrameApplied);
+    connect(ui->edtFrameImage, &QLineEdit::textChanged, _editor, &TokenEditor::setFrameFile);
+    connect(ui->btnBrowseFrameImage, &QAbstractButton::clicked, this, &TokenEditDialog::browseFrame);
+
+    connect(_editor, &TokenEditor::imageDirty, this, &TokenEditDialog::updateImage);
 }
 
-bool TokenEditDialog::fuzzyColorMatch(QRgb first, QRgb second)
-{
-    return ((qAbs(qRed(first) - qRed(second)) <= ui->sliderFuzzy->value()) &&
-            (qAbs(qGreen(first) - qGreen(second)) <= ui->sliderFuzzy->value()) &&
-            (qAbs(qBlue(first) - qBlue(second)) <= ui->sliderFuzzy->value()));
-}

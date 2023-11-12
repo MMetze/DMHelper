@@ -1,6 +1,7 @@
 #ifndef TOKENEDITDIALOG_H
 #define TOKENEDITDIALOG_H
 
+#include "tokeneditor.h"
 #include <QDialog>
 
 namespace Ui {
@@ -13,40 +14,34 @@ class TokenEditDialog : public QDialog
 
 public:
 
-    enum TokenDetailMode
-    {
-        TokenDetailMode_Original = 0,
-        TokenDetailMode_TransparentColor,
-        TokenDetailMode_FrameAndMask
-    };
-
-    explicit TokenEditDialog(const QString& tokenFilename, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, bool fill, QColor fillColor, QWidget *parent = nullptr);
+    explicit TokenEditDialog(const QString& tokenFilename = QString(), bool backgroundFill = false, const QColor& backgroundFillColor = Qt::white, bool transparent = false, const QColor& transparentColor = Qt::white, int transparentLevel = TokenEditor::TRANSPARENT_LEVEL_DEFAULT, bool maskApplied = false, const QString& maskFile = QString(), bool frameApplied = false, const QString& frameFile = QString(), qreal zoom = 1.0, const QPoint& offset = QPoint(), bool browsable = true, QWidget *parent = nullptr);
+    explicit TokenEditDialog(const QImage& sourceImage, bool backgroundFill = false, const QColor& backgroundFillColor = Qt::white, bool transparent = false, const QColor& transparentColor = Qt::white, int transparentLevel = TokenEditor::TRANSPARENT_LEVEL_DEFAULT, bool maskApplied = false, const QString& maskFile = QString(), bool frameApplied = false, const QString& frameFile = QString(), qreal zoom = 1.0, const QPoint& offset = QPoint(), bool browsable = true, QWidget *parent = nullptr);
     ~TokenEditDialog();
 
+    void setSourceImage(const QImage& sourceImage);
     QImage getFinalImage();
 
-    TokenDetailMode getTokenDetailMode() const;
-    QColor getTokenBackgroundColor() const;
-    int getTokenBackgroundLevel() const;
-    QString getTokenFrameFile() const;
-    QString getTokenMaskFile() const;
+protected:
+    virtual bool eventFilter(QObject *o, QEvent *e) override;
 
 protected slots:
     void updateImage();
+
+    void zoomIn();
+    void zoomOut();
+    void zoomReset();
+
+    void browseImage();
     void browseFrame();
     void browseMask();
-    void updateFrameMaskImages();
 
 private:
-    bool fuzzyColorMatch(QRgb first, QRgb second);
+    void initialize(bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable);
 
     Ui::TokenEditDialog *ui;
 
-    QImage _maskImage;
-    QImage _frameImage;
-
-    QImage _sourceImage;
-    QImage _finalImage;
+    TokenEditor* _editor;
+    QPointF _mouseDownPos;
 };
 
 #endif // TOKENEDITDIALOG_H

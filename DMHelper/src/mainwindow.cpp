@@ -178,21 +178,21 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Qt Information";
     qDebug() << "[MainWindow]     Qt Version: " << QLibraryInfo::version().toString();
     qDebug() << "[MainWindow]     Is Debug? " << QLibraryInfo::isDebugBuild();
-    qDebug() << "[MainWindow]     PrefixPath: " << QLibraryInfo::location(QLibraryInfo::PrefixPath);
-    qDebug() << "[MainWindow]     DocumentationPath: " << QLibraryInfo::location(QLibraryInfo::DocumentationPath);
-    qDebug() << "[MainWindow]     HeadersPath: " << QLibraryInfo::location(QLibraryInfo::HeadersPath);
-    qDebug() << "[MainWindow]     LibrariesPath: " << QLibraryInfo::location(QLibraryInfo::LibrariesPath);
-    qDebug() << "[MainWindow]     LibraryExecutablesPath: " << QLibraryInfo::location(QLibraryInfo::LibraryExecutablesPath);
-    qDebug() << "[MainWindow]     BinariesPath: " << QLibraryInfo::location(QLibraryInfo::BinariesPath);
-    qDebug() << "[MainWindow]     PluginsPath: " << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-    qDebug() << "[MainWindow]     QmlImportsPath: " << QLibraryInfo::location(QLibraryInfo::QmlImportsPath);
-    qDebug() << "[MainWindow]     Qml2ImportsPath: " << QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
-    qDebug() << "[MainWindow]     ArchDataPath: " << QLibraryInfo::location(QLibraryInfo::ArchDataPath);
-    qDebug() << "[MainWindow]     DataPath: " << QLibraryInfo::location(QLibraryInfo::DataPath);
-    qDebug() << "[MainWindow]     TranslationsPath: " << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-    qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
-    qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
-    qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
+    qDebug() << "[MainWindow]     PrefixPath: " << QLibraryInfo::path(QLibraryInfo::PrefixPath);
+    qDebug() << "[MainWindow]     DocumentationPath: " << QLibraryInfo::path(QLibraryInfo::DocumentationPath);
+    qDebug() << "[MainWindow]     HeadersPath: " << QLibraryInfo::path(QLibraryInfo::HeadersPath);
+    qDebug() << "[MainWindow]     LibrariesPath: " << QLibraryInfo::path(QLibraryInfo::LibrariesPath);
+    qDebug() << "[MainWindow]     LibraryExecutablesPath: " << QLibraryInfo::path(QLibraryInfo::LibraryExecutablesPath);
+    qDebug() << "[MainWindow]     BinariesPath: " << QLibraryInfo::path(QLibraryInfo::BinariesPath);
+    qDebug() << "[MainWindow]     PluginsPath: " << QLibraryInfo::path(QLibraryInfo::PluginsPath);
+    qDebug() << "[MainWindow]     QmlImportsPath: " << QLibraryInfo::path(QLibraryInfo::QmlImportsPath);
+    qDebug() << "[MainWindow]     Qml2ImportsPath: " << QLibraryInfo::path(QLibraryInfo::Qml2ImportsPath);
+    qDebug() << "[MainWindow]     ArchDataPath: " << QLibraryInfo::path(QLibraryInfo::ArchDataPath);
+    qDebug() << "[MainWindow]     DataPath: " << QLibraryInfo::path(QLibraryInfo::DataPath);
+    qDebug() << "[MainWindow]     TranslationsPath: " << QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+    qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::path(QLibraryInfo::ExamplesPath);
+    qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::path(QLibraryInfo::TestsPath);
+    qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::path(QLibraryInfo::SettingsPath);
 
     QSurfaceFormat fmt;
     qDebug() << "[MainWindow] OpenGL Information";
@@ -250,10 +250,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set the MRU menu to the created menu bar
     mruHandler->setActionsMenu(_ribbonTabFile->getMRUMenu());
 
-    // TODO: find out why the following has no effect! There must be something in the frames that has "minimumexpanding" size policy
-    //ui->splitter->setStretchFactor(0, 2);
-    //ui->splitter->setStretchFactor(1, 2);
-
     qDebug() << "[MainWindow] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[MainWindow] Bestiary Initialized";
@@ -279,10 +275,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(openClicked()), this, SLOT(openFileDialog()));
     QShortcut* openShortcut = new QShortcut(QKeySequence(tr("Ctrl+O", "Open")), this);
     connect(openShortcut, SIGNAL(activated()), this, SLOT(openFileDialog()));
-    //connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
     connect(_ribbonTabFile, &RibbonTabFile::saveClicked, this, &MainWindow::saveCampaign);
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
-    //connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
     connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveCampaign);
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
     connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
@@ -342,7 +336,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle Map Menu
 
     // Battle View Menu
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
+    connect(_options, SIGNAL(pointerFileNameChanged(QString)), _ribbonTabBattleView, SLOT(setPointerFile(QString)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
 
     // Mini Map Menu
@@ -387,8 +381,14 @@ MainWindow::MainWindow(QWidget *parent) :
     readBestiary();
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
     _bestiaryDlg.setTokenSearchString(_options->getTokenSearchString());
-    _bestiaryDlg.setTokenFrameFile(_options->getTokenFrameFile());
+    _bestiaryDlg.setTokenBackgroundFill(_options->getTokenBackgroundFill());
+    _bestiaryDlg.setTokenTransparent(_options->getTokenTransparent());
+    _bestiaryDlg.setTokenTransparentColor(_options->getTokenTransparentColor());
+    _bestiaryDlg.setTokenTransparentLevel(_options->getTokenTransparentLevel());
+    _bestiaryDlg.setTokenMaskApplied(_options->getTokenMaskApplied());
     _bestiaryDlg.setTokenMaskFile(_options->getTokenMaskFile());
+    _bestiaryDlg.setTokenFrameApplied(_options->getTokenFrameApplied());
+    _bestiaryDlg.setTokenFrameFile(_options->getTokenFrameFile());
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
@@ -400,10 +400,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
     connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
     connect(_options, &OptionsContainer::tokenSearchStringChanged, &_bestiaryDlg, &BestiaryDialog::setTokenSearchString);
-    connect(_options, &OptionsContainer::tokenFrameFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameFile);
+    connect(_options, &OptionsContainer::tokenBackgroundFillChanged, &_bestiaryDlg, &BestiaryDialog::setTokenBackgroundFill);
+    connect(_options, &OptionsContainer::tokenTransparentChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparent);
+    connect(_options, &OptionsContainer::tokenTransparentColorChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparentColor);
+    connect(_options, &OptionsContainer::tokenTransparentLevelChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparentLevel);
+    connect(_options, &OptionsContainer::tokenMaskAppliedChanged, &_bestiaryDlg, &BestiaryDialog::setTokenMaskApplied);
     connect(_options, &OptionsContainer::tokenMaskFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenMaskFile);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameFileChanged, _options, &OptionsContainer::setTokenFrameFile);
+    connect(_options, &OptionsContainer::tokenFrameAppliedChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameApplied);
+    connect(_options, &OptionsContainer::tokenFrameFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameFile);
+
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenBackgroundFillChanged, _options, &OptionsContainer::setTokenBackgroundFill);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenTransparentChanged, _options, &OptionsContainer::setTokenTransparent);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenTransparentColorChanged, _options, &OptionsContainer::setTokenTransparentColor);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenTransparentLevelChanged, _options, &OptionsContainer::setTokenTransparentLevel);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskAppliedChanged, _options, &OptionsContainer::setTokenMaskApplied);
     connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskFileChanged, _options, &OptionsContainer::setTokenMaskFile);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameAppliedChanged, _options, &OptionsContainer::setTokenFrameApplied);
+    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameFileChanged, _options, &OptionsContainer::setTokenFrameFile);
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
