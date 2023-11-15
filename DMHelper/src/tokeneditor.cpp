@@ -317,9 +317,12 @@ void TokenEditor::updateFinalImage()
     if((_sourceImage.isNull()) || (_finalImage.isNull()))
         return;
 
+    QSize zoomedSize = (_sourceImage.size().toSizeF() * _zoom).toSize();
+    QImage scaledSource = _sourceImage.scaled(zoomedSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
     _finalImage.fill(Qt::transparent);
-    int xOffset = _offset.x() + (_finalImage.width() - _sourceImage.width()) / 2;
-    int yOffset = _offset.y() + (_finalImage.height() - _sourceImage.height()) / 2;
+    int xOffset = _offset.x() + (_finalImage.width() - scaledSource.width()) / 2;
+    int yOffset = _offset.y() + (_finalImage.height() - scaledSource.height()) / 2;
 
     QImage interimSource(_finalImage.size(), _sourceImage.format());
     interimSource.fill(_backgroundFill ? _backgroundFillColor : Qt::transparent);
@@ -327,13 +330,13 @@ void TokenEditor::updateFinalImage()
     if(_transparent)
     {
         int yStart = qMax(0, -yOffset);
-        int yEnd = qMin(_sourceImage.height(), _finalImage.height() - yOffset);
+        int yEnd = qMin(scaledSource.height(), _finalImage.height() - yOffset);
         int xStart = qMax(0, -xOffset);
-        int xEnd = qMin(_sourceImage.width(), _finalImage.width() - xOffset);
+        int xEnd = qMin(scaledSource.width(), _finalImage.width() - xOffset);
 
         for (int y = yStart; y < yEnd; y++)
         {
-            const QRgb* inputLine = reinterpret_cast<const QRgb *>(_sourceImage.scanLine(y));
+            const QRgb* inputLine = reinterpret_cast<const QRgb *>(scaledSource.scanLine(y));
             QRgb* outputLine = reinterpret_cast<QRgb *>(interimSource.scanLine(y + yOffset));
             for(int x = xStart; x < xEnd; x++)
             {
@@ -345,7 +348,7 @@ void TokenEditor::updateFinalImage()
     else
     {
         QPainter p(&interimSource);
-        p.drawImage(xOffset, yOffset, _sourceImage);
+        p.drawImage(xOffset, yOffset, scaledSource);
     }
 
     if(_maskApplied)

@@ -19,14 +19,16 @@ public:
     ~TokenEditDialog();
 
     void setSourceImage(const QImage& sourceImage);
+    void setBackgroundFillColor(const QColor& color);
     QImage getFinalImage();
+
+public slots:
+    void updateImage();
 
 protected:
     virtual bool eventFilter(QObject *o, QEvent *e) override;
 
 protected slots:
-    void updateImage();
-
     void zoomIn();
     void zoomOut();
     void zoomReset();

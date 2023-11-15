@@ -47,12 +47,33 @@ TokenEditDialog::~TokenEditDialog()
 void TokenEditDialog::setSourceImage(const QImage& sourceImage)
 {
     if(_editor)
+    {
         _editor->setSourceImage(sourceImage);
+        _editor->setOffset(QPoint());
+        zoomReset();
+    }
+}
+
+void TokenEditDialog::setBackgroundFillColor(const QColor& color)
+{
+    if(_editor)
+    {
+        _editor->setBackgroundFillColor(color);
+        ui->btnFillColor->setColor(color);
+    }
 }
 
 QImage TokenEditDialog::getFinalImage()
 {
     return _editor ? _editor->getFinalImage() : QImage();
+}
+
+void TokenEditDialog::updateImage()
+{
+    if(!_editor)
+        return;
+
+    ui->lblToken->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
 }
 
 bool TokenEditDialog::eventFilter(QObject *o, QEvent *e)
@@ -91,16 +112,19 @@ bool TokenEditDialog::eventFilter(QObject *o, QEvent *e)
             return true;
         }
     }
+    else if(o == ui->frameToken)
+    {
+        if(e->type() == QEvent::Resize)
+        {
+            QSize size = ui->frameToken->size();
+            QMargins margins = ui->frameToken->contentsMargins();
+            int sideLength = qMin(size.width() - margins.left() - margins.right() - (ui->lblToken->lineWidth() * 2) - 10,
+                                  size.height() - margins.top() - margins.bottom() - (ui->lblToken->lineWidth() * 2) - 10);
+            ui->lblToken->setFixedSize(sideLength, sideLength);
+        }
+    }
 
     return QDialog::eventFilter(o, e);
-}
-
-void TokenEditDialog::updateImage()
-{
-    if(!_editor)
-        return;
-
-    ui->lblToken->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
 }
 
 void TokenEditDialog::zoomIn()
@@ -158,6 +182,7 @@ void TokenEditDialog::browseMask()
 void TokenEditDialog::initialize(bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable)
 {
     ui->lblToken->installEventFilter(this);
+    ui->frameToken->installEventFilter(this);
     ui->btnBrowse->setVisible(browsable);
 
     connect(ui->btnZoomIn, &QAbstractButton::clicked, this, &TokenEditDialog::zoomIn);
@@ -169,28 +194,28 @@ void TokenEditDialog::initialize(bool backgroundFill, const QColor& backgroundFi
     ui->btnFillColor->setColor(backgroundFillColor);
     ui->btnFillColor->setRotationVisible(false);
 
-    ui->grpTransparent->setChecked(transparent);
+    ui->chkTransparent->setChecked(transparent);
     ui->btnTransparentColor->setColor(transparentColor);
     ui->btnTransparentColor->setRotationVisible(false);
     ui->sliderFuzzy->setValue(transparentLevel);
 
-    ui->grpMask->setChecked(maskApplied);
+    ui->chkMask->setChecked(maskApplied);
     ui->edtMaskImage->setText(maskFile);
 
-    ui->grpFrame->setChecked(frameApplied);
+    ui->chkFrame->setChecked(frameApplied);
     ui->edtFrameImage->setText(frameFile);
 
     _editor = new TokenEditor(QString(), backgroundFill, backgroundFillColor, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, zoom, offset, this);
 
     connect(ui->chkFill, &QAbstractButton::toggled, _editor, &TokenEditor::setBackgroundFill);
     connect(ui->btnFillColor, &ColorPushButton::colorChanged, _editor, &TokenEditor::setBackgroundFillColor);
-    connect(ui->grpTransparent, &QGroupBox::toggled, _editor, &TokenEditor::setTransparent);
+    connect(ui->chkTransparent, &QAbstractButton::toggled, _editor, &TokenEditor::setTransparent);
     connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, _editor, &TokenEditor::setTransparentColor);
     connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, _editor, &TokenEditor::setTransparentLevel);
-    connect(ui->grpMask, &QGroupBox::toggled, _editor, &TokenEditor::setMaskApplied);
+    connect(ui->chkMask, &QAbstractButton::toggled, _editor, &TokenEditor::setMaskApplied);
     connect(ui->edtMaskImage, &QLineEdit::textChanged, _editor, &TokenEditor::setMaskFile);
     connect(ui->btnBrowseMaskImage, &QAbstractButton::clicked, this, &TokenEditDialog::browseMask);
-    connect(ui->grpFrame, &QGroupBox::toggled, _editor, &TokenEditor::setFrameApplied);
+    connect(ui->chkFrame, &QAbstractButton::toggled, _editor, &TokenEditor::setFrameApplied);
     connect(ui->edtFrameImage, &QLineEdit::textChanged, _editor, &TokenEditor::setFrameFile);
     connect(ui->btnBrowseFrameImage, &QAbstractButton::clicked, this, &TokenEditDialog::browseFrame);
 

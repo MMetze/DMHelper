@@ -518,8 +518,6 @@ void BestiaryDialog::handleSearchToken()
     dlg->resize(width() * 9 / 10, height() * 9 / 10);
     if(dlg->exec() == QDialog::Accepted)
     {
-        createTokenFiles(dlg);
-
         if(_tokenBackgroundFill != dlg->isBackgroundFill())
         {
             _tokenBackgroundFill = dlg->isBackgroundFill();
@@ -567,6 +565,8 @@ void BestiaryDialog::handleSearchToken()
             _tokenFrameFile = dlg->getFrameFile();
             emit tokenFrameFileChanged(_tokenFrameFile);
         }
+
+        createTokenFiles(dlg);
     }
 
     dlg->deleteLater();
@@ -769,8 +769,6 @@ void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
     if(filename.isEmpty())
         return;
 
-
-
     if(_monster->getIconCount() == 0)
         _monster->addIcon(filename);
     else
@@ -864,6 +862,9 @@ void BestiaryDialog::createTokenFiles(BestiaryFindTokenDialog* dialog)
             if((dialog->isEditingToken() && editDialog))
             {
                 editDialog->setSourceImage(image);
+                if(_tokenBackgroundFill)
+                    editDialog->setBackgroundFillColor(image.pixelColor(0,0));
+                editDialog->updateImage();
                 if(editDialog->exec() == QDialog::Accepted)
                     image = editDialog->getFinalImage();
                 else
