@@ -13,16 +13,28 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.6.0'
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2019_64'
-        dir: '$RUNNER_WORKSPACE'
-        install-deps: 'true'
-        modules: 'qtcharts qtwebengine'
+#    - name: Install Qt
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: '6.6.0'
+#        host: 'windows'
+#        target: 'desktop'
+#        arch: 'win64_msvc2019_64'
+#        dir: '$RUNNER_WORKSPACE'
+#        install-deps: 'true'
+#        modules: 'qtcharts qtwebengine'
     - uses: actions/checkout@v3
-    - name: build
-      run: cd ${GITHUB_WORKSPACE}/DMHelper/DMHelper/src && ./buildanddeploy_msvc64.cmd
+    - name: Print current working dir
+      run: |
+        cd
+        dir
+        echo ${{ github.workspace }}
+        echo $GITHUB_WORKSPACE
+        echo %GITHUB_WORKSPACE%
+        ls -la $PWD
+        ls -la $GITHUB_WORKSPACE
+        echo $env:GITHUB_WORKSPACE
+        echo $env:GITHUB_ENV
+        ls -la $env:GITHUB_WORKSPACE
+#    - name: build
+#      run: cd ${GITHUB_WORKSPACE}/DMHelper/DMHelper/src && ./buildanddeploy_msvc64.cmd
