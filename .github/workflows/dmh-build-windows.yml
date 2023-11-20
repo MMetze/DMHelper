@@ -20,19 +20,21 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        dir: '$RUNNER_WORKSPACE'
-        install-deps: 'true'
+        cache: 'true'
         modules: 'qtcharts qtwebengine'
     - uses: actions/checkout@v3
     - name: Print current working dir
       run: |
-        echo pwd
         pwd
-        echo github.workspace
+        echo Location of github.workspace:
         echo ${{ github.workspace }}
+        ls DMHelper
         cd DMHelper
+        pwd
     - name: Set up environment for build
       run: |
+        pwd
+        cd DMHelper
         mkdir bin64
         mkdir bin64\config
         mkdir bin64\packages
@@ -47,11 +49,15 @@ jobs:
         mkdir bin64\packages\com.dmhelper.app\data\resources\tables
         xcopy /s src\installer\* bin64\*
         rename bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
+        pwd
     - name: Build DMHelper for Windows
       run: |
+        pwd
+        cd DMHelper
         mkdir build-64_bit-release
         cd build-64_bit-release
         call vcvarsall.bat x64
         qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
         jom.exe /d /f Makefile qmake_all
         jom.exe /d /f Makefile.Release
+        ls
