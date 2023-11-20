@@ -26,7 +26,6 @@ jobs:
     - name: Print current working dir
       run: |
         pwd
-        echo Location of github.workspace:
         echo ${{ github.workspace }}
         ls DMHelper
         cd DMHelper
