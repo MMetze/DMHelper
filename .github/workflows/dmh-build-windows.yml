@@ -48,7 +48,7 @@ jobs:
         mkdir bin64\packages\com.dmhelper.app\data\resources
         mkdir bin64\packages\com.dmhelper.app\data\resources\tables
         xcopy /s src\installer\* bin64\*
-        rename bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
+        mv bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
         pwd
     - name: Build DMHelper for Windows
       run: |
