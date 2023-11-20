@@ -26,15 +26,8 @@ jobs:
     - uses: actions/checkout@v3
     - name: Print current working dir
       run: |
-        cd
-        dir
-        echo ${{ github.workspace }}
-        echo $GITHUB_WORKSPACE
-        echo %GITHUB_WORKSPACE%
-        ls -la $PWD
-        ls -la $GITHUB_WORKSPACE
-        echo $env:GITHUB_WORKSPACE
-        echo $env:GITHUB_ENV
-        ls -la $env:GITHUB_WORKSPACE
+        ls
+        cd ${{ github.workspace }}
+        ls
 #    - name: build
 #      run: cd ${GITHUB_WORKSPACE}/DMHelper/DMHelper/src && ./buildanddeploy_msvc64.cmd
