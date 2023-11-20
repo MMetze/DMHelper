@@ -1,0 +1,28 @@
+name: DMHelper CI Windows Workflow
+
+on:
+  workflow_dispatch:
+  #push:
+  #  branches: [ "master" ]
+  #pull_request:
+  #  branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.6.0'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        dir: '$RUNNER_WORKSPACE'
+        install-deps: 'true'
+        modules: 'qtcharts qtwebengine'
+    - uses: actions/checkout@v3
+    - name: build
+      run: cd ${GITHUB_WORKSPACE}/DMHelper/DMHelper/src && ./buildanddeploy_msvc64.cmd
