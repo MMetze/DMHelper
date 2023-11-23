@@ -381,17 +381,6 @@ MainWindow::MainWindow(QWidget *parent) :
     readBestiary();
     _bestiaryDlg.setOptions(_options);
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
-    /*
-    _bestiaryDlg.setTokenSearchString(_options->getTokenSearchString());
-    _bestiaryDlg.setTokenBackgroundFill(_options->getTokenBackgroundFill());
-    _bestiaryDlg.setTokenTransparent(_options->getTokenTransparent());
-    _bestiaryDlg.setTokenTransparentColor(_options->getTokenTransparentColor());
-    _bestiaryDlg.setTokenTransparentLevel(_options->getTokenTransparentLevel());
-    _bestiaryDlg.setTokenMaskApplied(_options->getTokenMaskApplied());
-    _bestiaryDlg.setTokenMaskFile(_options->getTokenMaskFile());
-    _bestiaryDlg.setTokenFrameApplied(_options->getTokenFrameApplied());
-    _bestiaryDlg.setTokenFrameFile(_options->getTokenFrameFile());
-*/
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
@@ -402,26 +391,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
     connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
-    /*
-    connect(_options, &OptionsContainer::tokenSearchStringChanged, &_bestiaryDlg, &BestiaryDialog::setTokenSearchString);
-    connect(_options, &OptionsContainer::tokenBackgroundFillChanged, &_bestiaryDlg, &BestiaryDialog::setTokenBackgroundFill);
-    connect(_options, &OptionsContainer::tokenTransparentChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparent);
-    connect(_options, &OptionsContainer::tokenTransparentColorChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparentColor);
-    connect(_options, &OptionsContainer::tokenTransparentLevelChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparentLevel);
-    connect(_options, &OptionsContainer::tokenMaskAppliedChanged, &_bestiaryDlg, &BestiaryDialog::setTokenMaskApplied);
-    connect(_options, &OptionsContainer::tokenMaskFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenMaskFile);
-    connect(_options, &OptionsContainer::tokenFrameAppliedChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameApplied);
-    connect(_options, &OptionsContainer::tokenFrameFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameFile);
-
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenBackgroundFillChanged, _options, &OptionsContainer::setTokenBackgroundFill);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenTransparentChanged, _options, &OptionsContainer::setTokenTransparent);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenTransparentColorChanged, _options, &OptionsContainer::setTokenTransparentColor);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenTransparentLevelChanged, _options, &OptionsContainer::setTokenTransparentLevel);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskAppliedChanged, _options, &OptionsContainer::setTokenMaskApplied);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskFileChanged, _options, &OptionsContainer::setTokenMaskFile);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameAppliedChanged, _options, &OptionsContainer::setTokenFrameApplied);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameFileChanged, _options, &OptionsContainer::setTokenFrameFile);
-*/
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC

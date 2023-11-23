@@ -101,51 +101,6 @@ QList<QImage> BestiaryFindTokenDialog::retrieveSelection(bool decorated)
 
     return resultList;
 }
-/*
-bool BestiaryFindTokenDialog::isBackgroundFill() const
-{
-    return _editor ? _editor->isBackgroundFill() : false;
-}
-
-QColor BestiaryFindTokenDialog::getBackgroundFillColor() const
-{
-    return _editor ? _editor->getBackgroundFillColor() : Qt::white;
-}
-
-bool BestiaryFindTokenDialog::isTransparent() const
-{
-    return _editor ? _editor->isTransparent() : false;
-}
-
-QColor BestiaryFindTokenDialog::getTransparentColor() const
-{
-    return _editor ? _editor->getTransparentColor() : Qt::white;
-}
-
-int BestiaryFindTokenDialog::getTransparentLevel() const
-{
-    return _editor ? _editor->getTransparentLevel() : TokenEditor::TRANSPARENT_LEVEL_DEFAULT;
-}
-
-bool BestiaryFindTokenDialog::isMaskApplied() const
-{
-    return _editor ? _editor->isMaskApplied() : false;
-}
-
-QString BestiaryFindTokenDialog::getMaskFile() const
-{
-    return _editor ? _editor->getMaskFile() : QString();
-}
-
-bool BestiaryFindTokenDialog::isFrameApplied() const
-{
-    return _editor ? _editor->isFrameApplied() : false;
-}
-
-QString BestiaryFindTokenDialog::getFrameFile() const
-{
-    return _editor ? _editor->getFrameFile() : QString();
-}*/
 
 bool BestiaryFindTokenDialog::isEditingToken() const
 {

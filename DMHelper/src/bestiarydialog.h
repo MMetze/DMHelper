@@ -31,16 +31,7 @@ signals:
     void monsterChanged();
     void publishMonsterImage(QImage img, const QColor& color);
     void dialogClosed();
-/*
-    void tokenBackgroundFillChanged(bool backgroundFill);
-    void tokenTransparentChanged(bool transparent);
-    void tokenTransparentColorChanged(const QColor& transparentColor);
-    void tokenTransparentLevelChanged(int transparentLevel);
-    void tokenMaskAppliedChanged(bool applied);
-    void tokenMaskFileChanged(const QString& tokenMaskFile);
-    void tokenFrameAppliedChanged(bool applied);
-    void tokenFrameFileChanged(const QString& tokenFrameFile);
-*/
+
 public slots:
     void setMonster(MonsterClass* monster, bool edit = true);
     void setMonster(const QString& monsterName, bool edit = true);
@@ -51,17 +42,7 @@ public slots:
     void nextMonster();
 
     void dataChanged();
-/*
-    void setTokenSearchString(const QString& searchString);
-    void setTokenBackgroundFill(bool backgroundFill);
-    void setTokenTransparent(bool transparent);
-    void setTokenTransparentColor(const QColor& transparentColor);
-    void setTokenTransparentLevel(int transparentLevel);
-    void setTokenMaskApplied(bool maskApplied);
-    void setTokenMaskFile(const QString& maskFile);
-    void setTokenFrameApplied(bool frameApplied);
-    void setTokenFrameFile(const QString& frameFile);
-*/
+
 protected slots:
     void hitDiceChanged();
     void abilityChanged();
@@ -125,19 +106,6 @@ private:
 
     // Token search data
     QString _searchString;
-
-    /*
-    // Token edit data
-    bool _tokenBackgroundFill;
-    QColor _tokenBackgroundFillColor;
-    bool _tokenTransparent;
-    QColor _tokenTransparentColor;
-    int _tokenTransparentLevel;
-    bool _tokenMaskApplied;
-    QString _tokenMaskFile;
-    bool _tokenFrameApplied;
-    QString _tokenFrameFile;
-*/
 };
 
 #endif // BESTIARYDIALOG_H

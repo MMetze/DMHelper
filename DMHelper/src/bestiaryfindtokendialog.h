@@ -24,18 +24,6 @@ public:
 
     QList<QImage> retrieveSelection(bool decorated = true);
 
-    /*
-    bool isBackgroundFill() const;
-    QColor getBackgroundFillColor() const;
-    bool isTransparent() const;
-    QColor getTransparentColor() const;
-    int getTransparentLevel() const;
-    bool isMaskApplied() const;
-    QString getMaskFile() const;
-    bool isFrameApplied() const;
-    QString getFrameFile() const;
-*/
-
     bool isEditingToken() const;
     TokenEditor* getEditor();
 

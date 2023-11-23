@@ -33,16 +33,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     _currentToken(0),
     _edit(false),
     _mouseDown(false),
-    _searchString()/*,
-    _tokenBackgroundFill(false),
-    _tokenBackgroundFillColor(Qt::white),
-    _tokenTransparent(false),
-    _tokenTransparentColor(Qt::white),
-    _tokenTransparentLevel(TokenEditor::TRANSPARENT_LEVEL_DEFAULT),
-    _tokenMaskApplied(false),
-    _tokenMaskFile(),
-    _tokenFrameApplied(false),
-    _tokenFrameFile()*/
+    _searchString()
 {
     ui->setupUi(this);
 
@@ -397,51 +388,6 @@ void BestiaryDialog::dataChanged()
     ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
 }
-/*
-void BestiaryDialog::setTokenSearchString(const QString& searchString)
-{
-    _searchString = searchString;
-}
-
-void BestiaryDialog::setTokenBackgroundFill(bool backgroundFill)
-{
-    _tokenBackgroundFill = backgroundFill;
-}
-
-void BestiaryDialog::setTokenTransparent(bool transparent)
-{
-    _tokenTransparent = transparent;
-}
-
-void BestiaryDialog::setTokenTransparentColor(const QColor& transparentColor)
-{
-    _tokenTransparentColor = transparentColor;
-}
-
-void BestiaryDialog::setTokenTransparentLevel(int transparentLevel)
-{
-    _tokenTransparentLevel = transparentLevel;
-}
-
-void BestiaryDialog::setTokenMaskApplied(bool maskApplied)
-{
-    _tokenMaskApplied = maskApplied;
-}
-
-void BestiaryDialog::setTokenMaskFile(const QString& maskFile)
-{
-    _tokenMaskFile = maskFile;
-}
-
-void BestiaryDialog::setTokenFrameApplied(bool frameApplied)
-{
-    _tokenFrameApplied = frameApplied;
-}
-
-void BestiaryDialog::setTokenFrameFile(const QString& frameFile)
-{
-    _tokenFrameFile = frameFile;
-}*/
 
 void BestiaryDialog::hitDiceChanged()
 {
@@ -571,56 +517,6 @@ void BestiaryDialog::handleSearchToken()
     dlg->resize(width() * 9 / 10, height() * 9 / 10);
     if(dlg->exec() == QDialog::Accepted)
     {
-        /*
-        if(_tokenBackgroundFill != dlg->isBackgroundFill())
-        {
-            _tokenBackgroundFill = dlg->isBackgroundFill();
-            emit tokenBackgroundFillChanged(_tokenBackgroundFill);
-        }
-
-        if(_tokenTransparent != dlg->isTransparent())
-        {
-            _tokenTransparent = dlg->isTransparent();
-            emit tokenTransparentChanged(_tokenTransparent);
-        }
-
-        if(_tokenTransparentColor != dlg->getTransparentColor())
-        {
-            _tokenTransparentColor = dlg->getTransparentColor();
-            emit tokenTransparentColorChanged(_tokenTransparentColor);
-        }
-
-        if(_tokenTransparentLevel != dlg->getTransparentLevel())
-        {
-            _tokenTransparentLevel = dlg->getTransparentLevel();
-            emit tokenTransparentLevelChanged(_tokenTransparentLevel);
-        }
-
-        if(_tokenMaskApplied != dlg->isMaskApplied())
-        {
-            _tokenMaskApplied = dlg->isMaskApplied();
-            emit tokenMaskAppliedChanged(_tokenMaskApplied);
-        }
-
-        if(_tokenMaskFile != dlg->getMaskFile())
-        {
-            _tokenMaskFile = dlg->getMaskFile();
-            emit tokenMaskFileChanged(_tokenMaskFile);
-        }
-
-        if(_tokenFrameApplied != dlg->isFrameApplied())
-        {
-            _tokenFrameApplied = dlg->isFrameApplied();
-            emit tokenFrameAppliedChanged(_tokenFrameApplied);
-        }
-
-        if(_tokenFrameFile != dlg->getFrameFile())
-        {
-            _tokenFrameFile = dlg->getFrameFile();
-            emit tokenFrameFileChanged(_tokenFrameFile);
-        }
-        */
-
         if(dlg->getEditor())
             dlg->getEditor()->applyEditorToOptions(*_options);
 
