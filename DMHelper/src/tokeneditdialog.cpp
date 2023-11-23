@@ -1,5 +1,6 @@
 #include "tokeneditdialog.h"
 #include "ui_tokeneditdialog.h"
+#include "optionscontainer.h"
 #include <QPainter>
 #include <QFileDialog>
 #include <QImageReader>
@@ -23,6 +24,34 @@ TokenEditDialog::TokenEditDialog(const QString& tokenFilename, bool backgroundFi
     }
 }
 
+TokenEditDialog::TokenEditDialog(const QString& tokenFilename, const OptionsContainer& options, qreal zoom, const QPoint& offset, bool browsable, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::TokenEditDialog),
+    _editor(nullptr),
+    _mouseDownPos()
+{
+    ui->setupUi(this);
+
+    initialize(options.getTokenBackgroundFill(),
+               options.getTokenBackgroundFillColor(),
+               options.getTokenTransparent(),
+               options.getTokenTransparentColor(),
+               options.getTokenTransparentLevel(),
+               options.getTokenMaskApplied(),
+               options.getTokenMaskFile(),
+               options.getTokenFrameApplied(),
+               options.getTokenFrameFile(),
+               zoom,
+               offset,
+               browsable);
+
+    if(_editor)
+    {
+        _editor->setSourceFile(tokenFilename);
+        updateImage();
+    }
+}
+
 TokenEditDialog::TokenEditDialog(const QImage& sourceImage, bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::TokenEditDialog),
@@ -32,6 +61,34 @@ TokenEditDialog::TokenEditDialog(const QImage& sourceImage, bool backgroundFill,
     ui->setupUi(this);
 
     initialize(backgroundFill, backgroundFillColor, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, zoom, offset, browsable);
+    if(_editor)
+    {
+        _editor->setSourceImage(sourceImage);
+        updateImage();
+    }
+}
+
+TokenEditDialog::TokenEditDialog(const QImage& sourceImage, const OptionsContainer& options, qreal zoom, const QPoint& offset, bool browsable, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::TokenEditDialog),
+    _editor(nullptr),
+    _mouseDownPos()
+{
+    ui->setupUi(this);
+
+    initialize(options.getTokenBackgroundFill(),
+               options.getTokenBackgroundFillColor(),
+               options.getTokenTransparent(),
+               options.getTokenTransparentColor(),
+               options.getTokenTransparentLevel(),
+               options.getTokenMaskApplied(),
+               options.getTokenMaskFile(),
+               options.getTokenFrameApplied(),
+               options.getTokenFrameFile(),
+               zoom,
+               offset,
+               browsable);
+
     if(_editor)
     {
         _editor->setSourceImage(sourceImage);
@@ -61,6 +118,11 @@ void TokenEditDialog::setBackgroundFillColor(const QColor& color)
         _editor->setBackgroundFillColor(color);
         ui->btnFillColor->setColor(color);
     }
+}
+
+TokenEditor* TokenEditDialog::getEditor()
+{
+    return _editor;
 }
 
 QImage TokenEditDialog::getFinalImage()

@@ -5,6 +5,8 @@
 #include <QImage>
 #include <QPoint>
 
+class OptionsContainer;
+
 class TokenEditor : public QObject
 {
     Q_OBJECT
@@ -33,6 +35,9 @@ public:
 
     qreal getZoom() const;
     QPoint getOffset() const;
+
+    void applyOptionsToEditor(const OptionsContainer& options);
+    void applyEditorToOptions(OptionsContainer& options);
 
 public slots:
     void setSourceFile(const QString& sourceFile);

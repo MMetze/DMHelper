@@ -200,12 +200,12 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Device pixel ratio: " << this->devicePixelRatio();
 
     qDebug() << "[MainWindow] Standard Path Information";
-    qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
-    qDebug() << "[MainWindow]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
-    qDebug() << "[MainWindow]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).first());
-    qDebug() << "[MainWindow]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
-    qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
-    qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
+    qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).constFirst());
+    qDebug() << "[MainWindow]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).constFirst());
+    qDebug() << "[MainWindow]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).constFirst());
+    qDebug() << "[MainWindow]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).constFirst());
+    qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).constFirst());
+    qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).constFirst());
 
     qDebug() << "[MainWindow] Registering application fonts";
     QFontDatabase::addApplicationFont(":/img/data/fonts/Rellanic-Agx7.ttf");
@@ -379,7 +379,9 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qApp->processEvents();
     readBestiary();
+    _bestiaryDlg.setOptions(_options);
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    /*
     _bestiaryDlg.setTokenSearchString(_options->getTokenSearchString());
     _bestiaryDlg.setTokenBackgroundFill(_options->getTokenBackgroundFill());
     _bestiaryDlg.setTokenTransparent(_options->getTokenTransparent());
@@ -389,6 +391,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _bestiaryDlg.setTokenMaskFile(_options->getTokenMaskFile());
     _bestiaryDlg.setTokenFrameApplied(_options->getTokenFrameApplied());
     _bestiaryDlg.setTokenFrameFile(_options->getTokenFrameFile());
+*/
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
@@ -399,6 +402,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
     connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
+    /*
     connect(_options, &OptionsContainer::tokenSearchStringChanged, &_bestiaryDlg, &BestiaryDialog::setTokenSearchString);
     connect(_options, &OptionsContainer::tokenBackgroundFillChanged, &_bestiaryDlg, &BestiaryDialog::setTokenBackgroundFill);
     connect(_options, &OptionsContainer::tokenTransparentChanged, &_bestiaryDlg, &BestiaryDialog::setTokenTransparent);
@@ -417,6 +421,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskFileChanged, _options, &OptionsContainer::setTokenMaskFile);
     connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameAppliedChanged, _options, &OptionsContainer::setTokenFrameApplied);
     connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameFileChanged, _options, &OptionsContainer::setTokenFrameFile);
+*/
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -568,7 +573,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
-    CharacterFrame* charFrame = new CharacterFrame;
+    CharacterFrame* charFrame = new CharacterFrame(_options);
     charFrame->setHeroForgeToken(_options->getHeroForgeToken());
     connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
     connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);

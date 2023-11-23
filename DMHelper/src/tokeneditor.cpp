@@ -1,4 +1,5 @@
 #include "tokeneditor.h"
+#include "optionscontainer.h"
 #include <QPainter>
 #include <QDebug>
 
@@ -135,6 +136,36 @@ qreal TokenEditor::getZoom() const
 QPoint TokenEditor::getOffset() const
 {
     return _offset;
+}
+
+void TokenEditor::applyOptionsToEditor(const OptionsContainer& options)
+{
+    _dirty = true;
+
+    setBackgroundFill(options.getTokenBackgroundFill());
+    setBackgroundFillColor(options.getTokenBackgroundFillColor());
+    setTransparent(options.getTokenTransparent());
+    setTransparentColor(options.getTokenTransparentColor());
+    setTransparentLevel(options.getTokenTransparentLevel());
+    setMaskApplied(options.getTokenMaskApplied());
+    setMaskFile(options.getTokenMaskFile());
+    setFrameApplied(options.getTokenFrameApplied());
+    setFrameFile(options.getTokenFrameFile());
+
+    emit imageDirty();
+}
+
+void TokenEditor::applyEditorToOptions(OptionsContainer& options)
+{
+    options.setTokenBackgroundFill(isBackgroundFill());
+    options.setTokenBackgroundFillColor(getBackgroundFillColor());
+    options.setTokenTransparent(isTransparent());
+    options.setTokenTransparentColor(getTransparentColor());
+    options.setTokenTransparentLevel(getTransparentLevel());
+    options.setTokenMaskApplied(isMaskApplied());
+    options.setTokenMaskFile(getMaskFile());
+    options.setTokenFrameApplied(isFrameApplied());
+    options.setTokenFrameFile(getFrameFile());
 }
 
 void TokenEditor::setSourceFile(const QString& sourceFile)

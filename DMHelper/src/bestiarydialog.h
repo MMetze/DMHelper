@@ -8,6 +8,7 @@ class MonsterClass;
 class MonsterAction;
 class Bestiary;
 class TokenEditor;
+class OptionsContainer;
 class QVBoxLayout;
 
 namespace Ui {
@@ -24,11 +25,13 @@ public:
 
     MonsterClass* getMonster() const;
 
+    void setOptions(OptionsContainer* options);
+
 signals:
     void monsterChanged();
     void publishMonsterImage(QImage img, const QColor& color);
     void dialogClosed();
-
+/*
     void tokenBackgroundFillChanged(bool backgroundFill);
     void tokenTransparentChanged(bool transparent);
     void tokenTransparentColorChanged(const QColor& transparentColor);
@@ -37,7 +40,7 @@ signals:
     void tokenMaskFileChanged(const QString& tokenMaskFile);
     void tokenFrameAppliedChanged(bool applied);
     void tokenFrameFileChanged(const QString& tokenFrameFile);
-
+*/
 public slots:
     void setMonster(MonsterClass* monster, bool edit = true);
     void setMonster(const QString& monsterName, bool edit = true);
@@ -48,7 +51,7 @@ public slots:
     void nextMonster();
 
     void dataChanged();
-
+/*
     void setTokenSearchString(const QString& searchString);
     void setTokenBackgroundFill(bool backgroundFill);
     void setTokenTransparent(bool transparent);
@@ -58,7 +61,7 @@ public slots:
     void setTokenMaskFile(const QString& maskFile);
     void setTokenFrameApplied(bool frameApplied);
     void setTokenFrameFile(const QString& frameFile);
-
+*/
 protected slots:
     void hitDiceChanged();
     void abilityChanged();
@@ -68,6 +71,7 @@ protected slots:
 
     void handlePreviousToken();
     void handleAddToken();
+    void handleEditToken();
     void handleSearchToken();
     void handleReloadImage();
     void handleClearImage();
@@ -113,6 +117,7 @@ private:
     QWidget* _specialAbilitiesWidget;
     QWidget* _reactionsWidget;
 
+    OptionsContainer* _options;
     MonsterClass* _monster;
     int _currentToken;
     bool _edit;
@@ -121,6 +126,7 @@ private:
     // Token search data
     QString _searchString;
 
+    /*
     // Token edit data
     bool _tokenBackgroundFill;
     QColor _tokenBackgroundFillColor;
@@ -131,6 +137,7 @@ private:
     QString _tokenMaskFile;
     bool _tokenFrameApplied;
     QString _tokenFrameFile;
+*/
 };
 
 #endif // BESTIARYDIALOG_H

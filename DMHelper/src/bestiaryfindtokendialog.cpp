@@ -1,5 +1,6 @@
 #include "bestiaryfindtokendialog.h"
 #include "ui_bestiaryfindtokendialog.h"
+#include "optionscontainer.h"
 #include <QGridLayout>
 #include <QPushButton>
 #include <QNetworkAccessManager>
@@ -17,7 +18,7 @@
 
 const qreal TOKEN_ICON_SIZE = 256.0;
 
-BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, bool backgroundFill, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, QWidget *parent) :
+BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, const OptionsContainer& options, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryFindTokenDialog),
     _monsterName(monsterName),
@@ -34,19 +35,20 @@ BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, con
     _tokenGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     ui->scrollAreaWidgetContents->setLayout(_tokenGrid);
 
-    ui->chkFill->setChecked(backgroundFill);
+    ui->chkFill->setChecked(options.getTokenBackgroundFill());
 
-    ui->chkTransparent->setChecked(transparent);
-    ui->btnTransparentColor->setColor(transparentColor);
+    ui->chkTransparent->setChecked(options.getTokenTransparent());
+    ui->btnTransparentColor->setColor(options.getTokenTransparentColor());
     ui->btnTransparentColor->setRotationVisible(false);
-    ui->sliderFuzzy->setValue(transparentLevel);
+    ui->sliderFuzzy->setValue(options.getTokenTransparentLevel());
 
-    ui->chkMask->setChecked(maskApplied);
-    ui->edtMaskImage->setText(maskFile);
-    ui->chkFrame->setChecked(frameApplied);
-    ui->edtFrameImage->setText(frameFile);
+    ui->chkMask->setChecked(options.getTokenMaskApplied());
+    ui->edtMaskImage->setText(options.getTokenMaskFile());
+    ui->chkFrame->setChecked(options.getTokenFrameApplied());
+    ui->edtFrameImage->setText(options.getTokenFrameFile());
 
-    _editor = new TokenEditor(QString(), backgroundFill, Qt::white, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, 1.0, QPoint(), this);
+    _editor = new TokenEditor;
+    _editor->applyOptionsToEditor(options);
 
     connect(ui->chkFill, &QAbstractButton::toggled, _editor, &TokenEditor::setBackgroundFill);
     connect(ui->chkTransparent, &QAbstractButton::toggled, _editor, &TokenEditor::setTransparent);
@@ -99,7 +101,7 @@ QList<QImage> BestiaryFindTokenDialog::retrieveSelection(bool decorated)
 
     return resultList;
 }
-
+/*
 bool BestiaryFindTokenDialog::isBackgroundFill() const
 {
     return _editor ? _editor->isBackgroundFill() : false;
@@ -143,11 +145,16 @@ bool BestiaryFindTokenDialog::isFrameApplied() const
 QString BestiaryFindTokenDialog::getFrameFile() const
 {
     return _editor ? _editor->getFrameFile() : QString();
-}
+}*/
 
 bool BestiaryFindTokenDialog::isEditingToken() const
 {
     return ui->chkEditTokens->isChecked();
+}
+
+TokenEditor* BestiaryFindTokenDialog::getEditor()
+{
+    return _editor;
 }
 
 void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)

@@ -9,6 +9,7 @@
 #include "bestiaryfindtokendialog.h"
 #include "tokeneditdialog.h"
 #include "tokeneditor.h"
+#include "optionscontainer.h"
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QInputDialog>
@@ -27,11 +28,12 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     _legendaryActionsWidget(nullptr),
     _specialAbilitiesWidget(nullptr),
     _reactionsWidget(nullptr),
+    _options(nullptr),
     _monster(nullptr),
     _currentToken(0),
     _edit(false),
     _mouseDown(false),
-    _searchString(),
+    _searchString()/*,
     _tokenBackgroundFill(false),
     _tokenBackgroundFillColor(Qt::white),
     _tokenTransparent(false),
@@ -40,7 +42,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     _tokenMaskApplied(false),
     _tokenMaskFile(),
     _tokenFrameApplied(false),
-    _tokenFrameFile()
+    _tokenFrameFile()*/
 {
     ui->setupUi(this);
 
@@ -55,6 +57,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     connect(ui->btnPreviousToken, &QPushButton::clicked, this, &BestiaryDialog::handlePreviousToken);
     connect(ui->btnAddToken, &QPushButton::clicked, this, &BestiaryDialog::handleAddToken);
+
+    connect(ui->btnEditIcon, &QPushButton::clicked, this, &BestiaryDialog::handleEditToken);
     connect(ui->btnSearchToken, &QPushButton::clicked, this, &BestiaryDialog::handleSearchToken);
     connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
     connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
@@ -77,7 +81,6 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     ui->edtArmorClass->setValidator(new QIntValidator(0, 100));
     ui->edtAverageHitPoints->setValidator(new QIntValidator(0, 10000));
-    //ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
 
     connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtMonsterSize, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -118,6 +121,14 @@ BestiaryDialog::~BestiaryDialog()
 MonsterClass* BestiaryDialog::getMonster() const
 {
     return _monster;
+}
+
+void BestiaryDialog::setOptions(OptionsContainer* options)
+{
+    if(!options)
+        return;
+
+    _options = options;
 }
 
 void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
@@ -386,7 +397,7 @@ void BestiaryDialog::dataChanged()
     ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
 }
-
+/*
 void BestiaryDialog::setTokenSearchString(const QString& searchString)
 {
     _searchString = searchString;
@@ -430,7 +441,7 @@ void BestiaryDialog::setTokenFrameApplied(bool frameApplied)
 void BestiaryDialog::setTokenFrameFile(const QString& frameFile)
 {
     _tokenFrameFile = frameFile;
-}
+}*/
 
 void BestiaryDialog::hitDiceChanged()
 {
@@ -509,15 +520,58 @@ void BestiaryDialog::handleAddToken()
     }
 }
 
-void BestiaryDialog::handleSearchToken()
+void BestiaryDialog::handleEditToken()
 {
-    if(!_monster)
+    // Use the TokenEditDialog to edit the character icon
+    if((!_monster) || (!_options))
         return;
 
-    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName(), _searchString, _tokenBackgroundFill, _tokenTransparent, _tokenTransparentColor, _tokenTransparentLevel, _tokenMaskApplied, _tokenMaskFile, _tokenFrameApplied, _tokenFrameFile);
+    TokenEditDialog* dlg = new TokenEditDialog(_monster->getIconPixmap(DMHelper::PixmapSize_Full).toImage(),
+                                               *_options,
+                                               1.0,
+                                               QPoint(),
+                                               false);
+    if(dlg->exec() == QDialog::Accepted)
+    {
+        QImage newToken = dlg->getFinalImage();
+        if(newToken.isNull())
+            return;
+
+        QString tokenPath = QFileDialog::getExistingDirectory(this, tr("Select Token Directory"), _monster->getIcon(_currentToken).isEmpty() ? QString() : QFileInfo(_monster->getIcon(_currentToken)).absolutePath());
+        if(tokenPath.isEmpty())
+            return;
+
+        QDir tokenDir(tokenPath);
+
+        int fileIndex = 1;
+        QString tokenFile = _monster->getName() + QString(".png");
+        while(tokenDir.exists(tokenFile))
+            tokenFile = _monster->getName() + QString::number(fileIndex++) + QString(".png");
+
+        QString finalTokenPath = tokenDir.absoluteFilePath(tokenFile);
+        newToken.save(finalTokenPath);
+
+        _monster->setIcon(_currentToken, finalTokenPath);
+        loadMonsterImage();
+
+        if(dlg->getEditor())
+            dlg->getEditor()->applyEditorToOptions(*_options);
+
+    }
+
+    dlg->deleteLater();
+}
+
+void BestiaryDialog::handleSearchToken()
+{
+    if((!_monster) || (!_options))
+        return;
+
+    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getName(), _searchString, *_options);
     dlg->resize(width() * 9 / 10, height() * 9 / 10);
     if(dlg->exec() == QDialog::Accepted)
     {
+        /*
         if(_tokenBackgroundFill != dlg->isBackgroundFill())
         {
             _tokenBackgroundFill = dlg->isBackgroundFill();
@@ -565,6 +619,10 @@ void BestiaryDialog::handleSearchToken()
             _tokenFrameFile = dlg->getFrameFile();
             emit tokenFrameFileChanged(_tokenFrameFile);
         }
+        */
+
+        if(dlg->getEditor())
+            dlg->getEditor()->applyEditorToOptions(*_options);
 
         createTokenFiles(dlg);
     }
@@ -589,6 +647,21 @@ void BestiaryDialog::handleClearImage()
 {
     if(!_monster)
         return;
+
+    QString currentIconPath = Bestiary::Instance()->getDirectory().absoluteFilePath(_monster->getIcon(_currentToken));
+    if((currentIconPath.isEmpty()) || (!QFile::exists(currentIconPath)))
+    {
+        qDebug() << "[BestiaryDialog] Unable to find token file to remove from monster: " << _monster->getName() << ", " << currentIconPath;
+        return;
+    }
+
+    // Ask if the app should remove the file
+    QMessageBox::StandardButton result = QMessageBox::question(this, tr("Delete Image"), tr("Do you want to also delete the token file from the disk?\n\n") + currentIconPath);
+    if(result == QMessageBox::Yes)
+    {
+        qDebug() << "[BestiaryDialog] Removing token file for monster: " << _monster->getName() << ", " << currentIconPath;
+        QFile::remove(currentIconPath);
+    }
 
     _monster->removeIcon(_currentToken);
     if(_monster->getIconCount() == 0)
@@ -825,6 +898,9 @@ void BestiaryDialog::nextMonster()
 
 void BestiaryDialog::createTokenFiles(BestiaryFindTokenDialog* dialog)
 {
+    if((!dialog) || (!_options))
+        return;
+
     QList<QImage> resultList = dialog->retrieveSelection(!dialog->isEditingToken());
     int fileIndex = 1;
     QString tokenPath = QFileDialog::getExistingDirectory(this, tr("Select Token Directory"), Bestiary::Instance()->getDirectory().absolutePath());
@@ -838,15 +914,7 @@ void BestiaryDialog::createTokenFiles(BestiaryFindTokenDialog* dialog)
     if(dialog->isEditingToken())
     {
         editDialog = new TokenEditDialog(QString(),
-                                         _tokenBackgroundFill,
-                                         _tokenBackgroundFillColor,
-                                         _tokenTransparent,
-                                         _tokenTransparentColor,
-                                         _tokenTransparentLevel,
-                                         _tokenMaskApplied,
-                                         _tokenMaskFile,
-                                         _tokenFrameApplied,
-                                         _tokenFrameFile,
+                                         *_options,
                                          1.0,
                                          QPoint(),
                                          false,
@@ -862,7 +930,7 @@ void BestiaryDialog::createTokenFiles(BestiaryFindTokenDialog* dialog)
             if((dialog->isEditingToken() && editDialog))
             {
                 editDialog->setSourceImage(image);
-                if(_tokenBackgroundFill)
+                if(_options->getTokenBackgroundFill())
                     editDialog->setBackgroundFillColor(image.pixelColor(0,0));
                 editDialog->updateImage();
                 if(editDialog->exec() == QDialog::Accepted)

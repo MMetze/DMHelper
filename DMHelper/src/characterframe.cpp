@@ -8,6 +8,8 @@
 #include "spellslotradiobutton.h"
 #include "spellslotlevelbutton.h"
 #include "characterimportheroforgedialog.h"
+#include "tokeneditdialog.h"
+#include "optionscontainer.h"
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QFileDialog>
@@ -22,9 +24,10 @@ const int SPELL_LEVEL_PACT_MAGIC = -1;
 
 // TODO: automate character level, next level exp, proficiency bonus
 
-CharacterFrame::CharacterFrame(QWidget *parent) :
+CharacterFrame::CharacterFrame(OptionsContainer* options, QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::CharacterFrame),
+    _options(options),
     _character(nullptr),
     _mouseDown(false),
     _reading(false),
@@ -50,6 +53,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui->edtProficiencyBonus->setValidator(new QIntValidator(-10, 100, this));
     ui->edtLevel->setValidator(new QIntValidator(0, 100, this));
 
+    connect(ui->btnEditIcon, &QAbstractButton::clicked, this, &CharacterFrame::editCharacterIcon);
     connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterFrame::syncDndBeyond);
     enableDndBeyondSync(false);
     connect(ui->btnHeroForge, &QAbstractButton::clicked, this, &CharacterFrame::importHeroForge);
@@ -531,6 +535,48 @@ void CharacterFrame::handlePublishClicked()
         iconImg = iconImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 
     emit publishCharacterImage(iconImg);
+}
+
+void CharacterFrame::editCharacterIcon()
+{
+    // Use the TokenEditDialog to edit the character icon
+    if((!_character) || (!_options))
+        return;
+
+    TokenEditDialog* dlg = new TokenEditDialog(_character->getIconPixmap(DMHelper::PixmapSize_Full).toImage(),
+                                               *_options,
+                                               1.0,
+                                               QPoint(),
+                                               false);
+    if(dlg->exec() == QDialog::Accepted)
+    {
+        QImage newToken = dlg->getFinalImage();
+        if(newToken.isNull())
+            return;
+
+        QString tokenPath = QFileDialog::getExistingDirectory(this, tr("Select Token Directory"), _character->getIconFile().isEmpty() ? QString() : QFileInfo(_character->getIconFile()).absolutePath());
+        if(tokenPath.isEmpty())
+            return;
+
+        QDir tokenDir(tokenPath);
+
+        int fileIndex = 1;
+        QString tokenFile = _character->getName() + QString(".png");
+        while(tokenDir.exists(tokenFile))
+            tokenFile = _character->getName() + QString::number(fileIndex++) + QString(".png");
+
+        QString finalTokenPath = tokenDir.absoluteFilePath(tokenFile);
+        newToken.save(finalTokenPath);
+
+        _character->setIcon(finalTokenPath);
+        loadCharacterImage();
+
+        if(dlg->getEditor())
+            dlg->getEditor()->applyEditorToOptions(*_options);
+
+    }
+
+    dlg->deleteLater();
 }
 
 void CharacterFrame::syncDndBeyond()

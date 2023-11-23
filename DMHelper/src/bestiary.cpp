@@ -1,7 +1,6 @@
 #include "bestiary.h"
 #include "monsterclass.h"
 #include "monster.h"
-#include "dmconstants.h"
 #include "dmversion.h"
 #include <QDomDocument>
 #include <QDomElement>

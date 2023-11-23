@@ -8,8 +8,8 @@ namespace Ui {
 class BestiaryFindTokenDialog;
 }
 
-class QGridLayout;
 class TokenData;
+class QGridLayout;
 class QNetworkAccessManager;
 class QNetworkReply;
 
@@ -19,11 +19,12 @@ class BestiaryFindTokenDialog : public QDialog
 
 public:
 
-    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, bool backgroundFill = false, bool transparent = false, const QColor& transparentColor = Qt::white, int transparentLevel = TokenEditor::TRANSPARENT_LEVEL_DEFAULT, bool maskApplied = false, const QString& maskFile = QString(), bool frameApplied = false, const QString& frameFile = QString(), QWidget *parent = nullptr);
+    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, const OptionsContainer& options, QWidget *parent = nullptr);
     ~BestiaryFindTokenDialog();
 
     QList<QImage> retrieveSelection(bool decorated = true);
 
+    /*
     bool isBackgroundFill() const;
     QColor getBackgroundFillColor() const;
     bool isTransparent() const;
@@ -33,8 +34,10 @@ public:
     QString getMaskFile() const;
     bool isFrameApplied() const;
     QString getFrameFile() const;
+*/
 
     bool isEditingToken() const;
+    TokenEditor* getEditor();
 
 protected slots:
     void urlRequestFinished(QNetworkReply *reply);
