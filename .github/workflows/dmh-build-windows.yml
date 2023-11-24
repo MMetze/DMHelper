@@ -4,9 +4,11 @@ on:
   workflow_dispatch:
 
 env:
+  SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION: 6.6.0
   QT_INSTALLER_VERSION: 4.6
   MSVC_VERSION: 2019
+  ARTIFACT:     qt-planets-build.zip
 
 jobs:
   build:
@@ -25,7 +27,6 @@ jobs:
         cache: 'true'
         modules: 'qtmultimedia qtnetworkauth'
         tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2019_x64 tools_ifw'
-        add-tools-to-path: 'true'
         archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
     - uses: actions/checkout@v3
     - name: Print current working dir
@@ -36,6 +37,15 @@ jobs:
         cd DMHelper
         pwd
         ls ${{env.Qt6Dir}}
+    - name: (4) Download JOM
+      uses: suisei-cn/actions-download-file@v1
+      with:
+        url:    http://download.qt.io/official_releases/jom/jom.zip
+        target: ${{ runner.temp }}\
+    - name: (5) Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  |
+        7z x jom.zip -ojom
     - name: Set up Visual Studio shell
       uses: egor-tensin/vs-shell@v2
       with:
@@ -66,8 +76,6 @@ jobs:
         cd DMHelper
         mkdir build-64_bit-release
         cd build-64_bit-release
-        #call vcvarsall.bat x64
-        #call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
         jom.exe /d /f Makefile qmake_all
         jom.exe /d /f Makefile.Release
