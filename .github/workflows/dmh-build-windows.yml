@@ -11,7 +11,7 @@ env:
   QT_VERSION: 6.6.0
   QT_INSTALLER_VERSION: 4.6
   MSVC_VERSION: 2019
-  PATH# : ${{QT_DIR}}\${{QT_VERSION}}\msvc${{MSVC_VERSION}}_64\bin;${{QT_DIR}}\Tools\QtInstallerFramework\${{QT_INSTALLER_VERSION}}\bin;${{QT_DIR}}\Tools\QtCreator\bin;${{QT_DIR}}\Tools\QtCreator\bin\jom;C:\Program Files (x86)\Microsoft Visual Studio\${{MSVC_VERSION}}\Enterprise\VC\Auxiliary\Build
+  # PATH : ${{QT_DIR}}\${{QT_VERSION}}\msvc${{MSVC_VERSION}}_64\bin;${{QT_DIR}}\Tools\QtInstallerFramework\${{QT_INSTALLER_VERSION}}\bin;${{QT_DIR}}\Tools\QtCreator\bin;${{QT_DIR}}\Tools\QtCreator\bin\jom;C:\Program Files (x86)\Microsoft Visual Studio\${{MSVC_VERSION}}\Enterprise\VC\Auxiliary\Build
 
 jobs:
   build:
