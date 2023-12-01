@@ -9,11 +9,18 @@ class DMHWaitingDialog;
 }
 
 /*
- *  Usage example:
+ *  Usage examples:
 
     DMHWaitingDialog dlg(QString("Please wait..."), this);
     QTimer::singleShot(5000, &dlg, &DMHWaitingDialog::accept);
     dlg.exec();
+
+    or
+
+    DMHWaitingDialog* _waitingDlg;
+    _waitingDlg = new DMHWaitingDialog(QString("Contacting HeroForge..."), this);
+    _waitingDlg->setModal(true);
+    _waitingDlg->show();
  */
 
 class DMHWaitingDialog : public QDialog

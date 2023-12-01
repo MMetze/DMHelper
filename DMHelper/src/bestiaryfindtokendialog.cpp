@@ -173,7 +173,7 @@ void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
                     {
                         TokenData* tokenData = new TokenData(urlText);
                 #ifdef DEBUG_FINDTOKEN_IMPORT
-                        qDebug() << "[BestiaryFindTokenDialog] Found URL data for address; " << tokenData->_tokenAddress;
+                        qDebug() << "[BestiaryFindTokenDialog] Found URL data for address: " << tokenData->_tokenAddress;
                 #endif
                         _tokenList.append(tokenData);
                         tokenData->_reply = _manager->get(QNetworkRequest(QUrl(tokenData->_tokenAddress)));

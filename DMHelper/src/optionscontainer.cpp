@@ -5,6 +5,8 @@
 #include "tokeneditor.h"
 #include <QDir>
 #include <QCoreApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -360,6 +362,12 @@ void OptionsContainer::editSettings()
     connect(editCopyContainer, &OptionsContainer::fontSizeChanged, this, &OptionsContainer::registerFontChange);
 
     OptionsDialog dlg(editCopyContainer);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+    {
+        QSize screenSize = primary->availableSize();
+        dlg.resize(screenSize.width() * 2 / 3, screenSize.height() * 4 / 5);
+    }
 
     if(dlg.exec() == QDialog::Accepted)
     {

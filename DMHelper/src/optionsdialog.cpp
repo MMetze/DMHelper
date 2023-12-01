@@ -1,5 +1,6 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
+#include "bestiarypopulatetokensdialog.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
@@ -111,6 +112,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->edtTokenFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editTokenFrame);
         connect(ui->btnBrowseTokenMask, &QAbstractButton::clicked, this, &OptionsDialog::browseTokenMask);
         connect(ui->edtTokenMask, &QLineEdit::editingFinished, this, &OptionsDialog::editTokenMask);
+        connect(ui->btnPopulateTokens, &QAbstractButton::clicked, this, &OptionsDialog::populateTokens);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
@@ -511,6 +513,16 @@ void OptionsDialog::setTokenMask(const QString& tokenMask)
 
     ui->edtTokenMask->setText(tokenMask);
     _options->setTokenMaskFile(tokenMask);
+}
+
+void OptionsDialog::populateTokens()
+{
+    if(!_options)
+        return;
+
+    BestiaryPopulateTokensDialog* dlg = new BestiaryPopulateTokensDialog(*_options);
+    dlg->exec();
+    dlg->deleteLater();
 }
 
 void OptionsDialog::updateFileLocations()
