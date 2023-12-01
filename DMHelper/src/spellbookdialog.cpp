@@ -28,7 +28,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->btnRight, SIGNAL(clicked()), this, SLOT(nextSpell()));
     connect(ui->btnNewSpell, SIGNAL(clicked()), this, SLOT(createNewSpell()));
     connect(ui->btnDeleteSpell, SIGNAL(clicked()), this, SLOT(deleteCurrentSpell()));
-    connect(ui->cmbSearch, SIGNAL(activated(QString)), this, SLOT(setSpell(QString)));
+    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setSpell(newValue);});
 
     ui->edtLevel->setValidator(new QIntValidator(0, 100));
     connect(ui->edtName, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));

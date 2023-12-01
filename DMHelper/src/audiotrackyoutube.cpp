@@ -75,7 +75,7 @@ bool AudioTrackYoutube::isMuted() const
     return _mute;
 }
 
-int AudioTrackYoutube::getVolume() const
+float AudioTrackYoutube::getVolume() const
 {
     if(isPlaying())
         return libvlc_audio_get_volume(_vlcPlayer);
@@ -123,12 +123,12 @@ void AudioTrackYoutube::setMute(bool mute)
     }
 }
 
-void AudioTrackYoutube::setVolume(int volume)
+void AudioTrackYoutube::setVolume(float volume)
 {
     if(!isPlaying())
         return;
 
-    libvlc_audio_set_volume(_vlcPlayer, volume);
+    libvlc_audio_set_volume(_vlcPlayer, static_cast<int>(volume * 100.f));
 }
 
 void AudioTrackYoutube::setRepeat(bool repeat)

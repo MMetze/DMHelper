@@ -1,7 +1,6 @@
 #include "bestiary.h"
 #include "monsterclass.h"
 #include "monster.h"
-#include "dmconstants.h"
 #include "dmversion.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -88,7 +87,7 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+    ts.setEncoding(QStringConverter::Utf8);
     ts << xmlString;
 
     file.close();
@@ -118,7 +117,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;
@@ -277,6 +276,9 @@ bool Bestiary::isDirty()
 
 MonsterClass* Bestiary::getMonsterClass(const QString& name)
 {
+    if(name.isEmpty())
+        return nullptr;
+
     if(!_bestiaryMap.contains(name))
         showMonsterClassWarning(name);
 
@@ -646,7 +648,7 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
         QString targetFile = _bestiaryDirectory.absoluteFilePath(monsterIcon);
         bool result = currentFile.copy(targetFile);
 
-        qDebug() << "[Bestiary] Copied " << currentFile << " to " << targetFile << ", result: " << result;
+        qDebug() << "[Bestiary] Copied " << currentFile.fileName() << " to " << targetFile << ", result: " << result;
     }
     else
     {
@@ -667,6 +669,6 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
         QString targetFile = _bestiaryDirectory.absoluteFilePath(sourcePath);
         bool result = currentFile.copy(targetFile);
 
-        qDebug() << "[Bestiary] Copied " << currentFile << " to " << targetFile << ", result: " << result;
+        qDebug() << "[Bestiary] Copied " << currentFile.fileName() << " to " << targetFile << ", result: " << result;
     }
 }

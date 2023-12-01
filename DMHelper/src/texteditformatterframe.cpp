@@ -42,7 +42,10 @@ void TextEditFormatterFrame::loadCurrentCharFormat(const QTextCharFormat &f)
     if(!_textEdit)
         return;
 
-    emit fontFamilyChanged(f.fontFamily());
+    QStringList families = f.fontFamilies().toStringList();
+    if(!families.isEmpty())
+        emit fontFamilyChanged(families.first());
+
     emit fontSizeChanged(f.fontPointSize());
     emit fontBoldChanged(f.fontWeight() == QFont::Bold);
     emit fontItalicsChanged(f.fontItalic());

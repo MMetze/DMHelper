@@ -1,13 +1,11 @@
 #include "battleframe.h"
 #include "ui_battleframe.h"
-#include "monster.h"
 #include "widgetmonster.h"
 #include "widgetmonsterinternal.h"
 #include "widgetcharacter.h"
 #include "widgetcharacterinternal.h"
 #include "monsterclass.h"
 #include "dmconstants.h"
-#include "bestiary.h"
 #include "spellbook.h"
 #include "spell.h"
 #include "encounterbattle.h"
@@ -19,7 +17,6 @@
 #include "character.h"
 #include "mapselectdialog.h"
 #include "combatantdialog.h"
-#include "selectzoom.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterbase.h"
@@ -29,10 +26,7 @@
 #include "battledialogeffectsettings.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
-#include "dicerolldialogcombatants.h"
 #include "itemselectdialog.h"
-#include "videoplayer.h"
-#include "videoplayerglscreenshot.h"
 #include "camerarect.h"
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
@@ -1035,7 +1029,7 @@ void BattleFrame::addMonsters()
 
     QPointF combatantPos = viewportCenter();
 
-    if(_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) <= 0)
+    if(!validateTokenLayerExists())
         return;
 
     qDebug() << "[Battle Frame] Adding monsters ...";
@@ -1094,6 +1088,9 @@ void BattleFrame::addCharacter()
     if((!_battle) || (!_model))
         return;
 
+    if(!validateTokenLayerExists())
+        return;
+
     Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
@@ -1124,6 +1121,9 @@ void BattleFrame::addNPC()
     if((!_battle) || (!_model))
         return;
 
+    if(!validateTokenLayerExists())
+        return;
+
     Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
@@ -1151,6 +1151,9 @@ void BattleFrame::addNPC()
 
 void BattleFrame::addEffectObject()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file..."));
     if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
         return;
@@ -1161,6 +1164,9 @@ void BattleFrame::addEffectObject()
 void BattleFrame::castSpell()
 {
     if(!_model)
+        return;
+
+    if(!validateTokenLayerExists())
         return;
 
     bool ok = false;
@@ -1250,21 +1256,33 @@ void BattleFrame::castSpell()
 
 void BattleFrame::addEffectRadius()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115, 18, 0, 64), QString()));
 }
 
 void BattleFrame::addEffectCone()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115, 18, 0, 64), QString()));
 }
 
 void BattleFrame::addEffectCube()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115, 18, 0, 64), QString()));
 }
 
 void BattleFrame::addEffectLine()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115, 18, 0, 64), QString()));
 }
 
@@ -2024,6 +2042,7 @@ void BattleFrame::editLayers()
 
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 {
+    Q_UNUSED(effectItem);
     /*
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Frame] Handle effect changed for " << effectItem;
@@ -2078,6 +2097,7 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
 
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
+    Q_UNUSED(object);
     return;
     /*
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
@@ -2266,6 +2286,7 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    Q_UNUSED(effect);
     return;
     /*
     if(!effect)
@@ -3152,6 +3173,7 @@ void BattleFrame::setEditMode()
 
 void BattleFrame::updateFowImage(const QPixmap& fow)
 {
+    Q_UNUSED(fow);
     // TODO: Layers
     // This probably can disappear? Make sure connections between drawer and scene are done
     //if(_fow)
@@ -3498,6 +3520,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
 {
+    Q_UNUSED(combatant);
 
     /*
     if(!_model)
@@ -3757,6 +3780,24 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
     }
 
     _model->removeCombatant(combatant);
+}
+
+bool BattleFrame::validateTokenLayerExists()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to validate the token layer, no battle model is set!";
+        return false;
+    }
+
+    if(_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 0)
+        return true;
+
+    if(QMessageBox::question(this, tr("No Token Layer"), tr("No token layer has been created for this battle. Would you like to create a token layer to be able to add tokens?")) == QMessageBox::Yes)
+        return false;
+
+    _model->getLayerScene().prependLayer(new LayerTokens(nullptr, tr("Token Layer")));
+    return true;
 }
 
 void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer)

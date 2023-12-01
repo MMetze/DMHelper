@@ -33,9 +33,9 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
     connect(this, &LayerFrame::visibleDMChanged, &layer, &Layer::setLayerVisibleDM);
     connect(this, &LayerFrame::visiblePlayerChanged, &layer, &Layer::setLayerVisiblePlayer);
-    connect(this, &LayerFrame::visibleDMChanged, [=](){ emit visibilityChanged(this); });
-    connect(this, &LayerFrame::visibleDMChanged, [=](){ emit dmVisibilityChanged(this); });
-    connect(this, &LayerFrame::visiblePlayerChanged, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::visibleDMChanged, this, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::visibleDMChanged, this, [=](){ emit dmVisibilityChanged(this); });
+    connect(this, &LayerFrame::visiblePlayerChanged, this, [=](){ emit visibilityChanged(this); });
     connect(this, &LayerFrame::linkedUpChanged, &layer, &Layer::setLinkedUp);
     connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
     connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));

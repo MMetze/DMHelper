@@ -8,8 +8,8 @@ if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
 set QT_DIR=C:\Qt
-set QT_VERSION=5.15.2
-set QT_INSTALLER_VERSION=4.3
+set QT_VERSION=6.6.0
+set QT_INSTALLER_VERSION=4.6
 set MSVC_VERSION=2019
 set SEVENZIP_APP=C:\Program Files\7-Zip\7z
 set PATH=%QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin;%QT_DIR%\Tools\QtInstallerFramework\%QT_INSTALLER_VERSION%\bin;%QT_DIR%\Tools\QtCreator\bin;%QT_DIR%\Tools\QtCreator\bin\jom;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%

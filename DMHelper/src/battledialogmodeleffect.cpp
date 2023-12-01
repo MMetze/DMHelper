@@ -8,6 +8,7 @@
 
 BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *parent) :
     BattleDialogModelObject(QPointF(), name, parent),
+    _tokensLayer(nullptr),
     _active(true),
     _visible(true),
     _size(20),
@@ -21,6 +22,7 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
 
 BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
     BattleDialogModelObject(position),
+    _tokensLayer(nullptr),
     _active(true),
     _visible(true),
     _size(size),
@@ -63,6 +65,7 @@ void BattleDialogModelEffect::copyValues(const CampaignObjectBase* other)
     if(!otherEffect)
         return;
 
+    _tokensLayer = otherEffect->_tokensLayer;
     _active = otherEffect->_active;
     _visible = otherEffect->_visible;
     _size = otherEffect->_size;
@@ -76,6 +79,16 @@ void BattleDialogModelEffect::copyValues(const CampaignObjectBase* other)
 int BattleDialogModelEffect::getObjectType() const
 {
     return DMHelper::CampaignType_BattleContentEffect;
+}
+
+void BattleDialogModelEffect::setLayer(LayerTokens* tokensLayer)
+{
+    _tokensLayer = tokensLayer;
+}
+
+LayerTokens* BattleDialogModelEffect::getLayer() const
+{
+    return _tokensLayer;
 }
 
 BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const

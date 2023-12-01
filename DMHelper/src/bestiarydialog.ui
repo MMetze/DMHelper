@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>845</width>
+    <width>849</width>
     <height>800</height>
    </rect>
   </property>
@@ -316,6 +316,44 @@ color: rgb(50, 50, 50);</string>
          <property name="icon">
           <iconset resource="resources.qrc">
            <normaloff>:/img/data/icon_plus.png</normaloff>:/img/data/icon_plus.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>28</width>
+           <height>28</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnEditIcon">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Edit the current token...</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/img/data/icon_edit.png</normaloff>:/img/data/icon_edit.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -638,7 +676,7 @@ color: rgb(50, 50, 50);</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>570</width>
+        <width>532</width>
         <height>792</height>
        </rect>
       </property>
@@ -1642,7 +1680,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>562</width>
+            <width>524</width>
             <height>70</height>
            </rect>
           </property>
@@ -1721,7 +1759,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>562</width>
+            <width>524</width>
             <height>70</height>
            </rect>
           </property>
@@ -1800,7 +1838,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>562</width>
+            <width>524</width>
             <height>69</height>
            </rect>
           </property>
@@ -1879,7 +1917,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>562</width>
+            <width>524</width>
             <height>70</height>
            </rect>
           </property>

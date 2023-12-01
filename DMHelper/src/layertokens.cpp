@@ -4,7 +4,6 @@
 #include "unselectedpixmap.h"
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
-#include "publishglimage.h"
 #include "campaign.h"
 #include "character.h"
 #include "bestiary.h"
@@ -408,6 +407,8 @@ void LayerTokens::playerGLUninitialize()
 
 void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(defaultModelMatrix);
+
     if(!_model)
         return;
 
@@ -523,7 +524,7 @@ void LayerTokens::setScale(int scale)
         BattleDialogModelEffect* effectKey = findEffectKey(effect);
         if(effectKey)
         {
-            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effectKey);
+            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
             if(effectToken)
                 effectToken->effectMoved();
 
@@ -632,6 +633,7 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
     if(_effects.contains(effect))
         return;
 
+    effect->setLayer(this);
     _effects.append(effect);
     connect(effect, &BattleDialogModelEffect::effectChanged, this, &LayerTokens::effectChanged);
     connect(effect, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::effectMoved);
@@ -662,8 +664,11 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
     disconnect(effect, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::effectMoved);
     disconnect(this, &LayerTokens::objectRemoved, effect, &BattleDialogModelObject::objectRemoved);
     disconnect(effect, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
+
     if(!_effects.removeOne(effect))
         return;
+
+    effect->setLayer(nullptr);
 
     _model->removeEffectFromList(effect);
     emit objectRemoved(effect);

@@ -38,26 +38,12 @@ public:
     QUndoStack* getUndoStack() const;
     void undoPaint();
     void applyPaintTo(int index, int startIndex = 0);
-    //void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
-    //void internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
 
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape);
     void fillFoW(const QColor& color);
-    //void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
-    //void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
-    //void fillFoW(const QColor& color, QPaintDevice* target);
-    /*
-    QImage getBWFoWImage();
-    QImage getBWFoWImage(const QImage &img);
-    QImage getBWFoWImage(const QSize &size);
-    */
 
     QRect getFoWVisibleRect() const;
-
-    //QSize getImageSize() const;
-    //void setImageSize(const QSize& imageSize);
-
 
 public slots:
     // DM Window Generic Interface
@@ -68,7 +54,6 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene) override;
     virtual void playerGLUninitialize() override;
-//    virtual bool playerGLUpdate() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;
     virtual bool playerIsInitialized() override;
@@ -103,9 +88,7 @@ protected:
     PublishGLScene* _scene;
 
     // Core contents
-    //QSize _imageSize;
     QImage _imageFow;
-    //QPixmap _pixmapFow;
     QUndoStack* _undoStack;
     QList<UndoFowBase*> _undoItems;
 

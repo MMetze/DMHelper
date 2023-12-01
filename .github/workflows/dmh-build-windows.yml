@@ -1,0 +1,82 @@
+name: DMHelper CI Windows Workflow
+
+on:
+  workflow_dispatch:
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION: 6.6.0
+  QT_INSTALLER_VERSION: 4.6
+  MSVC_VERSION: 2019
+  ARTIFACT:     qt-planets-build.zip
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.6.0'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        cache: 'true'
+        modules: 'qtmultimedia qtnetworkauth'
+        tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2019_x64 tools_ifw'
+        archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
+    - uses: actions/checkout@v3
+    - name: Print current working dir
+      run: |
+        pwd
+        echo ${{ github.workspace }}
+        ls DMHelper
+        cd DMHelper
+        pwd
+        ls ${{env.Qt6Dir}}
+    - name: (4) Download JOM
+      uses: suisei-cn/actions-download-file@v1
+      with:
+        url:    http://download.qt.io/official_releases/jom/jom.zip
+        target: ${{ runner.temp }}\
+    - name: (5) Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  |
+        7z x jom.zip -ojom
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
+    - name: Set up environment for build
+      run: |
+        echo "Current environmental path: ${{env.PATH}}"
+        pwd
+        cd DMHelper
+        mkdir bin64
+        mkdir bin64\config
+        mkdir bin64\packages
+        mkdir bin64\packages\com.dmhelper.app
+        mkdir bin64\packages\com.dmhelper.app\meta
+        mkdir bin64\packages\com.dmhelper.app\data
+        mkdir bin64\packages\com.dmhelper.app\data\bestiary
+        mkdir bin64\packages\com.dmhelper.app\data\doc
+        mkdir bin64\packages\com.dmhelper.app\data\pkgconfig
+        mkdir bin64\packages\com.dmhelper.app\data\plugins
+        mkdir bin64\packages\com.dmhelper.app\data\resources
+        mkdir bin64\packages\com.dmhelper.app\data\resources\tables
+        xcopy /s src\installer\* bin64\*
+        mv bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
+        pwd
+    - name: Build DMHelper for Windows
+      run: |
+        pwd
+        cd DMHelper
+        mkdir build-64_bit-release
+        cd build-64_bit-release
+        qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
+        jom.exe /d /f Makefile qmake_all
+        jom.exe /d /f Makefile.Release
+        ls

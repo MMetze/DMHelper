@@ -33,7 +33,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _vlcMedia(nullptr),
     _nativeWidth(0),
     _nativeHeight(0),
-    _mutex(new QMutex(QMutex::Recursive)),
+    _mutex(new QRecursiveMutex()),
     _buffers(),
     _idxRender(0),
     _idxDisplay(1),
@@ -167,7 +167,7 @@ bool VideoPlayer::isError() const
     return _vlcError;
 }
 
-QMutex* VideoPlayer::getMutex() const
+QRecursiveMutex* VideoPlayer::getMutex() const
 {
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting mutex: " << _mutex;

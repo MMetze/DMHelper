@@ -2,8 +2,11 @@
 #include "optionsdialog.h"
 #include "optionsaccessor.h"
 #include "dmversion.h"
+#include "tokeneditor.h"
 #include <QDir>
 #include <QCoreApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -47,8 +50,15 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _lastUpdateDate(),
     _heroForgeToken(),
     _tokenSearchString(),
-    _tokenFrameFile(),
+    _tokenBackgroundFill(false),
+    _tokenBackgroundFillColor(Qt::white),
+    _tokenTransparent(false),
+    _tokenTransparentColor(Qt::white),
+    _tokenTransparentLevel(TokenEditor::TRANSPARENT_LEVEL_DEFAULT),
+    _tokenMaskApplied(false),
     _tokenMaskFile(),
+    _tokenFrameApplied(false),
+    _tokenFrameFile(),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -247,14 +257,49 @@ QString OptionsContainer::getTokenSearchString() const
     return _tokenSearchString;
 }
 
-QString OptionsContainer::getTokenFrameFile() const
+bool OptionsContainer::getTokenBackgroundFill() const
 {
-    return _tokenFrameFile;
+    return _tokenBackgroundFill;
+}
+
+QColor OptionsContainer::getTokenBackgroundFillColor() const
+{
+    return _tokenBackgroundFillColor;
+}
+
+bool OptionsContainer::getTokenTransparent() const
+{
+    return _tokenTransparent;
+}
+
+QColor OptionsContainer::getTokenTransparentColor() const
+{
+    return _tokenTransparentColor;
+}
+
+int OptionsContainer::getTokenTransparentLevel() const
+{
+    return _tokenTransparentLevel;
+}
+
+bool OptionsContainer::getTokenMaskApplied() const
+{
+    return _tokenMaskApplied;
 }
 
 QString OptionsContainer::getTokenMaskFile() const
 {
     return _tokenMaskFile;
+}
+
+bool OptionsContainer::getTokenFrameApplied() const
+{
+    return _tokenFrameApplied;
+}
+
+QString OptionsContainer::getTokenFrameFile() const
+{
+    return _tokenFrameFile;
 }
 
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -317,6 +362,12 @@ void OptionsContainer::editSettings()
     connect(editCopyContainer, &OptionsContainer::fontSizeChanged, this, &OptionsContainer::registerFontChange);
 
     OptionsDialog dlg(editCopyContainer);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+    {
+        QSize screenSize = primary->availableSize();
+        dlg.resize(screenSize.width() * 2 / 3, screenSize.height() * 4 / 5);
+    }
 
     if(dlg.exec() == QDialog::Accepted)
     {
@@ -402,8 +453,6 @@ void OptionsContainer::readSettings()
     setHeroForgeToken(settings.value("heroforgeToken").toString());
 
     setTokenSearchString(settings.value("tokenSearchString", QVariant(QString("dnd 5e"))).toString());
-    //setTokenFrameFile(settings.value("tokenFrame").toString());
-    //setTokenMaskFile(settings.value("tokenMask").toString());
     setTokenFrameFile(getSettingsFile(settings, QString("tokenFrame"), QString("dmh_default_frame.png")));
     setTokenMaskFile(getSettingsFile(settings, QString("tokenMask"), QString("dmh_default_mask.png")));
 
@@ -753,7 +802,7 @@ void OptionsContainer::backupFile(const QString& filename)
         QDir backupDir(backupPath);
         QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
         QFileInfo backupFileInfo(previousBackup);
-        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
         if((!backupFileInfo.exists()) || (backupFileInfo.size() != fileInfo.size()))
         {
             if(backupFileInfo.exists())
@@ -1017,13 +1066,63 @@ void OptionsContainer::setTokenSearchString(const QString& tokenSearchString)
     }
 }
 
-void OptionsContainer::setTokenFrameFile(const QString& tokenFrameFile)
+void OptionsContainer::setTokenBackgroundFill(bool backgroundFill)
 {
-    if(_tokenFrameFile != tokenFrameFile)
+    if(_tokenBackgroundFill != backgroundFill)
     {
-        _tokenFrameFile = tokenFrameFile;
-        qDebug() << "[OptionsContainer] Token frame file set to: " << _tokenFrameFile;
-        emit tokenFrameFileChanged(_tokenFrameFile);
+        _tokenBackgroundFill = backgroundFill;
+        qDebug() << "[OptionsContainer] Token background fill set to: " << _tokenBackgroundFill;
+        emit tokenBackgroundFillChanged(_tokenBackgroundFill);
+    }
+}
+
+void OptionsContainer::setTokenBackgroundFillColor(const QColor& transparentColor)
+{
+    if(_tokenBackgroundFillColor != transparentColor)
+    {
+        _tokenBackgroundFillColor = transparentColor;
+        qDebug() << "[OptionsContainer] Token background fill color set to: " << _tokenBackgroundFillColor;
+        emit tokenBackgroundFillColorChanged(_tokenBackgroundFillColor);
+    }
+}
+
+void OptionsContainer::setTokenTransparent(bool transparent)
+{
+    if(_tokenTransparent != transparent)
+    {
+        _tokenTransparent = transparent;
+        qDebug() << "[OptionsContainer] Token transparent set to: " << _tokenTransparent;
+        emit tokenTransparentChanged(_tokenTransparent);
+    }
+}
+
+void OptionsContainer::setTokenTransparentColor(const QColor& transparentColor)
+{
+    if(_tokenTransparentColor != transparentColor)
+    {
+        _tokenTransparentColor = transparentColor;
+        qDebug() << "[OptionsContainer] Token transparent color set to: " << _tokenTransparentColor;
+        emit tokenTransparentColorChanged(_tokenTransparentColor);
+    }
+}
+
+void OptionsContainer::setTokenTransparentLevel(int transparentLevel)
+{
+    if(_tokenTransparentLevel != transparentLevel)
+    {
+        _tokenTransparentLevel = transparentLevel;
+        qDebug() << "[OptionsContainer] Token transparent level set to: " << _tokenTransparentLevel;
+        emit tokenTransparentLevelChanged(_tokenTransparentLevel);
+    }
+}
+
+void OptionsContainer::setTokenMaskApplied(bool maskApplied)
+{
+    if(_tokenMaskApplied != maskApplied)
+    {
+        _tokenMaskApplied = maskApplied;
+        qDebug() << "[OptionsContainer] Token mask applied set to: " << _tokenMaskApplied;
+        emit tokenMaskAppliedChanged(_tokenMaskApplied);
     }
 }
 
@@ -1036,6 +1135,26 @@ void OptionsContainer::setTokenMaskFile(const QString& tokenMaskFile)
         emit tokenMaskFileChanged(_tokenMaskFile);
     }
 }
+void OptionsContainer::setTokenFrameApplied(bool frameApplied)
+{
+    if(_tokenFrameApplied != frameApplied)
+    {
+        _tokenFrameApplied = frameApplied;
+        qDebug() << "[OptionsContainer] Token frame applied set to: " << _tokenFrameApplied;
+        emit tokenFrameAppliedChanged(_tokenFrameApplied);
+    }
+}
+
+void OptionsContainer::setTokenFrameFile(const QString& tokenFrameFile)
+{
+    if(_tokenFrameFile != tokenFrameFile)
+    {
+        _tokenFrameFile = tokenFrameFile;
+        qDebug() << "[OptionsContainer] Token frame file set to: " << _tokenFrameFile;
+        emit tokenFrameFileChanged(_tokenFrameFile);
+    }
+}
+
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 

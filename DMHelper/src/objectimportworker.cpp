@@ -58,7 +58,7 @@ bool ObjectImportWorker::doWork()
         return registerImportResult(false, QString("Not able to open the selected import file: ") + _importFilename);
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString contentError;
     int contentErrorLine = 0;
     int contentErrorColumn = 0;

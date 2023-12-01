@@ -5,7 +5,6 @@
 #include <QUrl>
 #include <QList>
 #include <QMediaPlayer>
-#include <QMediaPlaylist>
 #include "audiotrack.h"
 
 class AudioPlayer : public QObject
@@ -14,7 +13,7 @@ class AudioPlayer : public QObject
 public:
     explicit AudioPlayer(QObject *parent = nullptr);
 
-    int getVolume();
+    float getVolume();
     qint64 getPosition();
     qint64 getDuration();
 
@@ -29,7 +28,7 @@ public:
     };
 
 signals:
-    void volumeChanged(int volume);
+    void volumeChanged(float volume);
     void positionChanged(qint64 position);
     void durationChanged(qint64 duration);
     void trackChanged(AudioTrack* track);
@@ -40,7 +39,7 @@ public slots:
     void play();
     void pause();
     void stop();
-    void setVolume(int volume);
+    void setVolume(float volume);
     void setPosition(qint64 position);
 
     void playerPlayUrl(QUrl url);
@@ -48,15 +47,14 @@ public slots:
 
 private slots:
     void playerStatusChanged(QMediaPlayer::MediaStatus status);
-    void handleCurrentMediaChanged(const QMediaContent &media);
+    void handleSourceChanged(const QUrl &media);
     void handlePositionChanged(qint64 position);
     void handleDurationChanged(qint64 duration);
-    void handleVolumeChanged(int volume);
-    void handleStateChanged(QMediaPlayer::State playerState);
+    void handleVolumeChanged(float volume);
+    void handleStateChanged(QMediaPlayer::PlaybackState playerState);
 
 private:
     QMediaPlayer* _player;
-    QMediaPlaylist* _playlist;
     AudioTrack* _currentTrack;
 };
 

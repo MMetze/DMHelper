@@ -57,7 +57,7 @@ void RandomMarketDialog::loadMarkets(const QString& shopFile)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;
