@@ -2,12 +2,12 @@
 #include "battledialogeffectsettings.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
-#include "battledialogmodeleffectobject.h"
+//#include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodelmonsterclass.h"
 #include "monsterclass.h"
 #include "unselectedpixmap.h"
-#include "grid.h"
+//#include "grid.h"
 #include "layertokens.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
@@ -15,6 +15,8 @@
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QtMath>
+#include <QMimeData>
+#include <QMimeDatabase>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -31,9 +33,7 @@
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     CameraScene(parent),
     _contextMenuItem(nullptr),
-//    _grid(nullptr),
     _model(nullptr),
-//    _itemList(),
     _mouseDown(false),
     _mouseDownPos(),
     _mouseDownItem(nullptr),
@@ -96,33 +96,8 @@ void BattleDialogGraphicsScene::createBattleContents()
         return;
     }
 
-    /*
-    if(!isSceneEmpty())
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents. Contents already exist!";
-        return;
-    }
-    */
-
     qDebug() << "[Battle Dialog Scene] Creating scene contents";
-    //_grid = new Grid(*this, rect);
-    //_grid->rebuildGrid(*_model);
     setDistanceScale(_model->getGridScale());
-
-    /*
-    QList<BattleDialogModelEffect*> effects = _model->getEffectList();
-    for(BattleDialogModelEffect* effect : std::as_const(effects))
-    {
-        if(effect)
-        {
-            if((effect->children().count() != 1) ||
-               (addSpellEffect(*effect) == nullptr))
-            {
-                addEffectShape(*effect);
-            }
-        }
-    }
-    */
 
     QGraphicsView* view = views().constFirst();
     if(view)
@@ -137,73 +112,6 @@ void BattleDialogGraphicsScene::createBattleContents()
         _pointerPixmapItem->setVisible(_pointerVisible);
     }
 }
-
-/*
-void BattleDialogGraphicsScene::resizeBattleContents()
-{
-    qDebug() << "[Battle Dialog Scene] Resizing scene contents";
-
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to resize scene contents, no model exists.";
-        return;
-    }
-
-    if(_grid)
-    {
-        //qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
-        //_grid->setGridShape(rect);
-        //_grid->rebuildGrid(*_model);
-    }
-
-    for(QGraphicsItem* item : std::as_const(_itemList))
-    {
-        if(item)
-        {
-            QPoint mapPos = item->pos().toPoint() + _model->getPreviousMapRect().topLeft();
-            item->setPos(mapPos - _model->getMapRect().topLeft());
-            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
-            if(effect)
-                effect->setPosition(item->pos());
-            qDebug() << "[Battle Dialog Scene]     Setting position for item " << item << " to " << item->pos();
-        }
-    }
-}
-    */
-/*
-void BattleDialogGraphicsScene::updateBattleContents()
-{
-    qDebug() << "[Battle Dialog Scene] Updating scene contents";
-
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to update scene contents, no model exists.";
-        return;
-    }
-
-    if(_grid)
-    {
-        qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model->getGridScale();
-        //_grid->rebuildGrid(*_model);
-    }
-
-    for(QGraphicsItem* item : std::as_const(_itemList))
-    {
-        if(item)
-        {
-            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
-            if(effect)
-            {
-                qreal newScale = static_cast<qreal>(effect->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
-                qreal oldScale = item->scale();
-                effect->applyScale(*item, newScale);
-                item->setPos(item->pos() * item->scale()/oldScale);
-                effect->setPosition(item->pos());
-            }
-        }
-    }
-}
-    */
 
 void BattleDialogGraphicsScene::scaleBattleContents()
 {
@@ -220,57 +128,8 @@ void BattleDialogGraphicsScene::scaleBattleContents()
 
 void BattleDialogGraphicsScene::clearBattleContents()
 {
-    /*
-    qDebug() << "[Battle Dialog Scene] Clearing battle contents.";
-    if(_grid)
-    {
-        _grid->clear();
-        delete _grid;
-        _grid = nullptr;
-    }
-
-    qDeleteAll(_itemList);
-    _itemList.clear();
-    */
-
     delete _pointerPixmapItem; _pointerPixmapItem = nullptr;
 }
-
-/*
-void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffects)
-{
-    bool newVisible = visible;
-
-    for(QGraphicsItem* item : std::as_const(_itemList))
-    {
-        if(item)
-        {
-            if(!allEffects)
-                newVisible = visible && BattleDialogModelEffect::getEffectVisibleFromItem(item);
-
-            if(item->isVisible() != newVisible)
-                item->setVisible(newVisible);
-        }
-    }
-}
-*/
-
-/*
-void BattleDialogGraphicsScene::setGridVisibility(bool visible)
-{
-    if(_grid)
-        _grid->setGridVisible(visible);
-}
-
-void BattleDialogGraphicsScene::paintGrid(QPainter* painter)
-{
-    if((!_model) || (!_grid) || (!painter))
-        return;
-
-    // TODO: Layers Grid
-    //_grid->rebuildGrid(*_model, painter);
-}
-*/
 
 void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
 {
@@ -332,18 +191,6 @@ QGraphicsSimpleTextItem* BattleDialogGraphicsScene::getDistanceText() const
 
     return result;
 }
-
-/*
-QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
-{
-    return _itemList;
-}
-
-bool BattleDialogGraphicsScene::isSceneEmpty() const
-{
-    return((_grid == nullptr) && (_itemList.count() == 0));
-}
-*/
 
 QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 {
@@ -885,124 +732,6 @@ void BattleDialogGraphicsScene::setInputMode(int inputMode)
     _inputMode = inputMode;
 }
 
-/*
-void BattleDialogGraphicsScene::addEffectObject()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create object effect, no model exists.";
-        return;
-    }
-
-    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."));
-    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename);
-    
-    if(effect)
-    {
-        // TODO: Layers - move to Frame
-        //_contextMenuItem = addEffect(effect);
-        if(_contextMenuItem)
-        {
-            editItem();
-            _contextMenuItem = nullptr;
-        }
-    }
-}
-*/
-
-/*
-void BattleDialogGraphicsScene::castSpell()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to cast a spell, no model exists.";
-        return;
-    }
-
-    bool ok = false;
-    QString selectedSpell = QInputDialog::getItem(nullptr,
-                                                  QString("Select Spell"),
-                                                  QString("Select the spell to cast:"),
-                                                  Spellbook::Instance()->getSpellList(),
-                                                  0,
-                                                  false,
-                                                  &ok);
-    if(!ok)
-    {
-        qDebug() << "[Battle Dialog Scene] Spell cast aborted: spell selection dialog cancelled.";
-        return;
-    }
-
-    qDebug() << "[Battle Dialog Scene] Casting spell: " << selectedSpell;
-
-    Spell* spell = Spellbook::Instance()->getSpell(selectedSpell);
-    if(!spell)
-    {
-        qDebug() << "[Battle Dialog Scene] Spell cast aborted: not able to find selected spell in the Spellbook.";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = createEffect(spell->getEffectType(),
-                                                   spell->getEffectSize().height(),
-                                                   spell->getEffectSize().width(),
-                                                   spell->getEffectColor(),
-                                                   spell->getEffectTokenPath());
-
-    if(!effect)
-    {
-        qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect object.";
-        return;
-    }
-
-    if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
-    {
-        // Either an Object or a basic shape without a token
-        effect->setName(spell->getName());
-        effect->setTip(spell->getName());
-        // TODO: Layers - move to Frame
-        //addEffect(effect);
-    }
-    else
-    {
-        // A basic shape with a token image as well
-        int tokenHeight = spell->getEffectSize().height();
-        int tokenWidth = spell->getEffectSize().height();
-        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
-        {
-            tokenHeight *= 2;
-            tokenWidth *= 2;
-        }
-        else if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
-        {
-            tokenWidth = spell->getEffectSize().width();
-        }
-
-        BattleDialogModelEffectObject* tokenEffect =  dynamic_cast<BattleDialogModelEffectObject*>(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
-                                                                                                                tokenHeight,
-                                                                                                                tokenWidth,
-                                                                                                                Qt::black, //spell->getEffectColor(),
-                                                                                                                spell->getEffectTokenPath()));
-
-        if(!tokenEffect)
-        {
-            qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's token object!";
-            delete effect;
-            return;
-        }
-
-        tokenEffect->setName(spell->getName());
-        tokenEffect->setTip(spell->getName());
-        tokenEffect->setEffectActive(true);
-        tokenEffect->setImageRotation(spell->getEffectTokenRotation());
-
-        effect->addObject(tokenEffect);
-        _model->appendEffect(effect);
-        // TODO: Layers - move to Frame
-        //addSpellEffect(*effect);
-    }
-}
-*/
-
 void BattleDialogGraphicsScene::setSelectedIcon(const QString& selectedIcon)
 {
     _selectedIcon = selectedIcon;
@@ -1111,7 +840,6 @@ void BattleDialogGraphicsScene::deleteItem()
     if(result == QMessageBox::Yes)
     {
         qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
-//        _itemList.removeOne(_contextMenuItem);
         if(_mouseDownItem == _contextMenuItem)
         {
             _mouseDown = false;
@@ -1119,8 +847,6 @@ void BattleDialogGraphicsScene::deleteItem()
         }
         emit effectRemoved(_contextMenuItem);
         _model->removeEffect(deleteEffect);
-        //delete _contextMenuItem;
-        //_contextMenuItem = nullptr;
     }
 }
 
@@ -1325,6 +1051,88 @@ void BattleDialogGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
         _spaceDown = false;
 
     QGraphicsScene::keyReleaseEvent(keyEvent);
+}
+
+void BattleDialogGraphicsScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if(!event)
+        return;
+
+    if(isMimeDataImage(event->mimeData()))
+    {
+        event->acceptProposedAction();
+        return;
+    }
+
+    QGraphicsScene::dragEnterEvent(event);
+}
+
+void BattleDialogGraphicsScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if(!event)
+        return;
+
+    event->acceptProposedAction();
+}
+
+void BattleDialogGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if(!event)
+        return;
+
+    if(isMimeDataImage(event->mimeData()))
+    {
+        event->acceptProposedAction();
+        emit addEffectObjectFile(getMimeDataImageFile(event->mimeData()));
+        return;
+    }
+
+    QGraphicsScene::dropEvent(event);
+}
+
+bool BattleDialogGraphicsScene::isMimeDataImage(const QMimeData* mimeData) const
+{
+    if(!mimeData)
+        return false;
+
+    if(mimeData->hasUrls())
+    {
+        foreach(QUrl url, mimeData->urls())
+        {
+            if(url.isLocalFile())
+            {
+                QString filePath = url.toLocalFile();
+                QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filePath);
+                if((mimeType.isValid()) &&
+                    (mimeType.name().startsWith("image/")))
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+QString BattleDialogGraphicsScene::getMimeDataImageFile(const QMimeData* mimeData) const
+{
+    if(!mimeData)
+        return QString();
+
+    if(mimeData->hasUrls())
+    {
+        foreach(QUrl url, mimeData->urls())
+        {
+            if(url.isLocalFile())
+            {
+                QString filePath = url.toLocalFile();
+                QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filePath);
+                if((mimeType.isValid()) && (mimeType.name().startsWith("image/")))
+                    return filePath;
+            }
+        }
+    }
+
+    return QString();
 }
 
 BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int size, int width, const QColor& color, const QString& filename)

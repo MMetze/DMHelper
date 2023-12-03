@@ -34,9 +34,6 @@ class BattleFrame;
 
 //#define DEBUG_FILL_BOUNDING_RECTS
 
-//const int BattleDialogItemChild_Index = 0;
-//const int BattleDialogItemChild_EffectId = 0;
-
 class BattleFrame : public CampaignObjectFrame
 {
     Q_OBJECT
@@ -126,6 +123,7 @@ public slots:
     void addCharacter();
     void addNPC();
     void addEffectObject();
+    void addEffectObjectFile(const QString& filename);
     void castSpell();
 
     void addEffectRadius();
@@ -289,7 +287,6 @@ private slots:
 
     void removeRollover();
 
-//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
 
@@ -344,9 +341,6 @@ private:
     QRectF getCameraRect();
     void setCameraToView();
 
-    // Helper functions to simplify rendering
-    //void extractDMScreenshot();
-
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
@@ -383,7 +377,6 @@ private:
 
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _activePixmap;
-//    qreal _activeScale;
     qreal _selectedScale;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;

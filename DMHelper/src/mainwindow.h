@@ -83,7 +83,7 @@ public slots:
     void newTextEncounter();
     void newLinkedText();
     void newBattleEncounter();
-    void newMap();
+    void newMap(Layer* imageLayer = nullptr);
     void newMedia();
     void newAudioEntry();
     void newSyrinscapeEntry();
@@ -134,7 +134,6 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event);
 
     void dragEnterEvent(QDragEnterEvent *event);
-    void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
 

@@ -4,7 +4,6 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QHideEvent>
-#include <QMimeData>
 
 TextPublishDialog::TextPublishDialog(QWidget *parent) :
     QDialog(parent),
