@@ -69,6 +69,7 @@ signals:
     void addMonsters();
     void addNPC();
     void addEffectObject();
+    void addLayerImageFile(const QString& filename);
     void addEffectObjectFile(const QString& filename);
     void castSpell();
 

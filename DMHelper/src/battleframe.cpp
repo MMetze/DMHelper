@@ -37,6 +37,7 @@
 #include "layertokens.h"
 #include "layergrid.h"
 #include "layerfow.h"
+#include "layerimage.h"
 #include "layerreference.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
@@ -189,6 +190,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObjectFile, this, &BattleFrame::addEffectObjectFile);
+    connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
@@ -1165,6 +1167,20 @@ void BattleFrame::addEffectObjectFile(const QString& filename)
         return;
 
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename));
+}
+
+void BattleFrame::addLayerImageFile(const QString& filename)
+{
+    if((filename.isEmpty()) || (!_model))
+        return;
+
+    if(!QImageReader(filename).canRead())
+    {
+        qDebug() << "[BattleFrame] addLayerImageFile: " << filename << " is not a valid image file.";
+        return;
+    }
+
+    _model->getLayerScene().appendLayer(new LayerImage(QString("Image: ") + filename, filename));
 }
 
 void BattleFrame::castSpell()

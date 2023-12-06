@@ -1082,8 +1082,30 @@ void BattleDialogGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 
     if(isMimeDataImage(event->mimeData()))
     {
-        event->acceptProposedAction();
-        emit addEffectObjectFile(getMimeDataImageFile(event->mimeData()));
+        // Create a QMessageBox
+        QMessageBox msgBox;
+        msgBox.setText("Do you want to add the image as a layer or a token?");
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.addButton("Layer", QMessageBox::ActionRole);
+        msgBox.addButton("Token", QMessageBox::ActionRole);
+        msgBox.addButton("Cancel", QMessageBox::RejectRole);
+        int result = msgBox.exec();
+
+        if(result == 0)
+        {
+            event->acceptProposedAction();
+            emit addLayerImageFile(getMimeDataImageFile(event->mimeData()));
+        }
+        else if(result == 1)
+        {
+            event->acceptProposedAction();
+            emit addEffectObjectFile(getMimeDataImageFile(event->mimeData()));
+        }
+        else
+        {
+            event->ignore();
+        }
+
         return;
     }
 
