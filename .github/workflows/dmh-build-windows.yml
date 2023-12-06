@@ -11,7 +11,7 @@ env:
   ARTIFACT:     qt-planets-build.zip
 
 jobs:
-  build-DMH-win64:
+  build:
 
     runs-on: windows-latest
 
