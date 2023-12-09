@@ -69,6 +69,10 @@ void WidgetCombatantBase::updateData()
 {
 }
 
+void WidgetCombatantBase::updateImage()
+{
+}
+
 void WidgetCombatantBase::initiativeChanged(int initiative)
 {
     if(getCombatant() && (getCombatant()->getInitiative() != initiative))

@@ -43,6 +43,7 @@
 struct vlc_window;
 struct wl_display;
 struct wl_surface;
+typedef struct vlc_icc_profile_t vlc_icc_profile_t;
 
 /**
  * Window handle type.
@@ -311,6 +312,18 @@ struct vlc_window_callbacks {
      */
     void (*output_event)(struct vlc_window *,
                          const char *id, const char *desc);
+
+    /**
+     * Callback for ICC profile update.
+     *
+     * This can happen either because of the window being moved to a different
+     * display, or because the ICC profile associated with a display is
+     * updated. Memory transfers to the callee.
+     *
+     * \param profile ICC profile associated with the window, or NULL to
+     *                indicate absence of an ICC profile
+     */
+    void (*icc_event)(struct vlc_window *, vlc_icc_profile_t *profile);
 };
 
 /**
@@ -381,7 +394,7 @@ typedef struct vlc_window {
         void     *hwnd;          /**< Win32 window handle */
         uint32_t xid;            /**< X11 windows ID */
         void     *nsobject;      /**< macOS/iOS view object */
-        void     *anativewindow; /**< Android native window */
+        int      android_id;     /**< AWindow_ID */
         struct wl_surface *wl;   /**< Wayland surface (client pointer) */
         void     *dcomp_visual;  /**<  Win32 direct composition visual */
         uint32_t crtc;           /**< KMS CRTC identifier */
@@ -400,6 +413,7 @@ typedef struct vlc_window {
         struct wl_display *wl; /**< Wayland display (client pointer) */
         void* dcomp_device; /**< DirectComposition device */
         int      drm_fd; /**< KMS DRM device */
+        void* anativewindow; /**< Android native window */
     } display;
 
     const struct vlc_window_operations *ops; /**< operations handled by the
@@ -733,6 +747,22 @@ static inline void vlc_window_ReportOutputDevice(vlc_window_t *window,
 {
     if (window->owner.cbs->output_event != NULL)
         window->owner.cbs->output_event(window, id, name);
+}
+
+/**
+ * Reports a change to the currently active ICC profile.
+ *
+ * \param window the window reporting the ICC profile
+ * \param prof the profile data, or NULL. Ownership transfers to callee
+ */
+static inline void vlc_window_ReportICCProfile(vlc_window_t *window,
+                                               vlc_icc_profile_t *prof)
+{
+    if (window->owner.cbs->icc_event != NULL) {
+        window->owner.cbs->icc_event(window, prof);
+    } else {
+        free(prof);
+    }
 }
 
 /** @} */

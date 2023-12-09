@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QIcon>
 
 const int stopCallComplete = 0x01;
 const int stopConfirmed = 0x02;
@@ -31,6 +32,11 @@ AudioTrackYoutube::~AudioTrackYoutube()
         killTimer(_timerId);
 
     AudioTrackYoutube::stop();
+}
+
+QIcon AudioTrackYoutube::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_playerswindow.png");
 }
 
 int AudioTrackYoutube::getAudioType() const
@@ -69,7 +75,7 @@ bool AudioTrackYoutube::isMuted() const
     return _mute;
 }
 
-int AudioTrackYoutube::getVolume() const
+float AudioTrackYoutube::getVolume() const
 {
     if(isPlaying())
         return libvlc_audio_get_volume(_vlcPlayer);
@@ -117,12 +123,12 @@ void AudioTrackYoutube::setMute(bool mute)
     }
 }
 
-void AudioTrackYoutube::setVolume(int volume)
+void AudioTrackYoutube::setVolume(float volume)
 {
     if(!isPlaying())
         return;
 
-    libvlc_audio_set_volume(_vlcPlayer, volume);
+    libvlc_audio_set_volume(_vlcPlayer, static_cast<int>(volume * 100.f));
 }
 
 void AudioTrackYoutube::setRepeat(bool repeat)
@@ -183,9 +189,10 @@ void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
         return;
 
     if(!_manager)
+    {
         _manager = new QNetworkAccessManager(this);
-
-    connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(urlRequestFinished(QNetworkReply*)));
+        connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(urlRequestFinished(QNetworkReply*)));
+    }
 
     QString getString("https://api.dmhh.net/youtube?id=");
     getString.append(youtubeId);

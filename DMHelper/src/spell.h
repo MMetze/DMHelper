@@ -51,7 +51,6 @@ public:
     bool hasEffectCondition(Combatant::Condition condition) const;
 
 signals:
-    void iconChanged();
     void dirty();
 
 public slots:

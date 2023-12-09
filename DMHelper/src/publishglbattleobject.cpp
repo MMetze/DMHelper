@@ -1,6 +1,6 @@
 #include "publishglbattleobject.h"
 
-PublishGLBattleObject::PublishGLBattleObject(PublishGLBattleScene* scene) :
+PublishGLBattleObject::PublishGLBattleObject(PublishGLScene* scene) :
     PublishGLObject(),
     _scene(scene)
 {

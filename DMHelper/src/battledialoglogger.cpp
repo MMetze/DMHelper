@@ -41,14 +41,17 @@ BattleDialogLogger& BattleDialogLogger::operator=(const BattleDialogLogger& othe
 
 QDomElement BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
-    QDomElement loggerElement = doc.createElement( "battlelogger" );
+    if(_battleEvents.count() == 0)
+        return QDomElement();
+
+    QDomElement loggerElement = doc.createElement("battlelogger");
 
     DMHObjectBase::outputXML(doc, loggerElement, targetDirectory, isExport);
 
     for(BattleDialogEvent* i : _battleEvents)
     {
-        QDomElement eventElement = doc.createElement( "battleevent");
-        eventElement.setAttribute( "type", i->getType());
+        QDomElement eventElement = doc.createElement("battleevent");
+        eventElement.setAttribute("type", i->getType());
         i->outputXML(eventElement, isExport);
         loggerElement.appendChild(eventElement);
     }
@@ -71,7 +74,7 @@ void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)
     QDomElement eventElement = element.firstChildElement("battleevent");
     while(!eventElement.isNull())
     {
-        int eventType = eventElement.attribute("type",QString::number(DMHelper::BattleEvent_Blank)).toInt();
+        int eventType = eventElement.attribute("type", QString::number(DMHelper::BattleEvent_Blank)).toInt();
         switch(eventType)
         {
             case DMHelper::BattleEvent_Damage:

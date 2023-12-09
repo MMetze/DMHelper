@@ -16,6 +16,11 @@ BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 {
 }
 
+QString BattleDialogModelEffectRadius::getName() const
+{
+    return _tip.isEmpty() ? QString("Radius Effect") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectRadius::clone() const
 {
     BattleDialogModelEffectRadius* newEffect = new BattleDialogModelEffectRadius(getName());
@@ -37,7 +42,7 @@ BattleDialogEffectSettings* BattleDialogModelEffectRadius::getEffectEditor() con
 
 QGraphicsItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale)
 {
-    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(-100, -100, 200, 200);
+    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(this, -100, -100, 200, 200);
 
     setEffectItemData(circleItem);
 

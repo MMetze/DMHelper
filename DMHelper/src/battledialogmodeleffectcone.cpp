@@ -15,6 +15,11 @@ BattleDialogModelEffectCone::~BattleDialogModelEffectCone()
 {
 }
 
+QString BattleDialogModelEffectCone::getName() const
+{
+    return _tip.isEmpty() ? QString("Cone Effect") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectCone::clone() const
 {
     BattleDialogModelEffectCone* newEffect = new BattleDialogModelEffectCone(getName());
@@ -30,9 +35,9 @@ int BattleDialogModelEffectCone::getEffectType() const
 QGraphicsItem* BattleDialogModelEffectCone::createEffectShape(qreal gridScale)
 {
     QPolygonF poly;
-    poly << QPointF(0,0) << QPointF(-50,100) << QPoint(50,100) << QPoint(0,0);
+    poly << QPointF(0, 0) << QPointF(-50, 100) << QPoint(50, 100) << QPoint(0, 0);
 
-    QGraphicsPolygonItem* triangleItem = new UnselectedPolygon(poly);
+    QGraphicsPolygonItem* triangleItem = new UnselectedPolygon(this, poly);
     setEffectItemData(triangleItem);
 
     prepareItem(*triangleItem);

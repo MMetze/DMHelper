@@ -15,6 +15,7 @@ class EncounterBattle;
 class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
+class GridConfig;
 class Character;
 class Map;
 class QTimer;
@@ -24,13 +25,17 @@ class UnselectedPixmap;
 class CombatantRolloverFrame;
 class PublishGLRenderer;
 class PublishGLBattleRenderer;
+class Layer;
+class LayerTokens;
 
 namespace Ui {
 class BattleFrame;
 }
 
-const int BattleDialogItemChild_Index = 0;
-const int BattleDialogItemChild_EffectId = 0;
+//#define DEBUG_FILL_BOUNDING_RECTS
+
+//const int BattleDialogItemChild_Index = 0;
+//const int BattleDialogItemChild_EffectId = 0;
 
 class BattleFrame : public CampaignObjectFrame
 {
@@ -48,7 +53,7 @@ public:
 
     void setBattleMap();
 
-    void addCombatant(BattleDialogModelCombatant* combatant);
+    void addCombatant(BattleDialogModelCombatant* combatant, LayerTokens* targetLayer = nullptr);
     void addCombatants(QList<BattleDialogModelCombatant*> combatants);
     QList<BattleDialogModelCombatant*> getCombatants() const;
     QList<BattleDialogModelCombatant*> getLivingCombatants() const;
@@ -57,21 +62,11 @@ public:
     QList<BattleDialogModelCombatant*> getLivingMonsters() const;
 
     void recreateCombatantWidgets();
-    void recenterCombatants();
 
     QRect viewportRect();
     QPoint viewportCenter();
 
     BattleFrameMapDrawer* getMapDrawer() const;
-
-    enum BattleDialogItemChild
-    {
-        BattleDialogItemChild_Base = 0,
-        BattleDialogItemChild_Selection,
-        BattleDialogItemChild_AreaEffect,
-        BattleDialogItemChild_Area,
-        BattleDialogItemChild_PersonalEffect
-    };
 
     enum BattleFrameMode
     {
@@ -94,18 +89,18 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
-    void selecttGridCount();
+    void selectGridCount();
     void setGridAngle(int gridAngle);
     void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
-    void setGridVisible(bool gridVisible);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
 
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(qreal initiativeScale);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -125,18 +120,24 @@ public slots:
     void cancelSelect();
 
     // Public for connection to battle ribbon
-    void selectBattleMap();
+    bool createNewBattle();
     void reloadMap();
     void addMonsters();
     void addCharacter();
     void addNPC();
-    void addObject();
+    void addEffectObject();
     void castSpell();
 
     void addEffectRadius();
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void registerEffect(BattleDialogModelEffect* effect);
+
+    void duplicateSelection();
+    bool duplicateItem(QGraphicsItem* item);
+    bool duplicateCombatant(LayerTokens* tokenLayer, BattleDialogModelCombatant* combatant);
+    bool duplicateEffect(LayerTokens* tokenLayer, BattleDialogModelEffect* effect);
 
     // Public for connection to map ribbon
     void setCameraCouple();
@@ -162,24 +163,27 @@ public slots:
     void setPointerOn(bool enabled);
     void showStatistics();
 
+    void layerSelected(int selected);
+
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
     virtual void setBackgroundColor(const QColor& color) override;
-    virtual void reloadObject() override;
+    virtual void editLayers() override;
 
 signals:
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
 
     void modelChanged(BattleDialogModel* model);
 
-    void gridScaleChanged(int gridScale);
+    void gridConfigChanged(const GridConfig& config);
     void zoomSelectToggled(bool enabled);
 
     void cameraSelectToggled(bool enabled);
@@ -209,22 +213,27 @@ protected:
     virtual void showEvent(QShowEvent *event) override;
 
 private slots:
-    void setCompassVisibility(bool visible);
     void updateCombatantVisibility();
-    void updateEffectLayerVisibility();
     void updateMap();
     void updateRounds();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleEffectChanged(QGraphicsItem* effectItem);
     void handleEffectRemoved(QGraphicsItem* effectItem);
-    void handleCombatantMoved(BattleDialogModelCombatant* combatant);
+    void handleCombatantMoved(BattleDialogModelObject* object);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
     void handleCombatantRemove(BattleDialogModelCombatant* combatant);
+    void handleCombatantAdded(BattleDialogModelCombatant* combatant);
+    void handleCombatantRemoved(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
+    void handleChangeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex);
     void handleApplyEffect(QGraphicsItem* effect);
+
+    void handleItemChangeLayer(BattleDialogModelObject* battleObject);
+    void handleItemLink(BattleDialogModelObject* item);
+    void handleItemUnlink(BattleDialogModelObject* item);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
@@ -235,9 +244,16 @@ private slots:
     void handleMapMousePress(const QPointF& pos);
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
+    void handleSceneChanged(const QList<QRectF> &region);
+    void handleLayersChanged();
+    void handleLayerSelected(Layer* layer);
+
+    void itemLink();
+    void itemUnlink();
 
     void removeCombatant();
     void activateCombatant();
+    void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
     void applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange);
@@ -247,13 +263,16 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
+    void copyMonsters();
+    void clearCopy();
+    void pasteMonsters();
+
     void updateHighlights();
     void countdownTimerExpired();
     void updateCountdownText();
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
-    void setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded);
-    void setEffectLayerVisibility(bool visibility);
+    void setCombatantVisibility(bool aliveVisible, bool deadVisible);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);
@@ -270,10 +289,9 @@ private slots:
 
     void removeRollover();
 
-    void handleScreenshotReady(const QImage& image);
+//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
-    void updateRendererGrid();
 
     // State Machine
     void stateUpdated();
@@ -289,9 +307,18 @@ private:
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
+    QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
+    BattleDialogModelObject* getObjectFromItem(QGraphicsItem* item) const;
+    BattleDialogModelCombatant* getCombatantFromItem(QGraphicsItem* item) const;
+    BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item) const;
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
+    void removeSingleCombatant(BattleDialogModelCombatant* combatant);
+
+    bool validateTokenLayerExists();
+    void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);
+    void moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers);
 
     void updatePublishEnable();
 
@@ -318,11 +345,11 @@ private:
     void setCameraToView();
 
     // Helper functions to simplify rendering
-    void extractDMScreenshot();
+    //void extractDMScreenshot();
+
+    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
-    void removeEffectsFromItem(QGraphicsPixmapItem* item);
-    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
     void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
@@ -341,7 +368,6 @@ private:
     BattleDialogLogger* _logger;
 
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
-    QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
 
     BattleFrameStateMachine _stateMachine;
 
@@ -356,12 +382,9 @@ private:
     QGraphicsItem* _publishEffectItem;
 
     BattleDialogGraphicsScene* _scene;
-    QGraphicsPixmapItem* _background;
-    QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
-    qreal _activeScale;
+//    qreal _activeScale;
     qreal _selectedScale;
-    QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;
     QRectF _publishRectValue;
@@ -389,6 +412,7 @@ private:
     PublishGLBattleRenderer* _renderer;
 
     int _initiativeType;
+    qreal _initiativeScale;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;
@@ -400,6 +424,7 @@ private:
     QRect _rubberBandRect;
     qreal _scale;
     int _rotation;
+    QList<BattleDialogModelCombatant*> _copyList;
 
     qreal _moveRadius;
     QPointF _moveStart;

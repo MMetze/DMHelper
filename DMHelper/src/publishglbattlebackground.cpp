@@ -5,9 +5,11 @@
 #include <QImage>
 #include <QDebug>
 
-PublishGLBattleBackground::PublishGLBattleBackground(PublishGLBattleScene* scene, const QImage& image, int textureParam) :
+PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam) :
     PublishGLBattleObject(scene),
     _imageSize(),
+    _position(),
+    _targetSize(),
     _textureParam(textureParam),
     _VAO(0),
     _VBO(0),
@@ -24,6 +26,8 @@ PublishGLBattleBackground::~PublishGLBattleBackground()
 void PublishGLBattleBackground::cleanup()
 {
     _imageSize = QSize();
+
+    qDebug() << "[PublishGLBattleBackground] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
 
     if(QOpenGLContext::currentContext())
     {
@@ -59,6 +63,8 @@ void PublishGLBattleBackground::paintGL()
     if(!QOpenGLContext::currentContext())
         return;
 
+    //qDebug() << "[PublishGLBattleBackground]::paintGL context: " << QOpenGLContext::currentContext();
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
@@ -73,11 +79,43 @@ void PublishGLBattleBackground::setImage(const QImage& image)
 {
     cleanup();
     createImageObjects(image);
+    updateModelMatrix();
 }
 
 QSize PublishGLBattleBackground::getSize() const
 {
     return _imageSize;
+}
+
+void PublishGLBattleBackground::updateImage(const QImage& image)
+{
+    if((_imageSize.isEmpty()) || (_imageSize != image.size()))
+    {
+        setImage(image);
+    }
+    else
+    {
+        loadTexture(image);
+        updateModelMatrix();
+    }
+}
+
+void PublishGLBattleBackground::setPosition(const QPoint& position)
+{
+    if(_position == position)
+        return;
+
+    _position = position;
+    updateModelMatrix();
+}
+
+void PublishGLBattleBackground::setTargetSize(const QSize& size)
+{
+    if(_targetSize == size)
+        return;
+
+    _targetSize = size;
+    updateModelMatrix();
 }
 
 void PublishGLBattleBackground::createImageObjects(const QImage& image)
@@ -97,10 +135,14 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
 
     float vertices[] = {
         // positions                                                   // colors           // texture coords
-         (float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         (float)image.width() / 2, -(float)image.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -(float)image.width() / 2, -(float)image.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+//         (float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+//         (float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+//        -(float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+//        -(float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
+        (float)image.width(),                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+        (float)image.width(), -(float)image.height(),            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        0.0f,                 -(float)image.height(),            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        0.0f,                                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -131,6 +173,32 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
 
     // Texture
     f->glGenTextures(1, &_textureID);
+    loadTexture(image);
+
+    qDebug() << "[PublishGLBattleBackground] Created image object. w: " << image.width() << ", h: " << image.height() << ", VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID << ", context: " << QOpenGLContext::currentContext();
+
+}
+
+void PublishGLBattleBackground::updateModelMatrix()
+{
+    _modelMatrix.setToIdentity();
+    _modelMatrix.translate(_position.x(),
+                           _position.y());
+    if(_targetSize.isValid())
+        _modelMatrix.scale(static_cast<qreal>(_targetSize.width()) / static_cast<qreal>(_imageSize.width()),
+                           static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_imageSize.height()));
+}
+
+void PublishGLBattleBackground::loadTexture(const QImage& image)
+{
+    if((_textureID == 0) || (!QOpenGLContext::currentContext()))
+        return;
+
+    // Set up the rendering context, load shaders and other resources, etc.:
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if(!f)
+        return;
+
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
     // set the texture wrapping/filtering options (on the currently bound texture object)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -10,24 +10,23 @@ RibbonFrameText::RibbonFrameText(QWidget *parent) :
     ui->setupUi(this);
 
     ui->btnColor->setRotationVisible(false);
-    connect(ui->btnColor, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
+    connect(ui->btnColor, &ColorPushButton::colorChanged, this, &RibbonFrameText::colorChanged);
 
-    QFontDatabase fontDB;
-    ui->cmbFont->addItems(fontDB.families());
+    ui->cmbFont->addItems(QFontDatabase::families());
     ui->cmbFont->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    connect(ui->cmbFont, SIGNAL(currentIndexChanged(QString)), this, SIGNAL(fontFamilyChanged(QString)));
+    connect(ui->cmbFont, &QFontComboBox::currentFontChanged, this, &RibbonFrameText::handleCurrentFontChanged);
 
-    ui->edtSize->setValidator(new QIntValidator(1,999,this));
+    ui->edtSize->setValidator(new QIntValidator(1, 999, this));
     connect(ui->edtSize, SIGNAL(editingFinished()), this, SLOT(handleFontSizeChanged()));
 
-    connect(ui->btnBold, SIGNAL(toggled(bool)), this, SIGNAL(fontBoldChanged(bool)));
-    connect(ui->btnItalics, SIGNAL(toggled(bool)), this, SIGNAL(fontItalicsChanged(bool)));
-    connect(ui->btnUnderline, SIGNAL(toggled(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
+    connect(ui->btnBold, SIGNAL(clicked(bool)), this, SIGNAL(fontBoldChanged(bool)));
+    connect(ui->btnItalics, SIGNAL(clicked(bool)), this, SIGNAL(fontItalicsChanged(bool)));
+    connect(ui->btnUnderline, SIGNAL(clicked(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
 
     ui->btnGrpAlignment->setId(ui->btnLeftText, Qt::AlignLeft);
     ui->btnGrpAlignment->setId(ui->btnCenterText, Qt::AlignHCenter);
     ui->btnGrpAlignment->setId(ui->btnRightText, Qt::AlignRight);
-    connect(ui->btnGrpAlignment, SIGNAL(buttonClicked(int)), this, SLOT(handleAlignmentChanged(int)));
+    connect(ui->btnGrpAlignment, SIGNAL(idClicked(int)), this, SLOT(handleAlignmentChanged(int)));
 }
 
 RibbonFrameText::~RibbonFrameText()
@@ -129,6 +128,11 @@ void RibbonFrameText::handleAlignmentChanged(int id)
     }
 
     emit alignmentChanged(alignment);
+}
+
+void RibbonFrameText::handleCurrentFontChanged(const QFont &font)
+{
+    emit fontFamilyChanged(font.family());
 }
 
 void RibbonFrameText::showEvent(QShowEvent *event)

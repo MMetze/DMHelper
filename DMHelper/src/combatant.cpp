@@ -61,14 +61,14 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
     setInitiative(element.attribute("initiative", QString("0")).toInt());
     setIcon(element.attribute("icon"));
 
-    QDomElement attacksElement = element.firstChildElement( QString("attacks") );
-    if( !attacksElement.isNull() )
+    QDomElement attacksElement = element.firstChildElement(QString("attacks"));
+    if(!attacksElement.isNull())
     {
-        QDomElement attackElement = attacksElement.firstChildElement( QString("attack") );
-        while( !attackElement.isNull() )
+        QDomElement attackElement = attacksElement.firstChildElement(QString("attack"));
+        while(!attackElement.isNull())
         {
             addAttack(Attack(attackElement.attribute("name"), attackElement.attribute("dice")));
-            attackElement = attackElement.nextSiblingElement( QString("attack") );
+            attackElement = attackElement.nextSiblingElement(QString("attack"));
         }
     }
 
@@ -216,7 +216,7 @@ QString Combatant::getAbilityModStr(int ability)
 QString Combatant::convertModToStr(int modifier)
 {
     QString modifierStr = QString::number(modifier);
-    if( modifier >= 0 )
+    if(modifier >= 0)
         modifierStr.prepend("+");
 
     return modifierStr;
@@ -253,6 +253,7 @@ bool Combatant::isSkillSavingThrow(Skills skill)
             (skill == Skills_charismaSave));
 }
 
+/*
 QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup)
 {
     // TODO: Will be obsolete
@@ -274,12 +275,12 @@ QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup
     for(int n = 0; n < combatantGroup.first; ++n)
     {
         Combatant* newCombatant = combatantGroup.second->clone();
-        if( combatantGroup.first > 1) {
+        if(combatantGroup.first > 1) {
             newCombatant->setName(baseName + QString("#") + QString::number(n+1));
         } else {
             newCombatant->setName(baseName);
         }
-        if( newCombatant->getHitPoints() == 0 )
+        if(newCombatant->getHitPoints() == 0)
         {
             newCombatant->setHitPoints(newCombatant->getHitDice().roll());
         }
@@ -290,6 +291,7 @@ QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup
 
     return result;
 }
+*/
 
 int Combatant::getConditionCount()
 {
@@ -584,7 +586,7 @@ void Combatant::setIcon(const QString &newIcon)
 
 QDomElement Combatant::createOutputXML(QDomDocument &doc)
 {
-    return doc.createElement( "combatant" );
+    return doc.createElement("combatant");
 }
 
 void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -630,11 +632,7 @@ bool Combatant::belongsToObject(QDomElement& element)
 void Combatant::registerChange()
 {
     if(_batchChanges)
-    {
         _changesMade = true;
-    }
     else
-    {
         emit dirty();
-    }
 }

@@ -2,6 +2,7 @@
 #include "ui_ribbontabbattlemap.h"
 #include "dmconstants.h"
 #include "grid.h"
+#include "gridconfig.h"
 #include <QMenu>
 
 const int GRID_SIZE_PAUSE_TIMER = 750;
@@ -19,7 +20,7 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)), this, SIGNAL(reloadMapClicked()));
 
-    connect(ui->btnGrid, SIGNAL(toggled(bool)), this, SIGNAL(gridClicked(bool)));
+//    connect(ui->btnGrid, SIGNAL(toggled(bool)), this, SIGNAL(gridClicked(bool)));
     ui->btnGrid->setMenu(_menu);
 
     RibbonTabBattleMap_GridAction* gridAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Square, QString(":/img/data/icon_grid.png"), QString("Square Grid"));
@@ -56,7 +57,7 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     // Set up the brush mode button group
     ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
     ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
-    connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), this, SIGNAL(brushModeChanged(int)));
+    connect(ui->btnGrpBrush, SIGNAL(idClicked(int)), this, SIGNAL(brushModeChanged(int)));
 
     // Set up the extra slot to configure the erase button
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SLOT(setEraseMode()));
@@ -77,10 +78,23 @@ PublishButtonRibbon* RibbonTabBattleMap::getPublishRibbon()
     return ui->framePublish;
 }
 
+void RibbonTabBattleMap::setGridConfig(const GridConfig& config)
+{
+    setGridType(config.getGridType());
+    setGridScale(config.getGridScale());
+    setGridAngle(config.getGridAngle());
+    setGridXOffset(config.getGridOffsetX());
+    setGridYOffset(config.getGridOffsetY());
+    setGridWidth(config.getGridPen().width());
+    setGridColor(config.getGridPen().color());
+}
+
+/*
 void RibbonTabBattleMap::setGridOn(bool checked)
 {
     ui->btnGrid->setChecked(checked);
 }
+*/
 
 void RibbonTabBattleMap::setGridType(int gridType)
 {
@@ -88,7 +102,7 @@ void RibbonTabBattleMap::setGridType(int gridType)
         return;
 
     QList<QAction*> actionList = _menu->actions();
-    for(QAction* action : actionList)
+    foreach(QAction* action, actionList)
     {
         RibbonTabBattleMap_GridAction* gridAction = dynamic_cast<RibbonTabBattleMap_GridAction*>(action);
         if((gridAction) && (gridAction->getGridType() == gridType))

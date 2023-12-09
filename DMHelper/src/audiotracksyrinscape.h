@@ -9,13 +9,15 @@ class AudioTrackSyrinscape : public AudioTrackUrl
 public:
     explicit AudioTrackSyrinscape(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
 
+    virtual QIcon getDefaultIcon() override;
+
     virtual int getAudioType() const override;
 
 public slots:
     virtual void play() override;
     virtual void stop() override;
     virtual void setMute(bool mute) override;
-    virtual void setVolume(int volume) override;
+    virtual void setVolume(float volume) override;
     virtual void setRepeat(bool repeat) override;
 
 signals:

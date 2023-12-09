@@ -214,14 +214,11 @@
          <height>40</height>
         </size>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::MenuButtonPopup</enum>
+        <enum>QToolButton::InstantPopup</enum>
        </property>
       </widget>
      </item>
@@ -290,7 +287,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>The size of the map grid</string>
+          <string>The size of the grid</string>
          </property>
          <property name="minimum">
           <number>3</number>

@@ -8,8 +8,6 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnBackground, &QAbstractButton::clicked, this, &RibbonTabText::backgroundClicked);
-
     connect(ui->frameText, &RibbonFrameText::colorChanged, this, &RibbonTabText::colorChanged);
     connect(ui->frameText, &RibbonFrameText::fontFamilyChanged, this, &RibbonTabText::fontFamilyChanged);
     connect(ui->frameText, &RibbonFrameText::fontSizeChanged, this, &RibbonTabText::fontSizeChanged);
@@ -21,6 +19,7 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
 
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
     connect(ui->btnTranslateText, &QAbstractButton::clicked, this, &RibbonTabText::translateTextClicked);
+    connect(ui->btnCode, &QAbstractButton::clicked, this, &RibbonTabText::codeViewClicked);
 
     connect(ui->sliderWidth, &QAbstractSlider::valueChanged, this, &RibbonTabText::widthChanged);
     connect(ui->spinSpeed, SIGNAL(valueChanged(int)), this, SIGNAL(speedChanged(int)));
@@ -47,11 +46,6 @@ void RibbonTabText::setAnimation(bool checked)
     ui->spinSpeed->setEnabled(checked);
     ui->btnRewind->setEnabled(checked);
     ui->btnPlayPause->setEnabled(checked);
-}
-
-void RibbonTabText::setImageFile(const QString& imageFile)
-{
-    ui->btnBackground->setChecked(!imageFile.isEmpty());
 }
 
 void RibbonTabText::setColor(const QColor& color)
@@ -131,13 +125,25 @@ void RibbonTabText::setTranslationActive(bool active)
     ui->btnTranslateText->setChecked(active);
 }
 
+void RibbonTabText::setCodeView(bool active)
+{
+    ui->btnCode->setChecked(active);
+}
+
+void RibbonTabText::showCodeView(bool visible)
+{
+    ui->lblTranslateText->setVisible(!visible);
+    ui->btnTranslateText->setVisible(!visible);
+    ui->lblCode->setVisible(visible);
+    ui->btnCode->setVisible(visible);
+}
+
 void RibbonTabText::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
     int frameHeight = height();
 
-    setStandardButtonSize(*ui->lblBackground, *ui->btnBackground, frameHeight);
     setLineHeight(*ui->line_1, frameHeight);
     setStandardButtonSize(*ui->lblPasteRich, *ui->btnPasteRich, frameHeight);
     setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, frameHeight);
@@ -147,6 +153,7 @@ void RibbonTabText::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblRewind, *ui->btnRewind, frameHeight);
     setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText, frameHeight);
+    setStandardButtonSize(*ui->lblCode, *ui->btnCode, frameHeight);
     setLineHeight(*ui->line_4, frameHeight);
 }
 

@@ -2,8 +2,14 @@
 #define DMCONSTANTS_H
 
 #include <Qt>
+#include <QPoint>
+#include <QPointF>
 
+// Uncomment this to include network (client/server) support
 //#define INCLUDE_NETWORK_SUPPORT
+
+// Uncomment this to make sure shapes (for effects) do indeed show their selection boxes. Does not include pixmaps
+#define SHOW_UNSELECTED_SHAPE_SELECTION
 
 namespace DMHelper
 {
@@ -20,6 +26,10 @@ namespace DMHelper
         CampaignType_ScrollingText,
         CampaignType_AudioTrack,
         CampaignType_WelcomeScreen,
+        CampaignType_LayerScene,
+        CampaignType_LinkedText,
+        CampaignType_BattleContentCombatant,
+        CampaignType_BattleContentEffect,
 
         CampaignType_Placeholder = 0xffff
     };
@@ -114,14 +124,14 @@ namespace DMHelper
 
     enum BattleDialog_Z
     {
-        BattleDialog_Z_Background = -4,
-        BattleDialog_Z_Grid = -3,
-        BattleDialog_Z_Camera = -2,
-        BattleDialog_Z_BackHighlight = -1,
-        BattleDialog_Z_Combatant = 0,
-        BattleDialog_Z_SelectedCombatant = 1,
-        BattleDialog_Z_FrontHighlight = 2,
-        BattleDialog_Z_Overlay = 3
+        BattleDialog_Z_Background = 10000,
+        BattleDialog_Z_Grid = 10001,
+        BattleDialog_Z_Camera = 10002,
+        BattleDialog_Z_BackHighlight = 10003,
+        BattleDialog_Z_Combatant = 10004,
+        BattleDialog_Z_SelectedCombatant = 10005,
+        BattleDialog_Z_FrontHighlight = 10006,
+        BattleDialog_Z_Overlay = 10007
     };
 
     enum BattleFrameStates
@@ -134,7 +144,7 @@ namespace DMHelper
         BattleFrameState_FreeDistance,
         BattleFrameState_Pointer,
         BattleFrameState_FoWSelect,
-        BattleFrameState_FoWEdit,
+        BattleFrameState_FoWEdit
     };
 
     enum AudioType
@@ -149,18 +159,42 @@ namespace DMHelper
     {
         InitiativeType_None = 0,
         InitiativeType_Image,
-        InitiativeType_ImageName
+        InitiativeType_ImageName,
+        InitiativeType_ImagePCNames
+    };
+
+    enum LayerType
+    {
+        LayerType_Unknown = -1,
+        LayerType_Image = 0,
+        LayerType_Fow,
+        LayerType_Grid,
+        LayerType_Tokens,
+        LayerType_Reference,
+        LayerType_Video,
+        LayerType_Blank
+    };
+
+    enum FileType
+    {
+        FileType_Unknown = 0,
+        FileType_Text,
+        FileType_HTML,
+        FileType_Markdown
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;
 
+    const QPointF INVALID_POINT = QPointF(-1.0, -1.0);
+
     const int CHARACTER_WIDGET_HEIGHT = 20;
     const int CHARACTER_ICON_WIDTH = CHARACTER_WIDGET_HEIGHT * 4 / 3;
     const int CHARACTER_ICON_HEIGHT = CHARACTER_WIDGET_HEIGHT * 2;
 
-    const int STARTING_GRID_SCALE = 25;
+    const int STARTING_GRID_SCALE = 100;
+    const int DEFAULT_GRID_COUNT = 25;
 
     const int CURSOR_SIZE = 70; // increased, was 30
 

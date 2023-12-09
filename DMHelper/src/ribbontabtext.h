@@ -19,7 +19,6 @@ public:
 
 public slots:
     void setAnimation(bool checked);
-    void setImageFile(const QString& imageFile);
 
     void setColor(const QColor& color);
     void setFontFamily(const QString& fontFamily);
@@ -38,10 +37,10 @@ public slots:
     void setHyperlinkActive(bool active);
 
     void setTranslationActive(bool active);
+    void setCodeView(bool active);
+    void showCodeView(bool visible);
 
 signals:
-    void backgroundClicked(bool checked);
-
     // Animation
     void animationClicked(bool checked);
     void speedChanged(int speed);
@@ -62,6 +61,7 @@ signals:
 
     // Tools
     void translateTextClicked(bool checked);
+    void codeViewClicked(bool checked);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

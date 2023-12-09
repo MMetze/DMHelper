@@ -38,6 +38,7 @@ signals:
 protected slots:
     virtual void handleFontSizeChanged();
     virtual void handleAlignmentChanged(int id);
+    void handleCurrentFontChanged(const QFont &font);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

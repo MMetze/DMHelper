@@ -1,5 +1,6 @@
 #include "mapframescene.h"
 #include "mapmarkergraphicsitem.h"
+#include "undomarker.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsItem>
@@ -30,7 +31,7 @@ void MapFrameScene::handleEditMarker()
         markerItem = dynamic_cast<MapMarkerGraphicsItem*>(_contextMenuItem->parentItem());
 
     if(markerItem)
-        emit editMarker(markerItem->getMarkerId());
+        emit editMarker(markerItem->getMarker());
 }
 
 void MapFrameScene::handleDeleteMarker()
@@ -43,7 +44,7 @@ void MapFrameScene::handleDeleteMarker()
         markerItem = dynamic_cast<MapMarkerGraphicsItem*>(_contextMenuItem->parentItem());
 
     if(markerItem)
-        emit deleteMarker(markerItem->getMarkerId());
+        emit deleteMarker(markerItem->getMarker());
 }
 
 void MapFrameScene::handleCenterView()
@@ -73,7 +74,14 @@ void MapFrameScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     if(mouseEvent)
     {
         QList<QGraphicsItem*> mouseItems = items(mouseEvent->scenePos());
-        int itemType = (mouseItems.count() > 0) ? mouseItems.at(0)->type() : -1;
+//        int itemType = (mouseItems.count() > 0) ? mouseItems.at(0)->type() : -1;
+        int itemType = -1;
+
+        foreach(QGraphicsItem* item, mouseItems)
+        {
+            if((item) && (item->type() == MapMarkerGraphicsItem::Type))
+                itemType = MapMarkerGraphicsItem::Type;
+        }
 
         if((itemType != MapMarkerGraphicsItem::Type) && (isMapMovement(mouseEvent)))
         {
@@ -91,7 +99,14 @@ void MapFrameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     if(mouseEvent)
     {
         QList<QGraphicsItem*> mouseItems = items(mouseEvent->scenePos());
-        int itemType = (mouseItems.count() > 0) ? mouseItems.at(0)->type() : -1;
+//        int itemType = (mouseItems.count() > 0) ? mouseItems.at(0)->type() : -1;
+        int itemType = -1;
+
+        foreach(QGraphicsItem* item, mouseItems)
+        {
+            if((item) && (item->type() == MapMarkerGraphicsItem::Type))
+                itemType = MapMarkerGraphicsItem::Type;
+        }
 
         if((itemType != MapMarkerGraphicsItem::Type) && (isMapMovement(mouseEvent)))
         {

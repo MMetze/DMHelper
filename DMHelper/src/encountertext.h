@@ -2,6 +2,7 @@
 #define ENCOUNTERTEXT_H
 
 #include "campaignobjectbase.h"
+#include "layerscene.h"
 #include <QDomElement>
 
 class QDomDocument;
@@ -12,11 +13,13 @@ class EncounterText : public CampaignObjectBase
 public:
 
     explicit EncounterText(const QString& encounterName = QString(), QObject *parent = nullptr);
+    virtual ~EncounterText() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
     virtual int getObjectType() const override;
+    virtual QIcon getDefaultIcon() override;
 
     // Text
     virtual QString getText() const;
@@ -25,54 +28,44 @@ public:
     // Animation
     virtual bool getAnimated() const;
     virtual int getScrollSpeed() const;
-
-    //virtual QString getFontFamily() const;
-    //virtual int getFontSize() const;
-    //virtual bool getFontBold() const;
-    //virtual bool getFontItalics() const;
-    //virtual Qt::Alignment getAlignment() const;
     virtual int getTextWidth() const;
-    //virtual QColor getFontColor() const;
 
+    // Translation
     virtual bool getTranslated() const;
     virtual QString getTranslatedText() const;
 
+    bool isInitialized() const;
+    LayerScene& getLayerScene();
+    const LayerScene& getLayerScene() const;
+
 public slots:
-    //Text
+    bool initialize();
+    void uninitialize();
+
+    // Text
     virtual void setText(const QString& newText);
     virtual void setImageFile(const QString& imageFile);
 
     // Animation
     virtual void setAnimated(bool animated);
     virtual void setScrollSpeed(int scrollSpeed);
-
-    //virtual void setFontFamily(const QString& fontFamily);
-    //virtual void setFontSize(int fontSize);
-    //virtual void setFontBold(bool fontBold);
-    //virtual void setFontItalics(bool fontItalics);
-    //virtual void setAlignment(Qt::Alignment alignment);
     virtual void setTextWidth(int textWidth);
-    //virtual void setFontColor(QColor fontColor);
 
+    // Translation
     virtual void setTranslated(bool translated);
     virtual void setTranslatedText(const QString& translatedText);
 
 signals:
     // Text
     void textChanged(const QString& text);
-    void imageFileChanged(const QString& imageFile);
+//    void imageFileChanged(const QString& imageFile);
 
     // Animation
     void animatedChanged(bool animated);
     void scrollSpeedChanged(int scrollSpeed);
-    //void fontFamilyChanged(const QString& fontFamily);
-    //void fontSizeChanged(int fontSize);
-    //void fontBoldChanged(bool fontBold);
-    //void fontItalicsChanged(bool fontItalics);
-    //void alignmentChanged(Qt::Alignment alignment);
     void textWidthChanged(int textWidth);
-    //void fontColorChanged(QColor fontColor);
 
+    // Translation
     void translatedChanged(bool translated);
     void translatedTextChanged(const QString& translatedText);
 
@@ -83,13 +76,16 @@ protected slots:
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
 protected:
-    void extractTextNode(const QDomElement &element, bool isImport);
+    virtual void createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void extractTextNode(const QDomElement &element, bool isImport);
 
     // Text
+    LayerScene _layerScene;
     QString _text;
     QString _translatedText;
-    QString _imageFile;
+    QString _imageFile; // For compatibility only
     int _textWidth;
+    bool _initialized;
 
     // Animation
     bool _animated;

@@ -1,7 +1,6 @@
 #include "bestiary.h"
 #include "monsterclass.h"
 #include "monster.h"
-#include "dmconstants.h"
 #include "dmversion.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -9,6 +8,8 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QDebug>
 
 Bestiary* Bestiary::_instance = nullptr;
@@ -86,7 +87,7 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+    ts.setEncoding(QStringConverter::Utf8);
     ts << xmlString;
 
     file.close();
@@ -116,7 +117,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;
@@ -198,8 +199,8 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         return;
     }
 
-    _majorVersion = bestiaryElement.attribute("majorversion",QString::number(0)).toInt();
-    _minorVersion = bestiaryElement.attribute("minorversion",QString::number(0)).toInt();
+    _majorVersion = bestiaryElement.attribute("majorversion", QString::number(0)).toInt();
+    _minorVersion = bestiaryElement.attribute("minorversion", QString::number(0)).toInt();
     qDebug() << "[Bestiary]    Bestiary version: " << getVersion();
     if(!isVersionCompatible())
     {
@@ -275,6 +276,9 @@ bool Bestiary::isDirty()
 
 MonsterClass* Bestiary::getMonsterClass(const QString& name)
 {
+    if(name.isEmpty())
+        return nullptr;
+
     if(!_bestiaryMap.contains(name))
         showMonsterClassWarning(name);
 
@@ -441,6 +445,49 @@ QString Bestiary::findMonsterImage(const QDir& sourceDir, const QString& monster
     return fileName;
 }
 
+QStringList Bestiary::findMonsterImages(const QString& monsterName)
+{
+    QStringList monsterNameFilter;
+    monsterNameFilter << (monsterName + QString("*.png")) << (monsterName + QString("*.jpg"));
+    QStringList imageNameFilter;
+    imageNameFilter << QString("*.png") << QString("*.jpg");
+
+    QStringList entries = findSpecificImages(_bestiaryDirectory, monsterNameFilter, monsterName);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/") + monsterName + QString("/")), imageNameFilter);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/Images/")), monsterNameFilter, monsterName);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/Images/") + monsterName + QString("/")), imageNameFilter);
+
+    return entries;
+}
+
+QStringList Bestiary::findSpecificImages(const QDir& sourceDir, const QStringList& filterList, const QString& filterName)
+{
+    QStringList result;
+
+    QFileInfoList entries = sourceDir.entryInfoList(filterList);
+    for(int i = 0; i < entries.count(); ++i)
+    {
+        bool accept = false;
+        if(filterName.isEmpty())
+        {
+            accept = true;
+        }
+        else
+        {
+            QRegularExpression re(QString("([a-zA-Z\\s]*)"));
+            QRegularExpressionMatch reMatch = re.match(entries.at(i).baseName());
+            QString matchName = reMatch.captured(1);
+            if((!reMatch.hasMatch()) || (matchName.isEmpty()) || (matchName == filterName) || (!exists(matchName)))
+                accept = true;
+        }
+
+        if(accept)
+            result << _bestiaryDirectory.relativeFilePath(entries.at(i).absoluteFilePath());
+    }
+
+    return result;
+}
+
 void Bestiary::startBatchProcessing()
 {
     _batchProcessing = true;
@@ -601,7 +648,7 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
         QString targetFile = _bestiaryDirectory.absoluteFilePath(monsterIcon);
         bool result = currentFile.copy(targetFile);
 
-        qDebug() << "[Bestiary] Copied " << currentFile << " to " << targetFile << ", result: " << result;
+        qDebug() << "[Bestiary] Copied " << currentFile.fileName() << " to " << targetFile << ", result: " << result;
     }
     else
     {
@@ -622,6 +669,6 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
         QString targetFile = _bestiaryDirectory.absoluteFilePath(sourcePath);
         bool result = currentFile.copy(targetFile);
 
-        qDebug() << "[Bestiary] Copied " << currentFile << " to " << targetFile << ", result: " << result;
+        qDebug() << "[Bestiary] Copied " << currentFile.fileName() << " to " << targetFile << ", result: " << result;
     }
 }

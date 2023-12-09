@@ -45,11 +45,11 @@ public slots:
 protected:
 
     // From QWidget
-    virtual void showEvent(QShowEvent *event) override;
-    virtual void enterEvent(QEvent * event) override;
-    virtual void leaveEvent(QEvent * event) override;
-    virtual void mousePressEvent(QMouseEvent * event) override;
-    virtual void mouseReleaseEvent(QMouseEvent * event) override;
+    virtual void showEvent(QShowEvent* event) override;
+    virtual void enterEvent(QEnterEvent* event) override;
+    virtual void leaveEvent(QEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
     // local
     virtual void loadImage();

@@ -1,14 +1,21 @@
 #include "publishglbattletoken.h"
 #include "battledialogmodelcombatant.h"
+#include "battledialogmodeleffect.h"
 #include "publishglimage.h"
-#include "publishgleffect.h"
+#include "publishgltokenhighlighteffect.h"
+#include "publishgltokenhighlightref.h"
+#include "layertokens.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QPixmap>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QDebug>
 
-PublishGLBattleToken::PublishGLBattleToken(PublishGLBattleScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
+PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
     PublishGLBattleObject(scene),
     _combatant(combatant),
     _VAO(0),
@@ -16,7 +23,7 @@ PublishGLBattleToken::PublishGLBattleToken(PublishGLBattleScene* scene, BattleDi
     _EBO(0),
     _textureSize(),
     _isPC(isPC),
-    _effectList(),
+    _highlightList(),
     _recreateToken(false)
 {
     if((!QOpenGLContext::currentContext()) || (!_combatant))
@@ -24,7 +31,7 @@ PublishGLBattleToken::PublishGLBattleToken(PublishGLBattleScene* scene, BattleDi
 
     createTokenObjects();
 
-    connect(_combatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleToken::combatantMoved);
+    connect(_combatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleToken::combatantMoved);
     connect(_combatant, &BattleDialogModelCombatant::combatantSelected, this, &PublishGLBattleToken::combatantSelected);
     connect(_combatant, &BattleDialogModelCombatant::conditionsChanged, this, &PublishGLBattleToken::recreateToken);
     connect(_combatant, &BattleDialogModelCombatant::visibilityChanged, this, &PublishGLBattleToken::changed);
@@ -37,6 +44,8 @@ PublishGLBattleToken::~PublishGLBattleToken()
 
 void PublishGLBattleToken::cleanup()
 {
+//    qDebug() << "[PublishGLBattleToken] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+
     if(QOpenGLContext::currentContext())
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -64,8 +73,8 @@ void PublishGLBattleToken::cleanup()
         }
     }
 
-    qDeleteAll(_effectList);
-    _effectList.clear();
+    qDeleteAll(_highlightList);
+    _highlightList.clear();
 
     PublishGLBattleObject::cleanup();
 }
@@ -89,7 +98,7 @@ void PublishGLBattleToken::paintGL()
 
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);    
+    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void PublishGLBattleToken::paintEffects(int shaderModelMatrix)
@@ -101,13 +110,10 @@ void PublishGLBattleToken::paintEffects(int shaderModelMatrix)
     if(!f)
         return;
 
-    for(PublishGLEffect* effect : _effectList)
+    foreach(PublishGLTokenHighlight* effect, _highlightList)
     {
         if(effect)
-        {
-            f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, effect->getMatrixData());
-            effect->getImage().paintGL();
-        }
+            effect->paintGL(f, shaderModelMatrix);
     }
 }
 
@@ -126,44 +132,89 @@ bool PublishGLBattleToken::isPC() const
     return _isPC;
 }
 
-void PublishGLBattleToken::addEffect(PublishGLImage& effectImage)
+void PublishGLBattleToken::addHighlight(PublishGLImage& highlightImage)
 {
-    PublishGLEffect* newEffect = new PublishGLEffect(effectImage);
+    if((!_combatant) || (!_combatant->getLayer()))
+        return;
+
+    PublishGLTokenHighlightRef* newHighlight = new PublishGLTokenHighlightRef(highlightImage);
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
-    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
-    newEffect->setPositionScale(newPosition, sizeFactor);
+    qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
+    newHighlight->setPositionScale(newPosition, sizeFactor);
 
-    _effectList.append(newEffect);
+    _highlightList.append(newHighlight);
 }
 
-void PublishGLBattleToken::removeEffect(const PublishGLImage& effectImage)
+void PublishGLBattleToken::removeHighlight(const PublishGLImage& highlightImage)
 {
-    for(int i = 0; i < _effectList.count(); ++i)
+    for(int i = 0; i < _highlightList.count(); ++i)
     {
-        if((_effectList.at(i)) && (_effectList.at(i)->getImage() == effectImage))
+        PublishGLTokenHighlightRef* highlight = dynamic_cast<PublishGLTokenHighlightRef*>(_highlightList.at(i));
+        if((highlight) && (highlight->getImage() == highlightImage))
         {
-            PublishGLEffect* removeEffect = _effectList.takeAt(i);
-            delete removeEffect;
+            PublishGLTokenHighlight* removeHighlight = _highlightList.takeAt(i);
+            delete removeHighlight;
             return;
         }
     }
 }
 
+void PublishGLBattleToken::addEffectHighlight(BattleDialogModelEffect* effect)
+{
+    if((!effect) || (!_combatant) || (!_combatant->getLayer()))
+        return;
+
+    PublishGLTokenHighlightEffect* newEffect = new PublishGLTokenHighlightEffect(nullptr, effect);
+
+    QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
+    qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
+    newEffect->setPositionScale(newPosition, sizeFactor);
+
+    _highlightList.append(newEffect);
+}
+
+void PublishGLBattleToken::removeEffectHighlight(BattleDialogModelEffect* effect)
+{
+    for(int i = 0; i < _highlightList.count(); ++i)
+    {
+        PublishGLTokenHighlightEffect* highlight = dynamic_cast<PublishGLTokenHighlightEffect*>(_highlightList.at(i));
+        if((highlight) && (highlight->getEffect() == effect))
+        {
+            PublishGLTokenHighlight* removeHighlight = _highlightList.takeAt(i);
+            delete removeHighlight;
+        }
+    }
+}
+
+bool PublishGLBattleToken::hasEffectHighlight(BattleDialogModelEffect* effect)
+{
+    for(int i = 0; i < _highlightList.count(); ++i)
+    {
+        PublishGLTokenHighlightEffect* highlight = dynamic_cast<PublishGLTokenHighlightEffect*>(_highlightList.at(i));
+        if((highlight) && (highlight->getEffect() == effect))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void PublishGLBattleToken::combatantMoved()
 {
-    if((!_scene) || (_textureSize.isEmpty()))
+    if((!_combatant) || (!_combatant->getLayer()) || (_textureSize.isEmpty()))
         return;
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
-    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
     qreal scaleFactor = sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(newPosition);
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
-    for(PublishGLEffect* effect : _effectList)
+    foreach(PublishGLTokenHighlight* effect, _highlightList)
         effect->setPositionScale(newPosition, sizeFactor);
 
     emit changed();
@@ -212,10 +263,10 @@ void PublishGLBattleToken::createTokenObjects()
 
     float vertices[] = {
         // positions    // colors           // texture coords
-         (float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         (float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -(float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+         (float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+         (float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        -(float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -(float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!

@@ -104,13 +104,13 @@ void CombatantWidget::setHover(bool hover)
     }
 }
 
-void CombatantWidget::showEvent(QShowEvent *event)
+void CombatantWidget::showEvent(QShowEvent* event)
 {
     setStyleSheet(getStyleString());
     QFrame::showEvent(event);
 }
 
-void CombatantWidget::enterEvent(QEvent * event)
+void CombatantWidget::enterEvent(QEnterEvent* event)
 {
     Q_UNUSED(event);
 
@@ -118,7 +118,7 @@ void CombatantWidget::enterEvent(QEvent * event)
     setStyleSheet(getStyleString());
 }
 
-void CombatantWidget::leaveEvent(QEvent * event)
+void CombatantWidget::leaveEvent(QEvent* event)
 {
     Q_UNUSED(event);
 
@@ -128,7 +128,7 @@ void CombatantWidget::leaveEvent(QEvent * event)
     setStyleSheet(getStyleString());
 }
 
-void CombatantWidget::mousePressEvent(QMouseEvent * event)
+void CombatantWidget::mousePressEvent(QMouseEvent* event)
 {
     Q_UNUSED(event);
 
@@ -137,7 +137,7 @@ void CombatantWidget::mousePressEvent(QMouseEvent * event)
     _mouseDown = event->button();
 }
 
-void CombatantWidget::mouseReleaseEvent(QMouseEvent * event)
+void CombatantWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     if(_mouseDown == event->button())
     {
@@ -181,10 +181,8 @@ void CombatantWidget::updatePairData(QHBoxLayout* pair, const QString& pairValue
         return;
 
     QLabel* lbl = dynamic_cast<QLabel*>(pair->itemAt(1)->widget());
-    if( lbl )
-    {
-        lbl->setText( pairValue );
-    }
+    if(lbl)
+        lbl->setText(pairValue);
 }
 
 QString CombatantWidget::getStyleString()
@@ -192,18 +190,11 @@ QString CombatantWidget::getStyleString()
     setLineWidth(5);
 
     if(_selected)
-    {
         return QString("CombatantWidget{ background-image: url(); background-color: rgb(196, 196, 196); }");
-    }
     else if(_active)
-    {
         return QString("CombatantWidget{ background-color: rgb(115, 18, 0); }");
-    }
     else if(_hover)
-    {
-        //return QString("CombatantWidget{ background-color: rgb(128, 128, 128); }");
         return QString("CombatantWidget{ background-color: rgb(64, 64, 64); }");
-    }
-
-    return QString("CombatantWidget{ background-color: none; }");
+    else
+        return QString("CombatantWidget{ background-color: none; }");
 }

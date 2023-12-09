@@ -36,7 +36,7 @@ void PublishGLFrame::cleanup()
     _initialized = false;
 
     if(_renderer)
-        _renderer->cleanup();
+        _renderer->cleanupGL();
 }
 
 void PublishGLFrame::updateWidget()
@@ -57,11 +57,14 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
         if(!renderer)
             renderer = new PublishGLImageRenderer(nullptr, grabFramebuffer(), _renderer->getBackgroundColor());
 
+        makeCurrent();
+        _renderer->cleanupGL();
         _renderer->rendererDeactivated();
         disconnect(_renderer, &PublishGLRenderer::updateWidget, this, &PublishGLFrame::updateWidget);
         disconnect(_renderer, &PublishGLRenderer::destroyed, this, &PublishGLFrame::clearRenderer);
         if(_renderer->deleteOnDeactivation())
             _renderer->deleteLater();
+        doneCurrent();
     }
 
     _renderer = renderer;

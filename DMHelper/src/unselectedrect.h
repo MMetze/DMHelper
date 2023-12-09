@@ -3,15 +3,20 @@
 
 #include <QGraphicsRectItem>
 
+class BattleDialogModelObject;
+
 class UnselectedRect : public QGraphicsRectItem
 {
 public:
-    UnselectedRect(qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent = nullptr);
+    UnselectedRect(BattleDialogModelObject* object, qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent = nullptr);
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
 
 protected:
-    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
+private:
+    BattleDialogModelObject* _object;
 
 };
 

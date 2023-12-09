@@ -55,13 +55,13 @@ void WidgetMonster::setInternals(WidgetMonsterInternal* internals)
     BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
     if(monsterCombatant)
     {
-        connect(ui->chkKnown,SIGNAL(clicked(bool)),monsterCombatant,SLOT(setKnown(bool)));
-        connect(ui->chkVisible,SIGNAL(clicked(bool)),monsterCombatant,SLOT(setShown(bool)));
+        connect(ui->chkKnown, SIGNAL(clicked(bool)), monsterCombatant, SLOT(setKnown(bool)));
+        connect(ui->chkVisible, SIGNAL(clicked(bool)), monsterCombatant, SLOT(setShown(bool)));
 
         if(monsterCombatant->getCombatant())
-            connect(monsterCombatant->getCombatant(),SIGNAL(dirty()),this,SLOT(updateData()));
+            connect(monsterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
         else if (monsterCombatant->getMonsterClass())
-            connect(monsterCombatant->getMonsterClass(),SIGNAL(dirty()),this,SLOT(updateData()));
+            connect(monsterCombatant->getMonsterClass(), SIGNAL(dirty()), this, SLOT(updateData()));
         else
             qDebug() << "[Monster Widget] neither valid combatant nor monster class found!";
 
@@ -88,6 +88,11 @@ bool WidgetMonster::isShown()
 bool WidgetMonster::isKnown()
 {
     return ui->chkKnown->isChecked();
+}
+
+void WidgetMonster::clearImage()
+{
+    ui->lblIcon->clear();
 }
 
 void WidgetMonster::updateData()

@@ -62,7 +62,6 @@
 #define BLOCK_FLAG_TYPE_PB VLC_FRAME_FLAG_TYPE_PB
 #define BLOCK_FLAG_HEADER VLC_FRAME_FLAG_HEADER
 #define BLOCK_FLAG_END_OF_SEQUENCE VLC_FRAME_FLAG_END_OF_SEQUENCE
-#define BLOCK_FLAG_CLOCK VLC_FRAME_FLAG_CLOCK
 #define BLOCK_FLAG_SCRAMBLED VLC_FRAME_FLAG_SCRAMBLED
 #define BLOCK_FLAG_PREROLL VLC_FRAME_FLAG_PREROLL
 #define BLOCK_FLAG_CORRUPTED VLC_FRAME_FLAG_CORRUPTED
@@ -80,6 +79,7 @@
 #define vlc_block_callbacks vlc_frame_callbacks
 
 #define block_Init vlc_frame_Init
+#define block_New vlc_frame_New
 #define block_Alloc vlc_frame_Alloc
 #define block_TryRealloc vlc_frame_TryRealloc
 #define block_Realloc vlc_frame_Realloc

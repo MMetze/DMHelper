@@ -3,6 +3,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QUrlQuery>
+#include <QIcon>
 #include <QDebug>
 
 AudioTrackSyrinscapeOnline::AudioTrackSyrinscapeOnline(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
@@ -14,6 +15,11 @@ AudioTrackSyrinscapeOnline::AudioTrackSyrinscapeOnline(const QString& trackName,
 AudioTrackSyrinscapeOnline::~AudioTrackSyrinscapeOnline()
 {
     stop();
+}
+
+QIcon AudioTrackSyrinscapeOnline::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_syrinscape.png");
 }
 
 int AudioTrackSyrinscapeOnline::getAudioType() const
@@ -101,7 +107,7 @@ void AudioTrackSyrinscapeOnline::setMute(bool mute)
     Q_UNUSED(mute);
 }
 
-void AudioTrackSyrinscapeOnline::setVolume(int volume)
+void AudioTrackSyrinscapeOnline::setVolume(float volume)
 {
     Q_UNUSED(volume);
 }

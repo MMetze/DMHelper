@@ -47,25 +47,17 @@ void PublishGLRenderer::rendererActivated(QOpenGLWidget* glWidget)
     _targetWidget = glWidget;
 
     if((_targetWidget) && (_targetWidget->context()))
-        connect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLRenderer::cleanup);
+        connect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLRenderer::cleanupGL);
 }
 
 void PublishGLRenderer::rendererDeactivated()
 {
     qDebug() << "[PublishGLRenderer] Renderer deactivated: " << this;
     if((_targetWidget) && (_targetWidget->context()))
-        disconnect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLRenderer::cleanup);
-
-    cleanup();
+        disconnect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLRenderer::cleanupGL);
 
     emit deactivated();
     _targetWidget = nullptr;
-}
-
-void PublishGLRenderer::cleanup()
-{
-    delete _pointerImage;
-    _pointerImage = nullptr;
 }
 
 bool PublishGLRenderer::deleteOnDeactivation()
@@ -78,9 +70,20 @@ QRect PublishGLRenderer::getScissorRect()
     return QRect();
 }
 
+QOpenGLWidget* PublishGLRenderer::getTargetWidget()
+{
+    return _targetWidget;
+}
+
 void PublishGLRenderer::updateRender()
 {
     emit updateWidget();
+}
+
+void PublishGLRenderer::cleanupGL()
+{
+    delete _pointerImage;
+    _pointerImage = nullptr;
 }
 
 void PublishGLRenderer::setBackgroundColor(const QColor& color)

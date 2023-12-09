@@ -5,7 +5,7 @@
 #include <QGraphicsScene>
 #include <QImage>
 #include <QRubberBand>
-#include "undopath.h"
+#include "undofowpath.h"
 #include "videoplayer.h"
 #include "unselectedpixmap.h"
 
@@ -21,6 +21,7 @@ class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
+class Layer;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -35,8 +36,8 @@ public:
 
     void setMap(Map* map);
 
-    void mapMarkerMoved(int markerId);
-    void activateMapMarker(int markerId);
+    void mapMarkerMoved(UndoMarker* marker);
+    void activateMapMarker(UndoMarker* marker);
 
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -71,6 +72,7 @@ signals:
     void markerChanged();
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
@@ -86,12 +88,12 @@ signals:
     void publishCancelled();
 
 public slots:
-    void updateFoW();
+//    void updateFoW();
     void fillFoW();
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void clear();
+  // void clear();
 
     void colorize();
 
@@ -104,9 +106,9 @@ public slots:
     void setShowMarkers(bool show);
     void addNewMarker();
     void addMarker(const QPointF& markerPosition);
-    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
-    void editMapMarker(int markerId);
-    void deleteMapMarker(int markerId);
+//    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+    void editMapMarker(UndoMarker* marker);
+    void deleteMapMarker(UndoMarker* marker);
 
     void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
@@ -147,17 +149,19 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void targetResized(const QSize& newSize);
+    void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void editLayers() override;
 
 protected:
-    void initializeFoW();
-    void uninitializeFoW();
+    void initializeMap();
+    void uninitializeMap();
 
-    void createMarkerItems();
-    void cleanupMarkerItems();
+//    void createMarkerItems();
+//    void cleanupMarkerItems();
     void cleanupSelectionItems();
 
     virtual void hideEvent(QHideEvent * event) override;
@@ -181,7 +185,7 @@ protected:
     bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
     bool execEventFilterPointer(QObject *obj, QEvent *event);
 
-    void extractDMScreenshot();
+//    void extractDMScreenshot();
     void cleanupBuffers();
 
 protected slots:
@@ -192,7 +196,7 @@ protected slots:
     void loadViewRect();
     void checkPartyUpdate();
 
-    void handleScreenshotReady(const QImage& image);
+//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLMapRenderer* renderer);
     void rendererDeactivated();
 
@@ -204,10 +208,11 @@ protected slots:
 
     void handleItemChanged(QGraphicsItem* item);
     void handleSceneChanged(const QList<QRectF> &region);
+    void handleMapSceneChanged();
 
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
-    void setBackgroundPixmap(const QPixmap& pixmap);
+//    void setBackgroundPixmap(const QPixmap& pixmap);
     void setCameraToView();
     QGraphicsItem* findTopObject(const QPoint &pos);
     QPixmap getPointerPixmap();
@@ -215,8 +220,9 @@ private:
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
-    QGraphicsPixmapItem* _backgroundImage;
-    QGraphicsPixmapItem* _fow;
+    //QGraphicsPixmapItem* _backgroundImage;
+    //Layer* _backgroundLayer;
+    //QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;
 
@@ -234,7 +240,7 @@ private:
     bool _mapMoveMouseDown;
     bool _mouseDown;
     QPoint _mouseDownPos;
-    UndoPath* _undoPath;
+    UndoFowPath* _undoPath;
 
     QGraphicsLineItem* _distanceLine;
     MapDraw* _mapItem;

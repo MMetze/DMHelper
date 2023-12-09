@@ -3,6 +3,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDir>
+#include <QIcon>
 
 AudioTrack::AudioTrack(const QString& trackName, QObject *parent) :
     CampaignObjectBase(trackName, parent),
@@ -41,6 +42,11 @@ int AudioTrack::getObjectType() const
     return DMHelper::CampaignType_AudioTrack;
 }
 
+QIcon AudioTrack::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_soundboard.png");
+}
+
 QString AudioTrack::getMD5() const
 {
     return _md5;
@@ -66,7 +72,7 @@ bool AudioTrack::isMuted() const
     return false;
 }
 
-int AudioTrack::getVolume() const
+float AudioTrack::getVolume() const
 {
     return 0;
 }

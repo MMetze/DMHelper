@@ -26,7 +26,6 @@
 #include <vlc_es.h>
 #include <vlc_picture.h>
 #include <vlc_subpicture.h>
-#include <vlc_actions.h>
 #include <vlc_mouse.h>
 #include <vlc_vout.h>
 #include <vlc_window.h>
@@ -116,6 +115,7 @@ struct vout_display_placement {
 typedef struct vout_display_cfg {
     struct vlc_window *window; /**< Window */
     struct vout_display_placement display; /**< Display placement properties */
+    vlc_icc_profile_t *icc_profile; /**< Currently active ICC profile */
     vlc_viewpoint_t viewpoint;
 } vout_display_cfg_t;
 
@@ -310,6 +310,27 @@ struct vlc_display_operations
      * \param vp viewpoint to use on the next render
      */
     int        (*set_viewpoint)(vout_display_t *, const vlc_viewpoint_t *vp);
+
+    /**
+     * Notifies a change in output ICC profile.
+     *
+     * May be NULL. Memory owned by the caller.
+     *
+     * \param prof new ICC profile associated with display, or NULL for none
+     */
+    void       (*set_icc_profile)(vout_display_t *, const vlc_icc_profile_t *prof);
+
+    /**
+     * Notifies a change in the input format.
+     *
+     * The format size is not expected to change.
+     *
+     * \param fmt the requested input format
+     * \param ctx the video context
+     * \return VLC_SUCCESS on success, another value on error
+     */
+    int (*update_format)(vout_display_t *, const video_format_t *fmt,
+                         vlc_video_context *ctx);
 };
 
 struct vout_display_t {

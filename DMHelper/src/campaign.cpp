@@ -69,8 +69,8 @@
 
 Campaign::Campaign(const QString& campaignName, QObject *parent) :
     CampaignObjectBase(campaignName, parent),
-    _date(1,1,0),
-    _time(0,0),
+    _date(1, 1, 0),
+    _time(0, 0),
     _notes(),
     _batchChanges(false),
     _changesMade(false),
@@ -87,8 +87,8 @@ Campaign::~Campaign()
 
 void Campaign::inputXML(const QDomElement &element, bool isImport)
 {
-    int majorVersion = element.attribute("majorVersion",QString::number(0)).toInt();
-    int minorVersion = element.attribute("minorVersion",QString::number(0)).toInt();
+    int majorVersion = element.attribute("majorVersion", QString::number(0)).toInt();
+    int minorVersion = element.attribute("minorVersion", QString::number(0)).toInt();
     qDebug() << "[Campaign]    Campaign file version: " << majorVersion << "." << minorVersion;
     if(!isVersionCompatible(majorVersion, minorVersion))
     {
@@ -102,9 +102,9 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     QString calendarName = element.attribute("calendar", QString("Gregorian"));
     if(BasicDateServer::Instance())
         BasicDateServer::Instance()->setActiveCalendar(calendarName);
-    BasicDate inputDate(element.attribute("date",QString("")));
+    BasicDate inputDate(element.attribute("date", QString("")));
     setDate(inputDate);
-    setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time",QString::number(0)).toInt()));
+    setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time", QString::number(0)).toInt()));
 
     CampaignObjectBase::inputXML(element, isImport);
     Bestiary::Instance()->finishBatchProcessing();
@@ -489,25 +489,25 @@ void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
     {
         CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Party", Qt::FindDirectChildrenOnly);
         if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("partyExpanded",QString::number(0)).toInt()));
+            partyChild->setExpanded(static_cast<bool>(element.attribute("partyExpanded", QString::number(0)).toInt()));
     }
     if(element.hasAttribute("adventuresExpanded"))
     {
         CampaignObjectBase* adventuresChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
         if(adventuresChild)
-            adventuresChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded",QString::number(0)).toInt()));
+            adventuresChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded", QString::number(0)).toInt()));
     }
     if(element.hasAttribute("worldSettingsExpanded"))
     {
         CampaignObjectBase* worldChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
         if(worldChild)
-            worldChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt()));
+            worldChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded", QString::number(0)).toInt()));
     }
     if(element.hasAttribute("worldNPCsExpanded"))
     {
         CampaignObjectBase* npcChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
         if(npcChild)
-            npcChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt()));
+            npcChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded", QString::number(0)).toInt()));
     }
     */
 

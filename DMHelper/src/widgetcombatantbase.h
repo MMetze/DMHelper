@@ -34,8 +34,8 @@ signals:
     void hitPointsChanged(BattleDialogModelCombatant* combatant, int change);
 
 public slots:
-
     virtual void updateData();
+    virtual void updateImage();
     virtual void setInitiative(int initiative) = 0;
     virtual void initiativeChanged(int initiative);
     virtual void moveChanged(int move);

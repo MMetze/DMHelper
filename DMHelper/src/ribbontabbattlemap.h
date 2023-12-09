@@ -10,6 +10,7 @@ class RibbonTabBattleMap;
 
 class PublishButtonRibbon;
 class QMenu;
+class GridConfig;
 
 class RibbonTabBattleMap : public RibbonFrame
 {
@@ -22,7 +23,8 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
-    void setGridOn(bool checked);
+    void setGridConfig(const GridConfig& config);
+    //void setGridOn(bool checked);
     void setGridType(int gridType);
     void setGridScale(int scale);
     void setGridAngle(int angle);
@@ -40,7 +42,7 @@ public slots:
 signals:
     void newMapClicked();
     void reloadMapClicked();
-    void gridClicked(bool checked);
+    //void gridClicked(bool checked);
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);
     void gridScaleSetClicked();

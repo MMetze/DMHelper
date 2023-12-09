@@ -1,19 +1,20 @@
 #ifndef BATTLEDIALOGMODELEFFECT_H
 #define BATTLEDIALOGMODELEFFECT_H
 
-#include "campaignobjectbase.h"
+#include "battledialogmodelobject.h"
 #include <QPointF>
 #include <QColor>
 
-class QAbstractGraphicsShapeItem;
 class BattleDialogEffectSettings;
+class LayerTokens;
+class QAbstractGraphicsShapeItem;
 class QGraphicsItem;
 
 const int BATTLE_DIALOG_MODEL_EFFECT_ID = Qt::UserRole;
 const int BATTLE_DIALOG_MODEL_EFFECT_OBJECT = Qt::UserRole + 1;
 const int BATTLE_DIALOG_MODEL_EFFECT_ROLE = Qt::UserRole + 2;
 
-class BattleDialogModelEffect : public CampaignObjectBase
+class BattleDialogModelEffect : public BattleDialogModelObject
 {
     Q_OBJECT
 
@@ -44,14 +45,23 @@ public:
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual int getObjectType() const override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
+
+    void setLayer(LayerTokens* tokensLayer);
+    LayerTokens* getLayer() const;
 
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettings* getEffectEditor() const;
 
+    virtual void beginBatchChanges();
+    virtual void endBatchChanges();
+
     virtual QGraphicsItem* createEffectShape(qreal gridScale) = 0;
-    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const;
+    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale);
+    virtual void applyScale(QGraphicsItem& item, qreal gridScale) override;
+    virtual qreal getScale() override;
 
     virtual bool getEffectActive() const;
     virtual void setEffectActive(bool active);
@@ -64,12 +74,6 @@ public:
 
     virtual int getWidth() const;
     virtual void setWidth(int width);
-
-    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor) const;
-
-    virtual QPointF getPosition() const;
-    virtual void setPosition(const QPointF& position);
-    virtual void setPosition(qreal x, qreal y);
 
     virtual qreal getRotation() const;
     virtual void setRotation(qreal rotation);
@@ -89,11 +93,11 @@ public:
     void setEffectItemData(QGraphicsItem* item) const;
     static QUuid getEffectIdFromItem(QGraphicsItem* item);
     static BattleDialogModelEffect* getEffectFromItem(QGraphicsItem* item);
+    static BattleDialogModelEffect* getFinalEffect(BattleDialogModelEffect* effect);
     static bool getEffectActiveFromItem(QGraphicsItem* item);
     static bool getEffectVisibleFromItem(QGraphicsItem* item);
 
 signals:
-    void effectMoved(BattleDialogModelEffect* effect);
     void effectChanged(BattleDialogModelEffect* effect);
 
 protected:
@@ -102,14 +106,18 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
 
     virtual void prepareItem(QGraphicsItem& item) const;
+    virtual void registerChange();
 
+    LayerTokens* _tokensLayer;
     bool _active;
     bool _visible;
     int _size;
-    QPointF _position;
     qreal _rotation;
     QColor _color;
     QString _tip;
+
+    bool _batchChanges;
+    bool _changesMade;
 };
 
 

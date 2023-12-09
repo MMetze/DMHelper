@@ -15,6 +15,7 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
     virtual int getObjectType() const override;
+    virtual QIcon getDefaultIcon() override;
 
     // Local
     virtual int getAudioType() const = 0;
@@ -28,13 +29,13 @@ public:
     virtual bool isPlaying() const;
     virtual bool isRepeat() const;
     virtual bool isMuted() const;
-    virtual int getVolume() const;
+    virtual float getVolume() const;
 
 public slots:
     virtual void play() = 0;
     virtual void stop() = 0;
     virtual void setMute(bool mute) = 0;
-    virtual void setVolume(int volume) = 0;
+    virtual void setVolume(float volume) = 0;
     virtual void setRepeat(bool repeat) = 0;
 
 signals:

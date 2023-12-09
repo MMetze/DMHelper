@@ -6,7 +6,6 @@
 #include <QUuid>
 #include <QDate>
 #include "mruhandler.h"
-#include "dmconstants.h"
 
 class OptionsAccessor;
 
@@ -42,6 +41,7 @@ public:
 
     // Battle settings
     int getInitiativeType() const;
+    qreal getInitiativeScale() const;
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
@@ -60,6 +60,19 @@ public:
     QUuid getInstanceUuid();
     QString getInstanceUuidStr();
     QDate getLastUpdateCheck() const;
+    QString getHeroForgeToken() const;
+
+    // Token search settings
+    QString getTokenSearchString() const;
+    bool getTokenBackgroundFill() const;
+    QColor getTokenBackgroundFillColor() const;
+    bool getTokenTransparent() const;
+    QColor getTokenTransparentColor() const;
+    int getTokenTransparentLevel() const;
+    bool getTokenMaskApplied() const;
+    QString getTokenMaskFile() const;
+    bool getTokenFrameApplied() const;
+    QString getTokenFrameFile() const;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -98,6 +111,7 @@ signals:
 
     // Battle settings
     void initiativeTypeChanged(int initiativeType);
+    void initiativeScaleChanged(qreal initiativeScale);
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
@@ -107,6 +121,21 @@ signals:
     void countdownFrameChanged(const QString& countdownFrame);
     void gridLockedChanged(bool gridLocked);
     void gridLockScaleChanged(qreal gridLockScale);
+
+    // Data settings
+    void heroForgeTokenChanged(const QString& token);
+
+    // Token search settings
+    void tokenSearchStringChanged(const QString& tokenSearchString);
+    void tokenBackgroundFillChanged(bool backgroundFill);
+    void tokenBackgroundFillColorChanged(const QColor& transparentColor);
+    void tokenTransparentChanged(bool transparent);
+    void tokenTransparentColorChanged(const QColor& transparentColor);
+    void tokenTransparentLevelChanged(int transparentLevel);
+    void tokenMaskAppliedChanged(bool applied);
+    void tokenMaskFileChanged(const QString& tokenMaskFile);
+    void tokenFrameAppliedChanged(bool applied);
+    void tokenFrameFileChanged(const QString& tokenFrameFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -159,6 +188,8 @@ public slots:
 
     // Battle settings
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(int initiativeScale);
+    void setInitiativeScale(qreal initiativeScale);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
@@ -174,6 +205,19 @@ public slots:
     void setUpdatesEnabled(bool updatesEnabled);
     void setStatisticsAccepted(bool statisticsAccepted);
     void setLastUpdateDate(const QDate& date);
+    void setHeroForgeToken(const QString& token);
+
+    // Token search settings
+    void setTokenSearchString(const QString& tokenSearchString);
+    void setTokenBackgroundFill(bool backgroundFill);
+    void setTokenBackgroundFillColor(const QColor& transparentColor);
+    void setTokenTransparent(bool transparent);
+    void setTokenTransparentColor(const QColor& transparentColor);
+    void setTokenTransparentLevel(int transparentLevel);
+    void setTokenMaskApplied(bool maskApplied);
+    void setTokenMaskFile(const QString& tokenMaskFile);
+    void setTokenFrameApplied(bool frameApplied);
+    void setTokenFrameFile(const QString& tokenFrameFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -220,6 +264,7 @@ private:
 
     // Battle settings
     int _initiativeType;
+    qreal _initiativeScale;
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;
@@ -237,6 +282,19 @@ private:
     bool _statisticsAccepted;
     QUuid _instanceUuid;
     QDate _lastUpdateDate;
+    QString _heroForgeToken;
+
+    // Token search settings
+    QString _tokenSearchString;
+    bool _tokenBackgroundFill;
+    QColor _tokenBackgroundFillColor;
+    bool _tokenTransparent;
+    QColor _tokenTransparentColor;
+    int _tokenTransparentLevel;
+    bool _tokenMaskApplied;
+    QString _tokenMaskFile;
+    bool _tokenFrameApplied;
+    QString _tokenFrameFile;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings

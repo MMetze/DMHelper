@@ -16,6 +16,7 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual QIcon getDefaultIcon() override;
 
     // From Combatant
     virtual void beginBatchChanges() override;
@@ -52,7 +53,7 @@ public slots:
     void setNotes(const QString& newNotes);
 
 signals:
-    void iconChanged();
+    void iconChanged(CampaignObjectBase* monster);
 
 protected:
     // From Combatant

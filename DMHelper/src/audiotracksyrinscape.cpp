@@ -2,10 +2,16 @@
 #include "dmconstants.h"
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QIcon>
 
 AudioTrackSyrinscape::AudioTrackSyrinscape(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent)
 {
+}
+
+QIcon AudioTrackSyrinscape::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_syrinscape.png");
 }
 
 int AudioTrackSyrinscape::getAudioType() const
@@ -31,7 +37,7 @@ void AudioTrackSyrinscape::setMute(bool mute)
     Q_UNUSED(mute);
 }
 
-void AudioTrackSyrinscape::setVolume(int volume)
+void AudioTrackSyrinscape::setVolume(float volume)
 {
     Q_UNUSED(volume);
 }

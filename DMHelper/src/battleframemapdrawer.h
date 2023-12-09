@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QCursor>
 
-class UndoPath;
-class Map;
+class UndoFowPath;
+class LayerScene;
 
 class BattleFrameMapDrawer : public QObject
 {
@@ -13,13 +13,16 @@ class BattleFrameMapDrawer : public QObject
 public:
     explicit BattleFrameMapDrawer(QObject *parent = nullptr);
 
-    void setMap(Map* map, QPixmap* fow, QImage* glFow);
-    Map* getMap() const;
+    //void setMap(Map* map, QPixmap* fow, QImage* glFow);
+    //Map* getMap() const;
+    void setScene(LayerScene* scene);
+    LayerScene* getScene() const;
     const QCursor& getCursor() const;
 
 signals:
-    void fowEdited(const QPixmap& fow);
-    void fowChanged(const QImage& glFow);
+    //void fowEdited(const QPixmap& fow);
+    //void fowChanged(const QImage& glFow);
+    void dirty();
     void cursorChanged(const QCursor& cursor);
 
 public slots:
@@ -30,7 +33,7 @@ public slots:
     void drawRect(const QRect& rect);
 
     void setSize(int size);
-    void setScale(int gridScale, int viewScale);
+    void setScale(int gridScale, qreal zoomScale);
     void fillFoW();
     void resetFoW();
     void clearFoW();
@@ -45,14 +48,15 @@ private:
 
     bool _mouseDown;
     QPointF _mouseDownPos;
-    UndoPath* _undoPath;
-    Map* _map;
-    QPixmap* _fow;
-    QImage* _glFow;
+    UndoFowPath* _undoPath;
+    //Map* _map;
+    LayerScene* _scene;
+    //QPixmap* _fow;
+    //QImage* _glFow;
     QCursor _cursor;
 
     int _gridScale;
-    int _viewScale;
+    qreal _zoomScale;
     int _size;
     bool _erase;
     bool _smooth;

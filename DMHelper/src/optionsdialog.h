@@ -48,6 +48,8 @@ private slots:
     void editTables();
     void setTables(const QString& tablesDirectory);
 
+    void handleInitiativeScaleChanged(qreal initiativeScale);
+
     void browsePointerFile();
     void editPointerFile();
     void setPointerFile(const QString& pointerFile);
@@ -67,6 +69,19 @@ private slots:
     void browseCountdownFrame();
     void editCountdownFrame();
     void setCountdownFrame(const QString& countdownFrame);
+
+    void heroForgeTokenEdited();
+
+    void tokenSearchEdited();
+
+    void browseTokenFrame();
+    void editTokenFrame();
+    void setTokenFrame(const QString& tokenFrame);
+
+    void browseTokenMask();
+    void editTokenMask();
+    void setTokenMask(const QString& tokenMask);
+    void populateTokens();
 
     void updateFileLocations();
     void resetFileLocations();

@@ -28,6 +28,11 @@ public:
     virtual bool getExpanded() const;
     virtual QString getName() const;
     virtual int getRow() const;
+    virtual bool isTreeVisible() const;
+
+    virtual QIcon getIcon();
+    virtual QIcon getDefaultIcon();
+    virtual QString getIconFile() const;
 
     const QList<CampaignObjectBase*> getChildObjects() const;
     QList<CampaignObjectBase*> getChildObjects();
@@ -36,11 +41,11 @@ public:
     CampaignObjectBase* searchChildrenById(QUuid id);
     CampaignObjectBase* searchDirectChildrenByName(const QString& childName);
 
-    const CampaignObjectBase* getParentByType(int parentType) const;
-    CampaignObjectBase* getParentByType(int parentType);
+    virtual const CampaignObjectBase* getParentByType(int parentType) const;
+    virtual CampaignObjectBase* getParentByType(int parentType);
 
-    const CampaignObjectBase* getParentById(const QUuid& id) const;
-    CampaignObjectBase* getParentById(const QUuid& id);
+    virtual const CampaignObjectBase* getParentById(const QUuid& id) const;
+    virtual CampaignObjectBase* getParentById(const QUuid& id);
 
     QUuid addObject(CampaignObjectBase* object);
     CampaignObjectBase* removeObject(CampaignObjectBase* object);
@@ -54,12 +59,14 @@ signals:
     void dirty();
     void expandedChanged(bool expanded);
     void nameChanged(CampaignObjectBase* object, const QString& name);
+    void iconFileChanged(CampaignObjectBase* object);
     void campaignObjectDestroyed(const QUuid& id);
 
 public slots:
     void setExpanded(bool expanded);
     void setName(const QString& name);
     void setRow(int row);
+    void setIconFile(const QString& iconFile);
 
 protected slots:
     virtual void handleInternalChange();
@@ -77,6 +84,10 @@ protected:
 
     bool _expanded;
     int _row;
+    QString _iconFile;
+#ifdef QT_DEBUG
+    QString _DEBUG_NAME;
+#endif
 };
 
 Q_DECLARE_METATYPE(CampaignObjectBase*)

@@ -128,7 +128,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Set the text to bold</string>
+            <string>Set the text to bold (Ctrl+B)</string>
            </property>
            <property name="text">
             <string/>
@@ -163,7 +163,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Set the text to italics</string>
+            <string>Set the text to italics (Ctrl+I)</string>
            </property>
            <property name="text">
             <string/>
@@ -198,7 +198,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Set the text to underlined</string>
+            <string>Set the text to underlined (Ctrl+U)</string>
            </property>
            <property name="text">
             <string/>

@@ -2,10 +2,13 @@
 #define BESTIARYDIALOG_H
 
 #include <QDialog>
+#include "bestiaryfindtokendialog.h"
 
 class MonsterClass;
 class MonsterAction;
 class Bestiary;
+class TokenEditor;
+class OptionsContainer;
 class QVBoxLayout;
 
 namespace Ui {
@@ -21,6 +24,8 @@ public:
     ~BestiaryDialog();
 
     MonsterClass* getMonster() const;
+
+    void setOptions(OptionsContainer* options);
 
 signals:
     void monsterChanged();
@@ -45,8 +50,13 @@ protected slots:
     void monsterRenamed();
     void handlePublishButton();
 
+    void handlePreviousToken();
+    void handleAddToken();
+    void handleEditToken();
+    void handleSearchToken();
     void handleReloadImage();
     void handleClearImage();
+    void handleNextToken();
 
     void addAction();
     void deleteAction(const MonsterAction& action);
@@ -69,7 +79,11 @@ protected:
     virtual void hideEvent(QHideEvent * event);
     virtual void focusOutEvent(QFocusEvent * event);
 
+    void createTokenFiles(BestiaryFindTokenDialog* dialog);
+
 private:
+    QString selectToken();
+    void setTokenIndex(int index);
     void loadMonsterImage();
     void storeMonsterData();
 
@@ -84,9 +98,14 @@ private:
     QWidget* _specialAbilitiesWidget;
     QWidget* _reactionsWidget;
 
+    OptionsContainer* _options;
     MonsterClass* _monster;
+    int _currentToken;
     bool _edit;
     bool _mouseDown;
+
+    // Token search data
+    QString _searchString;
 };
 
 #endif // BESTIARYDIALOG_H

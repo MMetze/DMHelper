@@ -54,9 +54,8 @@ void DiceRollFrame::rollDice()
             //randNum = qrand();
             int roll = Dice::dX(diceType); // 1 + (randNum * diceType)/RAND_MAX;
             if(dc > 0)
-            {
                 resultStr.append(QString(" + "));
-            }
+
             resultStr.append(QString::number(roll));
             result += roll;
         }
@@ -69,20 +68,15 @@ void DiceRollFrame::rollDice()
         }
 
         // If there was somehow more than one number shown, then we should bother showing the overall sum
-        if( (dcEnd > 1) || ( bonus > 0 ) )
-        {
+        if((dcEnd > 1) || (bonus > 0))
             resultStr.append(QString(" = ") + QString::number(result));
-        }
 
         // Set the text color based on whether or not we exceeded the target
         if(result >= target)
-        {
             resultStr.prepend(QString("<font color=""#00ff00"">"));
-        }
         else
-        {
             resultStr.prepend(QString("<font color=""#ff0000"">"));
-        }
+
         resultStr.append(QString("</font>\n"));
 
         total += result;
@@ -107,5 +101,5 @@ void DiceRollFrame::init()
     QValidator *valTarget = new QIntValidator(0, 100, this);
     ui->editTarget->setValidator(valTarget);
 
-    connect(ui->btnRoll,SIGNAL(clicked()),this,SLOT(rollDice()));
+    connect(ui->btnRoll, SIGNAL(clicked()), this, SLOT(rollDice()));
 }

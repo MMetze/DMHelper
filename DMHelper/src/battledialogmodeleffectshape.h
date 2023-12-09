@@ -12,7 +12,7 @@ public:
     virtual ~BattleDialogModelEffectShape() override;
 
     // From CampaignObjectBase
-    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const override;
+    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) override;
 
 protected:
 

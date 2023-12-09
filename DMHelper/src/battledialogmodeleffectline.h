@@ -15,6 +15,7 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual QString getName() const override;
 
     virtual BattleDialogModelEffect* clone() const override;
 
@@ -22,7 +23,7 @@ public:
     virtual BattleDialogEffectSettings* getEffectEditor() const override;
 
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
-    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const override;
+    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) override;
 
     virtual int getWidth() const override;
     virtual void setWidth(int width) override;

@@ -2,8 +2,11 @@
 #include "optionsdialog.h"
 #include "optionsaccessor.h"
 #include "dmversion.h"
+#include "tokeneditor.h"
 #include <QDir>
 #include <QCoreApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -29,6 +32,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _pasteRich(false),
     _audioVolume(100),
     _initiativeType(DMHelper::InitiativeType_None),
+    _initiativeScale(1.0),
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
@@ -44,6 +48,17 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _statisticsAccepted(false),
     _instanceUuid(),
     _lastUpdateDate(),
+    _heroForgeToken(),
+    _tokenSearchString(),
+    _tokenBackgroundFill(false),
+    _tokenBackgroundFillColor(Qt::white),
+    _tokenTransparent(false),
+    _tokenTransparentColor(Qt::white),
+    _tokenTransparentLevel(TokenEditor::TRANSPARENT_LEVEL_DEFAULT),
+    _tokenMaskApplied(false),
+    _tokenMaskFile(),
+    _tokenFrameApplied(false),
+    _tokenFrameFile(),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -141,6 +156,11 @@ int OptionsContainer::getInitiativeType() const
     return _initiativeType;
 }
 
+qreal OptionsContainer::getInitiativeScale() const
+{
+    return _initiativeScale;
+}
+
 bool OptionsContainer::getShowCountdown() const
 {
     return _showCountdown;
@@ -227,6 +247,60 @@ QDate OptionsContainer::getLastUpdateCheck() const
     return _lastUpdateDate;
 }
 
+QString OptionsContainer::getHeroForgeToken() const
+{
+    return _heroForgeToken;
+}
+
+QString OptionsContainer::getTokenSearchString() const
+{
+    return _tokenSearchString;
+}
+
+bool OptionsContainer::getTokenBackgroundFill() const
+{
+    return _tokenBackgroundFill;
+}
+
+QColor OptionsContainer::getTokenBackgroundFillColor() const
+{
+    return _tokenBackgroundFillColor;
+}
+
+bool OptionsContainer::getTokenTransparent() const
+{
+    return _tokenTransparent;
+}
+
+QColor OptionsContainer::getTokenTransparentColor() const
+{
+    return _tokenTransparentColor;
+}
+
+int OptionsContainer::getTokenTransparentLevel() const
+{
+    return _tokenTransparentLevel;
+}
+
+bool OptionsContainer::getTokenMaskApplied() const
+{
+    return _tokenMaskApplied;
+}
+
+QString OptionsContainer::getTokenMaskFile() const
+{
+    return _tokenMaskFile;
+}
+
+bool OptionsContainer::getTokenFrameApplied() const
+{
+    return _tokenFrameApplied;
+}
+
+QString OptionsContainer::getTokenFrameFile() const
+{
+    return _tokenFrameFile;
+}
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 
@@ -288,6 +362,12 @@ void OptionsContainer::editSettings()
     connect(editCopyContainer, &OptionsContainer::fontSizeChanged, this, &OptionsContainer::registerFontChange);
 
     OptionsDialog dlg(editCopyContainer);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+    {
+        QSize screenSize = primary->availableSize();
+        dlg.resize(screenSize.width() * 2 / 3, screenSize.height() * 4 / 5);
+    }
 
     if(dlg.exec() == QDialog::Accepted)
     {
@@ -317,13 +397,13 @@ void OptionsContainer::readSettings()
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml"), &bestiaryExists));
     if((!settings.contains(QString("bestiary"))) || (!bestiaryExists))
         getDataDirectory(QString("Images"), true);
-    setLastMonster(settings.value("lastMonster","").toString());
+    setLastMonster(settings.value("lastMonster", "").toString());
 
     bool spellbookExists = true;
     setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml"), &spellbookExists));
     if((!settings.contains(QString("spellbook"))) || (!spellbookExists))
         getDataDirectory(QString("Images"), true);
-    setLastSpell(settings.value("lastSpell","").toString());
+    setLastSpell(settings.value("lastSpell", "").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
     setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
@@ -333,8 +413,8 @@ void OptionsContainer::readSettings()
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
-    setShowAnimations(settings.value("showAnimations",QVariant(false)).toBool());
-    setFontFamily(settings.value("fontFamily","Trebuchet MS").toString());
+    setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
+    setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
 
     //12*96/72 = 16 Pixels
     //10*96/72 = 13 Pixels
@@ -342,32 +422,39 @@ void OptionsContainer::readSettings()
     int defaultFontSize = 10;
     if(_logicalDPI > 0)
         defaultFontSize = (20*72)/_logicalDPI;
-    setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
-    setPasteRich(settings.value("pasteRich",QVariant(false)).toBool());
-    setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
+    setFontSize(settings.value("fontSize", QVariant(defaultFontSize)).toInt());
+    setPasteRich(settings.value("pasteRich", QVariant(false)).toBool());
+    setAudioVolume(settings.value("audioVolume", QVariant(100)).toInt());
     if(settings.contains("initiativeType"))
-        setInitiativeType(settings.value("initiativeType",QVariant(0)).toInt());
+        setInitiativeType(settings.value("initiativeType", QVariant(0)).toInt());
     else
-        setInitiativeType(settings.value("showOnDeck",QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
-    setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
-    setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
+        setInitiativeType(settings.value("showOnDeck", QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
+    setInitiativeScale(settings.value("initiativeScale", QVariant(1.0)).toReal());
+    setShowCountdown(settings.value("showCountdown", QVariant(true)).toBool());
+    setCountdownDuration(settings.value("countdownDuration", QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
     setSelectedIcon(settings.value("selectedIcon").toString());
     setActiveIcon(settings.value("activeIcon").toString());
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
-    setGridLocked(settings.value("gridLocked",QVariant(false)).toBool());
-    setGridLockScale(settings.value("gridLockScale",QVariant(0.0)).toReal());
+    setGridLocked(settings.value("gridLocked", QVariant(false)).toBool());
+    setGridLockScale(settings.value("gridLockScale", QVariant(0.0)).toReal());
 
     _lastAppVersion = settings.value("lastAppVersion").toString();
 
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
     {
-        setUpdatesEnabled(settings.value("updatesEnabled",QVariant(false)).toBool());
-        setStatisticsAccepted(settings.value("statisticsAccepted",QVariant(false)).toBool());
-        setLastUpdateDate(settings.value("lastUpdateCheck","").toDate());
+        setUpdatesEnabled(settings.value("updatesEnabled", QVariant(false)).toBool());
+        setStatisticsAccepted(settings.value("statisticsAccepted", QVariant(false)).toBool());
+        setLastUpdateDate(settings.value("lastUpdateCheck", "").toDate());
     }
+
+    setHeroForgeToken(settings.value("heroforgeToken").toString());
+
+    setTokenSearchString(settings.value("tokenSearchString", QVariant(QString("dnd 5e"))).toString());
+    setTokenFrameFile(getSettingsFile(settings, QString("tokenFrame"), QString("dmh_default_frame.png")));
+    setTokenMaskFile(getSettingsFile(settings, QString("tokenMask"), QString("dmh_default_mask.png")));
 
     QString uuidString = settings.value("instanceUuid").toString();
     if(uuidString.isEmpty())
@@ -376,13 +463,13 @@ void OptionsContainer::readSettings()
         _instanceUuid = QUuid::fromString(uuidString);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
-    setNetworkEnabled(settings.value("networkEnabled",QVariant(false)).toBool());
-    setURLString(settings.value("url","").toString());
-    setUserName(settings.value("username","").toString());
-    setSavePassword(settings.value("savePassword",QVariant(false)).toBool());
-    setPassword(settings.value("password","").toString());
-    setSessionID(settings.value("sessionID","").toString());
-    setInviteID(settings.value("inviteID","").toString());
+    setNetworkEnabled(settings.value("networkEnabled", QVariant(false)).toBool());
+    setURLString(settings.value("url", "").toString());
+    setUserName(settings.value("username", "").toString());
+    setSavePassword(settings.value("savePassword", QVariant(false)).toBool());
+    setPassword(settings.value("password", "").toString());
+    setSessionID(settings.value("sessionID", "").toString());
+    setInviteID(settings.value("inviteID", "").toString());
 #endif
 
     if(_mruHandler)
@@ -417,6 +504,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("pasteRich", getPasteRich());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("initiativeType", getInitiativeType());
+    settings.setValue("initiativeScale", getInitiativeScale());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
@@ -436,6 +524,7 @@ void OptionsContainer::writeSettings()
     {
         settings.setValue("updatesEnabled", isUpdatesEnabled());
         settings.setValue("statisticsAccepted", isStatisticsAccepted());
+
         if((!_instanceUuid.isNull()) && (_statisticsAccepted))
             settings.setValue("instanceUuid", _instanceUuid.toString());
         else
@@ -444,6 +533,22 @@ void OptionsContainer::writeSettings()
         if(isUpdatesEnabled())
             settings.setValue("lastUpdateCheck", _lastUpdateDate);
     }
+
+    if(_heroForgeToken.isEmpty())
+        settings.remove("heroforgeToken");
+    else
+        settings.setValue("heroforgeToken", _heroForgeToken);
+
+    settings.setValue("tokenSearchString", getTokenSearchString());
+    if(_tokenFrameFile.isEmpty())
+        settings.remove("tokenFrame");
+    else
+        settings.setValue("tokenFrame", getTokenFrameFile());
+    if(_tokenMaskFile.isEmpty())
+        settings.remove("tokenMask");
+    else
+        settings.setValue("tokenMask", getTokenMaskFile());
+
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
@@ -697,7 +802,7 @@ void OptionsContainer::backupFile(const QString& filename)
         QDir backupDir(backupPath);
         QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
         QFileInfo backupFileInfo(previousBackup);
-        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
         if((!backupFileInfo.exists()) || (backupFileInfo.size() != fileInfo.size()))
         {
             if(backupFileInfo.exists())
@@ -809,6 +914,20 @@ void OptionsContainer::setInitiativeType(int initiativeType)
     {
         _initiativeType = initiativeType;
         emit initiativeTypeChanged(_initiativeType);
+    }
+}
+
+void OptionsContainer::setInitiativeScale(int initiativeScale)
+{
+    setInitiativeScale(static_cast<qreal>(initiativeScale) / 100.0);
+}
+
+void OptionsContainer::setInitiativeScale(qreal initiativeScale)
+{
+    if(_initiativeScale != initiativeScale)
+    {
+        _initiativeScale = initiativeScale;
+        emit initiativeScaleChanged(_initiativeScale);
     }
 }
 
@@ -927,6 +1046,116 @@ void OptionsContainer::setLastUpdateDate(const QDate& date)
     _lastUpdateDate = date;
 }
 
+void OptionsContainer::setHeroForgeToken(const QString& token)
+{
+    if(_heroForgeToken != token)
+    {
+        _heroForgeToken = token;
+        qDebug() << "[OptionsContainer] Heroforge Token set to: " << _heroForgeToken;
+        emit heroForgeTokenChanged(_heroForgeToken);
+    }
+}
+
+void OptionsContainer::setTokenSearchString(const QString& tokenSearchString)
+{
+    if(_tokenSearchString != tokenSearchString)
+    {
+        _tokenSearchString = tokenSearchString;
+        qDebug() << "[OptionsContainer] Token search string set to: " << _tokenSearchString;
+        emit tokenSearchStringChanged(_tokenSearchString);
+    }
+}
+
+void OptionsContainer::setTokenBackgroundFill(bool backgroundFill)
+{
+    if(_tokenBackgroundFill != backgroundFill)
+    {
+        _tokenBackgroundFill = backgroundFill;
+        qDebug() << "[OptionsContainer] Token background fill set to: " << _tokenBackgroundFill;
+        emit tokenBackgroundFillChanged(_tokenBackgroundFill);
+    }
+}
+
+void OptionsContainer::setTokenBackgroundFillColor(const QColor& transparentColor)
+{
+    if(_tokenBackgroundFillColor != transparentColor)
+    {
+        _tokenBackgroundFillColor = transparentColor;
+        qDebug() << "[OptionsContainer] Token background fill color set to: " << _tokenBackgroundFillColor;
+        emit tokenBackgroundFillColorChanged(_tokenBackgroundFillColor);
+    }
+}
+
+void OptionsContainer::setTokenTransparent(bool transparent)
+{
+    if(_tokenTransparent != transparent)
+    {
+        _tokenTransparent = transparent;
+        qDebug() << "[OptionsContainer] Token transparent set to: " << _tokenTransparent;
+        emit tokenTransparentChanged(_tokenTransparent);
+    }
+}
+
+void OptionsContainer::setTokenTransparentColor(const QColor& transparentColor)
+{
+    if(_tokenTransparentColor != transparentColor)
+    {
+        _tokenTransparentColor = transparentColor;
+        qDebug() << "[OptionsContainer] Token transparent color set to: " << _tokenTransparentColor;
+        emit tokenTransparentColorChanged(_tokenTransparentColor);
+    }
+}
+
+void OptionsContainer::setTokenTransparentLevel(int transparentLevel)
+{
+    if(_tokenTransparentLevel != transparentLevel)
+    {
+        _tokenTransparentLevel = transparentLevel;
+        qDebug() << "[OptionsContainer] Token transparent level set to: " << _tokenTransparentLevel;
+        emit tokenTransparentLevelChanged(_tokenTransparentLevel);
+    }
+}
+
+void OptionsContainer::setTokenMaskApplied(bool maskApplied)
+{
+    if(_tokenMaskApplied != maskApplied)
+    {
+        _tokenMaskApplied = maskApplied;
+        qDebug() << "[OptionsContainer] Token mask applied set to: " << _tokenMaskApplied;
+        emit tokenMaskAppliedChanged(_tokenMaskApplied);
+    }
+}
+
+void OptionsContainer::setTokenMaskFile(const QString& tokenMaskFile)
+{
+    if(_tokenMaskFile != tokenMaskFile)
+    {
+        _tokenMaskFile = tokenMaskFile;
+        qDebug() << "[OptionsContainer] Token mask file set to: " << _tokenMaskFile;
+        emit tokenMaskFileChanged(_tokenMaskFile);
+    }
+}
+void OptionsContainer::setTokenFrameApplied(bool frameApplied)
+{
+    if(_tokenFrameApplied != frameApplied)
+    {
+        _tokenFrameApplied = frameApplied;
+        qDebug() << "[OptionsContainer] Token frame applied set to: " << _tokenFrameApplied;
+        emit tokenFrameAppliedChanged(_tokenFrameApplied);
+    }
+}
+
+void OptionsContainer::setTokenFrameFile(const QString& tokenFrameFile)
+{
+    if(_tokenFrameFile != tokenFrameFile)
+    {
+        _tokenFrameFile = tokenFrameFile;
+        qDebug() << "[OptionsContainer] Token frame file set to: " << _tokenFrameFile;
+        emit tokenFrameFileChanged(_tokenFrameFile);
+    }
+}
+
+
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::setNetworkEnabled(bool enabled)
@@ -1021,6 +1250,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);
+        setInitiativeScale(other->_initiativeScale);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);
@@ -1036,6 +1266,11 @@ void OptionsContainer::copy(OptionsContainer* other)
         _statisticsAccepted = other->_statisticsAccepted;
         _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
         _lastUpdateDate = other->_lastUpdateDate;
+
+        setHeroForgeToken(other->_heroForgeToken);
+        setTokenSearchString(other->_tokenSearchString);
+        setTokenFrameFile(other->_tokenFrameFile);
+        setTokenMaskFile(other->_tokenMaskFile);
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);

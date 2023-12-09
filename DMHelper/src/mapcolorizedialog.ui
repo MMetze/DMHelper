@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>DM Helper Colorize</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_9" stretch="5,1,0">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

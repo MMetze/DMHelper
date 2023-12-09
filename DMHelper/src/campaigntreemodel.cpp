@@ -2,11 +2,13 @@
 #include "combatant.h"
 #include "character.h"
 #include "map.h"
+#include "party.h"
 #include "campaigntreeitem.h"
 #include "dmconstants.h"
 #include <QMimeData>
 #include <QUuid>
 #include <QTimer>
+#include <QIODevice>
 #include <QDebug>
 
 // Uncomment the next line to log in detail all of the additions to the campaign model
@@ -266,9 +268,17 @@ void CampaignTreeModel::handleObjectNameChanged(CampaignObjectBase* object, cons
     qDebug() << "[CampaignTreeModel] Item " << item << ", item ID: " << item->getCampaignItemId() << " object ID: " << object->getID() << ", name: " << item->text();
 
     if(item->text() != name)
-    {
         item->setText(name);
-    }
+}
+
+void CampaignTreeModel::handleObjectIconChanged(CampaignObjectBase* object)
+{
+    if(!object)
+        return;
+
+    CampaignTreeItem* item = getObjectItem(object->getID());
+    if(item)
+        item->updateVisualization();
 }
 
 void CampaignTreeModel::updateCampaignEntries()
@@ -313,9 +323,23 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     if(object->getObjectType() == DMHelper::CampaignType_Map)
     {
         Map* mapObject = dynamic_cast<Map*>(object);
-        treeEntry->setToolTip(mapObject->getFileName());
+        if(mapObject)
+            treeEntry->setToolTip(mapObject->getFileName());
+    }
+    else if(object->getObjectType() == DMHelper::CampaignType_Combatant)
+    {
+        Character* characterObject = dynamic_cast<Character*>(object);
+        if(characterObject)
+            connect(characterObject, &Character::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
+    }
+    else if(object->getObjectType() == DMHelper::CampaignType_Party)
+    {
+        Party* partyObject = dynamic_cast<Party*>(object);
+        if(partyObject)
+            connect(partyObject, &Party::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
     }
 
+    connect(object, &CampaignObjectBase::iconFileChanged, this, &CampaignTreeModel::handleObjectIconChanged);
     connect(object, &CampaignObjectBase::nameChanged, this, &CampaignTreeModel::handleObjectNameChanged);
 
     addTreeEntry(treeEntry, parentEntry);
@@ -323,7 +347,8 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     QList<CampaignObjectBase*> childObjects = object->getChildObjects();
     for(CampaignObjectBase* childObject : childObjects)
     {
-        createTreeEntry(childObject, treeEntry);
+        if(childObject->isTreeVisible())
+            createTreeEntry(childObject, treeEntry);
     }
 
     updateChildRows(treeEntry);
@@ -380,7 +405,7 @@ void CampaignTreeModel::validateChildStructure(QStandardItem* parentItem)
         return;
 
     CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
-    QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
+    QUuid parentId = QUuid(parentItem->data(DMHelper::TreeItemData_ID).toString());
     if((!parentObject) || (parentId.isNull()))
     {
         qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child structure - parent ID: " << parentId << ", object: " << parentObject;

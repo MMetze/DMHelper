@@ -127,7 +127,7 @@ void QuickRef::readQuickRef(const QString& quickRefFile)
     QString quickRefIconDir = quickRefInfo.dir().absolutePath() + QString("/icons/");
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;
@@ -165,11 +165,11 @@ QuickRefSection::QuickRefSection(QDomElement &element, const QString& iconDir) :
     _limitation(element.firstChildElement(QString("limitation")).text()),
     _subSections()
 {
-    QDomElement subSectionElement = element.firstChildElement( QString("subsection") );
-    while( !subSectionElement.isNull() )
+    QDomElement subSectionElement = element.firstChildElement(QString("subsection"));
+    while(!subSectionElement.isNull())
     {
         _subSections.append(new QuickRefSubsection(subSectionElement, iconDir));
-        subSectionElement = subSectionElement.nextSiblingElement( QString("subsection") );
+        subSectionElement = subSectionElement.nextSiblingElement(QString("subsection"));
     }
 }
 
@@ -211,12 +211,12 @@ QuickRefSubsection::QuickRefSubsection(QDomElement &element, const QString& icon
     _description(element.firstChildElement(QString("description")).text()),
     _data()
 {
-    QDomElement dataElement = element.firstChildElement( QString("data") );
-    while( !dataElement.isNull() )
+    QDomElement dataElement = element.firstChildElement(QString("data"));
+    while(!dataElement.isNull())
     {
         QuickRefData* newData = new QuickRefData(dataElement, iconDir);
         _data.insert(newData->getTitle(), newData);
-        dataElement = dataElement.nextSiblingElement( QString("data") );
+        dataElement = dataElement.nextSiblingElement(QString("data"));
     }
 }
 
@@ -274,15 +274,15 @@ QuickRefData::QuickRefData(QDomElement &element, const QString& iconDir) :
             qDebug() << "[QuickRefData] ERROR: Unable to find icon '" << iconName << "' in path: " << fileIcon;
     }
 
-    QDomElement bulletsElement = element.firstChildElement( QString("bullets") );
-    if( !bulletsElement.isNull() )
+    QDomElement bulletsElement = element.firstChildElement(QString("bullets"));
+    if(!bulletsElement.isNull())
     {
-        QDomElement bulletElement = bulletsElement.firstChildElement( QString("bullet") );
-        while( !bulletElement.isNull() )
+        QDomElement bulletElement = bulletsElement.firstChildElement(QString("bullet"));
+        while(!bulletElement.isNull())
         {
             QDomCDATASection bulletData = bulletElement.firstChild().toCDATASection();
             _bullets.append(bulletData.data());
-            bulletElement = bulletElement.nextSiblingElement( QString("bullet") );
+            bulletElement = bulletElement.nextSiblingElement(QString("bullet"));
         }
     }
 }
@@ -331,7 +331,7 @@ QString QuickRefData::getOverview() const
     if(_bullets.count() > 0)
     {
         result += QString("<ul>");
-        for(const QString& bulletLine : qAsConst(_bullets))
+        for(const QString& bulletLine : std::as_const(_bullets))
             result += QString("<li>") + bulletLine + QString("</li>");
         result += QString("</ul>");
     }

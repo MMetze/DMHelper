@@ -31,7 +31,7 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
         _modifiers = modifiers;
     */
 
-    ui->edtDamage->setValidator(new QIntValidator(0,INT_MAX,this));
+    ui->edtDamage->setValidator(new QIntValidator(0, INT_MAX, this));
 
     ui->editDiceCount->setText(QString::number(dice.getCount()));
     ui->editDiceType->setText(QString::number(dice.getType()));
@@ -233,7 +233,7 @@ void DiceRollDialogCombatants::init()
     ui->cmbType->insertSeparator(ui->cmbType->count());
     ui->cmbType->addItem(QString("Intelligence Check"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, -1)));
     ui->cmbType->addItem(QString("   Intelligence Save"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, Combatant::Skills_intelligenceSave)));
-    ui->cmbType->addItem(QString("   Investigation"),QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, Combatant::Skills_investigation)));
+    ui->cmbType->addItem(QString("   Investigation"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, Combatant::Skills_investigation)));
     ui->cmbType->addItem(QString("   Arcana"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, Combatant::Skills_arcana)));
     ui->cmbType->addItem(QString("   Nature"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, Combatant::Skills_nature)));
     ui->cmbType->addItem(QString("   History"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Intelligence, Combatant::Skills_history)));
@@ -268,10 +268,10 @@ void DiceRollDialogCombatants::createCombatantWidgets()
     {
         WidgetBattleCombatant* newWidget = new WidgetBattleCombatant(combatant);
         _combatantLayout->addWidget(newWidget);
-        connect(newWidget,SIGNAL(selectCombatant(BattleDialogModelCombatant*)),this,SIGNAL(selectCombatant(BattleDialogModelCombatant*)));
-        connect(newWidget,SIGNAL(combatantChanged(BattleDialogModelCombatant*)),this,SIGNAL(combatantChanged(BattleDialogModelCombatant*)));
-        connect(newWidget,SIGNAL(rerollNeeded(WidgetBattleCombatant*)),this,SLOT(rerollWidget(WidgetBattleCombatant*)));
-        connect(newWidget,SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)),this,SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)));
+        connect(newWidget, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SIGNAL(selectCombatant(BattleDialogModelCombatant*)));
+        connect(newWidget, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SIGNAL(combatantChanged(BattleDialogModelCombatant*)));
+        connect(newWidget, SIGNAL(rerollNeeded(WidgetBattleCombatant*)), this, SLOT(rerollWidget(WidgetBattleCombatant*)));
+        connect(newWidget, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)));
         newWidget->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
     }
 }
