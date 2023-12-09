@@ -9,9 +9,19 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.0</h2>
+<h2>What's New: Version 3.1</h2>
 
-<h3>New Features:</h3>
+<h3>Extra v3.1 Features:</h3>
+<ul>
+<li><b>Token Search:</b> added a new monster to your Bestiary and need a token? Click the search button in the Bestiary and find one from the Internet!
+<li><b>Bestiary Token Fill:</b> have a bunch of monsters in your Bestiary without tokens and need a quick way to fill them in? Click the "Populate Bestiary Tokens" button in the options dialog and DMH will search the Internet for tokens for all your monsters missing a token!
+<li><b>Token Editor:</b> turn your own images into customized tokens for your campaign, adding backgrounds or a nice frame
+<li><b>Drag and Drop:</b> what is a D&D app without D'n'D? Now you can drag images onto the campaign tree to create new entries and onto a combat to create new layers or tokens!
+</ul>
+
+<p>
+
+<h3>New v3.0 Features:</h3>
 <ul>
 <li><b>Layers:</b> this is so big that it's hard to even fathom, let alone summarize. Just as a few examples, you can:
     <ul>
