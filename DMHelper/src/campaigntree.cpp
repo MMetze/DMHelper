@@ -1,11 +1,9 @@
 #include "campaigntree.h"
 #include "dmconstants.h"
 #include "campaigntreemodel.h"
-#include "campaigntreeitem.h"
 #include "campaignobjectbase.h"
 #include <QDropEvent>
 #include <QStandardItemModel>
-#include <QMimeData>
 
 CampaignTree::CampaignTree(QWidget *parent) :
     QTreeView(parent)

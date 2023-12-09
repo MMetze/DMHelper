@@ -82,6 +82,7 @@
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
+#include <QMimeDatabase>
 #include <QDomElement>
 #include <QDomDocument>
 #include <QFile>
@@ -1102,7 +1103,7 @@ void MainWindow::newBattleEncounter()
 //    battleFrame->recenterCombatants();
 }
 
-void MainWindow::newMap()
+void MainWindow::newMap(Layer* imageLayer)
 {
     // TODO: throw a message box when it doesn't work.
     if(!_campaign)
@@ -1113,7 +1114,7 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    Layer* mapLayer = selectMapFile();
+    Layer* mapLayer = (imageLayer != nullptr) ? imageLayer : selectMapFile();
     if(!mapLayer)
         return;
 
@@ -1736,32 +1737,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData* data = event->mimeData();
+
     if((data->hasUrls()) &&
        (data->urls().count() == 1) &&
-       (data->urls().first().isLocalFile()))
+       (data->urls().constFirst().isLocalFile()))
     {
-        // TODO: fix
-        QImageReader reader(data->urls().first().toLocalFile());
-        if(reader.canRead())
-        {
-            event->acceptProposedAction();
-            return;
-        }
-    }
-
-    event->ignore();
-}
-
-void MainWindow::dragMoveEvent(QDragMoveEvent *event)
-{
-    const QMimeData* data = event->mimeData();
-    if((data->hasUrls()) &&
-       (data->urls().count() == 1) &&
-       (data->urls().first().isLocalFile()))
-    {
-        // TODO: enhance to include non-images
-        QImageReader reader(data->urls().first().toLocalFile());
-        if(reader.canRead())
+        QString filename = data->urls().constFirst().toLocalFile();
+        QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+        if((mimeType.isValid()) &&
+           ((mimeType.name().startsWith("image/")) ||
+            (mimeType.name().startsWith("video/")) ||
+            (mimeType.name().startsWith("text/")) ||
+            (mimeType.suffixes().contains("xml"))))
         {
             event->acceptProposedAction();
             return;
@@ -1779,18 +1766,46 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 void MainWindow::dropEvent(QDropEvent *event)
 {
     const QMimeData* data = event->mimeData();
+
     if((data->hasUrls()) &&
-       (data->urls().count() == 1) &&
-       (data->urls().first().isLocalFile()))
+        (data->urls().count() == 1) &&
+        (data->urls().constFirst().isLocalFile()))
     {
-        QString filename = data->urls().first().toLocalFile();
-        openCampaign(filename);
-        event->accept();
+        QString filename = data->urls().constFirst().toLocalFile();
+        QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+        if(mimeType.isValid())
+        {
+            if(mimeType.name().startsWith("image/"))
+            {
+                QImageReader reader(filename);
+                if(reader.canRead())
+                    newMap(new LayerImage(QString("Map Image: ") + filename, filename));
+
+                event->acceptProposedAction();
+                return;
+            }
+            else if(mimeType.name().startsWith("video/"))
+            {
+                newMap(new LayerVideo(QString("Map Video: ") + filename, filename));
+                event->acceptProposedAction();
+                return;
+            }
+            else if(mimeType.suffixes().contains("xml")) // XML first because it is a form of text
+            {
+                openCampaign(filename);
+                event->acceptProposedAction();
+                return;
+            }
+            else if(mimeType.name().startsWith("text/"))
+            {
+                //_bestiaryDlg.addMonsterText(filename);
+                event->acceptProposedAction();
+                return;
+            }
+        }
     }
-    else
-    {
-        event->ignore();
-    }
+
+    event->ignore();
 }
 
 void MainWindow::setupRibbonBar()
@@ -2237,13 +2252,20 @@ Layer* MainWindow::selectMapFile()
     if(filename.isEmpty())
         return nullptr;
 
-    QImageReader reader(filename);
-    if(reader.canRead())
-        return new LayerImage(QString("Map Image: ") + filename, filename);
-
-    QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
-    if(result == QMessageBox::Yes)
-        return new LayerVideo(QString("Map Video: ") + filename, filename);
+    QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+    if(mimeType.isValid())
+    {
+        if(mimeType.name().startsWith("image/"))
+        {
+            QImageReader reader(filename);
+            if(reader.canRead())
+                return new LayerImage(QString("Map Image: ") + filename, filename);
+        }
+        else if(mimeType.name().startsWith("video/"))
+        {
+            return new LayerVideo(QString("Map Video: ") + filename, filename);
+        }
+    }
 
     return nullptr;
 }

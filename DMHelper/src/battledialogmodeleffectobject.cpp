@@ -1,6 +1,5 @@
 #include "battledialogmodeleffectobject.h"
 #include "battledialogeffectsettings.h"
-#include "dmconstants.h"
 #include "unselectedpixmap.h"
 #include <QDomElement>
 #include <QGraphicsPixmapItem>
