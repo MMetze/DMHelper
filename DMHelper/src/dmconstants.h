@@ -172,6 +172,7 @@ namespace DMHelper
         LayerType_Tokens,
         LayerType_Reference,
         LayerType_Video,
+        LayerType_VideoTransparent,
         LayerType_Blank
     };
 

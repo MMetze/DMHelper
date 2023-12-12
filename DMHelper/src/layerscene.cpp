@@ -6,6 +6,7 @@
 #include "layertokens.h"
 #include "layerreference.h"
 #include "layervideo.h"
+#include "layervideotransparent.h"
 #include "layerblank.h"
 #include "publishglscene.h"
 #include "campaign.h"
@@ -65,6 +66,9 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
                 break;
             case DMHelper::LayerType_Video:
                 newLayer = new LayerVideo();
+                break;
+            case DMHelper::LayerType_VideoTransparent:
+                newLayer = new LayerVideoTransparent();
                 break;
             case DMHelper::LayerType_Blank:
                 newLayer = new LayerBlank();
