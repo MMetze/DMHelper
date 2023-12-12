@@ -58,8 +58,6 @@ void LayerVideoTransparent::playerSetShaders(unsigned int programRGB, int modelM
     Q_UNUSED(alphaRGBA);
 
     _shaderProgramRGB = programRGB;
-
-//    LayerVideo::playerSetShaders(programRGB, modelMatrixRGB, projectionMatrixRGB, programRGBA, modelMatrixRGBA, projectionMatrixRGBA, alphaRGBA);
 }
 
 void LayerVideoTransparent::createShaders()
