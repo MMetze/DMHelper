@@ -2328,8 +2328,12 @@ void MainWindow::openCampaign(const QString& filename)
     QFileInfo fileInfo(_campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
     _campaign = new Campaign();
+
+    Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
     _campaign->postProcessXML(campaignElement, false);
+    Bestiary::Instance()->finishBatchProcessing();
+
     if(!_campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
