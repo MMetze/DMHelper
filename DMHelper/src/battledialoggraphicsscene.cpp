@@ -2,13 +2,12 @@
 #include "battledialogeffectsettings.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
-//#include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodelmonsterclass.h"
 #include "monsterclass.h"
 #include "unselectedpixmap.h"
-//#include "grid.h"
 #include "layertokens.h"
+#include "layergrid.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
@@ -97,7 +96,9 @@ void BattleDialogGraphicsScene::createBattleContents()
     }
 
     qDebug() << "[Battle Dialog Scene] Creating scene contents";
-    setDistanceScale(_model->getGridScale());
+
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    setDistanceScale(gridLayer ? gridLayer->getConfig().getGridScale() : _model->getGridScale());
 
     QGraphicsView* view = views().constFirst();
     if(view)
@@ -582,7 +583,6 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                             for(int i = 0; i < iconList.count(); ++i)
                             {
                                 QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
-                                //connect(tokenAction, &QAction::triggered, [i, monster](){monster->setIconIndex(i);});
                                 connect(tokenAction, &QAction::triggered, [this, i, monster](){this->changeMonsterToken(monster, i);});
                                 tokenMenu->addAction(tokenAction);
                             }

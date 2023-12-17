@@ -2614,7 +2614,10 @@ void BattleFrame::handleLayerSelected(Layer* layer)
 
     LayerGrid* newGrid = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(layer, DMHelper::LayerType_Grid));
     if(newGrid)
+    {
+        _scene->setDistanceScale(newGrid->getConfig().getGridScale());
         emit gridConfigChanged(newGrid->getConfig());
+    }
 }
 
 void BattleFrame::itemLink()

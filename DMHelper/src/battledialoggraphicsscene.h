@@ -136,7 +136,6 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
     virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
-//    virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
     virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event) override;
 

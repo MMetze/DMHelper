@@ -6,6 +6,7 @@
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
+#include "bestiary.h"
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDomDocument>
@@ -82,8 +83,12 @@ bool ObjectImportWorker::doWork()
     QFileInfo importFileInfo(_importFilename);
     QDir::setCurrent(importFileInfo.absolutePath());
     _importCampaign = new Campaign();
+
+    Bestiary::Instance()->startBatchProcessing();
     _importCampaign->inputXML(campaignElement, true);
     _importCampaign->postProcessXML(campaignElement, true);
+    Bestiary::Instance()->finishBatchProcessing();
+
     if(!_importCampaign->isValid())
         return registerImportResult(false, QString("The imported file contains a campaign with an invalid structure"));
 
