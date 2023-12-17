@@ -43,6 +43,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 
     connect(ui->sliderOpacity, &QSlider::valueChanged, this, &LayerFrame::handleOpacityChanged);
     connect(ui->spinOpacity, &QSpinBox::editingFinished, this, &LayerFrame::handleOpacityChanged);
+    connect(ui->btnSettings, &QAbstractButton::clicked, &layer, &Layer::editSettings);
     connect(ui->spinX, &QSpinBox::editingFinished, this, &LayerFrame::handleXChanged);
     connect(ui->spinY, &QSpinBox::editingFinished, this, &LayerFrame::handleYChanged);
     connect(ui->spinWidth, &QSpinBox::editingFinished, this, &LayerFrame::handleWidthChanged);
@@ -50,6 +51,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
 
     ui->edtName->installEventFilter(this);
+    ui->btnSettings->setVisible(layer.getType() == DMHelper::LayerType_VideoEffect);
 
     setLineWidth(5);
     setAutoFillBackground(true);

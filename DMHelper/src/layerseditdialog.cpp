@@ -6,7 +6,7 @@
 #include "layerimage.h"
 #include "layertokens.h"
 #include "layervideo.h"
-#include "layervideotransparent.h"
+#include "layervideoeffect.h"
 #include "layerblank.h"
 #include "layerframe.h"
 #include "layergrid.h"
@@ -95,7 +95,7 @@ void LayersEditDialog::moveDown()
 void LayersEditDialog::addLayer()
 {
     QStringList items;
-    items << tr("Image") << tr("Video") << tr("Transparent Video") << tr("FoW");
+    items << tr("Image") << tr("Video") << tr("Effect Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
     items << tr("Grid") << tr("Blank");
@@ -122,13 +122,13 @@ void LayersEditDialog::addLayer()
 
         newLayer = new LayerVideo(QString("Video: ") + newFileName, newFileName);
     }
-    else if(selectedItem == tr("Transparent Video"))
+    else if(selectedItem == tr("Effect Video"))
     {
-        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Transparent Video File"));
+        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Effect Video File"));
         if(newFileName.isEmpty())
             return;
-
-        newLayer = new LayerVideoTransparent(QString("Transparent Video: ") + newFileName, newFileName);
+        
+        newLayer = new LayerVideoEffect(QString("Effect Video: ") + newFileName, newFileName);
     }
     else if(selectedItem == tr("FoW"))
     {

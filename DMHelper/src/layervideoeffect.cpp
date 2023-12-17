@@ -1,36 +1,42 @@
-#include "layervideotransparent.h"
+#include "layervideoeffect.h"
+#include "layervideoeffectsettings.h"
 #include <QMatrix4x4>
 
-LayerVideoTransparent::LayerVideoTransparent(const QString& name, const QString& filename, int order, QObject *parent) :
-    LayerVideo{name, filename, order, parent}
+LayerVideoEffect::LayerVideoEffect(const QString& name, const QString& filename, int order, QObject *parent) :
+    LayerVideo{name, filename, order, parent},
+    _recreateShaders(true),
+    _effectType(LayerVideoEffectType_None),
+    _colorize(false),
+    _transparentColor(),
+    _colorizeColor()
 {
 }
 
-LayerVideoTransparent::~LayerVideoTransparent()
+LayerVideoEffect::~LayerVideoEffect()
 {
 }
 
-DMHelper::LayerType LayerVideoTransparent::getType() const
+DMHelper::LayerType LayerVideoEffect::getType() const
 {
-    return DMHelper::LayerType_VideoTransparent;
+    return DMHelper::LayerType_VideoEffect;
 }
 
-Layer* LayerVideoTransparent::clone() const
+Layer* LayerVideoEffect::clone() const
 {
-    LayerVideoTransparent* newLayer = new LayerVideoTransparent(_name, _filename, _order);
+    LayerVideoEffect* newLayer = new LayerVideoEffect(_name, _filename, _order);
 
     copyBaseValues(newLayer);
 
     return newLayer;
 }
 
-void LayerVideoTransparent::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerVideoEffect::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     createShaders();
     LayerVideo::playerGLInitialize(renderer, scene);
 }
 
-void LayerVideoTransparent::playerGLUninitialize()
+void LayerVideoEffect::playerGLUninitialize()
 {
     // Destroy the local shaders
     if((QOpenGLContext::currentContext()) && (_shaderProgramRGBA > 0))
@@ -48,7 +54,7 @@ void LayerVideoTransparent::playerGLUninitialize()
     LayerVideo::playerGLUninitialize();
 }
 
-void LayerVideoTransparent::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
+void LayerVideoEffect::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
 {
     Q_UNUSED(modelMatrixRGB);
     Q_UNUSED(projectionMatrixRGB);
@@ -60,7 +66,17 @@ void LayerVideoTransparent::playerSetShaders(unsigned int programRGB, int modelM
     _shaderProgramRGB = programRGB;
 }
 
-void LayerVideoTransparent::createShaders()
+void LayerVideoEffect::editSettings()
+{
+    LayerVideoEffectSettings* dlg = new LayerVideoEffectSettings();
+    dlg->exec();
+
+    _recreateShaders = true;
+
+    dlg->deleteLater();
+}
+
+void LayerVideoEffect::createShaders()
 {
     // Create the local shader program
     if((!QOpenGLContext::currentContext()) || (_shaderProgramRGBA != 0))
@@ -100,7 +116,7 @@ void LayerVideoTransparent::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShaderRGBA, 512, NULL, infoLog);
-        qDebug() << "[LayerVideoTransparent] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[LayerVideoEffect] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -124,7 +140,7 @@ void LayerVideoTransparent::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShaderRGBA, 512, NULL, infoLog);
-        qDebug() << "[LayerVideoTransparent] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[LayerVideoEffect] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -138,7 +154,7 @@ void LayerVideoTransparent::createShaders()
     if(!success)
     {
         f->glGetProgramInfoLog(_shaderProgramRGBA, 512, NULL, infoLog);
-        qDebug() << "[LayerVideoTransparent] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[LayerVideoEffect] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -156,5 +172,7 @@ void LayerVideoTransparent::createShaders()
     f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
     f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData());
+
+    _recreateShaders = false;
 }
 
