@@ -27,13 +27,17 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene) override;
     virtual void playerGLUninitialize() override;
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA) override;
 
     // Layer Specific Interface
     virtual void editSettings() override;
 
 protected:
-    void createShaders();
+    void createShadersGL();
+    void cleanupShadersGL();
+    const char* getVertexShaderSource();
+    const char* getFragmentShaderSource();
 
     bool _recreateShaders;
     LayerVideoEffectType _effectType;
