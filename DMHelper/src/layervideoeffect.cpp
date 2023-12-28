@@ -22,6 +22,26 @@ const char *vertexShaderSourceBase =
     "   TexCoord = aTexCoord;\n"
     "}\0";
 
+const char *vertexShaderSourceColorize =
+    "#version 410 core\n"
+    "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+    "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+    "layout (location = 2) in vec2 aTexCoord;\n"
+    "uniform mat4 model;\n"
+    "uniform mat4 view;\n"
+    "uniform mat4 projection;\n"
+    "uniform float alpha;\n"
+    "uniform vec3 colorizeColor;\n"
+    "out vec4 ourColor; // output a color to the fragment shader\n"
+    "out vec2 TexCoord;\n"
+    "void main()\n"
+    "{\n"
+    "   // note that we read the multiplication from right to left\n"
+    "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   ourColor = vec4(aColor * colorizeColor, alpha); // set ourColor to the input color we got from the vertex data\n"
+    "   TexCoord = aTexCoord;\n"
+    "}\0";
+
 const char *vertexShaderSourceTransparentColor =
     "#version 410 core\n"
     "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -42,6 +62,32 @@ const char *vertexShaderSourceTransparentColor =
     "   // note that we read the multiplication from right to left\n"
     "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
+    "   TexCoord = aTexCoord;\n"
+    "   fragTransparentColor = transparentColor;\n"
+    "   fragTransparentTolerance = transparentTolerance;\n"
+    "}\0";
+
+const char *vertexShaderSourceTransparentColorColorize =
+    "#version 410 core\n"
+    "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+    "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+    "layout (location = 2) in vec2 aTexCoord;\n"
+    "uniform mat4 model;\n"
+    "uniform mat4 view;\n"
+    "uniform mat4 projection;\n"
+    "uniform float alpha;\n"
+    "uniform vec3 colorizeColor;\n"
+    "uniform vec3 transparentColor;\n"
+    "uniform float transparentTolerance;\n"
+    "out vec4 ourColor; // output a color to the fragment shader\n"
+    "out vec3 fragTransparentColor;\n"
+    "out float fragTransparentTolerance;\n"
+    "out vec2 TexCoord;\n"
+    "void main()\n"
+    "{\n"
+    "   // note that we read the multiplication from right to left\n"
+    "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   ourColor = vec4(aColor * colorizeColor, alpha); // set ourColor to the input color we got from the vertex data\n"
     "   TexCoord = aTexCoord;\n"
     "   fragTransparentColor = transparentColor;\n"
     "   fragTransparentTolerance = transparentTolerance;\n"
@@ -115,9 +161,9 @@ LayerVideoEffect::LayerVideoEffect(const QString& name, const QString& filename,
     LayerVideo{name, filename, order, parent},
     _recreateShaders(true),
     _effectType(LayerVideoEffectType_None),
-    _colorize(false),
     _transparentColor(),
     _transparentTolerance(0.15),
+    _colorize(false),
     _colorizeColor(),
     _shaderTransparentColor(0),
     _shaderTransparentTolerance(0),
@@ -257,6 +303,9 @@ void LayerVideoEffect::playerGLSetUniforms(QOpenGLFunctions* functions, GLint de
         functions->glUniform3f(_shaderTransparentColor, _transparentColor.redF(), _transparentColor.greenF(), _transparentColor.blueF());
         functions->glUniform1f(_shaderTransparentTolerance, _transparentTolerance);
     }
+
+    if(_colorize)
+        functions->glUniform3f(_shaderColorizeColor, _colorizeColor.redF(), _colorizeColor.greenF(), _colorizeColor.blueF());
 }
 
 void LayerVideoEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -381,10 +430,20 @@ void LayerVideoEffect::cleanupShadersGL()
 
 const char* LayerVideoEffect::getVertexShaderSource()
 {
-    if(_effectType == LayerVideoEffectType_TransparentColor)
-        return vertexShaderSourceTransparentColor;
+    if(_colorize)
+    {
+        if(_effectType == LayerVideoEffectType_TransparentColor)
+            return vertexShaderSourceTransparentColorColorize;
+        else
+            return vertexShaderSourceColorize;
+    }
     else
-        return vertexShaderSourceBase;
+    {
+        if(_effectType == LayerVideoEffectType_TransparentColor)
+            return vertexShaderSourceTransparentColor;
+        else
+            return vertexShaderSourceBase;
+    }
 }
 
 const char* LayerVideoEffect::getFragmentShaderSource()

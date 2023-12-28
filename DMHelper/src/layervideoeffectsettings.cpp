@@ -9,10 +9,10 @@ LayerVideoEffectSettings::LayerVideoEffectSettings(QWidget *parent) :
     ui->setupUi(this);
 
     ui->btnTransparentColor->setRotationVisible(false);
-    ui->btnColorize->setRotationVisible(false);
+    ui->btnColorizeColor->setRotationVisible(false);
 
     ui->btnRed->setChecked(true);
-    ui->btnColorize->setChecked(false);
+    ui->btnColorizeColor->setChecked(false);
 
     connect(ui->btnTransparent, &QAbstractButton::toggled, ui->btnTransparentColor, &QAbstractButton::setEnabled);
     connect(ui->btnTransparent, &QAbstractButton::toggled, ui->slideTolerance, &QSlider::setEnabled);
@@ -49,12 +49,12 @@ qreal LayerVideoEffectSettings::getTransparentTolerance() const
 
 bool LayerVideoEffectSettings::isColorize() const
 {
-    return ui->btnColorize->isChecked();
+    return ui->chkColorize->isChecked();
 }
 
 QColor LayerVideoEffectSettings::getColorizeColor() const
 {
-    return ui->btnColorize->getColor();
+    return ui->btnColorizeColor->getColor();
 }
 
 void LayerVideoEffectSettings::setEffectType(LayerVideoEffect::LayerVideoEffectType effectType)
@@ -90,10 +90,10 @@ void LayerVideoEffectSettings::setTransparentTolerance(qreal transparentToleranc
 
 void LayerVideoEffectSettings::setColorize(bool colorize)
 {
-    ui->btnColorize->setChecked(colorize);
+    ui->chkColorize->setChecked(colorize);
 }
 
 void LayerVideoEffectSettings::setColorizeColor(const QColor& colorizeColor)
 {
-    ui->btnColorize->setColor(colorizeColor);
+    ui->btnColorizeColor->setColor(colorizeColor);
 }

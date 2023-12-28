@@ -47,9 +47,9 @@ protected:
 
     bool _recreateShaders;
     LayerVideoEffectType _effectType;
-    bool _colorize;
     QColor _transparentColor;
     qreal _transparentTolerance;
+    bool _colorize;
     QColor _colorizeColor;
 
     int _shaderTransparentColor;

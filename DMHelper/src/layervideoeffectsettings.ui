@@ -166,7 +166,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QCheckBox" name="chkFill">
+           <widget class="QCheckBox" name="chkColorize">
             <property name="text">
              <string>Colorize</string>
             </property>
@@ -176,7 +176,7 @@
            </widget>
           </item>
           <item>
-           <widget class="ColorPushButton" name="btnColorize">
+           <widget class="ColorPushButton" name="btnColorizeColor">
             <property name="minimumSize">
              <size>
               <width>50</width>
