@@ -1,5 +1,6 @@
 Layers dialog delete needs confirmation
 Video Layers don't store size
+Video Layer defaults to zero size and doesn't update in layers when screenshot found (same as token)
 Video layer dm-site preview should apply the effects as well
 
 

@@ -75,6 +75,16 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
+         <widget class="QRadioButton" name="btnNoTransparency">
+          <property name="text">
+           <string>No Transparency</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">grpTransparency</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
          <widget class="QRadioButton" name="btnRed">
           <property name="text">
            <string>Red Channel</string>

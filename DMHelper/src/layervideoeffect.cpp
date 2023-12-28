@@ -112,8 +112,9 @@ const char *fragmentShaderSourceRTransparent =
     "uniform sampler2D texture1;\n"
     "void main()\n"
     "{\n"
-    "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
+    "    FragColor = texture(texture1, TexCoord);\n"
     "    FragColor.a = FragColor.r;\n"
+    "    FragColor = FragColor * ourColor;\n"
     "}\0";
 
 const char *fragmentShaderSourceGTransparent =
@@ -124,8 +125,9 @@ const char *fragmentShaderSourceGTransparent =
     "uniform sampler2D texture1;\n"
     "void main()\n"
     "{\n"
-    "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
+    "    FragColor = texture(texture1, TexCoord);\n"
     "    FragColor.a = FragColor.g;\n"
+    "    FragColor = FragColor * ourColor;\n"
     "}\0";
 
 const char *fragmentShaderSourceBTransparent =
@@ -136,8 +138,9 @@ const char *fragmentShaderSourceBTransparent =
     "uniform sampler2D texture1;\n"
     "void main()\n"
     "{\n"
-    "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
+    "    FragColor = texture(texture1, TexCoord);\n"
     "    FragColor.a = FragColor.b;\n"
+    "    FragColor = FragColor * ourColor;\n"
     "}\0";
 
 const char *fragmentShaderSourceTransparentColor =
@@ -459,8 +462,6 @@ const char* LayerVideoEffect::getFragmentShaderSource()
         case LayerVideoEffectType_TransparentColor:
             return fragmentShaderSourceTransparentColor;
         default:
-            break;
+            return fragmentShaderSourceBase;
     }
-
-    return fragmentShaderSourceBase;
 }

@@ -11,7 +11,7 @@ LayerVideoEffectSettings::LayerVideoEffectSettings(QWidget *parent) :
     ui->btnTransparentColor->setRotationVisible(false);
     ui->btnColorizeColor->setRotationVisible(false);
 
-    ui->btnRed->setChecked(true);
+    ui->btnNoTransparency->setChecked(true);
     ui->btnColorizeColor->setChecked(false);
 
     connect(ui->btnTransparent, &QAbstractButton::toggled, ui->btnTransparentColor, &QAbstractButton::setEnabled);
@@ -74,6 +74,7 @@ void LayerVideoEffectSettings::setEffectType(LayerVideoEffect::LayerVideoEffectT
             ui->btnTransparent->setChecked(true);
             break;
         default:
+            ui->btnNoTransparency->setChecked(true);
             break;
     }
 }
