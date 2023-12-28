@@ -17,10 +17,17 @@ public:
     ~LayerVideoEffectSettings();
 
     LayerVideoEffect::LayerVideoEffectType getEffectType() const;
-    bool isColorize() const;
-
     QColor getTransparentColor() const;
+    qreal getTransparentTolerance() const;
+    bool isColorize() const;
     QColor getColorizeColor() const;
+
+public slots:
+    void setEffectType(LayerVideoEffect::LayerVideoEffectType effectType);
+    void setTransparentColor(const QColor& transparentColor);
+    void setTransparentTolerance(qreal transparentTolerance);
+    void setColorize(bool colorize);
+    void setColorizeColor(const QColor& colorizeColor);
 
 private:
     Ui::LayerVideoEffectSettings *ui;

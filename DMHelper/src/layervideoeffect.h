@@ -20,6 +20,8 @@ public:
     explicit LayerVideoEffect(const QString& name = QString(), const QString& filename = QString(), int order = 0, QObject *parent = nullptr);
     virtual ~LayerVideoEffect() override;
 
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
@@ -32,8 +34,12 @@ public slots:
 
     // Layer Specific Interface
     virtual void editSettings() override;
+    virtual void playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
 
 protected:
+    // Layer Specific Interface
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+
     void createShadersGL();
     void cleanupShadersGL();
     const char* getVertexShaderSource();
@@ -43,7 +49,12 @@ protected:
     LayerVideoEffectType _effectType;
     bool _colorize;
     QColor _transparentColor;
+    qreal _transparentTolerance;
     QColor _colorizeColor;
+
+    int _shaderTransparentColor;
+    int _shaderTransparentTolerance;
+    int _shaderColorizeColor;
 };
 
 #endif // LAYERVIDEOEFFECT_H

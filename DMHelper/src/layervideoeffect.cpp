@@ -31,9 +31,11 @@ const char *vertexShaderSourceTransparentColor =
     "uniform mat4 view;\n"
     "uniform mat4 projection;\n"
     "uniform float alpha;\n"
-    "uniform vec4 transparentColor;\n"
+    "uniform vec3 transparentColor;\n"
+    "uniform float transparentTolerance;\n"
     "out vec4 ourColor; // output a color to the fragment shader\n"
-    "out vec4 outTransparentColor;\n"
+    "out vec3 fragTransparentColor;\n"
+    "out float fragTransparentTolerance;\n"
     "out vec2 TexCoord;\n"
     "void main()\n"
     "{\n"
@@ -41,7 +43,8 @@ const char *vertexShaderSourceTransparentColor =
     "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
     "   TexCoord = aTexCoord;\n"
-    "   outTransparentColor = transparentColor;\n"
+    "   fragTransparentColor = transparentColor;\n"
+    "   fragTransparentTolerance = transparentTolerance;\n"
     "}\0";
 
 const char *fragmentShaderSourceBase =
@@ -95,17 +98,18 @@ const char *fragmentShaderSourceTransparentColor =
     "#version 410 core\n"
     "out vec4 FragColor;\n"
     "in vec4 ourColor;\n"
-    "in vec4 transparentColor;\n"
+    "in vec3 fragTransparentColor;\n"
+    "in float fragTransparentTolerance;\n"
     "in vec2 TexCoord;\n"
     "uniform sampler2D texture1;\n"
     "void main()\n"
     "{\n"
-    "    if(texture(texture1, TexCoord) == transparentColor)\n"
+    "    vec4 texColor = texture(texture1, TexCoord);\n"
+    "    vec3 delta = texColor.rgb - fragTransparentColor;\n"
+    "    if(dot(delta, delta) < fragTransparentTolerance)\n"
     "        discard;\n"
-    "    else\n"
-    "        FragColor = texture(texture1, TexCoord) * ourColor;\n"
+    "    FragColor = texColor * ourColor;\n"
     "}\0";
-
 
 LayerVideoEffect::LayerVideoEffect(const QString& name, const QString& filename, int order, QObject *parent) :
     LayerVideo{name, filename, order, parent},
@@ -113,12 +117,36 @@ LayerVideoEffect::LayerVideoEffect(const QString& name, const QString& filename,
     _effectType(LayerVideoEffectType_None),
     _colorize(false),
     _transparentColor(),
-    _colorizeColor()
+    _transparentTolerance(0.15),
+    _colorizeColor(),
+    _shaderTransparentColor(0),
+    _shaderTransparentTolerance(0),
+    _shaderColorizeColor(0)
 {
 }
 
 LayerVideoEffect::~LayerVideoEffect()
 {
+}
+
+void LayerVideoEffect::inputXML(const QDomElement &element, bool isImport)
+{
+    if(element.hasAttribute("effect"))
+        _effectType = static_cast<LayerVideoEffectType>(element.attribute("effect").toInt());
+
+    if(element.hasAttribute("transparentColor"))
+        _transparentColor = QColor(element.attribute("transparentColor"));
+
+    if(element.hasAttribute("transparentTolerance"))
+        _transparentTolerance = element.attribute("transparentTolerance").toDouble();
+
+    if(element.hasAttribute("colorize"))
+        _colorize = static_cast<bool>(element.attribute("colorize").toInt());
+
+    if(element.hasAttribute("colorizeColor"))
+        _colorizeColor = QColor(element.attribute("colorizeColor"));
+
+    LayerVideo::inputXML(element, isImport);
 }
 
 DMHelper::LayerType LayerVideoEffect::getType() const
@@ -174,6 +202,11 @@ void LayerVideoEffect::playerSetShaders(unsigned int programRGB, int modelMatrix
 void LayerVideoEffect::editSettings()
 {
     LayerVideoEffectSettings* dlg = new LayerVideoEffectSettings();
+    dlg->setEffectType(_effectType);
+    dlg->setTransparentColor(_transparentColor);
+    dlg->setTransparentTolerance(_transparentTolerance);
+    dlg->setColorize(_colorize);
+    dlg->setColorizeColor(_colorizeColor);
     int result = dlg->exec();
 
     if(result == QDialog::Accepted)
@@ -187,6 +220,12 @@ void LayerVideoEffect::editSettings()
         if(_transparentColor != dlg->getTransparentColor())
         {
             _transparentColor = dlg->getTransparentColor();
+            _recreateShaders = true;
+        }
+
+        if(_transparentTolerance != dlg->getTransparentTolerance())
+        {
+            _transparentTolerance = dlg->getTransparentTolerance();
             _recreateShaders = true;
         }
 
@@ -209,6 +248,37 @@ void LayerVideoEffect::editSettings()
     dlg->deleteLater();
 }
 
+void LayerVideoEffect::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
+{
+    LayerVideo::playerGLSetUniforms(functions, defaultModelMatrix, projectionMatrix);
+
+    if(_effectType == LayerVideoEffectType_TransparentColor)
+    {
+        functions->glUniform3f(_shaderTransparentColor, _transparentColor.redF(), _transparentColor.greenF(), _transparentColor.blueF());
+        functions->glUniform1f(_shaderTransparentTolerance, _transparentTolerance);
+    }
+}
+
+void LayerVideoEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    if(_effectType != LayerVideoEffectType_None)
+        element.setAttribute("effect", static_cast<int>(_effectType));
+
+    if((_effectType == LayerVideoEffectType_TransparentColor) && (_transparentColor.isValid()) && (_transparentColor != Qt::black))
+        element.setAttribute("transparentColor", _transparentColor.name());
+
+    if((_effectType == LayerVideoEffectType_TransparentColor) && (_transparentTolerance != 0.15))
+        element.setAttribute("transparentTolerance", _transparentTolerance);
+
+    if(_colorize)
+        element.setAttribute("colorize", 1);
+
+    if((_colorize) && (_colorizeColor.isValid()) && (_colorizeColor != Qt::black))
+        element.setAttribute("colorizeColor", _colorizeColor.name());
+
+    LayerVideo::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
 void LayerVideoEffect::createShadersGL()
 {
     // Create the local shader program
@@ -223,26 +293,6 @@ void LayerVideoEffect::createShadersGL()
     char infoLog[512];
 
     const char * vertexSource = getVertexShaderSource();
-    /*
-    const char *vertexShaderSourceRGBA = "#version 410 core\n"
-                                         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
-                                         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
-                                         "layout (location = 2) in vec2 aTexCoord;\n"
-                                         "uniform mat4 model;\n"
-                                         "uniform mat4 view;\n"
-                                         "uniform mat4 projection;\n"
-                                         "uniform float alpha;\n"
-                                         "out vec4 ourColor; // output a color to the fragment shader\n"
-                                         "out vec2 TexCoord;\n"
-                                         "void main()\n"
-                                         "{\n"
-                                         "   // note that we read the multiplication from right to left\n"
-                                         "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                         "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
-                                         "   TexCoord = aTexCoord;\n"
-                                         "}\0";
-    */
-
     unsigned int vertexShaderRGBA;
     vertexShaderRGBA = f->glCreateShader(GL_VERTEX_SHADER);
     f->glShaderSource(vertexShaderRGBA, 1, &vertexSource, NULL);
@@ -257,20 +307,6 @@ void LayerVideoEffect::createShadersGL()
     }
 
     const char * fragmentSource = getFragmentShaderSource();
-
-    /*
-    const char *fragmentShaderSourceRGBA = "#version 410 core\n"
-                                           "out vec4 FragColor;\n"
-                                           "in vec4 ourColor;\n"
-                                           "in vec2 TexCoord;\n"
-                                           "uniform sampler2D texture1;\n"
-                                           "void main()\n"
-                                           "{\n"
-                                           "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
-                                           "    FragColor.a = FragColor.r;\n"
-                                           "}\0";
-    */
-
     unsigned int fragmentShaderRGBA;
     fragmentShaderRGBA = f->glCreateShader(GL_FRAGMENT_SHADER);
     f->glShaderSource(fragmentShaderRGBA, 1, &fragmentSource, NULL);
@@ -305,6 +341,15 @@ void LayerVideoEffect::createShadersGL()
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
     _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
 
+    if(_effectType == LayerVideoEffectType_TransparentColor)
+    {
+        _shaderTransparentColor = f->glGetUniformLocation(_shaderProgramRGBA, "transparentColor");
+        _shaderTransparentTolerance = f->glGetUniformLocation(_shaderProgramRGBA, "transparentTolerance");
+    }
+
+    if(_colorize)
+        _shaderColorizeColor = f->glGetUniformLocation(_shaderProgramRGBA, "colorizeColor");
+
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
@@ -329,6 +374,9 @@ void LayerVideoEffect::cleanupShadersGL()
     _shaderModelMatrixRGBA = 0;
     _shaderProjectionMatrixRGBA = 0;
     _shaderAlphaRGBA = 0;
+    _shaderTransparentColor = 0;
+    _shaderTransparentTolerance = 0;
+    _shaderColorizeColor = 0;
 }
 
 const char* LayerVideoEffect::getVertexShaderSource()

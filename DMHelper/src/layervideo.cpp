@@ -208,9 +208,6 @@ bool LayerVideo::playerGLUpdate()
 
 void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
-    Q_UNUSED(defaultModelMatrix);
-    Q_UNUSED(projectionMatrix);
-
     if(!functions)
         return;
 
@@ -247,10 +244,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         _videoObject->updateImage(*(_videoPlayer->getImage()));
     }
 
-    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
-    functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _videoObject->getMatrixData());
-    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
+    playerGLSetUniforms(functions, defaultModelMatrix, projectionMatrix);
 
     _videoObject->paintGL();
 
@@ -292,6 +286,17 @@ void LayerVideo::uninitialize()
 {
     _layerScreenshot = QImage();
     clearScreenshot();
+}
+
+void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
+{
+    if(!functions)
+        return;
+
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+    functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _videoObject->getMatrixData());
+    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 }
 
 void LayerVideo::handleScreenshotReady(const QImage& image)

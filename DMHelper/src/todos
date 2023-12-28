@@ -1,3 +1,10 @@
+Layers dialog delete needs confirmation
+Video Layers don't store size
+Video layer dm-site preview should apply the effects as well
+
+
+
+
 Layers
 * Update order/opacity/visible to hit both player and dm views
 * Add opacity sliders
