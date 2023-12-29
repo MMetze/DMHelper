@@ -68,6 +68,8 @@ protected slots:
     void handleHeightChanged();
     void handleLockClicked();
 
+    void updateLayerData();
+
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
     QString getStyleString(bool selected);

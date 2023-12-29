@@ -171,6 +171,11 @@ void LayersEditDialog::addLayer()
 
 void LayersEditDialog::removeLayer()
 {
+    // Ask the user to confirm the deletion of the layer
+    QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Remove Layer"), tr("Are you sure you want to remove the selected layer?"), QMessageBox::Yes|QMessageBox::No);
+    if(reply != QMessageBox::Yes)
+        return;
+
     int currentSelected = _scene.getSelectedLayerIndex();
     _scene.removeLayer(currentSelected);
     resetLayout();

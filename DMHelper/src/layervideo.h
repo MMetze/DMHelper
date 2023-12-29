@@ -63,6 +63,7 @@ public slots:
 
 signals:
     void updateProjectionMatrix();
+    void screenshotAvailable();
 
 protected slots:
     // Local Interface

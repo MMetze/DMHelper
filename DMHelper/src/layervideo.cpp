@@ -276,9 +276,6 @@ bool LayerVideo::playerIsInitialized()
 
 void LayerVideo::initialize(const QSize& sceneSize)
 {
-    if(!_size.isEmpty())
-        setSize(sceneSize);
-
     requestScreenshot();
 }
 
@@ -290,6 +287,8 @@ void LayerVideo::uninitialize()
 
 void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(defaultModelMatrix);
+
     if(!functions)
         return;
 
@@ -313,6 +312,7 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
     if(_size.isEmpty())
         setSize(_layerScreenshot.size());
 
+    emit screenshotAvailable();
     emit dirty();
 }
 
