@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QImage>
 #include <QPoint>
+#include "dmconstants.h"
 
 class OptionsContainer;
 
@@ -22,8 +23,12 @@ public:
     QColor getBackgroundFillColor() const;
 
     bool isTransparent() const;
+    DMHelper::TransparentType getTransparent() const;
     QColor getTransparentColor() const;
     int getTransparentLevel() const;
+
+    bool isColorize() const;
+    QColor getColorizeColor() const;
 
     bool isMaskApplied() const;
     QString getMaskFile() const;
@@ -47,8 +52,12 @@ public slots:
     void setBackgroundFillColor(const QColor& color);
 
     void setTransparent(bool transparent);
+    void setTransparentValue(DMHelper::TransparentType transparent);
     void setTransparentColor(const QColor& transparentColor);
     void setTransparentLevel(int transparentLevel);
+
+    void setColorize(bool colorize);
+    void setColorizeColor(const QColor& colorizeColor);
 
     void setMaskApplied(bool maskApplied);
     void setMaskFile(const QString& maskFile);
@@ -77,9 +86,12 @@ protected:
     bool _backgroundFill;
     QColor _backgroundFillColor;
 
-    bool _transparent;
+    DMHelper::TransparentType _transparent;
     QRgb _transparentColor;
     int _transparentLevel;
+
+    bool _colorize;
+    QColor _colorizeColor;
 
     bool _maskApplied;
     QString _maskFile;

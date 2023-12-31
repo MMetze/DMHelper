@@ -7,9 +7,11 @@ TokenEditor::TokenEditor(const QString& sourceFile, bool backgroundFill, const Q
     QObject{parent},
     _backgroundFill{backgroundFill},
     _backgroundFillColor{backgroundFillColor},
-    _transparent{transparent},
+    _transparent{transparent ? DMHelper::TransparentType_TransparentColor : DMHelper::TransparentType_None},
     _transparentColor{transparentColor.rgb()},
     _transparentLevel{transparentLevel},
+    _colorize{false},
+    _colorizeColor{},
     _maskApplied{maskApplied},
     _maskFile{},
     _maskImage{},
@@ -38,7 +40,7 @@ TokenEditor::TokenEditor(QImage sourceImage, bool backgroundFill, const QColor& 
     QObject{parent},
     _backgroundFill{backgroundFill},
     _backgroundFillColor{backgroundFillColor},
-    _transparent{transparent},
+    _transparent{transparent ? DMHelper::TransparentType_TransparentColor : DMHelper::TransparentType_None},
     _transparentColor{transparentColor.rgb()},
     _transparentLevel{transparentLevel},
     _maskApplied{maskApplied},
@@ -85,6 +87,11 @@ QColor TokenEditor::getBackgroundFillColor() const
 
 bool TokenEditor::isTransparent() const
 {
+    return _transparent == DMHelper::TransparentType_TransparentColor;
+}
+
+DMHelper::TransparentType TokenEditor::getTransparent() const
+{
     return _transparent;
 }
 
@@ -96,6 +103,16 @@ QColor TokenEditor::getTransparentColor() const
 int TokenEditor::getTransparentLevel() const
 {
     return _transparentLevel;
+}
+
+bool TokenEditor::isColorize() const
+{
+    return _colorize;
+}
+
+QColor TokenEditor::getColorizeColor() const
+{
+    return _colorizeColor;
 }
 
 bool TokenEditor::isMaskApplied() const
@@ -190,7 +207,7 @@ void TokenEditor::setSourceImage(const QImage& sourceImage)
     _sourceImage = sourceImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
     int maxDim = qMax(_sourceImage.width(), _sourceImage.height());
-    _finalImage = QImage(QSize(maxDim, maxDim), _sourceImage.format());
+    _finalImage = QImage(QSize(maxDim, maxDim), QImage::Format_ARGB32);
     rescaleImages();
 
     setDirty();
@@ -216,6 +233,20 @@ void TokenEditor::setBackgroundFillColor(const QColor& color)
 
 void TokenEditor::setTransparent(bool transparent)
 {
+    if(((transparent) && (_transparent == DMHelper::TransparentType_TransparentColor)) ||
+       ((!transparent) && (_transparent == DMHelper::TransparentType_None)))
+        return;
+
+    if(transparent)
+        _transparent = DMHelper::TransparentType_TransparentColor;
+    else
+        _transparent = DMHelper::TransparentType_None;
+
+    setDirty();
+}
+
+void TokenEditor::setTransparentValue(DMHelper::TransparentType transparent)
+{
     if(transparent == _transparent)
         return;
 
@@ -238,6 +269,24 @@ void TokenEditor::setTransparentLevel(int transparentLevel)
         return;
 
     _transparentLevel = transparentLevel;
+    setDirty();
+}
+
+void TokenEditor::setColorize(bool colorize)
+{
+    if(colorize == _colorize)
+        return;
+
+    _colorize = colorize;
+    setDirty();
+}
+
+void TokenEditor::setColorizeColor(const QColor& colorizeColor)
+{
+    if(colorizeColor == _colorizeColor)
+        return;
+
+    _colorizeColor = colorizeColor;
     setDirty();
 }
 
@@ -358,7 +407,7 @@ void TokenEditor::updateFinalImage()
     QImage interimSource(_finalImage.size(), _sourceImage.format());
     interimSource.fill(_backgroundFill ? _backgroundFillColor : Qt::transparent);
 
-    if(_transparent)
+    if(_transparent == DMHelper::TransparentType_TransparentColor)
     {
         int yStart = qMax(0, -yOffset);
         int yEnd = qMin(scaledSource.height(), _finalImage.height() - yOffset);
@@ -373,6 +422,60 @@ void TokenEditor::updateFinalImage()
             {
                 if(!fuzzyColorMatch(inputLine[x], _transparentColor))
                     outputLine[x + xOffset] = inputLine[x];
+            }
+        }
+    }
+    else if(_transparent == DMHelper::TransparentType_RedChannel)
+    {
+        int yStart = qMax(0, -yOffset);
+        int yEnd = qMin(scaledSource.height(), _finalImage.height() - yOffset);
+        int xStart = qMax(0, -xOffset);
+        int xEnd = qMin(scaledSource.width(), _finalImage.width() - xOffset);
+
+        for (int y = yStart; y < yEnd; y++)
+        {
+            const QRgb* inputLine = reinterpret_cast<const QRgb *>(scaledSource.scanLine(y));
+            QRgb* outputLine = reinterpret_cast<QRgb *>(interimSource.scanLine(y + yOffset));
+            for(int x = xStart; x < xEnd; x++)
+            {
+                const QRgb &rgb = inputLine[x];
+                outputLine[x + xOffset] = qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), qRed(rgb));
+            }
+        }
+    }
+    else if(_transparent == DMHelper::TransparentType_GreenChannel)
+    {
+        int yStart = qMax(0, -yOffset);
+        int yEnd = qMin(scaledSource.height(), _finalImage.height() - yOffset);
+        int xStart = qMax(0, -xOffset);
+        int xEnd = qMin(scaledSource.width(), _finalImage.width() - xOffset);
+
+        for (int y = yStart; y < yEnd; y++)
+        {
+            const QRgb* inputLine = reinterpret_cast<const QRgb *>(scaledSource.scanLine(y));
+            QRgb* outputLine = reinterpret_cast<QRgb *>(interimSource.scanLine(y + yOffset));
+            for(int x = xStart; x < xEnd; x++)
+            {
+                const QRgb &rgb = inputLine[x];
+                outputLine[x + xOffset] = qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), qGreen(rgb));
+            }
+        }
+    }
+    else if(_transparent == DMHelper::TransparentType_BlueChannel)
+    {
+        int yStart = qMax(0, -yOffset);
+        int yEnd = qMin(scaledSource.height(), _finalImage.height() - yOffset);
+        int xStart = qMax(0, -xOffset);
+        int xEnd = qMin(scaledSource.width(), _finalImage.width() - xOffset);
+
+        for (int y = yStart; y < yEnd; y++)
+        {
+            const QRgb* inputLine = reinterpret_cast<const QRgb *>(scaledSource.scanLine(y));
+            QRgb* outputLine = reinterpret_cast<QRgb *>(interimSource.scanLine(y + yOffset));
+            for(int x = xStart; x < xEnd; x++)
+            {
+                const QRgb &rgb = inputLine[x];
+                outputLine[x + xOffset] = qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), qBlue(rgb));
             }
         }
     }
@@ -399,7 +502,10 @@ void TokenEditor::updateFinalImage()
 
 void TokenEditor::rescaleImages()
 {
-    _scaledMaskImage = _maskImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
+    if(!_maskImage.isNull())
+        _scaledMaskImage = _maskImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
+
+    if(!_frameImage.isNull())
     _scaledFrameImage = _frameImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
 }
 

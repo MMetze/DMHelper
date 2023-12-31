@@ -184,6 +184,15 @@ namespace DMHelper
         FileType_Markdown
     };
 
+    enum TransparentType
+    {
+        TransparentType_None = 0,
+        TransparentType_RedChannel,
+        TransparentType_GreenChannel,
+        TransparentType_BlueChannel,
+        TransparentType_TransparentColor
+    };
+
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;

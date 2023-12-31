@@ -35,7 +35,7 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="lblVideo">
+         <widget class="QLabel" name="lblPreview">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
@@ -150,7 +150,7 @@
         <item>
          <widget class="QSlider" name="slideTolerance">
           <property name="maximum">
-           <number>100</number>
+           <number>255</number>
           </property>
           <property name="value">
            <number>15</number>

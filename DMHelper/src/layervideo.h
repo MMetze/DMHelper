@@ -39,8 +39,8 @@ public:
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
 
-    QString getVideoFile() const;
-    QImage getScreenshot() const;
+    virtual QString getVideoFile() const;
+    virtual QImage getScreenshot() const;
 
 public slots:
     // DM Window Generic Interface
@@ -67,9 +67,9 @@ signals:
 
 protected slots:
     // Local Interface
-    void handleScreenshotReady(const QImage& image);
-    void requestScreenshot();
-    void clearScreenshot();
+    virtual void handleScreenshotReady(const QImage& image);
+    virtual void requestScreenshot();
+    virtual void clearScreenshot();
 
 protected:
     // Layer Specific Interface

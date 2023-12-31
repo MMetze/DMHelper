@@ -8,14 +8,6 @@ class LayerVideoEffect : public LayerVideo
 {
     Q_OBJECT
 public:
-    enum LayerVideoEffectType
-    {
-        LayerVideoEffectType_None = 0,
-        LayerVideoEffectType_Red,
-        LayerVideoEffectType_Green,
-        LayerVideoEffectType_Blue,
-        LayerVideoEffectType_TransparentColor
-    };
 
     explicit LayerVideoEffect(const QString& name = QString(), const QString& filename = QString(), int order = 0, QObject *parent = nullptr);
     virtual ~LayerVideoEffect() override;
@@ -24,6 +16,9 @@ public:
 
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
+
+    // Local Layer Interface
+    virtual QImage getScreenshot() const override;
 
 public slots:
     // Player Window Generic Interface
@@ -36,6 +31,10 @@ public slots:
     virtual void editSettings() override;
     virtual void playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
 
+protected slots:
+    // Local Interface
+    void updateEffectScreenshot();
+
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
@@ -46,11 +45,13 @@ protected:
     const char* getFragmentShaderSource();
 
     bool _recreateShaders;
-    LayerVideoEffectType _effectType;
+    DMHelper::TransparentType _effectType;
     QColor _transparentColor;
     qreal _transparentTolerance;
     bool _colorize;
     QColor _colorizeColor;
+    QImage _effectScreenshot;
+    bool _effectDirty;
 
     int _shaderTransparentColor;
     int _shaderTransparentTolerance;

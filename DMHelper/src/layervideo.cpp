@@ -56,7 +56,8 @@ QRectF LayerVideo::boundingRect() const
 
 QImage LayerVideo::getLayerIcon() const
 {
-    return _layerScreenshot.isNull() ? QImage(":/img/data/icon_play.png") : _layerScreenshot;
+    QImage screenshot = getScreenshot();
+    return screenshot.isNull() ? QImage(":/img/data/icon_play.png") : screenshot;
 }
 
 DMHelper::LayerType LayerVideo::getType() const
@@ -119,8 +120,10 @@ void LayerVideo::applySize(const QSize& size)
 {
     if(_graphicsItem)
     {
-        qreal xScale = static_cast<qreal>(size.width()) / _layerScreenshot.width();
-        qreal yScale = static_cast<qreal>(size.height()) / _layerScreenshot.height();
+        QImage screenshot = getScreenshot();
+        QSizeF screenshotSize = screenshot.isNull() ? QSizeF(10.0, 10.0) : screenshot.size();
+        qreal xScale = static_cast<qreal>(size.width()) / screenshotSize.width();
+        qreal yScale = static_cast<qreal>(size.height()) / screenshotSize.height();
         _graphicsItem->setScale(qMin(xScale, yScale));
     }
 
@@ -231,10 +234,10 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
     if(!_videoObject)
     {
-        if((!_videoPlayer->isNewImage()) && (_layerScreenshot.isNull()))
+        if((!_videoPlayer->isNewImage()) && (getScreenshot().isNull()))
             return;
 
-        _videoObject = new PublishGLBattleBackground(nullptr, (_videoPlayer->getImage() ? *(_videoPlayer->getImage()) : _layerScreenshot), GL_NEAREST);
+        _videoObject = new PublishGLBattleBackground(nullptr, (_videoPlayer->getImage() ? *(_videoPlayer->getImage()) : getScreenshot()), GL_NEAREST);
         QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
         _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
         _videoObject->setTargetSize(_size);
@@ -276,6 +279,8 @@ bool LayerVideo::playerIsInitialized()
 
 void LayerVideo::initialize(const QSize& sceneSize)
 {
+    Q_UNUSED(sceneSize);
+
     requestScreenshot();
 }
 
@@ -307,10 +312,10 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
     _layerScreenshot = image.copy();
 
     if(_dmScene)
-        createGraphicsItem(_size.isEmpty() ? _layerScreenshot.size() : _size);
+        createGraphicsItem(_size.isEmpty() ? getScreenshot().size() : _size);
 
     if(_size.isEmpty())
-        setSize(_layerScreenshot.size());
+        setSize(getScreenshot().size());
 
     emit screenshotAvailable();
     emit dirty();
@@ -318,9 +323,9 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
 
 void LayerVideo::requestScreenshot()
 {
-    if(!_layerScreenshot.isNull())
+    if(!getScreenshot().isNull())
     {
-        handleScreenshotReady(_layerScreenshot);
+        handleScreenshotReady(getScreenshot());
         return;
     }
 
@@ -370,7 +375,7 @@ void LayerVideo::createGraphicsItem(const QSize& size)
     if((!_dmScene) || (_graphicsItem) || (size.isEmpty()))
         return;
 
-    _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(_layerScreenshot));
+    _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(getScreenshot()));
     if(_graphicsItem)
     {
         _graphicsItem->setPos(_position);

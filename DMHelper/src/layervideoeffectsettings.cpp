@@ -4,7 +4,9 @@
 
 LayerVideoEffectSettings::LayerVideoEffectSettings(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::LayerVideoEffectSettings)
+    ui(new Ui::LayerVideoEffectSettings),
+    _previewImage(),
+    _editor(nullptr)
 {
     ui->setupUi(this);
 
@@ -14,27 +16,41 @@ LayerVideoEffectSettings::LayerVideoEffectSettings(QWidget *parent) :
     ui->btnNoTransparency->setChecked(true);
     ui->btnColorizeColor->setChecked(false);
 
+    ui->grpTransparency->setId(ui->btnNoTransparency, DMHelper::TransparentType_None);
+    ui->grpTransparency->setId(ui->btnRed, DMHelper::TransparentType_RedChannel);
+    ui->grpTransparency->setId(ui->btnGreen, DMHelper::TransparentType_GreenChannel);
+    ui->grpTransparency->setId(ui->btnBlue, DMHelper::TransparentType_BlueChannel);
+    ui->grpTransparency->setId(ui->btnTransparent, DMHelper::TransparentType_TransparentColor);
+
+    ui->lblPreview->installEventFilter(this);
+
     connect(ui->btnTransparent, &QAbstractButton::toggled, ui->btnTransparentColor, &QAbstractButton::setEnabled);
     connect(ui->btnTransparent, &QAbstractButton::toggled, ui->slideTolerance, &QSlider::setEnabled);
+    connect(ui->grpTransparency, &QButtonGroup::idToggled, this, &LayerVideoEffectSettings::handleButtonChanged);
+    connect(ui->slideTolerance, &QSlider::valueChanged, this, &LayerVideoEffectSettings::handleValueChanged);
+    connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, this, &LayerVideoEffectSettings::setTransparentColor);
+
+    _editor = new TokenEditor();
 }
 
 LayerVideoEffectSettings::~LayerVideoEffectSettings()
 {
+    _editor->deleteLater();
     delete ui;
 }
 
-LayerVideoEffect::LayerVideoEffectType LayerVideoEffectSettings::getEffectType() const
+DMHelper::TransparentType LayerVideoEffectSettings::getEffectType() const
 {
     if(ui->btnRed->isChecked())
-        return LayerVideoEffect::LayerVideoEffectType_Red;
+        return DMHelper::TransparentType_RedChannel;
     else if(ui->btnGreen->isChecked())
-        return LayerVideoEffect::LayerVideoEffectType_Green;
+        return DMHelper::TransparentType_GreenChannel;
     else if(ui->btnBlue->isChecked())
-        return LayerVideoEffect::LayerVideoEffectType_Blue;
+        return DMHelper::TransparentType_BlueChannel;
     else if(ui->btnTransparent->isChecked())
-        return LayerVideoEffect::LayerVideoEffectType_TransparentColor;
+        return DMHelper::TransparentType_TransparentColor;
     else
-        return LayerVideoEffect::LayerVideoEffectType_None;
+        return DMHelper::TransparentType_None;
 }
 
 QColor LayerVideoEffectSettings::getTransparentColor() const
@@ -57,44 +73,107 @@ QColor LayerVideoEffectSettings::getColorizeColor() const
     return ui->btnColorizeColor->getColor();
 }
 
-void LayerVideoEffectSettings::setEffectType(LayerVideoEffect::LayerVideoEffectType effectType)
+bool LayerVideoEffectSettings::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched == ui->lblPreview)
+    {
+        setEditorSource();
+    }
+
+    return QDialog::eventFilter(watched, event);
+}
+
+void LayerVideoEffectSettings::setEffectType(DMHelper::TransparentType effectType)
 {
     switch(effectType)
     {
-        case LayerVideoEffect::LayerVideoEffectType_Red:
+        case DMHelper::TransparentType_RedChannel:
             ui->btnRed->setChecked(true);
+            _editor->setTransparentValue(DMHelper::TransparentType_RedChannel);
             break;
-        case LayerVideoEffect::LayerVideoEffectType_Green:
+        case DMHelper::TransparentType_GreenChannel:
             ui->btnGreen->setChecked(true);
+            _editor->setTransparentValue(DMHelper::TransparentType_GreenChannel);
             break;
-        case LayerVideoEffect::LayerVideoEffectType_Blue:
+        case DMHelper::TransparentType_BlueChannel:
             ui->btnBlue->setChecked(true);
+            _editor->setTransparentValue(DMHelper::TransparentType_BlueChannel);
             break;
-        case LayerVideoEffect::LayerVideoEffectType_TransparentColor:
+        case DMHelper::TransparentType_TransparentColor:
             ui->btnTransparent->setChecked(true);
+            _editor->setTransparentValue(DMHelper::TransparentType_TransparentColor);
             break;
         default:
             ui->btnNoTransparency->setChecked(true);
+            _editor->setTransparentValue(DMHelper::TransparentType_None);
             break;
     }
+
+    updatePreview();
 }
 
 void LayerVideoEffectSettings::setTransparentColor(const QColor& transparentColor)
 {
     ui->btnTransparentColor->setColor(transparentColor);
+    _editor->setTransparentColor(transparentColor);
+    updatePreview();
 }
 
 void LayerVideoEffectSettings::setTransparentTolerance(qreal transparentTolerance)
 {
-    ui->slideTolerance->setValue(static_cast<int>(transparentTolerance * 100.0));
+    int intTolerance = static_cast<int>(transparentTolerance * 100.0);
+    ui->slideTolerance->setValue(intTolerance);
+    _editor->setTransparentLevel(intTolerance);
+    updatePreview();
 }
 
 void LayerVideoEffectSettings::setColorize(bool colorize)
 {
     ui->chkColorize->setChecked(colorize);
+    updatePreview();
 }
 
 void LayerVideoEffectSettings::setColorizeColor(const QColor& colorizeColor)
 {
     ui->btnColorizeColor->setColor(colorizeColor);
+    updatePreview();
+}
+
+void LayerVideoEffectSettings::setPreviewImage(const QImage& image)
+{
+    _previewImage = image;
+    setEditorSource();
+}
+
+void LayerVideoEffectSettings::handleButtonChanged(int id, bool checked)
+{
+    if(checked)
+    {
+        _editor->setTransparentValue(static_cast<DMHelper::TransparentType>(id));
+        updatePreview();
+    }
+}
+
+void LayerVideoEffectSettings::handleValueChanged(int value)
+{
+    _editor->setTransparentLevel(value);
+    updatePreview();
+}
+
+void LayerVideoEffectSettings::setEditorSource()
+{
+    if(_previewImage.isNull())
+        return;
+
+    QSize previewSize = ui->lblPreview->size() - QSize(10, 10);
+    if(!previewSize.isValid())
+        return;
+
+    _editor->setSourceImage(_previewImage.scaled(previewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    updatePreview();
+}
+
+void LayerVideoEffectSettings::updatePreview()
+{
+    ui->lblPreview->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
 }
