@@ -302,10 +302,8 @@ void LayerVideoEffect::editSettings()
         }
 
         _recreateShaders = _effectDirty;
-        updateEffectScreenshot();
+        emit screenshotAvailable(); // should update the local screenshot and an editor dialog
         updateImage();
-        //if(_graphicsItem)
-        //    _graphicsItem->setPixmap(QPixmap::fromImage(getScreenshot()));
 
         if(_recreateShaders)
             emit dirty();

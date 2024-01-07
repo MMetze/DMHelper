@@ -29,6 +29,8 @@ LayerVideoEffectSettings::LayerVideoEffectSettings(QWidget *parent) :
     connect(ui->grpTransparency, &QButtonGroup::idToggled, this, &LayerVideoEffectSettings::handleButtonChanged);
     connect(ui->slideTolerance, &QSlider::valueChanged, this, &LayerVideoEffectSettings::handleValueChanged);
     connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, this, &LayerVideoEffectSettings::setTransparentColor);
+    connect(ui->chkColorize, &QAbstractButton::toggled, this, &LayerVideoEffectSettings::setColorize);
+    connect(ui->btnColorizeColor, &ColorPushButton::colorChanged, this, &LayerVideoEffectSettings::setColorizeColor);
 
     _editor = new TokenEditor();
 }

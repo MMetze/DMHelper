@@ -70,14 +70,13 @@ protected slots:
     virtual void handleScreenshotReady(const QImage& image);
     virtual void requestScreenshot();
     virtual void clearScreenshot();
-    virtual void updateImage();
 
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     // DM Window Methods
-    void createGraphicsItem(const QSize& size);
+    virtual void updateImage();
     void cleanupDM();
 
     // Player Window Methods
