@@ -44,7 +44,8 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _selfRestart(false),
     _deleteOnStop(false),
     _stopStatus(0),
-    _firstImage(false),
+    //_firstImage(false),
+    _frameCount(0),
     _originalTrack(INVALID_TRACK_ID)
 {
     _buffers[0] = nullptr;
@@ -270,9 +271,10 @@ void VideoPlayer::unlockCallback(void *picture, void *const *planes)
     _newImage = true;
     _mutex->unlock();
 
-    if(!_firstImage)
+    //if(!_firstImage)
+    if(++_frameCount == 3)
     {
-        _firstImage = true;
+        //_firstImage = true;
         emit screenShotAvailable();
     }
 
@@ -697,7 +699,8 @@ void VideoPlayer::cleanupBuffers()
 #endif
 
     _newImage = false;
-    _firstImage = false;
+    //_firstImage = false;
+    _frameCount = 0;
     _originalSize = QSize();
 
     QMutexLocker locker(_mutex);

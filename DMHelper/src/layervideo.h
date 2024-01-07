@@ -70,6 +70,7 @@ protected slots:
     virtual void handleScreenshotReady(const QImage& image);
     virtual void requestScreenshot();
     virtual void clearScreenshot();
+    virtual void updateImage();
 
 protected:
     // Layer Specific Interface

@@ -105,7 +105,8 @@ protected:
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;
-    bool _firstImage;
+    //bool _firstImage;
+    int _frameCount;
     int _originalTrack;
 };
 

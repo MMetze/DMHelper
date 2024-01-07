@@ -120,11 +120,18 @@ void LayerVideo::applySize(const QSize& size)
 {
     if(_graphicsItem)
     {
+        updateImage();
+        //QImage scaledScreenshot = getScreenshot().scaled(getSize());
+        //QImage scaledScreenshot = getScreenshot().scaled(QSize(500, 500));
+        //_graphicsItem->setPixmap(QPixmap::fromImage(scaledScreenshot));
+
+        /*
         QImage screenshot = getScreenshot();
         QSizeF screenshotSize = screenshot.isNull() ? QSizeF(10.0, 10.0) : screenshot.size();
         qreal xScale = static_cast<qreal>(size.width()) / screenshotSize.width();
         qreal yScale = static_cast<qreal>(size.height()) / screenshotSize.height();
         _graphicsItem->setScale(qMin(xScale, yScale));
+        */
     }
 
 #ifdef LAYERVIDEO_USE_OPENGL
@@ -152,7 +159,10 @@ void LayerVideo::dmInitialize(QGraphicsScene* scene)
 
     _dmScene = scene;
 
-    requestScreenshot();
+    if(_layerScreenshot.isNull())
+        requestScreenshot();
+    else
+        createGraphicsItem(_size.isEmpty() ? getScreenshot().size() : _size);
 
     Layer::dmInitialize(scene);
 }
@@ -305,14 +315,13 @@ void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultM
 
 void LayerVideo::handleScreenshotReady(const QImage& image)
 {
-    if(image.isNull())
+    if((image.isNull()) || (_layerScreenshot == image))
         return;
 
     qDebug() << "[LayerVideo] Screenshot received for video: " << getVideoFile() << ", " << image;
     _layerScreenshot = image.copy();
 
-    if(_dmScene)
-        createGraphicsItem(_size.isEmpty() ? getScreenshot().size() : _size);
+    createGraphicsItem(_size.isEmpty() ? getScreenshot().size() : _size);
 
     if(_size.isEmpty())
         setSize(getScreenshot().size());
@@ -323,9 +332,9 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
 
 void LayerVideo::requestScreenshot()
 {
-    if(!getScreenshot().isNull())
+    if(!_layerScreenshot.isNull())
     {
-        handleScreenshotReady(getScreenshot());
+        handleScreenshotReady(_layerScreenshot);
         return;
     }
 
@@ -363,6 +372,29 @@ void LayerVideo::clearScreenshot()
     _screenshot = nullptr;
 }
 
+void LayerVideo::updateImage()
+{
+    QImage scaledImage = getScreenshot().scaled(getSize());
+    //QImage scaledImage = getScreenshot().scaled(QSize(500,500), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    if(!_graphicsItem)
+    {
+        _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(scaledImage));
+        if(_graphicsItem)
+        {
+            _graphicsItem->setPos(_position);
+            _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+            _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+            _graphicsItem->setZValue(getOrder());
+
+            //applySize(size);
+        }
+    }
+    else
+    {
+        _graphicsItem->setPixmap(QPixmap::fromImage(scaledImage));
+    }
+}
+
 void LayerVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("videoFile", targetDirectory.relativeFilePath(_filename));
@@ -375,16 +407,7 @@ void LayerVideo::createGraphicsItem(const QSize& size)
     if((!_dmScene) || (_graphicsItem) || (size.isEmpty()))
         return;
 
-    _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(getScreenshot()));
-    if(_graphicsItem)
-    {
-        _graphicsItem->setPos(_position);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _graphicsItem->setZValue(getOrder());
-
-        applySize(size);
-    }
+    updateImage();
 }
 
 void LayerVideo::cleanupDM()
@@ -400,7 +423,7 @@ void LayerVideo::cleanupDM()
         _dmScene = nullptr;
     }
 
-    clearScreenshot();
+    LayerVideo::clearScreenshot();
 }
 
 void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)

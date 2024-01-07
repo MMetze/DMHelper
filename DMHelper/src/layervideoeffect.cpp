@@ -274,36 +274,38 @@ void LayerVideoEffect::editSettings()
         if(_effectType != dlg->getEffectType())
         {
             _effectType = dlg->getEffectType();
-            _recreateShaders = true;
+            _effectDirty = true;
         }
 
         if(_transparentColor != dlg->getTransparentColor())
         {
             _transparentColor = dlg->getTransparentColor();
-            _recreateShaders = true;
+            _effectDirty = true;
         }
 
         if(_transparentTolerance != dlg->getTransparentTolerance())
         {
             _transparentTolerance = dlg->getTransparentTolerance();
-            _recreateShaders = true;
+            _effectDirty = true;
         }
 
         if(_colorize != dlg->isColorize())
         {
             _colorize = dlg->isColorize();
-            _recreateShaders = true;
+            _effectDirty = true;
         }
 
         if(_colorizeColor != dlg->getColorizeColor())
         {
             _colorizeColor = dlg->getColorizeColor();
-            _recreateShaders = true;
+            _effectDirty = true;
         }
 
+        _recreateShaders = _effectDirty;
         updateEffectScreenshot();
-        if(_graphicsItem)
-            _graphicsItem->setPixmap(QPixmap::fromImage(getScreenshot()));
+        updateImage();
+        //if(_graphicsItem)
+        //    _graphicsItem->setPixmap(QPixmap::fromImage(getScreenshot()));
 
         if(_recreateShaders)
             emit dirty();
@@ -339,6 +341,7 @@ void LayerVideoEffect::updateEffectScreenshot()
     editor->setTransparentLevel(static_cast<int>(_transparentTolerance * 100.0));
     editor->setColorize(_colorize);
     editor->setColorizeColor(_colorizeColor);
+    editor->setSquareFinalImage(false);
     _effectScreenshot = editor->getFinalImage();
 
     editor->deleteLater();

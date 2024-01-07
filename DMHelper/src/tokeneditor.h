@@ -41,6 +41,8 @@ public:
     qreal getZoom() const;
     QPoint getOffset() const;
 
+    bool isSquareFinalImage() const;
+
     void applyOptionsToEditor(const OptionsContainer& options);
     void applyEditorToOptions(OptionsContainer& options);
 
@@ -74,14 +76,28 @@ public slots:
     void setOffset(const QPoint& offset);
     void moveOffset(const QPoint& delta);
 
+    void setSquareFinalImage(bool squareFinalImage);
+
 signals:
     void imageDirty();
 
 protected:
     void updateFinalImage();
+    void resizeFinalImage();
     void rescaleImages();
     void setDirty();
     bool fuzzyColorMatch(QRgb first, QRgb second);
+
+    // The copy functions
+    void copyTransparentColor(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyRedChannel(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyGreenChannel(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyBlueChannel(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyTransparentColorColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyRedChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyGreenChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyBlueChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
 
     bool _backgroundFill;
     QColor _backgroundFillColor;
@@ -105,6 +121,7 @@ protected:
 
     qreal _zoom;
     QPoint _offset;
+    bool _squareFinalImage;
 
     QString _sourceFile;
     QImage _sourceImage;

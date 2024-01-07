@@ -75,7 +75,7 @@ QColor LayerVideoEffectSettings::getColorizeColor() const
 
 bool LayerVideoEffectSettings::eventFilter(QObject *watched, QEvent *event)
 {
-    if(watched == ui->lblPreview)
+    if((watched == ui->lblPreview) && (event) && (event->type() == QEvent::Resize))
     {
         setEditorSource();
     }
@@ -130,12 +130,14 @@ void LayerVideoEffectSettings::setTransparentTolerance(qreal transparentToleranc
 void LayerVideoEffectSettings::setColorize(bool colorize)
 {
     ui->chkColorize->setChecked(colorize);
+    _editor->setColorize(colorize);
     updatePreview();
 }
 
 void LayerVideoEffectSettings::setColorizeColor(const QColor& colorizeColor)
 {
     ui->btnColorizeColor->setColor(colorizeColor);
+    _editor->setColorizeColor(colorizeColor);
     updatePreview();
 }
 
