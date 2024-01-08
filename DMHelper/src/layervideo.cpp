@@ -119,7 +119,7 @@ void LayerVideo::applyPosition(const QPoint& position)
 void LayerVideo::applySize(const QSize& size)
 {
     if(_graphicsItem)
-        updateImage();
+        updateImage(size);
 
 #ifdef LAYERVIDEO_USE_OPENGL
     TODO, how should this work with: VideoPlayerGLPlayer* _videoGLPlayer;
@@ -308,10 +308,10 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
     qDebug() << "[LayerVideo] Screenshot received for video: " << getVideoFile() << ", " << image;
     _layerScreenshot = image.copy();
 
-    updateImage();
-
     if(_size.isEmpty())
         setSize(getScreenshot().size());
+
+    updateImage();
 
     emit screenshotAvailable();
     emit dirty();
@@ -366,16 +366,20 @@ void LayerVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
-void LayerVideo::updateImage()
+void LayerVideo::updateImage(const QSize& size)
 {
-    if((!_dmScene) || (getSize().isEmpty()))
+    if(!_dmScene)
         return;
 
     QImage screenshot = getScreenshot();
     if(screenshot.isNull())
         return;
 
-    QImage scaledImage = getScreenshot().scaled(getSize());
+    QSize scaleSize = size.isEmpty() ? getSize() : size;
+    if(scaleSize.isEmpty())
+        return;
+
+    QImage scaledImage = getScreenshot().scaled(scaleSize);
     if(!_graphicsItem)
     {
         _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(scaledImage));
