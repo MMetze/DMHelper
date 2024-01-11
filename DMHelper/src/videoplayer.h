@@ -53,7 +53,6 @@ public slots:
 protected slots:
 
     virtual void internalStopCheck(int status);
-    virtual void internalAudioCheck(int newStatus);
 
 protected:
 

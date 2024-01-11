@@ -342,7 +342,6 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
                 break;
             case libvlc_MediaPlayerPlaying:
                 qDebug() << "[VideoPlayer] Video event received: PLAYING = " << p_event->type;
-                internalAudioCheck(p_event->type);
                 emit videoPlaying();
                 break;
             case libvlc_MediaPlayerPaused:
@@ -453,30 +452,6 @@ void VideoPlayer::internalStopCheck(int status)
         qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed.";
         return;
     }
-}
-
-void VideoPlayer::internalAudioCheck(int newStatus)
-{
-    if((_playAudio) ||
-       (_originalTrack != INVALID_TRACK_ID) ||
-       (newStatus != libvlc_MediaPlayerPlaying) ||
-       (!_vlcPlayer))
-        return;
-
-    qDebug() << "[VideoPlayer] Internal Audio Check identified audio, shall be turned off";
-
-    // TODO: Layers
-    /*
-    libvlc_media_player_t * player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
-    if(player)
-    {
-        _originalTrack = libvlc_audio_get_track(player);
-        if(_originalTrack != -1)
-            libvlc_audio_set_track(player, -1);
-    }
-    */
-
-    qDebug() << "[VideoPlayer] Audio turning off completed";
 }
 
 bool VideoPlayer::initializeVLC()
