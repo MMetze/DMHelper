@@ -33,12 +33,12 @@ jobs:
     - name: Print current working dir
       run: |
         pwd
-        ls -al
+        ls -la
         echo Workspace is: ${{ github.workspace }}
-        ls -al DMHelper
+        ls -la DMHelper
         cd DMHelper
         pwd
-        ls -al ${{env.Qt6Dir}}
+        ls -la ${{env.Qt6Dir}}
         find .
     - name: (4) Download JOM
       uses: suisei-cn/actions-download-file@v1
@@ -83,7 +83,7 @@ jobs:
 
     - name: Copy binary resources
       run: |
-        ls -al
+        ls -la
         find .
         xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
         xcopy D:\a\DMHelper\Qt\6.6.0\msvc2019_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
