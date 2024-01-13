@@ -78,8 +78,17 @@ jobs:
         mkdir bin64\packages\com.dmhelper.app\data\resources
         mkdir bin64\packages\com.dmhelper.app\data\resources\tables
         xcopy /s src\installer\* bin64\*
-        mv bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
+        xcopy bin64\packages\com.dmhelper.app\meta\installscript64.qs bin64\packages\com.dmhelper.app\meta\installscript.qs
         ls
+        
+    - name: Create the installer
+      run: |
+        cd DMHelper
+        cd bin64
+        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        # binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        cd ..
+        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
 
     - name: Build DMHelper for Windows
       run: |
@@ -110,15 +119,6 @@ jobs:
         cd build-64_bit-release
         windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
         
-    - name: Create the installer
-      run: |
-        cd DMHelper
-        cd bin64
-        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        # binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        cd ..
-        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
-
     - name: Zip the build
       run:  |
         cd DMHelper
