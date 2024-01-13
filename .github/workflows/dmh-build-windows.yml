@@ -40,10 +40,8 @@ jobs:
         ls DMHelper
         cd DMHelper
         pwd
-        echo 'github.workspace === ${{ github.workspace }}'
-        echo "GITHUB_WORKSPACE === $GITHUB_WORKSPACE"
         echo 'runner.workspace === ${{ runner.workspace }}'
-        echo "RUNNER_WORKSPACE === $RUNNER_WORKSPACE"
+        echo 'github.workspace === ${{ github.workspace }}'
         ls ${{env.Qt6Dir}}
         Get-ChildItem -Recurse -Directory
         
@@ -88,7 +86,7 @@ jobs:
       run: |
         cd DMHelper
         cd bin64
-        D:\a\DMHelper\Qt\Tools\QtInstallerFramework\4.6\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
         # binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
         cd ..
         move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
