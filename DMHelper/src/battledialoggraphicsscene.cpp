@@ -457,6 +457,8 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         qDebug() << "[Battle Dialog Scene] right mouse released at " << mouseEvent->scenePos() << " for item " << item;
 #endif
 
+        emit itemMouseUp(pixItem);
+
         QMenu menu(views().constFirst());
         if((item) && (!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
         {
