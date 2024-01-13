@@ -40,6 +40,10 @@ jobs:
         ls DMHelper
         cd DMHelper
         pwd
+        echo 'github.workspace === ${{ github.workspace }}'
+        echo "GITHUB_WORKSPACE === $GITHUB_WORKSPACE"
+        echo 'runner.workspace === ${{ runner.workspace }}'
+        echo "RUNNER_WORKSPACE === $RUNNER_WORKSPACE"
         ls ${{env.Qt6Dir}}
         Get-ChildItem -Recurse -Directory
         
@@ -119,7 +123,6 @@ jobs:
         windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
 
     - name: Zip the build
-      working-directory: ${{ runner.temp }}
       run:  |
         cd DMHelper
         7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
