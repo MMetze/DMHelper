@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QImage>
 #include <QPoint>
+#include "dmconstants.h"
 
 class OptionsContainer;
 
@@ -22,8 +23,12 @@ public:
     QColor getBackgroundFillColor() const;
 
     bool isTransparent() const;
+    DMHelper::TransparentType getTransparent() const;
     QColor getTransparentColor() const;
     int getTransparentLevel() const;
+
+    bool isColorize() const;
+    QColor getColorizeColor() const;
 
     bool isMaskApplied() const;
     QString getMaskFile() const;
@@ -36,6 +41,8 @@ public:
     qreal getZoom() const;
     QPoint getOffset() const;
 
+    bool isSquareFinalImage() const;
+
     void applyOptionsToEditor(const OptionsContainer& options);
     void applyEditorToOptions(OptionsContainer& options);
 
@@ -47,8 +54,12 @@ public slots:
     void setBackgroundFillColor(const QColor& color);
 
     void setTransparent(bool transparent);
+    void setTransparentValue(DMHelper::TransparentType transparent);
     void setTransparentColor(const QColor& transparentColor);
     void setTransparentLevel(int transparentLevel);
+
+    void setColorize(bool colorize);
+    void setColorizeColor(const QColor& colorizeColor);
 
     void setMaskApplied(bool maskApplied);
     void setMaskFile(const QString& maskFile);
@@ -65,21 +76,38 @@ public slots:
     void setOffset(const QPoint& offset);
     void moveOffset(const QPoint& delta);
 
+    void setSquareFinalImage(bool squareFinalImage);
+
 signals:
     void imageDirty();
 
 protected:
     void updateFinalImage();
+    void resizeFinalImage();
     void rescaleImages();
     void setDirty();
     bool fuzzyColorMatch(QRgb first, QRgb second);
 
+    // The copy functions
+    void copyTransparentColor(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyRedChannel(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyGreenChannel(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyBlueChannel(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyTransparentColorColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyRedChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyGreenChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyBlueChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+    void copyColorize(QImage& dest, const QImage& source, int xOffset, int yOffset);
+
     bool _backgroundFill;
     QColor _backgroundFillColor;
 
-    bool _transparent;
+    DMHelper::TransparentType _transparent;
     QRgb _transparentColor;
     int _transparentLevel;
+
+    bool _colorize;
+    QColor _colorizeColor;
 
     bool _maskApplied;
     QString _maskFile;
@@ -93,6 +121,7 @@ protected:
 
     qreal _zoom;
     QPoint _offset;
+    bool _squareFinalImage;
 
     QString _sourceFile;
     QImage _sourceImage;

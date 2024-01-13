@@ -53,7 +53,6 @@ public slots:
 protected slots:
 
     virtual void internalStopCheck(int status);
-    virtual void internalAudioCheck(int newStatus);
 
 protected:
 
@@ -105,7 +104,7 @@ protected:
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;
-    bool _firstImage;
+    int _frameCount;
     int _originalTrack;
 };
 

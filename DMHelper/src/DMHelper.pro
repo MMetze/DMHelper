@@ -101,6 +101,8 @@ SOURCES += main.cpp\
     layerseditdialog.cpp \
     layertokens.cpp \
     layervideo.cpp \
+    layervideoeffect.cpp \
+    layervideoeffectsettings.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
@@ -362,6 +364,8 @@ HEADERS  += mainwindow.h \
     layerseditdialog.h \
     layertokens.h \
     layervideo.h \
+    layervideoeffect.h \
+    layervideoeffectsettings.h \
     legaldialog.h \
     mapblankdialog.h \
     mapcolorizedialog.h \
@@ -563,6 +567,7 @@ FORMS    += mainwindow.ui \
     expertisedialog.ui \
     layerframe.ui \
     layerseditdialog.ui \
+    layervideoeffectsettings.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \

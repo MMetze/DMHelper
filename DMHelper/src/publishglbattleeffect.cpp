@@ -46,8 +46,6 @@ PublishGLBattleEffect::~PublishGLBattleEffect()
 
 void PublishGLBattleEffect::cleanup()
 {
-//    qDebug() << "[PublishGLBattleEffect] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
-
     if(QOpenGLContext::currentContext())
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -170,7 +168,6 @@ void PublishGLBattleEffect::prepareObjects()
 
     QPainter painter;
     painter.begin(&effectImage);
-        //painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
         painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter.setBrush(QBrush(_effect->getColor()));
         drawShape(painter, _effect, effectSize, effectWidth);

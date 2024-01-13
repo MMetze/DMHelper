@@ -410,7 +410,7 @@
             <string notr="true"/>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -477,6 +477,9 @@
            </property>
            <property name="toolTip">
             <string>The scene's height</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

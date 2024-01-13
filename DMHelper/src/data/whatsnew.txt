@@ -13,6 +13,7 @@
 
 <h3>New v3.1 Features:</h3>
 <ul>
+<li><b>Video Effects:</b> Use semi-transparent, or black-and-white, or green-screen effects on videos in your campaign
 <li><b>Token Search:</b> added a new monster to your Bestiary and need a token? Click the search button in the Bestiary and find one from the Internet!
 <li><b>Bestiary Token Fill:</b> have a bunch of monsters in your Bestiary without tokens and need a quick way to fill them in? Click the "Populate Bestiary Tokens" button in the options dialog and DMH will search the Internet for tokens for all your monsters missing a token!
 <li><b>Token Editor:</b> turn your own images into customized tokens for your campaign, adding backgrounds or a nice frame

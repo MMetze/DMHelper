@@ -7,9 +7,11 @@ TokenEditor::TokenEditor(const QString& sourceFile, bool backgroundFill, const Q
     QObject{parent},
     _backgroundFill{backgroundFill},
     _backgroundFillColor{backgroundFillColor},
-    _transparent{transparent},
+    _transparent{transparent ? DMHelper::TransparentType_TransparentColor : DMHelper::TransparentType_None},
     _transparentColor{transparentColor.rgb()},
     _transparentLevel{transparentLevel},
+    _colorize{false},
+    _colorizeColor{},
     _maskApplied{maskApplied},
     _maskFile{},
     _maskImage{},
@@ -20,6 +22,7 @@ TokenEditor::TokenEditor(const QString& sourceFile, bool backgroundFill, const Q
     _scaledFrameImage{},
     _zoom{zoom},
     _offset{offset},
+    _squareFinalImage{true},
     _sourceFile(),
     _sourceImage(),
     _finalImage(),
@@ -38,7 +41,7 @@ TokenEditor::TokenEditor(QImage sourceImage, bool backgroundFill, const QColor& 
     QObject{parent},
     _backgroundFill{backgroundFill},
     _backgroundFillColor{backgroundFillColor},
-    _transparent{transparent},
+    _transparent{transparent ? DMHelper::TransparentType_TransparentColor : DMHelper::TransparentType_None},
     _transparentColor{transparentColor.rgb()},
     _transparentLevel{transparentLevel},
     _maskApplied{maskApplied},
@@ -51,6 +54,7 @@ TokenEditor::TokenEditor(QImage sourceImage, bool backgroundFill, const QColor& 
     _scaledFrameImage{},
     _zoom{zoom},
     _offset{offset},
+    _squareFinalImage{true},
     _sourceFile(),
     _sourceImage(),
     _finalImage(),
@@ -85,6 +89,11 @@ QColor TokenEditor::getBackgroundFillColor() const
 
 bool TokenEditor::isTransparent() const
 {
+    return _transparent == DMHelper::TransparentType_TransparentColor;
+}
+
+DMHelper::TransparentType TokenEditor::getTransparent() const
+{
     return _transparent;
 }
 
@@ -96,6 +105,16 @@ QColor TokenEditor::getTransparentColor() const
 int TokenEditor::getTransparentLevel() const
 {
     return _transparentLevel;
+}
+
+bool TokenEditor::isColorize() const
+{
+    return _colorize;
+}
+
+QColor TokenEditor::getColorizeColor() const
+{
+    return _colorizeColor;
 }
 
 bool TokenEditor::isMaskApplied() const
@@ -136,6 +155,11 @@ qreal TokenEditor::getZoom() const
 QPoint TokenEditor::getOffset() const
 {
     return _offset;
+}
+
+bool TokenEditor::isSquareFinalImage() const
+{
+    return _squareFinalImage;
 }
 
 void TokenEditor::applyOptionsToEditor(const OptionsContainer& options)
@@ -189,9 +213,7 @@ void TokenEditor::setSourceImage(const QImage& sourceImage)
 
     _sourceImage = sourceImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
-    int maxDim = qMax(_sourceImage.width(), _sourceImage.height());
-    _finalImage = QImage(QSize(maxDim, maxDim), _sourceImage.format());
-    rescaleImages();
+    resizeFinalImage();
 
     setDirty();
 }
@@ -216,6 +238,20 @@ void TokenEditor::setBackgroundFillColor(const QColor& color)
 
 void TokenEditor::setTransparent(bool transparent)
 {
+    if(((transparent) && (_transparent == DMHelper::TransparentType_TransparentColor)) ||
+       ((!transparent) && (_transparent == DMHelper::TransparentType_None)))
+        return;
+
+    if(transparent)
+        _transparent = DMHelper::TransparentType_TransparentColor;
+    else
+        _transparent = DMHelper::TransparentType_None;
+
+    setDirty();
+}
+
+void TokenEditor::setTransparentValue(DMHelper::TransparentType transparent)
+{
     if(transparent == _transparent)
         return;
 
@@ -238,6 +274,24 @@ void TokenEditor::setTransparentLevel(int transparentLevel)
         return;
 
     _transparentLevel = transparentLevel;
+    setDirty();
+}
+
+void TokenEditor::setColorize(bool colorize)
+{
+    if(colorize == _colorize)
+        return;
+
+    _colorize = colorize;
+    setDirty();
+}
+
+void TokenEditor::setColorizeColor(const QColor& colorizeColor)
+{
+    if(colorizeColor == _colorizeColor)
+        return;
+
+    _colorizeColor = colorizeColor;
     setDirty();
 }
 
@@ -343,6 +397,17 @@ void TokenEditor::moveOffset(const QPoint& delta)
     setDirty();
 }
 
+void TokenEditor::setSquareFinalImage(bool squareFinalImage)
+{
+    if(squareFinalImage == _squareFinalImage)
+        return;
+
+    _squareFinalImage = squareFinalImage;
+    resizeFinalImage();
+
+    setDirty();
+}
+
 void TokenEditor::updateFinalImage()
 {
     if((_sourceImage.isNull()) || (_finalImage.isNull()))
@@ -358,28 +423,44 @@ void TokenEditor::updateFinalImage()
     QImage interimSource(_finalImage.size(), _sourceImage.format());
     interimSource.fill(_backgroundFill ? _backgroundFillColor : Qt::transparent);
 
-    if(_transparent)
+    if(_transparent == DMHelper::TransparentType_TransparentColor)
     {
-        int yStart = qMax(0, -yOffset);
-        int yEnd = qMin(scaledSource.height(), _finalImage.height() - yOffset);
-        int xStart = qMax(0, -xOffset);
-        int xEnd = qMin(scaledSource.width(), _finalImage.width() - xOffset);
-
-        for (int y = yStart; y < yEnd; y++)
-        {
-            const QRgb* inputLine = reinterpret_cast<const QRgb *>(scaledSource.scanLine(y));
-            QRgb* outputLine = reinterpret_cast<QRgb *>(interimSource.scanLine(y + yOffset));
-            for(int x = xStart; x < xEnd; x++)
-            {
-                if(!fuzzyColorMatch(inputLine[x], _transparentColor))
-                    outputLine[x + xOffset] = inputLine[x];
-            }
-        }
+        if(_colorize)
+            copyTransparentColorColorize(interimSource, scaledSource, xOffset, yOffset);
+        else
+            copyTransparentColor(interimSource, scaledSource, xOffset, yOffset);
+    }
+    else if(_transparent == DMHelper::TransparentType_RedChannel)
+    {
+        if(_colorize)
+            copyRedChannelColorize(interimSource, scaledSource, xOffset, yOffset);
+        else
+            copyRedChannel(interimSource, scaledSource, xOffset, yOffset);
+    }
+    else if(_transparent == DMHelper::TransparentType_GreenChannel)
+    {
+        if(_colorize)
+            copyGreenChannelColorize(interimSource, scaledSource, xOffset, yOffset);
+        else
+            copyGreenChannel(interimSource, scaledSource, xOffset, yOffset);
+    }
+    else if(_transparent == DMHelper::TransparentType_BlueChannel)
+    {
+        if(_colorize)
+            copyBlueChannelColorize(interimSource, scaledSource, xOffset, yOffset);
+        else
+            copyBlueChannel(interimSource, scaledSource, xOffset, yOffset);
     }
     else
     {
-        QPainter p(&interimSource);
-        p.drawImage(xOffset, yOffset, scaledSource);
+        if(_colorize)
+            copyColorize(interimSource, scaledSource, xOffset, yOffset);
+        else
+        {
+            // Straight copy - no function needed
+            QPainter p(&interimSource);
+            p.drawImage(xOffset, yOffset, scaledSource);
+        }
     }
 
     if(_maskApplied)
@@ -397,9 +478,31 @@ void TokenEditor::updateFinalImage()
     _dirty = false;
 }
 
+void TokenEditor::resizeFinalImage()
+{
+    if(_sourceImage.isNull())
+        return;
+
+    if(_squareFinalImage)
+    {
+        int maxDim = qMax(_sourceImage.width(), _sourceImage.height());
+        _finalImage = QImage(QSize(maxDim, maxDim), QImage::Format_ARGB32);
+    }
+    else
+    {
+        _finalImage = QImage(_sourceImage.size(), QImage::Format_ARGB32);
+    }
+
+    rescaleImages();
+
+}
+
 void TokenEditor::rescaleImages()
 {
-    _scaledMaskImage = _maskImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
+    if(!_maskImage.isNull())
+        _scaledMaskImage = _maskImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
+
+    if(!_frameImage.isNull())
     _scaledFrameImage = _frameImage.scaled(_finalImage.size(), Qt::KeepAspectRatio);
 }
 
@@ -417,4 +520,203 @@ bool TokenEditor::fuzzyColorMatch(QRgb first, QRgb second)
     return ((qAbs(qRed(first) - qRed(second)) <= _transparentLevel) &&
             (qAbs(qGreen(first) - qGreen(second)) <= _transparentLevel) &&
             (qAbs(qBlue(first) - qBlue(second)) <= _transparentLevel));
+}
+
+void TokenEditor::copyTransparentColor(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            if(!fuzzyColorMatch(inputLine[x], _transparentColor))
+                outputLine[x + xOffset] = inputLine[x];
+        }
+    }
+}
+
+void TokenEditor::copyRedChannel(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba(qRed(rgba), qGreen(rgba), qBlue(rgba), qRed(rgba));
+        }
+    }
+}
+
+void TokenEditor::copyGreenChannel(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba(qRed(rgba), qGreen(rgba), qBlue(rgba), qGreen(rgba));
+        }
+    }
+}
+
+void TokenEditor::copyBlueChannel(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba(qRed(rgba), qGreen(rgba), qBlue(rgba), qBlue(rgba));
+        }
+    }
+}
+
+void TokenEditor::copyTransparentColorColorize(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    QRgb colorizeColor = _colorizeColor.rgb();
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            if(!fuzzyColorMatch(inputLine[x], _transparentColor))
+            {
+                const QRgb &rgba = inputLine[x];
+                outputLine[x + xOffset] = qRgba((qRed(rgba) * qRed(colorizeColor)) / 0xFF,
+                                                (qGreen(rgba) * qGreen(colorizeColor)) / 0xFF,
+                                                (qBlue(rgba) * qBlue(colorizeColor)) / 0xFF,
+                                                qAlpha(rgba));
+            }
+        }
+    }
+}
+
+void TokenEditor::copyRedChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    QRgb colorizeColor = _colorizeColor.rgb();
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba((qRed(rgba) * qRed(colorizeColor)) / 0xFF,
+                                            (qGreen(rgba) * qGreen(colorizeColor)) / 0xFF,
+                                            (qBlue(rgba) * qBlue(colorizeColor)) / 0xFF,
+                                            qRed(rgba));
+        }
+    }
+}
+
+void TokenEditor::copyGreenChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    QRgb colorizeColor = _colorizeColor.rgb();
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba((qRed(rgba) * qRed(colorizeColor)) / 0xFF,
+                                            (qGreen(rgba) * qGreen(colorizeColor)) / 0xFF,
+                                            (qBlue(rgba) * qBlue(colorizeColor)) / 0xFF,
+                                            qGreen(rgba));
+        }
+    }
+}
+
+void TokenEditor::copyBlueChannelColorize(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    QRgb colorizeColor = _colorizeColor.rgb();
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba((qRed(rgba) * qRed(colorizeColor)) / 0xFF,
+                                            (qGreen(rgba) * qGreen(colorizeColor)) / 0xFF,
+                                            (qBlue(rgba) * qBlue(colorizeColor)) / 0xFF,
+                                            qBlue(rgba));
+        }
+    }
+}
+
+void TokenEditor::copyColorize(QImage& dest, const QImage& source, int xOffset, int yOffset)
+{
+    int yStart = qMax(0, -yOffset);
+    int yEnd = qMin(source.height(), _finalImage.height() - yOffset);
+    int xStart = qMax(0, -xOffset);
+    int xEnd = qMin(source.width(), _finalImage.width() - xOffset);
+
+    QRgb colorizeColor = _colorizeColor.rgb();
+
+    for (int y = yStart; y < yEnd; y++)
+    {
+        const QRgb* inputLine = reinterpret_cast<const QRgb *>(source.scanLine(y));
+        QRgb* outputLine = reinterpret_cast<QRgb *>(dest.scanLine(y + yOffset));
+        for(int x = xStart; x < xEnd; x++)
+        {
+            const QRgb &rgba = inputLine[x];
+            outputLine[x + xOffset] = qRgba((qRed(rgba) * qRed(colorizeColor)) / 0xFF,
+                                            (qGreen(rgba) * qGreen(colorizeColor)) / 0xFF,
+                                            (qBlue(rgba) * qBlue(colorizeColor)) / 0xFF,
+                                            qAlpha(rgba));
+        }
+    }
 }

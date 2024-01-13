@@ -1,5 +1,7 @@
 Next version
 * Movement ring size isn't scaled right vs token scale
+* Double-click on a combatant widget centers the map on the combatant
+* Double-click on an effect token opens the edit for that token
 
 * name layers based on filename, not full path
 * party alt icon should be a relative path if possible
@@ -7,6 +9,12 @@ Next version
 
 * upgrade to latest Qt, activate Copilot for Qt
     * check volume usage across audio classes
+
+Video references:
+<a href="https://www.vecteezy.com/video/1803905-water-ring-splashes-in-a-circle-flow">Water ring splashes in a circle flow Stock Videos by Vecteezy</a>
+<a href="https://www.vecteezy.com/video/14196883-smoke-animation-loop-seamless-design-on-black-background-overlay-on-background-3d-illustratio">Smoke Animation Loop seamless design on black background. Overlay on background.3D Illustratio Stock Videos by Vecteezy</a>
+<a href="https://www.vecteezy.com/video/23951445-shockwave-smoke-splash-super-hero-landing-vfx-power-hit-shock-wave-large-smoke">Shockwave Smoke Splash super hero landing vfx power hit Shock wave Large smoke Stock Videos by Vecteezy</a>
+
 
 * Undo-redo on drawing fow
 * Make grid button a flat pushbutton that opens its own popup menu
