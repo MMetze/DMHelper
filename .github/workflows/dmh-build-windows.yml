@@ -80,15 +80,6 @@ jobs:
         xcopy /s src\installer\* bin64\*
         Rename-Item -Path "bin64\packages\com.dmhelper.app\meta\installscript64.qs" -NewName "installscript.qs"
         ls
-        
-    - name: Create the installer
-      run: |
-        cd DMHelper
-        cd bin64
-        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        # binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        cd ..
-        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
 
     - name: Build DMHelper for Windows
       run: |
@@ -118,6 +109,15 @@ jobs:
         cd DMHelper
         cd build-64_bit-release
         windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
+        
+    - name: Create the installer
+      run: |
+        cd DMHelper
+        cd bin64
+        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        # binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        cd ..
+        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
         
     - name: Zip the build
       run:  |
