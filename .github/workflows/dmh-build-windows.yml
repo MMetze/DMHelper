@@ -32,8 +32,6 @@ jobs:
     - uses: actions/checkout@v3
     - name: Print current working dir
       run: |
-        pwd
-        Get-ChildItem -Recurse -Directory
         echo Workspace is: ${{ github.workspace }}
         ls DMHelper
         cd DMHelper
@@ -56,7 +54,6 @@ jobs:
     - name: Set up environment for build
       run: |
         echo "Current environmental path: ${{env.PATH}}"
-        pwd
         cd DMHelper
         mkdir bin64
         mkdir bin64\config
@@ -72,9 +69,11 @@ jobs:
         mkdir bin64\packages\com.dmhelper.app\data\resources\tables
         xcopy /s src\installer\* bin64\*
         mv bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
+        ls
         
     - name: Build DMHelper for Windows
       run: |
+        cd DMHelper
         mkdir build-64_bit-release
         cd build-64_bit-release
         qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
@@ -83,8 +82,9 @@ jobs:
 
     - name: Copy binary resources
       run: |
+        cd DMHelper
+        cd build-64_bit-release
         ls
-        find .
         xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
         xcopy D:\a\DMHelper\Qt\6.6.0\msvc2019_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
         xcopy ..\src\bin-win64\* ..\bin64\packages\com.dmhelper.app\data\*
@@ -94,22 +94,24 @@ jobs:
         xcopy /s ..\src\bin-win64\plugins\* ..\bin64\packages\com.dmhelper.app\data\plugins\*
         xcopy /s ..\src\resources\* ..\bin64\packages\com.dmhelper.app\data\resources\*
 
-        # D:\a\DMHelper\DMHelper\DMHelper\build-64_bit-release
-
     - name: Call Deploy for Qt
       run: |
+        cd DMHelper
+        cd build-64_bit-release
         windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
 
     - name: Create the installer
       run: |
-        cd ..\bin64
-        binarycreator -c config\config_win64.xml -p packages "DMHelper-64-bit-release-Installer"
+        cd DMHelper
+        cd bin64
+        binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
         cd ..
-        move ".\bin64\DMHelper-64-bit-release-Installer.exe" ".\DMHelper 64-bit release Installer.exe"
+        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
 
     - name: Zip the build
       working-directory: ${{ runner.temp }}
       run:  |
+        cd DMHelper
         7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
 
     - name: Save the zip file
