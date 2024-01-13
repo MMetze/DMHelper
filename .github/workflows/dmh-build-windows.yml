@@ -77,6 +77,6 @@ jobs:
         mkdir build-64_bit-release
         cd build-64_bit-release
         qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
-        jom.exe /d /f Makefile qmake_all
-        jom.exe /d /f Makefile.Release
+        ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
+        ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
         ls
