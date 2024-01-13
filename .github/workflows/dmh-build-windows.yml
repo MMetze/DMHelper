@@ -33,11 +33,13 @@ jobs:
     - name: Print current working dir
       run: |
         pwd
-        echo ${{ github.workspace }}
-        ls DMHelper
+        ls -al
+        echo Workspace is: ${{ github.workspace }}
+        ls -al DMHelper
         cd DMHelper
         pwd
-        ls ${{env.Qt6Dir}}
+        ls -al ${{env.Qt6Dir}}
+        find .
     - name: (4) Download JOM
       uses: suisei-cn/actions-download-file@v1
       with:
@@ -70,21 +72,19 @@ jobs:
         mkdir bin64\packages\com.dmhelper.app\data\resources\tables
         xcopy /s src\installer\* bin64\*
         mv bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
-        pwd
+        
     - name: Build DMHelper for Windows
       run: |
-        pwd
-        cd DMHelper
         mkdir build-64_bit-release
         cd build-64_bit-release
         qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
         ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
         ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
-        ls
-        
+
     - name: Copy binary resources
       run: |
-        pwd
+        ls -al
+        find .
         xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
         xcopy D:\a\DMHelper\Qt\6.6.0\msvc2019_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
         xcopy ..\src\bin-win64\* ..\bin64\packages\com.dmhelper.app\data\*
@@ -96,7 +96,7 @@ jobs:
 
         # D:\a\DMHelper\DMHelper\DMHelper\build-64_bit-release
 
-    - name: Copy binary resources
+    - name: Call Deploy for Qt
       run: |
         windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
 
