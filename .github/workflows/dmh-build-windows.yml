@@ -8,7 +8,8 @@ env:
   QT_VERSION: 6.6.0
   QT_INSTALLER_VERSION: 4.6
   MSVC_VERSION: 2019
-  ARTIFACT:     qt-planets-build.zip
+  INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.zip
+  ZIPARTIFACT: DMHelper-64-bit-release.zip
 
 jobs:
   build-DMH-win64:
@@ -80,3 +81,45 @@ jobs:
         ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
         ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
         ls
+        
+    - name: Copy binary resources
+      run: |
+        pwd
+        xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
+        xcopy D:\a\DMHelper\Qt\6.6.0\msvc2019_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
+        xcopy ..\src\bin-win64\* ..\bin64\packages\com.dmhelper.app\data\*
+        xcopy /s ..\src\bestiary\* ..\bin64\packages\com.dmhelper.app\data\resources\*
+        xcopy /s ..\src\doc\* ..\bin64\packages\com.dmhelper.app\data\doc\*
+        xcopy /s ..\src\bin-win64\pkgconfig\* ..\bin64\packages\com.dmhelper.app\data\pkgconfig\*
+        xcopy /s ..\src\bin-win64\plugins\* ..\bin64\packages\com.dmhelper.app\data\plugins\*
+        xcopy /s ..\src\resources\* ..\bin64\packages\com.dmhelper.app\data\resources\*
+
+        # D:\a\DMHelper\DMHelper\DMHelper\build-64_bit-release
+
+    - name: Copy binary resources
+      run: |
+        windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
+
+    - name: Create the installer
+      run: |
+        cd ..\bin64
+        binarycreator -c config\config_win64.xml -p packages "DMHelper-64-bit-release-Installer"
+        cd ..
+        move ".\bin64\DMHelper-64-bit-release-Installer.exe" ".\DMHelper 64-bit release Installer.exe"
+
+    - name: Zip the build
+      working-directory: ${{ runner.temp }}
+      run:  |
+        7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
+
+    - name: Save the zip file
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.ZIPARTIFACT }}
+        path: ${{ runner.temp }}\${{ env.ZIPARTIFACT }}
+
+    - name: Save the install file
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.INSTALLERARTIFACT }}
+        path: ${{ runner.temp }}\${{ env.INSTALLERARTIFACT }}
