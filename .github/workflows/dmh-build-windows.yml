@@ -78,7 +78,7 @@ jobs:
         mkdir bin64\packages\com.dmhelper.app\data\resources
         mkdir bin64\packages\com.dmhelper.app\data\resources\tables
         xcopy /s src\installer\* bin64\*
-        xcopy bin64\packages\com.dmhelper.app\meta\installscript64.qs bin64\packages\com.dmhelper.app\meta\installscript.qs
+        Rename-Item -Path "bin64\packages\com.dmhelper.app\meta\installscript64.qs" -NewName "installscript.qs"
         ls
         
     - name: Create the installer
