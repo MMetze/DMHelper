@@ -30,7 +30,10 @@ jobs:
         tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2019_x64 tools_ifw'
         add-tools-to-path: 'true'
         archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
-    - uses: actions/checkout@v3
+        
+    - name: Check out the DMHelper source tree
+      uses: actions/checkout@v3
+    
     - name: Print current working dir
       run: |
         echo Workspace is: ${{ github.workspace }}
@@ -39,19 +42,23 @@ jobs:
         pwd
         ls ${{env.Qt6Dir}}
         Get-ChildItem -Recurse -Directory
-    - name: (4) Download JOM
+        
+    - name: Download JOM
       uses: suisei-cn/actions-download-file@v1
       with:
         url:    http://download.qt.io/official_releases/jom/jom.zip
         target: ${{ runner.temp }}\
-    - name: (5) Unzip JOM
+        
+    - name: Unzip JOM
       working-directory: ${{ runner.temp }}
       run:  |
         7z x jom.zip -ojom
+    
     - name: Set up Visual Studio shell
       uses: egor-tensin/vs-shell@v2
       with:
         arch: x64
+        
     - name: Set up environment for build
       run: |
         echo "Current environmental path: ${{env.PATH}}"
@@ -71,7 +78,17 @@ jobs:
         xcopy /s src\installer\* bin64\*
         mv bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.qs
         ls
+
         
+    - name: Create the installer
+      run: |
+        cd DMHelper
+        cd bin64
+        # D:\a\DMHelper\Qt\Tools\QtInstallerFramework\4.6\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        cd ..
+        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
+
     - name: Build DMHelper for Windows
       run: |
         cd DMHelper
@@ -100,15 +117,6 @@ jobs:
         cd DMHelper
         cd build-64_bit-release
         windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
-
-    - name: Create the installer
-      run: |
-        cd DMHelper
-        cd bin64
-        # D:\a\DMHelper\Qt\Tools\QtInstallerFramework\4.6\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        cd ..
-        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
 
     - name: Zip the build
       working-directory: ${{ runner.temp }}
