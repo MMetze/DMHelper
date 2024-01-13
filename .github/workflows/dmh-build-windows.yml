@@ -104,7 +104,7 @@ jobs:
       run: |
         cd DMHelper
         cd bin64
-        binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        D:\a\DMHelper\Qt\Tools\QtInstallerFramework\4.6\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
         cd ..
         move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
 
