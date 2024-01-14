@@ -57,7 +57,7 @@ jobs:
       run: |
         cd DMHelper
         cd build-clang_64bit-Release
-        $QT_BIN/qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
+        ${{env.Qt6_DIR}}/bin/qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
         make -j4
 
     - name: Copy binary resources
@@ -77,7 +77,7 @@ jobs:
         cd ../bin64/packages/com.dmhelper.app/data
         otool -L DMHelper.app/Contents/MacOS/DMHelper
         cd build-clang_64bit-Release
-        $QT_BIN/macdeployqt ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
+        ${{env.Qt6_DIR}}/bin/macdeployqt ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
         cp -R ../src/bestiary/ ../src/resources/ ../src/doc/ ../src/bin-macos/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
 
     - name: Create the installer
