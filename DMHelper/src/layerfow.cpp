@@ -19,16 +19,12 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     _graphicsItem(nullptr),
     _fowGLObject(nullptr),
     _scene(nullptr),
-    //_imageSize(imageSize),
     _imageFow(),
-    //_pixmapFow(),
     _undoStack(nullptr),
     _undoItems()
 {
     _undoStack = new QUndoStack(); // TODO: why does not leaking this avoid a crash at shutdown?
     setSize(imageSize);
-
-    //connect(this, &LayerFow::dirty, this, &LayerFow::updateFowInternal);
 }
 
 LayerFow::~LayerFow()
@@ -104,7 +100,6 @@ Layer* LayerFow::clone() const
 
     copyBaseValues(newLayer);
     newLayer->_imageFow = _imageFow;
-    //newLayer->_pixmapFow = _pixmapFow;
 
     if(_undoStack->count() > 0)
     {
@@ -193,12 +188,8 @@ void LayerFow::applySize(const QSize& size)
 
     if(_fowGLObject)
     {
-//        _fowGLObject->setTargetSize(size);
-//        _fowGLObject->setImage(newImage);
-
         delete _fowGLObject;
         _fowGLObject = nullptr;
-
     }
 }
 
@@ -214,7 +205,6 @@ QUndoStack* LayerFow::getUndoStack() const
 
 void LayerFow::undoPaint()
 {
-    //_mapSource->applyPaintTo(nullptr, QColor(0, 0, 0, 128), _mapSource->getUndoStack()->index() - 1)
     applyPaintTo(getUndoStack()->index() - 1);
 }
 
@@ -227,10 +217,7 @@ void LayerFow::applyPaintTo(int index, int startIndex)
         index = _undoStack->count();
 
     if(startIndex == 0)
-    {
         _imageFow.fill(Qt::black);
-        //_pixmapFow.fill(Qt::blue);
-    }
 
     // Need to add some batch processing to avoid updating every step
     for(int i = startIndex; i < index; ++i)
@@ -243,44 +230,10 @@ void LayerFow::applyPaintTo(int index, int startIndex)
                 action->apply();
         }
     }
-    /*
-    if(!target)
-    {
-        if(!_imgFow.isNull())
-            internalApplyPaintTo(&_imgFow, clearColor, index, true, startIndex);
-        if(!_imgBWFow.isNull())
-            internalApplyPaintTo(&_imgBWFow, clearColor, index, true, startIndex);
-    }
-    else
-    {
-        internalApplyPaintTo(target, clearColor, index, preview, startIndex);
-    }
-    */
 
     updateFowInternal();
     emit dirty();
 }
-
-/*
-void LayerFow::internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
-{
-    if((!target) || (index < startIndex))
-        return;
-
-    if(index > _undoStack->count())
-        index = _undoStack->count();
-
-    if(startIndex == 0)
-        target->fill(clearColor);
-
-    for(int i = startIndex; i < index; ++i)
-    {
-        const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
-        if(action)
-            action->apply(preview, target);
-    }
-}
-*/
 
 void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
 {
@@ -423,60 +376,8 @@ void LayerFow::fillFoW(const QColor& color)
     emit dirty();
 }
 
-/*
-QImage LayerFow::getBWFoWImage()
-{
-    // TODO: get layer and extract BW FOW image
-    //return getBWFoWImage(_layerScene.sceneSize().toSize());
-    return _imgFow;
-}
-
-QImage LayerFow::getBWFoWImage(const QImage &img)
-{
-    return getBWFoWImage(img.size());
-}
-
-QImage LayerFow::getBWFoWImage(const QSize &size)
-{
-    if((_imgBWFow.isNull()) || (size != _imgBWFow.size()) || (_indexBWFow > _undoStack->index()))
-    {
-        _imgBWFow = QImage(size, QImage::Format_ARGB32);
-        _indexBWFow = 0;
-    }
-
-    applyPaintTo(&_imgBWFow, QColor(0, 0, 0, 255), _undoStack->index(), false, _indexBWFow);
-    _indexBWFow = qMax(_undoStack->index() - 1, 0);
-
-    return _imgBWFow;
-}
-*/
-
-/*
-QSize LayerFow::getImageSize() const
-{
-    return _imageSize;
-}
-
-void LayerFow::setImageSize(const QSize& imageSize)
-{
-    if(imageSize == _imageSize)
-        return;
-
-    _imageSize = imageSize;
-
-    if(!_imageFow.isNull())
-    {
-        uninitialize();
-        initialize(_imageSize);
-    }
-}
-*/
-
 QRect LayerFow::getFoWVisibleRect() const
 {
-    //QImage bwFoWImage = getBWFoWImage(_imgBackground);
-    //QImage bwFoWImage;// = getBWFoWImage();
-
     int top, bottom, left, right;
     top = bottom = left = right = -1;
     int i, j;
@@ -584,12 +485,6 @@ void LayerFow::playerGLUninitialize()
     cleanupPlayer();
 }
 
-/*
-bool LayerFow::playerGLUpdate()
-{
-}
-*/
-
 void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
     Q_UNUSED(defaultModelMatrix);
@@ -624,14 +519,11 @@ void LayerFow::initialize(const QSize& sceneSize)
     if(!_imageFow.isNull())
         return;
 
-    //_imageSize = layerSize;
     if(getSize().isEmpty())
         setSize(sceneSize);
 
     _imageFow = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
     _imageFow.fill(Qt::black);
-    //_imgFow.fill(Qt::black);
-    //_pixmapFow.fill(Qt::black);
 
     initializeUndoStack();
 }
@@ -639,7 +531,6 @@ void LayerFow::initialize(const QSize& sceneSize)
 void LayerFow::uninitialize()
 {
     _imageFow = QImage();
-    //_pixmapFow = QPixmap();
 }
 
 void LayerFow::updateFowInternal()

@@ -1,5 +1,6 @@
 #include "bestiaryfindtokendialog.h"
 #include "ui_bestiaryfindtokendialog.h"
+#include "optionscontainer.h"
 #include <QGridLayout>
 #include <QPushButton>
 #include <QNetworkAccessManager>
@@ -11,22 +12,20 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QImageReader>
+#include <QtMinMax>
 
 //#define DEBUG_FINDTOKEN_IMPORT
 
-const int TOKEN_FRAME_SPACING = 16;
-const int TOKEN_ICON_SIZE = 256;
-const int TOKEN_FRAME_SIZE = TOKEN_ICON_SIZE + (TOKEN_ICON_SIZE / 10);
+const qreal TOKEN_ICON_SIZE = 256.0;
 
-BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, QWidget *parent) :
+BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, const OptionsContainer& options, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryFindTokenDialog),
     _monsterName(monsterName),
     _searchString(searchString),
     _manager(nullptr),
     _urlReply(nullptr),
-    _maskImage(),
-    _frameImage(),
+    _editor(nullptr),
     _tokenGrid(nullptr),
     _tokenList()
 {
@@ -34,42 +33,45 @@ BestiaryFindTokenDialog::BestiaryFindTokenDialog(const QString& monsterName, con
 
     _tokenGrid = new QGridLayout;
     _tokenGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    _tokenGrid->setContentsMargins(TOKEN_FRAME_SPACING, TOKEN_FRAME_SPACING, TOKEN_FRAME_SPACING, TOKEN_FRAME_SPACING);
-    _tokenGrid->setSpacing(TOKEN_FRAME_SPACING);
     ui->scrollAreaWidgetContents->setLayout(_tokenGrid);
 
-    switch(mode)
-    {
-        case TokenDetailMode_TransparentColor:
-            ui->btnTransparentColor->setChecked(true);
-            break;
-        case TokenDetailMode_FrameAndMask:
-            ui->btnFrameAndMask->setChecked(true);
-            break;
-        case TokenDetailMode_Original:
-        default:
-            ui->btnOriginalImage->setChecked(true);
-            break;
-    };
+    ui->chkFill->setChecked(options.getTokenBackgroundFill());
 
-    ui->btnColor->setColor(background);
-    ui->btnColor->setRotationVisible(false);
-    ui->sliderFuzzy->setValue(backgroundLevel);
+    ui->chkTransparent->setChecked(options.getTokenTransparent());
+    ui->btnTransparentColor->setColor(options.getTokenTransparentColor());
+    ui->btnTransparentColor->setRotationVisible(false);
+    ui->sliderFuzzy->setValue(options.getTokenTransparentLevel());
 
-    connect(ui->btnOriginalImage, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
-    connect(ui->btnTransparentColor, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
-    connect(ui->btnColor, &ColorPushButton::colorChanged, this, &BestiaryFindTokenDialog::updateLayoutImages);
-    connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, this, &BestiaryFindTokenDialog::updateLayoutImages);
-    connect(ui->btnFrameAndMask, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
-    connect(ui->btnBrowseFrameImage, &QAbstractButton::clicked, this, &BestiaryFindTokenDialog::browseFrame);
+    ui->chkMask->setChecked(options.getTokenMaskApplied());
+    ui->edtMaskImage->setText(options.getTokenMaskFile());
+    ui->chkFrame->setChecked(options.getTokenFrameApplied());
+    ui->edtFrameImage->setText(options.getTokenFrameFile());
+
+    _editor = new TokenEditor;
+    _editor->applyOptionsToEditor(options);
+
+    connect(ui->chkFill, &QAbstractButton::toggled, _editor, &TokenEditor::setBackgroundFill);
+    connect(ui->chkTransparent, &QAbstractButton::toggled, _editor, &TokenEditor::setTransparent);
+    connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, _editor, &TokenEditor::setTransparentColor);
+    connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, _editor, &TokenEditor::setTransparentLevel);
+    connect(ui->chkMask, &QAbstractButton::toggled, _editor, &TokenEditor::setMaskApplied);
+    connect(ui->edtMaskImage, &QLineEdit::textChanged, _editor, &TokenEditor::setMaskFile);
     connect(ui->btnBrowseMaskImage, &QAbstractButton::clicked, this, &BestiaryFindTokenDialog::browseMask);
-    connect(ui->edtFrameImage, &QLineEdit::textChanged, this, &BestiaryFindTokenDialog::updateFrameMaskImages);
-    connect(ui->edtMaskImage, &QLineEdit::textChanged, this, &BestiaryFindTokenDialog::updateFrameMaskImages);
+    connect(ui->chkFrame, &QAbstractButton::toggled, _editor, &TokenEditor::setFrameApplied);
+    connect(ui->edtFrameImage, &QLineEdit::textChanged, _editor, &TokenEditor::setFrameFile);
+    connect(ui->btnBrowseFrameImage, &QAbstractButton::clicked, this, &BestiaryFindTokenDialog::browseFrame);
+
+    connect(ui->chkFill, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->chkTransparent, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->chkMask, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->edtMaskImage, &QLineEdit::textChanged, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->chkFrame, &QAbstractButton::toggled, this, &BestiaryFindTokenDialog::updateLayoutImages);
+    connect(ui->edtFrameImage, &QLineEdit::textChanged, this, &BestiaryFindTokenDialog::updateLayoutImages);
 
     connect(ui->btnCustomize, &QAbstractButton::clicked, this, &BestiaryFindTokenDialog::customizeSearch);
-
-    ui->edtFrameImage->setText(frameFile);
-    ui->edtMaskImage->setText(maskFile);
+    connect(ui->sliderZoom, &QAbstractSlider::valueChanged, this, &BestiaryFindTokenDialog::rescaleData);
 
     startSearch(_searchString + QString(" ") + monsterName);
 }
@@ -83,7 +85,7 @@ BestiaryFindTokenDialog::~BestiaryFindTokenDialog()
     delete ui;
 }
 
-QList<QImage> BestiaryFindTokenDialog::retrieveSelection()
+QList<QImage> BestiaryFindTokenDialog::retrieveSelection(bool decorated)
 {
     QList<QImage> resultList;
 
@@ -91,7 +93,7 @@ QList<QImage> BestiaryFindTokenDialog::retrieveSelection()
     {
         if((data) && (!data->_pixmap.isNull()) && (data->_button) && (data->_button->isChecked()))
         {
-            QImage resultImage = decorateFullImage(data->_pixmap, data->_background);
+            QImage resultImage = decorated ? decorateFullImage(data->_pixmap, data->_background) : data->_pixmap.toImage();
             if(!resultImage.isNull())
                 resultList.append(resultImage);
         }
@@ -100,34 +102,14 @@ QList<QImage> BestiaryFindTokenDialog::retrieveSelection()
     return resultList;
 }
 
-BestiaryFindTokenDialog::TokenDetailMode BestiaryFindTokenDialog::getTokenDetailMode() const
+bool BestiaryFindTokenDialog::isEditingToken() const
 {
-    if(ui->btnTransparentColor->isChecked())
-        return TokenDetailMode_TransparentColor;
-    else if (ui->btnFrameAndMask->isChecked())
-        return TokenDetailMode_FrameAndMask;
-    else
-        return TokenDetailMode_Original;
+    return ui->chkEditTokens->isChecked();
 }
 
-QColor BestiaryFindTokenDialog::getTokenBackgroundColor() const
+TokenEditor* BestiaryFindTokenDialog::getEditor()
 {
-    return ui->btnColor->getColor();
-}
-
-int BestiaryFindTokenDialog::getTokenBackgroundLevel() const
-{
-    return ui->sliderFuzzy->value();
-}
-
-QString BestiaryFindTokenDialog::getTokenFrameFile() const
-{
-    return ui->edtFrameImage->text();
-}
-
-QString BestiaryFindTokenDialog::getTokenMaskFile() const
-{
-    return ui->edtMaskImage->text();
+    return _editor;
 }
 
 void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
@@ -191,7 +173,7 @@ void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
                     {
                         TokenData* tokenData = new TokenData(urlText);
                 #ifdef DEBUG_FINDTOKEN_IMPORT
-                        qDebug() << "[BestiaryFindTokenDialog] Found URL data for address; " << tokenData->_tokenAddress;
+                        qDebug() << "[BestiaryFindTokenDialog] Found URL data for address: " << tokenData->_tokenAddress;
                 #endif
                         _tokenList.append(tokenData);
                         tokenData->_reply = _manager->get(QNetworkRequest(QUrl(tokenData->_tokenAddress)));
@@ -227,7 +209,8 @@ void BestiaryFindTokenDialog::imageRequestFinished(QNetworkReply *reply)
     if(!data->_pixmap.loadFromData(bytes))
         return;
 
-    data->_scaledPixmap = data->_pixmap.scaled(TOKEN_ICON_SIZE, TOKEN_ICON_SIZE, Qt::KeepAspectRatio);
+    int tokenSize = TOKEN_ICON_SIZE * qPow(2.0, static_cast<qreal>(ui->sliderZoom->value()) / 10.0);
+    data->_scaledPixmap = data->_pixmap.scaled(tokenSize, tokenSize, Qt::KeepAspectRatio);
 
     QImage editImage = data->_scaledPixmap.toImage();
     data->_background = editImage.pixelColor(0, 0);
@@ -251,6 +234,12 @@ void BestiaryFindTokenDialog::browseMask()
         return;
 
     ui->edtMaskImage->setText(filename);
+}
+
+void BestiaryFindTokenDialog::resizeEvent(QResizeEvent *event)
+{
+    updateLayout();
+    QDialog::resizeEvent(event);
 }
 
 void BestiaryFindTokenDialog::startSearch(const QString& searchString)
@@ -321,7 +310,14 @@ void BestiaryFindTokenDialog::updateLayout()
 {
     clearGrid();
 
-    int columnCount = ui->scrollArea->width() / (TOKEN_FRAME_SIZE + TOKEN_FRAME_SPACING);
+    int tokenSize = TOKEN_ICON_SIZE * qPow(2.0, static_cast<qreal>(ui->sliderZoom->value()) / 10.0);
+    int tokeFrameSpacing = qMax(static_cast<int>(qSqrt(tokenSize)), 3);
+    int tokenFrameSize = tokenSize + qMax(tokenSize / 10, 2);
+
+    int columnCount = ui->scrollArea->width() / (tokenFrameSize + tokeFrameSpacing);
+
+    _tokenGrid->setContentsMargins(tokeFrameSpacing, tokeFrameSpacing, tokeFrameSpacing, tokeFrameSpacing);
+    _tokenGrid->setSpacing(tokeFrameSpacing);
 
     int column = 0;
     int row = 0;
@@ -331,9 +327,9 @@ void BestiaryFindTokenDialog::updateLayout()
         if((data) && (!data->_pixmap.isNull()))
         {
             QPushButton* tokenButton = new QPushButton(this);
-            tokenButton->setMinimumSize(TOKEN_FRAME_SIZE, TOKEN_FRAME_SIZE);
-            tokenButton->setMaximumSize(TOKEN_FRAME_SIZE, TOKEN_FRAME_SIZE);
-            tokenButton->setIconSize(QSize(TOKEN_ICON_SIZE, TOKEN_ICON_SIZE));
+            tokenButton->setMinimumSize(tokenFrameSize, tokenFrameSize);
+            tokenButton->setMaximumSize(tokenFrameSize, tokenFrameSize);
+            tokenButton->setIconSize(QSize(tokenSize, tokenSize));
             tokenButton->setIcon(QIcon(decoratePixmap(data->_scaledPixmap, data->_background)));
             tokenButton->setCheckable(true);
             data->_button = tokenButton;
@@ -382,6 +378,19 @@ void BestiaryFindTokenDialog::clearGrid()
     ui->scrollAreaWidgetContents->update();
 }
 
+void BestiaryFindTokenDialog::rescaleData()
+{
+    int tokenSize = TOKEN_ICON_SIZE * qPow(2.0, static_cast<qreal>(ui->sliderZoom->value()) / 10.0);
+
+    foreach(TokenData* data, _tokenList)
+    {
+        if((data) && (!data->_pixmap.isNull()))
+            data->_scaledPixmap = data->_pixmap.scaled(tokenSize, tokenSize, Qt::KeepAspectRatio);
+    }
+
+    updateLayout();
+}
+
 TokenData* BestiaryFindTokenDialog::getDataForReply(QNetworkReply *reply)
 {
     if(!reply)
@@ -398,118 +407,18 @@ TokenData* BestiaryFindTokenDialog::getDataForReply(QNetworkReply *reply)
 
 QPixmap BestiaryFindTokenDialog::decoratePixmap(QPixmap pixmap, const QColor& background)
 {
-    if(ui->btnOriginalImage->isChecked())
-    {
-        return pixmap;
-    }
-    else if(ui->btnTransparentColor->isChecked())
-    {
-        QImage inputImage = pixmap.toImage();
-        QImage transparentImage(inputImage.size(), QImage::Format_ARGB32_Premultiplied);
-
-        QRgb transparentColor = ui->btnColor->getColor().rgb();
-        QRgb outputColor = qRgba(qRed(transparentColor), qGreen(transparentColor), qBlue(transparentColor), 0);
-
-        for (int y = 0; y < inputImage.height(); y++)
-        {
-            const QRgb* inputLine = reinterpret_cast<const QRgb *>(inputImage.scanLine(y));
-            QRgb* outputLine = reinterpret_cast<QRgb *>(transparentImage.scanLine(y));
-            for(int x = 0; x < inputImage.width(); x++)
-            {
-                if(fuzzyColorMatch(inputLine[x], transparentColor))
-                    outputLine[x] = outputColor;
-                else
-                    outputLine[x] = inputLine[x];
-            }
-        }
-
-        return QPixmap::fromImage(transparentImage);
-    }
-    else if(ui->btnFrameAndMask->isChecked())
-    {
-        if((!_frameImage.isNull()) && (!_maskImage.isNull()))
-        {
-            QImage resultImage(TOKEN_ICON_SIZE, TOKEN_ICON_SIZE, QImage::Format_ARGB32_Premultiplied);
-            resultImage.fill(background);
-
-            QPainter p;
-            p.begin(&resultImage);
-                p.drawPixmap((TOKEN_ICON_SIZE - pixmap.width())/2, (TOKEN_ICON_SIZE - pixmap.height()) / 2, pixmap);
-                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-                p.drawImage((TOKEN_ICON_SIZE - _maskImage.width())/2, (TOKEN_ICON_SIZE - _maskImage.height()) / 2, _maskImage);
-                p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-                p.drawImage((TOKEN_ICON_SIZE - _frameImage.width())/2, (TOKEN_ICON_SIZE - _frameImage.height()) / 2, _frameImage);
-            p.end();
-
-            return QPixmap::fromImage(resultImage);
-        }
-    }
-
-    return pixmap;
+    return QPixmap::fromImage(decorateFullImage(pixmap, background));
 }
 
 QImage BestiaryFindTokenDialog::decorateFullImage(QPixmap pixmap, const QColor& background)
 {
-    if(ui->btnOriginalImage->isChecked())
-    {
+    if(!_editor)
         return pixmap.toImage();
-    }
-    else if(ui->btnTransparentColor->isChecked())
-    {
-        QImage inputImage = pixmap.toImage();
-        QImage transparentImage(inputImage.size(), QImage::Format_ARGB32_Premultiplied);
 
-        QRgb transparentColor = ui->btnColor->getColor().rgb();
-        QRgb outputColor = qRgba(qRed(transparentColor), qGreen(transparentColor), qBlue(transparentColor), 0);
+    _editor->setSourceImage(pixmap.toImage());
+    _editor->setBackgroundFillColor(background);
 
-        for (int y = 0; y < inputImage.height(); y++)
-        {
-            const QRgb* inputLine = reinterpret_cast<const QRgb *>(inputImage.scanLine(y));
-            QRgb* outputLine = reinterpret_cast<QRgb *>(transparentImage.scanLine(y));
-            for(int x = 0; x < inputImage.width(); x++)
-            {
-                if(fuzzyColorMatch(inputLine[x], transparentColor))
-                    outputLine[x] = outputColor;
-                else
-                    outputLine[x] = inputLine[x];
-            }
-        }
-
-        return transparentImage;
-    }
-    else if(ui->btnFrameAndMask->isChecked())
-    {
-        int maxSize = qMax(pixmap.width(), pixmap.height());
-        QImage frameImage = QImage(ui->edtFrameImage->text()).scaled(maxSize, maxSize, Qt::KeepAspectRatio);
-        QImage maskImage = QImage(ui->edtMaskImage->text()).scaled(maxSize, maxSize, Qt::KeepAspectRatio);
-        if((!frameImage.isNull()) && (!maskImage.isNull()))
-        {
-            QImage resultImage(maxSize, maxSize, QImage::Format_ARGB32_Premultiplied);
-            resultImage.fill(background);
-
-            QPainter p;
-            p.begin(&resultImage);
-                p.drawPixmap((maxSize - pixmap.width())/2, (maxSize - pixmap.height()) / 2, pixmap);
-                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-                p.drawImage((maxSize - maskImage.width())/2, (maxSize - maskImage.height()) / 2, maskImage);
-                p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-                p.drawImage((maxSize - frameImage.width())/2, (maxSize - frameImage.height()) / 2, frameImage);
-            p.end();
-
-            return resultImage;
-        }
-    }
-
-    return pixmap.toImage();
-}
-
-void BestiaryFindTokenDialog::updateFrameMaskImages()
-{
-    _frameImage = QImage(ui->edtFrameImage->text()).scaled(TOKEN_ICON_SIZE, TOKEN_ICON_SIZE, Qt::KeepAspectRatio);
-    _maskImage = QImage(ui->edtMaskImage->text()).scaled(TOKEN_ICON_SIZE, TOKEN_ICON_SIZE, Qt::KeepAspectRatio);
-
-    if((!_frameImage.isNull()) && (!_maskImage.isNull()))
-        updateLayoutImages();
+    return _editor->getFinalImage();
 }
 
 bool BestiaryFindTokenDialog::fuzzyColorMatch(QRgb first, QRgb second)

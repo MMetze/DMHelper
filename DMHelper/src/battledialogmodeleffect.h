@@ -5,8 +5,9 @@
 #include <QPointF>
 #include <QColor>
 
-class QAbstractGraphicsShapeItem;
 class BattleDialogEffectSettings;
+class LayerTokens;
+class QAbstractGraphicsShapeItem;
 class QGraphicsItem;
 
 const int BATTLE_DIALOG_MODEL_EFFECT_ID = Qt::UserRole;
@@ -47,6 +48,9 @@ public:
     virtual int getObjectType() const override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
+
+    void setLayer(LayerTokens* tokensLayer);
+    LayerTokens* getLayer() const;
 
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettings* getEffectEditor() const;
@@ -104,6 +108,7 @@ protected:
     virtual void prepareItem(QGraphicsItem& item) const;
     virtual void registerChange();
 
+    LayerTokens* _tokensLayer;
     bool _active;
     bool _visible;
     int _size;

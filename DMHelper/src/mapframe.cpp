@@ -12,14 +12,10 @@
 #include "mapcolorizedialog.h"
 #include "layerseditdialog.h"
 #include "layerfow.h"
-#include "selectzoom.h"
-#include "campaign.h"
 #include "party.h"
 #include "unselectedpixmap.h"
 #include "camerarect.h"
 #include "publishglmaprenderer.h"
-#include "videoplayerglscreenshot.h"
-//#include "layerimage.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -217,6 +213,7 @@ bool MapFrame::eventFilter(QObject *obj, QEvent *event)
 
 QAction* MapFrame::getUndoAction(QObject* parent)
 {
+    Q_UNUSED(parent);
     // TODO: layers
     //return _mapSource->getUndoStack()->createUndoAction(parent);
     return nullptr;
@@ -224,6 +221,7 @@ QAction* MapFrame::getUndoAction(QObject* parent)
 
 QAction* MapFrame::getRedoAction(QObject* parent)
 {
+    Q_UNUSED(parent);
     // TODO: layers
     //return _mapSource->getUndoStack()->createRedoAction(parent);
     return nullptr;
@@ -2189,7 +2187,7 @@ QGraphicsItem* MapFrame::findTopObject(const QPoint &pos)
         return nullptr;
 
     // Search for the first selectable item
-    for(QGraphicsItem* item : qAsConst(itemList))
+    for(QGraphicsItem* item : std::as_const(itemList))
     {
         if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
             return dynamic_cast<QGraphicsItem*>(item);

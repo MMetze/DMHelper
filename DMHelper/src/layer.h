@@ -74,6 +74,7 @@ public slots:
     virtual void aboutToDelete();
     virtual void setScale(int scale);
     virtual void setName(const QString& name);
+    virtual void editSettings();
 
     // Local Layer Interface (changing references doesn't change the source layer)
     virtual void setLayerScene(LayerScene* layerScene);

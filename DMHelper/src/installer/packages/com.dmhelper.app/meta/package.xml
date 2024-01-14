@@ -2,8 +2,8 @@
 <Package>
     <DisplayName>DMHelper Application</DisplayName>
     <Description>Install the DMHelper application.</Description>
-    <Version>3.0.0</Version>
-    <ReleaseDate>2024-10-04</ReleaseDate>
+    <Version>3.1.0</Version>
+    <ReleaseDate>2024-01-12</ReleaseDate>
     <Licenses>
         <License name="GPL v3" file="license.txt" />
     </Licenses>

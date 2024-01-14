@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia multimediawidgets opengl network
+QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -53,6 +53,7 @@ SOURCES += main.cpp\
     battleframestate.cpp \
     battleframestatemachine.cpp \
     bestiaryexportdialog.cpp \
+    bestiarypopulatetokensdialog.cpp \
     camerarect.cpp \
     camerascene.cpp \
     campaignexporter.cpp \
@@ -100,6 +101,8 @@ SOURCES += main.cpp\
     layerseditdialog.cpp \
     layertokens.cpp \
     layervideo.cpp \
+    layervideoeffect.cpp \
+    layervideoeffectsettings.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
@@ -169,6 +172,8 @@ SOURCES += main.cpp\
     spellslotradiobutton.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
+    tokeneditdialog.cpp \
+    tokeneditor.cpp \
     undofowbase.cpp \
     undofowfill.cpp \
     undofowpath.cpp \
@@ -310,6 +315,7 @@ HEADERS  += mainwindow.h \
     battleframestate.h \
     battleframestatemachine.h \
     bestiaryexportdialog.h \
+    bestiarypopulatetokensdialog.h \
     camerarect.h \
     camerascene.h \
     campaignexporter.h \
@@ -358,6 +364,8 @@ HEADERS  += mainwindow.h \
     layerseditdialog.h \
     layertokens.h \
     layervideo.h \
+    layervideoeffect.h \
+    layervideoeffectsettings.h \
     legaldialog.h \
     mapblankdialog.h \
     mapcolorizedialog.h \
@@ -427,6 +435,8 @@ HEADERS  += mainwindow.h \
     spellslotradiobutton.h \
     textbrowsermargins.h \
     texteditmargins.h \
+    tokeneditdialog.h \
+    tokeneditor.h \
     undofowbase.h \
     undofowfill.h \
     undofowpath.h \
@@ -540,6 +550,7 @@ FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
+    bestiarypopulatetokensdialog.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
@@ -556,6 +567,7 @@ FORMS    += mainwindow.ui \
     expertisedialog.ui \
     layerframe.ui \
     layerseditdialog.ui \
+    layervideoeffectsettings.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
@@ -600,6 +612,7 @@ FORMS    += mainwindow.ui \
     dmscreentabwidget.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
+    tokeneditdialog.ui \
     welcomeframe.ui \
     whatsnewdialog.ui \
     widgetbattlecombatant.ui \

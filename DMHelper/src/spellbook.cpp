@@ -131,7 +131,7 @@ bool Spellbook::writeSpellbook(const QString& targetFilename)
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+    ts.setEncoding(QStringConverter::Utf8);
     ts << xmlString;
 
     file.close();
@@ -160,7 +160,7 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;
@@ -416,6 +416,9 @@ bool Spellbook::isDirty()
 
 Spell* Spellbook::getSpell(const QString& name)
 {
+    if(name.isEmpty())
+        return nullptr;
+
     if(!_spellbookMap.contains(name))
         showSpellWarning(name);
 

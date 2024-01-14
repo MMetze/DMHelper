@@ -205,6 +205,10 @@ void Layer::setName(const QString& name)
     emit dirty();
 }
 
+void Layer::editSettings()
+{
+}
+
 void Layer::setLayerScene(LayerScene* layerScene)
 {
     if(_layerScene == layerScene)

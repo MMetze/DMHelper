@@ -1,6 +1,7 @@
-    #include "layerframe.h"
+#include "layerframe.h"
 #include "ui_layerframe.h"
 #include "layer.h"
+#include "layervideo.h"
 
 LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     QFrame(parent),
@@ -10,16 +11,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setLayerVisibleDM(layer.getLayerVisibleDM());
-    setLayerVisiblePlayer(layer.getLayerVisiblePlayer());
-    handleVisibleChanged();
-    setLinkedUp(layer.getLinkedUp());
-    handleLinkUp(layer.getLinkedUp());
-    setIcon(layer.getLayerIcon());
-    setName(layer.getName());
-    setOpacity(layer.getOpacity() * 100.0);
-    setPosition(layer.getPosition());
-    setSize(layer.getSize());
+    updateLayerData();
 
     connect(ui->chkVisibleDM, &QAbstractButton::toggled, this, &LayerFrame::visibleDMChanged);
     connect(ui->chkVisiblePlayer, &QAbstractButton::toggled, this, &LayerFrame::visiblePlayerChanged);
@@ -33,9 +25,9 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
     connect(this, &LayerFrame::visibleDMChanged, &layer, &Layer::setLayerVisibleDM);
     connect(this, &LayerFrame::visiblePlayerChanged, &layer, &Layer::setLayerVisiblePlayer);
-    connect(this, &LayerFrame::visibleDMChanged, [=](){ emit visibilityChanged(this); });
-    connect(this, &LayerFrame::visibleDMChanged, [=](){ emit dmVisibilityChanged(this); });
-    connect(this, &LayerFrame::visiblePlayerChanged, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::visibleDMChanged, this, [=](){ emit visibilityChanged(this); });
+    connect(this, &LayerFrame::visibleDMChanged, this, [=](){ emit dmVisibilityChanged(this); });
+    connect(this, &LayerFrame::visiblePlayerChanged, this, [=](){ emit visibilityChanged(this); });
     connect(this, &LayerFrame::linkedUpChanged, &layer, &Layer::setLinkedUp);
     connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
     connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));
@@ -43,6 +35,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 
     connect(ui->sliderOpacity, &QSlider::valueChanged, this, &LayerFrame::handleOpacityChanged);
     connect(ui->spinOpacity, &QSpinBox::editingFinished, this, &LayerFrame::handleOpacityChanged);
+    connect(ui->btnSettings, &QAbstractButton::clicked, &layer, &Layer::editSettings);
     connect(ui->spinX, &QSpinBox::editingFinished, this, &LayerFrame::handleXChanged);
     connect(ui->spinY, &QSpinBox::editingFinished, this, &LayerFrame::handleYChanged);
     connect(ui->spinWidth, &QSpinBox::editingFinished, this, &LayerFrame::handleWidthChanged);
@@ -50,6 +43,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
 
     ui->edtName->installEventFilter(this);
+    ui->btnSettings->setVisible(layer.getType() == DMHelper::LayerType_VideoEffect);
 
     setLineWidth(5);
     setAutoFillBackground(true);
@@ -66,6 +60,13 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     {
         ui->spinWidth->setEnabled(false);
         ui->spinHeight->setEnabled(false);
+    }
+    else if((layer.getFinalType() == DMHelper::LayerType_Video) ||
+            (layer.getFinalType() == DMHelper::LayerType_VideoEffect))
+    {
+        LayerVideo* layerVideo = dynamic_cast<LayerVideo*>(&layer);
+        if(layerVideo)
+            connect(layerVideo, &LayerVideo::screenshotAvailable, this, &LayerFrame::updateLayerData);
     }
 }
 
@@ -288,6 +289,20 @@ void LayerFrame::handleHeightChanged()
 void LayerFrame::handleLockClicked()
 {
     emit selectMe(this);
+}
+
+void LayerFrame::updateLayerData()
+{
+    setLayerVisibleDM(_layer.getLayerVisibleDM());
+    setLayerVisiblePlayer(_layer.getLayerVisiblePlayer());
+    handleVisibleChanged();
+    setLinkedUp(_layer.getLinkedUp());
+    handleLinkUp(_layer.getLinkedUp());
+    setName(_layer.getName());
+    setOpacity(_layer.getOpacity() * 100.0);
+    setPosition(_layer.getPosition());
+    setIcon(_layer.getLayerIcon());
+    setSize(_layer.getSize());
 }
 
 bool LayerFrame::eventFilter(QObject *obj, QEvent *event)

@@ -39,8 +39,8 @@ public:
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
 
-    QString getVideoFile() const;
-    QImage getScreenshot() const;
+    virtual QString getVideoFile() const;
+    virtual QImage getScreenshot() const;
 
 public slots:
     // DM Window Generic Interface
@@ -59,22 +59,24 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
+    virtual void playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
 
 signals:
     void updateProjectionMatrix();
+    void screenshotAvailable();
 
 protected slots:
     // Local Interface
-    void handleScreenshotReady(const QImage& image);
-    void requestScreenshot();
-    void clearScreenshot();
+    virtual void handleScreenshotReady(const QImage& image);
+    virtual void requestScreenshot();
+    virtual void clearScreenshot();
 
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     // DM Window Methods
-    void createGraphicsItem(const QSize& size);
+    virtual void updateImage(const QSize& size = QSize());
     void cleanupDM();
 
     // Player Window Methods

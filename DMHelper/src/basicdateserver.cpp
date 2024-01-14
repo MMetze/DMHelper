@@ -266,7 +266,7 @@ void BasicDateServer::readDateInformation(const QString& calendarFile)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;

@@ -1,75 +1,21 @@
-* edit FOW icon in combat is the wrong size
-* can't add an image to a new monster in the bestiary
-* maybe selection icons aren't always rightly sized?
-fixed * select many and delete doesn't delete them all
-* select many and link doesn't link them all
-fixed * select many and heal/damage doesn't heal/damage them all
-fixed * select many and change token doesn't change them all
-fixed * change token doesn't change how it looks on the DM View - need to recreate the icon
-* delete key to remove a combatant or effect
-fixed * shift magic effects to other layer doesnt work
-* edit effect sets the size wrong
-
-Move updatecombatanticon from battleframe to layertokens
-
-v2.5.11
-done * Add choice of Layer to add monsters to monster selection dialog
-done * Select priority only returns visible alternative layers (allows an explicitly selected layer if invisible)
-done * Making a layer invisible could deselect it
-done * Mouse over layers button shows name of currently active layer
-done? * Use screenshot until video shows up
-done * Use name of file for layer name in image/video
-done * Renaming a layer moves it in the order
-
-
-Video requirements
-Audio by Michael Ghelfi Studios
-https://michaelghelfistudios.com/
-Sound effects from https://quicksounds.com
-If they are just being shown in videos you can absolutely use them. Just make sure you are including a credit for me, with a link to my website or Patreon, and a credit for Splattered Ink Games for the token artwork and a link to their website - splatteredink.com
-
-
-* Saving a combat with FOW reference doesn't refer to the fow but the map
-* Layers list in the wrong order
-* Tie layers together
-* One button for layer visibility
-* Layer titles from references
-* Layer icon for references
-* Multiple FOW zoom not working - doesn't like reference FOWs
-FOW edit doesn't scale with zoom
-Save As should add the current file name to the dialog
-* Markers add unknown elements to maps
-
-
-feature * Scale the initiative list freely
-feature * Change layer with multiple selections
-feature * Double-click in change layer dialog to pick dialog
-fixed * Black screen rendering map/battle
-fixed * Ctrl and mouse move should not move map, but enable multiple selections
-fixed * resizing grid needs to resize tokens
-fixed * editing DM-invisible layer makes it visible
-fixed * changing layer with no selection doesn't do anything (should take the target item)
-done * Players side of blank layer
-done * create blank map
-done * create combat on map/video
-done * edit dialog: create new blank layer
-fixed * Select on the map doesn't select on the widget list
-fixed * find map fitting to battle doesn't work
-fixed * Dead don't disappear when HP set to zero
-fixed * Resize to visible
-fixed * Editing FoW has an offset based on negative position of scene rect
-fixed * Editing area on battle doesn't work
-fixed * edit dialog: create new text layer
-fixed * invisible player video should not start the video playback
-fixed * old scrolling text doesn't scroll
-fixed * old videos are not recognized, leads to broken mapframe
-fixed * party icon not visible
-fixed * markers (neverwinter region) seem to not work
-Not reproducible * resize camera view
-Not reproducible * Fog of war from old to new
-
 Next version
+* Movement ring size isn't scaled right vs token scale
+* Double-click on a combatant widget centers the map on the combatant
+* Double-click on an effect token opens the edit for that token
+
+* name layers based on filename, not full path
+* party alt icon should be a relative path if possible
+* something wonky in the DM side of the scrolling text show
+
 * upgrade to latest Qt, activate Copilot for Qt
+    * check volume usage across audio classes
+
+Video references:
+<a href="https://www.vecteezy.com/video/1803905-water-ring-splashes-in-a-circle-flow">Water ring splashes in a circle flow Stock Videos by Vecteezy</a>
+<a href="https://www.vecteezy.com/video/14196883-smoke-animation-loop-seamless-design-on-black-background-overlay-on-background-3d-illustratio">Smoke Animation Loop seamless design on black background. Overlay on background.3D Illustratio Stock Videos by Vecteezy</a>
+<a href="https://www.vecteezy.com/video/23951445-shockwave-smoke-splash-super-hero-landing-vfx-power-hit-shock-wave-large-smoke">Shockwave Smoke Splash super hero landing vfx power hit Shock wave Large smoke Stock Videos by Vecteezy</a>
+
+
 * Undo-redo on drawing fow
 * Make grid button a flat pushbutton that opens its own popup menu
 * Fix map markers scaling of icons to fit the rest
@@ -91,7 +37,77 @@ newLabel->setPixmap(activePixmap);
 newLabel->raise();
 newLabel->show();
 
+* delete key to remove a combatant or effect
+Remove _model->getGridScale()
+Move updatecombatanticon from battleframe to layertokens
 
+Bug: when creating a battle and setting stuff up i can then adjust the grid count across by clicking the "..." button next to the size
+but once i entered the count in there the grid size does not adjust it's value
+so if i've been off with counting or want to adjust it just a bit so it fits better - i'm back to 100 or whatever the default is
+
+
+Video requirements
+Audio by Michael Ghelfi Studios
+https://michaelghelfistudios.com/
+Sound effects from https://quicksounds.com
+If they are just being shown in videos you can absolutely use them. Just make sure you are including a credit for me, with a link to my website or Patreon, and a credit for Splattered Ink Games for the token artwork and a link to their website - splatteredink.com
+
+v3.0
+feature * Scale the initiative list freely
+feature * Change layer with multiple selections
+feature * Double-click in change layer dialog to pick dialog
+fixed * Black screen rendering map/battle
+fixed * Ctrl and mouse move should not move map, but enable multiple selections
+fixed * resizing grid needs to resize tokens
+fixed * editing DM-invisible layer makes it visible
+fixed * changing layer with no selection doesn't do anything (should take the target item)
+fixed * edit FOW icon in combat is the wrong size
+fixed * can't add an image to a new monster in the bestiary
+fixed * maybe selection icons aren't always rightly sized?
+fixed * select many and delete doesn't delete them all
+fixed * select many and link doesn't link them all
+fixed * select many and heal/damage doesn't heal/damage them all
+fixed * select many and change token doesn't change them all
+fixed * change token doesn't change how it looks on the DM View - need to recreate the icon
+fixed * shift magic effects to other layer doesnt work
+fixed * edit effect sets the size wrong
+done * Players side of blank layer
+done * create blank map
+done * create combat on map/video
+done * edit dialog: create new blank layer
+fixed * Select on the map doesn't select on the widget list
+fixed * find map fitting to battle doesn't work
+fixed * Dead don't disappear when HP set to zero
+fixed * Resize to visible
+fixed * Editing FoW has an offset based on negative position of scene rect
+fixed * Editing area on battle doesn't work
+fixed * edit dialog: create new text layer
+fixed * invisible player video should not start the video playback
+fixed * old scrolling text doesn't scroll
+fixed * old videos are not recognized, leads to broken mapframe
+fixed * party icon not visible
+fixed * markers (neverwinter region) seem to not work
+Not reproducible * resize camera view
+Not reproducible * Fog of war from old to new
+fixed * Saving a combat with FOW reference doesn't refer to the fow but the map
+fixed * Layers list in the wrong order
+done * Tie layers together
+done * One button for layer visibility
+done * Layer titles from references
+done * Layer icon for references
+fixed * Multiple FOW zoom not working - doesn't like reference FOWs
+fixed * FOW edit doesn't scale with zoom
+done * Save As should add the current file name to the dialog
+fixed * Markers add unknown elements to maps
+
+v2.5.11
+done * Add choice of Layer to add monsters to monster selection dialog
+done * Select priority only returns visible alternative layers (allows an explicitly selected layer if invisible)
+done * Making a layer invisible could deselect it
+done * Mouse over layers button shows name of currently active layer
+done? * Use screenshot until video shows up
+done * Use name of file for layer name in image/video
+done * Renaming a layer moves it in the order
 
 v2.5.7
 fixed * Crashes when adding an FOW layer

@@ -104,13 +104,13 @@ void CombatantWidget::setHover(bool hover)
     }
 }
 
-void CombatantWidget::showEvent(QShowEvent *event)
+void CombatantWidget::showEvent(QShowEvent* event)
 {
     setStyleSheet(getStyleString());
     QFrame::showEvent(event);
 }
 
-void CombatantWidget::enterEvent(QEvent * event)
+void CombatantWidget::enterEvent(QEnterEvent* event)
 {
     Q_UNUSED(event);
 
@@ -118,7 +118,7 @@ void CombatantWidget::enterEvent(QEvent * event)
     setStyleSheet(getStyleString());
 }
 
-void CombatantWidget::leaveEvent(QEvent * event)
+void CombatantWidget::leaveEvent(QEvent* event)
 {
     Q_UNUSED(event);
 
@@ -128,7 +128,7 @@ void CombatantWidget::leaveEvent(QEvent * event)
     setStyleSheet(getStyleString());
 }
 
-void CombatantWidget::mousePressEvent(QMouseEvent * event)
+void CombatantWidget::mousePressEvent(QMouseEvent* event)
 {
     Q_UNUSED(event);
 
@@ -137,7 +137,7 @@ void CombatantWidget::mousePressEvent(QMouseEvent * event)
     _mouseDown = event->button();
 }
 
-void CombatantWidget::mouseReleaseEvent(QMouseEvent * event)
+void CombatantWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     if(_mouseDown == event->button())
     {

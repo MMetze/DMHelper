@@ -172,6 +172,7 @@ namespace DMHelper
         LayerType_Tokens,
         LayerType_Reference,
         LayerType_Video,
+        LayerType_VideoEffect,
         LayerType_Blank
     };
 
@@ -181,6 +182,15 @@ namespace DMHelper
         FileType_Text,
         FileType_HTML,
         FileType_Markdown
+    };
+
+    enum TransparentType
+    {
+        TransparentType_None = 0,
+        TransparentType_RedChannel,
+        TransparentType_GreenChannel,
+        TransparentType_BlueChannel,
+        TransparentType_TransparentColor
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;

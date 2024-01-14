@@ -37,7 +37,7 @@ void AudioTrackSyrinscape::setMute(bool mute)
     Q_UNUSED(mute);
 }
 
-void AudioTrackSyrinscape::setVolume(int volume)
+void AudioTrackSyrinscape::setVolume(float volume)
 {
     Q_UNUSED(volume);
 }

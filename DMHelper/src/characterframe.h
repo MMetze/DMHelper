@@ -9,6 +9,7 @@ class CharacterFrame;
 }
 
 class SpellSlotRadioButton;
+class OptionsContainer;
 class QCheckBox;
 class QGridLayout;
 class QHBoxLayout;
@@ -19,7 +20,7 @@ class CharacterFrame : public CampaignObjectFrame
     Q_OBJECT
 
 public:
-    explicit CharacterFrame(QWidget *parent = nullptr);
+    explicit CharacterFrame(OptionsContainer* options, QWidget *parent = nullptr);
     ~CharacterFrame();
 
     virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
@@ -51,6 +52,7 @@ private slots:
     void writeCharacterData();
     void updateCharacterName();
     void handlePublishClicked();
+    void editCharacterIcon();
     void syncDndBeyond();
     void importHeroForge();
     void openExpertiseDialog();
@@ -77,6 +79,7 @@ private:
     void clearLayout(QLayout* layout);
 
     Ui::CharacterFrame *ui;
+    OptionsContainer* _options;
     Character* _character;
     bool _mouseDown;
     bool _reading;

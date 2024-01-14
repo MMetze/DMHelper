@@ -57,7 +57,7 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     // Set up the brush mode button group
     ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
     ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
-    connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), this, SIGNAL(brushModeChanged(int)));
+    connect(ui->btnGrpBrush, SIGNAL(idClicked(int)), this, SIGNAL(brushModeChanged(int)));
 
     // Set up the extra slot to configure the erase button
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SLOT(setEraseMode()));

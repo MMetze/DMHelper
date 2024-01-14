@@ -1,13 +1,10 @@
 #include "publishglbattlerenderer.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelcharacter.h"
-#include "battledialogmodeleffect.h"
-#include "publishglbattlebackground.h"
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
 #include "publishglimage.h"
 #include "battledialogmodelcombatant.h"
-#include "map.h"
 #include "layer.h"
 #include "layertokens.h"
 #include "character.h"
@@ -236,8 +233,6 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
     if(_model)
         _model->getLayerScene().playerGLResize(w, h);
 
-    // TODO: Layers
-    //resizeBackground(w, h);
     _updateInitiative = true;
 
     updateProjectionMatrix();
@@ -250,20 +245,6 @@ void PublishGLBattleRenderer::paintGL()
     if((!_initialized) || (!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    // TODO: Layers
-    /*
-    if(!isBackgroundReady())
-    {
-        updateBackground();
-        if(!isBackgroundReady())
-            return;
-
-        updateProjectionMatrix();
-
-        _recreateContent = true;
-    }
-    */
-
     if(_model->getLayerScene().playerGLUpdate())
         updateProjectionMatrix();
 
@@ -271,7 +252,6 @@ void PublishGLBattleRenderer::paintGL()
     {
         cleanupContents();
         createContents();
-        //updateProjectionMatrix();
     }
     else
     {
@@ -312,69 +292,6 @@ void PublishGLBattleRenderer::paintGL()
 
     _model->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
-
-    /*
-    paintBackground(f);
-
-    if(_gridObject)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _gridObject->getMatrixData());
-        _gridObject->paintGL();
-    }
-
-    if(_model->getShowEffects())
-    {
-        f->glUseProgram(_shaderProgramRGBA);
-        f->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, _projectionMatrix.constData());
-        f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-        for(PublishGLBattleEffect* effectToken : _effectTokens)
-        {
-            if((effectToken) && (effectToken->getEffect()) && (effectToken->getEffect()->getEffectVisible()))
-            {
-                f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
-                f->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
-                effectToken->paintGL();
-            }
-        }
-        f->glUseProgram(_shaderProgramRGB);
-    }
-
-    QList<PublishGLBattleToken*> tokens = _combatantTokens.values();
-    for(PublishGLBattleToken* enemyToken : tokens)
-    {
-        if((enemyToken) && (!enemyToken->isPC()) &&
-           (enemyToken->getCombatant()) && (enemyToken->getCombatant()->getKnown()) && (enemyToken->getCombatant()->getShown()) &&
-           ((_model->getShowDead()) || (enemyToken->getCombatant()->getHitPoints() > 0)) &&
-           ((_model->getShowAlive()) || (enemyToken->getCombatant()->getHitPoints() <= 0)))
-        {
-            f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, enemyToken->getMatrixData());
-            enemyToken->paintGL();
-            enemyToken->paintEffects(_shaderModelMatrixRGB);
-        }
-    }
-
-    paintTokens(f, false);
-
-    if(_fowObject)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fowObject->getMatrixData());
-        _fowObject->paintGL();
-    }
-
-    for(PublishGLBattleToken* pcToken : tokens)
-    {
-        if((pcToken) && (pcToken->isPC()) &&
-           (pcToken->getCombatant()) && (pcToken->getCombatant()->getKnown()) && (pcToken->getCombatant()->getShown()))
-        {
-            f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, pcToken->getMatrixData());
-            pcToken->paintGL();
-            pcToken->paintEffects(_shaderModelMatrixRGB);
-        }
-    }
-
-    paintTokens(f, true);
-    */
-
     if(_lineImage)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineImage->getMatrixData());
@@ -400,9 +317,6 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
 {
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
-
-    //if(!isBackgroundReady())
-    //    return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     if(!f)
@@ -465,7 +379,6 @@ void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
     _initiativeType = initiativeType;
     _updateInitiative = true;
     emit updateWidget();
-//    recreateContents(); // Todo: can we change this to updateInitiative?
 }
 
 void PublishGLBattleRenderer::setInitiativeScale(qreal initiativeScale)
@@ -506,7 +419,6 @@ void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCom
     {
         _movementVisible = false;
         _movementCombatant = nullptr;
-        //_movementPC = false;
     }
     else
     {
@@ -590,31 +502,6 @@ void PublishGLBattleRenderer::setCountdownValues(qreal countdown, const QColor& 
     _countdownColor = countdownColor;
     emit updateWidget();
 }
-
-/*
-void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool drawPCs)
-{
-    if((_activePC == drawPCs) && (_activeCombatant) && (_activeToken) &&
-       ((_activePC) || ((_activeCombatant->getKnown()) &&
-                        (_activeCombatant->getShown()) &&
-                        ((_model->getShowDead()) || (_activeCombatant->getHitPoints() > 0)) &&
-                        ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
-    {
-        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _activeToken->getMatrixData());
-        _activeToken->paintGL();
-    }
-
-    if((_movementPC == drawPCs) && (_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
-       ((_movementPC) || ((_movementCombatant->getKnown()) &&
-                          (_movementCombatant->getShown()) &&
-                          ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
-                          ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
-    {
-        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
-        _movementToken->paintGL();
-    }
-}
-*/
 
 void PublishGLBattleRenderer::updateBackground()
 {
@@ -718,8 +605,6 @@ void PublishGLBattleRenderer::createContents()
             BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
             if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
                 combatantToken->setPC(true);
-//            if(combatant->getSelected())
-//                combatantToken->addHighlight(*_selectionToken);
             _combatantTokens.insert(combatant, combatantToken);
 
             if(_initiativeType == DMHelper::InitiativeType_ImageName)
@@ -735,9 +620,6 @@ void PublishGLBattleRenderer::createContents()
                 PublishGLImage* combatantName = new PublishGLImage(nameImage, false);
                 _combatantNames.insert(combatant, combatantName);
             }
-
-//            connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
-//            connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
         }
     }
 
@@ -754,19 +636,6 @@ void PublishGLBattleRenderer::createContents()
         movementPainter.drawEllipse(0, 0, 512, 512);
     movementPainter.end();
     _movementToken = new PublishGLImage(movementImage);
-
-    /*
-    for(int i = 0; i < _model->getEffectCount(); ++i)
-    {
-        BattleDialogModelEffect* effect = _model->getEffect(i);
-        if(effect)
-        {
-            PublishGLBattleEffect* effectToken = new PublishGLBattleEffect(&_scene, effect);
-            _effectTokens.append(effectToken);
-            connect(effectToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
-        }
-    }
-    */
 
     // Check if we need a pointer
     evaluatePointer();
@@ -797,7 +666,6 @@ void PublishGLBattleRenderer::cleanupContents()
     _initiativeTokenHeight = 0.0;
     _movementVisible = false;
     _movementCombatant = nullptr;
-    //_movementPC = false;
 
     activeCombatantChanged(nullptr);
 }
@@ -924,7 +792,6 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                        functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBColor, 1, GL_FALSE, screenCoords.constData());
                        functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
                        functions->glUniform4f(_shaderRGBColor, _countdownColor.redF(), _countdownColor.greenF(), _countdownColor.blueF(), 1.0);
-                       //_countdownFill->setPositionScaleY(tokenY - (_initiativeTokenHeight / 2.0) + (_countdownScale * _initiativeTokenHeight), _countdownScale);
                        _countdownFill->setPositionScaleY(tokenY - (_initiativeTokenHeight / 2.0), _countdownScale);
                        functions->glUniformMatrix4fv(_shaderModelMatrixRGBColor, 1, GL_FALSE, _countdownFill->getMatrixData());
                        _countdownFill->paintGL();
@@ -1011,9 +878,6 @@ void PublishGLBattleRenderer::createShaders()
         "    FragColor = texture(texture1, TexCoord);\n"
         "}\0";
 
-    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
-    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
-
     unsigned int fragmentShaderRGB;
     fragmentShaderRGB = f->glCreateShader(GL_FRAGMENT_SHADER);
     f->glShaderSource(fragmentShaderRGB, 1, &fragmentShaderSourceRGB, NULL);
@@ -1087,10 +951,6 @@ void PublishGLBattleRenderer::createShaders()
         "{\n"
         "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
         "}\0";
-
-    //   "    FragColor = texture(texture1, TexCoord) * ourColor; // FragColor = vec4(ourColor, 1.0f);\n"
-    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
-    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShaderRGBA;
     fragmentShaderRGBA = f->glCreateShader(GL_FRAGMENT_SHADER);
@@ -1374,7 +1234,6 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
 
     if(combatant == _activeCombatant)
     {
-//        if((_activePC) && (_activeCombatant) && (_activeToken) &&
         if((_activeCombatant) && (_activeToken) &&
            ((combatantToken->isPC()) || ((_activeCombatant->getKnown()) &&
                                          (_activeCombatant->getShown()) &&
@@ -1385,22 +1244,4 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
             _activeToken->paintGL();
         }
     }
-
-    /*
-    if(combatant->getSelected())
-    {
-        if((_selectionToken) &&
-           ((combatantToken->isPC()) || ((combatant->getKnown()) &&
-                                         (combatant->getShown()) &&
-                                         ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
-                                         ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))))
-        {
-            QSize textureSize = _selectionToken->getImageSize();
-            qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * combatant->getSizeFactor() / qMax(textureSize.width(), textureSize.height());
-            _selectionToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), scaleFactor);
-            functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _selectionToken->getMatrixData());
-            _selectionToken->paintGL();
-        }
-    }
-    */
 }

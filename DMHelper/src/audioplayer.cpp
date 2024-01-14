@@ -1,6 +1,7 @@
 #include "audioplayer.h"
 #include "audiotrack.h"
-#include "dmconstants.h"
+#include <QAudioOutput>
+#include <QMediaDevices>
 #include <QDebug>
 
 //track changed, volume, position, duration signals, show them in the control frame
@@ -8,25 +9,28 @@
 AudioPlayer::AudioPlayer(QObject *parent) :
     QObject(parent),
     _player(nullptr),
-    _playlist(nullptr),
     _currentTrack(nullptr)
 {
     _player = new QMediaPlayer(this);
+    _player->setLoops(QMediaPlayer::Infinite);
 
-    _playlist = new QMediaPlaylist(this);
-    _playlist->setPlaybackMode(QMediaPlaylist::Loop);
+    QAudioOutput audioOutput;
+    _player->setAudioOutput(&audioOutput);
 
-    connect(_player, SIGNAL(positionChanged(qint64)), this, SLOT(handlePositionChanged(qint64)));
-    connect(_player, SIGNAL(durationChanged(qint64)), this, SLOT(handleDurationChanged(qint64)));
-    connect(_player, SIGNAL(volumeChanged(int)), this, SLOT(handleVolumeChanged(int)));
-    connect(_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(playerStatusChanged(QMediaPlayer::MediaStatus)));
-    connect(_player, SIGNAL(currentMediaChanged(const QMediaContent &)), this, SLOT(handleCurrentMediaChanged(const QMediaContent &)));
-    connect(_player, SIGNAL(stateChanged(QMediaPlayer::State)), this, SLOT(handleStateChanged(QMediaPlayer::State)));
+    connect(_player, &QMediaPlayer::positionChanged, this, &AudioPlayer::handlePositionChanged);
+    connect(_player, &QMediaPlayer::durationChanged, this, &AudioPlayer::handleDurationChanged);
+    connect(&audioOutput, &QAudioOutput::volumeChanged, this, &AudioPlayer::handleVolumeChanged);
+    connect(_player, &QMediaPlayer::mediaStatusChanged, this, &AudioPlayer::playerStatusChanged);
+    connect(_player, &QMediaPlayer::sourceChanged, this, &AudioPlayer::handleSourceChanged);
+    connect(_player, &QMediaPlayer::playbackStateChanged, this, &AudioPlayer::handleStateChanged);
 }
 
-int AudioPlayer::getVolume()
+float AudioPlayer::getVolume()
 {
-    return _player ? _player->volume() : 0;
+    if((!_player) || (!_player->audioOutput()))
+        return 0;
+
+    return _player->audioOutput()->volume();
 }
 
 qint64 AudioPlayer::getPosition()
@@ -51,7 +55,7 @@ int AudioPlayer::MS2MIN(qint64 ms)
 
 void AudioPlayer::playTrack(AudioTrack* track)
 {
-    if((!_player) || (!_playlist))
+    if(!_player)
         return;
 
     if(track)
@@ -92,10 +96,13 @@ void AudioPlayer::stop()
         _currentTrack->stop();
 }
 
-void AudioPlayer::setVolume(int volume)
+void AudioPlayer::setVolume(float volume)
 {
-    if(volume != _player->volume())
-        _player->setVolume(volume);
+    if((!_player) || (!_player->audioOutput()))
+        return;
+
+    if(volume != _player->audioOutput()->volume())
+        _player->audioOutput()->setVolume(volume);
 }
 
 void AudioPlayer::setPosition(qint64 position)
@@ -106,9 +113,7 @@ void AudioPlayer::setPosition(qint64 position)
 
 void AudioPlayer::playerPlayUrl(QUrl url)
 {
-    _playlist->clear();
-    _playlist->addMedia(url);
-    _player->setPlaylist(_playlist);
+    _player->setSource(url);
     _player->play();
 }
 
@@ -124,7 +129,6 @@ void AudioPlayer::playerStatusChanged(QMediaPlayer::MediaStatus status)
 
     switch(status)
     {
-        case QMediaPlayer::UnknownMediaStatus:
         case QMediaPlayer::NoMedia:
             emit trackChanged(nullptr);
             break;
@@ -139,9 +143,9 @@ void AudioPlayer::playerStatusChanged(QMediaPlayer::MediaStatus status)
     }
 }
 
-void AudioPlayer::handleCurrentMediaChanged(const QMediaContent &media)
+void AudioPlayer::handleSourceChanged(const QUrl &media)
 {
-    if(!media.isNull())
+    if(media.isValid())
         emit trackChanged(_currentTrack);
 }
 
@@ -155,12 +159,12 @@ void AudioPlayer::handleDurationChanged(qint64 duration)
     emit durationChanged(duration);
 }
 
-void AudioPlayer::handleVolumeChanged(int volume)
+void AudioPlayer::handleVolumeChanged(float volume)
 {
     emit volumeChanged(volume);
 }
 
-void AudioPlayer::handleStateChanged(QMediaPlayer::State playerState)
+void AudioPlayer::handleStateChanged(QMediaPlayer::PlaybackState playerState)
 {
     AudioPlayer::State state;
 

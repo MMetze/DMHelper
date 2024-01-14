@@ -1,38 +1,32 @@
 #include "battleframe.h"
 #include "ui_battleframe.h"
-#include "monster.h"
 #include "widgetmonster.h"
 #include "widgetmonsterinternal.h"
 #include "widgetcharacter.h"
 #include "widgetcharacterinternal.h"
 #include "monsterclass.h"
 #include "dmconstants.h"
-#include "bestiary.h"
 #include "spellbook.h"
 #include "spell.h"
 #include "encounterbattle.h"
 #include "battledialoglogger.h"
 #include "battledialoglogview.h"
-#include "unselectedpixmap.h"
 #include "map.h"
 #include "campaign.h"
 #include "character.h"
 #include "mapselectdialog.h"
 #include "combatantdialog.h"
-#include "selectzoom.h"
+#include "unselectedpixmap.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterbase.h"
 #include "battledialogmodelmonsterclass.h"
-#include "battledialogmodeleffectfactory.h"
 #include "battledialogmodeleffectobject.h"
+#include "battledialogmodeleffectfactory.h"
 #include "battledialogeffectsettings.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
-#include "dicerolldialogcombatants.h"
 #include "itemselectdialog.h"
-#include "videoplayer.h"
-#include "videoplayerglscreenshot.h"
 #include "camerarect.h"
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
@@ -43,6 +37,7 @@
 #include "layertokens.h"
 #include "layergrid.h"
 #include "layerfow.h"
+#include "layerimage.h"
 #include "layerreference.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
@@ -118,7 +113,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _publishEffectItem(nullptr),
     _scene(nullptr),
     _activePixmap(nullptr),
-//    _activeScale(1.0),
     _selectedScale(1.0),
     _movementPixmap(nullptr),
     _cameraRect(nullptr),
@@ -167,6 +161,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     ui->scrollArea->setAcceptDrops(true);
     ui->scrollArea->installEventFilter(this);
 
+    ui->graphicsView->setAcceptDrops(true);
     ui->graphicsView->installEventFilter(this);
 
     _countdownTimer = new QTimer(this);
@@ -194,6 +189,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
     connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectObjectFile, this, &BattleFrame::addEffectObjectFile);
+    connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
@@ -1035,7 +1032,7 @@ void BattleFrame::addMonsters()
 
     QPointF combatantPos = viewportCenter();
 
-    if(_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) <= 0)
+    if(!validateTokenLayerExists())
         return;
 
     qDebug() << "[Battle Frame] Adding monsters ...";
@@ -1094,6 +1091,9 @@ void BattleFrame::addCharacter()
     if((!_battle) || (!_model))
         return;
 
+    if(!validateTokenLayerExists())
+        return;
+
     Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
@@ -1122,6 +1122,9 @@ void BattleFrame::addCharacter()
 void BattleFrame::addNPC()
 {
     if((!_battle) || (!_model))
+        return;
+
+    if(!validateTokenLayerExists())
         return;
 
     Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
@@ -1155,12 +1158,37 @@ void BattleFrame::addEffectObject()
     if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
         return;
 
+    addEffectObjectFile(filename);
+}
+
+void BattleFrame::addEffectObjectFile(const QString& filename)
+{
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename));
+}
+
+void BattleFrame::addLayerImageFile(const QString& filename)
+{
+    if((filename.isEmpty()) || (!_model))
+        return;
+
+    if(!QImageReader(filename).canRead())
+    {
+        qDebug() << "[BattleFrame] addLayerImageFile: " << filename << " is not a valid image file.";
+        return;
+    }
+
+    _model->getLayerScene().appendLayer(new LayerImage(QString("Image: ") + filename, filename));
 }
 
 void BattleFrame::castSpell()
 {
     if(!_model)
+        return;
+
+    if(!validateTokenLayerExists())
         return;
 
     bool ok = false;
@@ -1250,21 +1278,33 @@ void BattleFrame::castSpell()
 
 void BattleFrame::addEffectRadius()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115, 18, 0, 64), QString()));
 }
 
 void BattleFrame::addEffectCone()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115, 18, 0, 64), QString()));
 }
 
 void BattleFrame::addEffectCube()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115, 18, 0, 64), QString()));
 }
 
 void BattleFrame::addEffectLine()
 {
+    if(!validateTokenLayerExists())
+        return;
+
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115, 18, 0, 64), QString()));
 }
 
@@ -1644,86 +1684,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
         }
         else
         {
-            if(event->type() == QEvent::DragEnter)
-            {
-                QDragEnterEvent* dragEnterEvent = dynamic_cast<QDragEnterEvent*>(event);
-                if(dragEnterEvent)
-                {
-                    const QMimeData* mimeData = dragEnterEvent->mimeData();
-                    if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
-                    {
-                        qDebug() << "[Battle Frame] combatant widget drag enter accepted";
-                        dragEnterEvent->accept();
-                        return true;
-                    }
-                    else
-                    {
-                        qDebug() << "[Battle Frame] unknown drag enter ignored";
-                        dragEnterEvent->ignore();
-                    }
-                }
-            }
-            else if(event->type() == QEvent::DragMove)
-            {
-                QDragMoveEvent* dragMoveEvent = dynamic_cast<QDragMoveEvent*>(event);
-                if(dragMoveEvent)
-                {
-                    const QMimeData* mimeData = dragMoveEvent->mimeData();
-                    if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
-                    {
-                        QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
-                        QDataStream stream(&encodedData, QIODevice::ReadOnly);
-                        int index;
-                        stream >> index;
-
-                        QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
-                        int currentIndex = _combatantLayout->indexOf(draggedWidget);
-
-                        QWidget* targetWidget = findCombatantWidgetFromPosition(dragMoveEvent->pos());
-
-                        if((draggedWidget)&&(targetWidget)&&(draggedWidget != targetWidget))
-                        {
-                            int targetIndex = _combatantLayout->indexOf(targetWidget);
-                            QLayoutItem* item = _combatantLayout->takeAt(currentIndex);
-                            _combatantLayout->insertItem(targetIndex, item);
-                        }
-                    }
-                }
-            }
-            else if(event->type() == QEvent::DragLeave)
-            {
-                qDebug() << "[Battle Frame] combatant drag left";
-                reorderCombatantWidgets();
-            }
-            else if(event->type() == QEvent::Drop)
-            {
-                QDropEvent* dropEvent = dynamic_cast<QDropEvent*>(event);
-                if(dropEvent)
-                {
-                    qDebug() << "[Battle Frame] combatant widget drag dropped (" << dropEvent->pos().x() << ", " << dropEvent->pos().y() << ")";
-
-                    const QMimeData* mimeData = dropEvent->mimeData();
-                    if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
-                    {
-                        QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
-                        QDataStream stream(&encodedData, QIODevice::ReadOnly);
-                        int index;
-                        stream >> index;
-
-                        QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
-                        int currentIndex = _combatantLayout->indexOf(draggedWidget);
-
-                        if(currentIndex != index)
-                        {
-                            BattleDialogModelCombatant* combatant = _model->getCombatant(index);
-                            _model->moveCombatant(index, currentIndex);
-                            qDebug() << "[Battle Frame] combatant widget drag dropped: index " << index << ": " << combatant->getName() << " (" << reinterpret_cast<quint64>(draggedWidget) << "), from pos " << index << " to pos " << currentIndex;
-                        }
-                    }
-                }
-                reorderCombatantWidgets();
-            }
-            else if(event->type() == QEvent::MouseButtonPress)
+            if(event->type() == QEvent::MouseButtonPress)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 _mouseDownPos = mouseEvent->pos();
@@ -1733,6 +1694,88 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             {
                 setSelectedCombatant(nullptr);
                 _mouseDown = false;
+            }
+            else if(obj == ui->scrollArea)
+            {
+                if(event->type() == QEvent::DragEnter)
+                {
+                    QDragEnterEvent* dragEnterEvent = dynamic_cast<QDragEnterEvent*>(event);
+                    if(dragEnterEvent)
+                    {
+                        const QMimeData* mimeData = dragEnterEvent->mimeData();
+                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        {
+                            qDebug() << "[Battle Frame] combatant widget drag enter accepted";
+                            dragEnterEvent->accept();
+                            return true;
+                        }
+                        else
+                        {
+                            qDebug() << "[Battle Frame] unknown drag enter ignored";
+                            dragEnterEvent->ignore();
+                        }
+                    }
+                }
+                else if(event->type() == QEvent::DragMove)
+                {
+                    QDragMoveEvent* dragMoveEvent = dynamic_cast<QDragMoveEvent*>(event);
+                    if(dragMoveEvent)
+                    {
+                        const QMimeData* mimeData = dragMoveEvent->mimeData();
+                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        {
+                            QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
+                            QDataStream stream(&encodedData, QIODevice::ReadOnly);
+                            int index;
+                            stream >> index;
+
+                            QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
+                            int currentIndex = _combatantLayout->indexOf(draggedWidget);
+
+                            QWidget* targetWidget = findCombatantWidgetFromPosition(dragMoveEvent->position().toPoint());
+
+                            if((draggedWidget)&&(targetWidget)&&(draggedWidget != targetWidget))
+                            {
+                                int targetIndex = _combatantLayout->indexOf(targetWidget);
+                                QLayoutItem* item = _combatantLayout->takeAt(currentIndex);
+                                _combatantLayout->insertItem(targetIndex, item);
+                            }
+                        }
+                    }
+                }
+                else if(event->type() == QEvent::DragLeave)
+                {
+                    qDebug() << "[Battle Frame] combatant drag left";
+                    reorderCombatantWidgets();
+                }
+                else if(event->type() == QEvent::Drop)
+                {
+                    QDropEvent* dropEvent = dynamic_cast<QDropEvent*>(event);
+                    if(dropEvent)
+                    {
+                        qDebug() << "[Battle Frame] combatant widget drag dropped (" << dropEvent->position().x() << ", " << dropEvent->position().y() << ")";
+
+                        const QMimeData* mimeData = dropEvent->mimeData();
+                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        {
+                            QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
+                            QDataStream stream(&encodedData, QIODevice::ReadOnly);
+                            int index;
+                            stream >> index;
+
+                            QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
+                            int currentIndex = _combatantLayout->indexOf(draggedWidget);
+
+                            if(currentIndex != index)
+                            {
+                                BattleDialogModelCombatant* combatant = _model->getCombatant(index);
+                                _model->moveCombatant(index, currentIndex);
+                                qDebug() << "[Battle Frame] combatant widget drag dropped: index " << index << ": " << combatant->getName() << " (" << reinterpret_cast<quint64>(draggedWidget) << "), from pos " << index << " to pos " << currentIndex;
+                            }
+                        }
+                    }
+                    reorderCombatantWidgets();
+                }
             }
         }
     }
@@ -2024,6 +2067,7 @@ void BattleFrame::editLayers()
 
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 {
+    Q_UNUSED(effectItem);
     /*
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Frame] Handle effect changed for " << effectItem;
@@ -2078,6 +2122,7 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
 
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
+    Q_UNUSED(object);
     return;
     /*
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
@@ -2266,6 +2311,7 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    Q_UNUSED(effect);
     return;
     /*
     if(!effect)
@@ -2568,7 +2614,10 @@ void BattleFrame::handleLayerSelected(Layer* layer)
 
     LayerGrid* newGrid = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(layer, DMHelper::LayerType_Grid));
     if(newGrid)
+    {
+        _scene->setDistanceScale(newGrid->getConfig().getGridScale());
         emit gridConfigChanged(newGrid->getConfig());
+    }
 }
 
 void BattleFrame::itemLink()
@@ -3158,6 +3207,7 @@ void BattleFrame::setEditMode()
 
 void BattleFrame::updateFowImage(const QPixmap& fow)
 {
+    Q_UNUSED(fow);
     // TODO: Layers
     // This probably can disappear? Make sure connections between drawer and scene are done
     //if(_fow)
@@ -3504,6 +3554,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
 {
+    Q_UNUSED(combatant);
 
     /*
     if(!_model)
@@ -3763,6 +3814,24 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
     }
 
     _model->removeCombatant(combatant);
+}
+
+bool BattleFrame::validateTokenLayerExists()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to validate the token layer, no battle model is set!";
+        return false;
+    }
+
+    if(_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 0)
+        return true;
+
+    if(QMessageBox::question(this, tr("No Token Layer"), tr("No token layer has been created for this battle. Would you like to create a token layer to be able to add tokens?")) == QMessageBox::Yes)
+        return false;
+
+    _model->getLayerScene().prependLayer(new LayerTokens(nullptr, tr("Token Layer")));
+    return true;
 }
 
 void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer)

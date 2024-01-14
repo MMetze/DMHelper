@@ -1,14 +1,15 @@
 #ifndef BESTIARYFINDTOKENDIALOG_H
 #define BESTIARYFINDTOKENDIALOG_H
 
+#include "tokeneditor.h"
 #include <QDialog>
 
 namespace Ui {
 class BestiaryFindTokenDialog;
 }
 
-class QGridLayout;
 class TokenData;
+class QGridLayout;
 class QNetworkAccessManager;
 class QNetworkReply;
 
@@ -18,23 +19,13 @@ class BestiaryFindTokenDialog : public QDialog
 
 public:
 
-    enum TokenDetailMode
-    {
-        TokenDetailMode_Original = 0,
-        TokenDetailMode_TransparentColor,
-        TokenDetailMode_FrameAndMask
-    };
-
-    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, TokenDetailMode mode, const QColor& background, int backgroundLevel, const QString& frameFile, const QString& maskFile, QWidget *parent = nullptr);
+    explicit BestiaryFindTokenDialog(const QString& monsterName, const QString& searchString, const OptionsContainer& options, QWidget *parent = nullptr);
     ~BestiaryFindTokenDialog();
 
-    QList<QImage> retrieveSelection();
+    QList<QImage> retrieveSelection(bool decorated = true);
 
-    TokenDetailMode getTokenDetailMode() const;
-    QColor getTokenBackgroundColor() const;
-    int getTokenBackgroundLevel() const;
-    QString getTokenFrameFile() const;
-    QString getTokenMaskFile() const;
+    bool isEditingToken() const;
+    TokenEditor* getEditor();
 
 protected slots:
     void urlRequestFinished(QNetworkReply *reply);
@@ -43,14 +34,16 @@ protected slots:
     void browseMask();
 
 protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
+
     void startSearch(const QString& searchString);
     void abortSearches();
 
     void customizeSearch();
     void updateLayout();
     void updateLayoutImages();
-    void updateFrameMaskImages();
     void clearGrid();
+    void rescaleData();
     TokenData* getDataForReply(QNetworkReply *reply);
     QPixmap decoratePixmap(QPixmap pixmap, const QColor& background);
     QImage decorateFullImage(QPixmap pixmap, const QColor& background);
@@ -65,8 +58,7 @@ private:
     QNetworkAccessManager* _manager;
     QNetworkReply* _urlReply;
 
-    QImage _maskImage;
-    QImage _frameImage;
+    TokenEditor* _editor;
 
     QGridLayout* _tokenGrid;
     QList<TokenData*> _tokenList;
