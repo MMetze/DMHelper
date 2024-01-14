@@ -1,4 +1,4 @@
-name: DMHelper CI Windows Workflow
+name: DMHelper CI MacOS Workflow
 
 on:
   workflow_dispatch:
