@@ -56,7 +56,6 @@ jobs:
     - name: Build DMHelper for MacOS
       run: |
         cd DMHelper
-        mkdir build-clang_64bit-Release
         cd build-clang_64bit-Release
         $QT_BIN/qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
         make -j4
