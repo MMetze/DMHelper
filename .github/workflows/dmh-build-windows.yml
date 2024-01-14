@@ -128,10 +128,10 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.ZIPARTIFACT }}
-        path: ${{ runner.temp }}\${{ env.ZIPARTIFACT }}
+        path: ${{ github.workspace }}\${{ env.ZIPARTIFACT }}
 
     - name: Save the install file
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.INSTALLERARTIFACT }}
-        path: ${{ runner.temp }}\${{ env.INSTALLERARTIFACT }}
+        path: ${{ github.workspace }}\DMHelper\${{ env.INSTALLERARTIFACT }}
