@@ -355,6 +355,9 @@ void BattleDialogModel::removeCombatant(BattleDialogModelCombatant* combatant)
         if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
         {
             tokenLayer->removeCombatant(combatant);
+            if(_activeCombatant == combatant)
+                setActiveCombatant(nullptr);
+
             delete combatant;
             return;
         }

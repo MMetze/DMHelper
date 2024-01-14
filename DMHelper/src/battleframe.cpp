@@ -2993,8 +2993,11 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
 
 void BattleFrame::setMapCursor()
 {    
-    if((_mapDrawer) && (_model))
-        _mapDrawer->setScale(_model->getGridScale(), _scale);
+    if((!_mapDrawer) || (!_model))
+        return;
+
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getPriority(DMHelper::LayerType_Fow), DMHelper::LayerType_Grid));
+    _mapDrawer->setScale(gridLayer ? gridLayer->getConfig().getGridScale() : _model->getGridScale(), _scale);
 }
 
 void BattleFrame::setCameraSelectable(bool selectable)
@@ -3178,7 +3181,10 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(battleMouseRelease(const QPointF&)), _mapDrawer, SLOT(handleMouseUp(const QPointF&)));
 
         if((_mapDrawer) && (_model))
-            _mapDrawer->setScale(_model->getGridScale(), _scale);
+        {
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getPriority(DMHelper::LayerType_Fow), DMHelper::LayerType_Grid));
+            _mapDrawer->setScale(gridLayer ? gridLayer->getConfig().getGridScale() : _model->getGridScale(), _scale);
+        }
             /*
         {
             QRect viewSize = ui->graphicsView->mapFromScene(QRect(0, 0, _model->getGridScale(), _model->getGridScale())).boundingRect();
@@ -4212,9 +4218,15 @@ BattleDialogModelEffect* BattleFrame::createEffect(int type, int size, int width
             result = BattleDialogModelEffectFactory::createEffectCone(effectPosition, size, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Cube:
-            scaledHalfSize = static_cast<qreal>(size) * _model->getGridScale() / (5.0 * 2.0);
-            effectPosition -= QPointF(scaledHalfSize, scaledHalfSize);
-            result = BattleDialogModelEffectFactory::createEffectCube(effectPosition, size, color);
+            {
+                LayerTokens* targetLayer = dynamic_cast<LayerTokens*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Tokens));
+                if(targetLayer)
+                {
+                    scaledHalfSize = static_cast<qreal>(size) * targetLayer->getScale() / (5.0 * 2.0);
+                    effectPosition -= QPointF(scaledHalfSize, scaledHalfSize);
+                    result = BattleDialogModelEffectFactory::createEffectCube(effectPosition, size, color);
+                }
+            }
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Line:
             result = BattleDialogModelEffectFactory::createEffectLine(effectPosition, size, width, color);
@@ -4266,17 +4278,24 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
     if((!combatant) || (!item) || (!_model))
         return;
 
-    if((_movementPixmap) && (_model->getShowMovement()))
-    {
-        int speedSquares = 2 * (speed / 5) + 1;
-        _moveRadius = _model->getGridScale() * speedSquares;
-        _moveStart = item->scenePos();
-        _movementPixmap->setPos(_moveStart);
-        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
-        _movementPixmap->setVisible(true);
+    if((!_movementPixmap) || (!_model->getShowMovement()))
+        return;
 
-        emit movementChanged(true, combatant, _moveRadius);
-    }
+    LayerTokens* tokenLayer = combatant->getLayer();
+    if(!tokenLayer)
+        return;
+
+    int speedSquares = 2 * (speed / 5) + 1;
+    _moveRadius = tokenLayer->getScale() * speedSquares;
+    if(_moveRadius <= tokenLayer->getScale())
+        return;
+
+    _moveStart = item->scenePos();
+    _movementPixmap->setPos(_moveStart);
+    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+    _movementPixmap->setVisible(true);
+
+    emit movementChanged(true, combatant, _moveRadius);
 }
 
 void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item)
@@ -4284,33 +4303,37 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if((!combatant) || (!item) || (!_model))
         return;
 
+    LayerTokens* tokenLayer = combatant->getLayer();
+    if(!tokenLayer)
+        return;
+
     QPointF combatantPos = item->scenePos();
     QPointF diff = _moveStart - combatantPos;
     _moveStart = combatantPos;
     qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
 
-    if(_model->getGridScale() > 0)
-        combatant->incrementMoved(5.0 * delta / static_cast<qreal>(_model->getGridScale()));
+    if(tokenLayer->getScale() > 0)
+        combatant->incrementMoved(5.0 * delta / static_cast<qreal>(tokenLayer->getScale()));
 
     if(!_movementPixmap)
         return;
 
     if(_model->getShowMovement())
     {
-        if(_moveRadius > _model->getGridScale())
+        if(_moveRadius > tokenLayer->getScale())
             _moveRadius -= 2 * delta;
 
-        if(_moveRadius <= _model->getGridScale())
+        if(_moveRadius <= tokenLayer->getScale())
         {
-            _moveRadius = _model->getGridScale();
+            _moveRadius = tokenLayer->getScale();
             _movementPixmap->setRotation(0.0);
             _movementPixmap->setVisible(false);
         }
     }
 
-    if(_moveRadius <= _model->getGridScale())
+    if(_moveRadius <= tokenLayer->getScale())
     {
-        _moveRadius = _model->getGridScale();
+        _moveRadius = tokenLayer->getScale();
         _movementPixmap->setRotation(0.0);
         _movementPixmap->setVisible(false);
     }

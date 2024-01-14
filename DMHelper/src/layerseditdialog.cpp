@@ -112,7 +112,8 @@ void LayersEditDialog::addLayer()
         if(newFileName.isEmpty())
             return;
 
-        newLayer = new LayerImage(QString("Image: ") + newFileName, newFileName);
+        QFileInfo fileInfo(newFileName);
+        newLayer = new LayerImage(QString("Image: ") + fileInfo.fileName(), newFileName);
     }
     else if(selectedItem == tr("Video"))
     {
@@ -120,7 +121,8 @@ void LayersEditDialog::addLayer()
         if(newFileName.isEmpty())
             return;
 
-        newLayer = new LayerVideo(QString("Video: ") + newFileName, newFileName);
+        QFileInfo fileInfo(newFileName);
+        newLayer = new LayerVideo(QString("Video: ") + fileInfo.fileName(), newFileName);
     }
     else if(selectedItem == tr("Effect Video"))
     {
