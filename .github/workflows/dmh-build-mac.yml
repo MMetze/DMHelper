@@ -2,27 +2,122 @@ name: DMHelper CI MacOS Workflow
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches: [ "master" ]
-  #pull_request:
-  #  branches: [ "master" ]
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION: 6.6.0
+  QT_INSTALLER_VERSION: 4.6
+  INSTALLERARTIFACT: DM-Helper-macOS-release-Installer.app
+  ZIPARTIFACT: DMHelper-macOS-release.zip
 
 jobs:
-  build:
+  build-DMH-macos:
 
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     steps:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
+        aqtversion: '==3.1.*'
         version: '6.6.0'
-        host: 'windows'
+        host: 'mac'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
-        dir: '$RUNNER_WORKSPACE'
-        install-deps: 'true'
-        modules: 'qtcharts qtwebengine'
-    - uses: actions/checkout@v3
-    - name: build
-      run: cd ${GITHUB_WORKSPACE}/DMHelper/DMHelper/src && ./buildanddeploy_msvc64.cmd
+        arch: 'clang_64'
+        cache: 'true'
+        modules: 'qtmultimedia qtnetworkauth'
+        tools: 'tools_ifw'
+        add-tools-to-path: 'true'
+        archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
+        
+    - name: Check out the DMHelper source tree
+      uses: actions/checkout@v3
+    
+    - name: Print current working dir
+      run: |
+        echo Workspace is: ${{ github.workspace }}
+        ls DMHelper
+        cd DMHelper
+        pwd
+        echo 'runner.workspace === ${{ runner.workspace }}'
+        echo 'github.workspace === ${{ github.workspace }}'
+        ls ${{env.Qt6Dir}}
+        Get-ChildItem -Recurse -Directory
+        
+    - name: Set up environment for build
+      run: |
+        echo "Current environmental path: ${{env.PATH}}"
+        cd DMHelper
+        mkdir bin64
+        mkdir bin64\config
+        mkdir bin64\packages
+        mkdir bin64\packages\com.dmhelper.app
+        mkdir bin64\packages\com.dmhelper.app\meta
+        mkdir bin64\packages\com.dmhelper.app\data
+        mkdir bin64\packages\com.dmhelper.app\data\bestiary
+        mkdir bin64\packages\com.dmhelper.app\data\doc
+        mkdir bin64\packages\com.dmhelper.app\data\pkgconfig
+        mkdir bin64\packages\com.dmhelper.app\data\plugins
+        mkdir bin64\packages\com.dmhelper.app\data\resources
+        mkdir bin64\packages\com.dmhelper.app\data\resources\tables
+        xcopy /s src\installer\* bin64\*
+        Rename-Item -Path "bin64\packages\com.dmhelper.app\meta\installscript64.qs" -NewName "installscript.qs"
+        ls
+
+    - name: Build DMHelper for Windows
+      run: |
+        cd DMHelper
+        mkdir build-clang_64bit-Release
+        cd build-clang_64bit-Release
+        $QT_BIN/qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
+        make -j4
+
+    - name: Copy binary resources
+      run: |
+        cd DMHelper
+        cd build-clang_64bit-Release
+        cp -R DMHelper.app/ ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
+        cp ../src/bin-macos/Info.plist ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/
+        mkdir ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/pkgconfig
+        cp ../src/bin-macos/pkgconfig/* ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/pkgconfig
+        mkdir ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/plugins
+        cp -R ../src/bin-macos/vlc/plugins/* ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/plugins
+
+    - name: Call Deploy for Qt
+      run: |
+        cd DMHelper
+        cd ../bin64/packages/com.dmhelper.app/data
+        otool -L DMHelper.app/Contents/MacOS/DMHelper
+        cd build-64_bit-release
+        $QT_BIN/macdeployqt ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
+        cp -R ../src/bestiary/ ../src/resources/ ../src/doc/ ../src/bin-macos/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
+
+    - name: Create the installer
+      run: |
+        cd DMHelper
+        cd bin64
+        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-macOS-release-Installer"
+        mv "./DM-Helper-macOS-release-Installer.app" "../DMHelper-macOS-release-Installer.app"
+        
+    - name: Zip the build
+      run:  |
+        cd DMHelper
+        cd packages/com.dmhelper.app/data
+        zip -r "DMHelper-macOS-release.zip" *
+        mv "DMHelper-macOS-release.zip" ../../../../
+    
+    - name: Output the workspace directory tree contents
+      run: |
+        Get-ChildItem -Recurse
+
+    - name: Save the zip file
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.ZIPARTIFACT }}
+        path: ${{ github.workspace }}\DMHelper\${{ env.ZIPARTIFACT }}
+
+    - name: Save the install file
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.INSTALLERARTIFACT }}
+        path: ${{ github.workspace }}\DMHelper\${{ env.INSTALLERARTIFACT }}
