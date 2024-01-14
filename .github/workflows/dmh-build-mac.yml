@@ -43,29 +43,17 @@ jobs:
         echo 'github.workspace === ${{ github.workspace }}'
         ls ${{env.Qt6Dir}}
         ls -alR
-        ls -R
         
     - name: Set up environment for build
       run: |
         echo "Current environmental path: ${{env.PATH}}"
         cd DMHelper
-        mkdir bin64
-        mkdir bin64\config
-        mkdir bin64\packages
-        mkdir bin64\packages\com.dmhelper.app
-        mkdir bin64\packages\com.dmhelper.app\meta
-        mkdir bin64\packages\com.dmhelper.app\data
-        mkdir bin64\packages\com.dmhelper.app\data\bestiary
-        mkdir bin64\packages\com.dmhelper.app\data\doc
-        mkdir bin64\packages\com.dmhelper.app\data\pkgconfig
-        mkdir bin64\packages\com.dmhelper.app\data\plugins
-        mkdir bin64\packages\com.dmhelper.app\data\resources
-        mkdir bin64\packages\com.dmhelper.app\data\resources\tables
-        xcopy /s src\installer\* bin64\*
-        Rename-Item -Path "bin64\packages\com.dmhelper.app\meta\installscript64.qs" -NewName "installscript.qs"
-        ls
+        mkdir -p {build-clang_64bit-Release,bin64/config,bin64/packages/com.dmhelper.app/{meta,data}}
+        cp -R src/installer/ bin64/
+        mv bin64/packages/com.dmhelper.app/meta/installscript64.qs bin64/packages/com.dmhelper.app/meta/installscript.qs
+        ls -alR
 
-    - name: Build DMHelper for Windows
+    - name: Build DMHelper for MacOS
       run: |
         cd DMHelper
         mkdir build-clang_64bit-Release
@@ -89,7 +77,7 @@ jobs:
         cd DMHelper
         cd ../bin64/packages/com.dmhelper.app/data
         otool -L DMHelper.app/Contents/MacOS/DMHelper
-        cd build-64_bit-release
+        cd build-clang_64bit-Release
         $QT_BIN/macdeployqt ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
         cp -R ../src/bestiary/ ../src/resources/ ../src/doc/ ../src/bin-macos/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
 
