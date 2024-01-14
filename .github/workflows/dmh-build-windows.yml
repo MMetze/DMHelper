@@ -123,6 +123,10 @@ jobs:
       run:  |
         cd DMHelper
         7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
+    
+    - name: Output the workspace directory tree contents
+      run: |
+        Get-ChildItem -Recurse
 
     - name: Save the zip file
       uses: actions/upload-artifact@master
