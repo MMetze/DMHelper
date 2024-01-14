@@ -7,7 +7,7 @@ env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION: 6.6.0
   QT_INSTALLER_VERSION: 4.6
-  INSTALLERARTIFACT: DM-Helper-macOS-release-Installer.app
+  INSTALLERARTIFACT: DM-Helper-macOS-release-Installer.zip
   ZIPARTIFACT: DMHelper-macOS-release.zip
 
 jobs:
@@ -82,7 +82,8 @@ jobs:
         cd DMHelper
         cd bin64
         ${{ runner.workspace }}/Qt/Tools/QtInstallerFramework/${{ env.QT_INSTALLER_VERSION }}/bin/binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-macOS-release-Installer"
-        mv "./DM-Helper-macOS-release-Installer.app" "../DMHelper-macOS-release-Installer.app"
+        zip -r ./DM-Helper-macOS-release-Installer.zip ./DM-Helper-macOS-release-Installer.app
+        # mv "./DM-Helper-macOS-release-Installer.app" "../DMHelper-macOS-release-Installer.app"
         
     - name: Zip the build
       run:  |
