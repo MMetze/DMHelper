@@ -35,14 +35,11 @@ jobs:
     
     - name: Print current working dir
       run: |
-        echo Workspace is: ${{ github.workspace }}
-        ls DMHelper
         cd DMHelper
-        pwd
+        echo Workspace is: ${{ github.workspace }}
         echo 'runner.workspace === ${{ runner.workspace }}'
         echo 'github.workspace === ${{ github.workspace }}'
         echo 'Qt6Dir === ${{env.Qt6_DIR}}'
-        ls -alR ${{ runner.workspace }}/Qt
         
     - name: Set up environment for build
       run: |
@@ -74,11 +71,11 @@ jobs:
     - name: Call Deploy for Qt
       run: |
         cd DMHelper
-        cd ../bin64/packages/com.dmhelper.app/data
+        cd bin64/packages/com.dmhelper.app/data
         otool -L DMHelper.app/Contents/MacOS/DMHelper
-        cd build-clang_64bit-Release
-        ${{env.Qt6_DIR}}/bin/macdeployqt ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
-        cp -R ../src/bestiary/ ../src/resources/ ../src/doc/ ../src/bin-macos/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
+        cd ../../../../
+        ${{env.Qt6_DIR}}/bin/macdeployqt ./bin64/packages/com.dmhelper.app/data/DMHelper.app/
+        cp -R ./src/bestiary/ ./src/resources/ ./src/doc/ ./src/bin-macos/DMHelper.icns ./bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
 
     - name: Create the installer
       run: |
