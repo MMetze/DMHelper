@@ -87,7 +87,7 @@ jobs:
     - name: Zip the build
       run:  |
         cd DMHelper
-        cd packages/com.dmhelper.app/data
+        cd ./bin64/packages/com.dmhelper.app/data
         zip -r "DMHelper-macOS-release.zip" *
         mv "DMHelper-macOS-release.zip" ../../../../
     
