@@ -51,6 +51,11 @@ bool WidgetCharacterInternal::isKnown()
         return true;
 }
 
+void WidgetCharacterInternal::updateImage()
+{
+    updateData();
+}
+
 void WidgetCharacterInternal::updateData()
 {
     if(_widgetParent)

@@ -21,6 +21,7 @@ class Encounter;
 class EncounterTextEdit;
 class TimeAndDateFrame;
 class Map;
+class Layer;
 class MRUHandler;
 class QStandardItem;
 class CampaignTreeModel;
@@ -80,8 +81,10 @@ public slots:
     void importItem();
     void newParty();
     void newTextEncounter();
+    void newLinkedText();
     void newBattleEncounter();
     void newMap();
+    void newMedia();
     void newAudioEntry();
     void newSyrinscapeEntry();
     void newSyrinscapeOnlineEntry();
@@ -90,6 +93,8 @@ public slots:
     void showNotes();
     void addNote();
     void editCurrentItem();
+    void setCurrentItemIcon();
+    void clearCurrentItemIcon();
     void exportCurrentItem();
     void addNewObject(CampaignObjectBase* newObject);
 
@@ -136,6 +141,7 @@ protected:
     void setupRibbonBar();
     void connectBattleView(bool toBattle);
 
+    bool doSaveCampaign(QString defaultFile);
     void deleteCampaign();
     void enableCampaignMenu();
 
@@ -150,6 +156,7 @@ protected:
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
     void addNewAudioObject(const QString& audioFile);
+    Layer* selectMapFile();
 
 protected slots:
     void openCampaign(const QString& filename);

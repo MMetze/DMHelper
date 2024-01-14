@@ -141,7 +141,7 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
     passwordPart.setBody(_logon.getPassword().toUtf8());
 
     QHttpPart filePart;
-    filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
+    filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"myFile[]\"; filename=\"internal\""));
     filePart.setBody(data);
 

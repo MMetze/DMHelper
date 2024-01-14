@@ -201,7 +201,7 @@ typedef enum video_orientation_t
 /** Convert enum video_orientation_t to EXIF */
 #define ORIENT_TO_EXIF(orient) ((0x76853421U >> (4 * (orient))) & 15)
 /** If the orientation is natural or mirrored */
-#define ORIENT_IS_MIRROR(orient) parity(orient)
+#define ORIENT_IS_MIRROR(orient) vlc_parity(orient)
 /** If the orientation swaps dimensions */
 #define ORIENT_IS_SWAP(orient) (((orient) & 4) != 0)
 /** Applies horizontal flip to an orientation */
@@ -392,6 +392,15 @@ struct video_format_t
         uint16_t MaxCLL;  /* max content light level */
         uint16_t MaxFALL; /* max frame average light level */
     } lighting;
+    struct {
+        uint8_t version_major;
+        uint8_t version_minor;
+        unsigned profile : 7;
+        unsigned level : 6;
+        unsigned rpu_present : 1;
+        unsigned el_present : 1;
+        unsigned bl_present : 1;
+    } dovi;
     uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
 };
 
@@ -545,73 +554,6 @@ static inline video_transform_t transform_Inverse( video_transform_t transform )
     }
 }
 
-/**
- * Dolby Vision metadata description
- */
-enum vlc_dovi_reshape_method_t
-{
-    VLC_DOVI_RESHAPE_POLYNOMIAL = 0,
-    VLC_DOVI_RESHAPE_MMR = 1,
-};
-
-enum vlc_dovi_nlq_method_t
-{
-    VLC_DOVI_NLQ_NONE = -1,
-    VLC_DOVI_NLQ_LINEAR_DZ = 0,
-};
-
-#define VLC_ANCILLARY_ID_DOVI VLC_FOURCC('D','o','V','i')
-
-typedef struct vlc_video_dovi_metadata_t
-{
-    /* Common header fields */
-    uint8_t coef_log2_denom;
-    uint8_t bl_bit_depth;
-    uint8_t el_bit_depth;
-    enum vlc_dovi_nlq_method_t nlq_method_idc;
-
-    /* Colorspace metadata */
-    float nonlinear_offset[3];
-    float nonlinear_matrix[9];
-    float linear_matrix[9];
-    uint16_t source_min_pq; /* 12-bit PQ values */
-    uint16_t source_max_pq;
-
-    /**
-     * Do not reorder or modify the following structs, they are intentionally
-     * specified to be identical to AVDOVIReshapingCurve / AVDOVINLQParams.
-     */
-    struct vlc_dovi_reshape_t {
-        uint8_t num_pivots;
-        uint16_t pivots[9];
-        enum vlc_dovi_reshape_method_t mapping_idc[8];
-        uint8_t poly_order[8];
-        int64_t poly_coef[8][3];
-        uint8_t mmr_order[8];
-        int64_t mmr_constant[8];
-        int64_t mmr_coef[8][3][7];
-    } curves[3];
-
-    struct vlc_dovi_nlq_t {
-        uint8_t offset_depth; /* bit depth of offset value */
-        uint16_t offset;
-        uint64_t hdr_in_max;
-        uint64_t dz_slope;
-        uint64_t dz_threshold;
-    } nlq[3];
-} vlc_video_dovi_metadata_t;
-
-/**
- * Embedded ICC profiles
- */
-
-#define VLC_ANCILLARY_ID_ICC VLC_FOURCC('i','C','C','P')
-
-typedef struct vlc_icc_profile_t
-{
-    size_t size;
-    uint8_t data[]; /* binary profile data, see ICC.1:2022 (or later) */
-} vlc_icc_profile_t;
 
 /**
  * subtitles format description

@@ -10,8 +10,8 @@ MapBlankDialog::MapBlankDialog(QWidget *parent) :
     ui->btnColor->setRotationVisible(false);
     ui->btnColor->setColor(Qt::white);
 
-    ui->edtWidth->setValidator(new QIntValidator(1,9999,this));
-    ui->edtHeight->setValidator(new QIntValidator(1,9999,this));
+    ui->edtWidth->setValidator(new QIntValidator(1, 9999, this));
+    ui->edtHeight->setValidator(new QIntValidator(1, 9999, this));
 }
 
 MapBlankDialog::~MapBlankDialog()

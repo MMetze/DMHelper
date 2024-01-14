@@ -12,7 +12,7 @@ class PublishGLBattleEffect : public PublishGLBattleObject
     Q_OBJECT
 
 public:
-    PublishGLBattleEffect(PublishGLBattleScene* scene, BattleDialogModelEffect* effect);
+    PublishGLBattleEffect(PublishGLScene* scene, BattleDialogModelEffect* effect);
     virtual ~PublishGLBattleEffect() override;
 
     virtual void cleanup() override;

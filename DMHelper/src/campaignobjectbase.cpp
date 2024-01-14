@@ -4,6 +4,7 @@
 #include "dmconstants.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QIcon>
 #include <QDebug>
 
 // Uncomment the next line to log in detail all of the campaign item input, output and postprocessing
@@ -12,7 +13,11 @@
 CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
     DMHObjectBase(parent),
     _expanded(true),
-    _row(-1)
+    _row(-1),
+    _iconFile()
+#ifdef QT_DEBUG
+    , _DEBUG_NAME(name)
+#endif
 {
     if(!name.isEmpty())
         setObjectName(name);
@@ -29,20 +34,29 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
     qDebug() << "[CampaignBaseObject] Outputting object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
 #endif
     QDomElement newElement = createOutputXML(doc);
-    internalOutputXML(doc, newElement, targetDirectory, isExport);
-
-    if(!isExport)
+    if(!newElement.isNull())
     {
-        QList<CampaignObjectBase*> childList = getChildObjects();
-        for(int i = 0; i < childList.count(); ++i)
-        {
-            childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
-        }
-    }
+        internalOutputXML(doc, newElement, targetDirectory, isExport);
 
-    parent.appendChild(newElement);
+        if(!isExport)
+        {
+            QList<CampaignObjectBase*> childList = getChildObjects();
+            for(int i = 0; i < childList.count(); ++i)
+            {
+                childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+            }
+        }
+
+        parent.appendChild(newElement);
 #ifdef CAMPAIGN_OBJECT_LOGGING
-    qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+        qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+#endif
+    }
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    else
+    {
+        qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+    }
 #endif
 
     return newElement;
@@ -65,6 +79,12 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
     {
         setObjectName(importName);
     }
+
+    _iconFile = element.attribute("base-icon");
+
+#ifdef QT_DEBUG
+    _DEBUG_NAME = objectName();
+#endif
 
 #ifdef CAMPAIGN_OBJECT_LOGGING
     qDebug() << "[CampaignBaseObject] Inputting object started: " << getName() << ", id: " << getID();
@@ -101,7 +121,7 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     QDomElement childElement = element.firstChildElement();
     while(!childElement.isNull())
     {
-//        if(!belongsToObject(childElement))
+        //if(!belongsToObject(childElement))
         {
             QString elTagName = childElement.tagName();
             QString elName = childElement.attribute(QString("name"));
@@ -147,6 +167,33 @@ QString CampaignObjectBase::getName() const
 int CampaignObjectBase::getRow() const
 {
     return _row;
+}
+
+bool CampaignObjectBase::isTreeVisible() const
+{
+    return true;
+}
+
+QIcon CampaignObjectBase::getIcon()
+{
+    if(!_iconFile.isEmpty())
+    {
+        QPixmap pixmap(_iconFile);
+        if(!pixmap.isNull())
+            return QIcon(pixmap.scaled(128, 128, Qt::KeepAspectRatio));
+    }
+
+    return getDefaultIcon();
+}
+
+QIcon CampaignObjectBase::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_contenttextencounter.png");
+}
+
+QString CampaignObjectBase::getIconFile() const
+{
+    return _iconFile;
 }
 
 const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
@@ -359,6 +406,9 @@ void CampaignObjectBase::setName(const QString& name)
     if(objectName() != name)
     {
         setObjectName(name);
+#ifdef QT_DEBUG
+        _DEBUG_NAME = name;
+#endif
         emit nameChanged(this, objectName());
         handleInternalChange();
     }
@@ -371,6 +421,15 @@ void CampaignObjectBase::setRow(int row)
         _row = row;
         handleInternalDirty();
     }
+}
+
+void CampaignObjectBase::setIconFile(const QString& iconFile)
+{
+    if(iconFile == _iconFile)
+        return;
+
+    _iconFile = iconFile;
+    emit iconFileChanged(this);
 }
 
 void CampaignObjectBase::handleInternalChange()
@@ -389,6 +448,8 @@ void CampaignObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &eleme
     element.setAttribute("expanded", getExpanded());
     element.setAttribute("row", getRow());
     element.setAttribute("name", getName());
+    if(!_iconFile.isEmpty())
+        element.setAttribute("base-icon", getIconFile());
 
     DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

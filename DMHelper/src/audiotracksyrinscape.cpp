@@ -2,10 +2,16 @@
 #include "dmconstants.h"
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QIcon>
 
 AudioTrackSyrinscape::AudioTrackSyrinscape(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent)
 {
+}
+
+QIcon AudioTrackSyrinscape::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_syrinscape.png");
 }
 
 int AudioTrackSyrinscape::getAudioType() const

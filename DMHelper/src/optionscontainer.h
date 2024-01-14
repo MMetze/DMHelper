@@ -42,6 +42,7 @@ public:
 
     // Battle settings
     int getInitiativeType() const;
+    qreal getInitiativeScale() const;
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
@@ -60,6 +61,12 @@ public:
     QUuid getInstanceUuid();
     QString getInstanceUuidStr();
     QDate getLastUpdateCheck() const;
+    QString getHeroForgeToken() const;
+
+    // Token search settings
+    QString getTokenSearchString() const;
+    QString getTokenFrameFile() const;
+    QString getTokenMaskFile() const;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -98,6 +105,7 @@ signals:
 
     // Battle settings
     void initiativeTypeChanged(int initiativeType);
+    void initiativeScaleChanged(qreal initiativeScale);
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
@@ -107,6 +115,14 @@ signals:
     void countdownFrameChanged(const QString& countdownFrame);
     void gridLockedChanged(bool gridLocked);
     void gridLockScaleChanged(qreal gridLockScale);
+
+    // Data settings
+    void heroForgeTokenChanged(const QString& token);
+
+    // Token search settings
+    void tokenSearchStringChanged(const QString& tokenSearchString);
+    void tokenFrameFileChanged(const QString& tokenFrameFile);
+    void tokenMaskFileChanged(const QString& tokenMaskFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -159,6 +175,8 @@ public slots:
 
     // Battle settings
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(int initiativeScale);
+    void setInitiativeScale(qreal initiativeScale);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
@@ -174,6 +192,12 @@ public slots:
     void setUpdatesEnabled(bool updatesEnabled);
     void setStatisticsAccepted(bool statisticsAccepted);
     void setLastUpdateDate(const QDate& date);
+    void setHeroForgeToken(const QString& token);
+
+    // Token search settings
+    void setTokenSearchString(const QString& tokenSearchString);
+    void setTokenFrameFile(const QString& tokenFrameFile);
+    void setTokenMaskFile(const QString& tokenMaskFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -220,6 +244,7 @@ private:
 
     // Battle settings
     int _initiativeType;
+    qreal _initiativeScale;
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;
@@ -237,6 +262,12 @@ private:
     bool _statisticsAccepted;
     QUuid _instanceUuid;
     QDate _lastUpdateDate;
+    QString _heroForgeToken;
+
+    // Token search settings
+    QString _tokenSearchString;
+    QString _tokenFrameFile;
+    QString _tokenMaskFile;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings

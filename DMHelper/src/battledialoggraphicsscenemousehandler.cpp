@@ -140,13 +140,17 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mousePressEvent(QGraphicsSce
 {
     if(_distanceLine)
         delete _distanceLine;
+
     _distanceLine = _scene.addLine(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()), QPen(QBrush(_color), _lineWidth, static_cast<Qt::PenStyle>(_lineType)));
+    _distanceLine->setPen(QPen(QBrush(_color), _lineWidth, static_cast<Qt::PenStyle>(_lineType)));
+    _distanceLine->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
     if(_distanceText)
         delete _distanceText;
     _distanceText = _scene.addSimpleText(QString("0"));
     _distanceText->setBrush(QBrush(_color));
     _distanceText->setPos(mouseEvent->scenePos());
+    _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
     emit distanceItemChanged(_distanceLine, _distanceText);
 
@@ -158,6 +162,16 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseReleaseEvent(QGraphicsS
 {
     mouseEvent->accept();
     return false;
+}
+
+QGraphicsItem* BattleDialogGraphicsSceneMouseHandlerDistance::getDistanceLine() const
+{
+    return _distanceLine;
+}
+
+QGraphicsSimpleTextItem* BattleDialogGraphicsSceneMouseHandlerDistance::getDistanceText() const
+{
+    return _distanceText;
 }
 
 
@@ -202,6 +216,7 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mouseMoveEvent(QGraphics
         currentPath.moveTo(_mouseDownPos);
         currentPath.lineTo(scenePos);
         _distancePath = _scene.addPath(currentPath, QPen(QBrush(_color), _lineWidth, static_cast<Qt::PenStyle>(_lineType)));
+        _distancePath->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
         emit distanceItemChanged(_distancePath, _distanceText);
     }
     qreal lineDistance = 5.0 * _distancePath->path().length() / _scale;//_distancePath->path().length() * _scale / 1000.0;
@@ -235,6 +250,7 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mousePressEvent(QGraphic
     textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
     _distanceText->setFont(textFont);
     _distanceText->setPos(_mouseDownPos + QPointF(5.0, 5.0));
+    _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
     mouseEvent->accept();
     return false;
@@ -245,6 +261,17 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mouseReleaseEvent(QGraph
     mouseEvent->accept();
     return false;
 }
+
+QGraphicsItem* BattleDialogGraphicsSceneMouseHandlerFreeDistance::getDistanceLine() const
+{
+    return _distancePath;
+}
+
+QGraphicsSimpleTextItem* BattleDialogGraphicsSceneMouseHandlerFreeDistance::getDistanceText() const
+{
+    return _distanceText;
+}
+
 
 
 /******************************************************************************************************/

@@ -1,12 +1,14 @@
 #ifndef BATTLEDIALOGMODELCOMBATANT_H
 #define BATTLEDIALOGMODELCOMBATANT_H
 
-#include "campaignobjectbase.h"
+#include "battledialogmodelobject.h"
 #include "scaledpixmap.h"
 #include "combatant.h"
 #include <QPoint>
 
-class BattleDialogModelCombatant : public CampaignObjectBase
+class LayerTokens;
+
+class BattleDialogModelCombatant : public BattleDialogModelObject
 {
     Q_OBJECT
 
@@ -19,10 +21,14 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual int getObjectType() const override;
 
     // Local
     virtual int getCombatantType() const = 0;
     virtual BattleDialogModelCombatant* clone() const = 0;
+
+    void setLayer(LayerTokens* tokensLayer);
+    LayerTokens* getLayer() const;
 
     virtual bool getShown() const;
     virtual bool getKnown() const;
@@ -31,8 +37,6 @@ public:
     int getInitiative() const;
     void setInitiative(int initiative);
 
-    const QPointF& getPosition() const;
-    void setPosition(const QPointF& position);
     virtual qreal getSizeFactor() const = 0;
     virtual int getSizeCategory() const = 0;    
 
@@ -63,7 +67,7 @@ public:
 public slots:
     virtual void setShown(bool isShown);
     virtual void setKnown(bool isKnown);
-    virtual void setSelected(bool isSelected);
+    virtual void setSelected(bool isSelected) override;
     virtual void setConditions(int conditions) = 0;
     virtual void applyConditions(int conditions) = 0;
     virtual void removeConditions(int conditions) = 0;
@@ -72,22 +76,22 @@ public slots:
 signals:
     void initiativeChanged(BattleDialogModelCombatant* combatant);
     void conditionsChanged(BattleDialogModelCombatant* combatant);
-    void combatantMoved(BattleDialogModelCombatant* combatant);
     void combatantSelected(BattleDialogModelCombatant* combatant);
     void moveUpdated();
     void visibilityChanged();
 
 protected:
-    // From BattleDialogModelCombatant
+    // From CampaignObjectBase
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
 
+    // Local
     void setCombatant(Combatant* combatant);
 
     Combatant* _combatant;
+    LayerTokens* _tokensLayer;
     int _initiative;
-    QPointF _position;
     qreal _moved;
     bool _isShown;
     bool _isKnown;

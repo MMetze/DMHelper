@@ -17,7 +17,7 @@ public:
 
     virtual void registerNewFrame() override;
 
-    static void playerEventCallback( const struct libvlc_event_t *p_event, void *p_data );
+    static void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
 
 signals:
     void screenshotReady(const QImage& image);

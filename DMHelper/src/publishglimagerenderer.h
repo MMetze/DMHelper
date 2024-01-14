@@ -2,7 +2,7 @@
 #define PUBLISHGLIMAGERENDERER_H
 
 #include "publishglrenderer.h"
-#include "publishglbattlescene.h"
+#include "publishglscene.h"
 #include <QColor>
 #include <QImage>
 
@@ -18,12 +18,12 @@ public:
     virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
-    virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
     virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
+    virtual void cleanupGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
@@ -31,20 +31,23 @@ public:
     QColor getColor() const;
 
 public slots:
+    // DMH OpenGL renderer calls
+    virtual void updateProjectionMatrix() override;
+
     void setImage(const QImage& image);
     //void setColor(QColor color);
 
 protected:
-    virtual void updateProjectionMatrix() override;
 
 private:
     CampaignObjectBase* _renderObject;
     QImage _image;
     QColor _color;
-    PublishGLBattleScene _scene;
+    PublishGLScene _scene;
     bool _initialized;
+    bool _newProjection;
     unsigned int _shaderProgram;
-    PublishGLBattleBackground* _backgroundObject;
+    PublishGLBattleBackground* _imageGLObject;
 };
 
 #endif // PUBLISHGLIMAGERENDERER_H

@@ -862,9 +862,6 @@
            <height>40</height>
           </size>
          </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
          <property name="popupMode">
           <enum>QToolButton::InstantPopup</enum>
          </property>
@@ -920,6 +917,9 @@
            <height>25</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>The distance between two points</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -959,7 +959,6 @@
          </property>
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -1005,7 +1004,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Activate to include a height in the distance</string>
+          <string>The vertical distance included</string>
          </property>
          <property name="text">
           <string/>
@@ -1076,6 +1075,9 @@
            <width>16777215</width>
            <height>25</height>
           </size>
+         </property>
+         <property name="toolTip">
+          <string>The scale to apply to the map for measurements</string>
          </property>
          <property name="text">
           <string>Scale</string>

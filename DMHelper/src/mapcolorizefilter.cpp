@@ -17,7 +17,7 @@ MapColorizeFilter::~MapColorizeFilter()
 {
 }
 
-QImage MapColorizeFilter::apply(const QImage& in)
+QImage MapColorizeFilter::apply(const QImage& in) const
 {
     if(!in.size().isValid())
         return QImage();
@@ -39,9 +39,9 @@ QImage MapColorizeFilter::apply(const QImage& in)
             qreal r = static_cast<qreal>(qRed(inputLine[x]));
             qreal g = static_cast<qreal>(qGreen(inputLine[x]));
             qreal b = static_cast<qreal>(qBlue(inputLine[x]));
-            outputLine[x] = qRgba(qMin(qMax(static_cast<int>((_r2r*r + _g2r*g + _b2r*b) * _sr),0),255),
-                                  qMin(qMax(static_cast<int>((_r2g*r + _g2g*g + _b2g*b) * _sg),0),255),
-                                  qMin(qMax(static_cast<int>((_r2b*r + _g2b*g + _b2b*b) * _sb),0),255),
+            outputLine[x] = qRgba(qMin(qMax(static_cast<int>((_r2r*r + _g2r*g + _b2r*b) * _sr), 0), 255),
+                                  qMin(qMax(static_cast<int>((_r2g*r + _g2g*g + _b2g*b) * _sg), 0), 255),
+                                  qMin(qMax(static_cast<int>((_r2b*r + _g2b*g + _b2b*b) * _sb), 0), 255),
                                   qAlpha(inputLine[x]));
         }
     }
@@ -58,7 +58,7 @@ QImage MapColorizeFilter::apply(const QImage& in)
     return filteredImage;
 }
 
-bool MapColorizeFilter::isValid()
+bool MapColorizeFilter::isValid() const
 {
     return((_r2r != 1.0) || (_g2r != 0.0) || (_b2r != 0.0) ||
            (_r2g != 0.0) || (_g2g != 1.0) || (_b2g != 0.0) ||

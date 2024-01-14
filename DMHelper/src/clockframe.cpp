@@ -22,9 +22,9 @@ ClockFrame::ClockFrame(QWidget *parent) :
     _lastMousePos(0, 0)
 {
     _astrolobe.load(":/img/data/astrolobe.png");        // size is 370x370
-    _smallHand.load(":/img/data/clockhands-small.png"); // 50,50 is center, size is 242x100
+    _smallHand.load(":/img/data/clockhands-small.png"); // 50, 50 is center, size is 242x100
     _smallHandScaled = _smallHand;
-    _largeHand.load(":/img/data/clockhands-large.png"); // 50,50 is center, size is 311x100
+    _largeHand.load(":/img/data/clockhands-large.png"); // 50, 50 is center, size is 311x100
     _largeHandScaled = _largeHand;
     ui->setupUi(this);
     ui->lblHandLarge->setAttribute(Qt::WA_TranslucentBackground);
@@ -98,7 +98,7 @@ void ClockFrame::setSmallHandActive(bool active)
 
 void ClockFrame::resizeEvent(QResizeEvent *event)
 {
-    int smallerDimension = qMin(event->size().width(),event->size().height());
+    int smallerDimension = qMin(event->size().width(), event->size().height());
 
     ui->lblAstrolobe->resize(smallerDimension, smallerDimension);
     ui->lblAstrolobe->setPixmap(QPixmap::fromImage(_astrolobe.scaled(smallerDimension, smallerDimension, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
@@ -155,7 +155,7 @@ void ClockFrame::mousePressEvent(QMouseEvent *event)
     QPoint midPoint(ui->lblAstrolobe->x() + (ui->lblAstrolobe->width()/2), ui->lblAstrolobe->y() + (ui->lblAstrolobe->height()/2));
     QVector2D vectorFromCenter = QVector2D(event->pos() - midPoint);
     _lastMousePos = vectorFromCenter.normalized();
-    if((_smallHandActive) && (vectorFromCenter.lengthSquared() < qPow((float)qMin(ui->lblAstrolobe->width(),ui->lblAstrolobe->height())/6.f, 2.f) * 2.f ))
+    if((_smallHandActive) && (vectorFromCenter.lengthSquared() < qPow((float)qMin(ui->lblAstrolobe->width(), ui->lblAstrolobe->height())/6.f, 2.f) * 2.f))
     {
         _mouseDown = MouseDownValue_small;
     }
@@ -183,7 +183,7 @@ void ClockFrame::timerEvent(QTimerEvent *event)
     }
 
     float delta = _largeHandAngleTarget - _largeHandAngle;
-    if( ((delta <= 20.f) && (delta >= 0.f)) || (delta <= -340.f))
+    if(((delta <= 20.f) && (delta >= 0.f)) || (delta <= -340.f))
     {
         _largeHandAngle = _largeHandAngleTarget;
         killTimer(_timerId);
@@ -202,7 +202,7 @@ void ClockFrame::timerEvent(QTimerEvent *event)
 
 void ClockFrame::scaleClockFrame(int scaleFactor)
 {
-    if( (scaleFactor > 0 ) && (scaleFactor != _scaleFactor) )
+    if((scaleFactor > 0) && (scaleFactor != _scaleFactor))
     {
         _scaleFactor = scaleFactor;
 

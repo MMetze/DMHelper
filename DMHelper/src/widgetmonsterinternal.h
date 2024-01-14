@@ -28,8 +28,8 @@ signals:
     void clicked(const QString& monsterClass);
 
 public slots:
-
     virtual void updateData() override;
+    virtual void updateImage() override;
     virtual void setInitiative(int initiative) override;
     virtual void setHitPoints(int hp) override;
     virtual void executeDoubleClick() override;

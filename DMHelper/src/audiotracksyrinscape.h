@@ -9,6 +9,8 @@ class AudioTrackSyrinscape : public AudioTrackUrl
 public:
     explicit AudioTrackSyrinscape(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
 
+    virtual QIcon getDefaultIcon() override;
+
     virtual int getAudioType() const override;
 
 public slots:

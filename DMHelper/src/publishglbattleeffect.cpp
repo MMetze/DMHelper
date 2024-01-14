@@ -9,7 +9,7 @@
 #include <QPixmap>
 #include <QPainter>
 
-PublishGLBattleEffect::PublishGLBattleEffect(PublishGLBattleScene* scene, BattleDialogModelEffect* effect) :
+PublishGLBattleEffect::PublishGLBattleEffect(PublishGLScene* scene, BattleDialogModelEffect* effect) :
     PublishGLBattleObject(scene),
     _effect(effect),
     _childEffect(nullptr),
@@ -29,11 +29,11 @@ PublishGLBattleEffect::PublishGLBattleEffect(PublishGLBattleScene* scene, Battle
 
     prepareObjects();
 
-    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
+    connect(_effect, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleEffect::effectMoved);
     connect(_effect, &BattleDialogModelEffect::effectChanged, this, &PublishGLBattleEffect::effectChanged);
     if(_childEffect)
     {
-        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
+        connect(_childEffect, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleEffect::effectMoved);
         connect(_childEffect, &BattleDialogModelEffect::effectChanged, this, &PublishGLBattleEffect::effectChanged);
     }
 }
@@ -45,6 +45,8 @@ PublishGLBattleEffect::~PublishGLBattleEffect()
 
 void PublishGLBattleEffect::cleanup()
 {
+//    qDebug() << "[PublishGLBattleEffect] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+
     if(QOpenGLContext::currentContext())
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();

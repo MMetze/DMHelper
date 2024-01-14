@@ -12,7 +12,7 @@ class WhatsNewDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit WhatsNewDialog(QWidget *parent = nullptr);
+    explicit WhatsNewDialog(const QString& dataFile, const QString& dialogTitle = QString(), QWidget *parent = nullptr);
     ~WhatsNewDialog();
 
     virtual bool eventFilter(QObject *watched, QEvent *event) override;

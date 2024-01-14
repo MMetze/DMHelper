@@ -55,11 +55,11 @@ void WidgetCharacter::setInternals(WidgetCharacterInternal* internals)
     BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(_internals->getCombatant());
     if(characterCombatant)
     {
-        connect(ui->chkKnown,SIGNAL(clicked(bool)),characterCombatant,SLOT(setKnown(bool)));
-        connect(ui->chkVisible,SIGNAL(clicked(bool)),characterCombatant,SLOT(setShown(bool)));
+        connect(ui->chkKnown, SIGNAL(clicked(bool)), characterCombatant, SLOT(setKnown(bool)));
+        connect(ui->chkVisible, SIGNAL(clicked(bool)), characterCombatant, SLOT(setShown(bool)));
 
         if(characterCombatant->getCombatant())
-            connect(characterCombatant->getCombatant(),SIGNAL(dirty()),this,SLOT(updateData()));
+            connect(characterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
         else
             qDebug() << "[Character Widget] a valid combatant could not be found!";
     }

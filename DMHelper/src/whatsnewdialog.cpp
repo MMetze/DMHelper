@@ -5,7 +5,7 @@
 #include <QTextStream>
 #include <QScreen>
 
-WhatsNewDialog::WhatsNewDialog(QWidget *parent) :
+WhatsNewDialog::WhatsNewDialog(const QString& dataFile, const QString& dialogTitle, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::WhatsNewDialog),
     _backgroundImage(),
@@ -15,7 +15,7 @@ WhatsNewDialog::WhatsNewDialog(QWidget *parent) :
 
     ui->textBrowser->installEventFilter(this);
 
-    QFile data(":/img/data/whatsnew.txt");
+    QFile data(dataFile.isEmpty() ? QString(":/img/data/whatsnew.txt") : dataFile);
     if(data.open(QFile::ReadOnly))
     {
         QTextStream in(&data);
@@ -23,6 +23,9 @@ WhatsNewDialog::WhatsNewDialog(QWidget *parent) :
     }
 
     _backgroundImage.load(":/img/data/dmc_background.png");
+
+    if(!dialogTitle.isEmpty())
+        setWindowTitle(dialogTitle);
 }
 
 WhatsNewDialog::~WhatsNewDialog()

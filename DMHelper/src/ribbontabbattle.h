@@ -34,6 +34,7 @@ signals:
     void addEffectCubeClicked();
     void addEffectConeClicked();
     void addEffectLineClicked();
+    void duplicateClicked();
     void showLivingClicked(bool checked);
     void showDeadClicked(bool checked);
     void showEffectsClicked(bool checked);

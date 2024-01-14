@@ -5,7 +5,8 @@
 ColorPushButton::ColorPushButton(QWidget *parent) :
     QPushButton(parent),
     _color(Qt::black),
-    _rotation(0)
+    _rotation(0),
+    _rotationVisible(true)
 {
     connect(this, SIGNAL(clicked(bool)), this, SLOT(selectColor()));
 }

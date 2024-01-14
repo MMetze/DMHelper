@@ -17,14 +17,15 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
     virtual int getObjectType() const override;
+    virtual QIcon getDefaultIcon() override;
 
-    virtual QString getIcon(bool localOnly = false) const;
+    virtual QString getPartyIcon(bool localOnly = false) const;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
 
     QList<Character*> getActiveCharacters();
 
 signals:
-    void iconChanged();
+    void iconChanged(CampaignObjectBase* party);
 
 public slots:
     virtual void setIcon(const QString &newIcon);

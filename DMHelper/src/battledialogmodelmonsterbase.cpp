@@ -31,8 +31,8 @@ void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isI
 {
     BattleDialogModelCombatant::inputXML(element, isImport);
 
-    _legendaryCount = element.attribute("legendaryCount",QString::number(-1)).toInt();
-    _conditions = element.attribute("conditions",QString::number(0)).toInt();
+    _legendaryCount = element.attribute("legendaryCount", QString::number(-1)).toInt();
+    _conditions = element.attribute("conditions", QString::number(0)).toInt();
 }
 
 void BattleDialogModelMonsterBase::copyValues(const CampaignObjectBase* other)

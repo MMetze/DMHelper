@@ -1,7 +1,139 @@
+* edit FOW icon in combat is the wrong size
+* can't add an image to a new monster in the bestiary
+* maybe selection icons aren't always rightly sized?
+fixed * select many and delete doesn't delete them all
+* select many and link doesn't link them all
+fixed * select many and heal/damage doesn't heal/damage them all
+fixed * select many and change token doesn't change them all
+fixed * change token doesn't change how it looks on the DM View - need to recreate the icon
+* delete key to remove a combatant or effect
+fixed * shift magic effects to other layer doesnt work
+* edit effect sets the size wrong
 
-Effects
-* optional set of whether effect colors are applied or not
-* parent an effect to a token
+Move updatecombatanticon from battleframe to layertokens
+
+v2.5.11
+done * Add choice of Layer to add monsters to monster selection dialog
+done * Select priority only returns visible alternative layers (allows an explicitly selected layer if invisible)
+done * Making a layer invisible could deselect it
+done * Mouse over layers button shows name of currently active layer
+done? * Use screenshot until video shows up
+done * Use name of file for layer name in image/video
+done * Renaming a layer moves it in the order
+
+
+Video requirements
+Audio by Michael Ghelfi Studios
+https://michaelghelfistudios.com/
+Sound effects from https://quicksounds.com
+If they are just being shown in videos you can absolutely use them. Just make sure you are including a credit for me, with a link to my website or Patreon, and a credit for Splattered Ink Games for the token artwork and a link to their website - splatteredink.com
+
+
+* Saving a combat with FOW reference doesn't refer to the fow but the map
+* Layers list in the wrong order
+* Tie layers together
+* One button for layer visibility
+* Layer titles from references
+* Layer icon for references
+* Multiple FOW zoom not working - doesn't like reference FOWs
+FOW edit doesn't scale with zoom
+Save As should add the current file name to the dialog
+* Markers add unknown elements to maps
+
+
+feature * Scale the initiative list freely
+feature * Change layer with multiple selections
+feature * Double-click in change layer dialog to pick dialog
+fixed * Black screen rendering map/battle
+fixed * Ctrl and mouse move should not move map, but enable multiple selections
+fixed * resizing grid needs to resize tokens
+fixed * editing DM-invisible layer makes it visible
+fixed * changing layer with no selection doesn't do anything (should take the target item)
+done * Players side of blank layer
+done * create blank map
+done * create combat on map/video
+done * edit dialog: create new blank layer
+fixed * Select on the map doesn't select on the widget list
+fixed * find map fitting to battle doesn't work
+fixed * Dead don't disappear when HP set to zero
+fixed * Resize to visible
+fixed * Editing FoW has an offset based on negative position of scene rect
+fixed * Editing area on battle doesn't work
+fixed * edit dialog: create new text layer
+fixed * invisible player video should not start the video playback
+fixed * old scrolling text doesn't scroll
+fixed * old videos are not recognized, leads to broken mapframe
+fixed * party icon not visible
+fixed * markers (neverwinter region) seem to not work
+Not reproducible * resize camera view
+Not reproducible * Fog of war from old to new
+
+Next version
+* upgrade to latest Qt, activate Copilot for Qt
+* Undo-redo on drawing fow
+* Make grid button a flat pushbutton that opens its own popup menu
+* Fix map markers scaling of icons to fit the rest
+* Asset library
+* Save new campaign --> default file name is campaign name
+* Remove dead code (e.g. battleframe, map, layerfow)
+* Add new item dialog instead of pseudo-wizards / clean up mainwindow: newbattle function
+* Switch between party icon and players on a battle (aka toggle initiative)
+* Backend queries as a class to automate the versioning and debug query
+
+Sample Code - overlay pixmap for an intro tutorial
+QLabel* newLabel = new QLabel(this);
+QPixmap activePixmap(":/img/data/active.png");
+newLabel->setMinimumSize(activePixmap.size());
+newLabel->setMaximumSize(activePixmap.size());
+newLabel->setAttribute(Qt::WA_TranslucentBackground);
+newLabel->move(50,50);
+newLabel->setPixmap(activePixmap);
+newLabel->raise();
+newLabel->show();
+
+
+
+v2.5.7
+fixed * Crashes when adding an FOW layer
+fixed * Resizing video not always working
+fixed * Resized video unsized when restarted
+fixed * Invisible token layer should be skipped in player initiative, not in initiative order DM Side when invisible on both
+fixed * DM View token layer of selection not visible, active token hidden
+
+v2.5.6
+2) As far as layer functions are concerned, the grid is not visible in any way.
+Also, sometimes adding elements (text, video, images) via the layer edit window crashes the program.
+Unfortunately, I have not been able to recognize a pattern in this behavior that would allow me to speculate what the step might be that causes the program to crash.
+3) Finally, a problem regarding combats. When creating a combat by assigning a map it is not visible in any way in the master window. You can see the map in the players window (however without a grid). Adding a monster shifts the view of the map in the players window by centering the view on the monster.
+works * Create/edit/move effect doesn't dirty
+fixed * Include "add XYZ..." to right-click context menu
+fixed * Party icon on map not scaled right
+done * backwards compatibility - add a grid layer only if "showGrid==1" or true
+fixed * Make the tooltip for a combatant or effect mention their layer
+fixed * Add combatants have the wrong Z-value
+fixed * Show living, show dead don't work when battle is running (only when activated)
+fixed * Show effects never works
+fixed * dirty on load of campaign
+fixed * Changes to effects or combatants only affects one, not all
+done * Duplicate effects or non-PC combatants
+fixed * Pointer position doesn't work
+
+v2.5.5
+fixed * Create spell gives object transparency from base shape
+fixed * added effect doesn't then move with the Layer
+fixed * delete effect doesn't work
+fixed * line and description not on the front
+fixed * line and description not publishing
+fixed * grid controls not working
+fixed * burning hands effect doesn't resize with grid size
+fixed * Grid type should no be a button, not clickable
+fixed * need to be able to change layers for effects
+fixed * Effect markers on enemies not visible
+fixed * Selection and Active markers in publish version
+fixed * moving pc between layers ruins rendering
+fixed * Selection and Active markers not visible from the beginning
+fixed * Moving character on the publish screen leaves the selection active, doesn't highlight on the dm screen
+fixed * Hide layers separately between DM and Player windows
 
 
 Checkpoint: when adding a new attribute/item to a campaign entry, consider:

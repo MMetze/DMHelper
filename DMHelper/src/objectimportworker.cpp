@@ -167,6 +167,7 @@ void ObjectImportWorker::importObjectAssets(CampaignObjectBase* object)
             Map* map = dynamic_cast<Map*>(object);
             if(map)
             {
+                // TODO: Layers import/export
                 qDebug() << "[ObjectImportWorker] Importing map: " << map->getName() << ", file: " << map->getFileName();
                 map->setFileName(importFile(map->getFileName()));
             }
@@ -207,6 +208,11 @@ void ObjectImportWorker::importObjectAssets(CampaignObjectBase* object)
             EncounterBattle* battle = dynamic_cast<EncounterBattle*>(object);
             qDebug() << "[ObjectImportWorker] Importing battle: " << battle->getName();
             importBattle(battle);
+            break;
+        }
+        case DMHelper::CampaignType_LinkedText:
+        {
+            // Todo: Markdown
             break;
         }
         default:

@@ -13,7 +13,7 @@
 #include <QMessageBox>
 
 // Uncomment this define to output payload data to a local file "_dmhpayload.txt"
-#define DMH_NETWORK_CONTROLLER_LOCAL_PAYLOAD
+//#define DMH_NETWORK_CONTROLLER_LOCAL_PAYLOAD
 
 NetworkController::NetworkController(QObject *parent) :
     QObject(parent),

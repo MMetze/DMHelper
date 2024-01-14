@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QIcon>
 
 const int stopCallComplete = 0x01;
 const int stopConfirmed = 0x02;
@@ -31,6 +32,11 @@ AudioTrackYoutube::~AudioTrackYoutube()
         killTimer(_timerId);
 
     AudioTrackYoutube::stop();
+}
+
+QIcon AudioTrackYoutube::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_playerswindow.png");
 }
 
 int AudioTrackYoutube::getAudioType() const
@@ -183,9 +189,10 @@ void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
         return;
 
     if(!_manager)
+    {
         _manager = new QNetworkAccessManager(this);
-
-    connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(urlRequestFinished(QNetworkReply*)));
+        connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(urlRequestFinished(QNetworkReply*)));
+    }
 
     QString getString("https://api.dmhh.net/youtube?id=");
     getString.append(youtubeId);

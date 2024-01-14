@@ -14,7 +14,6 @@ class BattleDialogEffectSettings : public QDialog
     Q_OBJECT
 
 public:
-    explicit BattleDialogEffectSettings(int sizeval, qreal rotation, const QColor& color, QString tip, QWidget *parent = nullptr);
     explicit BattleDialogEffectSettings(const BattleDialogModelEffect& effect, QWidget *parent = nullptr);
     ~BattleDialogEffectSettings();
 
@@ -27,7 +26,8 @@ public:
     QColor getColor() const;
     int getAlpha() const;
 
-    void copyValues(BattleDialogModelEffect& effect);
+    void mergeValuesToSettings(BattleDialogModelEffect& effect);
+    void copyValuesFromSettings(BattleDialogModelEffect& effect);
 
 public slots:
     void setSizeLabel(const QString& sizeLabel);

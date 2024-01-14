@@ -9,48 +9,54 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 2.5</h2>
+<h2>What's New: Version 3.0</h2>
 
 <h3>New Features:</h3>
 <ul>
-<li>Syrinscape Online supported
-<li>Lock the published grid size - useful to configure an external screen using minis
-<li>Grid size and grid color are configurable
-<li>Enter a fixed number of grid squares for a map
-<li>Spell slot management in the character frame
-<li>Animated maps supported now across all entries; current limitations: Windows only and all animations are converted to screenshots
-<li>Navigate backwards and forwards through last campaign entries
-<li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat
-<li>Map selection improvements for videos
-<li>Automatic saving of the bestiary and spellbook upon close of the dialog
+<li><b>Layers:</b> this is so big that it's hard to even fathom, let alone summarize. Just as a few examples, you can:
+    <ul>
+    <li> have multiple map levels, with their own fog of war
+    <li> put monsters in groups on different layers, and hide or reveal them all at once
+    <li> make individual layers partially transparent, hide them for the player or the DM (imagine a player version and DM version of a map!)
+    <li> scale and shift layers relative to one another
+    <li> ...and so much more...
+    </ul>
+<li>Upgraded monster tokens
+    <ul>
+    <li> Monsters can have multiple tokens
+    <li> Search and grab tokens from the Internet, applying effects and adding them directly to your Bestiary!
+    </ul>
+<li>Duplication (ie copy/paste) of monsters or effects in a battle - look for a button called... "Duplicate"
+<li>Dynamic entry icons in the campaign tree
+    <ul>
+    <li> PC icons are now their own token
+    <li> You can apply a custom icon to any entry in the tree
+    </ul>
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Combatant selection and activation tokens are fully configurable again
-<li>Initiative Frame/Countdown works and is configurable
-<li>Effects and objects in combat smaller than 5 ft are drawn properly
-<li>Fixed the HP randomizer in add combatant dialog
-<li>Changed experience from an int to a string to allow e.g. "34,000" as well as "34000"
-<li>Fix issues saving YouTube audio files on MacOS
-<li>Local audio file playback working on MacOS
-<li>32-bit memory management (map images unloaded when not in use)
+<li>Video playback is back! Just add a video layer to your entry/map/battle! DMH now also caches a screenshot of each video, so loading videos should go quite a bit quicker
 </ul>
 
+<!--
 <p>
 
 <h3>Other Improvements:</h3>
 <ul>
-<li>Fixed the x86 installer
-<li>Youtube playback is more reliable
+<li>
+<li>
 </ul>
+//-->
 
 <p>
 <h3>And don't forget</h3>
 <ul>
 <li><b>Press the magical "F" key on the Player's Window for Fullscreen mode</b>
+<br>
+<li>If you like the app, consider supporting our Patreon here: <a href="www.patreon.com/dmhelper">www.patreon.com/dmhelper</a>
 </ul>
 </div>
 </body>

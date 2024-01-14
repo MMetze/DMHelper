@@ -13,7 +13,7 @@ Name: VLC plugin API
 Description: VLC media player plugin interface
 Version: 4.0.0-dev
 Cflags: -I${includedir} -I${pkgincludedir}/plugins \
-	-D__PLUGIN__ \
+	-DVLC_DYNAMIC_PLUGIN \
 	-D_FILE_OFFSET_BITS=64 \
 	
 Libs: -L${libdir} -lvlccore

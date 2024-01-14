@@ -6,6 +6,8 @@
 #include "combatant.h"
 
 class MonsterClass;
+class LayerScene;
+class LayerTokens;
 
 namespace Ui {
 class CombatantDialog;
@@ -16,12 +18,13 @@ class CombatantDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CombatantDialog(QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
+    explicit CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
     ~CombatantDialog();
 
     //void setCombatant(int combatantCount, Combatant* combatant);
     int getCount() const;
     QString getName() const;
+    LayerTokens* getLayer() const;
     int getCombatantHitPoints() const;
     bool isRandomInitiative() const;
     QString getInitiative() const;
@@ -30,6 +33,7 @@ public:
     bool isCustomSize() const;
     QString getSizeFactor() const;
     MonsterClass* getMonsterClass() const;
+    int getIconIndex() const;
 
     void writeCombatant(Combatant* combatant);
 
@@ -46,7 +50,10 @@ protected:
 
 private slots:
     void monsterClassChanged(const QString &text);
+    void setIconIndex(int index);
     void updateIcon();
+    void previousIcon();
+    void nextIcon();
     void setHitPointAverageChanged();
     void openMonsterClicked();
     void sizeSelected(int index);
@@ -55,8 +62,10 @@ private:
     void fillSizeCombo();
 
     Ui::CombatantDialog *ui;
-    Combatant* _combatant;
-    int _count;
+    //Combatant* _combatant;
+    int _iconIndex;
+    //int _count;
+
 };
 
 #endif // COMBATANTDIALOG_H

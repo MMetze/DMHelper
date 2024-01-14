@@ -2,6 +2,7 @@
 #define BESTIARYDIALOG_H
 
 #include <QDialog>
+#include "bestiaryfindtokendialog.h"
 
 class MonsterClass;
 class MonsterAction;
@@ -27,6 +28,9 @@ signals:
     void publishMonsterImage(QImage img, const QColor& color);
     void dialogClosed();
 
+    void tokenFrameFileChanged(const QString& tokenFrameFile);
+    void tokenMaskFileChanged(const QString& tokenMaskFile);
+
 public slots:
     void setMonster(MonsterClass* monster, bool edit = true);
     void setMonster(const QString& monsterName, bool edit = true);
@@ -38,6 +42,10 @@ public slots:
 
     void dataChanged();
 
+    void setTokenSearchString(const QString& searchString);
+    void setTokenFrameFile(const QString& tokenFrameFile);
+    void setTokenMaskFile(const QString& tokenMaskFile);
+
 protected slots:
     void hitDiceChanged();
     void abilityChanged();
@@ -45,8 +53,12 @@ protected slots:
     void monsterRenamed();
     void handlePublishButton();
 
+    void handlePreviousToken();
+    void handleAddToken();
+    void handleSearchToken();
     void handleReloadImage();
     void handleClearImage();
+    void handleNextToken();
 
     void addAction();
     void deleteAction(const MonsterAction& action);
@@ -70,6 +82,8 @@ protected:
     virtual void focusOutEvent(QFocusEvent * event);
 
 private:
+    QString selectToken();
+    void setTokenIndex(int index);
     void loadMonsterImage();
     void storeMonsterData();
 
@@ -85,8 +99,17 @@ private:
     QWidget* _reactionsWidget;
 
     MonsterClass* _monster;
+    int _currentToken;
     bool _edit;
     bool _mouseDown;
+
+    // Token search data
+    QString _searchString;
+    BestiaryFindTokenDialog::TokenDetailMode _tokenMode;
+    QColor _tokenBackground;
+    int _tokenBackgroundLevel;
+    QString _tokenFrameFile;
+    QString _tokenMaskFile;
 };
 
 #endif // BESTIARYDIALOG_H

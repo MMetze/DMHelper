@@ -40,6 +40,7 @@ public:
 
 signals:
     void dataChanged(BattleDialogModelMonsterBase* monsterBase);
+    void imageChanged(BattleDialogModelMonsterBase* monsterBase);
 
 public slots:
     virtual void setConditions(int conditions) override;
