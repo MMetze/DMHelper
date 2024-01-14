@@ -99,10 +99,10 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.ZIPARTIFACT }}
-        path: ${{ github.workspace }}\DMHelper\${{ env.ZIPARTIFACT }}
+        path: ${{ github.workspace }}/DMHelper/${{ env.ZIPARTIFACT }}
 
     - name: Save the install file
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.INSTALLERARTIFACT }}
-        path: ${{ github.workspace }}\DMHelper\${{ env.INSTALLERARTIFACT }}
+        path: ${{ github.workspace }}/DMHelper/${{ env.INSTALLERARTIFACT }}
