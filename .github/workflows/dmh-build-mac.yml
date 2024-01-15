@@ -82,15 +82,15 @@ jobs:
         cd DMHelper
         cd bin64
         ${{ runner.workspace }}/Qt/Tools/QtInstallerFramework/${{ env.QT_INSTALLER_VERSION }}/bin/binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-macOS-release-Installer"
-        zip -r ./DM-Helper-macOS-release-Installer.zip ./DM-Helper-macOS-release-Installer.app
-        # mv "./DM-Helper-macOS-release-Installer.app" "../DMHelper-macOS-release-Installer.app"
+        zip -r ${{ env.INSTALLERARTIFACT }} ./DM-Helper-macOS-release-Installer.app
+        mv ${{ env.INSTALLERARTIFACT }} ../../../../
         
     - name: Zip the build
       run:  |
         cd DMHelper
         cd ./bin64/packages/com.dmhelper.app/data
-        zip -r "DMHelper-macOS-release.zip" *
-        mv "DMHelper-macOS-release.zip" ../../../../
+        zip -r ${{ env.ZIPARTIFACT }} *
+        mv ${{ env.ZIPARTIFACT }} ../../../../
     
     - name: Output the workspace directory tree contents
       run: |
