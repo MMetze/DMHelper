@@ -83,7 +83,7 @@ jobs:
         cd bin64
         ${{ runner.workspace }}/Qt/Tools/QtInstallerFramework/${{ env.QT_INSTALLER_VERSION }}/bin/binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-macOS-release-Installer"
         zip -r ${{ env.INSTALLERARTIFACT }} ./DM-Helper-macOS-release-Installer.app
-        mv ${{ env.INSTALLERARTIFACT }} ../../../../
+        mv ${{ env.INSTALLERARTIFACT }} ../
         
     - name: Zip the build
       run:  |
