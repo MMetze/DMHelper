@@ -2,11 +2,12 @@
 #include <QDomElement>
 #include <QGraphicsItem>
 
-BattleDialogModelObject::BattleDialogModelObject(const QPointF& position, const QString& name, QObject *parent) :
+BattleDialogModelObject::BattleDialogModelObject(const QPointF& position, qreal rotation, const QString& name, QObject *parent) :
     CampaignObjectBase{name, parent},
     _linkedObject(nullptr),
     _linkedId(),
-    _position(position)
+    _position(position),
+    _rotation(rotation)
 {
 }
 
@@ -18,6 +19,7 @@ void BattleDialogModelObject::inputXML(const QDomElement &element, bool isImport
 {
     _position = QPointF(element.attribute("positionX", QString::number(0)).toDouble(),
                         element.attribute("positionY", QString::number(0)).toDouble());
+    _rotation = element.attribute("rotation", QString::number(0)).toDouble();
 
     if(element.hasAttribute("linkID"))
         _linkedId = QUuid(element.attribute("linkID"));
@@ -32,6 +34,7 @@ void BattleDialogModelObject::copyValues(const CampaignObjectBase* other)
         return;
 
     _position = otherObject->_position;
+    _rotation = otherObject->_rotation;
 
     CampaignObjectBase::copyValues(other);
 }
@@ -66,6 +69,21 @@ void BattleDialogModelObject::setPosition(const QPointF& position)
 void BattleDialogModelObject::setPosition(qreal x, qreal y)
 {
     setPosition(QPointF(x, y));
+}
+
+qreal BattleDialogModelObject::getRotation() const
+{
+    return _rotation;
+}
+
+void BattleDialogModelObject::setRotation(qreal rotation)
+{
+    if(_rotation != rotation)
+    {
+        _rotation = rotation;
+        emit objectMoved(this);
+        emit dirty();
+    }
 }
 
 void BattleDialogModelObject::applyScale(QGraphicsItem& item, qreal gridScale)
@@ -115,6 +133,8 @@ void BattleDialogModelObject::internalOutputXML(QDomDocument &doc, QDomElement &
 {
     element.setAttribute("positionX", _position.x());
     element.setAttribute("positionY", _position.y());
+    if(_rotation != 0.0)
+        element.setAttribute("rotation", _rotation);
 
     if(_linkedObject)
         element.setAttribute("linkID", _linkedObject->getID().toString());

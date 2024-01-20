@@ -7,12 +7,11 @@
 #include <QVariant>
 
 BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *parent) :
-    BattleDialogModelObject(QPointF(), name, parent),
+    BattleDialogModelObject(QPointF(), 0.0, name, parent),
     _tokensLayer(nullptr),
     _active(true),
     _visible(true),
     _size(20),
-    _rotation(0),
     _color(115, 18, 0, 64),
     _tip(),
     _batchChanges(false),
@@ -21,12 +20,11 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
 }
 
 BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
-    BattleDialogModelObject(position),
+    BattleDialogModelObject(position, rotation),
     _tokensLayer(nullptr),
     _active(true),
     _visible(true),
     _size(size),
-    _rotation(rotation),
     _color(color),
     _tip(tip),
     _batchChanges(false),
@@ -49,7 +47,6 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
     _active = static_cast<bool>(element.attribute("active", QString::number(1)).toInt());
     _visible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
     _size = element.attribute("size", QString::number(20)).toInt();
-    _rotation = element.attribute("rotation", QString::number(0)).toDouble();
     _color = QColor(element.attribute("colorR", QString::number(115)).toInt(),
                     element.attribute("colorG", QString::number(18)).toInt(),
                     element.attribute("colorB", QString::number(0)).toInt(),
@@ -69,7 +66,6 @@ void BattleDialogModelEffect::copyValues(const CampaignObjectBase* other)
     _active = otherEffect->_active;
     _visible = otherEffect->_visible;
     _size = otherEffect->_size;
-    _rotation = otherEffect->_rotation;
     _color = otherEffect->_color;
     _tip = otherEffect->_tip;
 
@@ -191,20 +187,6 @@ void BattleDialogModelEffect::setWidth(int width)
     Q_UNUSED(width);
 }
 
-qreal BattleDialogModelEffect::getRotation() const
-{
-    return _rotation;
-}
-
-void BattleDialogModelEffect::setRotation(qreal rotation)
-{
-    if(_rotation != rotation)
-    {
-        _rotation = rotation;
-        emit objectMoved(this);
-    }
-}
-
 QColor BattleDialogModelEffect::getColor() const
 {
     return _color;
@@ -310,7 +292,6 @@ void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &
     element.setAttribute("active", _active);
     element.setAttribute("visible", _visible);
     element.setAttribute("size", _size);
-    element.setAttribute("rotation", _rotation);
     element.setAttribute("colorR", _color.red());
     element.setAttribute("colorG", _color.green());
     element.setAttribute("colorB", _color.blue());
