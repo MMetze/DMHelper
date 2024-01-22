@@ -28,7 +28,8 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CombatantDialog::previousIcon);
     connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CombatantDialog::nextIcon);
 
-    connect(ui->cmbMonsterClass, SIGNAL(currentIndexChanged(QString)), this, SLOT(monsterClassChanged(QString)));
+    //connect(ui->cmbMonsterClass, SIGNAL(currentIndexChanged(QString)), this, SLOT(monsterClassChanged(QString)));
+    connect(ui->cmbMonsterClass,  &QComboBox::currentTextChanged, this, &CombatantDialog::monsterClassChanged);
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
     connect(ui->btnOpenMonster, SIGNAL(clicked(bool)), this, SLOT(openMonsterClicked()));
 
