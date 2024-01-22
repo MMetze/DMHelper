@@ -27,6 +27,7 @@ public:
         BattleDialogModelEffect_Cube,
         BattleDialogModelEffect_Line,
         BattleDialogModelEffect_Object,
+        BattleDialogModelEffect_ObjectVideo,
 
         BattleDialogModelEffect_Count
     };

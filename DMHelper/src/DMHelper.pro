@@ -46,6 +46,7 @@ SOURCES += main.cpp\
     battlecombatantframe.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
+    battledialogmodeleffectobjectvideo.cpp \
     battledialogmodeleffectshape.cpp \
     battledialogmodelobject.cpp \
     battleframe.cpp \
@@ -308,6 +309,7 @@ HEADERS  += mainwindow.h \
     battlecombatantframe.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
+    battledialogmodeleffectobjectvideo.h \
     battledialogmodeleffectshape.h \
     battledialogmodelobject.h \
     battleframe.h \
