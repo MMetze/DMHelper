@@ -15,9 +15,7 @@
 CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
-    //_combatant(nullptr),
     _iconIndex(0)
-//    _count(1)
 {
     ui->setupUi(this);
 
@@ -28,7 +26,6 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CombatantDialog::previousIcon);
     connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CombatantDialog::nextIcon);
 
-    //connect(ui->cmbMonsterClass, SIGNAL(currentIndexChanged(QString)), this, SLOT(monsterClassChanged(QString)));
     connect(ui->cmbMonsterClass,  &QComboBox::currentTextChanged, this, &CombatantDialog::monsterClassChanged);
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
     connect(ui->btnOpenMonster, SIGNAL(clicked(bool)), this, SLOT(openMonsterClicked()));
@@ -161,8 +158,6 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
     if(monsterClass == nullptr)
         return;
 
-    //_count = ui->edtCount->text().toInt();
-
     monster->setMonsterClass(monsterClass);
 
     combatant->setName(ui->edtNameLocal->text());
@@ -171,8 +166,6 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
 
 void CombatantDialog::accept()
 {
-    //if(_combatant)
-    //    writeCombatant(_combatant);
     QDialog::accept();
 }
 

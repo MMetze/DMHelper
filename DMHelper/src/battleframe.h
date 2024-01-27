@@ -272,6 +272,7 @@ private slots:
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
     void setCombatantVisibility(bool aliveVisible, bool deadVisible);
+    void setSingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);
