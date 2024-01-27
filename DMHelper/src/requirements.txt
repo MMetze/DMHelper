@@ -1,4 +1,3 @@
-Moving layers around and hiding leads to wrong initiative list
 Mouse status not always exclusive
 Open log directory button
 Clear cache button
