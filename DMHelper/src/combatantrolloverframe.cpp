@@ -129,7 +129,7 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
 
     addSectionTitle(QString("Actions"));
     const QList<MonsterAction>& actionList = characterBase->getActions();
-    for(const MonsterAction& action : qAsConst(actionList))
+    for(const MonsterAction& action : std::as_const(actionList))
     {
         QListWidgetItem *item = new QListWidgetItem(action.getName());
 //        item->setToolTip(action.getDescription());
@@ -144,7 +144,7 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
     {
         addSectionTitle(QString("Proficiencies"));
         QStringList proficiencyList = proficiencyString.split(QChar::LineFeed);
-        for(const QString& oneItem : qAsConst(proficiencyList))
+        for(const QString& oneItem : std::as_const(proficiencyList))
         {
             ui->listActions->addItem(oneItem);
         }
@@ -174,7 +174,7 @@ void CombatantRolloverFrame::addActionList(const QList<MonsterAction>& actionLis
 
     addSectionTitle(listTitle);
 
-    for(const MonsterAction& action : qAsConst(actionList))
+    for(const MonsterAction& action : std::as_const(actionList))
     {
         QListWidgetItem *item = new QListWidgetItem(action.summaryString());
         item->setToolTip(action.getDescription());

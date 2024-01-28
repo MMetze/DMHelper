@@ -2,7 +2,7 @@
 #define VIDEOPLAYER_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QImage>
 #include "dmh_vlc.h"
 
@@ -21,7 +21,7 @@ public:
     virtual void setPlayingAudio(bool playAudio);
 
     virtual bool isError() const;
-    virtual QMutex* getMutex() const;
+    virtual QRecursiveMutex* getMutex() const;
     virtual QImage* getImage() const;
     virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
@@ -53,7 +53,6 @@ public slots:
 protected slots:
 
     virtual void internalStopCheck(int status);
-    virtual void internalAudioCheck(int newStatus);
 
 protected:
 
@@ -94,7 +93,7 @@ protected:
 
     unsigned int _nativeWidth;
     unsigned int _nativeHeight;
-    QMutex* _mutex;
+    QRecursiveMutex* _mutex;
     class VideoPlayerImageBuffer *_buffers[2];
     size_t _idxRender;
     size_t _idxDisplay;
@@ -105,7 +104,7 @@ protected:
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;
-    bool _firstImage;
+    int _frameCount;
     int _originalTrack;
 };
 

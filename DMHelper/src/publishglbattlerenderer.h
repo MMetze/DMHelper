@@ -71,7 +71,6 @@ protected:
     virtual bool isBackgroundReady() = 0;
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
-//    virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
     virtual void updateBackground();
 
     virtual void updateSelectionTokens();
@@ -126,7 +125,6 @@ protected:
     qreal _initiativeTokenHeight;
     bool _movementVisible;
     BattleDialogModelCombatant* _movementCombatant;
-//    bool _movementPC;
     PublishGLImage* _movementToken;
     QString _tokenFrameFile;
     PublishGLImage* _tokenFrame;
@@ -138,7 +136,6 @@ protected:
     QColor _countdownColor;
 
     BattleDialogModelCombatant* _activeCombatant;
-    //bool _activePC;
 
     QString _activeTokenFile;
     PublishGLImage* _activeToken;

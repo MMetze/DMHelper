@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "dmversion.h"
 #include "publishwindow.h"
-#include "publishframe.h"
 #include "dicerolldialog.h"
 #include "countdownframe.h"
 #include "party.h"
@@ -24,13 +23,11 @@
 #include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "campaignobjectframe.h"
-#include "combatant.h"
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
-#include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
 #include "spell.h"
@@ -39,12 +36,7 @@
 #include "bestiaryexportdialog.h"
 #include "exportdialog.h"
 #include "equipmentserver.h"
-#include "textpublishdialog.h"
-#include "texttranslatedialog.h"
 #include "randommarketdialog.h"
-#include "combatantselectdialog.h"
-#include "optionsdialog.h"
-#include "selectzoom.h"
 #include "quickref.h"
 #include "quickrefframe.h"
 #include "dmscreentabwidget.h"
@@ -59,7 +51,6 @@
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"
-#include "discordposter.h"
 #include "legaldialog.h"
 #include "updatechecker.h"
 #include "ribbonmain.h"
@@ -74,12 +65,10 @@
 #include "ribbontabmap.h"
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
-#include "publishbuttonribbon.h"
 #include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
-#include "dmhwaitingdialog.h"
 #include "layerimage.h"
 #include "layerfow.h"
 #include "layervideo.h"
@@ -93,6 +82,7 @@
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
+#include <QMimeDatabase>
 #include <QDomElement>
 #include <QDomDocument>
 #include <QFile>
@@ -189,21 +179,21 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Qt Information";
     qDebug() << "[MainWindow]     Qt Version: " << QLibraryInfo::version().toString();
     qDebug() << "[MainWindow]     Is Debug? " << QLibraryInfo::isDebugBuild();
-    qDebug() << "[MainWindow]     PrefixPath: " << QLibraryInfo::location(QLibraryInfo::PrefixPath);
-    qDebug() << "[MainWindow]     DocumentationPath: " << QLibraryInfo::location(QLibraryInfo::DocumentationPath);
-    qDebug() << "[MainWindow]     HeadersPath: " << QLibraryInfo::location(QLibraryInfo::HeadersPath);
-    qDebug() << "[MainWindow]     LibrariesPath: " << QLibraryInfo::location(QLibraryInfo::LibrariesPath);
-    qDebug() << "[MainWindow]     LibraryExecutablesPath: " << QLibraryInfo::location(QLibraryInfo::LibraryExecutablesPath);
-    qDebug() << "[MainWindow]     BinariesPath: " << QLibraryInfo::location(QLibraryInfo::BinariesPath);
-    qDebug() << "[MainWindow]     PluginsPath: " << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-    qDebug() << "[MainWindow]     ImportsPath: " << QLibraryInfo::location(QLibraryInfo::ImportsPath);
-    qDebug() << "[MainWindow]     Qml2ImportsPath: " << QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
-    qDebug() << "[MainWindow]     ArchDataPath: " << QLibraryInfo::location(QLibraryInfo::ArchDataPath);
-    qDebug() << "[MainWindow]     DataPath: " << QLibraryInfo::location(QLibraryInfo::DataPath);
-    qDebug() << "[MainWindow]     TranslationsPath: " << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-    qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
-    qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
-    qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
+    qDebug() << "[MainWindow]     PrefixPath: " << QLibraryInfo::path(QLibraryInfo::PrefixPath);
+    qDebug() << "[MainWindow]     DocumentationPath: " << QLibraryInfo::path(QLibraryInfo::DocumentationPath);
+    qDebug() << "[MainWindow]     HeadersPath: " << QLibraryInfo::path(QLibraryInfo::HeadersPath);
+    qDebug() << "[MainWindow]     LibrariesPath: " << QLibraryInfo::path(QLibraryInfo::LibrariesPath);
+    qDebug() << "[MainWindow]     LibraryExecutablesPath: " << QLibraryInfo::path(QLibraryInfo::LibraryExecutablesPath);
+    qDebug() << "[MainWindow]     BinariesPath: " << QLibraryInfo::path(QLibraryInfo::BinariesPath);
+    qDebug() << "[MainWindow]     PluginsPath: " << QLibraryInfo::path(QLibraryInfo::PluginsPath);
+    qDebug() << "[MainWindow]     QmlImportsPath: " << QLibraryInfo::path(QLibraryInfo::QmlImportsPath);
+    qDebug() << "[MainWindow]     Qml2ImportsPath: " << QLibraryInfo::path(QLibraryInfo::Qml2ImportsPath);
+    qDebug() << "[MainWindow]     ArchDataPath: " << QLibraryInfo::path(QLibraryInfo::ArchDataPath);
+    qDebug() << "[MainWindow]     DataPath: " << QLibraryInfo::path(QLibraryInfo::DataPath);
+    qDebug() << "[MainWindow]     TranslationsPath: " << QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+    qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::path(QLibraryInfo::ExamplesPath);
+    qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::path(QLibraryInfo::TestsPath);
+    qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::path(QLibraryInfo::SettingsPath);
 
     QSurfaceFormat fmt;
     qDebug() << "[MainWindow] OpenGL Information";
@@ -211,12 +201,12 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Device pixel ratio: " << this->devicePixelRatio();
 
     qDebug() << "[MainWindow] Standard Path Information";
-    qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
-    qDebug() << "[MainWindow]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
-    qDebug() << "[MainWindow]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).first());
-    qDebug() << "[MainWindow]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
-    qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
-    qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
+    qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).constFirst());
+    qDebug() << "[MainWindow]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).constFirst());
+    qDebug() << "[MainWindow]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).constFirst());
+    qDebug() << "[MainWindow]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).constFirst());
+    qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).constFirst());
+    qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).constFirst());
 
     qDebug() << "[MainWindow] Registering application fonts";
     QFontDatabase::addApplicationFont(":/img/data/fonts/Rellanic-Agx7.ttf");
@@ -261,10 +251,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set the MRU menu to the created menu bar
     mruHandler->setActionsMenu(_ribbonTabFile->getMRUMenu());
 
-    // TODO: find out why the following has no effect! There must be something in the frames that has "minimumexpanding" size policy
-    //ui->splitter->setStretchFactor(0, 2);
-    //ui->splitter->setStretchFactor(1, 2);
-
     qDebug() << "[MainWindow] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[MainWindow] Bestiary Initialized";
@@ -290,10 +276,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(openClicked()), this, SLOT(openFileDialog()));
     QShortcut* openShortcut = new QShortcut(QKeySequence(tr("Ctrl+O", "Open")), this);
     connect(openShortcut, SIGNAL(activated()), this, SLOT(openFileDialog()));
-    //connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
     connect(_ribbonTabFile, &RibbonTabFile::saveClicked, this, &MainWindow::saveCampaign);
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
-    //connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
     connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveCampaign);
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
     connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
@@ -353,7 +337,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle Map Menu
 
     // Battle View Menu
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
+    connect(_options, SIGNAL(pointerFileNameChanged(QString)), _ribbonTabBattleView, SLOT(setPointerFile(QString)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
 
     // Mini Map Menu
@@ -390,19 +374,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_treeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
 
-    connect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
-    connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
-
     qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
     splash.showMessage(QString("Initializing Bestiary...\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
     readBestiary();
+    _bestiaryDlg.setOptions(_options);
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
-    _bestiaryDlg.setTokenSearchString(_options->getTokenSearchString());
-    _bestiaryDlg.setTokenFrameFile(_options->getTokenFrameFile());
-    _bestiaryDlg.setTokenMaskFile(_options->getTokenMaskFile());
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
@@ -413,11 +392,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
     connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
     connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
-    connect(_options, &OptionsContainer::tokenSearchStringChanged, &_bestiaryDlg, &BestiaryDialog::setTokenSearchString);
-    connect(_options, &OptionsContainer::tokenFrameFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenFrameFile);
-    connect(_options, &OptionsContainer::tokenMaskFileChanged, &_bestiaryDlg, &BestiaryDialog::setTokenMaskFile);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenFrameFileChanged, _options, &OptionsContainer::setTokenFrameFile);
-    connect(&_bestiaryDlg, &BestiaryDialog::tokenMaskFileChanged, _options, &OptionsContainer::setTokenMaskFile);
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -569,7 +543,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
-    CharacterFrame* charFrame = new CharacterFrame;
+    CharacterFrame* charFrame = new CharacterFrame(_options);
     charFrame->setHeroForgeToken(_options->getHeroForgeToken());
     connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
     connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
@@ -755,7 +729,6 @@ MainWindow::~MainWindow()
 {
     deleteCampaign();
 
-    delete _pubWindow;
     delete ui;
 
     Bestiary::Shutdown();
@@ -1130,7 +1103,7 @@ void MainWindow::newBattleEncounter()
 //    battleFrame->recenterCombatants();
 }
 
-void MainWindow::newMap()
+void MainWindow::newMap(Layer* imageLayer)
 {
     // TODO: throw a message box when it doesn't work.
     if(!_campaign)
@@ -1141,7 +1114,7 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    Layer* mapLayer = selectMapFile();
+    Layer* mapLayer = (imageLayer != nullptr) ? imageLayer : selectMapFile();
     if(!mapLayer)
         return;
 
@@ -1540,6 +1513,8 @@ void MainWindow::readBestiary()
         }
     }
 
+    disconnect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
+
     QString bestiaryFileName = _options->getBestiaryFileName();
     if(!Bestiary::Instance()->readBestiary(bestiaryFileName))
     {
@@ -1550,10 +1525,13 @@ void MainWindow::readBestiary()
     // Bestiary file seems ok, make a backup
     _options->backupFile(bestiaryFileName);
 
+    _bestiaryDlg.dataChanged();
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
         _bestiaryDlg.setMonster(_options->getLastMonster());
     else
         _bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
+
+    connect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Bestiary reading complete.";
 }
@@ -1588,6 +1566,8 @@ void MainWindow::readSpellbook()
         }
     }
 
+    disconnect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
+
     QString spellbookFileName = _options->getSpellbookFileName();
     if(!Spellbook::Instance()->readSpellbook(spellbookFileName))
     {
@@ -1598,10 +1578,13 @@ void MainWindow::readSpellbook()
     // Spellbook file seems ok, make a backup
     _options->backupFile(spellbookFileName);
 
+    _spellDlg.dataChanged();
     if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
         _spellDlg.setSpell(_options->getLastSpell());
     else
         _spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
+
+    connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Spellbook reading complete.";
 }
@@ -1754,32 +1737,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData* data = event->mimeData();
+
     if((data->hasUrls()) &&
        (data->urls().count() == 1) &&
-       (data->urls().first().isLocalFile()))
+       (data->urls().constFirst().isLocalFile()))
     {
-        // TODO: fix
-        QImageReader reader(data->urls().first().toLocalFile());
-        if(reader.canRead())
-        {
-            event->acceptProposedAction();
-            return;
-        }
-    }
-
-    event->ignore();
-}
-
-void MainWindow::dragMoveEvent(QDragMoveEvent *event)
-{
-    const QMimeData* data = event->mimeData();
-    if((data->hasUrls()) &&
-       (data->urls().count() == 1) &&
-       (data->urls().first().isLocalFile()))
-    {
-        // TODO: enhance to include non-images
-        QImageReader reader(data->urls().first().toLocalFile());
-        if(reader.canRead())
+        QString filename = data->urls().constFirst().toLocalFile();
+        QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+        if((mimeType.isValid()) &&
+           ((mimeType.name().startsWith("image/")) ||
+            (mimeType.name().startsWith("video/")) ||
+            (mimeType.name().startsWith("text/")) ||
+            (mimeType.suffixes().contains("xml"))))
         {
             event->acceptProposedAction();
             return;
@@ -1797,18 +1766,46 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 void MainWindow::dropEvent(QDropEvent *event)
 {
     const QMimeData* data = event->mimeData();
+
     if((data->hasUrls()) &&
-       (data->urls().count() == 1) &&
-       (data->urls().first().isLocalFile()))
+        (data->urls().count() == 1) &&
+        (data->urls().constFirst().isLocalFile()))
     {
-        QString filename = data->urls().first().toLocalFile();
-        openCampaign(filename);
-        event->accept();
+        QString filename = data->urls().constFirst().toLocalFile();
+        QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+        if(mimeType.isValid())
+        {
+            if(mimeType.name().startsWith("image/"))
+            {
+                QImageReader reader(filename);
+                if(reader.canRead())
+                    newMap(new LayerImage(QString("Map Image: ") + filename, filename));
+
+                event->acceptProposedAction();
+                return;
+            }
+            else if(mimeType.name().startsWith("video/"))
+            {
+                newMap(new LayerVideo(QString("Map Video: ") + filename, filename));
+                event->acceptProposedAction();
+                return;
+            }
+            else if(mimeType.suffixes().contains("xml")) // XML first because it is a form of text
+            {
+                openCampaign(filename);
+                event->acceptProposedAction();
+                return;
+            }
+            else if(mimeType.name().startsWith("text/"))
+            {
+                //_bestiaryDlg.addMonsterText(filename);
+                event->acceptProposedAction();
+                return;
+            }
+        }
     }
-    else
-    {
-        event->ignore();
-    }
+
+    event->ignore();
 }
 
 void MainWindow::setupRibbonBar()
@@ -2036,7 +2033,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+    ts.setEncoding(QStringConverter::Utf8);
     ts << doc.toString();
 
     file.close();
@@ -2255,15 +2252,20 @@ Layer* MainWindow::selectMapFile()
     if(filename.isEmpty())
         return nullptr;
 
-    QFileInfo fileInfo(filename);
-
-    QImageReader reader(filename);
-    if(reader.canRead())
-        return new LayerImage(QString("Map Image: ") + fileInfo.fileName(), filename);
-
-    QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
-    if(result == QMessageBox::Yes)
-        return new LayerVideo(QString("Map Video: ") + fileInfo.fileName(), filename);
+    QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+    if(mimeType.isValid())
+    {
+        if(mimeType.name().startsWith("image/"))
+        {
+            QImageReader reader(filename);
+            if(reader.canRead())
+                return new LayerImage(QString("Map Image: ") + filename, filename);
+        }
+        else if(mimeType.name().startsWith("video/"))
+        {
+            return new LayerVideo(QString("Map Video: ") + filename, filename);
+        }
+    }
 
     return nullptr;
 }
@@ -2286,7 +2288,7 @@ void MainWindow::openCampaign(const QString& filename)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString contentError;
     int contentErrorLine = 0;
     int contentErrorColumn = 0;
@@ -2326,8 +2328,12 @@ void MainWindow::openCampaign(const QString& filename)
     QFileInfo fileInfo(_campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
     _campaign = new Campaign();
+
+    Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
     _campaign->postProcessXML(campaignElement, false);
+    Bestiary::Instance()->finishBatchProcessing();
+
     if(!_campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
@@ -2719,7 +2725,7 @@ void MainWindow::importBestiary()
         }
 
         QTextStream in(&file);
-        in.setCodec("UTF-8");
+        in.setEncoding(QStringConverter::Utf8);
         QString errMsg;
         int errRow;
         int errColumn;

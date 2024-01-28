@@ -107,7 +107,7 @@ void AudioTrackSyrinscapeOnline::setMute(bool mute)
     Q_UNUSED(mute);
 }
 
-void AudioTrackSyrinscapeOnline::setVolume(int volume)
+void AudioTrackSyrinscapeOnline::setVolume(float volume)
 {
     Q_UNUSED(volume);
 }

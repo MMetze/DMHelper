@@ -136,7 +136,7 @@ void EncounterTextLinked::readLinkedFile()
     }
 
     QTextStream in(&extFile);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString inputString;
     QString line;
     while(in.readLineInto(&line))

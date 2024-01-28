@@ -2,6 +2,7 @@
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectobject.h"
 #include "scaledpixmap.h"
+#include "layertokens.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
@@ -45,8 +46,6 @@ PublishGLBattleEffect::~PublishGLBattleEffect()
 
 void PublishGLBattleEffect::cleanup()
 {
-//    qDebug() << "[PublishGLBattleEffect] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
-
     if(QOpenGLContext::currentContext())
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -121,12 +120,14 @@ void PublishGLBattleEffect::effectMoved()
         return;
 
     BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
+    if((!_effect) || (!_effect->getLayer()))
+        return;
 
     QPointF effectPos = effect->getPosition();
     qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         sizeFactor *= 2.0; // Convert radius to diameter
-    qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+    qreal scaleFactor = (static_cast<qreal>(_effect->getLayer()->getScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(QVector3D(sceneToWorld(effectPos)));
@@ -167,7 +168,6 @@ void PublishGLBattleEffect::prepareObjects()
 
     QPainter painter;
     painter.begin(&effectImage);
-        //painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
         painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter.setBrush(QBrush(_effect->getColor()));
         drawShape(painter, _effect, effectSize, effectWidth);

@@ -81,6 +81,7 @@ private slots:
     void browseTokenMask();
     void editTokenMask();
     void setTokenMask(const QString& tokenMask);
+    void populateTokens();
 
     void updateFileLocations();
     void resetFileLocations();

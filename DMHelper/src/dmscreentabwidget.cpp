@@ -52,7 +52,7 @@ void DMScreenTabWidget::readEquipment(const QString& equipmentFile)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;

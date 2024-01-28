@@ -6,7 +6,6 @@
 #include <QUuid>
 #include <QDate>
 #include "mruhandler.h"
-#include "dmconstants.h"
 
 class OptionsAccessor;
 
@@ -65,8 +64,15 @@ public:
 
     // Token search settings
     QString getTokenSearchString() const;
-    QString getTokenFrameFile() const;
+    bool getTokenBackgroundFill() const;
+    QColor getTokenBackgroundFillColor() const;
+    bool getTokenTransparent() const;
+    QColor getTokenTransparentColor() const;
+    int getTokenTransparentLevel() const;
+    bool getTokenMaskApplied() const;
     QString getTokenMaskFile() const;
+    bool getTokenFrameApplied() const;
+    QString getTokenFrameFile() const;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -121,8 +127,15 @@ signals:
 
     // Token search settings
     void tokenSearchStringChanged(const QString& tokenSearchString);
-    void tokenFrameFileChanged(const QString& tokenFrameFile);
+    void tokenBackgroundFillChanged(bool backgroundFill);
+    void tokenBackgroundFillColorChanged(const QColor& transparentColor);
+    void tokenTransparentChanged(bool transparent);
+    void tokenTransparentColorChanged(const QColor& transparentColor);
+    void tokenTransparentLevelChanged(int transparentLevel);
+    void tokenMaskAppliedChanged(bool applied);
     void tokenMaskFileChanged(const QString& tokenMaskFile);
+    void tokenFrameAppliedChanged(bool applied);
+    void tokenFrameFileChanged(const QString& tokenFrameFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -196,8 +209,15 @@ public slots:
 
     // Token search settings
     void setTokenSearchString(const QString& tokenSearchString);
-    void setTokenFrameFile(const QString& tokenFrameFile);
+    void setTokenBackgroundFill(bool backgroundFill);
+    void setTokenBackgroundFillColor(const QColor& transparentColor);
+    void setTokenTransparent(bool transparent);
+    void setTokenTransparentColor(const QColor& transparentColor);
+    void setTokenTransparentLevel(int transparentLevel);
+    void setTokenMaskApplied(bool maskApplied);
     void setTokenMaskFile(const QString& tokenMaskFile);
+    void setTokenFrameApplied(bool frameApplied);
+    void setTokenFrameFile(const QString& tokenFrameFile);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -266,8 +286,15 @@ private:
 
     // Token search settings
     QString _tokenSearchString;
-    QString _tokenFrameFile;
+    bool _tokenBackgroundFill;
+    QColor _tokenBackgroundFillColor;
+    bool _tokenTransparent;
+    QColor _tokenTransparentColor;
+    int _tokenTransparentLevel;
+    bool _tokenMaskApplied;
     QString _tokenMaskFile;
+    bool _tokenFrameApplied;
+    QString _tokenFrameFile;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings

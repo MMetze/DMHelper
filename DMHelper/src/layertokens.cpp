@@ -4,7 +4,6 @@
 #include "unselectedpixmap.h"
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
-#include "publishglimage.h"
 #include "campaign.h"
 #include "character.h"
 #include "bestiary.h"
@@ -110,7 +109,6 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
             if(combatant)
             {
                 combatant->inputXML(combatantElement, isImport);
-                //_model->appendCombatantToList(combatant);
                 addCombatant(combatant);
             }
 
@@ -408,6 +406,8 @@ void LayerTokens::playerGLUninitialize()
 
 void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(defaultModelMatrix);
+
     if(!_model)
         return;
 
@@ -457,11 +457,9 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
 
             localMatrix = combatantToken->getMatrix();
             localMatrix.translate(_position.x(), _position.y());
-//            functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, localMatrix.constData());
             functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
             functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
             combatantToken->paintGL();
-//            combatantToken->paintEffects(defaultModelMatrix);
             combatantToken->paintEffects(_shaderModelMatrixRGBA);
 
             emit postCombatantDrawGL(functions, combatant, combatantToken);
@@ -523,7 +521,7 @@ void LayerTokens::setScale(int scale)
         BattleDialogModelEffect* effectKey = findEffectKey(effect);
         if(effectKey)
         {
-            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effectKey);
+            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
             if(effectToken)
                 effectToken->effectMoved();
 
@@ -632,6 +630,7 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
     if(_effects.contains(effect))
         return;
 
+    effect->setLayer(this);
     _effects.append(effect);
     connect(effect, &BattleDialogModelEffect::effectChanged, this, &LayerTokens::effectChanged);
     connect(effect, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::effectMoved);
@@ -662,8 +661,11 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
     disconnect(effect, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::effectMoved);
     disconnect(this, &LayerTokens::objectRemoved, effect, &BattleDialogModelObject::objectRemoved);
     disconnect(effect, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
+
     if(!_effects.removeOne(effect))
         return;
+
+    effect->setLayer(nullptr);
 
     _model->removeEffectFromList(effect);
     emit objectRemoved(effect);
@@ -832,7 +834,29 @@ void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
     QGraphicsItem* graphicsItem = _effectIconHash.value(effect);
     if(graphicsItem)
         effect->applyEffectValues(*graphicsItem, _scale);
-    //effect->applyEffectValues(*graphicsItem, _model->getGridScale());
+
+    // Remove current effect markers from all combatants
+    QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
+        {
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                QGraphicsPixmapItem* combatantItem = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
+                if(combatantItem)
+                {
+                    removeSpecificEffectFromItem(combatantItem, effect);
+                    removeEffectFromToken(tokenLayer->getCombatantToken(combatant), effect);
+                }
+            }
+        }
+    }
+
+    // Refresh the effect markers
+    effectMoved(effect);
 }
 
 void LayerTokens::effectMoved(BattleDialogModelObject* object)
@@ -868,8 +892,7 @@ void LayerTokens::effectMoved(BattleDialogModelObject* object)
                 QGraphicsPixmapItem* combatantItem = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
                 if(combatantItem)
                 {
-                    bool collision = isItemInEffectArea(combatantItem, collisionEffect);
-                    if(!collision)
+                    if((!movedEffect->getEffectActive()) || (!isItemInEffectArea(combatantItem, collisionEffect)))
                     {
                         removeSpecificEffectFromItem(combatantItem, movedEffect);
                         removeEffectFromToken(tokenLayer->getCombatantToken(combatant), movedEffect);
@@ -898,66 +921,15 @@ void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDia
     if(!object)
         return;
 
-    /*
-    QGraphicsItem* objectItem = findGraphicsItem(object);
-    if(!objectItem)
-        return;
-
-    BattleDialogModelObject* primaryObject = dynamic_cast<BattleDialogModelObject*>((object->children().count() == 1) ? object->children().at(0) : object);
-    if(!primaryObject)
-        return;
-        */
-
     if(object->getLinkedObject())
     {
         connect(object->getLinkedObject(), &BattleDialogModelObject::objectMovedDelta, object, &BattleDialogModelObject::parentMoved);
         connect(object, &BattleDialogModelObject::objectMoved, this, &LayerTokens::linkedObjectMoved);
-
-        /*
-        QGraphicsItem* linkedItem = findGraphicsItem(object->getLinkedObject());
-        if(!linkedItem)
-            return;
-
-        QPointF objectPos = linkedItem->mapFromScene(objectItem->scenePos());
-        objectItem->setParentItem(linkedItem);
-        objectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
-
-        qreal primaryScale = primaryObject->getScale();
-        qreal fullLinkedScale = getTotalScale(*linkedItem);
-        qreal newScale = (fullLinkedScale > 0.0) ? objectItem->scale() / fullLinkedScale : objectItem->scale();
-        primaryObject->applyScale(*objectItem, primaryScale > 0 ? newScale / primaryScale : newScale);
-
-        objectItem->setPos(objectPos);
-        */
     }
     else
     {
         disconnect(previousLink, &BattleDialogModelObject::objectMovedDelta, object, &BattleDialogModelObject::parentMoved);
         disconnect(object, &BattleDialogModelObject::objectMoved, this, &LayerTokens::linkedObjectMoved);
-        /*
-        QPointF objectPos = objectItem->scenePos();
-        objectItem->setParentItem(nullptr);
-        objectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, false);
-        objectItem->setPos(objectPos);
-        if(object->getObjectType() == DMHelper::CampaignType_BattleContentCombatant)
-        {
-            BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
-            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(objectItem);
-            if((!combatant) || (!pixmapItem))
-                return;
-
-            qreal sizeFactor = combatant->getSizeFactor();
-            qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pixmapItem->pixmap().width(), pixmapItem->pixmap().height()));
-            objectItem->setScale(scaleFactor);
-        }
-        else
-        {
-            BattleDialogModelEffect* effect = dynamic_cast<BattleDialogModelEffect*>(primaryObject);
-            if(effect)
-                effect->applyScale(*objectItem, _scale);
-                //effect->applyEffectValues(*objectItem, _scale);
-        }
-        */
     }
 }
 
@@ -1055,6 +1027,7 @@ QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, Bat
     pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
     pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
     pixmapItem->setPos(combatant->getPosition() + _position);
+    pixmapItem->setRotation(combatant->getRotation());
     pixmapItem->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
     qreal sizeFactor = combatant->getSizeFactor();
     qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(), pix.height()));
@@ -1105,9 +1078,6 @@ QGraphicsItem* LayerTokens::createEffectIcon(QGraphicsScene* scene, BattleDialog
         effectMoved(effect);
 
     return result;
-
-//    if((effect->children().count() != 1) || (addSpellEffect(scene, effect) == nullptr))
-//        return addEffectShape(scene, effect);
 }
 
 QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect)
@@ -1228,24 +1198,6 @@ QGraphicsItem* LayerTokens::findGraphicsItem(BattleDialogModelObject* object)
         return combatantItem;
 
     return findEffectItem(dynamic_cast<BattleDialogModelEffect*>(object));
-
-/*
-    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
-    if(combatant)
-        return _combatantIconHash.value(combatant);
-
-    BattleDialogModelEffect* effect = nullptr;
-    QList<CampaignObjectBase*> childObjects = object->getChildObjects();
-    if(childObjects.count() == 1)
-        effect = dynamic_cast<BattleDialogModelEffectObject*>(childObjects.at(0));
-    else
-        effect = dynamic_cast<BattleDialogModelEffect*>(object);
-
-    if(effect)
-        return _effectIconHash.value(effect);
-
-    return nullptr;
-    */
 }
 
 qreal LayerTokens::getTotalScale(QGraphicsItem& item)
@@ -1293,24 +1245,6 @@ bool LayerTokens::isItemInEffectArea(QGraphicsPixmapItem* item, QGraphicsItem* c
 
     return item->collidesWithItem(collisionEffect);
 }
-
-/*
-void LayerTokens::removeAllEffectsFromItem(QGraphicsPixmapItem* item)
-{
-    if(!item)
-        return;
-
-    // Remove any existing effects on this combatant
-    for(QGraphicsItem* childItem : item->childItems())
-    {
-        if((childItem) && (childItem->data(BATTLE_CONTENT_CHILD_INDEX).toInt() == BattleDialogItemChild_AreaEffect))
-        {
-            childItem->setParentItem(nullptr);
-            delete childItem;
-        }
-    }
-}
-*/
 
 void LayerTokens::removeSpecificEffectFromItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect)
 {
@@ -1360,9 +1294,6 @@ void LayerTokens::applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModel
     effectItem->setPen(QPen(ellipseColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipseColor.setAlpha(128);
     effectItem->setBrush(QBrush(ellipseColor));
-    //effectItem->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
-    //effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent);
-    //effectItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     effectItem->setData(BATTLE_CONTENT_CHILD_INDEX, BattleDialogItemChild_AreaEffect);
     effectItem->setData(BATTLE_CONTENT_CHILD_ID, effectId);
     effectItem->setParentItem(item);

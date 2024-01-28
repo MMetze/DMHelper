@@ -6,6 +6,7 @@
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
+#include "bestiary.h"
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDomDocument>
@@ -58,7 +59,7 @@ bool ObjectImportWorker::doWork()
         return registerImportResult(false, QString("Not able to open the selected import file: ") + _importFilename);
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString contentError;
     int contentErrorLine = 0;
     int contentErrorColumn = 0;
@@ -82,8 +83,12 @@ bool ObjectImportWorker::doWork()
     QFileInfo importFileInfo(_importFilename);
     QDir::setCurrent(importFileInfo.absolutePath());
     _importCampaign = new Campaign();
+
+    Bestiary::Instance()->startBatchProcessing();
     _importCampaign->inputXML(campaignElement, true);
     _importCampaign->postProcessXML(campaignElement, true);
+    Bestiary::Instance()->finishBatchProcessing();
+
     if(!_importCampaign->isValid())
         return registerImportResult(false, QString("The imported file contains a campaign with an invalid structure"));
 

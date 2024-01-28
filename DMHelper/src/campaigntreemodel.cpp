@@ -8,6 +8,7 @@
 #include <QMimeData>
 #include <QUuid>
 #include <QTimer>
+#include <QIODevice>
 #include <QDebug>
 
 // Uncomment the next line to log in detail all of the additions to the campaign model
@@ -404,7 +405,7 @@ void CampaignTreeModel::validateChildStructure(QStandardItem* parentItem)
         return;
 
     CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
-    QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
+    QUuid parentId = QUuid(parentItem->data(DMHelper::TreeItemData_ID).toString());
     if((!parentObject) || (parentId.isNull()))
     {
         qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child structure - parent ID: " << parentId << ", object: " << parentObject;

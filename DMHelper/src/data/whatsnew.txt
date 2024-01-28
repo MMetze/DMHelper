@@ -9,36 +9,18 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.0</h2>
+<h2>What's New: Version 3.2</h2>
 
-<h3>New Features:</h3>
+<h3>New v3.2 Features:</h3>
 <ul>
-<li><b>Layers:</b> this is so big that it's hard to even fathom, let alone summarize. Just as a few examples, you can:
-    <ul>
-    <li> have multiple map levels, with their own fog of war
-    <li> put monsters in groups on different layers, and hide or reveal them all at once
-    <li> make individual layers partially transparent, hide them for the player or the DM (imagine a player version and DM version of a map!)
-    <li> scale and shift layers relative to one another
-    <li> ...and so much more...
-    </ul>
-<li>Upgraded monster tokens
-    <ul>
-    <li> Monsters can have multiple tokens
-    <li> Search and grab tokens from the Internet, applying effects and adding them directly to your Bestiary!
-    </ul>
-<li>Duplication (ie copy/paste) of monsters or effects in a battle - look for a button called... "Duplicate"
-<li>Dynamic entry icons in the campaign tree
-    <ul>
-    <li> PC icons are now their own token
-    <li> You can apply a custom icon to any entry in the tree
-    </ul>
+<li><b>Rotatable Tokens:</b> Right click on a token in a combat and rotate it to any angle you want
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Video playback is back! Just add a video layer to your entry/map/battle! DMH now also caches a screenshot of each video, so loading videos should go quite a bit quicker
+<li>None yet... but I'm sure there will be some
 </ul>
 
 <!--
@@ -46,8 +28,7 @@
 
 <h3>Other Improvements:</h3>
 <ul>
-<li>
-<li>
+<li> None yet
 </ul>
 //-->
 

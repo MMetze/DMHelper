@@ -96,9 +96,6 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         return;
     }
 
-    // TODO: WHY IS THIS NECESSARY?
-    Bestiary::Instance()->startBatchProcessing();
-
     QString calendarName = element.attribute("calendar", QString("Gregorian"));
     if(BasicDateServer::Instance())
         BasicDateServer::Instance()->setActiveCalendar(calendarName);
@@ -107,7 +104,6 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time", QString::number(0)).toInt()));
 
     CampaignObjectBase::inputXML(element, isImport);
-    Bestiary::Instance()->finishBatchProcessing();
 
     QDomElement notesElement = element.firstChildElement(QString("notes"));
     if(!notesElement.isNull())

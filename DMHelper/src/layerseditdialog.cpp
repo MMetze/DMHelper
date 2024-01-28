@@ -6,6 +6,7 @@
 #include "layerimage.h"
 #include "layertokens.h"
 #include "layervideo.h"
+#include "layervideoeffect.h"
 #include "layerblank.h"
 #include "layerframe.h"
 #include "layergrid.h"
@@ -94,7 +95,7 @@ void LayersEditDialog::moveDown()
 void LayersEditDialog::addLayer()
 {
     QStringList items;
-    items << tr("Image") << tr("Video") << tr("FoW");
+    items << tr("Image") << tr("Video") << tr("Effect Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
     items << tr("Grid") << tr("Blank");
@@ -122,6 +123,14 @@ void LayersEditDialog::addLayer()
 
         QFileInfo fileInfo(newFileName);
         newLayer = new LayerVideo(QString("Video: ") + fileInfo.fileName(), newFileName);
+    }
+    else if(selectedItem == tr("Effect Video"))
+    {
+        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Effect Video File"));
+        if(newFileName.isEmpty())
+            return;
+        
+        newLayer = new LayerVideoEffect(QString("Effect Video: ") + newFileName, newFileName);
     }
     else if(selectedItem == tr("FoW"))
     {
@@ -164,6 +173,11 @@ void LayersEditDialog::addLayer()
 
 void LayersEditDialog::removeLayer()
 {
+    // Ask the user to confirm the deletion of the layer
+    QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Remove Layer"), tr("Are you sure you want to remove the selected layer?"), QMessageBox::Yes|QMessageBox::No);
+    if(reply != QMessageBox::Yes)
+        return;
+
     int currentSelected = _scene.getSelectedLayerIndex();
     _scene.removeLayer(currentSelected);
     resetLayout();

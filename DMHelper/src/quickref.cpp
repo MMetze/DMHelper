@@ -127,7 +127,7 @@ void QuickRef::readQuickRef(const QString& quickRefFile)
     QString quickRefIconDir = quickRefInfo.dir().absolutePath() + QString("/icons/");
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     QString errMsg;
     int errRow;
     int errColumn;
@@ -331,7 +331,7 @@ QString QuickRefData::getOverview() const
     if(_bullets.count() > 0)
     {
         result += QString("<ul>");
-        for(const QString& bulletLine : qAsConst(_bullets))
+        for(const QString& bulletLine : std::as_const(_bullets))
             result += QString("<li>") + bulletLine + QString("</li>");
         result += QString("</ul>");
     }

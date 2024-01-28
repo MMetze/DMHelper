@@ -16,7 +16,7 @@ class AudioTrack;
 class Party;
 class UndoMarker;
 
-class Map : public CampaignObjectBase//, public ILayerImageSource
+class Map : public CampaignObjectBase
 {
     Q_OBJECT
 public:
@@ -29,10 +29,6 @@ public:
 
     virtual int getObjectType() const override;
     virtual QIcon getDefaultIcon() override;
-
-    // From ILayerImageSource
-    //virtual const QImage& getImage() const override;
-//    QUndoStack* getMarkerStack();
 
     // Local
     QString getFileName() const;
@@ -72,7 +68,6 @@ public:
 
     void initializeMarkers(QGraphicsScene* scene);
     void cleanupMarkers();
-//    UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
     QList<UndoMarker*> getMarkers();
     int getMarkerCount() const;
@@ -93,19 +88,7 @@ public:
     QImage getFoWImage();
     bool isCleared();
 
-    /*
-    void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
-    void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
-    void fillFoW(const QColor& color, QPaintDevice* target);
-    QImage getBWFoWImage();
-    QImage getBWFoWImage(const QImage &img);
-    QImage getBWFoWImage(const QSize &size);
-    */
-//    QImage getPublishImage();
-//    QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
-//    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
-//    QRect getShrunkPublishRect();
 
     bool isFilterApplied() const;
     MapColorizeFilter getFilter() const;
@@ -116,10 +99,6 @@ public:
     void removeMarker(UndoMarker* marker);
 
 signals:
-    //void executeUndo();
-    //void requestFoWUpdate();
-    //void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
-
     void partyChanged(Party* party);
     void partyIconChanged(const QString& partyIcon);
     void partyIconPosChanged(const QPoint& pos);
@@ -146,8 +125,6 @@ public slots:
 
     void undoPaint();
     void updateFoW();
-
-//    void addMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
@@ -177,8 +154,6 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-    //QString _filename; // for compatibility only
-    //QUndoStack* _undoStack;
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
@@ -188,7 +163,6 @@ protected:
     QUuid _partyId;
     QString _partyAltIcon;
     QPoint _partyIconPos;
-    //int _partyScale;
     int _mapScale;
     int _gridCount;
 
@@ -197,13 +171,7 @@ protected:
 
     bool _initialized;
     LayerScene _layerScene;
-    //QImage _imgBackground;
-    //QImage _imgFow;
     QList<UndoFowBase*> _undoItems;
-    //QImage _imgBWFow;
-    //int _indexBWFow;
-    //bool _filterApplied;
-    //MapColorizeFilter _filter;
     int _lineType;
     QColor _lineColor;
     int _lineWidth;

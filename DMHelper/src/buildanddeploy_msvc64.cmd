@@ -8,11 +8,14 @@ if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
 set QT_DIR=C:\Qt
-set QT_VERSION=5.15.2
-set QT_INSTALLER_VERSION=4.3
+set QT_VERSION=6.6.0
+set QT_INSTALLER_VERSION=4.6
 set MSVC_VERSION=2019
 set SEVENZIP_APP=C:\Program Files\7-Zip\7z
 set PATH=%QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin;%QT_DIR%\Tools\QtInstallerFramework\%QT_INSTALLER_VERSION%\bin;%QT_DIR%\Tools\QtCreator\bin;%QT_DIR%\Tools\QtCreator\bin\jom;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%
+
+rem Uncomment the following line to skip actually building the SW
+rem goto skip_build
 
 rmdir /s /q ..\bin64
 mkdir ..\bin64
@@ -32,9 +35,6 @@ rename ..\bin64\packages\com.dmhelper.app\meta\installscript64.qs installscript.
 
 cd ..
 
-rem Uncomment the following line to skip actually building the SW
-rem goto skip_build
-
 @CALL :Message "Compiling DMHelper"
 
 rmdir /s /q .\build-64_bit-release
@@ -53,7 +53,7 @@ cd build-64_bit-release
 :build_done
 @CALL :Message "Copy resource content"
 xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
-xcopy %QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin\Qt5Xml.dll ..\bin64\packages\com.dmhelper.app\data\
+xcopy %QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
 xcopy ..\src\bin-win64\* ..\bin64\packages\com.dmhelper.app\data\*
 xcopy /s ..\src\bestiary\* ..\bin64\packages\com.dmhelper.app\data\resources\*
 xcopy /s ..\src\doc\* ..\bin64\packages\com.dmhelper.app\data\doc\*
@@ -61,7 +61,7 @@ xcopy /s ..\src\bin-win64\pkgconfig\* ..\bin64\packages\com.dmhelper.app\data\pk
 xcopy /s ..\src\bin-win64\plugins\* ..\bin64\packages\com.dmhelper.app\data\plugins\*
 xcopy /s ..\src\resources\* ..\bin64\packages\com.dmhelper.app\data\resources\*
 
-windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64\packages\com.dmhelper.app\data
+windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
 
 @CALL :Message "Create the installer"
 cd ..\bin64

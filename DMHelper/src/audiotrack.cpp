@@ -72,7 +72,7 @@ bool AudioTrack::isMuted() const
     return false;
 }
 
-int AudioTrack::getVolume() const
+float AudioTrack::getVolume() const
 {
     return 0;
 }

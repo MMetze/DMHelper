@@ -34,9 +34,6 @@ class BattleFrame;
 
 //#define DEBUG_FILL_BOUNDING_RECTS
 
-//const int BattleDialogItemChild_Index = 0;
-//const int BattleDialogItemChild_EffectId = 0;
-
 class BattleFrame : public CampaignObjectFrame
 {
     Q_OBJECT
@@ -126,6 +123,8 @@ public slots:
     void addCharacter();
     void addNPC();
     void addEffectObject();
+    void addEffectObjectFile(const QString& filename);
+    void addLayerImageFile(const QString& filename);
     void castSpell();
 
     void addEffectRadius();
@@ -235,7 +234,7 @@ private slots:
     void handleItemLink(BattleDialogModelObject* item);
     void handleItemUnlink(BattleDialogModelObject* item);
 
-    void handleItemMouseDown(QGraphicsPixmapItem* item);
+    void handleItemMouseDown(QGraphicsPixmapItem* item, bool showMovement);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
     void handleItemMouseUp(QGraphicsPixmapItem* item);
     void handleItemChanged(QGraphicsItem* item);
@@ -273,6 +272,7 @@ private slots:
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
     void setCombatantVisibility(bool aliveVisible, bool deadVisible);
+    void setSingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);
@@ -289,7 +289,6 @@ private slots:
 
     void removeRollover();
 
-//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
 
@@ -316,6 +315,7 @@ private:
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
     void removeSingleCombatant(BattleDialogModelCombatant* combatant);
 
+    bool validateTokenLayerExists();
     void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);
     void moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers);
 
@@ -342,9 +342,6 @@ private:
     void updateCameraRect();
     QRectF getCameraRect();
     void setCameraToView();
-
-    // Helper functions to simplify rendering
-    //void extractDMScreenshot();
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
@@ -382,7 +379,6 @@ private:
 
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _activePixmap;
-//    qreal _activeScale;
     qreal _selectedScale;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;

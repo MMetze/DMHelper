@@ -294,7 +294,7 @@ QString MonsterClass::getSpeed() const
 int MonsterClass::getSpeedValue() const
 {
     QString speedStr = getSpeed();
-    return speedStr.leftRef(speedStr.indexOf(" ")).toInt();
+    return speedStr.left(speedStr.indexOf(" ")).toInt();
 }
 
 QString MonsterClass::getAlignment() const

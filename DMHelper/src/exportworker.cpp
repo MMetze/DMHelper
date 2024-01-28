@@ -381,7 +381,7 @@ bool ExportWorker::tryToDoWork()
         }
 
         QTextStream ts(&file);
-        ts.setCodec("UTF-8");
+        ts.setEncoding(QStringConverter::Utf8);
         ts << doc.toString();
 
         file.close();
