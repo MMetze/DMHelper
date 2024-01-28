@@ -91,7 +91,7 @@ signals:
 
     void mapZoom(int zoomFactor);
 
-    void itemMouseDown(QGraphicsPixmapItem* item);
+    void itemMouseDown(QGraphicsPixmapItem* item, bool showMovement);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);

@@ -234,7 +234,7 @@ private slots:
     void handleItemLink(BattleDialogModelObject* item);
     void handleItemUnlink(BattleDialogModelObject* item);
 
-    void handleItemMouseDown(QGraphicsPixmapItem* item);
+    void handleItemMouseDown(QGraphicsPixmapItem* item, bool showMovement);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
     void handleItemMouseUp(QGraphicsPixmapItem* item);
     void handleItemChanged(QGraphicsItem* item);
@@ -272,6 +272,7 @@ private slots:
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
     void setCombatantVisibility(bool aliveVisible, bool deadVisible);
+    void setSingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);

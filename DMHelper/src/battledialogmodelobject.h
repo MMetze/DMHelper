@@ -10,7 +10,7 @@ class BattleDialogModelObject : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit BattleDialogModelObject(const QPointF& position = QPointF(), const QString& name = QString(), QObject *parent = nullptr);
+    explicit BattleDialogModelObject(const QPointF& position = QPointF(), qreal rotation = 0.0, const QString& name = QString(), QObject *parent = nullptr);
     virtual ~BattleDialogModelObject() override;
 
     // From CampaignObjectBase
@@ -23,6 +23,9 @@ public:
     virtual QPointF getPosition() const;
     virtual void setPosition(const QPointF& position);
     virtual void setPosition(qreal x, qreal y);
+
+    virtual qreal getRotation() const;
+    virtual void setRotation(qreal rotation);
 
     virtual void applyScale(QGraphicsItem& item, qreal gridScale);
     virtual qreal getScale();
@@ -45,6 +48,7 @@ protected:
     BattleDialogModelObject* _linkedObject;
     QUuid _linkedId;
     QPointF _position;
+    qreal _rotation;
 };
 
 #endif // BATTLEDIALOGMODELOBJECT_H

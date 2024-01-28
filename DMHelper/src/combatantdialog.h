@@ -21,7 +21,6 @@ public:
     explicit CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
     ~CombatantDialog();
 
-    //void setCombatant(int combatantCount, Combatant* combatant);
     int getCount() const;
     QString getName() const;
     LayerTokens* getLayer() const;
@@ -62,9 +61,7 @@ private:
     void fillSizeCombo();
 
     Ui::CombatantDialog *ui;
-    //Combatant* _combatant;
     int _iconIndex;
-    //int _count;
 
 };
 
