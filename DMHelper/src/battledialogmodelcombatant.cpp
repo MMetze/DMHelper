@@ -2,7 +2,7 @@
 #include <QDomElement>
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
-    BattleDialogModelObject(QPointF(), name, parent),
+    BattleDialogModelObject(QPointF(), 0.0, name, parent),
     _combatant(nullptr),
     _tokensLayer(nullptr),
     _initiative(0),

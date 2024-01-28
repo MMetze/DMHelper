@@ -212,6 +212,7 @@ void PublishGLBattleToken::combatantMoved()
 
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(newPosition);
+    _modelMatrix.rotate(_combatant->getRotation(), 0.f, 0.f, -1.f);
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
     foreach(PublishGLTokenHighlight* effect, _highlightList)

@@ -305,7 +305,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
             qDebug() << "[Battle Dialog Scene] right button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
 #endif
 
-            if((_mouseDown) && (abstractShape) && (!effectId.isNull()))
+            if(_mouseDown)
             {
                 // |A·B| = |A| |B| COS(θ)
                 // |A×B| = |A| |B| SIN(θ)
@@ -313,16 +313,28 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
                 qreal cross = _mouseDownPos.x()*eventPos.y()-_mouseDownPos.y()*eventPos.x();
                 qreal dot = _mouseDownPos.x()*eventPos.x()+_mouseDownPos.y()*eventPos.y();
                 qreal angle = qRadiansToDegrees(qAtan2(cross, dot));
-                _mouseDownItem->setRotation(_previousRotation + angle);
+
                 _isRotation = true;
-                BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
-                if(effect)
-                    effect->setRotation(_previousRotation + angle);
-#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+
+                if((abstractShape) && (!effectId.isNull()))
+                {
+                    _mouseDownItem->setRotation(_previousRotation + angle);
+                    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
+                    if(effect)
+                        effect->setRotation(_previousRotation + angle);
+
+                    emit effectChanged(abstractShape);
+                }
                 else
-                    qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
-#endif
-                emit effectChanged(abstractShape);
+                {
+                    QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(_mouseDownItem);
+                    if(pixItem)
+                        pixItem->setRotation(_previousRotation + angle);
+
+                    BattleDialogModelObject* object = getFinalObjectFromItem(_mouseDownItem);
+                    if(object)
+                        object->setRotation(_previousRotation + angle);
+                }
             }
 
             mouseEvent->accept();
@@ -415,18 +427,30 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
 #endif
             }
         }
-        else if((mouseEvent->button() == Qt::LeftButton) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+        else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
         {
             QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
             if(pixItem)
             {
-                _mouseDown = true;
-                _mouseDownItem = item;
+                if((mouseEvent->button() == Qt::LeftButton) ||
+                   (mouseEvent->button() == Qt::RightButton))
+                {
+                    _mouseDown = true;
+                    _mouseDownPos = mouseEvent->scenePos() - item->scenePos();
+                    _mouseDownItem = item;
+
+                    if(mouseEvent->button() == Qt::RightButton)
+                        _previousRotation = _mouseDownItem->rotation();
+
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
-                qDebug() << "[Battle Dialog Scene] left mouse down on combatant " << pixItem;
+                    if(mouseEvent->button() == Qt::LeftButton)
+                        qDebug() << "[Battle Dialog Scene] left mouse down on combatant " << pixItem;
+                    else
+                        qDebug() << "[Battle Dialog Scene] right mouse down on combatant " << pixItem;
 #endif
-                emit itemMouseDown(pixItem);
-                mouseEvent->accept();
+                    emit itemMouseDown(pixItem, (mouseEvent->button() == Qt::LeftButton));
+                    mouseEvent->accept();
+                }
             }
         }
     }

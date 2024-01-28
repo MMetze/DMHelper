@@ -27,6 +27,7 @@ public:
         BattleDialogModelEffect_Cube,
         BattleDialogModelEffect_Line,
         BattleDialogModelEffect_Object,
+        BattleDialogModelEffect_ObjectVideo,
 
         BattleDialogModelEffect_Count
     };
@@ -74,9 +75,6 @@ public:
 
     virtual int getWidth() const;
     virtual void setWidth(int width);
-
-    virtual qreal getRotation() const;
-    virtual void setRotation(qreal rotation);
 
     virtual QColor getColor() const;
     virtual void setColor(const QColor& color);

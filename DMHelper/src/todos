@@ -1,3 +1,9 @@
+emit itemMoved second parameter
+void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
+All the commented code in battleframe.cpp, layertoken.cpp, and layertoken.h
+Check for // TODO: Layers comments
+
+
 movement circle with release right click accidentally
 
 
