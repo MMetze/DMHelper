@@ -2972,25 +2972,29 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
 
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        BattleDialogModelCombatant* combatant = _model->getCombatant(i);
-        if(combatant)
-        {
-            bool vis = ((combatant->getHitPoints() > 0) ||
-                        (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
-
-            LayerTokens* tokensLayer = combatant->getLayer();
-            if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
-                vis = false;
-
-            QWidget* widget = _combatantLayout->itemAt(i)->widget();
-            if(widget)
-                widget->setVisible(vis);
-
-            // Set the visibility of the active rect
-            if((_activePixmap) && (combatant == _model->getActiveCombatant()))
-                _activePixmap->setVisible(vis);
-        }
+        setSingleCombatantVisibility(_model->getCombatant(i), aliveVisible, deadVisible);
     }
+}
+
+void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible)
+{
+    if((!_model) || (!combatant))
+        return;
+
+    bool vis = ((combatant->getHitPoints() > 0) ||
+                (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+
+    LayerTokens* tokensLayer = combatant->getLayer();
+    if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
+        vis = false;
+
+    QWidget* widget = _combatantWidgets.value(combatant);
+    if(widget)
+        widget->setVisible(vis);
+
+    // Set the visibility of the active rect
+    if((_activePixmap) && (combatant == _model->getActiveCombatant()))
+        _activePixmap->setVisible(vis);
 }
 
 void BattleFrame::setMapCursor()
@@ -3838,7 +3842,7 @@ bool BattleFrame::validateTokenLayerExists()
 
 void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer)
 {
-    if((!combatant) || (!newLayer))
+    if((!combatant) || (!newLayer) || (!_model))
         return;
 
     LayerTokens* currentLayer = combatant->getLayer();
@@ -3850,6 +3854,8 @@ void BattleFrame::moveCombatantToLayer(BattleDialogModelCombatant* combatant, La
         if(QGraphicsPixmapItem* newItem = dynamic_cast<QGraphicsPixmapItem*>(newLayer->getCombatantItem(combatant)))
             newItem->setSelected(combatant->getSelected());
     }
+
+    setSingleCombatantVisibility(combatant, _model->getShowAlive(), _model->getShowDead());
 }
 
 void BattleFrame::moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers)
