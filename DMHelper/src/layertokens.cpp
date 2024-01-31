@@ -704,6 +704,11 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
     delete effectToken;
 }
 
+void LayerTokens::effectReady(BattleDialogModelEffect* effect)
+{
+    Q_UNUSED(effect);
+}
+
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
 {
     if(!effect)

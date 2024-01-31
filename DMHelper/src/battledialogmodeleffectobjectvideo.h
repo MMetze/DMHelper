@@ -17,9 +17,14 @@ public:
 
     virtual BattleDialogModelEffect* clone() const override;
 
+    virtual void setLayer(LayerTokens* tokensLayer) override;
+
     virtual int getEffectType() const override;
 
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
+
+signals:
+    void effectReady(BattleDialogModelEffect* effect);
 
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

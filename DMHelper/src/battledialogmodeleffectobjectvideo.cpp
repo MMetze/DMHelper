@@ -1,4 +1,5 @@
 #include "battledialogmodeleffectobjectvideo.h"
+#include "layertokens.h"
 
 BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(const QString& name, QObject *parent) :
     BattleDialogModelEffectObject{name, parent}
@@ -32,6 +33,16 @@ BattleDialogModelEffect* BattleDialogModelEffectObjectVideo::clone() const
     return newEffect;
 }
 
+void BattleDialogModelEffectObjectVideo::setLayer(LayerTokens* tokensLayer)
+{
+    if(tokensLayer)
+        connect(this, &BattleDialogModelEffectObjectVideo::effectReady, tokensLayer, &LayerTokens::effectReady);
+    else if(_tokensLayer)
+        disconnect(this, &BattleDialogModelEffectObjectVideo::effectReady, _tokensLayer, &LayerTokens::effectReady);
+
+    BattleDialogModelEffectObject::setLayer(tokensLayer);
+}
+
 int BattleDialogModelEffectObjectVideo::getEffectType() const
 {
     return BattleDialogModelEffect_ObjectVideo;
@@ -39,7 +50,7 @@ int BattleDialogModelEffectObjectVideo::getEffectType() const
 
 QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridScale)
 {
-    todo
+    return nullptr;
 }
 
 void BattleDialogModelEffectObjectVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

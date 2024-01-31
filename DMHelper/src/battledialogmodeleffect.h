@@ -50,7 +50,7 @@ public:
 
     virtual BattleDialogModelEffect* clone() const = 0;
 
-    void setLayer(LayerTokens* tokensLayer);
+    virtual void setLayer(LayerTokens* tokensLayer);
     LayerTokens* getLayer() const;
 
     virtual int getEffectType() const = 0;
