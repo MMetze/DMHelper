@@ -1,12 +1,17 @@
 #include "battledialogmodeleffectobjectvideo.h"
 #include "layertokens.h"
+#include "videoplayerscreenshot.h"
 
 BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(const QString& name, QObject *parent) :
-    BattleDialogModelEffectObject{name, parent}
+    BattleDialogModelEffectObject{name, parent},
+    _screenshot{nullptr},
+    _pixmap{}
 {}
 
-BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& imageFile, const QString& tip) :
-    BattleDialogModelEffectObject{size, width, position, rotation, imageFile, tip}
+BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& videoFile, const QString& tip) :
+    BattleDialogModelEffectObject{size, width, position, rotation, videoFile, tip},
+    _screenshot{nullptr},
+    _pixmap{}
 {}
 
 BattleDialogModelEffectObjectVideo::~BattleDialogModelEffectObjectVideo()
@@ -50,7 +55,27 @@ int BattleDialogModelEffectObjectVideo::getEffectType() const
 
 QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridScale)
 {
-    return nullptr;
+    if(!_screenshot)
+    {
+        _screenshot = new VideoPlayerScreenshot{getImageFile()};
+        connect(_screenshot, &VideoPlayerScreenshot::screenshotReady, this, &BattleDialogModelEffectObjectVideo::onScreenshotReady);
+        _screenshot->retrieveScreenshot();
+        return nullptr;
+    }
+
+    if(_pixmap.isNull())
+        return nullptr;
+    else
+        return createPixmapShape(gridScale, _pixmap);
+}
+
+void BattleDialogModelEffectObjectVideo::onScreenshotReady(const QImage& image)
+{
+    if(image.isNull())
+        return;
+
+    _pixmap = QPixmap::fromImage(image);
+    emit effectReady(this);
 }
 
 void BattleDialogModelEffectObjectVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

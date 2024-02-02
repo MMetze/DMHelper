@@ -88,24 +88,7 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
         return nullptr;
     }
 
-    QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(this);
-    setEffectItemData(pixmapItem);
-    prepareItem(*pixmapItem);
-
-    qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
-
-    // Now correct the special case information for the object effect
-    _imageScaleFactor = 100.0 / itemPixmap.width();
-    if(_imageRotation != 0)
-    {
-        itemPixmap = itemPixmap.transformed(QTransform().rotate(_imageRotation));
-    }
-    pixmapItem->setPixmap(itemPixmap);
-    pixmapItem->setOffset(-itemPixmap.width() / 2, -itemPixmap.height() / 2);
-
-    applyEffectValues(*pixmapItem, gridScale);
-
-    return pixmapItem;
+    return createPixmapShape(gridScale, itemPixmap);
 }
 
 void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale)
@@ -193,4 +176,28 @@ void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomEle
 void BattleDialogModelEffectObject::prepareItem(QGraphicsItem& item) const
 {
     BattleDialogModelEffect::prepareItem(item);
+}
+
+QGraphicsItem* BattleDialogModelEffectObject::createPixmapShape(qreal gridScale, const QPixmap& pixmap)
+{
+    QPixmap itemPixmap(pixmap);
+
+    QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(this);
+    setEffectItemData(pixmapItem);
+    prepareItem(*pixmapItem);
+
+    qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
+
+    // Now correct the special case information for the object effect
+    _imageScaleFactor = 100.0 / itemPixmap.width();
+    if(_imageRotation != 0)
+    {
+        itemPixmap = itemPixmap.transformed(QTransform().rotate(_imageRotation));
+    }
+    pixmapItem->setPixmap(itemPixmap);
+    pixmapItem->setOffset(-itemPixmap.width() / 2, -itemPixmap.height() / 2);
+
+    applyEffectValues(*pixmapItem, gridScale);
+
+    return pixmapItem;
 }

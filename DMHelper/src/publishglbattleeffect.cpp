@@ -108,7 +108,8 @@ qreal PublishGLBattleEffect::getEffectAlpha() const
     if(_childEffect)
         return _childEffect->getColor().alphaF();
 
-    if((_effect) && (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object))
+    if((_effect) && ((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) ||
+                     (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)))
         return _effect->getColor().alphaF();
     else
         return 1.0;
@@ -290,6 +291,7 @@ void PublishGLBattleEffect::drawShape(QPainter& painter, BattleDialogModelEffect
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
             drawObject(painter, dynamic_cast<BattleDialogModelEffectObject*>(effect), effectSize, effectWidth);
             break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
         default:
             break;
     }

@@ -657,9 +657,13 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         connect(addNPCItem, SIGNAL(triggered()), this, SIGNAL(addNPC()));
         menu.addAction(addNPCItem);
 
-        QAction* addObjectItem = new QAction(QString("Add Object..."), &menu);
+        QAction* addObjectItem = new QAction(QString("Add Image Object..."), &menu);
         connect(addObjectItem, SIGNAL(triggered()), this, SIGNAL(addEffectObject()));
         menu.addAction(addObjectItem);
+
+        QAction* addObjectVideoItem = new QAction(QString("Add Video Object..."), &menu);
+        connect(addObjectVideoItem, SIGNAL(triggered()), this, SIGNAL(addEffectObjectVideo()));
+        menu.addAction(addObjectVideoItem);
 
         QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
         connect(castItem, SIGNAL(triggered()), this, SIGNAL(castSpell()));
@@ -1183,6 +1187,7 @@ QString BattleDialogGraphicsScene::getMimeDataImageFile(const QMimeData* mimeDat
     return QString();
 }
 
+/*
 BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int size, int width, const QColor& color, const QString& filename)
 {
     BattleDialogModelEffect* result = nullptr;
@@ -1208,12 +1213,16 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
             result = BattleDialogModelEffectFactory::createEffectObject(effectPosition, QSize(width, size), color, filename);
             break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
+            result = BattleDialogModelEffectFactory::createEffectObjectVideo(effectPosition, QSize(width, size), color, filename);
+            break;
         default:
             break;
     }
 
     return result;
 }
+*/
 
 BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)
 {

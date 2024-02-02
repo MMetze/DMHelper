@@ -42,6 +42,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     virtual void prepareItem(QGraphicsItem& item) const override;
+    virtual QGraphicsItem* createPixmapShape(qreal gridScale, const QPixmap& pixmap);
 
     int _width;
     int _imageRotation;

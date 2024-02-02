@@ -2,13 +2,16 @@
 #define BATTLEDIALOGMODELEFFECTOBJECTVIDEO_H
 
 #include "battledialogmodeleffectobject.h"
+#include <QPixmap>
+
+class VideoPlayerScreenshot;
 
 class BattleDialogModelEffectObjectVideo : public BattleDialogModelEffectObject
 {
     Q_OBJECT
 public:
     BattleDialogModelEffectObjectVideo(const QString& name = QString(), QObject *parent = nullptr);
-    explicit BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& imageFile, const QString& tip);
+    explicit BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& videoFile, const QString& tip);
     virtual ~BattleDialogModelEffectObjectVideo() override;
 
     // From CampaignObjectBase
@@ -26,9 +29,14 @@ public:
 signals:
     void effectReady(BattleDialogModelEffect* effect);
 
+protected slots:
+    void onScreenshotReady(const QImage& image);
+
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    VideoPlayerScreenshot* _screenshot;
+    QPixmap _pixmap;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTOBJECTVIDEO_H

@@ -639,17 +639,7 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
     connect(effect, &BattleDialogModelEffect::dirty, this, &LayerTokens::dirty);
     _model->appendEffectToList(effect);
 
-    if((getLayerScene()) && (getLayerScene()->getDMScene()))
-    {
-        QGraphicsItem* effectIcon = createEffectIcon(getLayerScene()->getDMScene(), effect);
-        if(effectIcon)
-        {
-            effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
-            effectIcon->setVisible(getLayerVisibleDM());
-            effectIcon->setOpacity(_opacityReference);
-            effectIcon->setPos(effect->getPosition());
-        }
-    }
+    effectReady(effect);
 }
 
 void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
@@ -706,7 +696,17 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
 
 void LayerTokens::effectReady(BattleDialogModelEffect* effect)
 {
-    Q_UNUSED(effect);
+    if((!effect) || (!getLayerScene()) || (!getLayerScene()->getDMScene()))
+        return;
+
+    QGraphicsItem* effectIcon = createEffectIcon(getLayerScene()->getDMScene(), effect);
+    if(!effectIcon)
+        return;
+
+    effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
+    effectIcon->setVisible(getLayerVisibleDM());
+    effectIcon->setOpacity(_opacityReference);
+    effectIcon->setPos(effect->getPosition());
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
