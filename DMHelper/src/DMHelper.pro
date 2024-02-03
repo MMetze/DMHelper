@@ -126,6 +126,7 @@ SOURCES += main.cpp\
     publishbuttonribbon.cpp \
     publishglbattlebackground.cpp \
     publishglbattleeffect.cpp \
+    publishglbattleeffectvideo.cpp \
     publishglbattlegrid.cpp \
     publishglbattleimagerenderer.cpp \
     publishglbattleobject.cpp \
@@ -390,6 +391,7 @@ HEADERS  += mainwindow.h \
     publishbuttonribbon.h \
     publishglbattlebackground.h \
     publishglbattleeffect.h \
+    publishglbattleeffectvideo.h \
     publishglbattlegrid.h \
     publishglbattleimagerenderer.h \
     publishglbattleobject.h \
