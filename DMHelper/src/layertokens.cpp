@@ -30,11 +30,9 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _playerInitialized(false),
     _model(),
     _combatants(),
-    _combatantTokens(),
     _combatantIconHash(),
     _combatantTokenHash(),
     _effects(),
-    _effectTokens(),
     _effectIconHash(),
     _effectTokenHash(),
     _scale(DMHelper::STARTING_GRID_SCALE)
@@ -1382,12 +1380,10 @@ void LayerTokens::applyEffectVisibility(bool visible)
 
 void LayerTokens::cleanupPlayer()
 {
-    qDeleteAll(_combatantTokens.values());
-    _combatantTokens.clear();
+    qDeleteAll(_combatantTokenHash);
     _combatantTokenHash.clear();
 
-    qDeleteAll(_effectTokens.values());
-    _effectTokens.clear();
+    qDeleteAll(_effectTokenHash);
     _effectTokenHash.clear();
 
     _glScene = nullptr;

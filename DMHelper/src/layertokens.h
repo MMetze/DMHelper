@@ -142,12 +142,10 @@ protected:
     // Core contents
     BattleDialogModel* _model;
     QList<BattleDialogModelCombatant*> _combatants;
-    QHash<QString, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIconHash;
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokenHash;
 
     QList<BattleDialogModelEffect*> _effects;
-    QHash<QString, PublishGLBattleEffect*> _effectTokens;
     QHash<BattleDialogModelEffect*, QGraphicsItem*> _effectIconHash;
     QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
 
