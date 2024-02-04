@@ -385,6 +385,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
             {
                 effectToken = new PublishGLBattleEffect(_glScene, effect);
             }
+            effectToken->prepareObjectsGL();
             _effectTokenHash.insert(effect, effectToken);
         }
     }

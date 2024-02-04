@@ -28,8 +28,6 @@ PublishGLBattleEffect::PublishGLBattleEffect(PublishGLScene* scene, BattleDialog
     if(childEffects.count() == 1)
         _childEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
 
-    prepareObjects();
-
     connect(_effect, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleEffect::effectMoved);
     connect(_effect, &BattleDialogModelEffect::effectChanged, this, &PublishGLBattleEffect::effectChanged);
     if(_childEffect)
@@ -76,6 +74,126 @@ void PublishGLBattleEffect::cleanup()
     PublishGLBattleObject::cleanup();
 }
 
+
+void PublishGLBattleEffect::prepareObjectsGL()
+{
+    if(!_effect)
+        return;
+
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    if((!f) || (!e))
+        return;
+
+    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
+    int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
+    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+        effectSize *= 2; // Convert radius to diameter
+
+    QImage effectImage;
+    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
+        effectImage = QImage(QSize(effectWidth, effectSize), QImage::Format_RGBA8888);
+    else
+        effectImage = QImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
+
+    effectImage.fill(Qt::transparent);
+
+    QPainter painter;
+    painter.begin(&effectImage);
+    painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setBrush(QBrush(_effect->getColor()));
+    drawShape(painter, _effect, effectSize, effectWidth);
+
+    if(_childEffect)
+    {
+        QImage itemImage(_childEffect->getImageFile());
+        if(!itemImage.isNull())
+        {
+            if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+                (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+                itemImage = itemImage.mirrored(true, false); // mirror horizontally
+            else
+                itemImage = itemImage.mirrored(false, true); // mirror vertically
+
+            if(_childEffect->getImageRotation() != 0)
+                itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));
+
+            if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
+                painter.drawImage(QRect(0, 0, effectWidth, effectSize), itemImage);
+            else
+                painter.drawImage(effectImage.rect(), itemImage);
+        }
+    }
+    painter.end();
+
+    _textureSize = effectImage.size();
+
+    float vertices[] = {
+        // positions                                                                     // colors           // texture coords
+        (float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+        (float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        -(float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -(float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
+    };
+
+    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
+    {
+        vertices[0]  = (float)_textureSize.width(); vertices[1]  = 0.0f;
+        vertices[8]  = (float)_textureSize.width(); vertices[9]  = (float)-_textureSize.height();
+        vertices[16] = 0.0f;                        vertices[17] = (float)-_textureSize.height();
+        vertices[24] = 0.0f;                        vertices[25] = 0.0f;
+    }
+    else if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+             (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+    {
+        /*vertices[0]  = (float)_textureSize.width(); */ vertices[1]  = 0.0f;
+        /*vertices[8]  = (float)_textureSize.width(); */ vertices[9]  = (float)-_textureSize.height();
+        /*vertices[16] = 0.0f;                        */ vertices[17] = (float)-_textureSize.height();
+        /*vertices[24] = 0.0f;                        */ vertices[25] = 0.0f;
+    }
+
+    unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
+    e->glGenVertexArrays(1, &_VAO);
+    f->glGenBuffers(1, &_VBO);
+    f->glGenBuffers(1, &_EBO);
+
+    e->glBindVertexArray(_VAO);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // position attribute
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    f->glEnableVertexAttribArray(0);
+    // color attribute
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    f->glEnableVertexAttribArray(1);
+    // texture attribute
+    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    f->glEnableVertexAttribArray(2);
+
+    // Texture
+    f->glGenTextures(1, &_textureID);
+    f->glBindTexture(GL_TEXTURE_2D, _textureID);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load and generate the background texture
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, effectImage.width(), effectImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
+    f->glGenerateMipmap(GL_TEXTURE_2D);
+
+    PublishGLBattleEffect::effectMoved();
+}
+
 void PublishGLBattleEffect::paintGL()
 {
     if(!QOpenGLContext::currentContext())
@@ -90,7 +208,7 @@ void PublishGLBattleEffect::paintGL()
     {
         _recreateEffect = false;
         cleanup();
-        prepareObjects();
+        prepareObjectsGL();
     }
 
     e->glBindVertexArray(_VAO);
@@ -142,125 +260,6 @@ void PublishGLBattleEffect::effectChanged()
 {
     _recreateEffect = true;
     emit changed();
-}
-
-void PublishGLBattleEffect::prepareObjects()
-{
-    if(!_effect)
-        return;
-
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
-        return;
-
-    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
-    int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
-    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
-        effectSize *= 2; // Convert radius to diameter
-
-    QImage effectImage;
-    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
-        effectImage = QImage(QSize(effectWidth, effectSize), QImage::Format_RGBA8888);
-    else
-        effectImage = QImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
-
-    effectImage.fill(Qt::transparent);
-
-    QPainter painter;
-    painter.begin(&effectImage);
-        painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.setBrush(QBrush(_effect->getColor()));
-        drawShape(painter, _effect, effectSize, effectWidth);
-
-        if(_childEffect)
-        {
-            QImage itemImage(_childEffect->getImageFile());
-            if(!itemImage.isNull())
-            {
-                if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
-                   (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
-                    itemImage = itemImage.mirrored(true, false); // mirror horizontally
-                else
-                    itemImage = itemImage.mirrored(false, true); // mirror vertically
-
-                if(_childEffect->getImageRotation() != 0)
-                    itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));
-
-                if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
-                    painter.drawImage(QRect(0, 0, effectWidth, effectSize), itemImage);
-                else
-                    painter.drawImage(effectImage.rect(), itemImage);
-            }
-        }
-    painter.end();
-
-    _textureSize = effectImage.size();
-
-    float vertices[] = {
-        // positions                                                                     // colors           // texture coords
-         (float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-         (float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        -(float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
-    };
-
-    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
-    {
-        vertices[0]  = (float)_textureSize.width(); vertices[1]  = 0.0f;
-        vertices[8]  = (float)_textureSize.width(); vertices[9]  = (float)-_textureSize.height();
-        vertices[16] = 0.0f;                        vertices[17] = (float)-_textureSize.height();
-        vertices[24] = 0.0f;                        vertices[25] = 0.0f;
-    }
-    else if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
-            (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
-    {
-        /*vertices[0]  = (float)_textureSize.width(); */ vertices[1]  = 0.0f;
-        /*vertices[8]  = (float)_textureSize.width(); */ vertices[9]  = (float)-_textureSize.height();
-        /*vertices[16] = 0.0f;                        */ vertices[17] = (float)-_textureSize.height();
-        /*vertices[24] = 0.0f;                        */ vertices[25] = 0.0f;
-    }
-
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-
-    e->glGenVertexArrays(1, &_VAO);
-    f->glGenBuffers(1, &_VBO);
-    f->glGenBuffers(1, &_EBO);
-
-    e->glBindVertexArray(_VAO);
-
-    f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    f->glEnableVertexAttribArray(0);
-    // color attribute
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
-    f->glEnableVertexAttribArray(1);
-    // texture attribute
-    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    f->glEnableVertexAttribArray(2);
-
-    // Texture
-    f->glGenTextures(1, &_textureID);
-    f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // load and generate the background texture
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, effectImage.width(), effectImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
-
-    effectMoved();
 }
 
 void PublishGLBattleEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)

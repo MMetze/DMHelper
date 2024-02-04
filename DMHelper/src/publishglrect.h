@@ -32,7 +32,7 @@ signals:
     void changed();
 
 protected:
-    void prepareObjects();
+    void prepareObjectsGL();
 
     unsigned int _VAO;
     unsigned int _VBO;

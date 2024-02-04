@@ -16,6 +16,7 @@ public:
     virtual ~PublishGLBattleEffect() override;
 
     virtual void cleanup() override;
+    virtual void prepareObjectsGL();
     virtual void paintGL() override;
 
     virtual BattleDialogModelEffect* getEffect() const;
@@ -26,7 +27,6 @@ public slots:
     virtual void effectChanged();
 
 protected:
-    virtual void prepareObjects();
     virtual void drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth);
     virtual void drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth);
 

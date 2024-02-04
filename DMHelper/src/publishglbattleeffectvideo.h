@@ -5,7 +5,7 @@
 
 class BattleDialogModelEffectObjectVideo;
 class VideoPlayer;
-class PublishGLBattleBackground;
+//class PublishGLBattleBackground;
 
 class PublishGLBattleEffectVideo : public PublishGLBattleEffect
 {
@@ -14,7 +14,7 @@ public:
     PublishGLBattleEffectVideo(PublishGLScene* scene, BattleDialogModelEffectObjectVideo* effect);
     virtual ~PublishGLBattleEffectVideo() override;
 
-    virtual void cleanup() override;
+    virtual void prepareObjectsGL() override;
     virtual void paintGL() override;
 
     virtual BattleDialogModelEffectObjectVideo* getEffectVideo() const;
@@ -25,7 +25,6 @@ signals:
 protected:
 
     VideoPlayer* _videoPlayer;
-    PublishGLBattleBackground* _videoObject;
     QSize _playerSize;
 };
 

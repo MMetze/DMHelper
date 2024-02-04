@@ -14,7 +14,7 @@ PublishGLRect::PublishGLRect(const QColor& color, const QRectF& rect, QObject *p
     _rect(rect),
     _rebuildShape(false)
 {
-    prepareObjects();
+    prepareObjectsGL();
 }
 
 PublishGLRect::~PublishGLRect()
@@ -65,7 +65,7 @@ void PublishGLRect::paintGL()
     if((_rebuildShape) || (_VAO == 0) || (_VBO == 0) || (_EBO == 0))
     {
         cleanup();
-        prepareObjects();
+        prepareObjectsGL();
         _rebuildShape = false;
     }
 
@@ -137,7 +137,7 @@ const float * PublishGLRect::getMatrixData() const
     return _modelMatrix.constData();
 }
 
-void PublishGLRect::prepareObjects()
+void PublishGLRect::prepareObjectsGL()
 {
     if(_rect.isEmpty())
         return;
