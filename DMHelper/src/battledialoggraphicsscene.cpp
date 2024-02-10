@@ -788,7 +788,7 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
-    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    BattleDialogEffectSettingsBase* settings = effect->getEffectEditor();
     if(!settings)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << _contextMenuItem;

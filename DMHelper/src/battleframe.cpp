@@ -23,7 +23,7 @@
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
-#include "battledialogeffectsettings.h"
+#include "battledialogeffectsettingsbase.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
 #include "itemselectdialog.h"
@@ -1341,7 +1341,7 @@ void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
         return;
     }
 
-    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    BattleDialogEffectSettingsBase* settings = effect->getEffectEditor();
     if(!settings)
     {
         delete effect;

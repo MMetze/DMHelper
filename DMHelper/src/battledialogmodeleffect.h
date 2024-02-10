@@ -5,7 +5,7 @@
 #include <QPointF>
 #include <QColor>
 
-class BattleDialogEffectSettings;
+class BattleDialogEffectSettingsBase;
 class LayerTokens;
 class QAbstractGraphicsShapeItem;
 class QGraphicsItem;
@@ -54,7 +54,7 @@ public:
     LayerTokens* getLayer() const;
 
     virtual int getEffectType() const = 0;
-    virtual BattleDialogEffectSettings* getEffectEditor() const;
+    virtual BattleDialogEffectSettingsBase* getEffectEditor() const;
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();

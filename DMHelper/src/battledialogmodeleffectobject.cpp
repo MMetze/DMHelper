@@ -69,7 +69,7 @@ int BattleDialogModelEffectObject::getEffectType() const
     return BattleDialogModelEffect_Object;
 }
 
-BattleDialogEffectSettings* BattleDialogModelEffectObject::getEffectEditor() const
+BattleDialogEffectSettingsBase* BattleDialogModelEffectObject::getEffectEditor() const
 {
     BattleDialogEffectSettings* result = new BattleDialogEffectSettings(*this);
     result->setSizeLabel(QString("Height"));

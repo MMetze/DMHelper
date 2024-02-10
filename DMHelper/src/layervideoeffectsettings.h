@@ -16,7 +16,7 @@ public:
     explicit LayerVideoEffectSettings(QWidget *parent = nullptr);
     ~LayerVideoEffectSettings();
 
-    DMHelper::TransparentType getEffectType() const;
+    DMHelper::TransparentType getEffectTransparencyType() const;
     QColor getTransparentColor() const;
     qreal getTransparentTolerance() const;
     bool isColorize() const;
@@ -25,7 +25,7 @@ public:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 public slots:
-    void setEffectType(DMHelper::TransparentType effectType);
+    void setEffectTransparencyType(DMHelper::TransparentType effectType);
     void setTransparentColor(const QColor& transparentColor);
     void setTransparentTolerance(qreal transparentTolerance);
     void setColorize(bool colorize);

@@ -2,6 +2,7 @@
 #define BATTLEDIALOGMODELEFFECTOBJECTVIDEO_H
 
 #include "battledialogmodeleffectobject.h"
+#include "dmconstants.h"
 #include <QPixmap>
 
 class VideoPlayerScreenshot;
@@ -19,12 +20,16 @@ public:
     virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual BattleDialogModelEffect* clone() const override;
-
     virtual void setLayer(LayerTokens* tokensLayer) override;
-
     virtual int getEffectType() const override;
-
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
+
+    // Local Layer Interface
+    virtual DMHelper::TransparentType getEffectTransparencyType() const;
+    virtual QColor getTransparentColor() const;
+    virtual qreal getTransparentTolerance() const;
+    virtual bool isColorize() const;
+    virtual QColor getColorizeColor() const;
 
 signals:
     void effectReady(BattleDialogModelEffect* effect);

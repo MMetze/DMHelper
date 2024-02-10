@@ -69,6 +69,31 @@ QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridS
         return createPixmapShape(gridScale, _pixmap);
 }
 
+DMHelper::TransparentType BattleDialogModelEffectObjectVideo::getEffectTransparencyType() const
+{
+    return DMHelper::TransparentType_None;
+}
+
+QColor BattleDialogModelEffectObjectVideo::getTransparentColor() const
+{
+    return Qt::black;
+}
+
+qreal BattleDialogModelEffectObjectVideo::getTransparentTolerance() const
+{
+    return 0;
+}
+
+bool BattleDialogModelEffectObjectVideo::isColorize() const
+{
+    return false;
+}
+
+QColor BattleDialogModelEffectObjectVideo::getColorizeColor() const
+{
+    return Qt::black;
+}
+
 void BattleDialogModelEffectObjectVideo::onScreenshotReady(const QImage& image)
 {
     if(image.isNull())

@@ -44,6 +44,8 @@ SOURCES += main.cpp\
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
     battlecombatantframe.cpp \
+    battledialogeffectsettingsbase.cpp \
+    battledialogeffectsettingsobjectvideo.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
     battledialogmodeleffectobjectvideo.cpp \
@@ -308,6 +310,8 @@ HEADERS  += mainwindow.h \
     audiotrackyoutube.h \
     basicdateserver.h \
     battlecombatantframe.h \
+    battledialogeffectsettingsbase.h \
+    battledialogeffectsettingsobjectvideo.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
     battledialogmodeleffectobjectvideo.h \
@@ -552,6 +556,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
+    battledialogeffectsettingsobjectvideo.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     bestiarypopulatetokensdialog.ui \
