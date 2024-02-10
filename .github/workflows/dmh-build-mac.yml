@@ -25,7 +25,7 @@ jobs:
         target: 'desktop'
         arch: 'clang_64'
         cache: 'true'
-        modules: 'qtmultimedia qtnetworkauth'
+        modules: 'qtmultimedia qtnetworkauth qtimageformats'
         tools: 'tools_ifw'
         add-tools-to-path: 'true'
         archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
