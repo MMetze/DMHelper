@@ -2,13 +2,17 @@
 #define BATTLEDIALOGMODELEFFECTOBJECTVIDEO_H
 
 #include "battledialogmodeleffectobject.h"
+#include "dmconstants.h"
+#include <QPixmap>
+
+class VideoPlayerScreenshot;
 
 class BattleDialogModelEffectObjectVideo : public BattleDialogModelEffectObject
 {
     Q_OBJECT
 public:
     BattleDialogModelEffectObjectVideo(const QString& name = QString(), QObject *parent = nullptr);
-    explicit BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& imageFile, const QString& tip);
+    explicit BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& videoFile, const QString& tip);
     virtual ~BattleDialogModelEffectObjectVideo() override;
 
     // From CampaignObjectBase
@@ -16,14 +20,28 @@ public:
     virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual BattleDialogModelEffect* clone() const override;
-
+    virtual void setLayer(LayerTokens* tokensLayer) override;
     virtual int getEffectType() const override;
-
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
+
+    // Local Layer Interface
+    virtual DMHelper::TransparentType getEffectTransparencyType() const;
+    virtual QColor getTransparentColor() const;
+    virtual qreal getTransparentTolerance() const;
+    virtual bool isColorize() const;
+    virtual QColor getColorizeColor() const;
+
+signals:
+    void effectReady(BattleDialogModelEffect* effect);
+
+protected slots:
+    void onScreenshotReady(const QImage& image);
 
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    VideoPlayerScreenshot* _screenshot;
+    QPixmap _pixmap;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTOBJECTVIDEO_H

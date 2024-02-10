@@ -124,6 +124,8 @@ public slots:
     void addNPC();
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
+    void addEffectObjectVideo();
+    void addEffectObjectVideoFile(const QString& filename);
     void addLayerImageFile(const QString& filename);
     void castSpell();
 

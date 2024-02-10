@@ -23,7 +23,7 @@
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
-#include "battledialogeffectsettings.h"
+#include "battledialogeffectsettingsbase.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
 #include "itemselectdialog.h"
@@ -63,6 +63,8 @@
 #include <QPixmap>
 #include <QScreen>
 #include <QImageReader>
+#include <QMimeDatabase>
+#include <QMimeType>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
@@ -70,15 +72,6 @@
 //#define BATTLE_DIALOG_LOG_MOVEMENT
 
 //#define BATTLE_DIALOG_LOG_VIDEO
-
-/*
- *
- * setCameraRect
- * emit cameraRectChanged ==> renderer
- * changing the size/shape of the CameraRect causes handleItemChanged which calls updateCameraRect
- * updateCameraRect sets CameraRect
- *
- */
 
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
@@ -189,6 +182,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
     connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectObjectVideo, this, &BattleFrame::addEffectObjectVideo);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObjectFile, this, &BattleFrame::addEffectObjectFile);
     connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
@@ -1156,7 +1150,10 @@ void BattleFrame::addEffectObject()
 {
     QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file..."));
     if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
+    {
+        qDebug() << "[BattleFrame] addEffectObject: " << filename << " is not a valid image file.";
         return;
+    }
 
     addEffectObjectFile(filename);
 }
@@ -1167,6 +1164,31 @@ void BattleFrame::addEffectObjectFile(const QString& filename)
         return;
 
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename));
+}
+
+void BattleFrame::addEffectObjectVideo()
+{
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object video file..."));
+    if(filename.isEmpty())
+        return;
+
+    QMimeDatabase db;
+    QMimeType mimeType = db.mimeTypeForFile(filename);
+    if((!mimeType.isValid()) || (!mimeType.name().startsWith("video/")))
+    {
+        qDebug() << "[BattleFrame] addEffectObjectVideo: " << filename << " is not a valid video file. Mime type: " << mimeType.name() << " - " << mimeType.comment();
+        return;
+    }
+
+    addEffectObjectVideoFile(filename);
+}
+
+void BattleFrame::addEffectObjectVideoFile(const QString& filename)
+{
+    if(!validateTokenLayerExists())
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo, 20, 20, QColor(), filename));
 }
 
 void BattleFrame::addLayerImageFile(const QString& filename)
@@ -1319,7 +1341,7 @@ void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
         return;
     }
 
-    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    BattleDialogEffectSettingsBase* settings = effect->getEffectEditor();
     if(!settings)
     {
         delete effect;
@@ -4241,6 +4263,9 @@ BattleDialogModelEffect* BattleFrame::createEffect(int type, int size, int width
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
             result = BattleDialogModelEffectFactory::createEffectObject(effectPosition, QSize(width, size), color, filename);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
+            result = BattleDialogModelEffectFactory::createEffectObjectVideo(effectPosition, QSize(width, size), color, filename);
             break;
         default:
             break;

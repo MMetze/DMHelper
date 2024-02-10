@@ -5,6 +5,7 @@
 #include "battledialogmodeleffectradius.h"
 #include "battledialogmodeleffectline.h"
 #include "battledialogmodeleffectobject.h"
+#include "battledialogmodeleffectobjectvideo.h"
 #include <QDomElement>
 #include <QPixmap>
 #include <QDebug>
@@ -37,6 +38,9 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
             result = new BattleDialogModelEffectObject();
             break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
+            result = new BattleDialogModelEffectObjectVideo();
+            break;
         default:
             break;
     }
@@ -65,6 +69,27 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDom
     return result;
 }
 
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectObjectVideo(const QPointF& position, const QSize& size, const QColor& color, const QString& videoFile)
+{
+    if(videoFile.isEmpty())
+    {
+        qDebug() << "[BattleDialogModelEffectFactory] ERROR: unable to create object effect, empty video file";
+        return nullptr;
+    }
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo);
+    if(!effect)
+        return nullptr;
+
+    effect->setSize(size.height());
+    effect->setWidth(size.width());
+    effect->setColor(color);
+    effect->setPosition(position);
+    effect->setImageFile(videoFile);
+
+    return effect;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectObject(const QPointF& position, const QSize& size, const QColor& color, const QString& imageFile)
 {
     if(imageFile.isEmpty())
@@ -84,24 +109,10 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectObject(cons
     if(!effect)
         return nullptr;
 
-    /*
-    what to do with size?
-    if(objectPixmap.width() >= objectPixmap.height())
-    {
-        effect->setWidth(10);
-        effect->setSize(10 * objectPixmap.height() / objectPixmap.width());
-    }
-    else
-    {
-        effect->setSize(10);
-        effect->setWidth(10 * objectPixmap.width() / objectPixmap.height());
-    }
-    */
-
     effect->setSize(size.height());
     effect->setWidth(size.width());
     effect->setColor(color);
-    effect->setPosition(position);//_mouseDownPos.x(), _mouseDownPos.y());
+    effect->setPosition(position);
     effect->setImageFile(imageFile);
 
     return effect;

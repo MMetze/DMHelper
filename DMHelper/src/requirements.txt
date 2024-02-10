@@ -4,6 +4,9 @@ Mouse status not always exclusive
 Open log directory button
 Clear cache button
 Effect layers: rain (particles), clouds (noise), birds/flying (particles), fire (particles), smoke (particles), fog (noise), lightning (particles), snow (particles), wind (noise)
+Announcements
+Fixed-zoom for mini play
+    Set zoom rectangle size to player window size
 
 Big features
 * Video-based combat objects

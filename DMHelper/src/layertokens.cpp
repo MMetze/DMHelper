@@ -2,8 +2,10 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelcombatant.h"
 #include "unselectedpixmap.h"
+#include "publishglrenderer.h"
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
+#include "publishglbattleeffectvideo.h"
 #include "campaign.h"
 #include "character.h"
 #include "bestiary.h"
@@ -14,6 +16,7 @@
 #include "battledialogmodelmonstercombatant.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodeleffectobject.h"
+#include "battledialogmodeleffectobjectvideo.h"
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QImage>
@@ -27,11 +30,9 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _playerInitialized(false),
     _model(),
     _combatants(),
-    _combatantTokens(),
     _combatantIconHash(),
     _combatantTokenHash(),
     _effects(),
-    _effectTokens(),
     _effectIconHash(),
     _effectTokenHash(),
     _scale(DMHelper::STARTING_GRID_SCALE)
@@ -364,22 +365,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
         if(combatant)
         {
             PublishGLBattleToken* combatantToken = new PublishGLBattleToken(_glScene, combatant);
-            // TODO: Layers - is this needed?
-            /*
-            BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
-            if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
-                combatantToken->setPC(true);
-            */
-            // TODO: Layers - how do selections work?
-            /*
-            if(combatant->getSelected())
-                combatantToken->addEffect(*_selectionToken);
-            */
-
             _combatantTokenHash.insert(combatant, combatantToken);
-            // TODO: Layers
-            //connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
-            //connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
         }
     }
 
@@ -388,7 +374,18 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
         BattleDialogModelEffect* effect = _effects.at(i);
         if(effect)
         {
-            PublishGLBattleEffect* effectToken = new PublishGLBattleEffect(_glScene, effect);
+            PublishGLBattleEffect* effectToken;
+            if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)
+            {
+                PublishGLBattleEffectVideo* effectVideo = new PublishGLBattleEffectVideo(_glScene, dynamic_cast<BattleDialogModelEffectObjectVideo*>(effect));
+                connect(effectVideo, &PublishGLBattleEffectVideo::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectVideo;
+            }
+            else
+            {
+                effectToken = new PublishGLBattleEffect(_glScene, effect);
+            }
+            effectToken->prepareObjectsGL();
             _effectTokenHash.insert(effect, effectToken);
         }
     }
@@ -426,17 +423,14 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
             if((effect) && (effect->getEffectVisible()))
             {
                 PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
-                if(!effectToken)
+                if(effectToken)
                 {
-                    effectToken = new PublishGLBattleEffect(_glScene, effect);
-                    _effectTokenHash.insert(effect, effectToken);
+                    localMatrix = effectToken->getMatrix();
+                    localMatrix.translate(_position.x(), _position.y());
+                    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+                    functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
+                    effectToken->paintGL();
                 }
-
-                localMatrix = effectToken->getMatrix();
-                localMatrix.translate(_position.x(), _position.y());
-                functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
-                functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
-                effectToken->paintGL();
             }
         }
     }
@@ -449,20 +443,17 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
            ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))
         {
             PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
-            if(!combatantToken)
+            if(combatantToken)
             {
-                combatantToken = new PublishGLBattleToken(_glScene, combatant);
-                _combatantTokenHash.insert(combatant, combatantToken);
+                localMatrix = combatantToken->getMatrix();
+                localMatrix.translate(_position.x(), _position.y());
+                functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+                functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
+                combatantToken->paintGL();
+                combatantToken->paintEffects(_shaderModelMatrixRGBA);
+
+                emit postCombatantDrawGL(functions, combatant, combatantToken);
             }
-
-            localMatrix = combatantToken->getMatrix();
-            localMatrix.translate(_position.x(), _position.y());
-            functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
-            functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
-            combatantToken->paintGL();
-            combatantToken->paintEffects(_shaderModelMatrixRGBA);
-
-            emit postCombatantDrawGL(functions, combatant, combatantToken);
         }
     }
 
@@ -639,17 +630,7 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
     connect(effect, &BattleDialogModelEffect::dirty, this, &LayerTokens::dirty);
     _model->appendEffectToList(effect);
 
-    if((getLayerScene()) && (getLayerScene()->getDMScene()))
-    {
-        QGraphicsItem* effectIcon = createEffectIcon(getLayerScene()->getDMScene(), effect);
-        if(effectIcon)
-        {
-            effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
-            effectIcon->setVisible(getLayerVisibleDM());
-            effectIcon->setOpacity(_opacityReference);
-            effectIcon->setPos(effect->getPosition());
-        }
-    }
+    effectReady(effect);
 }
 
 void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
@@ -702,6 +683,21 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
 
     PublishGLBattleEffect* effectToken = _effectTokenHash.take(effectKey);
     delete effectToken;
+}
+
+void LayerTokens::effectReady(BattleDialogModelEffect* effect)
+{
+    if((!effect) || (!getLayerScene()) || (!getLayerScene()->getDMScene()))
+        return;
+
+    QGraphicsItem* effectIcon = createEffectIcon(getLayerScene()->getDMScene(), effect);
+    if(!effectIcon)
+        return;
+
+    effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
+    effectIcon->setVisible(getLayerVisibleDM());
+    effectIcon->setOpacity(_opacityReference);
+    effectIcon->setPos(effect->getPosition());
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
@@ -827,7 +823,7 @@ void LayerTokens::deadVisibilityChanged(bool showDead)
 
 void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
 {
-    if((!effect) || (!_model))
+    if((!effect) || (!_model) || (!_layerScene))
         return;
 
     // Changes to the player item will be directly handled through the signal
@@ -1385,12 +1381,10 @@ void LayerTokens::applyEffectVisibility(bool visible)
 
 void LayerTokens::cleanupPlayer()
 {
-    qDeleteAll(_combatantTokens);
-    _combatantTokens.clear();
+    qDeleteAll(_combatantTokenHash);
     _combatantTokenHash.clear();
 
-    qDeleteAll(_effectTokens);
-    _effectTokens.clear();
+    qDeleteAll(_effectTokenHash);
     _effectTokenHash.clear();
 
     _glScene = nullptr;

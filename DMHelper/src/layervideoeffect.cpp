@@ -165,7 +165,7 @@ const char *fragmentShaderSourceTransparentColor =
 LayerVideoEffect::LayerVideoEffect(const QString& name, const QString& filename, int order, QObject *parent) :
     LayerVideo{name, filename, order, parent},
     _recreateShaders(true),
-    _effectType(DMHelper::TransparentType_None),
+    _effectTransparencyType(DMHelper::TransparentType_None),
     _transparentColor(),
     _transparentTolerance(0.15),
     _colorize(false),
@@ -186,7 +186,7 @@ LayerVideoEffect::~LayerVideoEffect()
 void LayerVideoEffect::inputXML(const QDomElement &element, bool isImport)
 {
     if(element.hasAttribute("effect"))
-        _effectType = static_cast<DMHelper::TransparentType>(element.attribute("effect").toInt());
+        _effectTransparencyType = static_cast<DMHelper::TransparentType>(element.attribute("effect").toInt());
 
     if(element.hasAttribute("transparentColor"))
         _transparentColor = QColor(element.attribute("transparentColor"));
@@ -261,7 +261,7 @@ void LayerVideoEffect::playerSetShaders(unsigned int programRGB, int modelMatrix
 void LayerVideoEffect::editSettings()
 {
     LayerVideoEffectSettings* dlg = new LayerVideoEffectSettings();
-    dlg->setEffectType(_effectType);
+    dlg->setEffectTransparencyType(_effectTransparencyType);
     dlg->setTransparentColor(_transparentColor);
     dlg->setTransparentTolerance(_transparentTolerance);
     dlg->setColorize(_colorize);
@@ -271,9 +271,9 @@ void LayerVideoEffect::editSettings()
 
     if(result == QDialog::Accepted)
     {
-        if(_effectType != dlg->getEffectType())
+        if(_effectTransparencyType != dlg->getEffectTransparencyType())
         {
-            _effectType = dlg->getEffectType();
+            _effectTransparencyType = dlg->getEffectTransparencyType();
             _effectDirty = true;
         }
 
@@ -316,7 +316,7 @@ void LayerVideoEffect::playerGLSetUniforms(QOpenGLFunctions* functions, GLint de
 {
     LayerVideo::playerGLSetUniforms(functions, defaultModelMatrix, projectionMatrix);
 
-    if(_effectType == DMHelper::TransparentType_TransparentColor)
+    if(_effectTransparencyType == DMHelper::TransparentType_TransparentColor)
     {
         functions->glUniform3f(_shaderTransparentColor, _transparentColor.redF(), _transparentColor.greenF(), _transparentColor.blueF());
         functions->glUniform1f(_shaderTransparentTolerance, _transparentTolerance);
@@ -334,7 +334,7 @@ void LayerVideoEffect::updateEffectScreenshot()
     TokenEditor* editor = new TokenEditor();
 
     editor->setSourceImage(_layerScreenshot);
-    editor->setTransparentValue(_effectType);
+    editor->setTransparentValue(_effectTransparencyType);
     editor->setTransparentColor(_transparentColor);
     editor->setTransparentLevel(static_cast<int>(_transparentTolerance * 100.0));
     editor->setColorize(_colorize);
@@ -349,13 +349,13 @@ void LayerVideoEffect::updateEffectScreenshot()
 
 void LayerVideoEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    if(_effectType != DMHelper::TransparentType_None)
-        element.setAttribute("effect", static_cast<int>(_effectType));
+    if(_effectTransparencyType != DMHelper::TransparentType_None)
+        element.setAttribute("effect", static_cast<int>(_effectTransparencyType));
 
-    if((_effectType == DMHelper::TransparentType_TransparentColor) && (_transparentColor.isValid()) && (_transparentColor != Qt::black))
+    if((_effectTransparencyType == DMHelper::TransparentType_TransparentColor) && (_transparentColor.isValid()) && (_transparentColor != Qt::black))
         element.setAttribute("transparentColor", _transparentColor.name());
 
-    if((_effectType == DMHelper::TransparentType_TransparentColor) && (_transparentTolerance != 0.15))
+    if((_effectTransparencyType == DMHelper::TransparentType_TransparentColor) && (_transparentTolerance != 0.15))
         element.setAttribute("transparentTolerance", _transparentTolerance);
 
     if(_colorize)
@@ -429,7 +429,7 @@ void LayerVideoEffect::createShadersGL()
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
     _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
 
-    if(_effectType == DMHelper::TransparentType_TransparentColor)
+    if(_effectTransparencyType == DMHelper::TransparentType_TransparentColor)
     {
         _shaderTransparentColor = f->glGetUniformLocation(_shaderProgramRGBA, "transparentColor");
         _shaderTransparentTolerance = f->glGetUniformLocation(_shaderProgramRGBA, "transparentTolerance");
@@ -471,14 +471,14 @@ const char* LayerVideoEffect::getVertexShaderSource()
 {
     if(_colorize)
     {
-        if(_effectType == DMHelper::TransparentType_TransparentColor)
+        if(_effectTransparencyType == DMHelper::TransparentType_TransparentColor)
             return vertexShaderSourceTransparentColorColorize;
         else
             return vertexShaderSourceColorize;
     }
     else
     {
-        if(_effectType == DMHelper::TransparentType_TransparentColor)
+        if(_effectTransparencyType == DMHelper::TransparentType_TransparentColor)
             return vertexShaderSourceTransparentColor;
         else
             return vertexShaderSourceBase;
@@ -487,7 +487,7 @@ const char* LayerVideoEffect::getVertexShaderSource()
 
 const char* LayerVideoEffect::getFragmentShaderSource()
 {
-    switch(_effectType)
+    switch(_effectTransparencyType)
     {
         case DMHelper::TransparentType_RedChannel:
             return fragmentShaderSourceRTransparent;

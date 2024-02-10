@@ -87,7 +87,7 @@ LayerTokens* BattleDialogModelEffect::getLayer() const
     return _tokensLayer;
 }
 
-BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
+BattleDialogEffectSettingsBase* BattleDialogModelEffect::getEffectEditor() const
 {
     return new BattleDialogEffectSettings(*this);
 }
