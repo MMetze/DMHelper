@@ -345,6 +345,7 @@ void AudioTrackYoutube::playDirectUrl()
     }
 
     // Start playback
+    _stopStatus = 0;
     if(_mute)
         libvlc_audio_set_volume(_vlcPlayer, 0);
     else
