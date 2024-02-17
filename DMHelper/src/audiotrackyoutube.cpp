@@ -7,9 +7,9 @@
 #include <QDomElement>
 #include <QIcon>
 
-const int stopCallComplete = 0x01;
-const int stopConfirmed = 0x02;
-const int stopComplete = stopCallComplete | stopConfirmed;
+const int AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE = 0x01;
+const int AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED = 0x02;
+const int AUDIOTRACKYOUTUBE_STOPCOMPLETE = AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE | AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED;
 
 void youtubeEventCallback(const struct libvlc_event_t *p_event, void *p_data);
 
@@ -19,9 +19,9 @@ AudioTrackYoutube::AudioTrackYoutube(const QString& trackName, const QUrl& track
     _urlString(),
     _vlcPlayer(nullptr),
     _stopStatus(0),
-    _lastVolume(100),
+    _volume(100),
     _timerId(0),
-    _repeat(false),
+    _repeat(true),
     _mute(false)
 {
 }
@@ -32,6 +32,28 @@ AudioTrackYoutube::~AudioTrackYoutube()
         killTimer(_timerId);
 
     AudioTrackYoutube::stop();
+}
+
+void AudioTrackYoutube::inputXML(const QDomElement &element, bool isImport)
+{
+    _volume = element.attribute("volume", QString::number(100)).toInt();
+    _repeat = static_cast<bool>(element.attribute("repeat", QString::number(1)).toInt());
+    _mute = static_cast<bool>(element.attribute("mute", QString::number(0)).toInt());
+
+    AudioTrackUrl::inputXML(element, isImport);
+}
+
+void AudioTrackYoutube::copyValues(const CampaignObjectBase* other)
+{
+    const AudioTrackYoutube* otherAudioTrack = dynamic_cast<const AudioTrackYoutube*>(other);
+    if(!otherAudioTrack)
+        return;
+
+    _volume = otherAudioTrack->_volume;
+    _repeat = otherAudioTrack->_repeat;
+    _mute = otherAudioTrack->_mute;
+
+    AudioTrackUrl::copyValues(other);
 }
 
 QIcon AudioTrackYoutube::getDefaultIcon()
@@ -51,7 +73,7 @@ void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
 
     if(p_event->type == libvlc_MediaPlayerStopped)
     {
-        internalStopCheck(stopConfirmed);
+        internalStopCheck(AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED);
     }
     if(p_event->type == libvlc_MediaPlayerPlaying)
     {
@@ -62,7 +84,7 @@ void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
 
 bool AudioTrackYoutube::isPlaying() const
 {
-    return((_vlcPlayer) && (_stopStatus < stopCallComplete));
+    return((_vlcPlayer) && (_stopStatus < AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE));
 }
 
 bool AudioTrackYoutube::isRepeat() const
@@ -77,10 +99,7 @@ bool AudioTrackYoutube::isMuted() const
 
 float AudioTrackYoutube::getVolume() const
 {
-    if(isPlaying())
-        return libvlc_audio_get_volume(_vlcPlayer);
-    else
-        return 0;
+    return static_cast<float>(_volume) / 100.f;
 }
 
 void AudioTrackYoutube::play()
@@ -102,7 +121,7 @@ void AudioTrackYoutube::stop()
 
     _stopStatus = 0;
     libvlc_media_player_stop_async(_vlcPlayer);
-    internalStopCheck(stopCallComplete);
+    internalStopCheck(AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE);
 }
 
 void AudioTrackYoutube::setMute(bool mute)
@@ -112,23 +131,24 @@ void AudioTrackYoutube::setMute(bool mute)
 
     _mute = mute;
 
+    //_lastVolume = libvlc_audio_get_volume(_vlcPlayer);
     if(_mute)
-    {
-        _lastVolume = libvlc_audio_get_volume(_vlcPlayer);
         libvlc_audio_set_volume(_vlcPlayer, 0);
-    }
     else
-    {
-        libvlc_audio_set_volume(_vlcPlayer, _lastVolume);
-    }
+        libvlc_audio_set_volume(_vlcPlayer, _volume);
+
+    emit dirty();
 }
 
 void AudioTrackYoutube::setVolume(float volume)
 {
-    if(!isPlaying())
+    if((!isPlaying()) || (volume == _volume))
         return;
 
-    libvlc_audio_set_volume(_vlcPlayer, static_cast<int>(volume * 100.f));
+    _volume = static_cast<int>(volume * 100.f);
+    libvlc_audio_set_volume(_vlcPlayer, _volume);
+
+    emit dirty();
 }
 
 void AudioTrackYoutube::setRepeat(bool repeat)
@@ -137,8 +157,7 @@ void AudioTrackYoutube::setRepeat(bool repeat)
         return;
 
     _repeat = repeat;
-
-    // TODO - need to add a repeat capability
+    emit dirty();
 }
 
 void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
@@ -183,6 +202,15 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
+void AudioTrackYoutube::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("volume", QString::number(_volume));
+    element.setAttribute("repeat", QString::number(_repeat));
+    element.setAttribute("mute", QString::number(_mute));
+
+    AudioTrackUrl::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
 void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
 {
     if(isPlaying())
@@ -216,7 +244,7 @@ void AudioTrackYoutube::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    if((!_vlcPlayer) || (_stopStatus == stopComplete))
+    if((!_vlcPlayer) || (_stopStatus == AUDIOTRACKYOUTUBE_STOPCOMPLETE))
     {
         if(_timerId)
         {
@@ -317,6 +345,10 @@ void AudioTrackYoutube::playDirectUrl()
 
     // Start playback
     libvlc_media_player_play(_vlcPlayer);
+    if(_mute)
+        libvlc_audio_set_volume(_vlcPlayer, 0);
+    else
+        libvlc_audio_set_volume(_vlcPlayer, _volume);
 
     if(_timerId == 0)
         _timerId = startTimer(500);
@@ -328,7 +360,17 @@ void AudioTrackYoutube::internalStopCheck(int status)
 
     qDebug() << "[AudioTrackYoutube] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
 
-    if(_stopStatus != stopComplete)
+    if((_stopStatus == AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED) && (_repeat))
+    {
+        qDebug() << "[AudioTrackYoutube] Internal Stop Check: Audio ended, restarting playback";
+        _stopStatus = 0;
+        libvlc_media_player_release(_vlcPlayer);
+        _vlcPlayer = nullptr;
+        playDirectUrl();
+        return;
+    }
+
+    if(_stopStatus != AUDIOTRACKYOUTUBE_STOPCOMPLETE)
         return;
 
     libvlc_media_player_release(_vlcPlayer);

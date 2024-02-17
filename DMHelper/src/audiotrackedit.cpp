@@ -107,7 +107,7 @@ void AudioTrackEdit::setMute(bool checked)
         _track->setMute(checked);
 }
 
-void AudioTrackEdit::setVolume(int volume)
+void AudioTrackEdit::setVolume(float volume)
 {
     if(_track)
         _track->setVolume(volume);
