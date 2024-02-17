@@ -126,27 +126,32 @@ void AudioTrackYoutube::stop()
 
 void AudioTrackYoutube::setMute(bool mute)
 {
-    if((!isPlaying()) || (mute == _mute))
+    if(mute == _mute)
         return;
 
     _mute = mute;
 
-    //_lastVolume = libvlc_audio_get_volume(_vlcPlayer);
-    if(_mute)
-        libvlc_audio_set_volume(_vlcPlayer, 0);
-    else
-        libvlc_audio_set_volume(_vlcPlayer, _volume);
+    if(isPlaying())
+    {
+        //_lastVolume = libvlc_audio_get_volume(_vlcPlayer);
+        if(_mute)
+            libvlc_audio_set_volume(_vlcPlayer, 0);
+        else
+            libvlc_audio_set_volume(_vlcPlayer, _volume);
+    }
 
     emit dirty();
 }
 
 void AudioTrackYoutube::setVolume(float volume)
 {
-    if((!isPlaying()) || (volume == _volume))
+    if(volume == _volume)
         return;
 
     _volume = static_cast<int>(volume * 100.f);
-    libvlc_audio_set_volume(_vlcPlayer, _volume);
+
+    if(isPlaying())
+        libvlc_audio_set_volume(_vlcPlayer, _volume);
 
     emit dirty();
 }
@@ -315,15 +320,11 @@ void AudioTrackYoutube::playDirectUrl()
     if(isPlaying())
         return;
 
-    libvlc_media_list_t *vlcMediaList = libvlc_media_list_new();
-
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #else
     libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
 #endif
-    libvlc_media_list_add_media(vlcMediaList, vlcMedia);
-    libvlc_media_release(vlcMedia);
 
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
@@ -344,11 +345,11 @@ void AudioTrackYoutube::playDirectUrl()
     }
 
     // Start playback
-    libvlc_media_player_play(_vlcPlayer);
     if(_mute)
         libvlc_audio_set_volume(_vlcPlayer, 0);
     else
         libvlc_audio_set_volume(_vlcPlayer, _volume);
+    libvlc_media_player_play(_vlcPlayer);
 
     if(_timerId == 0)
         _timerId = startTimer(500);
