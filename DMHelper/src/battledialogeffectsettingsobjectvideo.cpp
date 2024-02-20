@@ -6,7 +6,10 @@
 BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(const BattleDialogModelEffectObjectVideo& effect, QWidget *parent) :
     BattleDialogEffectSettingsBase(parent),
     ui(new Ui::BattleDialogEffectSettingsObjectVideo),
-    _effect(effect)
+    _effect(effect),
+    _color(effect.getColor()),
+    _previewImage(),
+    _editor(nullptr)
 {
     ui->setupUi(this);
 
@@ -21,7 +24,66 @@ BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(con
     ui->edtWidth->selectAll();
     ui->edtRotation->setValidator(new QDoubleValidator(0, 360, 5, this));
     ui->edtRotation->setText(QString::number(effect.getRotation()));
-    ui->sliderTransparency->setSliderPosition(effect.getColor().alpha());
+    ui->btnEffectColor->setRotationVisible(false);
+    _color.setAlpha(255);
+    ui->btnEffectColor->setColor(_color);
+    ui->sliderOpacity->setSliderPosition(effect.getColor().alpha());
+
+    _editor = new TokenEditor();
+
+    ui->btnColorizeColor->setChecked(effect.isColorize());
+    _editor->setColorize(effect.isColorize());
+
+    ui->btnColorizeColor->setRotationVisible(false);
+    ui->btnColorizeColor->setColor(effect.getColorizeColor());
+    _editor->setColorizeColor(effect.getColorizeColor());
+
+    switch(effect.getEffectTransparencyType())
+    {
+    case DMHelper::TransparentType_RedChannel:
+        ui->btnRed->setChecked(true);
+        _editor->setTransparentValue(DMHelper::TransparentType_RedChannel);
+        break;
+    case DMHelper::TransparentType_GreenChannel:
+        ui->btnGreen->setChecked(true);
+        _editor->setTransparentValue(DMHelper::TransparentType_GreenChannel);
+        break;
+    case DMHelper::TransparentType_BlueChannel:
+        ui->btnBlue->setChecked(true);
+        _editor->setTransparentValue(DMHelper::TransparentType_BlueChannel);
+        break;
+    case DMHelper::TransparentType_TransparentColor:
+        ui->btnTransparent->setChecked(true);
+        _editor->setTransparentValue(DMHelper::TransparentType_TransparentColor);
+        break;
+    default:
+        ui->btnNoTransparency->setChecked(true);
+        _editor->setTransparentValue(DMHelper::TransparentType_None);
+        break;
+    }
+
+    ui->btnTransparentColor->setRotationVisible(false);
+    ui->btnTransparentColor->setColor(effect.getTransparentColor());
+    _editor->setTransparentColor(effect.getTransparentColor());
+
+    ui->buttonGroup->setId(ui->btnNoTransparency, DMHelper::TransparentType_None);
+    ui->buttonGroup->setId(ui->btnRed, DMHelper::TransparentType_RedChannel);
+    ui->buttonGroup->setId(ui->btnGreen, DMHelper::TransparentType_GreenChannel);
+    ui->buttonGroup->setId(ui->btnBlue, DMHelper::TransparentType_BlueChannel);
+    ui->buttonGroup->setId(ui->btnTransparent, DMHelper::TransparentType_TransparentColor);
+
+    ui->lblPreview->installEventFilter(this);
+
+    connect(ui->btnTransparent, &QAbstractButton::toggled, ui->btnTransparentColor, &QAbstractButton::setEnabled);
+    connect(ui->btnTransparent, &QAbstractButton::toggled, ui->slideTolerance, &QSlider::setEnabled);
+    connect(ui->buttonGroup, &QButtonGroup::idToggled, this, &BattleDialogEffectSettingsObjectVideo::handleButtonChanged);
+    connect(ui->slideTolerance, &QSlider::valueChanged, this, &BattleDialogEffectSettingsObjectVideo::handleValueChanged);
+    connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, this, &BattleDialogEffectSettingsObjectVideo::setTransparentColor);
+    connect(ui->chkColorize, &QAbstractButton::toggled, this, &BattleDialogEffectSettingsObjectVideo::setColorize);
+    connect(ui->btnColorizeColor, &ColorPushButton::colorChanged, this, &BattleDialogEffectSettingsObjectVideo::setColorizeColor);
+
+    readEffectImage();
+    connect(&_effect, &BattleDialogModelEffectObjectVideo::effectReady, this, &BattleDialogEffectSettingsObjectVideo::readEffectImage);
 }
 
 BattleDialogEffectSettingsObjectVideo::~BattleDialogEffectSettingsObjectVideo()
@@ -68,27 +130,37 @@ void BattleDialogEffectSettingsObjectVideo::mergeValuesToSettings(BattleDialogMo
 
 void BattleDialogEffectSettingsObjectVideo::copyValuesFromSettings(BattleDialogModelEffect& effect)
 {
-    BattleDialogModelEffectObjectVideo* other = dynamic_cast<BattleDialogModelEffectObjectVideo*>(&effect);
-    if(!other)
+    BattleDialogModelEffectObjectVideo* videoEffect = dynamic_cast<BattleDialogModelEffectObjectVideo*>(&effect);
+    if(!videoEffect)
         return;
 
     if(ui->chkActive->checkState() != Qt::PartiallyChecked)
-        effect.setEffectActive(isEffectActive());
+        videoEffect->setEffectActive(isEffectActive());
 
     if(ui->chkVisible->checkState() != Qt::PartiallyChecked)
-        effect.setEffectVisible(isEffectVisible());
+        videoEffect->setEffectVisible(isEffectVisible());
 
     if(!ui->edtRotation->text().isEmpty())
-        effect.setRotation(getRotation());
+        videoEffect->setRotation(getRotation());
 
     if(!ui->edtHeight->text().isEmpty())
-        effect.setSize(getHeightValue());
+        videoEffect->setSize(getHeightValue());
 
     if(!ui->edtWidth->text().isEmpty())
-        effect.setWidth(getWidthValue());
+        videoEffect->setWidth(getWidthValue());
 
     if(!ui->edtName->text().isEmpty())
-        effect.setTip(getTip());
+        videoEffect->setTip(getTip());
+
+    QColor effectColor = ui->btnEffectColor->getColor();
+    effectColor.setAlpha(ui->sliderOpacity->sliderPosition());
+    videoEffect->setColor(effectColor);
+
+    videoEffect->setColorize(ui->chkColorize->isChecked());
+    videoEffect->setColorizeColor(ui->btnColorizeColor->getColor());
+    videoEffect->setEffectTransparencyType(getEffectTransparencyType());
+    videoEffect->setTransparentColor(ui->btnTransparentColor->getColor());
+    videoEffect->setTransparentTolerance(ui->slideTolerance->value());
 }
 
 bool BattleDialogEffectSettingsObjectVideo::isEffectActive() const
@@ -153,4 +225,74 @@ bool BattleDialogEffectSettingsObjectVideo::isColorize() const
 QColor BattleDialogEffectSettingsObjectVideo::getColorizeColor() const
 {
     return ui->btnColorizeColor->getColor();
+}
+
+bool BattleDialogEffectSettingsObjectVideo::eventFilter(QObject *watched, QEvent *event)
+{
+    if((watched == ui->lblPreview) && (event) && (event->type() == QEvent::Resize))
+    {
+        setEditorSource();
+    }
+
+    return QDialog::eventFilter(watched, event);
+}
+
+void BattleDialogEffectSettingsObjectVideo::readEffectImage()
+{
+    _previewImage = _effect.getPixmap().toImage();
+    setEditorSource();
+}
+
+void BattleDialogEffectSettingsObjectVideo::setTransparentColor(const QColor& transparentColor)
+{
+    ui->btnTransparentColor->setColor(transparentColor);
+    _editor->setTransparentColor(transparentColor);
+    updatePreview();
+}
+
+void BattleDialogEffectSettingsObjectVideo::setColorize(bool colorize)
+{
+    ui->chkColorize->setChecked(colorize);
+    _editor->setColorize(colorize);
+    updatePreview();
+}
+
+void BattleDialogEffectSettingsObjectVideo::setColorizeColor(const QColor& colorizeColor)
+{
+    ui->btnColorizeColor->setColor(colorizeColor);
+    _editor->setColorizeColor(colorizeColor);
+    updatePreview();
+}
+
+void BattleDialogEffectSettingsObjectVideo::handleButtonChanged(int id, bool checked)
+{
+    if(checked)
+    {
+        _editor->setTransparentValue(static_cast<DMHelper::TransparentType>(id));
+        updatePreview();
+    }
+}
+
+void BattleDialogEffectSettingsObjectVideo::handleValueChanged(int value)
+{
+    _editor->setTransparentLevel(value);
+    updatePreview();
+}
+
+void BattleDialogEffectSettingsObjectVideo::setEditorSource()
+{
+    if(_previewImage.isNull())
+        return;
+
+    QSize previewSize = ui->lblPreview->size() - QSize(10, 10);
+    if(!previewSize.isValid())
+        return;
+
+    _editor->setSourceImage(_previewImage.scaled(previewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    updatePreview();
+}
+
+void BattleDialogEffectSettingsObjectVideo::updatePreview()
+{
+    ui->lblPreview->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
 }

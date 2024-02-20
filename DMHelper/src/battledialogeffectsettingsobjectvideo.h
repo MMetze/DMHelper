@@ -3,6 +3,7 @@
 
 #include "battledialogeffectsettingsbase.h"
 #include "dmconstants.h"
+#include "tokeneditor.h"
 
 namespace Ui {
 class BattleDialogEffectSettingsObjectVideo;
@@ -35,9 +36,26 @@ public:
     bool isColorize() const;
     QColor getColorizeColor() const;
 
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
+
+private slots:
+    void readEffectImage();
+    void setTransparentColor(const QColor& transparentColor);
+    void setColorize(bool colorize);
+    void setColorizeColor(const QColor& colorizeColor);
+
+    void handleButtonChanged(int id, bool checked);
+    void handleValueChanged(int value);
+    void setEditorSource();
+    void updatePreview();
+
 private:
     Ui::BattleDialogEffectSettingsObjectVideo *ui;
     const BattleDialogModelEffectObjectVideo& _effect;
+
+    QColor _color;
+    QImage _previewImage;
+    TokenEditor* _editor;
 };
 
 #endif // BATTLEDIALOGEFFECTSETTINGSOBJECTVIDEO_H

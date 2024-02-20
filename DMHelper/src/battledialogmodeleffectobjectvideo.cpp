@@ -1,15 +1,26 @@
 #include "battledialogmodeleffectobjectvideo.h"
 #include "layertokens.h"
 #include "videoplayerscreenshot.h"
+#include "battledialogeffectsettingsobjectvideo.h"
 
 BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(const QString& name, QObject *parent) :
     BattleDialogModelEffectObject{name, parent},
+    _effectTransparencyType(DMHelper::TransparentType_None),
+    _transparentColor(),
+    _transparentTolerance(0.15),
+    _colorize(false),
+    _colorizeColor(),
     _screenshot{nullptr},
     _pixmap{}
 {}
 
 BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& videoFile, const QString& tip) :
     BattleDialogModelEffectObject{size, width, position, rotation, videoFile, tip},
+    _effectTransparencyType(DMHelper::TransparentType_None),
+    _transparentColor(),
+    _transparentTolerance(0.15),
+    _colorize(false),
+    _colorizeColor(),
     _screenshot{nullptr},
     _pixmap{}
 {}
@@ -19,6 +30,21 @@ BattleDialogModelEffectObjectVideo::~BattleDialogModelEffectObjectVideo()
 
 void BattleDialogModelEffectObjectVideo::inputXML(const QDomElement &element, bool isImport)
 {
+    if(element.hasAttribute("effect"))
+        _effectTransparencyType = static_cast<DMHelper::TransparentType>(element.attribute("effect").toInt());
+
+    if(element.hasAttribute("transparentColor"))
+        _transparentColor = QColor(element.attribute("transparentColor"));
+
+    if(element.hasAttribute("transparentTolerance"))
+        _transparentTolerance = element.attribute("transparentTolerance").toDouble();
+
+    if(element.hasAttribute("colorize"))
+        _colorize = static_cast<bool>(element.attribute("colorize").toInt());
+
+    if(element.hasAttribute("colorizeColor"))
+        _colorizeColor = QColor(element.attribute("colorizeColor"));
+
     BattleDialogModelEffectObject::inputXML(element, isImport);
 }
 
@@ -53,6 +79,12 @@ int BattleDialogModelEffectObjectVideo::getEffectType() const
     return BattleDialogModelEffect_ObjectVideo;
 }
 
+BattleDialogEffectSettingsBase* BattleDialogModelEffectObjectVideo::getEffectEditor() const
+{
+    BattleDialogEffectSettingsObjectVideo* result = new BattleDialogEffectSettingsObjectVideo(*this);
+    return result;
+}
+
 QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridScale)
 {
     if(!_screenshot)
@@ -65,33 +97,97 @@ QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridS
 
     if(_pixmap.isNull())
         return nullptr;
-    else
-        return createPixmapShape(gridScale, _pixmap);
+
+    TokenEditor* editor = new TokenEditor();
+
+    editor->setSourceImage(_pixmap.toImage());
+    editor->setTransparentValue(_effectTransparencyType);
+    editor->setTransparentColor(_transparentColor);
+    editor->setTransparentLevel(static_cast<int>(_transparentTolerance * 100.0));
+    editor->setColorize(_colorize);
+    editor->setColorizeColor(_colorizeColor);
+    editor->setSquareFinalImage(false);
+
+    QGraphicsItem* pixmapShape = createPixmapShape(gridScale, QPixmap::fromImage(editor->getFinalImage()));
+
+    editor->deleteLater();
+
+    return pixmapShape;
 }
 
 DMHelper::TransparentType BattleDialogModelEffectObjectVideo::getEffectTransparencyType() const
 {
-    return DMHelper::TransparentType_None;
+    return _effectTransparencyType;
 }
 
 QColor BattleDialogModelEffectObjectVideo::getTransparentColor() const
 {
-    return Qt::black;
+    return _transparentColor;
 }
 
 qreal BattleDialogModelEffectObjectVideo::getTransparentTolerance() const
 {
-    return 0;
+    return _transparentTolerance;
 }
 
 bool BattleDialogModelEffectObjectVideo::isColorize() const
 {
-    return false;
+    return _colorize;
 }
 
 QColor BattleDialogModelEffectObjectVideo::getColorizeColor() const
 {
-    return Qt::black;
+    return _colorizeColor;
+}
+
+QPixmap BattleDialogModelEffectObjectVideo::getPixmap() const
+{
+    return _pixmap;
+}
+
+void BattleDialogModelEffectObjectVideo::setEffectTransparencyType(DMHelper::TransparentType effectType)
+{
+    if(_effectTransparencyType == effectType)
+        return;
+
+    _effectTransparencyType = effectType;
+    emit dirty();
+}
+
+void BattleDialogModelEffectObjectVideo::setTransparentColor(const QColor& transparentColor)
+{
+    if(_transparentColor == transparentColor)
+        return;
+
+    _transparentColor = transparentColor;
+    emit dirty();
+}
+
+void BattleDialogModelEffectObjectVideo::setTransparentTolerance(qreal transparentTolerance)
+{
+    if(_transparentTolerance == transparentTolerance)
+        return;
+
+    _transparentTolerance = transparentTolerance;
+    emit dirty();
+}
+
+void BattleDialogModelEffectObjectVideo::setColorize(bool colorize)
+{
+    if(_colorize == colorize)
+        return;
+
+    _colorize = colorize;
+    emit dirty();
+}
+
+void BattleDialogModelEffectObjectVideo::setColorizeColor(const QColor& colorizeColor)
+{
+    if(_colorizeColor == colorizeColor)
+        return;
+
+    _colorizeColor = colorizeColor;
+    emit dirty();
 }
 
 void BattleDialogModelEffectObjectVideo::onScreenshotReady(const QImage& image)
@@ -105,5 +201,20 @@ void BattleDialogModelEffectObjectVideo::onScreenshotReady(const QImage& image)
 
 void BattleDialogModelEffectObjectVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
+    if(_effectTransparencyType != DMHelper::TransparentType_None)
+        element.setAttribute("effect", static_cast<int>(_effectTransparencyType));
+
+    if((_effectTransparencyType == DMHelper::TransparentType_TransparentColor) && (_transparentColor.isValid()) && (_transparentColor != Qt::black))
+        element.setAttribute("transparentColor", _transparentColor.name());
+
+    if((_effectTransparencyType == DMHelper::TransparentType_TransparentColor) && (_transparentTolerance != 0.15))
+        element.setAttribute("transparentTolerance", _transparentTolerance);
+
+    if(_colorize)
+        element.setAttribute("colorize", 1);
+
+    if((_colorize) && (_colorizeColor.isValid()) && (_colorizeColor != Qt::black))
+        element.setAttribute("colorizeColor", _colorizeColor.name());
+
     BattleDialogModelEffectObject::internalOutputXML(doc, element, targetDirectory, isExport);
 }

@@ -39,6 +39,23 @@ Video references:
 * Switch between party icon and players on a battle (aka toggle initiative)
 * Backend queries as a class to automate the versioning and debug query
 
+
+Audio requirements:
+mybigfriendjo — Today at 4:49 PM
+well, the thing is - there is 2 "types" of sound for me
+the first one is music - the other one is ambience. and within ambience you have 2 types as well - continuous and one-hits
+so there is different requirements for those types
+music is pretty straightforward - requirement is play music and be able to have a list of music queued that is able to randomize, repeat (song or list)
+not so much to play multiples at once
+for ambience there is more mixture going on - you might have the underlying tones of a creaking ship, next to some waves and every now and then either manually per button or with some long timeouts a one-hit of some whale sound to keep it interesting but not overbearing
+so depending which role you want to fill (or even both roles) there are different expectations of capability i feel
+there are things that i expect from spotify that i don't expect from syrinscape and vice versa for example
+not sure if those can be combined in a sensible way - or if they should have their own little areas where one tab in the sound board is a music player like spotify - and the other is what the soundboard is now - multiple sounds that are being mixed together as background ambiance
+mybigfriendjo — Today at 4:58 PM
+i mean there is a reason why i'm using 2 different apps for those 2 different kinds of requirements
+
+
+
 Sample Code - overlay pixmap for an intro tutorial
 QLabel* newLabel = new QLabel(this);
 QPixmap activePixmap(":/img/data/active.png");
