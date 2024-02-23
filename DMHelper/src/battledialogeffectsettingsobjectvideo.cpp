@@ -172,7 +172,14 @@ void BattleDialogEffectSettingsObjectVideo::copyValuesFromSettings(BattleDialogM
     {
         QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getEffectItem(videoEffect));
         if(pixmapItem)
-            pixmapItem->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
+        {
+            _editor->setSquareFinalImage(false);
+            _editor->setSourceImage(_previewImage);
+            QPixmap itemPixmap = QPixmap::fromImage(_editor->getFinalImage());
+            pixmapItem->setPixmap(itemPixmap);
+            pixmapItem->setOffset(-itemPixmap.width() / 2, -itemPixmap.height() / 2);
+            setEditorSource();
+        }
     }
 }
 
@@ -301,6 +308,7 @@ void BattleDialogEffectSettingsObjectVideo::setEditorSource()
     if(!previewSize.isValid())
         return;
 
+    _editor->setSquareFinalImage(true);
     _editor->setSourceImage(_previewImage.scaled(previewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     updatePreview();
 }
