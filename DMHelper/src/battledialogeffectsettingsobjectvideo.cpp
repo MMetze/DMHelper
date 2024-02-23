@@ -4,6 +4,9 @@
 #include "layertokens.h"
 #include <QIntValidator>
 #include <QGraphicsPixmapItem>
+#include <QTimer>
+
+const int BATTLEEFFECTSETTINGS_TIMER_MSEC = 1000;
 
 BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(const BattleDialogModelEffectObjectVideo& effect, QWidget *parent) :
     BattleDialogEffectSettingsBase(parent),
@@ -11,7 +14,8 @@ BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(con
     _effect(effect),
     _color(effect.getColor()),
     _previewImage(),
-    _editor(nullptr)
+    _editor(nullptr),
+    _resizing(false)
 {
     ui->setupUi(this);
 
@@ -249,9 +253,10 @@ QColor BattleDialogEffectSettingsObjectVideo::getColorizeColor() const
 
 bool BattleDialogEffectSettingsObjectVideo::eventFilter(QObject *watched, QEvent *event)
 {
-    if((watched == ui->lblPreview) && (event) && (event->type() == QEvent::Resize))
+    if((watched == ui->lblPreview) && (event) && (event->type() == QEvent::Resize) && (!_resizing))
     {
-        setEditorSource();
+        _resizing = true;
+        QTimer::singleShot(BATTLEEFFECTSETTINGS_TIMER_MSEC, this, &BattleDialogEffectSettingsObjectVideo::setEditorSource);
     }
 
     return QDialog::eventFilter(watched, event);
@@ -311,6 +316,8 @@ void BattleDialogEffectSettingsObjectVideo::setEditorSource()
     _editor->setSquareFinalImage(true);
     _editor->setSourceImage(_previewImage.scaled(previewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     updatePreview();
+
+    _resizing = false;
 }
 
 void BattleDialogEffectSettingsObjectVideo::updatePreview()

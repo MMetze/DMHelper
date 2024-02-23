@@ -56,6 +56,7 @@ private:
     QColor _color;
     QImage _previewImage;
     TokenEditor* _editor;
+    bool _resizing;
 };
 
 #endif // BATTLEDIALOGEFFECTSETTINGSOBJECTVIDEO_H
