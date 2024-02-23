@@ -1,7 +1,9 @@
 #include "battledialogeffectsettingsobjectvideo.h"
 #include "ui_battledialogeffectsettingsobjectvideo.h"
 #include "battledialogmodeleffectobjectvideo.h"
+#include "layertokens.h"
 #include <QIntValidator>
+#include <QGraphicsPixmapItem>
 
 BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(const BattleDialogModelEffectObjectVideo& effect, QWidget *parent) :
     BattleDialogEffectSettingsBase(parent),
@@ -161,6 +163,17 @@ void BattleDialogEffectSettingsObjectVideo::copyValuesFromSettings(BattleDialogM
     videoEffect->setEffectTransparencyType(getEffectTransparencyType());
     videoEffect->setTransparentColor(ui->btnTransparentColor->getColor());
     videoEffect->setTransparentTolerance(ui->slideTolerance->value());
+
+    if(!_editor)
+        return;
+
+    LayerTokens* tokenLayer = videoEffect->getLayer();
+    if(tokenLayer)
+    {
+        QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getEffectItem(videoEffect));
+        if(pixmapItem)
+            pixmapItem->setPixmap(QPixmap::fromImage(_editor->getFinalImage()));
+    }
 }
 
 bool BattleDialogEffectSettingsObjectVideo::isEffectActive() const
