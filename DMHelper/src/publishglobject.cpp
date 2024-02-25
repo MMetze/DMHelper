@@ -28,6 +28,11 @@ void PublishGLObject::cleanup()
     }
 }
 
+bool PublishGLObject::hasCustomShaders() const
+{
+    return false;
+}
+
 unsigned int PublishGLObject::getTextureID() const
 {
     return _textureID;

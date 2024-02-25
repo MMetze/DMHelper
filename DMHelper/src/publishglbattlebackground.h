@@ -12,7 +12,7 @@ public:
     virtual ~PublishGLBattleBackground() override;
 
     virtual void cleanup() override;
-    virtual void paintGL() override;
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
 
     void setImage(const QImage& image);
     void updateImage(const QImage& image);

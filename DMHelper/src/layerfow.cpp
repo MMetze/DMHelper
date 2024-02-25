@@ -498,7 +498,7 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _fowGLObject->getMatrixData());
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
-    _fowGLObject->paintGL();
+    _fowGLObject->paintGL(functions, projectionMatrix);
 
     functions->glUseProgram(_shaderProgramRGB);
 }

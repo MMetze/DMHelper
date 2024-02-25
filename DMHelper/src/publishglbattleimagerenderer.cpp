@@ -63,5 +63,5 @@ void PublishGLBattleImageRenderer::paintBackground(QOpenGLFunctions* functions)
         return;
 
     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData());
-    _backgroundObject->paintGL();
+    _backgroundObject->paintGL(functions, nullptr);
 }

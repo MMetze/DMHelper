@@ -190,7 +190,7 @@ void PublishGLImageRenderer::paintGL()
     if(_imageGLObject)
     {
         f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _imageGLObject->getMatrixData());
-        _imageGLObject->paintGL();
+        _imageGLObject->paintGL(f, nullptr);
     }
 }
 

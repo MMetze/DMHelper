@@ -295,13 +295,13 @@ void PublishGLBattleRenderer::paintGL()
     if(_lineImage)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineImage->getMatrixData());
-        _lineImage->paintGL();
+        _lineImage->paintGL(f, nullptr);
     }
 
     if(_lineTextImage)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineTextImage->getMatrixData());
-        _lineTextImage->paintGL();
+        _lineTextImage->paintGL(f, nullptr);
     }
 
     if(!_scissorRect.isEmpty())
@@ -747,7 +747,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     if(_initiativeBackground)
     {
         functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _initiativeBackground->getMatrixData());
-        _initiativeBackground->paintGL();
+        _initiativeBackground->paintGL(functions, nullptr);
     }
 
     int activeCombatant = _model->getActiveCombatantIndex();
@@ -780,12 +780,12 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
                 tokenScreenCoords.scale(scaleFactor, scaleFactor);
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
-                tokenObject->paintGL();
+                tokenObject->paintGL(functions, nullptr);
                 if(_tokenFrame)
                 {
                     _tokenFrame->setY(tokenY - (_initiativeTokenHeight / 2.0));
                     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _tokenFrame->getMatrixData());
-                   _tokenFrame->paintGL();
+                   _tokenFrame->paintGL(functions, nullptr);
                    if((_countdownFrame) && (_countdownFill) && (_showCountdown) && (currentCombatant == activeCombatant))
                    {
                        functions->glUseProgram(_shaderProgramRGBColor);
@@ -794,12 +794,12 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                        functions->glUniform4f(_shaderRGBColor, _countdownColor.redF(), _countdownColor.greenF(), _countdownColor.blueF(), 1.0);
                        _countdownFill->setPositionScaleY(tokenY - (_initiativeTokenHeight / 2.0), _countdownScale);
                        functions->glUniformMatrix4fv(_shaderModelMatrixRGBColor, 1, GL_FALSE, _countdownFill->getMatrixData());
-                       _countdownFill->paintGL();
+                       _countdownFill->paintGL(functions, nullptr);
                        functions->glUseProgram(_shaderProgramRGB);
 
                        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _countdownFrame->getMatrixData());
                        _countdownFrame->setY(tokenY - (_initiativeTokenHeight / 2.0));
-                       _countdownFrame->paintGL();
+                       _countdownFrame->paintGL(functions, nullptr);
                    }
                 }
             }
@@ -813,7 +813,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                     tokenScreenCoords.setToIdentity();
                     tokenScreenCoords.translate(tokenSize * 1.25, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
                     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
-                    combatantName->paintGL();
+                    combatantName->paintGL(functions, nullptr);
                 }
             }
 
@@ -1228,7 +1228,7 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
                                          ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
         {
             functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
-            _movementToken->paintGL();
+            _movementToken->paintGL(functions, nullptr);
         }
     }
 
@@ -1241,7 +1241,7 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
                                          ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
         {
             functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _activeToken->getMatrixData());
-            _activeToken->paintGL();
+            _activeToken->paintGL(functions, nullptr);
         }
     }
 }

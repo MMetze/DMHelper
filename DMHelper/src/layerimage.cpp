@@ -248,7 +248,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData());
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
-    _imageGLObject->paintGL();
+    _imageGLObject->paintGL(functions, projectionMatrix);
 
     functions->glUseProgram(_shaderProgramRGB);
 }

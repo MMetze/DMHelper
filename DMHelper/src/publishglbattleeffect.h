@@ -17,7 +17,7 @@ public:
 
     virtual void cleanup() override;
     virtual void prepareObjectsGL();
-    virtual void paintGL() override;
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
 
     virtual BattleDialogModelEffect* getEffect() const;
     virtual qreal getEffectAlpha() const;

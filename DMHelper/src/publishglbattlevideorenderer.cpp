@@ -123,7 +123,7 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
     if(_backgroundObject)
     {
         functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
+        _backgroundObject->paintGL(functions, nullptr);
     }
 #else
     if(!_videoPlayer)
@@ -131,7 +131,7 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 
     QMatrix4x4 modelMatrix;
     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, modelMatrix.constData());
-    _videoPlayer->paintGL();
+    _videoPlayer->paintGL(functions, nullptr);
 #endif
 }
 
