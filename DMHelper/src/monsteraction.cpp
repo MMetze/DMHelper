@@ -50,11 +50,16 @@ QDomElement MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bo
     return element;
 }
 
+bool MonsterAction::hasDiceSummary() const
+{
+    return((_damageDice.getBonus() != 0) || ((_damageDice.getCount() > 0) && (_damageDice.getType() > 0)));
+}
+
 QString MonsterAction::summaryString() const
 {
     QString result = _name;
 
-    if((_attackBonus != 0) || ((_damageDice.getCount() > 0) && (_damageDice.getType() > 0)))
+    if(hasDiceSummary())
     {
         result.append(QString(" ("));
         if(_attackBonus >= 0)

@@ -505,17 +505,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         _character = _campaign->getCharacterOrNPCByDndBeyondId(dndBeyondId);
         if(!_character)
         {
-            //_character = new Character();
             _character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, QString(), false));
             _character->setDndBeyondID(dndBeyondId);
-            /*
-            if(_isCharacter)
-                _campaign->addCharacter(_character);
-            else
-                _campaign->addNPC(_character);
-                */
-            //_campaign->addObject(_character);
-            //emit characterCreated(_character);
         }
     }
 
@@ -739,20 +730,72 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             (inventoryObj["attunementDescription"].toString() != QString("Required")) ||
             (inventoryObj["isAttuned"].toBool())))
         {
-            int armorClass = invDefinition["armorClass"].toInt();
-            if(armorClass > 0)
+            if(invDefinition["filterType"].toString() == QString("Weapon"))
             {
-                if(armorClass >= 10)
-                    armorType = invDefinition["type"].toString();
-                _totalArmor += armorClass;
-#ifdef IMPORTER_LOG_AC
-                qDebug() << "[CharacterImporter] AC LOG: " << invDefinition["name"].toString() << ", equipped: " << inventoryObj["equipped"].toBool()
-                         << ", canAttune: " << inventoryObj["canAttune"].toBool() << ", attunementDescription: " << inventoryObj["attunementDescription"].toString()
-                         << ", isAttuned: " << inventoryObj["isAttuned"].toBool() << ", armorClass: " << invDefinition["armorClass"].toInt()
-                         << ", total AC: " << _totalArmor;
-#endif
+                QString weaponName = invDefinition["name"].toString();
+                QString weaponDescription = invDefinition["description"].toString();
+
+                int j;
+                bool finesse = false;
+                bool ranged = false;
+                QJsonArray propertyArray = invDefinition["properties"].toArray();
+                for(j = 0; j < propertyArray.count(); ++j)
+                {
+                    QJsonObject propertyObj = propertyArray.at(j).toObject();
+                    if(propertyObj["name"].toString() == QString("Finesse"))
+                        finesse = true;
+                    else if(propertyObj["name"].toString() == QString("Ranged"))
+                        ranged = true;
+                }
+
+                // Get the attack bonus
+                int attackBonus = _character->getProficiencyBonus();
+                if(ranged)
+                    attackBonus += Combatant::getAbilityMod(_character->getDexterity());
+                else
+                {
+                    if(finesse)
+                        attackBonus += qMax(Combatant::getAbilityMod(_character->getStrength()), Combatant::getAbilityMod(_character->getDexterity()));
+                    else
+                        attackBonus += Combatant::getAbilityMod(_character->getStrength());
+                }
+
+                // Get the basic damage
+                Dice weaponDamage;
+                QJsonObject damageObject = invDefinition["damage"].toObject();
+                if(!damageObject.isEmpty())
+                    weaponDamage = Dice(damageObject["diceString"].toString());
+
+                // Check for magic properties
+                int magicBonus = 0;
+                QJsonArray grantedModifiers = invDefinition["grantedModifiers"].toArray();
+                for(j = 0; j < grantedModifiers.count(); ++j)
+                {
+                    QJsonObject grantedModifier = grantedModifiers.at(j).toObject();
+                    if((grantedModifier["type"].toString() == QString("bonus")) && (grantedModifier["subType"].toString() == QString("magic")))
+                        magicBonus += grantedModifier["value"].toInt();
+                }
+                weaponDamage.setBonus(weaponDamage.getBonus() + magicBonus);
+
+                _character->addAction(MonsterAction(attackBonus + magicBonus, weaponDescription, weaponName, weaponDamage));
             }
-            scanModifiers(invDefinition, QString("grantedModifiers"), *_character);
+            else
+            {
+                int armorClass = invDefinition["armorClass"].toInt();
+                if(armorClass > 0)
+                {
+                    if(armorClass >= 10)
+                        armorType = invDefinition["type"].toString();
+                    _totalArmor += armorClass;
+    #ifdef IMPORTER_LOG_AC
+                    qDebug() << "[CharacterImporter] AC LOG: " << invDefinition["name"].toString() << ", equipped: " << inventoryObj["equipped"].toBool()
+                             << ", canAttune: " << inventoryObj["canAttune"].toBool() << ", attunementDescription: " << inventoryObj["attunementDescription"].toString()
+                             << ", isAttuned: " << inventoryObj["isAttuned"].toBool() << ", armorClass: " << invDefinition["armorClass"].toInt()
+                             << ", total AC: " << _totalArmor;
+    #endif
+                }
+                scanModifiers(invDefinition, QString("grantedModifiers"), *_character);
+            }
         }
 
         QString itemDesc = invDefinition["name"].toString();

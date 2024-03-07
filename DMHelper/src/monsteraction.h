@@ -16,6 +16,7 @@ public:
     virtual ~MonsterAction();
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const;
+    bool hasDiceSummary() const;
     QString summaryString() const;
 
     int getAttackBonus() const;

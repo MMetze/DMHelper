@@ -646,6 +646,7 @@ QList<MonsterAction> Character::getActions() const
 void Character::addAction(const MonsterAction& action)
 {
     _actions.append(action);
+    registerChange();
 }
 
 void Character::setAction(int index, const MonsterAction& action)
@@ -654,12 +655,16 @@ void Character::setAction(int index, const MonsterAction& action)
         return;
 
     if(_actions.at(index) != action)
+    {
         _actions[index] = action;
+        registerChange();
+    }
 }
 
 int Character::removeAction(const MonsterAction& action)
 {
     _actions.removeAll(action);
+    registerChange();
     return _actions.count();
 }
 
@@ -707,13 +712,16 @@ void Character::copyMonsterValues(MonsterClass& monster)
         proficiencyString += QString("Damage Vulnerabilities:") + QChar::LineFeed + monster.getDamageVulnerabilities() + QChar::LineFeed + QChar::LineFeed;
     setStringValue(StringValue_proficiencies, proficiencyString);
 
-    // Notes
+    // Notes and actions
     QString notesString;
     if(monster.getActions().count() > 0)
     {
         notesString += QString("Actions:") + QChar::LineFeed;
         for(MonsterAction monsterAction : monster.getActions())
+        {
             notesString += monsterAction.summaryString() + QChar::LineFeed;
+            addAction(monsterAction);
+        }
         notesString += QChar::LineFeed;
     }
     if(monster.getLegendaryActions().count() > 0)
