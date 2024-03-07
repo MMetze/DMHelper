@@ -263,14 +263,14 @@ void PublishGLMapRenderer::paintGL()
     if(_lineImage)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineImage->getMatrixData());
-        _lineImage->paintGL();
+        _lineImage->paintGL(f, nullptr);
     }
 
     if((_partyToken) && (_map->getShowParty()))
     {
         _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _partyToken->getMatrixData());
-        _partyToken->paintGL();
+        _partyToken->paintGL(f, nullptr);
     }
 
     if((_markerTokens.count() > 0) && (_map->getShowMarkers()))
@@ -280,7 +280,7 @@ void PublishGLMapRenderer::paintGL()
             if(markerToken)
             {
                 f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, markerToken->getMatrixData());
-                markerToken->paintGL();
+                markerToken->paintGL(f, nullptr);
             }
         }
     }

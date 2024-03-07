@@ -34,18 +34,19 @@ void PublishGLBattleGrid::cleanup()
     PublishGLBattleObject::cleanup();
 }
 
-void PublishGLBattleGrid::paintGL()
+void PublishGLBattleGrid::paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix)
 {
-    if(!QOpenGLContext::currentContext())
+    Q_UNUSED(projectionMatrix);
+
+    if((!QOpenGLContext::currentContext()) || (!functions))
         return;
 
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid]::paintGL context: " << QOpenGLContext::currentContext();
 #endif
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
+    if(!e)
         return;
 
     if(_recreateGrid)
@@ -57,13 +58,13 @@ void PublishGLBattleGrid::paintGL()
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid]::paintGL UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
 #endif
-    f->glUseProgram(_shaderProgram);
-    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
+    functions->glUseProgram(_shaderProgram);
+    functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
     e->glBindVertexArray(_VAO);
-    f->glLineWidth(_config.getGridPen().width());
-    f->glUniform4f(f->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
+    functions->glLineWidth(_config.getGridPen().width());
+    functions->glUniform4f(functions->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
 
-    f->glDrawElements(GL_LINES, _indices.count(), GL_UNSIGNED_INT, 0);
+    functions->glDrawElements(GL_LINES, _indices.count(), GL_UNSIGNED_INT, 0);
 }
 
 void PublishGLBattleGrid::setPosition(const QPoint& position)

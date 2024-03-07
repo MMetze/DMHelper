@@ -32,7 +32,7 @@ void PublishGLTokenHighlightEffect::paintGL(QOpenGLFunctions *f, int shaderModel
     }
 
     f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, getMatrixData());
-    _effectImage->paintGL();
+    _effectImage->paintGL(f, nullptr);
 }
 
 

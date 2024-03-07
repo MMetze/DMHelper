@@ -411,7 +411,7 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     QMatrix4x4 localMatrix;
 
     functions->glUseProgram(_shaderProgramRGBA);
-    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
+    //functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -425,11 +425,16 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
                 PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
                 if(effectToken)
                 {
-                    localMatrix = effectToken->getMatrix();
-                    localMatrix.translate(_position.x(), _position.y());
-                    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
-                    functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
-                    effectToken->paintGL();
+                    if(!effectToken->hasCustomShaders())
+                    {
+                        localMatrix = effectToken->getMatrix();
+                        localMatrix.translate(_position.x(), _position.y());
+                        functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+                        functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
+                    }
+                    effectToken->paintGL(functions, projectionMatrix);
+                    if(effectToken->hasCustomShaders())
+                        functions->glUseProgram(_shaderProgramRGBA);
                 }
             }
         }
@@ -449,7 +454,7 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
                 localMatrix.translate(_position.x(), _position.y());
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
                 functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
-                combatantToken->paintGL();
+                combatantToken->paintGL(functions, projectionMatrix);
                 combatantToken->paintEffects(_shaderModelMatrixRGBA);
 
                 emit postCombatantDrawGL(functions, combatant, combatantToken);

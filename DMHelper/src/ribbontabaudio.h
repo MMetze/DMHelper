@@ -22,13 +22,16 @@ public slots:
     void setPlay(bool checked);
     void setRepeat(bool checked);
     void setMute(bool checked);
-    void setVolume(int volume);
+    void setVolume(float volume);
 
 signals:
     void playClicked(bool checked);
     void repeatClicked(bool checked);
     void muteClicked(bool checked);
-    void volumeChanged(int volume);
+    void volumeChanged(float volume);
+
+protected slots:
+    void handleVolumeChanged(int volume);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

@@ -214,11 +214,6 @@ void EncounterText::uninitialize()
 
 void EncounterText::setText(const QString& newText)
 {
-    if(newText.isEmpty())
-    {
-        qDebug() << "[EncounterText] ERROR: Attempting to set encounter text to nothing! This is assumed to be an error and needs to be further investigated!";
-    }
-
     if(_text != newText)
     {
         _text = newText;

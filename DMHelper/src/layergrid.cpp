@@ -176,7 +176,7 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
         return;
 
     _gridGLObject->setProjectionMatrix(projectionMatrix);
-    _gridGLObject->paintGL();
+    _gridGLObject->paintGL(functions, projectionMatrix);
 }
 
 void LayerGrid::playerGLResize(int w, int h)

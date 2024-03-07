@@ -28,7 +28,6 @@ public slots:
     virtual void publishClicked(bool checked);
     virtual void setRotation(int rotation);
     virtual void setBackgroundColor(const QColor& color);
-    //virtual void reloadObject();
     virtual void editLayers();
 };
 

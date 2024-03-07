@@ -10,6 +10,8 @@
 #include "characterimportheroforgedialog.h"
 #include "tokeneditdialog.h"
 #include "optionscontainer.h"
+#include "monsteractioneditdialog.h"
+#include "monsteractionframe.h"
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QFileDialog>
@@ -115,6 +117,7 @@ CharacterFrame::CharacterFrame(OptionsContainer* options, QWidget *parent) :
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterFrame::editConditions);
     connect(ui->btnRemoveConditions, &QAbstractButton::clicked, this, &CharacterFrame::clearConditions);
 
+    connect(ui->btnAddAction, &QAbstractButton::clicked, this, &CharacterFrame::addAction);
     connect(ui->edtSpells, &QTextBrowser::anchorClicked, this, &CharacterFrame::spellAnchorClicked);
 }
 
@@ -344,6 +347,7 @@ void CharacterFrame::mouseReleaseEvent(QMouseEvent * event)
     ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
     _mouseDown = false;
 
+    //this doesnt work, shouldn't the event go to the action list? and the frame geometry needs to consider the scrollbar position
     if((!_character) || (!ui->lblIcon->frameGeometry().contains(event->pos())))
         return;
 
@@ -434,6 +438,32 @@ void CharacterFrame::readCharacterData()
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
     updateConditionLayout();
+
+    QLayout* oldActionsLayout = ui->scrollActions->layout();
+    if(oldActionsLayout)
+    {
+        QLayoutItem *child;
+        while ((child = oldActionsLayout->takeAt(0)) != nullptr)
+        {
+            if(child->widget())
+                child->widget()->deleteLater();
+            delete child;
+        }
+
+        delete oldActionsLayout;
+    }
+
+    QVBoxLayout* actionsLayout = new QVBoxLayout;
+    QList<MonsterAction> actionList = _character->getActions();
+    //actionsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    for(int i = 0; i < actionList.count(); ++i)
+    {
+        MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
+        connect(newFrame, &MonsterActionFrame::deleteAction, this, &CharacterFrame::deleteAction);
+        actionsLayout->addWidget(newFrame);
+    }
+    ui->scrollActions->setLayout(actionsLayout);
+
     readSpellSlots();
 
     connectChanged(true);
@@ -752,6 +782,30 @@ void CharacterFrame::addCondition(Combatant::Condition condition)
 
     _conditionGrid->addWidget(conditionLabel, row, column);
 }
+
+void CharacterFrame::addAction()
+{
+    if((!_character) || (!ui->scrollActions->layout()))
+        return;
+
+    MonsterActionEditDialog dlg(MonsterAction(0, QString(), QString(), Dice()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        _character->addAction(dlg.getAction());
+        MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
+        connect(newFrame, &MonsterActionFrame::deleteAction, this, &CharacterFrame::deleteAction);
+        ui->scrollActions->layout()->addWidget(newFrame);
+    }
+}
+
+void CharacterFrame::deleteAction(const MonsterAction& action)
+{
+    if(!_character)
+        return;
+
+    _character->removeAction(action);
+}
+
 
 void CharacterFrame::spellSlotChanged(int level, int slot, bool checked)
 {

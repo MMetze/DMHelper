@@ -13,6 +13,9 @@ public:
     explicit AudioTrackYoutube(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
     virtual ~AudioTrackYoutube() override;
 
+    // From CampaignObjectBase
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
     virtual QIcon getDefaultIcon() override;
 
     virtual int getAudioType() const override;
@@ -36,7 +39,11 @@ protected slots:
     void urlRequestFinished(QNetworkReply *reply);
 
 protected:
+    // From QObject
     virtual void timerEvent(QTimerEvent *event) override;
+
+    // From CampaignObjectBase
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     virtual void findDirectUrl(const QString& youtubeId);
     bool handleReplyDirect(const QByteArray& data);
@@ -48,7 +55,7 @@ protected:
     QString _urlString;
     libvlc_media_player_t *_vlcPlayer;
     int _stopStatus;
-    int _lastVolume;
+    int _volume;
     int _timerId;
     bool _repeat;
     bool _mute;
