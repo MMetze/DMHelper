@@ -14,8 +14,13 @@ public:
     Dice& operator=(const Dice& other);
 
     int getCount() const;
+    void setCount(int count);
+
     int getType() const;
+    void setType(int type);
+
     int getBonus() const;
+    void setBonus(int bonus);
 
     QString toString() const;
 
