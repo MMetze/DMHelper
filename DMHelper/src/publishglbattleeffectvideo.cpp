@@ -159,7 +159,6 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
     }
 
     functions->glUseProgram(_shaderProgramRGBA);
-//    functions->glUniform1f(_shaderAlphaRGBA, tokensLayer->getOpacity());
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -167,6 +166,15 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
     localMatrix.translate(tokensLayer->getPosition().x(), tokensLayer->getPosition().y());
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
     functions->glUniform1f(_shaderAlphaRGBA, getEffectAlpha() * tokensLayer->getOpacity());
+
+    if(effectVideo->getEffectTransparencyType() == DMHelper::TransparentType_TransparentColor)
+    {
+        functions->glUniform3f(_shaderTransparentColor, effectVideo->getTransparentColor().redF(), effectVideo->getTransparentColor().greenF(), effectVideo->getTransparentColor().blueF());
+        functions->glUniform1f(_shaderTransparentTolerance, effectVideo->getTransparentTolerance());
+    }
+
+    if(effectVideo->isColorize())
+        functions->glUniform3f(_shaderColorizeColor, effectVideo->getColorizeColor().redF(), effectVideo->getColorizeColor().greenF(), effectVideo->getColorizeColor().blueF());
 
     e->glBindVertexArray(_VAO);
     functions->glBindTexture(GL_TEXTURE_2D, _textureID);
