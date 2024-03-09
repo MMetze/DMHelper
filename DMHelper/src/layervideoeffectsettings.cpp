@@ -41,7 +41,7 @@ LayerVideoEffectSettings::~LayerVideoEffectSettings()
     delete ui;
 }
 
-DMHelper::TransparentType LayerVideoEffectSettings::getEffectType() const
+DMHelper::TransparentType LayerVideoEffectSettings::getEffectTransparencyType() const
 {
     if(ui->btnRed->isChecked())
         return DMHelper::TransparentType_RedChannel;
@@ -85,7 +85,7 @@ bool LayerVideoEffectSettings::eventFilter(QObject *watched, QEvent *event)
     return QDialog::eventFilter(watched, event);
 }
 
-void LayerVideoEffectSettings::setEffectType(DMHelper::TransparentType effectType)
+void LayerVideoEffectSettings::setEffectTransparencyType(DMHelper::TransparentType effectType)
 {
     switch(effectType)
     {

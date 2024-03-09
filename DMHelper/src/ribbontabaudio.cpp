@@ -11,7 +11,7 @@ RibbonTabAudio::RibbonTabAudio(QWidget *parent) :
     connect(ui->btnPlay, SIGNAL(clicked(bool)), this, SIGNAL(playClicked(bool)));
     connect(ui->btnRepeat, SIGNAL(clicked(bool)), this, SIGNAL(repeatClicked(bool)));
     connect(ui->btnMute, SIGNAL(clicked(bool)), this, SIGNAL(muteClicked(bool)));
-    connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SIGNAL(volumeChanged(int)));
+    connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(handleVolumeChanged(int)));
 }
 
 RibbonTabAudio::~RibbonTabAudio()
@@ -65,9 +65,14 @@ void RibbonTabAudio::setMute(bool checked)
     ui->btnMute->setChecked(checked);
 }
 
-void RibbonTabAudio::setVolume(int volume)
+void RibbonTabAudio::setVolume(float volume)
 {
-    ui->sliderVolume->setValue(volume);
+    ui->sliderVolume->setValue(static_cast<int>(volume * 100.f));
+}
+
+void RibbonTabAudio::handleVolumeChanged(int volume)
+{
+    emit volumeChanged(static_cast<float>(volume) / 100.f);
 }
 
 void RibbonTabAudio::showEvent(QShowEvent *event)

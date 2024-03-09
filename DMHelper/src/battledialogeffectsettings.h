@@ -1,21 +1,23 @@
 #ifndef BATTLEDIALOGEFFECTSETTINGS_H
 #define BATTLEDIALOGEFFECTSETTINGS_H
 
-#include <QDialog>
+#include "battledialogeffectsettingsbase.h"
 
 namespace Ui {
 class BattleDialogEffectSettings;
 }
 
-class BattleDialogModelEffect;
-
-class BattleDialogEffectSettings : public QDialog
+class BattleDialogEffectSettings : public BattleDialogEffectSettingsBase
 {
     Q_OBJECT
 
 public:
     explicit BattleDialogEffectSettings(const BattleDialogModelEffect& effect, QWidget *parent = nullptr);
-    ~BattleDialogEffectSettings();
+    virtual ~BattleDialogEffectSettings();
+
+    // Base clase implementations
+    virtual void mergeValuesToSettings(BattleDialogModelEffect& effect) override;
+    virtual void copyValuesFromSettings(BattleDialogModelEffect& effect) override;
 
     bool isEffectActive() const;
     bool isEffectVisible() const;
@@ -25,9 +27,6 @@ public:
     qreal getRotation() const;
     QColor getColor() const;
     int getAlpha() const;
-
-    void mergeValuesToSettings(BattleDialogModelEffect& effect);
-    void copyValuesFromSettings(BattleDialogModelEffect& effect);
 
 public slots:
     void setSizeLabel(const QString& sizeLabel);

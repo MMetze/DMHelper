@@ -598,6 +598,7 @@ void SpellbookDialog::updateImage()
                 }
                 case BattleDialogModelEffect::BattleDialogModelEffect_Base:
                 case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+                case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
                 default:
                     break;
             }

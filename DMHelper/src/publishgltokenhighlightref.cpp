@@ -18,7 +18,7 @@ void PublishGLTokenHighlightRef::paintGL(QOpenGLFunctions *f, int shaderModelMat
         return;
 
     f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, getMatrixData());
-    _referenceImage.paintGL();
+    _referenceImage.paintGL(f, nullptr);
 }
 
 int PublishGLTokenHighlightRef::getWidth() const

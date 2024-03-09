@@ -61,6 +61,8 @@ private slots:
     void updateConditionLayout();
     void clearConditionGrid();
     void addCondition(Combatant::Condition condition);
+    void addAction();
+    void deleteAction(const MonsterAction& action);
     void spellSlotChanged(int level, int slot, bool checked);
     void editLevelSlots(int level);
     void addSpellLevel();

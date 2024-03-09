@@ -16,7 +16,7 @@ public:
     virtual ~PublishGLBattleGrid() override;
 
     virtual void cleanup() override;
-    virtual void paintGL() override;
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
     QSize getSize() const;
 
     void setPosition(const QPoint& position);

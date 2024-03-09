@@ -28,8 +28,6 @@ PublishGLBattleEffect::PublishGLBattleEffect(PublishGLScene* scene, BattleDialog
     if(childEffects.count() == 1)
         _childEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
 
-    prepareObjects();
-
     connect(_effect, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleEffect::effectMoved);
     connect(_effect, &BattleDialogModelEffect::effectChanged, this, &PublishGLBattleEffect::effectChanged);
     if(_childEffect)
@@ -76,74 +74,8 @@ void PublishGLBattleEffect::cleanup()
     PublishGLBattleObject::cleanup();
 }
 
-void PublishGLBattleEffect::paintGL()
-{
-    if(!QOpenGLContext::currentContext())
-        return;
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
-        return;
-
-    if(_recreateEffect)
-    {
-        _recreateEffect = false;
-        cleanup();
-        prepareObjects();
-    }
-
-    e->glBindVertexArray(_VAO);
-    f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
-BattleDialogModelEffect* PublishGLBattleEffect::getEffect() const
-{
-    return _effect;
-}
-
-qreal PublishGLBattleEffect::getEffectAlpha() const
-{
-    if(_childEffect)
-        return _childEffect->getColor().alphaF();
-
-    if((_effect) && (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object))
-        return _effect->getColor().alphaF();
-    else
-        return 1.0;
-}
-
-void PublishGLBattleEffect::effectMoved()
-{
-    if(!_scene)
-        return;
-
-    BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
-    if((!_effect) || (!_effect->getLayer()))
-        return;
-
-    QPointF effectPos = effect->getPosition();
-    qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
-    if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
-        sizeFactor *= 2.0; // Convert radius to diameter
-    qreal scaleFactor = (static_cast<qreal>(_effect->getLayer()->getScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
-
-    _modelMatrix.setToIdentity();
-    _modelMatrix.translate(QVector3D(sceneToWorld(effectPos)));
-    _modelMatrix.rotate(effect->getRotation(), 0.f, 0.f, -1.f);
-    _modelMatrix.scale(scaleFactor, scaleFactor);
-
-    emit changed();
-}
-
-void PublishGLBattleEffect::effectChanged()
-{
-    _recreateEffect = true;
-    emit changed();
-}
-
-void PublishGLBattleEffect::prepareObjects()
+void PublishGLBattleEffect::prepareObjectsGL()
 {
     if(!_effect)
         return;
@@ -168,38 +100,38 @@ void PublishGLBattleEffect::prepareObjects()
 
     QPainter painter;
     painter.begin(&effectImage);
-        painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.setBrush(QBrush(_effect->getColor()));
-        drawShape(painter, _effect, effectSize, effectWidth);
+    painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setBrush(QBrush(_effect->getColor()));
+    drawShape(painter, _effect, effectSize, effectWidth);
 
-        if(_childEffect)
+    if(_childEffect)
+    {
+        QImage itemImage(_childEffect->getImageFile());
+        if(!itemImage.isNull())
         {
-            QImage itemImage(_childEffect->getImageFile());
-            if(!itemImage.isNull())
-            {
-                if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
-                   (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
-                    itemImage = itemImage.mirrored(true, false); // mirror horizontally
-                else
-                    itemImage = itemImage.mirrored(false, true); // mirror vertically
+            if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+                (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+                itemImage = itemImage.mirrored(true, false); // mirror horizontally
+            else
+                itemImage = itemImage.mirrored(false, true); // mirror vertically
 
-                if(_childEffect->getImageRotation() != 0)
-                    itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));
+            if(_childEffect->getImageRotation() != 0)
+                itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));
 
-                if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
-                    painter.drawImage(QRect(0, 0, effectWidth, effectSize), itemImage);
-                else
-                    painter.drawImage(effectImage.rect(), itemImage);
-            }
+            if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
+                painter.drawImage(QRect(0, 0, effectWidth, effectSize), itemImage);
+            else
+                painter.drawImage(effectImage.rect(), itemImage);
         }
+    }
     painter.end();
 
     _textureSize = effectImage.size();
 
     float vertices[] = {
         // positions                                                                     // colors           // texture coords
-         (float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-         (float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        (float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+        (float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
         -(float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
         -(float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
     };
@@ -212,7 +144,7 @@ void PublishGLBattleEffect::prepareObjects()
         vertices[24] = 0.0f;                        vertices[25] = 0.0f;
     }
     else if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
-            (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+             (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
     {
         /*vertices[0]  = (float)_textureSize.width(); */ vertices[1]  = 0.0f;
         /*vertices[8]  = (float)_textureSize.width(); */ vertices[9]  = (float)-_textureSize.height();
@@ -259,7 +191,76 @@ void PublishGLBattleEffect::prepareObjects()
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, effectImage.width(), effectImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 
-    effectMoved();
+    PublishGLBattleEffect::effectMoved();
+}
+
+void PublishGLBattleEffect::paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix)
+{
+    Q_UNUSED(projectionMatrix);
+
+    if((!QOpenGLContext::currentContext()) || (!functions))
+        return;
+
+    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    if(!e)
+        return;
+
+    if(_recreateEffect)
+    {
+        _recreateEffect = false;
+        cleanup();
+        prepareObjectsGL();
+    }
+
+    e->glBindVertexArray(_VAO);
+    functions->glBindTexture(GL_TEXTURE_2D, _textureID);
+    functions->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+BattleDialogModelEffect* PublishGLBattleEffect::getEffect() const
+{
+    return _effect;
+}
+
+qreal PublishGLBattleEffect::getEffectAlpha() const
+{
+    if(_childEffect)
+        return _childEffect->getColor().alphaF();
+
+    if((_effect) && ((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) ||
+                     (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)))
+        return _effect->getColor().alphaF();
+    else
+        return 1.0;
+}
+
+void PublishGLBattleEffect::effectMoved()
+{
+    if(!_scene)
+        return;
+
+    BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
+    if((!_effect) || (!_effect->getLayer()))
+        return;
+
+    QPointF effectPos = effect->getPosition();
+    qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
+    if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+        sizeFactor *= 2.0; // Convert radius to diameter
+    qreal scaleFactor = (static_cast<qreal>(_effect->getLayer()->getScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+
+    _modelMatrix.setToIdentity();
+    _modelMatrix.translate(QVector3D(sceneToWorld(effectPos)));
+    _modelMatrix.rotate(effect->getRotation(), 0.f, 0.f, -1.f);
+    _modelMatrix.scale(scaleFactor, scaleFactor);
+
+    emit changed();
+}
+
+void PublishGLBattleEffect::effectChanged()
+{
+    _recreateEffect = true;
+    emit changed();
 }
 
 void PublishGLBattleEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)
@@ -290,6 +291,7 @@ void PublishGLBattleEffect::drawShape(QPainter& painter, BattleDialogModelEffect
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
             drawObject(painter, dynamic_cast<BattleDialogModelEffectObject*>(effect), effectSize, effectWidth);
             break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
         default:
             break;
     }

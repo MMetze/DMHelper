@@ -625,8 +625,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
     connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
     connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
-    connect(_ribbonTabAudio, SIGNAL(volumeChanged(int)), audioTrackEdit, SLOT(setVolume(int)));
-    connect(audioTrackEdit, SIGNAL(volumeChanged(int)), _ribbonTabAudio, SLOT(setVolume(int)));
+    connect(_ribbonTabAudio, SIGNAL(volumeChanged(float)), audioTrackEdit, SLOT(setVolume(float)));
+    connect(audioTrackEdit, SIGNAL(volumeChanged(float)), _ribbonTabAudio, SLOT(setVolume(float)));
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -762,7 +762,7 @@ void MainWindow::newCampaign()
 
 bool MainWindow::saveCampaign()
 {
-    return doSaveCampaign(QString());
+    return doSaveCampaign(_campaign ? _campaign->getName() + QString(".xml") : QString());
 }
 
 void MainWindow::saveCampaignAs()

@@ -209,7 +209,7 @@ void PublishGLTextRenderer::paintGL()
     if(_textObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _textObject->getMatrixData());
-        _textObject->paintGL();
+        _textObject->paintGL(f, nullptr);
     }
 
     if(!_scissorRect.isEmpty())

@@ -20,7 +20,7 @@ public:
     virtual BattleDialogModelEffect* clone() const override;
 
     virtual int getEffectType() const override;
-    virtual BattleDialogEffectSettings* getEffectEditor() const override;
+    virtual BattleDialogEffectSettingsBase* getEffectEditor() const override;
 
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) override;
@@ -42,6 +42,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     virtual void prepareItem(QGraphicsItem& item) const override;
+    virtual QGraphicsItem* createPixmapShape(qreal gridScale, const QPixmap& pixmap);
 
     int _width;
     int _imageRotation;
