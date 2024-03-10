@@ -44,11 +44,11 @@ jobs:
         echo 'github.workspace === ${{ github.workspace }}'
         ls ${{env.Qt6Dir}}
         Get-ChildItem -Recurse -Directory
-        echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator
-        cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin
-        Get-ChildItem -Recurse -Directory
-        echo STOP!
-        Dosomethingthatbreaks
+        # echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator
+        # cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin
+        # Get-ChildItem -Recurse -Directory
+        # echo STOP!
+        # Dosomethingthatbreaks
         
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1
