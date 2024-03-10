@@ -44,6 +44,9 @@ jobs:
         echo 'github.workspace === ${{ github.workspace }}'
         ls ${{env.Qt6Dir}}
         Get-ChildItem -Recurse -Directory
+        echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\
+        Get-ChildItem -Recurse -Directory
         
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1
