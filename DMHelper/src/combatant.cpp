@@ -150,9 +150,13 @@ Dice Combatant::getHitDice() const
     return _hitDice;
 }
 
-QString Combatant::getIcon(bool localOnly) const
+QString Combatant::getIconFile() const
 {
-    Q_UNUSED(localOnly);
+    return _icon;
+}
+
+QString Combatant::getIconFileLocal() const
+{
     return _icon;
 }
 
@@ -598,7 +602,7 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     element.setAttribute("conditions", getConditions());
     element.setAttribute("initiative", getInitiative());
 
-    QString iconPath = getIcon(true);
+    QString iconPath = getIconFileLocal();
     if(iconPath.isEmpty())
     {
         element.setAttribute("icon", QString(""));

@@ -208,39 +208,5 @@ QIcon ObjectImportDialog::objectIcon(CampaignObjectBase* object)
         return QIcon();
     else
         return object->getIcon();
-
-    /*
-    switch(object->getObjectType())
-    {
-        case DMHelper::CampaignType_Party:
-            return QIcon(":/img/data/icon_contentparty.png");
-        case DMHelper::CampaignType_Combatant:
-            {
-                Character* character = dynamic_cast<Character*>(object);
-                return ((character) && (character->isInParty())) ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png");
-            }
-        case DMHelper::CampaignType_Map:
-            return QIcon(":/img/data/icon_contentmap.png");
-        case DMHelper::CampaignType_Text:
-        case DMHelper::CampaignType_LinkedText:
-            return QIcon(":/img/data/icon_contenttextencounter.png");
-        case DMHelper::CampaignType_Battle:
-            return QIcon(":/img/data/icon_contentbattle.png");
-        case DMHelper::CampaignType_ScrollingText:
-            return QIcon(":/img/data/icon_contentscrollingtext.png");
-        case DMHelper::CampaignType_AudioTrack:
-            {
-                AudioTrack* track = dynamic_cast<AudioTrack*>(object);
-                if((track) && (track->getAudioType() == DMHelper::AudioType_Syrinscape))
-                    return QIcon(":/img/data/icon_syrinscape.png");
-                else if((track) && (track->getAudioType() == DMHelper::AudioType_Youtube))
-                    return QIcon(":/img/data/icon_playerswindow.png");
-                else
-                    return QIcon(":/img/data/icon_soundboard.png");
-            }
-        default:
-            return QIcon();
-    }
-    */
 }
 

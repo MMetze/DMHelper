@@ -201,49 +201,4 @@ void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* ob
         return;
 
     item->setIcon(0, object->getIcon());
-
-    /*
-    switch(object->getObjectType())
-    {
-        case DMHelper::CampaignType_Party:
-            item->setIcon(0, QIcon(":/img/data/icon_contentparty.png"));
-            break;
-        case DMHelper::CampaignType_Combatant:
-            {
-                Character* character = dynamic_cast<Character*>(object);
-                bool isPC = ((character) && (character->isInParty()));
-                item->setIcon(0, isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
-            }
-            break;
-        case DMHelper::CampaignType_Map:
-            item->setIcon(0, QIcon(":/img/data/icon_contentmap.png"));
-            break;
-        case DMHelper::CampaignType_Text:
-        case DMHelper::CampaignType_LinkedText:
-            item->setIcon(0, QIcon(":/img/data/icon_contenttextencounter.png"));
-            break;
-        case DMHelper::CampaignType_Battle:
-            item->setIcon(0, QIcon(":/img/data/icon_contentbattle.png"));
-            break;
-        case DMHelper::CampaignType_ScrollingText:
-            item->setIcon(0, QIcon(":/img/data/icon_contentscrollingtext.png"));
-            break;
-        case DMHelper::CampaignType_AudioTrack:
-            {
-                QString audioIcon(":/img/data/icon_soundboard.png");
-                AudioTrack* track = dynamic_cast<AudioTrack*>(object);
-                if(track)
-                {
-                    if(track->getAudioType() == DMHelper::AudioType_Syrinscape)
-                        audioIcon = QString(":/img/data/icon_syrinscape.png");
-                    else if(track->getAudioType() == DMHelper::AudioType_Youtube)
-                        audioIcon = QString(":/img/data/icon_playerswindow.png");
-                }
-                item->setIcon(0, QIcon(audioIcon));
-            }
-            break;
-        default:
-            break;
-    }
-    */
 }

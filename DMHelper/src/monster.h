@@ -31,7 +31,8 @@ public:
 
     MonsterClass* getMonsterClass() const;
     QString getMonsterClassName() const;
-    virtual QString getIcon(bool localOnly) const override;
+    virtual QString getIconFile() const override;
+    virtual QString getIconFileLocal() const override;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) override;
 
     virtual int getStrength() const override;

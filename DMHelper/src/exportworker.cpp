@@ -113,8 +113,8 @@ void ExportWorker::exportObjectAssets(const CampaignObjectBase* object, QDir& di
             const Combatant* combatant = dynamic_cast<const Combatant*>(object);
             if(combatant)
             {
-                qDebug() << "[ExportWorker] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
-                exportFile(combatant->getIcon(), directory, element, QString("icon"), false);
+                qDebug() << "[ExportWorker] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIconFile();
+                exportFile(combatant->getIconFile(), directory, element, QString("icon"), false);
             }
             break;
         }

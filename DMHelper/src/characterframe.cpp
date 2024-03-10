@@ -554,7 +554,7 @@ void CharacterFrame::handlePublishClicked()
         return;
 
     QImage iconImg;
-    QString iconFile = _character->getIcon();
+    QString iconFile = _character->getIconFile();
     if(!iconImg.load(iconFile))
         iconImg = _character->getIconPixmap(DMHelper::PixmapSize_Full).toImage(); // .load(QString(":/img/data/portrait.png"));
 
