@@ -14,13 +14,16 @@
 <h3>New v3.2 Features:</h3>
 <ul>
 <li><b>Rotatable Tokens:</b> Right click on a token in a combat and rotate it to any angle you want
+<li><b>Video Effects:</b> Last time it was cool animated layers, now you can add a video as a local effect and move it around. Same editing abilities as before. Get those Spirit Guardians swirling around the cleric
+<li><b>Improved Character Actions:</b> PC/NPC actions can be importing from DnD Beyond, edited, inherited from creatures and show up in the mouse-over pop-up in battles. Click on an item in that pop-up to expand and see the description. No more jumping back and forth to character pages!
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>None yet... but I'm sure there will be some
+<li>Audio playback of sounds fixed - thanks for pointing this one out, friends (you know who you are)!
+<li>Crash-bug with opening campaign files from v2.5 fixed
 </ul>
 
 <!--
