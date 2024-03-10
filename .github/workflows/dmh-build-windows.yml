@@ -48,7 +48,7 @@ jobs:
         cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\
         Get-ChildItem -Recurse -Directory
         echo STOP!
-        Do something that breaks
+        Dosomethingthatbreaks
         
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1
