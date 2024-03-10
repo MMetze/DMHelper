@@ -131,7 +131,8 @@ public:
     virtual int getHitPoints() const;
     virtual Dice getHitDice() const;
 
-    virtual QString getIcon(bool localOnly = false) const;
+    virtual QString getIconFile() const override;
+    virtual QString getIconFileLocal() const;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
 
     virtual int getStrength() const = 0;

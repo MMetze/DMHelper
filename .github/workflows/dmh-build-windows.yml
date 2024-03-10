@@ -6,7 +6,7 @@ on:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION: 6.6.0
-  QT_INSTALLER_VERSION: 4.6
+  QT_INSTALLER_VERSION: 4.7
   MSVC_VERSION: 2019
   INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.exe
   ZIPARTIFACT: DMHelper-64-bit-release.zip
@@ -44,6 +44,11 @@ jobs:
         echo 'github.workspace === ${{ github.workspace }}'
         ls ${{env.Qt6Dir}}
         Get-ChildItem -Recurse -Directory
+        # echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator
+        # cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin
+        # Get-ChildItem -Recurse -Directory
+        # echo STOP!
+        # Dosomethingthatbreaks
         
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1

@@ -6,7 +6,7 @@ on:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION: 6.6.0
-  QT_INSTALLER_VERSION: 4.6
+  QT_INSTALLER_VERSION: 4.7
   INSTALLERARTIFACT: DM-Helper-macOS-release-Installer.zip
   ZIPARTIFACT: DMHelper-macOS-release.zip
 

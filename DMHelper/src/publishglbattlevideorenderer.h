@@ -3,9 +3,9 @@
 
 #include "publishglbattlerenderer.h"
 
-#ifdef Q_OS_WIN64
+//#ifdef Q_OS_WIN64
     #define BATTLEVIDEO_USE_SCREENSHOT_ONLY
-#endif
+//#endif
 
 class VideoPlayerGLPlayer;
 
