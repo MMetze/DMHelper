@@ -41,6 +41,7 @@
 #include "layerreference.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
+#include "dicerolldialogcombatants.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -2333,33 +2334,31 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
-    Q_UNUSED(effect);
-    return;
-    /*
-    if(!effect)
-        return;
+    QList<BattleDialogModelCombatant*> affectedCombatantList;
 
-    QList<BattleDialogModelCombatant*> combatantList;
-
-    QList<QGraphicsPixmapItem*> iconPixmaps = _combatantIcons.values();
-    for(int i = 0; i < iconPixmaps.count(); ++i)
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
     {
-        QGraphicsPixmapItem* item = iconPixmaps.at(i);
-        if((item) && (isItemInEffect(item, effect)))
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
         {
-            BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
-            if(combatant)
-                combatantList.append(combatant);
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
+                if((item) && (isItemInEffect(item, effect)))
+                    affectedCombatantList.append(combatant);
+            }
         }
     }
 
-    if(combatantList.isEmpty())
+    if(affectedCombatantList.isEmpty())
     {
         QMessageBox::information(this, QString("Apply Effect"), QString("No target combatants were found for the selected effect."));
         return;
     }
 
-    DiceRollDialogCombatants* dlg = new DiceRollDialogCombatants(Dice(1, 20, 0), combatantList, 15, this);
+    DiceRollDialogCombatants* dlg = new DiceRollDialogCombatants(Dice(1, 20, 0), affectedCombatantList, 15, this);
     connect(dlg, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SLOT(setSelectedCombatant(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantWidget(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
@@ -2367,7 +2366,6 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
     dlg->resize(800, 600);
 
     dlg->fireAndForget();
-    */
 }
 
 void BattleFrame::handleItemLink(BattleDialogModelObject* item)
