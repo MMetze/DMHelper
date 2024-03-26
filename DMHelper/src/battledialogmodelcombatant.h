@@ -37,6 +37,9 @@ public:
     int getInitiative() const;
     void setInitiative(int initiative);
 
+    int getSortPosition() const;
+    void setSortPosition(int sortPosition);
+
     virtual qreal getSizeFactor() const = 0;
     virtual int getSizeCategory() const = 0;    
 
@@ -92,6 +95,7 @@ protected:
     Combatant* _combatant;
     LayerTokens* _tokensLayer;
     int _initiative;
+    int _sortPosition;
     qreal _moved;
     bool _isShown;
     bool _isKnown;

@@ -1074,6 +1074,9 @@ void BattleFrame::addMonsters()
         }
 
         recreateCombatantWidgets();
+
+        if(combatantDlg.isSortInitiative())
+            _model->sortCombatants();
     }
     else
     {
@@ -2363,8 +2366,8 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
     connect(dlg, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantWidget(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
-    dlg->resize(800, 600);
 
+    dlg->resize(width() * 3 / 4, height() * 3 / 4);
     dlg->fireAndForget();
 }
 
@@ -3376,6 +3379,9 @@ void BattleFrame::stateUpdated()
 
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)
 {
+    if(!_model)
+        return nullptr;
+
     CombatantWidget* newWidget = nullptr;
 
     if(_combatantWidgets.contains(combatant))

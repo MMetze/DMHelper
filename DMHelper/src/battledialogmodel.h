@@ -92,6 +92,7 @@ public slots:
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setBackgroundImage(QImage backgroundImage);
     void sortCombatants();
+    void sortCombatantsBySortValue();
 
 signals:
     void mapChanged(Map* map);
@@ -118,6 +119,7 @@ protected slots:
     void mapDestroyed(const QUuid& id);
     void characterDestroyed(const QUuid& destroyedId);
     void handleScaleChanged(Layer* layer);
+    void resetCombatantSortValues();
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -126,6 +128,7 @@ protected:
 
 private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
+    static bool CompareCombatantsBySortValue(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
 
     // Encounter
     EncounterBattle* _encounter;

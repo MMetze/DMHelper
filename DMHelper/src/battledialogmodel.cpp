@@ -3,7 +3,6 @@
 #include "dmconstants.h"
 #include "campaign.h"
 #include "map.h"
-#include "grid.h"
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
@@ -40,7 +39,6 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
 
 BattleDialogModel::~BattleDialogModel()
 {
-    //qDeleteAll(_combatants);
     qDeleteAll(_effects);
     _layerScene.clearLayers();
 }
@@ -102,6 +100,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             }
         }
         _layerScene.postProcessXML(layersElement, isImport);
+        sortCombatantsBySortValue();
     }
     else
     {
@@ -338,6 +337,7 @@ void BattleDialogModel::moveCombatant(int fromIndex, int toIndex)
     }
 
     _combatants.move(fromIndex, toIndex);
+    resetCombatantSortValues();
 
     emit combatantListChanged();
     emit dirty();
@@ -382,6 +382,7 @@ void BattleDialogModel::appendCombatantToList(BattleDialogModelCombatant* combat
         return;
 
     _combatants.append(combatant);
+    combatant->setSortPosition(combatant->getSortPosition() >= 0 ? combatant->getSortPosition() : _combatants.count() - 1);
 
     // For a character addition, connect to the destroyed signal
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
@@ -414,6 +415,8 @@ void BattleDialogModel::removeCombatantFromList(BattleDialogModelCombatant* comb
         if(monster)
             disconnect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
     }
+
+    resetCombatantSortValues();
 
     emit combatantRemoved(combatant);
     emit combatantListChanged();
@@ -774,6 +777,14 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 void BattleDialogModel::sortCombatants()
 {
     std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+    resetCombatantSortValues();
+    emit initiativeOrderChanged();
+    emit dirty();
+}
+
+void BattleDialogModel::sortCombatantsBySortValue()
+{
+    std::sort(_combatants.begin(), _combatants.end(), CompareCombatantsBySortValue);
     emit initiativeOrderChanged();
     emit dirty();
 }
@@ -817,6 +828,16 @@ void BattleDialogModel::handleScaleChanged(Layer* layer)
     LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(nearestLayer);
     if(gridLayer)
         emit gridScaleChanged(gridLayer->getConfig());
+}
+
+void BattleDialogModel::resetCombatantSortValues()
+{
+    for(int i = 0; i < _combatants.count(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = _combatants.at(i);
+        if(combatant)
+            combatant->setSortPosition(i);
+    }
 }
 
 QDomElement BattleDialogModel::createOutputXML(QDomDocument &doc)
@@ -872,4 +893,12 @@ bool BattleDialogModel::CompareCombatants(const BattleDialogModelCombatant* a, c
     {
         return a->getInitiative() > b->getInitiative();
     }
+}
+
+bool BattleDialogModel::CompareCombatantsBySortValue(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
+{
+    if((!a)||(!b))
+        return false;
+
+    return a->getSortPosition() < b->getSortPosition();
 }
