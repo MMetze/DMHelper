@@ -23,6 +23,8 @@
 <h3>Fixes:</h3>
 <ul>
 <li>Audio playback of sounds fixed - thanks for pointing this one out, friends (you know who you are)!
+<li>"Apply Effect..." fixed, you can go ahead and fireball the party again
+<li>Saving of initiative order fixed
 <li>Crash-bug with opening campaign files from v2.5 fixed
 </ul>
 
@@ -31,7 +33,7 @@
 
 <h3>Other Improvements:</h3>
 <ul>
-<li> None yet
+<li> Added an option to automatically sort monsters in initiative when they are added
 </ul>
 //-->
 

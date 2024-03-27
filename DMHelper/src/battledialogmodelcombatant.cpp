@@ -6,6 +6,7 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObj
     _combatant(nullptr),
     _tokensLayer(nullptr),
     _initiative(0),
+    _sortPosition(-1),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
@@ -18,6 +19,7 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     _combatant(combatant),
     _tokensLayer(nullptr),
     _initiative(0),
+    _sortPosition(-1),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
@@ -30,6 +32,7 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
     _combatant(combatant),
     _tokensLayer(nullptr),
     _initiative(initiative),
+    _sortPosition(-1),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
@@ -46,6 +49,7 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
     BattleDialogModelObject::inputXML(element, isImport);
 
     _initiative = element.attribute("initiative", QString::number(0)).toInt();
+    _sortPosition = element.attribute("sort", QString::number(-1)).toInt();
     _isShown = static_cast<bool>(element.attribute("isShown", QString::number(1)).toInt());
     _isKnown = static_cast<bool>(element.attribute("isKnown", QString::number(1)).toInt());
 }
@@ -109,6 +113,16 @@ void BattleDialogModelCombatant::setInitiative(int initiative)
         _initiative = initiative;
         emit initiativeChanged(this);
     }
+}
+
+int BattleDialogModelCombatant::getSortPosition() const
+{
+    return _sortPosition;
+}
+
+void BattleDialogModelCombatant::setSortPosition(int sortPosition)
+{
+    _sortPosition = sortPosition;
 }
 
 Combatant* BattleDialogModelCombatant::getCombatant() const
@@ -206,6 +220,7 @@ void BattleDialogModelCombatant::internalOutputXML(QDomDocument &doc, QDomElemen
     element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
     element.setAttribute("type", getCombatantType());
     element.setAttribute("initiative", _initiative);
+    element.setAttribute("sort", _sortPosition);
     element.setAttribute("isShown", _isShown);
     element.setAttribute("isKnown", _isKnown);
 

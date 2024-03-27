@@ -423,6 +423,16 @@
                 </widget>
                </item>
                <item>
+                <widget class="QCheckBox" name="chkSortInitiative">
+                 <property name="text">
+                  <string>Sort Initiative</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QCheckBox" name="chkRandomTokens">
                  <property name="text">
                   <string>Use Random Tokens</string>

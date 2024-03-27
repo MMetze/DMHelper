@@ -5,26 +5,23 @@
 #include <QStringList>
 #include <QVBoxLayout>
 #include "dice.h"
-#include "battledialogmodel.h"
 
 namespace Ui {
 class DiceRollDialogCombatants;
 }
 
 class WidgetBattleCombatant;
+class BattleDialogModelCombatant;
 
 class DiceRollDialogCombatants : public QDialog
 {
     Q_OBJECT
 
 public:
-    //explicit DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, const QList<int>& modifiers, int rollDC = 10, QWidget *parent = 0);
     explicit DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC = 10, QWidget *parent = nullptr);
     ~DiceRollDialogCombatants();
 
     void fireAndForget();
-
-//    virtual QSize sizeHint() const;
 
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);

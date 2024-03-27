@@ -26,6 +26,7 @@ public:
     LayerTokens* getLayer() const;
     int getCombatantHitPoints() const;
     bool isRandomInitiative() const;
+    bool isSortInitiative() const;
     QString getInitiative() const;
     bool isKnown() const;
     bool isShown() const;

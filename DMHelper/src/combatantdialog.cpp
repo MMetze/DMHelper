@@ -99,6 +99,11 @@ bool CombatantDialog::isRandomInitiative() const
     return ui->chkRandomInitiative->isChecked();
 }
 
+bool CombatantDialog::isSortInitiative() const
+{
+    return ui->chkSortInitiative->isChecked();
+}
+
 QString CombatantDialog::getInitiative() const
 {
     return ui->edtInitiative->text();

@@ -1,12 +1,12 @@
 #include "dicerolldialogcombatants.h"
 #include "ui_dicerolldialogcombatants.h"
 #include "widgetbattlecombatant.h"
+#include "battledialogmodelcombatant.h"
 #include "character.h"
 #include "conditionseditdialog.h"
 #include <QtGlobal>
 #include <QMouseEvent>
 
-//DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, const QList<int>& modifiers, int rollDC, QWidget *parent) :
 DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DiceRollDialogCombatants),
@@ -20,16 +20,10 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
 {
     ui->setupUi(this);
     init();
-    //resize(800, 600);
 
     _combatantLayout = new QVBoxLayout;
     _combatantLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui->scrollAreaWidgetContents->setLayout(_combatantLayout);
-
-    /*
-    if(modifiers.count() == _combatants.count())
-        _modifiers = modifiers;
-    */
 
     ui->edtDamage->setValidator(new QIntValidator(0, INT_MAX, this));
 
@@ -39,7 +33,6 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
     ui->edtTarget->setText(QString::number(rollDC));
 
     createCombatantWidgets();
-    //rollDice();
 
     connect(ui->chkIncludeDead, SIGNAL(clicked(bool)), this, SLOT(setWidgetVisibility()));
 }
@@ -53,13 +46,6 @@ DiceRollDialogCombatants::~DiceRollDialogCombatants()
 
     delete ui;
 }
-
-/*
-QSize DiceRollDialogCombatants::sizeHint() const
-{
-    return QSize(800, 600);
-}
-*/
 
 void DiceRollDialogCombatants::fireAndForget()
 {
@@ -105,17 +91,13 @@ void DiceRollDialogCombatants::applyDamage()
                 if(combatantWidget->getResult() >= target)
                 {
                     if(ui->chkHalfDamage->isChecked())
-                    {
                         combatantWidget->applyDamage(damage / 2);
-                    }
                 }
                 else
                 {
                     combatantWidget->applyDamage(damage);
                     if(_conditions != 0)
-                    {
                         combatantWidget->applyConditions(_conditions);
-                    }
                 }
             }
         }
