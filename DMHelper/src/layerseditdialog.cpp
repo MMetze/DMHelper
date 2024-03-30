@@ -10,6 +10,7 @@
 #include "layerblank.h"
 #include "layerframe.h"
 #include "layergrid.h"
+#include "layereffect.h"
 #include "ribbonframe.h"
 #include "publishglrenderer.h"
 #include "mapblankdialog.h"
@@ -98,7 +99,7 @@ void LayersEditDialog::addLayer()
     items << tr("Image") << tr("Video") << tr("Effect Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
-    items << tr("Grid") << tr("Blank");
+    items << tr("Grid") << tr("Blank") << tr("Effect");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -160,6 +161,10 @@ void LayersEditDialog::addLayer()
         LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
         blankLayer->setSize(blankDlg.getMapSize());
         newLayer = blankLayer;
+    }
+    else if(selectedItem == tr("Effect"))
+    {
+        newLayer = new LayerEffect(QString("Effect"));
     }
     else
     {

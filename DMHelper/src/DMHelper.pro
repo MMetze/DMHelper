@@ -95,6 +95,7 @@ SOURCES += main.cpp\
     gridconfig.cpp \
     layer.cpp \
     layerblank.cpp \
+    layereffect.cpp \
     layerfow.cpp \
     layerframe.cpp \
     layergrid.cpp \
@@ -362,6 +363,7 @@ HEADERS  += mainwindow.h \
     gridconfig.h \
     layer.h \
     layerblank.h \
+    layereffect.h \
     layerfow.h \
     layerframe.h \
     layergrid.h \
