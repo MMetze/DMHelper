@@ -8,6 +8,7 @@
 #include "layervideo.h"
 #include "layervideoeffect.h"
 #include "layerblank.h"
+#include "layereffect.h"
 #include "publishglscene.h"
 #include "campaign.h"
 #include <QRectF>
@@ -74,6 +75,9 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             case DMHelper::LayerType_Blank:
                 newLayer = new LayerBlank();
                 break;
+            case DMHelper::LayerType_Effect:
+                newLayer = new LayerEffect();
+                break;
             default:
                 qDebug() << "[LayerScene] ERROR: unable to read layer for unexpected type: " << layerType;
                 break;
@@ -85,7 +89,6 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             newLayer->inputXML(layerElement, isImport);
             newLayer->setLayerScene(this);
             connectLayer(newLayer);
-            //connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
             _layers.append(newLayer);
         }
 
@@ -148,7 +151,6 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
     {
         Layer* newLayer = otherScene->_layers[i]->clone();
         connectLayer(newLayer);
-        //connect(newLayer, &Layer::dirty, this, &LayerScene::handleLayerDirty);
         _layers.append(newLayer);
         updateLayerScales();
     }

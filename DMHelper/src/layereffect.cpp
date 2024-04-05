@@ -1,13 +1,15 @@
 #include "layereffect.h"
+#include "publishglrenderer.h"
 #include <QImage>
 #include <QMatrix4x4>
+#include <QTimerEvent>
 #include <QOpenGLExtraFunctions>
 
 // TODOs:
 // add real icon
+// get the model matrix right
 // figure out a DM layer visualization
 // apply order, layervisible, opacity, position, size to DM layer
-
 
 const char *vertexShaderSourceRGBColor = "#version 410 core\n"
                                          "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -16,14 +18,14 @@ const char *vertexShaderSourceRGBColor = "#version 410 core\n"
                                          "uniform mat4 model;\n"
                                          "uniform mat4 view;\n"
                                          "uniform mat4 projection;\n"
-                                         "uniform vec4 inColor;\n"
+                                         "uniform float alpha;\n"
                                          "out vec4 ourColor; // output a color to the fragment shader\n"
                                          "out vec2 TexCoord;\n"
                                          "void main()\n"
                                          "{\n"
                                          "   // note that we read the multiplication from right to left\n"
                                          "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                         "   ourColor = inColor; // set ourColor to the input color we got from the vertex data\n"
+                                         "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
                                          "   TexCoord = aTexCoord;\n"
                                          "}\0";
 
@@ -115,31 +117,32 @@ const char *fragmentShaderSourceSNoise = "#version 410 core\n"
                                          "\n"
                                          "void main(void) {\n"
                                          "    vec4 color = vec4(vec3(0.0), 1.0);\n"
-                                         "    vec2 pixel = 0.3/u_resolution.xy;\n"
+                                         "    //vec2 pixel = 0.3/u_resolution.xy;\n"
+                                         "    vec2 pixel = vec2(50.0/u_resolution.x, 150.0/u_resolution.y);\n"
                                          "    vec2 st = TexCoord * pixel;\n"
                                          "    \n"
-                                         "    float d2 = snoise(vec2(st * 5. + u_time/5.0)) * 0.5 + 0.5;\n"
-                                         "    float d3 = snoise(vec3(st * 5. + u_time/10.0, u_time/10.)) * 0.5 + 0.5;\n"
+                                         "    //float d2 = snoise(vec2(st * 5. + u_time/5.0)) * 0.5 + 0.5;\n"
+                                         "    //float d3 = snoise(vec3(st * 5. + u_time/10.0, u_time/10.0)) * 0.5 + 0.5;\n"
+                                         "    float d3 = snoise(vec3(st.x + u_time/3000.0, st.y + u_time/9000.0, u_time/30000.0)) * 0.4 + 0.6;\n"
                                          "    \n"
-                                         "    color += mix(d2, d3, step(0.5, st.x));\n"
+                                         "    //color += mix(d2, d3, step(0.5, st.x));\n"
                                          "    \n"
-                                         "    FragColor = vec4(1,1,1,d3);\n"
+                                         "    FragColor = vec4(d3,d3,d3,d3);\n"
                                          "}\n";
 
 LayerEffect::LayerEffect(const QString& name, int order, QObject *parent) :
     Layer{name, order, parent},
     _scene(nullptr),
-    _shaderProgramRGBA(0),
-    _shaderModelMatrixRGBA(0),
-    _shaderProjectionMatrixRGBA(0),
-    _shaderAlphaRGBA(0)
+    _shaderFragmentResolution(0),
+    _shaderFragmentTime(0),
+    _timerId(0)
 {
 }
 
 LayerEffect::~LayerEffect()
 {
-//    LayerEffect::cleanupDM();
-//    LayerEffect::cleanupPlayer();
+    cleanupDM();
+    cleanupPlayer();
 }
 
 void LayerEffect::inputXML(const QDomElement &element, bool isImport)
@@ -155,6 +158,11 @@ QRectF LayerEffect::boundingRect() const
 QImage LayerEffect::getLayerIcon() const
 {
     return QImage(":/img/data/icon_fow2.png");
+}
+
+bool LayerEffect::defaultShader() const
+{
+    return false;
 }
 
 DMHelper::LayerType LayerEffect::getType() const
@@ -219,6 +227,12 @@ void LayerEffect::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
 {
     _scene = scene;
     Layer::playerGLInitialize(renderer, scene);
+
+    if((_timerId == 0) && (renderer))
+    {
+        connect(this, &LayerEffect::update, renderer, &PublishGLRenderer::updateWidget);
+        _timerId = startTimer(30);
+    }
 }
 
 void LayerEffect::playerGLUninitialize()
@@ -244,6 +258,17 @@ void LayerEffect::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     if(!e)
         return;
 
+    functions->glUseProgram(_shaderProgramRGBA);
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+
+    QMatrix4x4 modelMatrix;
+    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
+
+    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
+    //functions->glUniform2f(_shaderFragmentResolution, _size.width(), _size.height());
+    functions->glUniform2f(_shaderFragmentResolution, 20.f, 20.f);
+    functions->glUniform1f(_shaderFragmentTime, QTime::currentTime().msecsSinceStartOfDay());
+
     e->glBindVertexArray(_VAO);
     functions->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -255,6 +280,17 @@ void LayerEffect::playerGLResize(int w, int h)
 
     destroyObjects();
     destroyShaders();
+}
+
+void LayerEffect::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
+{
+    Q_UNUSED(programRGB);
+    Q_UNUSED(modelMatrixRGB);
+    Q_UNUSED(projectionMatrixRGB);
+    Q_UNUSED(programRGBA);
+    Q_UNUSED(modelMatrixRGBA);
+    Q_UNUSED(projectionMatrixRGBA);
+    Q_UNUSED(alphaRGBA);
 }
 
 bool LayerEffect::playerIsInitialized()
@@ -272,6 +308,12 @@ void LayerEffect::uninitialize()
 {
 }
 
+void LayerEffect::timerEvent(QTimerEvent *event)
+{
+    if((event) && (event->timerId() > 0) && (event->timerId() == _timerId))
+        emit update();
+}
+
 void LayerEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
@@ -283,8 +325,17 @@ void LayerEffect::cleanupDM()
 
 void LayerEffect::cleanupPlayer()
 {
-    LayerEffect::destroyObjects();
-    LayerEffect::destroyShaders();
+    disconnect(this, &LayerEffect::update, nullptr, nullptr);
+
+    if(_timerId > 0)
+    {
+        killTimer(_timerId);
+        _timerId = 0;
+    }
+
+    destroyObjects();
+    destroyShaders();
+
     _scene = nullptr;
 }
 
@@ -349,6 +400,11 @@ void LayerEffect::createShaders()
     _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
     _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
+    _shaderFragmentResolution = f->glGetUniformLocation(_shaderProgramRGBA, "u_resolution");
+    _shaderFragmentTime = f->glGetUniformLocation(_shaderProgramRGBA, "u_time");
+
+    qDebug() << "[LayerEffect] _shaderProgramRGBA: " << _shaderProgramRGBA << " _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << " _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA << " _shaderAlphaRGBA: " << _shaderAlphaRGBA;
+    qDebug() << "[LayerEffect] _shaderFragmentResolution: " << _shaderFragmentResolution << " _shaderFragmentTime: " << _shaderFragmentTime;
 
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
@@ -360,25 +416,20 @@ void LayerEffect::createShaders()
 
 void LayerEffect::destroyShaders()
 {
-    if(!QOpenGLContext::currentContext())
-        return;
-
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-
-    if((!f) || (!e))
-        return;
-
-    if(_shaderProgramRGBA)
+    if(QOpenGLContext::currentContext())
     {
-        e->glDeleteProgram(_shaderProgramRGBA);
-        _shaderProgramRGBA = 0;
+        QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+
+        if((e) && (_shaderProgramRGBA > 0))
+            e->glDeleteProgram(_shaderProgramRGBA);
     }
 
     _shaderProgramRGBA = 0;
     _shaderModelMatrixRGBA = 0;
     _shaderProjectionMatrixRGBA = 0;
     _shaderAlphaRGBA = 0;
+    _shaderFragmentResolution = 0;
+    _shaderFragmentTime = 0;
 }
 
 void LayerEffect::createObjects()
@@ -399,14 +450,14 @@ void LayerEffect::createObjects()
 
     float vertices[] = {
         // positions                                                   // colors           // texture coords
-        //         (float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-        //         (float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        //        -(float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        //        -(float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
-        (float)_size.width(),                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-        (float)_size.width(), -(float)_size.height(),            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        0.0f,                 -(float)_size.height(),            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        0.0f,                                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
+        (float)_size.width() / 2,  (float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+        (float)_size.width() / 2, -(float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        -(float)_size.width() / 2, -(float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -(float)_size.width() / 2,  (float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
+        //(float)_size.width(),                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+        //(float)_size.width(), -(float)_size.height(),            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        //0.0f,                 -(float)_size.height(),            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        //0.0f,                                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -438,30 +489,25 @@ void LayerEffect::createObjects()
 
 void LayerEffect::destroyObjects()
 {
-    if(!QOpenGLContext::currentContext())
-        return;
-
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-
-    if(_VAO > 0)
+    if(QOpenGLContext::currentContext())
     {
-        if(e)
-            e->glDeleteVertexArrays(1, &_VAO);
-        _VAO = 0;
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+
+        if((f) && (e))
+        {
+            if(_VAO > 0)
+                e->glDeleteVertexArrays(1, &_VAO);
+
+            if(_VBO > 0)
+                f->glDeleteBuffers(1, &_VBO);
+
+            if(_EBO > 0)
+                f->glDeleteBuffers(1, &_EBO);
+        }
     }
 
-    if(_VBO > 0)
-    {
-        if(f)
-            f->glDeleteBuffers(1, &_VBO);
-        _VBO = 0;
-    }
-
-    if(_EBO > 0)
-    {
-        if(f)
-            f->glDeleteBuffers(1, &_EBO);
-        _EBO = 0;
-    }
+    _VAO = 0;
+    _VBO = 0;
+    _EBO = 0;
 }
