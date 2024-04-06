@@ -264,6 +264,7 @@
         <file>data/icon_linkup.png</file>
         <file>data/icon_linkglow.png</file>
         <file>data/firststart.txt</file>
+        <file>data/icon_clouds.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -2,6 +2,9 @@
 #define LAYEREFFECT_H
 
 #include "layer.h"
+#include <QColor>
+
+class QGraphicsPixmapItem;
 
 class LayerEffect : public Layer
 {
@@ -46,6 +49,15 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
+    virtual void editSettings() override;
+
+    void setEffectWidth(int width);
+    void setEffectHeight(int height);
+    void setEffectThickness(int thickness);
+    void setEffectDirection(int direction);
+    void setEffectSpeed(int speed);
+    void setEffectMorph(int morph);
+    void setEffectColor(const QColor& color);
 
 protected:
     // QObject overrides
@@ -53,6 +65,7 @@ protected:
 
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    void velocityChanged();
 
     // DM Window Methods
     void cleanupDM();
@@ -68,11 +81,17 @@ protected:
     // Generic Methods
 
     // DM Window Members
+    QGraphicsPixmapItem* _graphicsItem;
 
     // Player Window Members
     PublishGLScene* _scene;
     int _shaderFragmentResolution;
     int _shaderFragmentTime;
+    int _shaderFragmentWidth;
+    int _shaderFragmentHeight;
+    int _shaderFragmentThickness;
+    int _shaderFragmentVelocity;
+    int _shaderFragmentColor;
 
     unsigned int _VAO;
     unsigned int _VBO;
@@ -81,7 +100,17 @@ protected:
     int _timerId;
 
     // Core contents
+    int _effectWidth;
+    int _effectHeight;
+    int _effectThickness;
+    int _effectDirection;
+    int _effectSpeed;
+    int _effectMorph;
+    QColor _effectColor;
 
+    qreal _xVelocity;
+    qreal _yVelocity;
+    qreal _morphVelocity;
 };
 
 #endif // LAYEREFFECT_H

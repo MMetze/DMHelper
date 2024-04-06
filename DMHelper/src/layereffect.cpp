@@ -1,15 +1,19 @@
 #include "layereffect.h"
 #include "publishglrenderer.h"
+#include "layereffectsettings.h"
 #include <QImage>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsScene>
 #include <QMatrix4x4>
 #include <QTimerEvent>
 #include <QOpenGLExtraFunctions>
 
 // TODOs:
-// add real icon
-// get the model matrix right
-// figure out a DM layer visualization
-// apply order, layervisible, opacity, position, size to DM layer
+// Add presets
+
+const qreal LAYEREFFECT_SPEED_FACTOR = 1.0 / 100000.0;
+const qreal LAYEREFFECT_MORPH_FACTOR = 1.0 / 1000000.0;
+const int LAYEREFFECT_PREVIEWSIZE = 512;
 
 const char *vertexShaderSourceRGBColor = "#version 410 core\n"
                                          "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -18,24 +22,29 @@ const char *vertexShaderSourceRGBColor = "#version 410 core\n"
                                          "uniform mat4 model;\n"
                                          "uniform mat4 view;\n"
                                          "uniform mat4 projection;\n"
-                                         "uniform float alpha;\n"
-                                         "out vec4 ourColor; // output a color to the fragment shader\n"
+                                         "//uniform float alpha;\n"
+                                         "//out vec4 ourColor; // output a color to the fragment shader\n"
                                          "out vec2 TexCoord;\n"
                                          "void main()\n"
                                          "{\n"
                                          "   // note that we read the multiplication from right to left\n"
                                          "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                         "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
+                                         "   //ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
                                          "   TexCoord = aTexCoord;\n"
                                          "}\0";
 
 // Simplex 2D noise from https://lygia.xyz/generative/snoise
 const char *fragmentShaderSourceSNoise = "#version 410 core\n"
                                          "out vec4 FragColor;\n"
-                                         "in vec4 ourColor;\n"
+                                         "//in vec4 ourColor;\n"
                                          "in vec2 TexCoord;\n"
                                          "uniform vec2 u_resolution;\n"
                                          "uniform float u_time;\n"
+                                         "uniform float u_width;\n"
+                                         "uniform float u_height;\n"
+                                         "uniform float u_thickness;\n"
+                                         "uniform vec3 u_velocity;\n"
+                                         "uniform vec4 u_color;\n"
                                          "\n"
                                          "vec3 mod289(const in vec3 x) { return x - floor(x * (1. / 289.)) * 289.; }\n"
                                          "vec4 mod289(const in vec4 x) { return x - floor(x * (1. / 289.)) * 289.; }\n"
@@ -116,27 +125,47 @@ const char *fragmentShaderSourceSNoise = "#version 410 core\n"
                                          "}\n"
                                          "\n"
                                          "void main(void) {\n"
-                                         "    vec4 color = vec4(vec3(0.0), 1.0);\n"
+                                         "    //vec4 color = vec4(vec3(0.0), 1.0);\n"
                                          "    //vec2 pixel = 0.3/u_resolution.xy;\n"
-                                         "    vec2 pixel = vec2(50.0/u_resolution.x, 150.0/u_resolution.y);\n"
+                                         "    //vec2 pixel = vec2(50.0/u_resolution.x, 150.0/u_resolution.y);\n"
+                                         "    vec2 pixel = vec2(u_width/u_resolution.x, u_height/u_resolution.y);\n"
                                          "    vec2 st = TexCoord * pixel;\n"
                                          "    \n"
                                          "    //float d2 = snoise(vec2(st * 5. + u_time/5.0)) * 0.5 + 0.5;\n"
                                          "    //float d3 = snoise(vec3(st * 5. + u_time/10.0, u_time/10.0)) * 0.5 + 0.5;\n"
-                                         "    float d3 = snoise(vec3(st.x + u_time/3000.0, st.y + u_time/9000.0, u_time/30000.0)) * 0.4 + 0.6;\n"
+                                         "    //float d3 = snoise(vec3(st.x + u_time/3000.0, st.y + u_time/9000.0, u_time/30000.0)) * 0.4 + 0.6;\n"
+                                         "    float d3 = snoise(vec3(st.x + u_time*u_velocity.x, st.y + u_time*u_velocity.y, u_time*u_velocity.z)) * (1.0 - u_thickness) + u_thickness;\n"
                                          "    \n"
                                          "    //color += mix(d2, d3, step(0.5, st.x));\n"
                                          "    \n"
-                                         "    FragColor = vec4(d3,d3,d3,d3);\n"
+                                         "    //FragColor = vec4(d3,d3,d3,d3);\n"
+                                         "    //FragColor = d3 * u_color;\n"
+                                         "    FragColor = vec4(u_color.rgb, d3 * u_color.a);\n"
                                          "}\n";
 
 LayerEffect::LayerEffect(const QString& name, int order, QObject *parent) :
     Layer{name, order, parent},
+    _graphicsItem(nullptr),
     _scene(nullptr),
     _shaderFragmentResolution(0),
     _shaderFragmentTime(0),
-    _timerId(0)
+    _shaderFragmentWidth(0),
+    _shaderFragmentHeight(0),
+    _shaderFragmentThickness(0),
+    _shaderFragmentVelocity(0),
+    _shaderFragmentColor(0),
+    _timerId(0),
+    _xVelocity(0.f),
+    _yVelocity(0.f),
+    _morphVelocity(0.f)
 {
+    setEffectWidth(LayerEffectSettings::defaultWidth);
+    setEffectHeight(LayerEffectSettings::defaultHeight);
+    setEffectThickness(LayerEffectSettings::defaultThickness);
+    setEffectDirection(LayerEffectSettings::defaultDirection);
+    setEffectSpeed(LayerEffectSettings::defaultSpeed);
+    setEffectMorph(LayerEffectSettings::defaultMorph);
+    setEffectColor(QColor(LayerEffectSettings::defaultColor));
 }
 
 LayerEffect::~LayerEffect()
@@ -147,6 +176,14 @@ LayerEffect::~LayerEffect()
 
 void LayerEffect::inputXML(const QDomElement &element, bool isImport)
 {
+    setEffectWidth(element.attribute("effectWidth", QString::number(LayerEffectSettings::defaultWidth)).toInt());
+    setEffectHeight(element.attribute("effectHeight", QString::number(LayerEffectSettings::defaultHeight)).toInt());
+    setEffectThickness(element.attribute("effectThickness", QString::number(LayerEffectSettings::defaultThickness)).toInt());
+    setEffectDirection(element.attribute("effectDirection", QString::number(LayerEffectSettings::defaultDirection)).toInt());
+    setEffectSpeed(element.attribute("effectSpeed", QString::number(LayerEffectSettings::defaultSpeed)).toInt());
+    setEffectMorph(element.attribute("effectMorph", QString::number(LayerEffectSettings::defaultMorph)).toInt());
+    setEffectColor(QColor(element.attribute("effectColor", QColor(LayerEffectSettings::defaultColor).name())));
+
     Layer::inputXML(element, isImport);
 }
 
@@ -157,7 +194,7 @@ QRectF LayerEffect::boundingRect() const
 
 QImage LayerEffect::getLayerIcon() const
 {
-    return QImage(":/img/data/icon_fow2.png");
+    return QImage(":/img/data/icon_clouds.png");
 }
 
 bool LayerEffect::defaultShader() const
@@ -181,12 +218,14 @@ Layer* LayerEffect::clone() const
 
 void LayerEffect::applyOrder(int order)
 {
-    Q_UNUSED(order);
+    if(_graphicsItem)
+        _graphicsItem->setZValue(order);
 }
 
 void LayerEffect::applyLayerVisibleDM(bool layerVisible)
 {
-    Q_UNUSED(layerVisible);
+    if(_graphicsItem)
+        _graphicsItem->setVisible(layerVisible);
 }
 
 void LayerEffect::applyLayerVisiblePlayer(bool layerVisible)
@@ -196,21 +235,57 @@ void LayerEffect::applyLayerVisiblePlayer(bool layerVisible)
 
 void LayerEffect::applyOpacity(qreal opacity)
 {
-    Q_UNUSED(opacity);
+    _opacityReference = opacity;
+
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(opacity);
 }
 
 void LayerEffect::applyPosition(const QPoint& position)
 {
-    Q_UNUSED(position);
+    if(_graphicsItem)
+        _graphicsItem->setPos(position);
 }
 
 void LayerEffect::applySize(const QSize& size)
 {
-    Q_UNUSED(size);
+    if(_graphicsItem)
+    {
+        QImage effectImage = LayerEffectSettings::createNoiseImage(QSize(LAYEREFFECT_PREVIEWSIZE, LAYEREFFECT_PREVIEWSIZE),
+                                                                   static_cast<qreal>(_effectWidth) / 10.f,
+                                                                   static_cast<qreal>(_effectHeight) / 10.f,
+                                                                   _effectColor,
+                                                                   static_cast<qreal>(_effectThickness) / 100.f);
+        _graphicsItem->setPixmap(QPixmap::fromImage(effectImage.scaled(size)));
+    }
 }
 
 void LayerEffect::dmInitialize(QGraphicsScene* scene)
 {
+    if(!scene)
+        return;
+
+    if(_graphicsItem)
+    {
+        qDebug() << "[LayerEffect] ERROR: dmInitialize called although the graphics item already exists!";
+        return;
+    }
+
+    QImage effectImage = LayerEffectSettings::createNoiseImage(QSize(LAYEREFFECT_PREVIEWSIZE, LAYEREFFECT_PREVIEWSIZE),
+                                                               static_cast<qreal>(_effectWidth) / 10.f,
+                                                               static_cast<qreal>(_effectHeight) / 10.f,
+                                                               _effectColor,
+                                                               static_cast<qreal>(_effectThickness) / 100.f);
+    _graphicsItem = scene->addPixmap(QPixmap::fromImage(effectImage.scaled(_size)));
+
+    if(_graphicsItem)
+    {
+        _graphicsItem->setPos(_position);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        _graphicsItem->setZValue(getOrder());
+    }
+
     Layer::dmInitialize(scene);
 }
 
@@ -264,10 +339,13 @@ void LayerEffect::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     QMatrix4x4 modelMatrix;
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
 
-    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
-    //functions->glUniform2f(_shaderFragmentResolution, _size.width(), _size.height());
     functions->glUniform2f(_shaderFragmentResolution, 20.f, 20.f);
     functions->glUniform1f(_shaderFragmentTime, QTime::currentTime().msecsSinceStartOfDay());
+    functions->glUniform1f(_shaderFragmentWidth, static_cast<qreal>(_effectWidth) / 10.f);
+    functions->glUniform1f(_shaderFragmentHeight, static_cast<qreal>(_effectHeight) / 10.f);
+    functions->glUniform1f(_shaderFragmentThickness, static_cast<qreal>(_effectThickness) / 100.f);
+    functions->glUniform3f(_shaderFragmentVelocity, _xVelocity, _yVelocity, _morphVelocity);
+    functions->glUniform4f(_shaderFragmentColor, _effectColor.redF(), _effectColor.greenF(), _effectColor.blueF(), _opacityReference);
 
     e->glBindVertexArray(_VAO);
     functions->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -308,6 +386,114 @@ void LayerEffect::uninitialize()
 {
 }
 
+void LayerEffect::editSettings()
+{
+    LayerEffectSettings* dlg = new LayerEffectSettings();
+
+    connect(dlg, &LayerEffectSettings::effectWidthChanged, this, &LayerEffect::setEffectWidth);
+    connect(dlg, &LayerEffectSettings::effectHeightChanged, this, &LayerEffect::setEffectHeight);
+    connect(dlg, &LayerEffectSettings::effectThicknessChanged, this, &LayerEffect::setEffectThickness);
+    connect(dlg, &LayerEffectSettings::effectDirectionChanged, this, &LayerEffect::setEffectDirection);
+    connect(dlg, &LayerEffectSettings::effectSpeedChanged, this, &LayerEffect::setEffectSpeed);
+    connect(dlg, &LayerEffectSettings::effectMorphChanged, this, &LayerEffect::setEffectMorph);
+    connect(dlg, &LayerEffectSettings::effectColorChanged, this, &LayerEffect::setEffectColor);
+
+    dlg->setEffectWidth(_effectWidth);
+    dlg->setEffectHeight(_effectHeight);
+    dlg->setEffectThickness(_effectThickness);
+    dlg->setEffectDirection(_effectDirection);
+    dlg->setEffectSpeed(_effectSpeed);
+    dlg->setEffectMorph(_effectMorph);
+    dlg->setEffectColor(_effectColor);
+
+    dlg->exec();
+
+    if(_graphicsItem)
+    {
+        QImage effectImage = LayerEffectSettings::createNoiseImage(QSize(LAYEREFFECT_PREVIEWSIZE, LAYEREFFECT_PREVIEWSIZE),
+                                                                   static_cast<qreal>(_effectWidth) / 10.f,
+                                                                   static_cast<qreal>(_effectHeight) / 10.f,
+                                                                   _effectColor,
+                                                                   static_cast<qreal>(_effectThickness) / 100.f);
+        _graphicsItem->setPixmap(QPixmap::fromImage(effectImage.scaled(_size)));
+    }
+
+    dlg->deleteLater();
+}
+
+void LayerEffect::setEffectWidth(int width)
+{
+    if(_effectWidth == width)
+        return;
+
+    _effectWidth = width;
+    emit dirty();
+    emit update();
+}
+
+void LayerEffect::setEffectHeight(int height)
+{
+    if(_effectHeight == height)
+        return;
+
+    _effectHeight = height;
+    emit dirty();
+    emit update();
+}
+
+void LayerEffect::setEffectThickness(int thickness)
+{
+    if(_effectThickness == thickness)
+        return;
+
+    _effectThickness = thickness;
+    emit dirty();
+    emit update();
+}
+
+void LayerEffect::setEffectDirection(int direction)
+{
+    if(_effectDirection == direction)
+        return;
+
+    _effectDirection = direction;
+    velocityChanged();
+    emit dirty();
+    emit update();
+}
+
+void LayerEffect::setEffectSpeed(int speed)
+{
+    if(_effectSpeed == speed)
+        return;
+
+    _effectSpeed = speed;
+    velocityChanged();
+    emit dirty();
+    emit update();
+}
+
+void LayerEffect::setEffectMorph(int morph)
+{
+    if(_effectMorph == morph)
+        return;
+
+    _effectMorph = morph;
+    velocityChanged();
+    emit dirty();
+    emit update();
+}
+
+void LayerEffect::setEffectColor(const QColor& color)
+{
+    if(_effectColor == color)
+        return;
+
+    _effectColor = color;
+    emit dirty();
+    emit update();
+}
+
 void LayerEffect::timerEvent(QTimerEvent *event)
 {
     if((event) && (event->timerId() > 0) && (event->timerId() == _timerId))
@@ -316,11 +502,47 @@ void LayerEffect::timerEvent(QTimerEvent *event)
 
 void LayerEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
+    if(_effectWidth != LayerEffectSettings::defaultWidth)
+        element.setAttribute("effectWidth", _effectWidth);
+
+    if(_effectHeight != LayerEffectSettings::defaultHeight)
+        element.setAttribute("effectHeight", _effectHeight);
+
+    if(_effectThickness != LayerEffectSettings::defaultThickness)
+        element.setAttribute("effectThickness", _effectThickness);
+
+    if(_effectDirection != LayerEffectSettings::defaultDirection)
+        element.setAttribute("effectDirection", _effectDirection);
+
+    if(_effectSpeed != LayerEffectSettings::defaultSpeed)
+        element.setAttribute("effectSpeed", _effectSpeed);
+
+    if(_effectMorph != LayerEffectSettings::defaultMorph)
+        element.setAttribute("effectMorph", _effectMorph);
+
+    if(_effectColor != QColor(LayerEffectSettings::defaultColor))
+        element.setAttribute("effectColor", _effectColor.name());
+
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+void LayerEffect::velocityChanged()
+{
+    _xVelocity = -qSin(qDegreesToRadians(_effectDirection)) * _effectSpeed * LAYEREFFECT_SPEED_FACTOR;
+    _yVelocity = -qCos(qDegreesToRadians(_effectDirection)) * _effectSpeed * LAYEREFFECT_SPEED_FACTOR;
+    _morphVelocity = _effectMorph * LAYEREFFECT_MORPH_FACTOR;
 }
 
 void LayerEffect::cleanupDM()
 {
+    if(!_graphicsItem)
+        return;
+
+    if(_graphicsItem->scene())
+        _graphicsItem->scene()->removeItem(_graphicsItem);
+
+    delete _graphicsItem;
+    _graphicsItem = nullptr;
 }
 
 void LayerEffect::cleanupPlayer()
@@ -399,11 +621,15 @@ void LayerEffect::createShaders()
     f->glDeleteShader(fragmentShaderRGBA);
     _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
-    _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
     _shaderFragmentResolution = f->glGetUniformLocation(_shaderProgramRGBA, "u_resolution");
     _shaderFragmentTime = f->glGetUniformLocation(_shaderProgramRGBA, "u_time");
+    _shaderFragmentWidth = f->glGetUniformLocation(_shaderProgramRGBA, "u_width");
+    _shaderFragmentHeight = f->glGetUniformLocation(_shaderProgramRGBA, "u_height");
+    _shaderFragmentThickness = f->glGetUniformLocation(_shaderProgramRGBA, "u_thickness");
+    _shaderFragmentVelocity = f->glGetUniformLocation(_shaderProgramRGBA, "u_velocity");
+    _shaderFragmentColor = f->glGetUniformLocation(_shaderProgramRGBA, "u_color");
 
-    qDebug() << "[LayerEffect] _shaderProgramRGBA: " << _shaderProgramRGBA << " _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << " _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA << " _shaderAlphaRGBA: " << _shaderAlphaRGBA;
+    qDebug() << "[LayerEffect] _shaderProgramRGBA: " << _shaderProgramRGBA << " _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << " _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA; // << " _shaderAlphaRGBA: " << _shaderAlphaRGBA;
     qDebug() << "[LayerEffect] _shaderFragmentResolution: " << _shaderFragmentResolution << " _shaderFragmentTime: " << _shaderFragmentTime;
 
     QMatrix4x4 modelMatrix;
@@ -427,9 +653,13 @@ void LayerEffect::destroyShaders()
     _shaderProgramRGBA = 0;
     _shaderModelMatrixRGBA = 0;
     _shaderProjectionMatrixRGBA = 0;
-    _shaderAlphaRGBA = 0;
     _shaderFragmentResolution = 0;
     _shaderFragmentTime = 0;
+    _shaderFragmentWidth = 0;
+    _shaderFragmentHeight = 0;
+    _shaderFragmentThickness = 0;
+    _shaderFragmentVelocity = 0;
+    _shaderFragmentColor = 0;
 }
 
 void LayerEffect::createObjects()
@@ -454,10 +684,6 @@ void LayerEffect::createObjects()
         (float)_size.width() / 2, -(float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
         -(float)_size.width() / 2, -(float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
         -(float)_size.width() / 2,  (float)_size.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
-        //(float)_size.width(),                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-        //(float)_size.width(), -(float)_size.height(),            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        //0.0f,                 -(float)_size.height(),            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        //0.0f,                                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
