@@ -162,9 +162,9 @@ void LayersEditDialog::addLayer()
         blankLayer->setSize(blankDlg.getMapSize());
         newLayer = blankLayer;
     }
-    else if(selectedItem == tr("Effect"))
+    else if(selectedItem == tr("Cloud Effect"))
     {
-        newLayer = new LayerEffect(QString("Effect"));
+        newLayer = new LayerEffect(QString("Cloud Effect"));
     }
     else
     {

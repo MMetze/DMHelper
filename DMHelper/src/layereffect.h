@@ -98,6 +98,7 @@ protected:
     unsigned int _EBO;
 
     int _timerId;
+    int _milliseconds;
 
     // Core contents
     int _effectWidth;

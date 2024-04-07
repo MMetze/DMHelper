@@ -11,6 +11,7 @@
 const qreal LAYEREFFECT_SPEED_FACTOR = 1.0 / 100000.0;
 const qreal LAYEREFFECT_MORPH_FACTOR = 1.0 / 1000000.0;
 const int LAYEREFFECT_PREVIEWSIZE = 512;
+const int LAYEREFFECT_TIMERPERIOD = 30;
 
 const char *vertexShaderSourceRGBColor = "#version 410 core\n"
                                          "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -152,6 +153,7 @@ LayerEffect::LayerEffect(const QString& name, int order, QObject *parent) :
     _shaderFragmentVelocity(0),
     _shaderFragmentColor(0),
     _timerId(0),
+    _milliseconds(0),
     _xVelocity(0.f),
     _yVelocity(0.f),
     _morphVelocity(0.f)
@@ -337,7 +339,7 @@ void LayerEffect::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
 
     functions->glUniform2f(_shaderFragmentResolution, 20.f, 20.f);
-    functions->glUniform1f(_shaderFragmentTime, QTime::currentTime().msecsSinceStartOfDay());
+    functions->glUniform1f(_shaderFragmentTime, _milliseconds);
     functions->glUniform1f(_shaderFragmentWidth, static_cast<qreal>(_effectWidth) / 10.f);
     functions->glUniform1f(_shaderFragmentHeight, static_cast<qreal>(_effectHeight) / 10.f);
     functions->glUniform1f(_shaderFragmentThickness, static_cast<qreal>(_effectThickness) / 100.f);
@@ -494,7 +496,10 @@ void LayerEffect::setEffectColor(const QColor& color)
 void LayerEffect::timerEvent(QTimerEvent *event)
 {
     if((event) && (event->timerId() > 0) && (event->timerId() == _timerId))
+    {
+        _milliseconds += LAYEREFFECT_TIMERPERIOD;
         emit update();
+    }
 }
 
 void LayerEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

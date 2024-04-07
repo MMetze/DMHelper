@@ -694,6 +694,8 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
             }
         }
     }
+
+    functions->glUseProgram(shaderProgram);
 }
 
 void LayerScene::playerGLResize(int w, int h)
