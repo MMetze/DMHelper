@@ -99,7 +99,7 @@ void LayersEditDialog::addLayer()
     items << tr("Image") << tr("Video") << tr("Effect Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
-    items << tr("Grid") << tr("Blank") << tr("Effect");
+    items << tr("Grid") << tr("Blank") << tr("Cloud Effect");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
