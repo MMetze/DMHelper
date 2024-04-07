@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>594</width>
-    <height>440</height>
+    <width>788</width>
+    <height>582</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,11 +39,14 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>512</width>
+            <height>512</height>
+           </size>
+          </property>
           <property name="autoFillBackground">
            <bool>true</bool>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 127);</string>
           </property>
           <property name="frameShape">
            <enum>QFrame::Box</enum>

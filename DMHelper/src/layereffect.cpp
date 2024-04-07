@@ -8,9 +8,6 @@
 #include <QTimerEvent>
 #include <QOpenGLExtraFunctions>
 
-// TODOs:
-// Add presets
-
 const qreal LAYEREFFECT_SPEED_FACTOR = 1.0 / 100000.0;
 const qreal LAYEREFFECT_MORPH_FACTOR = 1.0 / 1000000.0;
 const int LAYEREFFECT_PREVIEWSIZE = 512;
