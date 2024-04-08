@@ -55,7 +55,7 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
     if(_renderer)
     {
         if(!renderer)
-            renderer = new PublishGLImageRenderer(nullptr, grabFramebuffer(), _renderer->getBackgroundColor());
+            renderer = new PublishGLImageRenderer(nullptr, grab().toImage(), _renderer->getBackgroundColor());
 
         makeCurrent();
         _renderer->cleanupGL();
