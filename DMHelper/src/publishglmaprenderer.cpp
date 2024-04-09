@@ -4,8 +4,6 @@
 #include "layer.h"
 #include "undomarker.h"
 #include "mapmarkergraphicsitem.h"
-#include "publishglbattlebackground.h"
-#include "publishglobject.h"
 #include "publishglimage.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>

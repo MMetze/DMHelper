@@ -173,7 +173,8 @@ namespace DMHelper
         LayerType_Reference,
         LayerType_Video,
         LayerType_VideoEffect,
-        LayerType_Blank
+        LayerType_Blank,
+        LayerType_Effect,
     };
 
     enum FileType
