@@ -22,6 +22,9 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     licenseText += QString("Quick reference icons provided by www.game-icons.net\n\n");
 
+    licenseText += QString("Simplex Noise GLSL implementation from the LYGIA Shader Library (https://lygia.xyz/generative/snoise), licensed under the Prosperity Liecense here: https://prosperitylicense.com/versions/3.0.0\n\n");
+    licenseText += QString("Simplex Noise C++ implementation from Sebastien Rombauts (https://github.com/SRombauts/SimplexNoise) distributed under the MIT License (MIT) (See license file copy at http://opensource.org/licenses/MIT)\n\n");
+
     licenseText += QString("Quick reference source originally from www.github.com/crobi/dnd5e-quickref provided under the following license:\n");
     licenseText += QString("MIT License\n");
     licenseText += QString("Copyright (c) 2016 Robert Autenrieth\n");

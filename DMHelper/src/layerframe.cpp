@@ -43,7 +43,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
 
     ui->edtName->installEventFilter(this);
-    ui->btnSettings->setVisible(layer.getType() == DMHelper::LayerType_VideoEffect);
+    ui->btnSettings->setVisible((layer.getType() == DMHelper::LayerType_VideoEffect) || (layer.getType() == DMHelper::LayerType_Effect));
 
     setLineWidth(5);
     setAutoFillBackground(true);

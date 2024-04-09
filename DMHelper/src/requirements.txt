@@ -8,6 +8,8 @@ Announcements
 Fixed-zoom for mini play
     Set zoom rectangle size to player window size
 
+https://lygia.xyz/
+
 Big features
 * Video-based combat objects
 * Real mini support (locked scale)

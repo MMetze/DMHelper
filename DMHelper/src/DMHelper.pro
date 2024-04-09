@@ -95,6 +95,8 @@ SOURCES += main.cpp\
     gridconfig.cpp \
     layer.cpp \
     layerblank.cpp \
+    layereffect.cpp \
+    layereffectsettings.cpp \
     layerfow.cpp \
     layerframe.cpp \
     layergrid.cpp \
@@ -362,6 +364,8 @@ HEADERS  += mainwindow.h \
     gridconfig.h \
     layer.h \
     layerblank.h \
+    layereffect.h \
+    layereffectsettings.h \
     layerfow.h \
     layerframe.h \
     layergrid.h \
@@ -574,6 +578,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    layereffectsettings.ui \
     layerframe.ui \
     layerseditdialog.ui \
     layervideoeffectsettings.ui \
