@@ -1206,7 +1206,7 @@ void BattleFrame::addLayerImageFile(const QString& filename)
         return;
     }
 
-    _model->getLayerScene().appendLayer(new LayerImage(QString("Image: ") + filename, filename));
+    _model->getLayerScene().appendLayer(new LayerImage(QString("Image: ") + QFileInfo(filename).fileName(), filename));
 }
 
 void BattleFrame::castSpell()

@@ -249,6 +249,8 @@ bool LayerReference::playerGLUpdate()
 
 void LayerReference::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     if(_referenceLayer)
         _referenceLayer->playerGLPaint(functions, defaultModelMatrix, projectionMatrix);
 }

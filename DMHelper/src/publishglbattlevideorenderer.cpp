@@ -2,8 +2,8 @@
 #include "battledialogmodel.h"
 #include "videoplayerglplayer.h"
 #include "map.h"
+#include "dmh_opengl.h"
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
 
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
 #include "videoplayerglscreenshot.h"
@@ -122,6 +122,7 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     if(_backgroundObject)
     {
+        DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData(), _backgroundObject->getMatrix());
         functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL(functions, nullptr);
     }
@@ -130,6 +131,7 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
         return;
 
     QMatrix4x4 modelMatrix;
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, modelMatrix.constData());
     _videoPlayer->paintGL(functions, nullptr);
 #endif

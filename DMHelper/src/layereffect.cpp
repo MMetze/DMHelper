@@ -1,12 +1,12 @@
 #include "layereffect.h"
 #include "publishglrenderer.h"
 #include "layereffectsettings.h"
+#include "dmh_opengl.h"
 #include <QImage>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QMatrix4x4>
 #include <QTimerEvent>
-#include <QOpenGLExtraFunctions>
 
 const qreal LAYEREFFECT_SPEED_FACTOR = 1.0 / 100000.0;
 const qreal LAYEREFFECT_MORPH_FACTOR = 1.0 / 1000000.0;
@@ -319,6 +319,8 @@ void LayerEffect::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     Q_UNUSED(defaultModelMatrix);
     Q_UNUSED(projectionMatrix);
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     if(_shaderProgramRGBA == 0)
         createShaders();
 
@@ -332,18 +334,28 @@ void LayerEffect::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     if(!e)
         return;
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
 
     QMatrix4x4 modelMatrix;
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
 
+    DMH_DEBUG_OPENGL_glUniform2f(_shaderFragmentResolution, 20.f, 20.f);
     functions->glUniform2f(_shaderFragmentResolution, 20.f, 20.f);
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderFragmentTime, _milliseconds);
     functions->glUniform1f(_shaderFragmentTime, _milliseconds);
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderFragmentWidth, static_cast<qreal>(_effectWidth) / 10.f);
     functions->glUniform1f(_shaderFragmentWidth, static_cast<qreal>(_effectWidth) / 10.f);
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderFragmentHeight, static_cast<qreal>(_effectHeight) / 10.f);
     functions->glUniform1f(_shaderFragmentHeight, static_cast<qreal>(_effectHeight) / 10.f);
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderFragmentThickness, static_cast<qreal>(_effectThickness) / 100.f);
     functions->glUniform1f(_shaderFragmentThickness, static_cast<qreal>(_effectThickness) / 100.f);
+    DMH_DEBUG_OPENGL_glUniform3f(_shaderFragmentVelocity, _xVelocity, _yVelocity, _morphVelocity);
     functions->glUniform3f(_shaderFragmentVelocity, _xVelocity, _yVelocity, _morphVelocity);
+    DMH_DEBUG_OPENGL_glUniform4f(_shaderFragmentColor, _effectColor.redF(), _effectColor.greenF(), _effectColor.blueF(), _opacityReference);
     functions->glUniform4f(_shaderFragmentColor, _effectColor.redF(), _effectColor.greenF(), _effectColor.blueF(), _opacityReference);
 
     e->glBindVertexArray(_VAO);
@@ -605,6 +617,7 @@ void LayerEffect::createShaders()
     }
 
     _shaderProgramRGBA = f->glCreateProgram();
+    DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgramRGBA, "_shaderProgramRGBA");
 
     f->glAttachShader(_shaderProgramRGBA, vertexShaderRGBA);
     f->glAttachShader(_shaderProgramRGBA, fragmentShaderRGBA);
@@ -618,18 +631,28 @@ void LayerEffect::createShaders()
         return;
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     f->glUseProgram(_shaderProgramRGBA);
     f->glDeleteShader(vertexShaderRGBA);
     f->glDeleteShader(fragmentShaderRGBA);
     _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderModelMatrixRGBA, "model");
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderProjectionMatrixRGBA, "projection");
     _shaderFragmentResolution = f->glGetUniformLocation(_shaderProgramRGBA, "u_resolution");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentResolution, "u_resolution");
     _shaderFragmentTime = f->glGetUniformLocation(_shaderProgramRGBA, "u_time");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentTime, "u_time");
     _shaderFragmentWidth = f->glGetUniformLocation(_shaderProgramRGBA, "u_width");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentWidth, "u_width");
     _shaderFragmentHeight = f->glGetUniformLocation(_shaderProgramRGBA, "u_height");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentHeight, "u_height");
     _shaderFragmentThickness = f->glGetUniformLocation(_shaderProgramRGBA, "u_thickness");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentThickness, "u_thickness");
     _shaderFragmentVelocity = f->glGetUniformLocation(_shaderProgramRGBA, "u_velocity");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentVelocity, "u_velocity");
     _shaderFragmentColor = f->glGetUniformLocation(_shaderProgramRGBA, "u_color");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderFragmentColor, "u_color");
 
     qDebug() << "[LayerEffect] _shaderProgramRGBA: " << _shaderProgramRGBA << " _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << " _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA; // << " _shaderAlphaRGBA: " << _shaderAlphaRGBA;
     qDebug() << "[LayerEffect] _shaderFragmentResolution: " << _shaderFragmentResolution << " _shaderFragmentTime: " << _shaderFragmentTime;
@@ -638,7 +661,10 @@ void LayerEffect::createShaders()
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
 
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, f->glGetUniformLocation(_shaderProgramRGBA, "view"), "view");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData(), viewMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData());
 }
 
@@ -649,7 +675,10 @@ void LayerEffect::destroyShaders()
         QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
 
         if((e) && (_shaderProgramRGBA > 0))
+        {
+            DMH_DEBUG_OPENGL_Singleton::removeProgram(_shaderProgramRGBA);
             e->glDeleteProgram(_shaderProgramRGBA);
+        }
     }
 
     _shaderProgramRGBA = 0;

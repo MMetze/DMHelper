@@ -217,6 +217,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
     TODO: update this to position correctly
     QMatrix4x4 modelMatrix;
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoGLPlayer->paintGL();
 #else
@@ -224,6 +225,9 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
 
     if(!_videoObject)
@@ -245,6 +249,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
     _videoObject->paintGL(functions, projectionMatrix);
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     functions->glUseProgram(_shaderProgramRGB);
 #endif
 }
@@ -291,9 +296,12 @@ void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultM
     if(!functions)
         return;
 
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _videoObject->getMatrixData(), _videoObject->getMatrix());
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _videoObject->getMatrixData());
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderAlphaRGBA, _opacityReference);
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 }
 

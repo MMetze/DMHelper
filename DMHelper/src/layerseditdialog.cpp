@@ -131,7 +131,7 @@ void LayersEditDialog::addLayer()
         if(newFileName.isEmpty())
             return;
         
-        newLayer = new LayerVideoEffect(QString("Effect Video: ") + newFileName, newFileName);
+        newLayer = new LayerVideoEffect(QString("Effect Video: ") + QFileInfo(newFileName).fileName(), newFileName);
     }
     else if(selectedItem == tr("FoW"))
     {

@@ -2,8 +2,8 @@
 #define LAYER_H
 
 #include "dmhobjectbase.h"
+#include "dmh_opengl.h"
 #include <QRectF>
-#include <QOpenGLFunctions>
 #include <QDomElement>
 #include <QDir>
 #include "dmconstants.h"

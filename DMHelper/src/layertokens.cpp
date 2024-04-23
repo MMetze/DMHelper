@@ -408,10 +408,14 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     if(!_model)
         return;
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     QMatrix4x4 localMatrix;
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
     //functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -429,12 +433,17 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
                     {
                         localMatrix = effectToken->getMatrix();
                         localMatrix.translate(_position.x(), _position.y());
+                        DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData(), localMatrix);
                         functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+                        DMH_DEBUG_OPENGL_glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
                         functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
                     }
                     effectToken->paintGL(functions, projectionMatrix);
                     if(effectToken->hasCustomShaders())
+                    {
+                        DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
                         functions->glUseProgram(_shaderProgramRGBA);
+                    }
                 }
             }
         }
@@ -452,7 +461,9 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
             {
                 localMatrix = combatantToken->getMatrix();
                 localMatrix.translate(_position.x(), _position.y());
+                DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData(), localMatrix);
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+                DMH_DEBUG_OPENGL_glUniform1f(_shaderAlphaRGBA, _opacityReference);
                 functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
                 combatantToken->paintGL(functions, projectionMatrix);
                 combatantToken->paintEffects(_shaderModelMatrixRGBA);
@@ -462,6 +473,7 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
         }
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     functions->glUseProgram(_shaderProgramRGB);
 }
 

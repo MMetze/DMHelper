@@ -80,6 +80,7 @@ SOURCES += main.cpp\
     customtableframe.cpp \
     bestiaryfindtokendialog.cpp \
     discordposter.cpp \
+    dmh_opengl.cpp \
     dmh_vlc.cpp \
     dmhcache.cpp \
     dmhelperribbon.cpp \
@@ -348,6 +349,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     bestiaryfindtokendialog.h \
     discordposter.h \
+    dmh_opengl.h \
     dmh_vlc.h \
     dmhcache.h \
     dmhelperribbon.h \

@@ -175,6 +175,8 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
     if((!functions) || (!projectionMatrix) || (!_gridGLObject))
         return;
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     _gridGLObject->setProjectionMatrix(projectionMatrix);
     _gridGLObject->paintGL(functions, projectionMatrix);
 }

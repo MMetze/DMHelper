@@ -129,12 +129,12 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             if(reader.canRead())
             {
                 qDebug() << "[Map] inputXML - QImageReader can read the file: " << filename << ", creating an image layer.";
-                imageLayer = new LayerImage(QString("Map Image: ") + filename, filename);
+                imageLayer = new LayerImage(QString("Map Image: ") + QFileInfo(filename).fileName(), filename);
             }
             else
             {
                 qDebug() << "[Map] inputXML - QImageReader *cannot* read the file: " << filename << ", creating a video layer.";
-                imageLayer = new LayerVideo(QString("Map Video: ") + filename, filename);
+                imageLayer = new LayerVideo(QString("Map Video: ") + QFileInfo(filename).fileName(), filename);
             }
         }
 

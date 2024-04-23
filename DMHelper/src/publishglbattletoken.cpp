@@ -5,9 +5,8 @@
 #include "publishgltokenhighlighteffect.h"
 #include "publishgltokenhighlightref.h"
 #include "layertokens.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QPixmap>
 #include <QPainter>

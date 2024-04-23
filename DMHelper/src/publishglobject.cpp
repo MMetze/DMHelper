@@ -1,6 +1,6 @@
 #include "publishglobject.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
 
 PublishGLObject::PublishGLObject(QObject *parent) :
     QObject(parent),

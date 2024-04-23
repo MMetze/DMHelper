@@ -1,7 +1,6 @@
 #include "publishglbattlebackground.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QDebug>
 

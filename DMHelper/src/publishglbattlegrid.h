@@ -4,7 +4,7 @@
 #include "publishglbattleobject.h"
 #include "gridconfig.h"
 #include "grid.h"
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 
 //#define DEBUG_BATTLE_GRID
 

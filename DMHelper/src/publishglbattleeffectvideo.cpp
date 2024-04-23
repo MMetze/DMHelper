@@ -3,8 +3,7 @@
 #include "videoplayer.h"
 #include "scaledpixmap.h"
 #include "layertokens.h"
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
+#include "dmh_opengl.h"
 
 // Here are the various shader programs that we will use
 extern const char *vertexShaderSourceBase;
@@ -70,7 +69,7 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
     createShadersGL();
 
     int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
-    int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
+    //int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
 
     QImage effectImage = _videoPlayer->getImage()->scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
     _textureSize = effectImage.size();
@@ -158,23 +157,32 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
         prepareObjectsGL();
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     QMatrix4x4 localMatrix = getMatrix();
     localMatrix.translate(tokensLayer->getPosition().x(), tokensLayer->getPosition().y());
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData(), localMatrix);
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderAlphaRGBA, getEffectAlpha() * tokensLayer->getOpacity());
     functions->glUniform1f(_shaderAlphaRGBA, getEffectAlpha() * tokensLayer->getOpacity());
 
     if(effectVideo->getEffectTransparencyType() == DMHelper::TransparentType_TransparentColor)
     {
+        DMH_DEBUG_OPENGL_glUniform3f(_shaderTransparentColor, effectVideo->getTransparentColor().redF(), effectVideo->getTransparentColor().greenF(), effectVideo->getTransparentColor().blueF());
         functions->glUniform3f(_shaderTransparentColor, effectVideo->getTransparentColor().redF(), effectVideo->getTransparentColor().greenF(), effectVideo->getTransparentColor().blueF());
+        DMH_DEBUG_OPENGL_glUniform1f(_shaderTransparentTolerance, effectVideo->getTransparentTolerance());
         functions->glUniform1f(_shaderTransparentTolerance, effectVideo->getTransparentTolerance());
     }
 
     if(effectVideo->isColorize())
-        functions->glUniform3f(_shaderColorizeColor, effectVideo->getColorizeColor().redF(), effectVideo->getColorizeColor().greenF(), effectVideo->getColorizeColor().blueF());
+    {
+            DMH_DEBUG_OPENGL_glUniform3f(_shaderColorizeColor, effectVideo->getColorizeColor().redF(), effectVideo->getColorizeColor().greenF(), effectVideo->getColorizeColor().blueF());
+            functions->glUniform3f(_shaderColorizeColor, effectVideo->getColorizeColor().redF(), effectVideo->getColorizeColor().greenF(), effectVideo->getColorizeColor().blueF());
+    }
 
     e->glBindVertexArray(_VAO);
     functions->glBindTexture(GL_TEXTURE_2D, _textureID);
@@ -246,6 +254,7 @@ void PublishGLBattleEffectVideo::createShadersGL()
     }
 
     _shaderProgramRGBA = f->glCreateProgram();
+    DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgramRGBA, "_shaderProgramRGBA");
 
     f->glAttachShader(_shaderProgramRGBA, vertexShaderRGBA);
     f->glAttachShader(_shaderProgramRGBA, fragmentShaderRGBA);
@@ -259,28 +268,42 @@ void PublishGLBattleEffectVideo::createShadersGL()
         return;
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     f->glUseProgram(_shaderProgramRGBA);
     f->glDeleteShader(vertexShaderRGBA);
     f->glDeleteShader(fragmentShaderRGBA);
     _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderModelMatrixRGBA, "model");
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderProjectionMatrixRGBA, "projection");
     _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderAlphaRGBA, "alpha");
 
     if(effectVideo->getEffectTransparencyType() == DMHelper::TransparentType_TransparentColor)
     {
         _shaderTransparentColor = f->glGetUniformLocation(_shaderProgramRGBA, "transparentColor");
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderTransparentColor, "transparentColor");
         _shaderTransparentTolerance = f->glGetUniformLocation(_shaderProgramRGBA, "transparentTolerance");
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderTransparentTolerance, "transparentTolerance");
     }
 
     if(effectVideo->isColorize())
+    {
         _shaderColorizeColor = f->glGetUniformLocation(_shaderProgramRGBA, "colorizeColor");
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderColorizeColor, "colorizeColor");
+    }
 
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
 
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), "texture1");
+    DMH_DEBUG_OPENGL_glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
     f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, f->glGetUniformLocation(_shaderProgramRGBA, "view"), "view");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData(), viewMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData());
 }
 
@@ -291,7 +314,10 @@ void PublishGLBattleEffectVideo::cleanupShadersGL()
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     if(f)
+    {
+        DMH_DEBUG_OPENGL_Singleton::removeProgram(_shaderProgramRGBA);
         f->glDeleteProgram(_shaderProgramRGBA);
+    }
 
     _shaderProgramRGBA = 0;
     _shaderModelMatrixRGBA = 0;

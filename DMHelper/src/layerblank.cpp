@@ -174,13 +174,20 @@ void LayerBlank::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if(!functions)
         return;
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBColorBlank);
     functions->glUseProgram(_shaderProgramRGBColorBlank);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBColorBlank, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBColorBlank, 1, GL_FALSE, projectionMatrix);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBColorBlank, 1, GL_FALSE, _publishRect->getMatrixData(), _publishRect->getMatrix());
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBColorBlank, 1, GL_FALSE, _publishRect->getMatrixData());
+    DMH_DEBUG_OPENGL_glUniform4f(_shaderRGBColorBlank, _color.redF(), _color.greenF(), _color.blueF(), _opacityReference);
     functions->glUniform4f(_shaderRGBColorBlank, _color.redF(), _color.greenF(), _color.blueF(), _opacityReference);
 
     _publishRect->paintGL();
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     functions->glUseProgram(_shaderProgramRGB);
 }
 
@@ -273,6 +280,7 @@ bool LayerBlank::createShadersGL()
     }
 
     _shaderProgramRGBColorBlank = f->glCreateProgram();
+    DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgramRGBColorBlank, "_shaderProgramRGBColorBlank");
 
     f->glAttachShader(_shaderProgramRGBColorBlank, vertexShaderRGB);
     f->glAttachShader(_shaderProgramRGBColorBlank, fragmentShaderRGB);
@@ -286,20 +294,28 @@ bool LayerBlank::createShadersGL()
         return false;
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBColorBlank);
     f->glUseProgram(_shaderProgramRGBColorBlank);
     f->glDeleteShader(vertexShaderRGB);
     f->glDeleteShader(fragmentShaderRGB);
     _shaderModelMatrixRGBColorBlank = f->glGetUniformLocation(_shaderProgramRGBColorBlank, "model");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBColorBlank, _shaderModelMatrixRGBColorBlank, "model");
     _shaderProjectionMatrixRGBColorBlank = f->glGetUniformLocation(_shaderProgramRGBColorBlank, "projection");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBColorBlank, _shaderProjectionMatrixRGBColorBlank, "projection");
     _shaderRGBColorBlank = f->glGetUniformLocation(_shaderProgramRGBColorBlank, "inColor");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBColorBlank, _shaderRGBColorBlank, "inColor");
 
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBColorBlank);
     f->glUseProgram(_shaderProgramRGBColorBlank);
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBColorBlank, f->glGetUniformLocation(_shaderProgramRGBColorBlank, "texture1"), "texture1");
+    DMH_DEBUG_OPENGL_glUniform1i(f->glGetUniformLocation(_shaderProgramRGBColorBlank, "texture1"), 0);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBColorBlank, "texture1"), 0); // set it manually
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBColorBlank, f->glGetUniformLocation(_shaderProgramRGBColorBlank, "view"), "view");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBColorBlank, "view"), 1, GL_FALSE, viewMatrix.constData(), viewMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBColorBlank, "view"), 1, GL_FALSE, viewMatrix.constData());
-
 
     return true;
 }

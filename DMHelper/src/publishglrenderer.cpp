@@ -2,9 +2,9 @@
 #include "publishglimage.h"
 #include "campaignobjectbase.h"
 #include "dmconstants.h"
+#include "dmh_opengl.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
 #include <QUuid>
 #include <QDebug>
 
@@ -137,6 +137,7 @@ void PublishGLRenderer::paintPointer(QOpenGLFunctions* functions, const QSize& s
 
     QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2) - _pointerImage->getSize().height());
     _pointerImage->setPosition(pointPos);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, _pointerImage->getMatrixData(), _pointerImage->getMatrix());
     functions->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, _pointerImage->getMatrixData());
     _pointerImage->paintGL(functions, nullptr);
 }

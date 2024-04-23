@@ -1,7 +1,6 @@
 #include "publishglimage.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
 #include <QDebug>
 
 PublishGLImage::PublishGLImage(const QImage& image, bool centered, QObject *parent) :

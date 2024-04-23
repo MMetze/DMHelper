@@ -673,6 +673,8 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
         return;
     }
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i)->getLayerVisiblePlayer()) && (_layers.at(i)->getOpacity() > 0.0))
@@ -687,6 +689,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
 #ifdef DEBUG_LAYERSCENE
                     qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
 #endif
+                    DMH_DEBUG_OPENGL_glUseProgram(shaderProgram);
                     functions->glUseProgram(shaderProgram);
                 }
 
@@ -695,6 +698,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
         }
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(shaderProgram);
     functions->glUseProgram(shaderProgram);
 }
 

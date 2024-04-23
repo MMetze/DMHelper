@@ -237,6 +237,8 @@ void LayerVideoEffect::playerGLUninitialize()
 
 void LayerVideoEffect::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     if(_recreateShaders)
     {
         cleanupShadersGL();
@@ -318,12 +320,17 @@ void LayerVideoEffect::playerGLSetUniforms(QOpenGLFunctions* functions, GLint de
 
     if(_effectTransparencyType == DMHelper::TransparentType_TransparentColor)
     {
+        DMH_DEBUG_OPENGL_glUniform3f(_shaderTransparentColor, _transparentColor.redF(), _transparentColor.greenF(), _transparentColor.blueF());
         functions->glUniform3f(_shaderTransparentColor, _transparentColor.redF(), _transparentColor.greenF(), _transparentColor.blueF());
+        DMH_DEBUG_OPENGL_glUniform1f(_shaderTransparentTolerance, _transparentTolerance);
         functions->glUniform1f(_shaderTransparentTolerance, _transparentTolerance);
     }
 
     if(_colorize)
+    {
+        DMH_DEBUG_OPENGL_glUniform3f(_shaderColorizeColor, _colorizeColor.redF(), _colorizeColor.greenF(), _colorizeColor.blueF());
         functions->glUniform3f(_shaderColorizeColor, _colorizeColor.redF(), _colorizeColor.greenF(), _colorizeColor.blueF());
+    }
 }
 
 void LayerVideoEffect::updateEffectScreenshot()
@@ -409,6 +416,7 @@ void LayerVideoEffect::createShadersGL()
     }
 
     _shaderProgramRGBA = f->glCreateProgram();
+    DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgramRGBA, "_shaderProgramRGBA");
 
     f->glAttachShader(_shaderProgramRGBA, vertexShaderRGBA);
     f->glAttachShader(_shaderProgramRGBA, fragmentShaderRGBA);
@@ -422,28 +430,42 @@ void LayerVideoEffect::createShadersGL()
         return;
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     f->glUseProgram(_shaderProgramRGBA);
     f->glDeleteShader(vertexShaderRGBA);
     f->glDeleteShader(fragmentShaderRGBA);
     _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderModelMatrixRGBA, "model");
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderProjectionMatrixRGBA, "projection");
     _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderAlphaRGBA, "alpha");
 
     if(_effectTransparencyType == DMHelper::TransparentType_TransparentColor)
     {
         _shaderTransparentColor = f->glGetUniformLocation(_shaderProgramRGBA, "transparentColor");
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderTransparentColor, "transparentColor");
         _shaderTransparentTolerance = f->glGetUniformLocation(_shaderProgramRGBA, "transparentTolerance");
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderTransparentTolerance, "transparentTolerance");
     }
 
     if(_colorize)
+    {
         _shaderColorizeColor = f->glGetUniformLocation(_shaderProgramRGBA, "colorizeColor");
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, _shaderColorizeColor, "colorizeColor");
+    }
 
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
 
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), "texture1");
+    DMH_DEBUG_OPENGL_glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
     f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgramRGBA, f->glGetUniformLocation(_shaderProgramRGBA, "view"), "view");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData(), viewMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData());
 
     _recreateShaders = false;
@@ -456,7 +478,10 @@ void LayerVideoEffect::cleanupShadersGL()
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     if(f)
+    {
+        DMH_DEBUG_OPENGL_Singleton::removeProgram(_shaderProgramRGBA);
         f->glDeleteProgram(_shaderProgramRGBA);
+    }
 
     _shaderProgramRGBA = 0;
     _shaderModelMatrixRGBA = 0;

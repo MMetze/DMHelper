@@ -1,7 +1,6 @@
 #include "publishglrect.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
 
 PublishGLRect::PublishGLRect(const QColor& color, const QRectF& rect, QObject *parent) :
     QObject{parent},
@@ -61,6 +60,8 @@ void PublishGLRect::paintGL()
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    DMH_DEBUG_OPENGL_PAINTGL();
 
     if((_rebuildShape) || (_VAO == 0) || (_VBO == 0) || (_EBO == 0))
     {

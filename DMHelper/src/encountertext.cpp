@@ -100,9 +100,9 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
             Layer* imageLayer = nullptr;
             QImageReader reader(_imageFile);
             if(reader.canRead())
-                imageLayer = new LayerImage(QString("Background Image: ") + _imageFile, _imageFile);
+                imageLayer = new LayerImage(QString("Background Image: ") + QFileInfo(_imageFile).fileName(), _imageFile);
             else
-                imageLayer = new LayerVideo(QString("Background Video: ") + _imageFile, _imageFile);
+                imageLayer = new LayerVideo(QString("Background Video: ") + QFileInfo(_imageFile).fileName(), _imageFile);
 
             imageLayer->inputXML(element, isImport);
             _layerScene.appendLayer(imageLayer);
@@ -254,7 +254,7 @@ void EncounterText::setImageFile(const QString& imageFile)
     if(layer)
         layer->setFileName(imageFile);
     else
-        _layerScene.appendLayer(new LayerImage(QString("Background Image: ") + imageFile, imageFile));
+        _layerScene.appendLayer(new LayerImage(QString("Background Image: ") + fileInfo.fileName(), imageFile));
 
     _imageFile = imageFile;
 //    emit imageFileChanged(_imageFile);

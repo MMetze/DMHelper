@@ -1,9 +1,9 @@
 #ifndef PUBLISHGLOBJECT_H
 #define PUBLISHGLOBJECT_H
 
+#include "dmh_opengl.h"
 #include <QObject>
 #include <QMatrix4x4>
-#include <QOpenGLFunctions>
 
 class PublishGLObject : public QObject
 {

@@ -1,9 +1,9 @@
 #include "layerimage.h"
 #include "publishglbattlebackground.h"
 #include "dmhfilereader.h"
+#include "dmh_opengl.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
-#include <QOpenGLFunctions>
 #include <QDebug>
 
 // TODO: Layers - clean up image loading to use the filename
@@ -216,6 +216,7 @@ void LayerImage::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene*
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     f->glUseProgram(_shaderProgramRGBA);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -242,14 +243,21 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         return;
     }
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData(), _imageGLObject->getMatrix());
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData());
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderAlphaRGBA, _opacityReference);
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
     _imageGLObject->paintGL(functions, projectionMatrix);
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     functions->glUseProgram(_shaderProgramRGB);
 }
 
