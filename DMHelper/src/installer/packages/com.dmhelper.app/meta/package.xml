@@ -3,7 +3,7 @@
     <DisplayName>DMHelper Application</DisplayName>
     <Description>Install the DMHelper application.</Description>
     <Version>3.2.0</Version>
-    <ReleaseDate>2024-03-22</ReleaseDate>
+    <ReleaseDate>2024-04-24</ReleaseDate>
     <Licenses>
         <License name="GPL v3" file="license.txt" />
     </Licenses>
