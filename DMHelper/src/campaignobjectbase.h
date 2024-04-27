@@ -5,14 +5,11 @@
 #include <QList>
 #include <QDataStream>
 
-class Campaign;
-
 class CampaignObjectBase : public DMHObjectBase
 {
     Q_OBJECT
 public:
 
-    // Allow full access to the Campaign class
     explicit CampaignObjectBase(const QString& name = QString(), QObject *parent = nullptr);
     virtual ~CampaignObjectBase() override;
 

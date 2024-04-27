@@ -165,6 +165,7 @@ SOURCES += main.cpp\
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
+    ruleset.cpp \
     selectcombatantdialog.cpp \
     selectitemdialog.cpp \
     selectstringdialog.cpp \
@@ -435,6 +436,7 @@ HEADERS  += mainwindow.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
+    ruleset.h \
     selectcombatantdialog.h \
     selectitemdialog.h \
     selectstringdialog.h \
