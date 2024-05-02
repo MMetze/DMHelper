@@ -170,6 +170,7 @@ protected slots:
     void handleTreeItemExpanded(const QModelIndex & index);
     void handleTreeItemCollapsed(const QModelIndex & index);
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
+    void handleEditSettings();
 
     void handleAnimationStarted();
 

@@ -72,12 +72,14 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _date(1, 1, 0),
     _time(0, 0),
     _notes(),
+    _ruleset(),
     _batchChanges(false),
     _changesMade(false),
     _dirtyMade(false),
     _isValid(true),
     _soundboardGroups()
 {
+    connect(&_ruleset, &Ruleset::dirty, this, &Campaign::dirty);
 }
 
 Campaign::~Campaign()
@@ -102,6 +104,10 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     BasicDate inputDate(element.attribute("date", QString("")));
     setDate(inputDate);
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time", QString::number(0)).toInt()));
+
+    QDomElement rulesetElement = element.firstChildElement(QString("ruleset"));
+    if(!rulesetElement.isNull())
+        _ruleset.inputXML(rulesetElement, isImport);
 
     CampaignObjectBase::inputXML(element, isImport);
 
@@ -317,6 +323,16 @@ QTime Campaign::getTime() const
     return _time;
 }
 
+Ruleset& Campaign::getRuleset()
+{
+    return _ruleset;
+}
+
+const Ruleset& Campaign::getRuleset() const
+{
+    return _ruleset;
+}
+
 bool Campaign::isValid() const
 {
     return _isValid;
@@ -447,6 +463,8 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
         element.appendChild(notesElement);
     }
 
+    _ruleset.outputXML(doc, element, targetDirectory, isExport);
+
     QDomElement soundboardElement = doc.createElement("soundboard");
     for(SoundboardGroup* group : _soundboardGroups)
     {
@@ -469,6 +487,7 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 bool Campaign::belongsToObject(QDomElement& element)
 {
     if((element.tagName() == QString("soundboard")) ||
+       (element.tagName() == QString("ruleset")) ||
        (element.tagName() == QString("notes")))
         return true;
     else

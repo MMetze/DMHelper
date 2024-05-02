@@ -1,15 +1,39 @@
 #ifndef RULESET_H
 #define RULESET_H
 
-#include <QObject>
+#include "campaignobjectbase.h"
 
-class Ruleset : public QObject
+class RuleInitiative;
+
+class Ruleset : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit Ruleset(QObject *parent = nullptr);
+    explicit Ruleset(const QString& name = QString(), QObject *parent = nullptr);
+    virtual ~Ruleset() override;
+
+    // From CampaignObjectBase
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual int getObjectType() const override;
+    virtual bool isTreeVisible() const override;
+
+    // Local accessors
+    RuleInitiative* getRuleInitiative();
+    QString getRuleInitiativeType();
 
 signals:
+
+public slots:
+    void setRuleInitiative(const QString& initiativeType);
+
+protected slots:
+
+protected:
+    // From CampaignObjectBase
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+
+    RuleInitiative* _ruleInitiative;
 };
 
 #endif // RULESET_H

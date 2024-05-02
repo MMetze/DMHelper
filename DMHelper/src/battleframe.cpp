@@ -42,6 +42,7 @@
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
+#include "ruleinitiative.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -166,9 +167,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect, QPointF, QPointF)), this, SLOT(handleRubberBandChanged(QRect, QPointF, QPointF)));
 
-    connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
-    connect(ui->btnTop, SIGNAL(clicked()), this, SLOT(top()));
-    connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
+    connect(ui->btnRoll, &QAbstractButton::clicked, this, &BattleFrame::roll);
+    connect(ui->btnSort, &QAbstractButton::clicked, this, &BattleFrame::sort);
+    connect(ui->btnTop, &QAbstractButton::clicked, this, &BattleFrame::top);
+    connect(ui->btnNext, &QAbstractButton::clicked, this, &BattleFrame::next);
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -460,6 +462,27 @@ BattleFrameMapDrawer* BattleFrame::getMapDrawer() const
 void BattleFrame::clear()
 {
     setBattle(nullptr);
+}
+
+void BattleFrame::roll()
+{
+    if(!_battle)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to roll for initiative, no battle or battle model is set!";
+        return;
+    }
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    RuleInitiative* ruleInitiative = campaign->getRuleset().getRuleInitiative();
+    if(!ruleInitiative)
+        return;
+
+    QList<BattleDialogModelCombatant*> combatants = getLivingCombatants();
+    if(ruleInitiative->rollInitiative(combatants))
+        sort();
 }
 
 void BattleFrame::sort()

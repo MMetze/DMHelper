@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "basicdate.h"
+#include "ruleset.h"
 #include <QTime>
 #include <QList>
 
@@ -49,6 +50,9 @@ public:
     QTime getTime() const;
     QStringList getNotes() const;
 
+    Ruleset& getRuleset();
+    const Ruleset& getRuleset() const;
+
     bool isValid() const;
     void cleanupCampaign(bool deleteAll);
 
@@ -80,6 +84,8 @@ protected:
     BasicDate _date;
     QTime _time;
     QStringList _notes;
+
+    Ruleset _ruleset;
 
     bool _batchChanges;
     bool _changesMade;

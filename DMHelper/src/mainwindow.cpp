@@ -283,7 +283,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
     connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveCampaign);
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
-    connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
+    connect(_ribbonTabFile, &RibbonTabFile::optionsClicked, this, &MainWindow::handleEditSettings);
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
     QShortcut* quitShortcut = new QShortcut(QKeySequence(tr("Ctrl+Q", "Quit")), this);
     connect(quitShortcut, SIGNAL(activated()), this, SLOT(close()));
@@ -2390,7 +2390,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
             selectIndex(firstIndex); //ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
-        connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
+        connect(campaign, &Campaign::dirty, this, &MainWindow::setDirty);
+        connect(campaign, &Campaign::nameChanged, this, &MainWindow::setDirty);
+        connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
         QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);
@@ -2656,6 +2658,11 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
         return;
 
     object->setExpanded(expanded);
+}
+
+void MainWindow::handleEditSettings()
+{
+    _options->editSettings(_campaign);
 }
 
 void MainWindow::handleAnimationStarted()

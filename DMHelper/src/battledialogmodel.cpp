@@ -7,6 +7,7 @@
 #include "layertokens.h"
 #include "layerreference.h"
 #include "encounterbattle.h"
+#include "ruleinitiative.h"
 #include <QDebug>
 
 BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& name, QObject *parent) :
@@ -776,8 +777,19 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 
 void BattleDialogModel::sortCombatants()
 {
-    std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
-    resetCombatantSortValues();
+    //std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+    //resetCombatantSortValues();
+
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    RuleInitiative* ruleInitiative = campaign->getRuleset().getRuleInitiative();
+    if(!ruleInitiative)
+        return;
+
+    ruleInitiative->sortInitiative(_combatants);
+
     emit initiativeOrderChanged();
     emit dirty();
 }
@@ -880,6 +892,7 @@ bool BattleDialogModel::belongsToObject(QDomElement& element)
     return true;
 }
 
+/*
 bool BattleDialogModel::CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
 {
     if((!a)||(!b))
@@ -894,6 +907,7 @@ bool BattleDialogModel::CompareCombatants(const BattleDialogModelCombatant* a, c
         return a->getInitiative() > b->getInitiative();
     }
 }
+*/
 
 bool BattleDialogModel::CompareCombatantsBySortValue(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
 {

@@ -1,16 +1,20 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
 #include "bestiarypopulatetokensdialog.h"
+#include "dmconstants.h"
+#include "campaign.h"
+#include "rulefactory.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
 #include <QIntValidator>
 #include <QImageReader>
 
-OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
+OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OptionsDialog),
-    _options(options)
+    _options(options),
+    _campaign(campaign)
 {
     ui->setupUi(this);
 
@@ -61,6 +65,32 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtTokenSearchString->setText(_options->getTokenSearchString());
         ui->edtTokenFrame->setText(_options->getTokenFrameFile());
         ui->edtTokenMask->setText(_options->getTokenMaskFile());
+
+        if(_campaign)
+        {
+            ui->edtCampaignName->setText(_campaign->getName());
+
+            QString ruleInitiativeType = _campaign->getRuleset().getRuleInitiativeType();
+            if(ruleInitiativeType.isEmpty())
+            {
+                ui->cmbInitiative->setEnabled(false);
+            }
+            else
+            {
+                QStringList ruleInitiativeNames = RuleFactory::getRuleInitiativeNames();
+                for(int i = 0; i  < ruleInitiativeNames.count() / 2; ++i)
+                {
+                    ui->cmbInitiative->addItem(ruleInitiativeNames.at(2 * i + 1), ruleInitiativeNames.at(2 * i));
+                    if(ruleInitiativeType == ruleInitiativeNames.at(2 * i))
+                        ui->cmbInitiative->setCurrentIndex(i);
+                }
+            }
+        }
+        else
+        {
+            ui->tabWidget->removeTab(3); // Remove the campaign tab
+        }
+
 #ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
@@ -83,7 +113,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtInviteID->setEnabled(_options->getNetworkEnabled());
         ui->btnGenerateInvite->setEnabled(_options->getNetworkEnabled());
 #else
-        ui->tabWidget->removeTab(2);
+        ui->tabWidget->removeTab(2); // Remove the network tab
 #endif
 
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
@@ -151,6 +181,15 @@ OptionsDialog::~OptionsDialog()
 OptionsContainer* OptionsDialog::getOptions() const
 {
     return _options;
+}
+
+void OptionsDialog::applyCampaignChanges()
+{
+    if(!_campaign)
+        return;
+
+    _campaign->setName(ui->edtCampaignName->text());
+    _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
 }
 
 void OptionsDialog::browseBestiary()

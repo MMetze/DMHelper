@@ -8,6 +8,7 @@
 #include "mruhandler.h"
 
 class OptionsAccessor;
+class Campaign;
 
 class OptionsContainer : public QObject
 {
@@ -150,7 +151,7 @@ signals:
 #endif
 
 public slots:
-    void editSettings();
+    void editSettings(Campaign* currentCampaign);
     void readSettings();
     void writeSettings();
 

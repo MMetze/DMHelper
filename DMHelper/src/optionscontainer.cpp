@@ -352,7 +352,7 @@ void OptionsContainer::setMRUHandler(MRUHandler* mruHandler)
     _mruHandler = mruHandler;
 }
 
-void OptionsContainer::editSettings()
+void OptionsContainer::editSettings(Campaign* currentCampaign)
 {
     OptionsContainer* editCopyContainer = new OptionsContainer(getMainWindow());
     editCopyContainer->copy(this);
@@ -361,7 +361,7 @@ void OptionsContainer::editSettings()
     connect(editCopyContainer, &OptionsContainer::fontFamilyChanged, this, &OptionsContainer::registerFontChange);
     connect(editCopyContainer, &OptionsContainer::fontSizeChanged, this, &OptionsContainer::registerFontChange);
 
-    OptionsDialog dlg(editCopyContainer);
+    OptionsDialog dlg(editCopyContainer, currentCampaign);
     QScreen* primary = QGuiApplication::primaryScreen();
     if(primary)
     {
@@ -375,6 +375,7 @@ void OptionsContainer::editSettings()
             QMessageBox::information(nullptr, QString("Font Changed"), QString("Changes made in the font used by the DMHelper will only be applied when then application is restarted."));
 
         copy(editCopyContainer);
+        dlg.applyCampaignChanges();
     }
 
     delete editCopyContainer;

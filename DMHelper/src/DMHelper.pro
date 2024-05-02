@@ -94,6 +94,7 @@ SOURCES += main.cpp\
     exportdialog.cpp \
     exportworker.cpp \
     gridconfig.cpp \
+    initiativelistdialog.cpp \
     layer.cpp \
     layerblank.cpp \
     layereffect.cpp \
@@ -165,6 +166,11 @@ SOURCES += main.cpp\
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
+    rulefactory.cpp \
+    ruleinitiative.cpp \
+    ruleinitiative5e.cpp \
+    ruleinitiativegroup.cpp \
+    ruleinitiativegroupmonsters.cpp \
     ruleset.cpp \
     selectcombatantdialog.cpp \
     selectitemdialog.cpp \
@@ -254,6 +260,7 @@ SOURCES += main.cpp\
     widgetcharacter.cpp \
     widgetcombatantbase.cpp \
     widgetcharacterinternal.cpp \
+    widgetinitiativecombatant.cpp \
     widgetmonster.cpp \
     widgetmonsterinternal.cpp \
     battledialogmodelcharacter.cpp \
@@ -365,6 +372,7 @@ HEADERS  += mainwindow.h \
     exportdialog.h \
     exportworker.h \
     gridconfig.h \
+    initiativelistdialog.h \
     layer.h \
     layerblank.h \
     layereffect.h \
@@ -436,6 +444,11 @@ HEADERS  += mainwindow.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
+    rulefactory.h \
+    ruleinitiative.h \
+    ruleinitiative5e.h \
+    ruleinitiativegroup.h \
+    ruleinitiativegroupmonsters.h \
     ruleset.h \
     selectcombatantdialog.h \
     selectitemdialog.h \
@@ -526,6 +539,7 @@ HEADERS  += mainwindow.h \
     widgetcharacter.h \
     widgetcombatantbase.h \
     widgetcharacterinternal.h \
+    widgetinitiativecombatant.h \
     widgetmonster.h \
     widgetmonsterinternal.h \
     battledialogmodelcharacter.h \
@@ -582,6 +596,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    initiativelistdialog.ui \
     layereffectsettings.ui \
     layerframe.ui \
     layerseditdialog.ui \
@@ -636,6 +651,7 @@ FORMS    += mainwindow.ui \
     widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \
+    widgetinitiativecombatant.ui \
     widgetmonster.ui \
     encountertextedit.ui \
     mapselectdialog.ui \

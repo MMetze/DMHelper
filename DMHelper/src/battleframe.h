@@ -75,6 +75,7 @@ public:
 
 public slots:
     void clear();
+    void roll();
     void sort();
     void top();
     void next();
