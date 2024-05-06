@@ -1,6 +1,6 @@
 #include "ruleinitiative5e.h"
 #include "battledialogmodelcombatant.h"
-#include "widgetinitiativecombatant.h"
+#include "initiativelistcombatantwidget.h"
 #include "initiativelistdialog.h"
 
 QString RuleInitiative5e::InitiativeType = QString("5e");
@@ -28,7 +28,7 @@ bool RuleInitiative5e::rollInitiative(QList<BattleDialogModelCombatant*>& combat
         BattleDialogModelCombatant* combatant = combatants.at(i);
         if((combatant) && (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
         {
-            WidgetInitiativeCombatant* widget = new WidgetInitiativeCombatant(combatant);
+            InitiativeListCombatantWidget* widget = new InitiativeListCombatantWidget(combatant);
             dlg->addCombatantWidget(widget);
         }
     }
@@ -39,7 +39,7 @@ bool RuleInitiative5e::rollInitiative(QList<BattleDialogModelCombatant*>& combat
         BattleDialogModelCombatant* combatant = combatants.at(i);
         if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
         {
-            WidgetInitiativeCombatant* widget = new WidgetInitiativeCombatant(combatant);
+            InitiativeListCombatantWidget* widget = new InitiativeListCombatantWidget(combatant);
             dlg->addCombatantWidget(widget);
         }
     }
@@ -49,7 +49,7 @@ bool RuleInitiative5e::rollInitiative(QList<BattleDialogModelCombatant*>& combat
     {
         for(int i = 0; i < dlg->getCombatantCount(); ++i)
         {
-            WidgetInitiativeCombatant* widget = dlg->getCombatantWidget(i);
+            InitiativeListCombatantWidget* widget = dlg->getCombatantWidget(i);
             if(widget)
             {
                 BattleDialogModelCombatant* combatant = widget->getCombatant();

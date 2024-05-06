@@ -291,6 +291,7 @@ private slots:
     void setItemsInert(bool inert);
 
     void removeRollover();
+    void clearDoneFlags();
 
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
@@ -299,7 +300,7 @@ private slots:
     void stateUpdated();
 
 private:
-
+    
     CombatantWidget* createCombatantWidget(BattleDialogModelCombatant* combatant);
     void clearCombatantWidgets();
     void buildCombatantWidgets();
@@ -365,7 +366,7 @@ private:
     BattleDialogModel* _model;
     QVBoxLayout* _combatantLayout;
     BattleDialogLogger* _logger;
-
+    
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
 
     BattleFrameStateMachine _stateMachine;

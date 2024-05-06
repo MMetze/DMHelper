@@ -1,6 +1,6 @@
 #include "initiativelistdialog.h"
 #include "ui_initiativelistdialog.h"
-#include "widgetinitiativecombatant.h"
+#include "initiativelistcombatantwidget.h"
 
 InitiativeListDialog::InitiativeListDialog(QWidget *parent) :
     QDialog(parent),
@@ -25,7 +25,7 @@ InitiativeListDialog::~InitiativeListDialog()
     delete ui;
 }
 
-void InitiativeListDialog::addCombatantWidget(WidgetInitiativeCombatant* widget)
+void InitiativeListDialog::addCombatantWidget(InitiativeListCombatantWidget* widget)
 {
     if(!widget)
         return;
@@ -38,7 +38,7 @@ int InitiativeListDialog::getCombatantCount() const
     return _combatantLayout->count();
 }
 
-WidgetInitiativeCombatant* InitiativeListDialog::getCombatantWidget(int index)
+InitiativeListCombatantWidget* InitiativeListDialog::getCombatantWidget(int index)
 {
     if((index < 0) || (index >= _combatantLayout->count()))
         return nullptr;
@@ -46,6 +46,6 @@ WidgetInitiativeCombatant* InitiativeListDialog::getCombatantWidget(int index)
     QLayoutItem* layoutItem = _combatantLayout->itemAt(index);
     if(!layoutItem)
         return nullptr;
-
-    return qobject_cast<WidgetInitiativeCombatant*>(layoutItem->widget());
+    
+    return qobject_cast<InitiativeListCombatantWidget*>(layoutItem->widget());
 }

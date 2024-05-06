@@ -1,6 +1,6 @@
 #include "ruleinitiativegroupmonsters.h"
 #include "battledialogmodelcombatant.h"
-#include "widgetinitiativecombatant.h"
+#include "initiativelistcombatantwidget.h"
 #include "initiativelistdialog.h"
 
 QString RuleInitiativeGroupMonsters::InitiativeType = QString("group-monsters");
@@ -21,8 +21,8 @@ bool RuleInitiativeGroupMonsters::rollInitiative(QList<BattleDialogModelCombatan
         return false;
 
     InitiativeListDialog* dlg = new InitiativeListDialog();
-
-    WidgetInitiativeCombatant* widgetMonsters = new WidgetInitiativeCombatant(0, QPixmap(":/img/data/icon_bestiary.png"), QString("Monsters"));
+    
+    InitiativeListCombatantWidget* widgetMonsters = new InitiativeListCombatantWidget(0, QPixmap(":/img/data/icon_bestiary.png"), QString("Monsters"));
     dlg->addCombatantWidget(widgetMonsters);
 
     for(int i = 0; i < combatants.count(); ++i)
@@ -30,7 +30,7 @@ bool RuleInitiativeGroupMonsters::rollInitiative(QList<BattleDialogModelCombatan
         BattleDialogModelCombatant* combatant = combatants.at(i);
         if((combatant) && (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
         {
-            WidgetInitiativeCombatant* widget = new WidgetInitiativeCombatant(combatant);
+            InitiativeListCombatantWidget* widget = new InitiativeListCombatantWidget(combatant);
             dlg->addCombatantWidget(widget);
         }
     }
@@ -41,7 +41,7 @@ bool RuleInitiativeGroupMonsters::rollInitiative(QList<BattleDialogModelCombatan
         // Go through the PC widgets and update their initiative values
         for(int i = 0; i < dlg->getCombatantCount(); ++i)
         {
-            WidgetInitiativeCombatant* widget = dlg->getCombatantWidget(i);
+            InitiativeListCombatantWidget* widget = dlg->getCombatantWidget(i);
             if((widget) && (widget != widgetMonsters))
             {
                 BattleDialogModelCombatant* combatant = widget->getCombatant();

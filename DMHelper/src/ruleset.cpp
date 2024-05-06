@@ -7,7 +7,8 @@
 
 Ruleset::Ruleset(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
-    _ruleInitiative(nullptr)
+    _ruleInitiative(nullptr),
+    _combatantDoneCheckbox(false)
 {
 }
 
@@ -19,6 +20,8 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
 {
     QString initiativeType = element.attribute("initiative", RuleFactory::getRuleInitiativeDefault());
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
+
+    _combatantDoneCheckbox = static_cast<bool>(element.attribute("done", QString::number(1)).toInt());
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -49,6 +52,11 @@ QString Ruleset::getRuleInitiativeType()
     return _ruleInitiative ? _ruleInitiative->getInitiativeType() : QString();
 }
 
+bool Ruleset::getCombatantDoneCheckbox() const
+{
+    return _combatantDoneCheckbox;
+}
+
 void Ruleset::setRuleInitiative(const QString& initiativeType)
 {
     if((_ruleInitiative) && (_ruleInitiative->getInitiativeType() == initiativeType))
@@ -57,6 +65,15 @@ void Ruleset::setRuleInitiative(const QString& initiativeType)
     delete _ruleInitiative;
 
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
+    emit dirty();
+}
+
+void Ruleset::setCombatantDoneCheckbox(bool checked)
+{
+    if(_combatantDoneCheckbox == checked)
+        return;
+
+    _combatantDoneCheckbox = checked;
     emit dirty();
 }
 
@@ -73,4 +90,7 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
 
     if((_ruleInitiative) && (_ruleInitiative->getInitiativeType() != RuleFactory::getRuleInitiativeDefault()))
         element.setAttribute("initiative", _ruleInitiative->getInitiativeType());
+
+    if(!_combatantDoneCheckbox)
+        element.setAttribute("done", _combatantDoneCheckbox);
 }

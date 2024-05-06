@@ -8,7 +8,7 @@ class InitiativeListDialog;
 }
 
 class QVBoxLayout;
-class WidgetInitiativeCombatant;
+class InitiativeListCombatantWidget;
 
 class InitiativeListDialog : public QDialog
 {
@@ -17,11 +17,11 @@ class InitiativeListDialog : public QDialog
 public:
     explicit InitiativeListDialog(QWidget *parent = nullptr);
     ~InitiativeListDialog();
-
-    void addCombatantWidget(WidgetInitiativeCombatant* widget);
+    
+    void addCombatantWidget(InitiativeListCombatantWidget* widget);
 
     int getCombatantCount() const;
-    WidgetInitiativeCombatant* getCombatantWidget(int index);
+    InitiativeListCombatantWidget* getCombatantWidget(int index);
 
 private:
     Ui::InitiativeListDialog *ui;

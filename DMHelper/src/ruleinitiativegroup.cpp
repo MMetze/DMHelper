@@ -1,6 +1,6 @@
 #include "ruleinitiativegroup.h"
 #include "battledialogmodelcombatant.h"
-#include "widgetinitiativecombatant.h"
+#include "initiativelistcombatantwidget.h"
 #include "initiativelistdialog.h"
 
 QString RuleInitiativeGroup::InitiativeType = QString("group");
@@ -21,11 +21,11 @@ bool RuleInitiativeGroup::rollInitiative(QList<BattleDialogModelCombatant*>& com
         return false;
 
     InitiativeListDialog* dlg = new InitiativeListDialog();
-
-    WidgetInitiativeCombatant* widgetPCs = new WidgetInitiativeCombatant(0, QPixmap(":/img/data/icon_contentcharacter.png"), QString("PCs"));
+    
+    InitiativeListCombatantWidget* widgetPCs = new InitiativeListCombatantWidget(0, QPixmap(":/img/data/icon_contentcharacter.png"), QString("PCs"));
     dlg->addCombatantWidget(widgetPCs);
-
-    WidgetInitiativeCombatant* widgetMonsters = new WidgetInitiativeCombatant(0, QPixmap(":/img/data/icon_bestiary.png"), QString("Monsters"));
+    
+    InitiativeListCombatantWidget* widgetMonsters = new InitiativeListCombatantWidget(0, QPixmap(":/img/data/icon_bestiary.png"), QString("Monsters"));
     dlg->addCombatantWidget(widgetMonsters);
 
     int result = dlg->exec();

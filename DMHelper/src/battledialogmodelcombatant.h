@@ -33,6 +33,7 @@ public:
     virtual bool getShown() const;
     virtual bool getKnown() const;
     virtual bool getSelected() const;
+    virtual bool getDone() const;
 
     int getInitiative() const;
     void setInitiative(int initiative);
@@ -71,6 +72,7 @@ public slots:
     virtual void setShown(bool isShown);
     virtual void setKnown(bool isKnown);
     virtual void setSelected(bool isSelected) override;
+    virtual void setDone(bool isDone);
     virtual void setConditions(int conditions) = 0;
     virtual void applyConditions(int conditions) = 0;
     virtual void removeConditions(int conditions) = 0;
@@ -82,6 +84,7 @@ signals:
     void combatantSelected(BattleDialogModelCombatant* combatant);
     void moveUpdated();
     void visibilityChanged();
+    void combatantDoneChanged(BattleDialogModelCombatant* combatant);
 
 protected:
     // From CampaignObjectBase
@@ -100,6 +103,7 @@ protected:
     bool _isShown;
     bool _isKnown;
     bool _isSelected;
+    bool _isDone;
 };
 
 #endif // BATTLEDIALOGMODELCOMBATANT_H

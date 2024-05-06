@@ -1,4 +1,4 @@
-#include "widgetcombatantbase.h"
+#include "combatantwidgetinternals.h"
 #include "dmconstants.h"
 #include "battledialogmodel.h"
 #include <QLineEdit>
@@ -6,42 +6,42 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
-WidgetCombatantBase::WidgetCombatantBase(QWidget *parent) :
+CombatantWidgetInternals::CombatantWidgetInternals(QWidget *parent) :
     QObject(parent),
     _mouseDown(Qt::NoButton)
 {
 }
 
-int WidgetCombatantBase::getInitiative() const
+int CombatantWidgetInternals::getInitiative() const
 {
     return 0;
 }
 
-bool WidgetCombatantBase::isShown()
+bool CombatantWidgetInternals::isShown()
 {
     return true;
 }
 
-bool WidgetCombatantBase::isKnown()
+bool CombatantWidgetInternals::isKnown()
 {
     return true;
 }
 
-void WidgetCombatantBase::leaveEvent(QEvent * event)
+void CombatantWidgetInternals::leaveEvent(QEvent * event)
 {
     Q_UNUSED(event);
 
     _mouseDown = Qt::NoButton;
 }
 
-void WidgetCombatantBase::mousePressEvent(QMouseEvent * event)
+void CombatantWidgetInternals::mousePressEvent(QMouseEvent * event)
 {
     Q_UNUSED(event);
 
     _mouseDown = event->button();
 }
 
-void WidgetCombatantBase::mouseReleaseEvent(QMouseEvent * event)
+void CombatantWidgetInternals::mouseReleaseEvent(QMouseEvent * event)
 {
     if(_mouseDown == event->button())
     {
@@ -49,14 +49,14 @@ void WidgetCombatantBase::mouseReleaseEvent(QMouseEvent * event)
         {
             if(getCombatant())
             {
-                emit contextMenu(getCombatant(), event->globalPos());
+                emit contextMenu(getCombatant(), event->globalPosition().toPoint());
             }
         }
         _mouseDown = Qt::NoButton;
     }
 }
 
-void WidgetCombatantBase::mouseDoubleClickEvent(QMouseEvent *event)
+void CombatantWidgetInternals::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton)
     {
@@ -65,15 +65,15 @@ void WidgetCombatantBase::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void WidgetCombatantBase::updateData()
+void CombatantWidgetInternals::updateData()
 {
 }
 
-void WidgetCombatantBase::updateImage()
+void CombatantWidgetInternals::updateImage()
 {
 }
 
-void WidgetCombatantBase::initiativeChanged(int initiative)
+void CombatantWidgetInternals::initiativeChanged(int initiative)
 {
     if(getCombatant() && (getCombatant()->getInitiative() != initiative))
     {
@@ -82,13 +82,13 @@ void WidgetCombatantBase::initiativeChanged(int initiative)
     }
 }
 
-void WidgetCombatantBase::moveChanged(int move)
+void CombatantWidgetInternals::moveChanged(int move)
 {
     if(getCombatant())
         getCombatant()->setMoved(move);
 }
 
-void WidgetCombatantBase::handleHitPointsChanged(int hp)
+void CombatantWidgetInternals::handleHitPointsChanged(int hp)
 {
     if(getCombatant() && (getCombatant()->getHitPoints() != hp))
     {
@@ -99,6 +99,6 @@ void WidgetCombatantBase::handleHitPointsChanged(int hp)
     }
 }
 
-void WidgetCombatantBase::executeDoubleClick()
+void CombatantWidgetInternals::executeDoubleClick()
 {
 }

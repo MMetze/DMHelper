@@ -1,18 +1,18 @@
-#ifndef WIDGETCHARACTERINTERNAL_H
-#define WIDGETCHARACTERINTERNAL_H
+#ifndef COMBATANTWIDGETINTERNALSCHARACTER_H
+#define COMBATANTWIDGETINTERNALSCHARACTER_H
 
-#include "widgetcombatantbase.h"
+#include "combatantwidgetinternals.h"
 #include <QUuid>
 
 class BattleDialogModelCharacter;
 class QTimer;
-class WidgetCharacter;
+class CombatantWidgetCharacter;
 
-class WidgetCharacterInternal : public WidgetCombatantBase
+class CombatantWidgetInternalsCharacter : public CombatantWidgetInternals
 {
     Q_OBJECT
 public:
-    explicit WidgetCharacterInternal(BattleDialogModelCharacter* character, WidgetCharacter *parent);
+    explicit CombatantWidgetInternalsCharacter(BattleDialogModelCharacter* character, CombatantWidgetCharacter *parent);
 
     virtual BattleDialogModelCombatant* getCombatant() override;
     virtual QFrame* getFrame() override;
@@ -34,8 +34,8 @@ public slots:
 protected:
 
     // Data
-    WidgetCharacter* _widgetParent;
+    CombatantWidgetCharacter* _widgetParent;
     BattleDialogModelCharacter* _character;
 };
 
-#endif // WIDGETCHARACTERINTERNAL_H
+#endif // COMBATANTWIDGETINTERNALSCHARACTER_H

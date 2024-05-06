@@ -1,5 +1,5 @@
-#ifndef WIDGETCOMBATANTBASE_H
-#define WIDGETCOMBATANTBASE_H
+#ifndef COMBATANTWIDGETINTERNALS_H
+#define COMBATANTWIDGETINTERNALS_H
 
 #include <QObject>
 
@@ -9,11 +9,11 @@ class QMouseEvent;
 class QHBoxLayout;
 class QFrame;
 
-class WidgetCombatantBase : public QObject
+class CombatantWidgetInternals : public QObject
 {
     Q_OBJECT
 public:
-    explicit WidgetCombatantBase(QWidget *parent = nullptr);
+    explicit CombatantWidgetInternals(QWidget *parent = nullptr);
 
     virtual BattleDialogModelCombatant* getCombatant() = 0;
     virtual QFrame* getFrame() = 0;
@@ -50,4 +50,4 @@ protected:
 
 };
 
-#endif // WIDGETCOMBATANTBASE_H
+#endif // COMBATANTWIDGETINTERNALS_H

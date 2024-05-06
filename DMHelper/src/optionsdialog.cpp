@@ -85,6 +85,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
                         ui->cmbInitiative->setCurrentIndex(i);
                 }
             }
+
+            ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
         }
         else
         {
@@ -190,6 +192,7 @@ void OptionsDialog::applyCampaignChanges()
 
     _campaign->setName(ui->edtCampaignName->text());
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
+    _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
 }
 
 void OptionsDialog::browseBestiary()

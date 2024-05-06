@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetInitiativeCombatant</class>
- <widget class="QWidget" name="WidgetInitiativeCombatant">
+ <class>InitiativeListCombatantWidget</class>
+ <widget class="QWidget" name="InitiativeListCombatantWidget">
   <property name="geometry">
    <rect>
     <x>0</x>

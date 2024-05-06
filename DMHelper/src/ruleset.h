@@ -20,11 +20,13 @@ public:
     // Local accessors
     RuleInitiative* getRuleInitiative();
     QString getRuleInitiativeType();
+    bool getCombatantDoneCheckbox() const;
 
 signals:
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
+    void setCombatantDoneCheckbox(bool checked);
 
 protected slots:
 
@@ -34,6 +36,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     RuleInitiative* _ruleInitiative;
+    bool _combatantDoneCheckbox;
 };
 
 #endif // RULESET_H

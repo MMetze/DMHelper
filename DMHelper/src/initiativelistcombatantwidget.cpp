@@ -1,11 +1,11 @@
-#include "widgetinitiativecombatant.h"
-#include "ui_widgetinitiativecombatant.h"
+#include "initiativelistcombatantwidget.h"
+#include "ui_initiativelistcombatantwidget.h"
 #include "battledialogmodelcombatant.h"
 #include <QIntValidator>
 
-WidgetInitiativeCombatant::WidgetInitiativeCombatant(int initiative, const QPixmap& pixmap, const QString& name, QWidget *parent) :
+InitiativeListCombatantWidget::InitiativeListCombatantWidget(int initiative, const QPixmap& pixmap, const QString& name, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::WidgetInitiativeCombatant),
+    ui(new Ui::InitiativeListCombatantWidget),
     _combatant(nullptr)
 {
     ui->setupUi(this);
@@ -18,9 +18,9 @@ WidgetInitiativeCombatant::WidgetInitiativeCombatant(int initiative, const QPixm
     setName(name);
 }
 
-WidgetInitiativeCombatant::WidgetInitiativeCombatant(BattleDialogModelCombatant* combatant, QWidget *parent) :
+InitiativeListCombatantWidget::InitiativeListCombatantWidget(BattleDialogModelCombatant* combatant, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::WidgetInitiativeCombatant),
+    ui(new Ui::InitiativeListCombatantWidget),
     _combatant(nullptr)
 {
     ui->setupUi(this);
@@ -31,12 +31,12 @@ WidgetInitiativeCombatant::WidgetInitiativeCombatant(BattleDialogModelCombatant*
     setCombatant(combatant);
 }
 
-WidgetInitiativeCombatant::~WidgetInitiativeCombatant()
+InitiativeListCombatantWidget::~InitiativeListCombatantWidget()
 {
     delete ui;
 }
 
-void WidgetInitiativeCombatant::setCombatant(BattleDialogModelCombatant* combatant)
+void InitiativeListCombatantWidget::setCombatant(BattleDialogModelCombatant* combatant)
 {
     _combatant = combatant;
     if(!_combatant)
@@ -47,32 +47,32 @@ void WidgetInitiativeCombatant::setCombatant(BattleDialogModelCombatant* combata
     setName(_combatant->getName());
 }
 
-void WidgetInitiativeCombatant::setInitiative(int initiative)
+void InitiativeListCombatantWidget::setInitiative(int initiative)
 {
     ui->edtInitiative->setText(QString::number(initiative));
 }
 
-void WidgetInitiativeCombatant::setIconPixmap(const QPixmap& pixmap)
+void InitiativeListCombatantWidget::setIconPixmap(const QPixmap& pixmap)
 {
     ui->lblIcon->setPixmap(pixmap.scaled(ui->lblIcon->size(), Qt::KeepAspectRatio));
 }
 
-void WidgetInitiativeCombatant::setName(const QString& name)
+void InitiativeListCombatantWidget::setName(const QString& name)
 {
     ui->lblName->setText(name);
 }
 
-int WidgetInitiativeCombatant::getInitiative() const
+int InitiativeListCombatantWidget::getInitiative() const
 {
     return ui->edtInitiative->text().toInt();
 }
 
-BattleDialogModelCombatant* WidgetInitiativeCombatant::getCombatant() const
+BattleDialogModelCombatant* InitiativeListCombatantWidget::getCombatant() const
 {
     return _combatant;
 }
 
-QString WidgetInitiativeCombatant::getName() const
+QString InitiativeListCombatantWidget::getName() const
 {
     return ui->lblName->text();
 }

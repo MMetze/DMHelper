@@ -1,12 +1,12 @@
-#include "widgetbattlecombatant.h"
-#include "ui_widgetbattlecombatant.h"
+#include "battlecombatantwidget.h"
+#include "ui_battlecombatantwidget.h"
 #include "battledialogmodel.h"
 #include <QIntValidator>
 #include <QMouseEvent>
 
-WidgetBattleCombatant::WidgetBattleCombatant(BattleDialogModelCombatant* combatant, QWidget *parent) :
+BattleCombatantWidget::BattleCombatantWidget(BattleDialogModelCombatant* combatant, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::WidgetBattleCombatant),
+    ui(new Ui::BattleCombatantWidget),
     _combatant(combatant),
     _mouseDown(false),
     _mouseDownPos(),
@@ -23,37 +23,37 @@ WidgetBattleCombatant::WidgetBattleCombatant(BattleDialogModelCombatant* combata
     connect(ui->chkActive, SIGNAL(toggled(bool)), this, SLOT(handleCombatantActive(bool)));
 }
 
-WidgetBattleCombatant::~WidgetBattleCombatant()
+BattleCombatantWidget::~BattleCombatantWidget()
 {
     delete ui;
 }
 
-bool WidgetBattleCombatant::hasAdvantage() const
+bool BattleCombatantWidget::hasAdvantage() const
 {
     return ui->btnAdvantage->isChecked();
 }
 
-bool WidgetBattleCombatant::hasDisadvantage() const
+bool BattleCombatantWidget::hasDisadvantage() const
 {
     return ui->btnDisadvantage->isChecked();
 }
 
-void WidgetBattleCombatant::setResult(const QString &text)
+void BattleCombatantWidget::setResult(const QString &text)
 {
     ui->edtResult->setText(text);
 }
 
-void WidgetBattleCombatant::setResult(int result)
+void BattleCombatantWidget::setResult(int result)
 {
     _result = result;
 }
 
-int WidgetBattleCombatant::getResult() const
+int BattleCombatantWidget::getResult() const
 {
     return _result;
 }
 
-void WidgetBattleCombatant::applyDamage(int damage)
+void BattleCombatantWidget::applyDamage(int damage)
 {
     if(!_combatant)
         return;
@@ -68,7 +68,7 @@ void WidgetBattleCombatant::applyDamage(int damage)
     emit hitPointsChanged(_combatant, damage);
 }
 
-void WidgetBattleCombatant::applyConditions(int conditions)
+void BattleCombatantWidget::applyConditions(int conditions)
 {
     if((!_combatant) || (conditions == 0))
         return;
@@ -77,12 +77,12 @@ void WidgetBattleCombatant::applyConditions(int conditions)
     emit combatantChanged(_combatant);
 }
 
-bool WidgetBattleCombatant::isActive()
+bool BattleCombatantWidget::isActive()
 {
     return ui->chkActive->isChecked();
 }
 
-void WidgetBattleCombatant::mousePressEvent(QMouseEvent *event)
+void BattleCombatantWidget::mousePressEvent(QMouseEvent *event)
 {
     if(!event)
         return;
@@ -91,7 +91,7 @@ void WidgetBattleCombatant::mousePressEvent(QMouseEvent *event)
     _mouseDownPos = event->pos();
 }
 
-void WidgetBattleCombatant::mouseReleaseEvent(QMouseEvent *event)
+void BattleCombatantWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if(!event)
         return;
@@ -104,7 +104,7 @@ void WidgetBattleCombatant::mouseReleaseEvent(QMouseEvent *event)
     _mouseDown = false;
 }
 
-void WidgetBattleCombatant::resizeEvent(QResizeEvent *event)
+void BattleCombatantWidget::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
@@ -115,7 +115,7 @@ void WidgetBattleCombatant::resizeEvent(QResizeEvent *event)
     ui->lblIcon->setPixmap(combatantImage.scaled(ui->lblIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void WidgetBattleCombatant::handleHitPointsChanged(const QString& text)
+void BattleCombatantWidget::handleHitPointsChanged(const QString& text)
 {
     int newHP = text.toInt();
 
@@ -126,12 +126,12 @@ void WidgetBattleCombatant::handleHitPointsChanged(const QString& text)
     emit combatantChanged(_combatant);
 }
 
-void WidgetBattleCombatant::handleRerollRequest()
+void BattleCombatantWidget::handleRerollRequest()
 {
     emit rerollNeeded(this);
 }
 
-void WidgetBattleCombatant::handleAdvantageClicked(bool checked)
+void BattleCombatantWidget::handleAdvantageClicked(bool checked)
 {
     if(checked && ui->btnDisadvantage->isChecked())
         ui->btnDisadvantage->setChecked(false);
@@ -139,7 +139,7 @@ void WidgetBattleCombatant::handleAdvantageClicked(bool checked)
     handleRerollRequest();
 }
 
-void WidgetBattleCombatant::handleDisadvantageClicked(bool checked)
+void BattleCombatantWidget::handleDisadvantageClicked(bool checked)
 {
     if(checked && ui->btnAdvantage->isChecked())
         ui->btnAdvantage->setChecked(false);
@@ -147,7 +147,7 @@ void WidgetBattleCombatant::handleDisadvantageClicked(bool checked)
     handleRerollRequest();
 }
 
-void WidgetBattleCombatant::handleCombatantActive(bool active)
+void BattleCombatantWidget::handleCombatantActive(bool active)
 {
     ui->lblIcon->setEnabled(active);
     ui->edtName->setEnabled(active);
@@ -158,7 +158,7 @@ void WidgetBattleCombatant::handleCombatantActive(bool active)
     ui->btnDisadvantage->setEnabled(active);
 }
 
-void WidgetBattleCombatant::setCombatantValues()
+void BattleCombatantWidget::setCombatantValues()
 {
     if(!_combatant)
         return;

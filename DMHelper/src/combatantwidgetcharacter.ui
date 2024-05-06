@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetMonster</class>
- <widget class="CombatantWidget" name="WidgetMonster">
+ <class>CombatantWidgetCharacter</class>
+ <widget class="CombatantWidget" name="CombatantWidgetCharacter">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>242</width>
-    <height>57</height>
+    <width>276</width>
+    <height>58</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string/>
@@ -21,9 +27,6 @@
   </property>
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
-  </property>
-  <property name="lineWidth">
-   <number>1</number>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <property name="spacing">
@@ -60,9 +63,6 @@
        <width>32</width>
        <height>50</height>
       </size>
-     </property>
-     <property name="toolTip">
-      <string>Monster icon</string>
      </property>
      <property name="styleSheet">
       <string notr="true">background-image: url();</string>
@@ -127,7 +127,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Is this monster visible?</string>
+          <string>Is this character visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -155,7 +155,7 @@
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this monster visible?</string>
+          <string>Is this character visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -169,7 +169,7 @@ background-color: rgba(0, 0, 0, 0);</string>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <property name="spacing">
         <number>2</number>
        </property>
@@ -206,7 +206,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>Is this monster known?</string>
+          <string>Is this character known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -234,7 +234,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this monster known?</string>
+          <string>Is this character known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -255,7 +255,7 @@ background-color: rgba(0, 0, 0, 0);</string>
       <number>0</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="5,1,1,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,1,1">
        <property name="spacing">
         <number>2</number>
        </property>
@@ -268,7 +268,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's name</string>
+          <string>The character's name</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -276,34 +276,6 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="readOnly">
           <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnLegendary">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>30</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>Remaining Legendary Actions</string>
-         </property>
-         <property name="text">
-          <string>L: 3</string>
          </property>
         </widget>
        </item>
@@ -316,7 +288,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's Armor Class</string>
+          <string>The character's armor class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -338,7 +310,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's Armor Class</string>
+          <string>The character's armor class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -360,7 +332,7 @@ background-color: rgba(0, 0, 0, 0);</string>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,2,1,2">
        <property name="spacing">
-        <number>2</number>
+        <number>0</number>
        </property>
        <item>
         <widget class="QLabel" name="label">
@@ -370,8 +342,20 @@ background-color: rgba(0, 0, 0, 0);</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>The monster's initiative</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -389,8 +373,20 @@ background-color: rgba(0, 0, 0, 0);</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>The monster's initiative</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -405,31 +401,43 @@ background-color: rgba(0, 0, 0, 0);</string>
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_3">
+        <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>0</width>
-           <height>20</height>
+           <height>5</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_6">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>The monster's initiative</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -447,8 +455,20 @@ background-color: rgba(0, 0, 0, 0);</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>The monster's initiative</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -468,12 +488,12 @@ background-color: rgba(0, 0, 0, 0);</string>
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>0</width>
-           <height>20</height>
+           <height>5</height>
           </size>
          </property>
         </spacer>
@@ -486,8 +506,20 @@ background-color: rgba(0, 0, 0, 0);</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>The monster's current hit points</string>
+          <string>The character's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -505,8 +537,20 @@ background-color: rgba(0, 0, 0, 0);</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>The monster's current hit points</string>
+          <string>The character's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -523,6 +567,66 @@ background-color: rgba(0, 0, 0, 0);</string>
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblDone">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Did this character go yet?</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url();</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/img/data/icon_contentbattle.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="chkDone">
+     <property name="toolTip">
+      <string>Did this character go yet?</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

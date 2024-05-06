@@ -1,6 +1,6 @@
 #include "dicerolldialogcombatants.h"
 #include "ui_dicerolldialogcombatants.h"
-#include "widgetbattlecombatant.h"
+#include "battlecombatantwidget.h"
 #include "battledialogmodelcombatant.h"
 #include "character.h"
 #include "conditionseditdialog.h"
@@ -63,7 +63,7 @@ void DiceRollDialogCombatants::rollDice()
         QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
         if(layoutItem)
         {
-            WidgetBattleCombatant* combatant = qobject_cast<WidgetBattleCombatant*>(layoutItem->widget());
+            BattleCombatantWidget* combatant = qobject_cast<BattleCombatantWidget*>(layoutItem->widget());
             if((combatant) && (combatant->isActive()))
             {
                 rollForWidget(combatant, readDice(), (_modifiers.count() > 0) ? (_modifiers.at(rc)) : 0);
@@ -85,7 +85,7 @@ void DiceRollDialogCombatants::applyDamage()
         QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
         if(layoutItem)
         {
-            WidgetBattleCombatant* combatantWidget = qobject_cast<WidgetBattleCombatant*>(layoutItem->widget());
+            BattleCombatantWidget* combatantWidget = qobject_cast<BattleCombatantWidget*>(layoutItem->widget());
             if((combatantWidget) && (combatantWidget->isActive()) && (combatantWidget->isVisible()))
             {
                 if(combatantWidget->getResult() >= target)
@@ -104,7 +104,7 @@ void DiceRollDialogCombatants::applyDamage()
     }
 }
 
-void DiceRollDialogCombatants::rerollWidget(WidgetBattleCombatant* widget)
+void DiceRollDialogCombatants::rerollWidget(BattleCombatantWidget* widget)
 {
     if(!widget)
         return;
@@ -248,7 +248,7 @@ void DiceRollDialogCombatants::createCombatantWidgets()
 
     for(BattleDialogModelCombatant* combatant : _combatants)
     {
-        WidgetBattleCombatant* newWidget = new WidgetBattleCombatant(combatant);
+        BattleCombatantWidget* newWidget = new BattleCombatantWidget(combatant);
         _combatantLayout->addWidget(newWidget);
         connect(newWidget, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SIGNAL(selectCombatant(BattleDialogModelCombatant*)));
         connect(newWidget, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SIGNAL(combatantChanged(BattleDialogModelCombatant*)));
@@ -297,7 +297,7 @@ int DiceRollDialogCombatants::rollOnce(const Dice& dice, int modifier, QString& 
     return result;
 }
 
-void DiceRollDialogCombatants::rollForWidget(WidgetBattleCombatant* widget, const Dice& dice, int modifier)
+void DiceRollDialogCombatants::rollForWidget(BattleCombatantWidget* widget, const Dice& dice, int modifier)
 {
     if(!widget)
         return;

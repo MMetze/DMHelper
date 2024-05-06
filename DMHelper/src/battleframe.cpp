@@ -1,9 +1,9 @@
 #include "battleframe.h"
 #include "ui_battleframe.h"
-#include "widgetmonster.h"
-#include "widgetmonsterinternal.h"
-#include "widgetcharacter.h"
-#include "widgetcharacterinternal.h"
+#include "combatantwidgetmonster.h"
+#include "combatantwidgetinternalsmonster.h"
+#include "combatantwidgetcharacter.h"
+#include "combatantwidgetinternalscharacter.h"
 #include "monsterclass.h"
 #include "dmconstants.h"
 #include "spellbook.h"
@@ -234,7 +234,7 @@ BattleFrame::~BattleFrame()
     {
         delete child;
     }
-
+    
     QMapIterator<BattleDialogModelCombatant*, CombatantWidget*> i(_combatantWidgets);
     while(i.hasNext())
     {
@@ -483,6 +483,8 @@ void BattleFrame::roll()
     QList<BattleDialogModelCombatant*> combatants = getLivingCombatants();
     if(ruleInitiative->rollInitiative(combatants))
         sort();
+
+    clearDoneFlags();
 }
 
 void BattleFrame::sort()
@@ -549,8 +551,13 @@ void BattleFrame::next()
         }
     }
 
-    if((_logger) && (activeInitiative < nextInitiative))
-        _logger->newRound();
+    if(activeInitiative < nextInitiative)
+    {
+        if(_logger)
+            _logger->newRound();
+
+        clearDoneFlags();
+    }
 
     setActiveCombatant(nextCombatant);
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
@@ -2219,7 +2226,7 @@ void BattleFrame::handleCombatantSelected(BattleDialogModelCombatant* combatant)
     QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
     if(!item)
         return;
-
+    
     CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
     if(!widget)
         return;
@@ -2232,7 +2239,7 @@ void BattleFrame::handleCombatantHover(BattleDialogModelCombatant* combatant, bo
 {
     if(!combatant)
         return;
-
+    
     CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
     if(!widget)
         return;
@@ -2549,7 +2556,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item, bool showMoveme
 
                     _selectedCombatant = combatant;
                     ui->frameCombatant->setCombatant(combatant);
-
+                    
                     CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
                     if(widget)
                         ui->scrollArea->ensureWidgetVisible(widget);
@@ -2594,7 +2601,7 @@ void BattleFrame::handleItemMouseDoubleClick(QGraphicsPixmapItem* item)
     BattleDialogModelCombatant* combatant = getCombatantFromItem(item);
     if(!combatant)
         return;
-
+    
     CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
     if(!widget)
         return;
@@ -2728,7 +2735,7 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
         setUniqueSelection(nullptr);
         return;
     }
-
+    
     CombatantWidget* combatantWidget = nullptr;
     QGraphicsPixmapItem* selectedItem = nullptr;
     if(selected)
@@ -2774,7 +2781,7 @@ void BattleFrame::updateCombatantWidget(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
         return;
-
+    
     CombatantWidget* widget = _combatantWidgets.value(combatant);
     if(!widget)
         return;
@@ -3311,6 +3318,20 @@ void BattleFrame::removeRollover()
     _hoverFrame = nullptr;
 }
 
+void BattleFrame::clearDoneFlags()
+{
+    if(!_model)
+        return;
+
+    // Clean up the Done flags on the combatants
+    for(int i = 0; i < _model->getCombatantCount(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = _model->getCombatant(i);
+        if(combatant)
+            combatant->setDone(false);
+    }
+}
+
 /*
 void BattleFrame::handleScreenshotReady(const QImage& image)
 {
@@ -3402,9 +3423,9 @@ void BattleFrame::stateUpdated()
 
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)
 {
-    if(!_model)
+    if((!_model) || (!_battle))
         return nullptr;
-
+    
     CombatantWidget* newWidget = nullptr;
 
     if(_combatantWidgets.contains(combatant))
@@ -3414,6 +3435,8 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
         return newWidget;
     }
 
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+
     switch(combatant->getCombatantType())
     {
         case DMHelper::CombatantType_Character:
@@ -3422,14 +3445,14 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             if(character)
             {
                 qDebug() << "[Battle Frame] creating character widget for " << character->getName();
-                newWidget = new WidgetCharacter(ui->scrollAreaWidgetContents);
-                WidgetCharacterInternal* widgetInternals = new WidgetCharacterInternal(character, dynamic_cast<WidgetCharacter*>(newWidget));
+                newWidget = new CombatantWidgetCharacter(((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox())), ui->scrollAreaWidgetContents);
+                CombatantWidgetInternalsCharacter* widgetInternals = new CombatantWidgetInternalsCharacter(character, dynamic_cast<CombatantWidgetCharacter*>(newWidget));
                 connect(widgetInternals, SIGNAL(clicked(QUuid)), this, SIGNAL(characterSelected(QUuid)));
                 connect(widgetInternals, SIGNAL(contextMenu(BattleDialogModelCombatant*, QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*, QPoint)));
                 connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
                 connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
-                connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isShownChanged(bool)), character, SLOT(setShown(bool)));
-                connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isKnownChanged(bool)), character, SLOT(setKnown(bool)));
+//                connect(dynamic_cast<CombatantWidgetCharacter*>(newWidget), SIGNAL(isShownChanged(bool)), character, SLOT(setShown(bool)));
+//                connect(dynamic_cast<CombatantWidgetCharacter*>(newWidget), SIGNAL(isKnownChanged(bool)), character, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
                 connect(character, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
             }
@@ -3441,14 +3464,14 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             if(monster)
             {
                 qDebug() << "[Battle Frame] creating monster widget for " << monster->getName();
-                newWidget = new WidgetMonster(ui->scrollAreaWidgetContents);
-                WidgetMonsterInternal* widgetInternals = new WidgetMonsterInternal(monster, dynamic_cast<WidgetMonster*>(newWidget));
+                newWidget = new CombatantWidgetMonster(((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox())), ui->scrollAreaWidgetContents);
+                CombatantWidgetInternalsMonster* widgetInternals = new CombatantWidgetInternalsMonster(monster, dynamic_cast<CombatantWidgetMonster*>(newWidget));
                 connect(widgetInternals, SIGNAL(clicked(const QString&)), this, SIGNAL(monsterSelected(const QString&)));
                 connect(widgetInternals, SIGNAL(contextMenu(BattleDialogModelCombatant*, QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*, QPoint)));
                 connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
                 connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
-                connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isShownChanged(bool)), monster, SLOT(setShown(bool)));
-                connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
+//                connect(dynamic_cast<CombatantWidgetMonster*>(newWidget), SIGNAL(isShownChanged(bool)), monster, SLOT(setShown(bool)));
+//                connect(dynamic_cast<CombatantWidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
                 connect(monster, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
             }
@@ -3547,7 +3570,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
     if(previousActive)
     {
         disconnect(previousActive, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()));
-
+        
         CombatantWidget* previousWidget = getWidgetFromCombatant(_model->getActiveCombatant());
         if(previousWidget)
         {
@@ -3555,7 +3578,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
             previousWidget->setActive(false);
         }
     }
-
+    
     CombatantWidget* combatantWidget = getWidgetFromCombatant(active);
     if(combatantWidget)
     {
@@ -3603,6 +3626,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 */
 
     _model->setActiveCombatant(active);
+    active->setDone(true);
     connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
     updateHighlights();
 }

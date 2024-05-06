@@ -1,35 +1,37 @@
-#ifndef WIDGETCHARACTER_H
-#define WIDGETCHARACTER_H
+#ifndef COMBATANTWIDGETMONSTER_H
+#define COMBATANTWIDGETMONSTER_H
 
 #include "combatantwidget.h"
 
 namespace Ui {
-class WidgetCharacter;
+class CombatantWidgetMonster;
 }
 
-class WidgetCharacterInternal;
+class CombatantWidgetInternalsMonster;
 class BattleDialogModelCombatant;
 
-class WidgetCharacter : public CombatantWidget
+class CombatantWidgetMonster : public CombatantWidget
 {
     Q_OBJECT
 
 public:
-    explicit WidgetCharacter(QWidget *parent = nullptr);
-    virtual ~WidgetCharacter() override;
+    explicit CombatantWidgetMonster(bool showDone, QWidget *parent = nullptr);
+    virtual ~CombatantWidgetMonster() override;
 
     // From CombatantWidget
     virtual BattleDialogModelCombatant* getCombatant() override;
 
-    void setInternals(WidgetCharacterInternal* internals);
+    void setInternals(CombatantWidgetInternalsMonster* internals);
     virtual bool isShown() override;
     virtual bool isKnown() override;
 
 public slots:
+    void clearImage();
     virtual void updateData() override;
     virtual void updateMove() override;
 
     // From CombatantWidget
+    virtual void setActive(bool active) override;
     virtual void selectCombatant() override;
 
 protected:
@@ -49,9 +51,9 @@ private:
     void readInternals();
     virtual void loadImage() override;
 
-    Ui::WidgetCharacter *ui;
+    Ui::CombatantWidgetMonster *ui;
 
-    WidgetCharacterInternal* _internals;
+    CombatantWidgetInternalsMonster* _internals;
 };
 
-#endif // WIDGETCHARACTER_H
+#endif // COMBATANTWIDGETMONSTER_H

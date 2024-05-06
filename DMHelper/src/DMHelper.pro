@@ -44,6 +44,7 @@ SOURCES += main.cpp\
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
     battlecombatantframe.cpp \
+    battlecombatantwidget.cpp \
     battledialogeffectsettingsbase.cpp \
     battledialogeffectsettingsobjectvideo.cpp \
     battledialoggraphicsscenemousehandler.cpp \
@@ -73,6 +74,11 @@ SOURCES += main.cpp\
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
+    combatantwidgetcharacter.cpp \
+    combatantwidgetinternals.cpp \
+    combatantwidgetinternalscharacter.cpp \
+    combatantwidgetinternalsmonster.cpp \
+    combatantwidgetmonster.cpp \
     conditionseditdialog.cpp \
     configurelockedgriddialog.cpp \
     customtable.cpp \
@@ -94,6 +100,7 @@ SOURCES += main.cpp\
     exportdialog.cpp \
     exportworker.cpp \
     gridconfig.cpp \
+    initiativelistcombatantwidget.cpp \
     initiativelistdialog.cpp \
     layer.cpp \
     layerblank.cpp \
@@ -255,14 +262,7 @@ SOURCES += main.cpp\
     videoplayerscreenshot.cpp \
     welcomeframe.cpp \
     whatsnewdialog.cpp \
-    widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
-    widgetcharacter.cpp \
-    widgetcombatantbase.cpp \
-    widgetcharacterinternal.cpp \
-    widgetinitiativecombatant.cpp \
-    widgetmonster.cpp \
-    widgetmonsterinternal.cpp \
     battledialogmodelcharacter.cpp \
     battledialogmodelcombatant.cpp \
     battledialogmodelmonsterbase.cpp \
@@ -321,6 +321,7 @@ HEADERS  += mainwindow.h \
     audiotrackyoutube.h \
     basicdateserver.h \
     battlecombatantframe.h \
+    battlecombatantwidget.h \
     battledialogeffectsettingsbase.h \
     battledialogeffectsettingsobjectvideo.h \
     battledialoggraphicsscenemousehandler.h \
@@ -350,6 +351,11 @@ HEADERS  += mainwindow.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \
+    combatantwidgetcharacter.h \
+    combatantwidgetinternals.h \
+    combatantwidgetinternalscharacter.h \
+    combatantwidgetinternalsmonster.h \
+    combatantwidgetmonster.h \
     conditionseditdialog.h \
     configurelockedgriddialog.h \
     customtable.h \
@@ -372,6 +378,7 @@ HEADERS  += mainwindow.h \
     exportdialog.h \
     exportworker.h \
     gridconfig.h \
+    initiativelistcombatantwidget.h \
     initiativelistdialog.h \
     layer.h \
     layerblank.h \
@@ -534,14 +541,7 @@ HEADERS  += mainwindow.h \
     videoplayerscreenshot.h \
     welcomeframe.h \
     whatsnewdialog.h \
-    widgetbattlecombatant.h \
     dicerolldialogcombatants.h \
-    widgetcharacter.h \
-    widgetcombatantbase.h \
-    widgetcharacterinternal.h \
-    widgetinitiativecombatant.h \
-    widgetmonster.h \
-    widgetmonsterinternal.h \
     battledialogmodelcharacter.h \
     battledialogmodelcombatant.h \
     battledialogmodelmonsterbase.h \
@@ -578,6 +578,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
+    battlecombatantwidget.ui \
     battledialogeffectsettingsobjectvideo.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
@@ -586,6 +587,8 @@ FORMS    += mainwindow.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
     combatantrolloverframe.ui \
+    combatantwidgetcharacter.ui \
+    combatantwidgetmonster.ui \
     conditionseditdialog.ui \
     configurelockedgriddialog.ui \
     customtableframe.ui \
@@ -596,6 +599,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    initiativelistcombatantwidget.ui \
     initiativelistdialog.ui \
     layereffectsettings.ui \
     layerframe.ui \
@@ -648,11 +652,7 @@ FORMS    += mainwindow.ui \
     tokeneditdialog.ui \
     welcomeframe.ui \
     whatsnewdialog.ui \
-    widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
-    widgetcharacter.ui \
-    widgetinitiativecombatant.ui \
-    widgetmonster.ui \
     encountertextedit.ui \
     mapselectdialog.ui \
     countdownframe.ui \

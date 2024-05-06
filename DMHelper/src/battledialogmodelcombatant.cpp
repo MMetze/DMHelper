@@ -10,7 +10,8 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObj
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
-    _isSelected(false)
+    _isSelected(false),
+    _isDone(false)
 {
 }
 
@@ -23,7 +24,8 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
-    _isSelected(false)
+    _isSelected(false),
+    _isDone(false)
 {
 }
 
@@ -36,7 +38,8 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
-    _isSelected(false)
+    _isSelected(false),
+    _isDone(false)
 {
 }
 
@@ -52,6 +55,7 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
     _sortPosition = element.attribute("sort", QString::number(-1)).toInt();
     _isShown = static_cast<bool>(element.attribute("isShown", QString::number(1)).toInt());
     _isKnown = static_cast<bool>(element.attribute("isKnown", QString::number(1)).toInt());
+    _isDone = static_cast<bool>(element.attribute("done", QString::number(0)).toInt());
 }
 
 void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
@@ -67,6 +71,7 @@ void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
     _isShown = otherCombatant->_isShown;
     _isKnown = otherCombatant->_isKnown;
     _isSelected = otherCombatant->_isSelected;
+    _isDone = otherCombatant->_isDone;
 
     BattleDialogModelObject::copyValues(other);
 }
@@ -99,6 +104,11 @@ bool BattleDialogModelCombatant::getKnown() const
 bool BattleDialogModelCombatant::getSelected() const
 {
     return _isSelected;
+}
+
+bool BattleDialogModelCombatant::getDone() const
+{
+    return _isDone;
 }
 
 int BattleDialogModelCombatant::getInitiative() const
@@ -210,6 +220,15 @@ void BattleDialogModelCombatant::setSelected(bool isSelected)
     }
 }
 
+void BattleDialogModelCombatant::setDone(bool isDone)
+{
+    if(_isDone != isDone)
+    {
+        _isDone = isDone;
+        emit combatantDoneChanged(this);
+    }
+}
+
 QDomElement BattleDialogModelCombatant::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("battlecombatant");
@@ -223,6 +242,7 @@ void BattleDialogModelCombatant::internalOutputXML(QDomDocument &doc, QDomElemen
     element.setAttribute("sort", _sortPosition);
     element.setAttribute("isShown", _isShown);
     element.setAttribute("isKnown", _isKnown);
+    element.setAttribute("done", _isDone);
 
     BattleDialogModelObject::internalOutputXML(doc, element, targetDirectory, isExport);
 }
