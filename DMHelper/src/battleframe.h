@@ -79,6 +79,7 @@ public slots:
     void sort();
     void top();
     void next();
+    void initiativeRuleChanged();
 
     void setTargetSize(const QSize& targetSize);
     void setTargetLabelSize(const QSize& targetSize);

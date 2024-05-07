@@ -23,6 +23,7 @@ public:
     bool getCombatantDoneCheckbox() const;
 
 signals:
+    void initiativeRuleChanged();
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);

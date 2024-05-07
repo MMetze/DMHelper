@@ -66,6 +66,7 @@ void Ruleset::setRuleInitiative(const QString& initiativeType)
 
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
     emit dirty();
+    emit initiativeRuleChanged();
 }
 
 void Ruleset::setCombatantDoneCheckbox(bool checked)
@@ -75,6 +76,7 @@ void Ruleset::setCombatantDoneCheckbox(bool checked)
 
     _combatantDoneCheckbox = checked;
     emit dirty();
+    emit initiativeRuleChanged();
 }
 
 QDomElement Ruleset::createOutputXML(QDomDocument &doc)

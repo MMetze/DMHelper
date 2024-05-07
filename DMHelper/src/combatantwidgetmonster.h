@@ -25,6 +25,8 @@ public:
     virtual bool isShown() override;
     virtual bool isKnown() override;
 
+    virtual void setShowDone(bool showDone) override;
+
 public slots:
     void clearImage();
     virtual void updateData() override;

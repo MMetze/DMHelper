@@ -21,8 +21,7 @@ CombatantWidgetCharacter::CombatantWidgetCharacter(bool showDone, QWidget *paren
     connect(ui->chkKnown, SIGNAL(clicked(bool)), this, SIGNAL(isKnownChanged(bool)));
     connect(ui->chkVisible, SIGNAL(clicked(bool)), this, SIGNAL(isShownChanged(bool)));
 
-    ui->lblDone->setVisible(showDone);
-    ui->chkDone->setVisible(showDone);
+    CombatantWidgetCharacter::setShowDone(showDone);
 
     QValidator* valInit = new QIntValidator(-99, 99, this);
     ui->edtInit->setValidator(valInit);
@@ -80,6 +79,12 @@ bool CombatantWidgetCharacter::isShown()
 bool CombatantWidgetCharacter::isKnown()
 {
     return ui->chkKnown->isChecked();
+}
+
+void CombatantWidgetCharacter::setShowDone(bool showDone)
+{
+    ui->lblDone->setVisible(showDone);
+    ui->chkDone->setVisible(showDone);
 }
 
 void CombatantWidgetCharacter::updateData()

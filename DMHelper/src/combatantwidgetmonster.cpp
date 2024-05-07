@@ -22,8 +22,7 @@ CombatantWidgetMonster::CombatantWidgetMonster(bool showDone, QWidget *parent) :
     connect(ui->chkKnown, SIGNAL(clicked(bool)), this, SIGNAL(isKnownChanged(bool)));
     connect(ui->chkVisible, SIGNAL(clicked(bool)), this, SIGNAL(isShownChanged(bool)));
 
-    ui->lblDone->setVisible(showDone);
-    ui->chkDone->setVisible(showDone);
+    CombatantWidgetMonster::setShowDone(showDone);
 
     QValidator* valInit = new QIntValidator(-99, 99, this);
     ui->edtInit->setValidator(valInit);
@@ -94,6 +93,12 @@ bool CombatantWidgetMonster::isShown()
 bool CombatantWidgetMonster::isKnown()
 {
     return ui->chkKnown->isChecked();
+}
+
+void CombatantWidgetMonster::setShowDone(bool showDone)
+{
+    ui->lblDone->setVisible(showDone);
+    ui->chkDone->setVisible(showDone);
 }
 
 void CombatantWidgetMonster::clearImage()

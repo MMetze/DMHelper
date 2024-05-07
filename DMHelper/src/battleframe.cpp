@@ -171,6 +171,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->btnSort, &QAbstractButton::clicked, this, &BattleFrame::sort);
     connect(ui->btnTop, &QAbstractButton::clicked, this, &BattleFrame::top);
     connect(ui->btnNext, &QAbstractButton::clicked, this, &BattleFrame::next);
+    connect(ui->btnClear, &QAbstractButton::clicked, this, &BattleFrame::clearDoneFlags);
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -563,6 +564,20 @@ void BattleFrame::next()
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
 
+void BattleFrame::initiativeRuleChanged()
+{
+    if(!_battle)
+        return;
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+    ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+    recreateCombatantWidgets();
+}
+
 void BattleFrame::setTargetSize(const QSize& targetSize)
 {
     qDebug() << "[Battle Frame] Target size being set to: " << targetSize;
@@ -831,6 +846,10 @@ void BattleFrame::setInitiativeScale(qreal initiativeScale)
 void BattleFrame::setShowCountdown(bool showCountdown)
 {
     _showCountdown = showCountdown;
+
+    ui->lblCountdown->setVisible(_showCountdown);
+    ui->edtCountdown->setVisible(_showCountdown);
+
     if(_renderer)
         _renderer->setShowCountdown(_showCountdown);
 }
@@ -1902,6 +1921,16 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->lblSort->setMinimumHeight(labelHeight);
     ui->lblSort->setMaximumHeight(labelHeight);
 
+    ui->lblRoll->setMinimumWidth(newWidth);
+    ui->lblRoll->setMaximumWidth(newWidth);
+    ui->lblRoll->setMinimumHeight(labelHeight);
+    ui->lblRoll->setMaximumHeight(labelHeight);
+
+    ui->lblClear->setMinimumWidth(newWidth);
+    ui->lblClear->setMaximumWidth(newWidth);
+    ui->lblClear->setMinimumHeight(labelHeight);
+    ui->lblClear->setMaximumHeight(labelHeight);
+
     ui->lblRound->setMinimumWidth(newWidth);
     ui->lblRound->setMaximumWidth(newWidth);
     ui->lblRound->setMinimumHeight(labelHeight);
@@ -1937,10 +1966,32 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->btnSort->setMinimumHeight(iconDim);
     ui->btnSort->setMaximumHeight(iconDim);
 
+    ui->btnRoll->setMinimumWidth(newWidth);
+    ui->btnRoll->setMaximumWidth(newWidth);
+    ui->btnRoll->setMinimumHeight(iconDim);
+    ui->btnRoll->setMaximumHeight(iconDim);
+
+    ui->btnClear->setMinimumWidth(newWidth);
+    ui->btnClear->setMaximumWidth(newWidth);
+    ui->btnClear->setMinimumHeight(iconDim);
+    ui->btnClear->setMaximumHeight(iconDim);
+
     int iconSize = qMin(newWidth, iconDim) * 4 / 5;
     ui->btnNext->setIconSize(QSize(iconSize, iconSize));
     ui->btnTop->setIconSize(QSize(iconSize, iconSize));
     ui->btnSort->setIconSize(QSize(iconSize, iconSize));
+    ui->btnRoll->setIconSize(QSize(iconSize, iconSize));
+    ui->btnClear->setIconSize(QSize(iconSize, iconSize));
+
+    if(_battle)
+    {
+        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+        if(campaign)
+        {
+            ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+        }
+    }
 }
 
 void BattleFrame::updateCombatantVisibility()
@@ -3426,16 +3477,17 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
     if((!_model) || (!_battle))
         return nullptr;
     
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+
     CombatantWidget* newWidget = nullptr;
 
     if(_combatantWidgets.contains(combatant))
     {
         newWidget = _combatantWidgets.value(combatant);
+        newWidget->setShowDone((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox()));
         qDebug() << "[Battle Frame] found widget for combatant " << combatant->getName() << ": " << reinterpret_cast<quint64>(newWidget);
         return newWidget;
     }
-
-    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
 
     switch(combatant->getCombatantType())
     {
