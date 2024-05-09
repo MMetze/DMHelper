@@ -14,8 +14,9 @@ public:
 
     virtual QString getInitiativeType() override;
 
-    virtual bool rollInitiative(QList<BattleDialogModelCombatant*>& combatants) override;
-    virtual void sortInitiative(QList<BattleDialogModelCombatant*>& combatants) override;
+protected:
+    virtual bool internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult) override;
+    virtual void internalSortInitiative(QList<BattleDialogModelCombatant*>& combatants) override;
 
 private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);

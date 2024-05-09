@@ -15,9 +15,9 @@ QString RuleInitiativeGroup::getInitiativeType()
     return RuleInitiativeGroup::InitiativeType;
 }
 
-bool RuleInitiativeGroup::rollInitiative(QList<BattleDialogModelCombatant*>& combatants)
+bool RuleInitiativeGroup::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
 {
-    if(combatants.isEmpty())
+    if((combatants.isEmpty()) || (!previousResult))
         return false;
 
     InitiativeListDialog* dlg = new InitiativeListDialog();
@@ -43,10 +43,9 @@ bool RuleInitiativeGroup::rollInitiative(QList<BattleDialogModelCombatant*>& com
     return (result == QDialog::Accepted);
 }
 
-void RuleInitiativeGroup::sortInitiative(QList<BattleDialogModelCombatant*>& combatants)
+void RuleInitiativeGroup::internalSortInitiative(QList<BattleDialogModelCombatant*>& combatants)
 {
     std::sort(combatants.begin(), combatants.end(), CompareCombatants);
-    resetCombatantSortValues(combatants);
 }
 
 bool RuleInitiativeGroup::CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)

@@ -13,10 +13,18 @@ public:
 
     virtual QString getInitiativeType();
 
-    virtual bool rollInitiative(QList<BattleDialogModelCombatant*>& combatants);
-    virtual void sortInitiative(QList<BattleDialogModelCombatant*>& combatants);
+    bool rollInitiative(QList<BattleDialogModelCombatant*>& combatants);
+    void sortInitiative(QList<BattleDialogModelCombatant*>& combatants);
 
 protected:
+    virtual bool preRollInitiative(QList<BattleDialogModelCombatant*>& combatants);
+    virtual bool internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult) = 0;
+    virtual bool postRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult);
+
+    virtual void preSortInitiative(QList<BattleDialogModelCombatant*>& combatants);
+    virtual void internalSortInitiative(QList<BattleDialogModelCombatant*>& combatants) = 0;
+    virtual void postSortInitiative(QList<BattleDialogModelCombatant*>& combatants);
+
     void resetCombatantSortValues(QList<BattleDialogModelCombatant*> combatants);
 
 signals:
