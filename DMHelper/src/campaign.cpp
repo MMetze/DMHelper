@@ -1,5 +1,5 @@
 #include "campaign.h"
-#include "character.h"
+#include "characterv2.h"
 #include "encounterfactory.h"
 #include "map.h"
 #include "party.h"
@@ -190,9 +190,9 @@ void Campaign::endBatchChanges()
         emit dirty();
 }
 
-Character* Campaign::getCharacterById(QUuid id)
+Characterv2* Campaign::getCharacterById(QUuid id)
 {
-    Character* character = dynamic_cast<Character*>(getObjectById(id));
+    Characterv2* character = dynamic_cast<Characterv2*>(getObjectById(id));
     if(!character)
         return nullptr;
 
@@ -202,9 +202,9 @@ Character* Campaign::getCharacterById(QUuid id)
         return nullptr;
 }
 
-const Character* Campaign::getCharacterById(QUuid id) const
+const Characterv2* Campaign::getCharacterById(QUuid id) const
 {
-    const Character* character = dynamic_cast<const Character*>(getObjectById(id));
+    const Characterv2* character = dynamic_cast<const Characterv2*>(getObjectById(id));
     if(!character)
         return nullptr;
 
@@ -214,13 +214,13 @@ const Character* Campaign::getCharacterById(QUuid id) const
         return nullptr;
 }
 
-Character* Campaign::getCharacterByDndBeyondId(int id)
+Characterv2* Campaign::getCharacterByDndBeyondId(int id)
 {
     QList<Party*> partyList = findChildren<Party*>();
 
     for(int p = 0; p < partyList.count(); ++p)
     {
-        QList<Character*> characterList = partyList.at(p)->findChildren<Character*>();
+        QList<Characterv2*> characterList = partyList.at(p)->findChildren<Characterv2*>();
         for(int i = 0; i < characterList.count(); ++i)
         {
             if(characterList.at(i)->getDndBeyondID() == id)
@@ -231,9 +231,9 @@ Character* Campaign::getCharacterByDndBeyondId(int id)
     return nullptr;
 }
 
-Character* Campaign::getCharacterOrNPCByDndBeyondId(int id)
+Characterv2* Campaign::getCharacterOrNPCByDndBeyondId(int id)
 {
-    QList<Character*> characterList = findChildren<Character*>();
+    QList<Characterv2*> characterList = findChildren<Characterv2*>();
 
     for(int i = 0; i < characterList.count(); ++i)
     {
@@ -244,17 +244,17 @@ Character* Campaign::getCharacterOrNPCByDndBeyondId(int id)
     return nullptr;
 }
 
-QList<Character*> Campaign::getActiveCharacters()
+QList<Characterv2*> Campaign::getActiveCharacters()
 {
-    QList<Character*> actives;
+    QList<Characterv2*> actives;
 
     QList<Party*> partyList = findChildren<Party*>();
     for(int p = 0; p < partyList.count(); ++p)
     {
-        QList<Character*> characterList = partyList.at(p)->findChildren<Character*>();
+        QList<Characterv2*> characterList = partyList.at(p)->findChildren<Characterv2*>();
         for(int i = 0; i < characterList.count(); ++i)
         {
-            if(characterList.at(i)->getActive())
+            if(characterList.at(i)->getBoolValue(QString("active")))
                 actives.append(characterList.at(i));
         }
     }
@@ -262,9 +262,9 @@ QList<Character*> Campaign::getActiveCharacters()
     return actives;
 }
 
-Character* Campaign::getNPCById(QUuid id)
+Characterv2* Campaign::getNPCById(QUuid id)
 {
-    Character* character = dynamic_cast<Character*>(getObjectById(id));
+    Characterv2* character = dynamic_cast<Characterv2*>(getObjectById(id));
     if(!character)
         return nullptr;
 
@@ -274,9 +274,9 @@ Character* Campaign::getNPCById(QUuid id)
         return character;
 }
 
-const Character* Campaign::getNPCById(QUuid id) const
+const Characterv2* Campaign::getNPCById(QUuid id) const
 {
-    const Character* character = dynamic_cast<const Character*>(getObjectById(id));
+    const Characterv2* character = dynamic_cast<const Characterv2*>(getObjectById(id));
     if(!character)
         return nullptr;
 

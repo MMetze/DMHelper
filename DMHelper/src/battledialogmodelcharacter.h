@@ -6,7 +6,7 @@
 #include <QString>
 #include <QPoint>
 
-class Character;
+class Characterv2;
 
 class BattleDialogModelCharacter : public BattleDialogModelCombatant
 {
@@ -14,9 +14,8 @@ class BattleDialogModelCharacter : public BattleDialogModelCombatant
 
 public:
     BattleDialogModelCharacter(const QString& name = QString(), QObject *parent = nullptr);
-    explicit BattleDialogModelCharacter(Character* character);
-    explicit BattleDialogModelCharacter(Character* character, int initiative, const QPointF& position);
-    //BattleDialogModelCharacter(const BattleDialogModelCharacter& other);
+    explicit BattleDialogModelCharacter(Characterv2* character);
+    explicit BattleDialogModelCharacter(Characterv2* character, int initiative, const QPointF& position);
     virtual ~BattleDialogModelCharacter() override;
 
     // From CampaignObjectBase
@@ -45,8 +44,8 @@ public:
     virtual QString getName() const override;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const override;
 
-    Character* getCharacter() const;
-    void setCharacter(Character* character);
+    Characterv2* getCharacter() const;
+    void setCharacter(Characterv2* character);
 
 public slots:
     virtual void setConditions(int conditions) override;

@@ -5,13 +5,15 @@
 #include "dicerolldialog.h"
 #include "countdownframe.h"
 #include "party.h"
-#include "character.h"
+#include "characterv2.h"
 #include "characterimporter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
 #include "characterframe.h"
+#include "charactertemplateframe.h"
 #include "campaign.h"
 #include "combatantfactory.h"
+#include "campaignobjectfactory.h"
 #include "map.h"
 #include "mapfactory.h"
 #include "mapframe.h"
@@ -546,14 +548,17 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
-    CharacterFrame* charFrame = new CharacterFrame(_options);
+    //CharacterFrame* charFrame = new CharacterFrame(_options);
+    CharacterTemplateFrame* charFrame = new CharacterTemplateFrame(_options);
     charFrame->setHeroForgeToken(_options->getHeroForgeToken());
-    connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
-    connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
+    //connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
+    //connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
+    connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterTemplateFrame::setHeroForgeToken);
+    connect(charFrame, &CharacterTemplateFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
-    connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
+    //connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
 
     PartyFrame* partyFrame = new PartyFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
@@ -734,6 +739,8 @@ MainWindow::~MainWindow()
 
     delete ui;
 
+    CampaignObjectFactory::Shutdown(); //CombatantFactory::Shutdown(); is handled by the CampaignObjectFactory
+
     Bestiary::Shutdown();
     DMH_VLC::Shutdown();
     ScaledPixmap::cleanupDefaultPixmap();
@@ -880,7 +887,13 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Character* character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
+    if(!CombatantFactory::Instance())
+    {
+        qDebug() << "[MainWindow] New character not created because the combatant factory could not be found";
+        return;
+    }
+
+    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -910,7 +923,8 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            character->copyMonsterValues(*monsterClass);
+            // HACK
+            //character->copyMonsterValues(*monsterClass);
         }
     }
 
@@ -1086,7 +1100,7 @@ void MainWindow::newBattleEncounter()
     if(mapCenter.isNull())
             mapCenter = QPointF(gridScale, gridScale);
     QPointF multiplePos(gridScale / 10.0, gridScale / 10.0);
-    QList<Character*> activeCharacters = _campaign->getActiveCharacters();
+    QList<Characterv2*> activeCharacters = _campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
         BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));

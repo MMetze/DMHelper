@@ -15,6 +15,9 @@ public:
     explicit CampaignObjectFactory(QObject *parent = nullptr);
     ~CampaignObjectFactory();
 
+    static CampaignObjectFactory* Instance();
+    static void Shutdown();
+
     static CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport);
     static CampaignObjectBase* createObject(const QDomElement& element, bool isImport);
 
@@ -22,7 +25,6 @@ public:
     ObjectFactory* getFactory(int index) const;
 
 private:
-    static CampaignObjectFactory* Instance();
     static CampaignObjectFactory* _instance;
 
     CampaignObjectBase* localCreateObject(const QDomElement& element, bool isImport);

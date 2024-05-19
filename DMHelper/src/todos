@@ -1,3 +1,74 @@
+Thoughts for templates:
+* Issues for backwards compatibility
+    Convert Notes, Equipment and Spells into HTML CDATA
+    Combine level1 level2 and level3 or class1 class2 class3 into basic strings (on loading!!)
+    Integrate Jack of All Trades into the skills during DnDBeyond
+    Change pact magic and spell slots to be resource entities, move spell slots to a list
+    Added inspiration (==> Importer)
+    Check DnDBeyondID == 0 being the invalid value
+    Fix overall import/export
+    Fix DndBeyond import
+    Fix these: <dmh:attribute type="dmh:integer" name="conditions"/>
+    Change hitdice to a multi-resource
+    Added temporary hp (==> Importer)
+    copy default xml and ui files with resources
+    Implement Character::findKeyForSkillName and CharacteR::getWrittenSkillName
+    Should known string values actually be constants rather than magic numbers?
+    Fix     // HACK
+* How to interpret types:
+    Dice --> string to be interpreted: QString expression("(\\d*)d(\\d+)(\\+|-)*(\\d*)");
+    Expertise (skill value 0, 1, 2) --> list of proficiencies/expertise?
+    <dmh:attribute type="dmh:integer" name="passiveperception"/> --> create this
+* Defaults:
+    Integer = 0
+    String = ""
+    Boolean = 0 (false)
+    Resource = 0,0
+
+Things to be mandated for templates: App to check and have default values for the template
+<dmh:attribute type="dmh:string" name="_baseID"/>
+<dmh:attribute type="dmh:integer" name="type"/>
+<dmh:attribute type="dmh:string" name="name"/>
+<dmh:attribute type="dmh:boolean" name="active" default="1"/>
+<dmh:attribute type="dmh:boolean" name="expanded"/>
+<dmh:attribute type="dmh:integer" name="row"/>
+<dmh:attribute type="dmh:string" name="dndBeyondID" default="-1"/>
+<dmh:attribute type="dmh:string" name="icon"/>
+<dmh:attribute type="dmh:integer" name="initiative"/>
+<dmh:attribute type="dmh:string" name="size" default="medium"/>
+<dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
+<dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>
+<dmh:attribute type="dmh:integer" name="speed" default="30"/>
+
+from CampaignObjectBase:
+    element.attribute("expanded", QString::number(0)).toInt());
+    element.attribute("row", QString::number(-1)).toInt();
+    element.attribute("name");
+    element.attribute("base-icon");
+from Combatant
+    element.attribute("armorClass").toInt());
+    element.attribute("hitPoints").toInt());
+    element.attribute("hitDice")));
+    element.attribute("conditions", QString("0")).toInt());
+    element.attribute("initiative", QString("0")).toInt());
+    element.attribute("icon"));
+    element.firstChildElement(QString("attacks"));
+
+Exempted classes (can be removed with Character):
+Character
+CharacterFrame
+ExpertiseDialog
+
+** CLEAN UP DEAD CODE!!!
+
+
+Mappings needed:
+    Stats to modifiers
+    Conditions
+    Size to size factor
+
+
+
 emit itemMoved second parameter
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 All the commented code in battleframe.cpp, layertoken.cpp, and layertoken.h

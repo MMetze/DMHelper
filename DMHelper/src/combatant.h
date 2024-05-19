@@ -11,6 +11,8 @@ class Combatant;
 //typedef QPair<int, Combatant*> CombatantGroup;
 //typedef QList<CombatantGroup> CombatantGroupList;
 
+typedef QPair<int, int> ResourcePair;
+
 class Combatant : public CampaignObjectBase
 {
     Q_OBJECT

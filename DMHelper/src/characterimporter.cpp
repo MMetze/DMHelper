@@ -502,10 +502,12 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             return false;
 
         int dndBeyondId = rootObject["id"].toInt(DMH_GLOBAL_INVALID_ID);
-        _character = _campaign->getCharacterOrNPCByDndBeyondId(dndBeyondId);
-        if(!_character)
+        // HACK
+        _character = nullptr;
+        //_character = _campaign->getCharacterOrNPCByDndBeyondId(dndBeyondId);
+        if((!_character) && (CombatantFactory::Instance()))
         {
-            _character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, QString(), false));
+            _character = dynamic_cast<Character*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, QString(), false));
             _character->setDndBeyondID(dndBeyondId);
         }
     }

@@ -374,7 +374,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             if(combatantType == DMHelper::CombatantType_Character)
             {
                 combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId);
-                Character* character = campaign->getCharacterById(combatantId);
+                Characterv2* character = campaign->getCharacterById(combatantId);
                 if(!character)
                     character = campaign->getNPCById(combatantId);
 
@@ -535,7 +535,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
 
     /*
     // Add the active characters
-    QList<Character*> activeCharacters = campaign->getActiveCharacters();
+    QList<Characterv2*> activeCharacters = campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
         BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));

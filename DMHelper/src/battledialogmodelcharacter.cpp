@@ -1,5 +1,5 @@
 #include "battledialogmodelcharacter.h"
-#include "character.h"
+#include "characterv2.h"
 #include "monsterclass.h"
 #include <QDomElement>
 #include <QDebug>
@@ -9,12 +9,12 @@ BattleDialogModelCharacter::BattleDialogModelCharacter(const QString& name, QObj
 {
 }
 
-BattleDialogModelCharacter::BattleDialogModelCharacter(Character* character) :
+BattleDialogModelCharacter::BattleDialogModelCharacter(Characterv2* character) :
     BattleDialogModelCombatant(character)
 {
 }
 
-BattleDialogModelCharacter::BattleDialogModelCharacter(Character* character, int initiative, const QPointF& position) :
+BattleDialogModelCharacter::BattleDialogModelCharacter(Characterv2* character, int initiative, const QPointF& position) :
     BattleDialogModelCombatant(character, initiative, position)
 {
 }
@@ -42,11 +42,11 @@ BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
 
 qreal BattleDialogModelCharacter::getSizeFactor() const
 {
-    Character* character = getCharacter();
+    Characterv2* character = getCharacter();
     if(!character)
         return 1;
 
-    return MonsterClass::convertSizeToScaleFactor(character->getStringValue(Character::StringValue_size));
+    return MonsterClass::convertSizeToScaleFactor(character->getStringValue(QString("size")));
 }
 
 int BattleDialogModelCharacter::getSizeCategory() const
@@ -140,15 +140,64 @@ int BattleDialogModelCharacter::getCharisma() const
 
 int BattleDialogModelCharacter::getSkillModifier(Combatant::Skills skill) const
 {
-    Character* character = getCharacter();
+    Characterv2* character = getCharacter();
     if(!character)
         return 0;
 
-    int modifier = Combatant::getAbilityMod(_combatant->getAbilityValue(Combatant::getSkillAbility(skill)));
-    if(character->getSkillValue(skill))
-        modifier += character->getProficiencyBonus();
-
-    return modifier;
+    // HACK
+    switch(skill)
+    {
+        case Combatant::Skills_strengthSave:
+            return character->getIntValue(QString("strengthSave"));
+        case Combatant::Skills_athletics:
+            return character->getIntValue(QString("athletics"));
+        case Combatant::Skills_dexteritySave:
+            return character->getIntValue(QString("dexteritySave"));
+        case Combatant::Skills_stealth:
+            return character->getIntValue(QString("stealth"));
+        case Combatant::Skills_acrobatics:
+            return character->getIntValue(QString("acrobatics"));
+        case Combatant::Skills_sleightOfHand:
+            return character->getIntValue(QString("sleightOfHand"));
+        case Combatant::Skills_constitutionSave:
+            return character->getIntValue(QString("constitutionSave"));
+        case Combatant::Skills_intelligenceSave:
+            return character->getIntValue(QString("intelligenceSave"));
+        case Combatant::Skills_investigation:
+            return character->getIntValue(QString("investigation"));
+        case Combatant::Skills_arcana:
+            return character->getIntValue(QString("arcana"));
+        case Combatant::Skills_nature:
+            return character->getIntValue(QString("nature"));
+        case Combatant::Skills_history:
+            return character->getIntValue(QString("history"));
+        case Combatant::Skills_religion:
+            return character->getIntValue(QString("religion"));
+        case Combatant::Skills_wisdomSave:
+            return character->getIntValue(QString("wisdomSave"));
+        case Combatant::Skills_medicine:
+            return character->getIntValue(QString("medicine"));
+        case Combatant::Skills_animalHandling:
+            return character->getIntValue(QString("animalHandling"));
+        case Combatant::Skills_perception:
+            return character->getIntValue(QString("perception"));
+        case Combatant::Skills_insight:
+            return character->getIntValue(QString("insight"));
+        case Combatant::Skills_survival:
+            return character->getIntValue(QString("survival"));
+        case Combatant::Skills_charismaSave:
+            return character->getIntValue(QString("charismaSave"));
+        case Combatant::Skills_performance:
+            return character->getIntValue(QString("performance"));
+        case Combatant::Skills_deception:
+            return character->getIntValue(QString("deception"));
+        case Combatant::Skills_persuasion:
+            return character->getIntValue(QString("persuasion"));
+        case Combatant::Skills_intimidation:
+            return character->getIntValue(QString("intimidation"));
+        default:
+            return 0;
+    }
 }
 
 int BattleDialogModelCharacter::getConditions() const
@@ -257,15 +306,15 @@ QPixmap BattleDialogModelCharacter::getIconPixmap(DMHelper::PixmapSize iconSize)
     }
 }
 
-Character* BattleDialogModelCharacter::getCharacter() const
+Characterv2* BattleDialogModelCharacter::getCharacter() const
 {
     if((!_combatant) || (_combatant->getCombatantType() != DMHelper::CombatantType_Character))
         return nullptr;
 
-    return dynamic_cast<Character*>(_combatant);
+    return dynamic_cast<Characterv2*>(_combatant);
 }
 
-void BattleDialogModelCharacter::setCharacter(Character* character)
+void BattleDialogModelCharacter::setCharacter(Characterv2* character)
 {
     setCombatant(character);
 }

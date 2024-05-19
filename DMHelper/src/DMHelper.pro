@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets
+QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets uitools
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -71,6 +71,8 @@ SOURCES += main.cpp\
     characterimportheroforge.cpp \
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
+    charactertemplateframe.cpp \
+    characterv2.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
@@ -348,6 +350,8 @@ HEADERS  += mainwindow.h \
     characterimportheroforge.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
+    charactertemplateframe.h \
+    characterv2.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \
@@ -586,6 +590,7 @@ FORMS    += mainwindow.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
+    charactertemplateframe.ui \
     combatantrolloverframe.ui \
     combatantwidgetcharacter.ui \
     combatantwidgetmonster.ui \
@@ -616,6 +621,7 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/character.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \
     ribbontabbattle.ui \
@@ -696,12 +702,17 @@ DISTFILES += \
     preparebuilddirectory_msvc64.cmd \
     release_notes.txt \
     resources/calendar.xml \
+    resources/character.xml \
     resources/equipment.xml \
     resources/quickref_data.xml \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
+    resources/tables/Indefinite Madness.xml \
+    resources/tables/Long Term Madness.xml \
     resources/tables/Long Term Madness.xml \
     resources/tables/Short Term Madness.xml \
+    resources/tables/Short Term Madness.xml \
+    resources/tables/table.xsd \
     todos
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc

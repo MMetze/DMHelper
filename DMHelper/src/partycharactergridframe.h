@@ -8,14 +8,14 @@ namespace Ui {
 class PartyCharacterGridFrame;
 }
 
-class Character;
+class Characterv2;
 
 class PartyCharacterGridFrame : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit PartyCharacterGridFrame(Character& character, QWidget *parent = nullptr);
+    explicit PartyCharacterGridFrame(Characterv2& character, QWidget *parent = nullptr);
     virtual ~PartyCharacterGridFrame();
 
     void readCharacter();
@@ -35,7 +35,7 @@ private slots:
 private:
     Ui::PartyCharacterGridFrame *ui;
 
-    Character& _character;
+    Characterv2& _character;
 };
 
 #endif // PARTYCHARACTERGRIDFRAME_H

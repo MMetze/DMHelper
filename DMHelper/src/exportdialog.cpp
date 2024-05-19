@@ -2,7 +2,7 @@
 #include "ui_exportdialog.h"
 #include "campaign.h"
 #include "dmconstants.h"
-#include "character.h"
+#include "characterv2.h"
 #include "map.h"
 #include "audiotrack.h"
 #include "encounterbattle.h"
@@ -311,7 +311,7 @@ void ExportDialog::setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem
             break;
         case DMHelper::CampaignType_Combatant:
             {
-                const Character* character = dynamic_cast<const Character*>(baseObject);
+                const Characterv2* character = dynamic_cast<const Characterv2*>(baseObject);
                 bool isPC = ((character) && (character->isInParty()));
                 widgetItem->setIcon(0, isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
             }
@@ -451,7 +451,7 @@ QTreeWidgetItem* ExportDialog::findItem(QTreeWidgetItem *item, QUuid id)
     return nullptr;
 }
 
-void ExportDialog::addCharacter(Character* character)
+void ExportDialog::addCharacter(Characterv2* character)
 {
     if((!character) || _characters.contains(character))
         return;

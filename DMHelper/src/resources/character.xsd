@@ -1,0 +1,116 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="combatant" maxOccurs="unbounded" minOccurs="0">
+        <xs:complexType>
+            <xs:element type="xs:string" name="spell-data"/>
+
+            <xs:element name="actions">
+                <xs:complexType>
+                    <xs:element name="action" maxOccurs="unbounded" minOccurs="0">
+                        <xs:complexType>
+                            <xs:element type="xs:byte" name="attack_bonus"/>
+                            <xs:element type="xs:string" name="desc"/>
+                            <xs:element type="xs:string" name="name"/>
+                            <xs:element type="xs:byte" name="damage_bonus"/>
+                            <xs:element type="xs:string" name="damage_dice"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element type="xs:string" name="attacks"/>
+
+        <xs:attribute type="xs:string" name="_baseID" use="optional"/>
+        <xs:attribute type="xs:byte" name="acrobatics" use="optional"/>
+        <xs:attribute type="xs:byte" name="active" use="optional"/>
+        <xs:attribute type="xs:short" name="age" use="optional"/>
+        <xs:attribute type="xs:string" name="alignment" use="optional"/>
+        <xs:attribute type="xs:byte" name="animalHandling" use="optional"/>
+        <xs:attribute type="xs:byte" name="arcana" use="optional"/>
+        <xs:attribute type="xs:byte" name="armorClass" use="optional"/>
+        <xs:attribute type="xs:byte" name="athletics" use="optional"/>
+        <xs:attribute type="xs:string" name="background" use="optional"/>
+        <xs:attribute type="xs:byte" name="cantrips" use="optional"/>
+        <xs:attribute type="xs:byte" name="charisma" use="optional"/>
+        <xs:attribute type="xs:byte" name="charismaSave" use="optional"/>
+        <xs:attribute type="xs:string" name="class" use="optional"/>
+        <xs:attribute type="xs:string" name="class2" use="optional"/>
+        <xs:attribute type="xs:string" name="class3" use="optional"/>
+        <xs:attribute type="xs:byte" name="conditions" use="optional"/>
+        <xs:attribute type="xs:byte" name="constitution" use="optional"/>
+        <xs:attribute type="xs:byte" name="constitutionSave" use="optional"/>
+        <xs:attribute type="xs:byte" name="copper" use="optional"/>
+        <xs:attribute type="xs:byte" name="deception" use="optional"/>
+        <xs:attribute type="xs:byte" name="dexterity" use="optional"/>
+        <xs:attribute type="xs:byte" name="dexteritySave" use="optional"/>
+        <xs:attribute type="xs:int" name="dndBeyondID" use="optional"/>
+        <xs:attribute type="xs:string" name="equipment" use="optional"/>
+        <xs:attribute type="xs:byte" name="expanded" use="optional"/>
+        <xs:attribute type="xs:string" name="experience" use="optional"/>
+        <xs:attribute type="xs:string" name="eyes" use="optional"/>
+        <xs:attribute type="xs:byte" name="gold" use="optional"/>
+        <xs:attribute type="xs:string" name="hair" use="optional"/>
+        <xs:attribute type="xs:string" name="height" use="optional"/>
+        <xs:attribute type="xs:byte" name="history" use="optional"/>
+        <xs:attribute type="xs:string" name="hitDice" use="optional"/>
+        <xs:attribute type="xs:byte" name="hitPoints" use="optional"/>
+        <xs:attribute type="xs:string" name="icon" use="optional"/>
+        <xs:attribute type="xs:byte" name="initiative" use="optional"/>
+        <xs:attribute type="xs:byte" name="insight" use="optional"/>
+        <xs:attribute type="xs:byte" name="intelligence" use="optional"/>
+        <xs:attribute type="xs:byte" name="intelligenceSave" use="optional"/>
+        <xs:attribute type="xs:byte" name="intimidation" use="optional"/>
+        <xs:attribute type="xs:byte" name="investigation" use="optional"/>
+        <xs:attribute type="xs:byte" name="jackofalltrades" use="optional"/>
+        <xs:attribute type="xs:byte" name="level" use="optional"/>
+        <xs:attribute type="xs:byte" name="level2" use="optional"/>
+        <xs:attribute type="xs:byte" name="level3" use="optional"/>
+        <xs:attribute type="xs:byte" name="maximumhp" use="optional"/>
+        <xs:attribute type="xs:byte" name="medicine" use="optional"/>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:byte" name="nature" use="optional"/>
+        <xs:attribute type="xs:string" name="notes" use="optional"/>
+        <xs:attribute type="xs:byte" name="pactmagiclevel" use="optional"/>
+        <xs:attribute type="xs:byte" name="pactmagicslots" use="optional"/>
+        <xs:attribute type="xs:byte" name="pactmagicused" use="optional"/>
+        <xs:attribute type="xs:byte" name="perception" use="optional"/>
+        <xs:attribute type="xs:byte" name="performance" use="optional"/>
+        <xs:attribute type="xs:byte" name="persuasion" use="optional"/>
+        <xs:attribute type="xs:byte" name="platinum" use="optional"/>
+        <xs:attribute type="xs:string" name="player" use="optional"/>
+        <xs:attribute type="xs:string" name="proficiencies" use="optional"/>
+        <xs:attribute type="xs:string" name="race" use="optional"/>
+        <xs:attribute type="xs:byte" name="religion" use="optional"/>
+        <xs:attribute type="xs:byte" name="row" use="optional"/>
+        <xs:attribute type="xs:string" name="sex" use="optional"/>
+        <xs:attribute type="xs:byte" name="silver" use="optional"/>
+        <xs:attribute type="xs:string" name="size" use="optional"/>
+        <xs:attribute type="xs:byte" name="sleightOfHand" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots1" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots2" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots3" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots4" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots5" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots6" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots7" use="optional"/>
+        <xs:attribute type="xs:byte" name="slots8" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused1" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused2" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused3" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused4" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused5" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused6" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused7" use="optional"/>
+        <xs:attribute type="xs:byte" name="slotsused8" use="optional"/>
+        <xs:attribute type="xs:byte" name="speed" use="optional"/>
+        <xs:attribute type="xs:byte" name="stealth" use="optional"/>
+        <xs:attribute type="xs:byte" name="strength" use="optional"/>
+        <xs:attribute type="xs:byte" name="strengthSave" use="optional"/>
+        <xs:attribute type="xs:string" name="subrace" use="optional"/>
+        <xs:attribute type="xs:byte" name="survival" use="optional"/>
+        <xs:attribute type="xs:byte" name="type" use="optional"/>
+        <xs:attribute type="xs:short" name="weight" use="optional"/>
+        <xs:attribute type="xs:byte" name="wisdom" use="optional"/>
+        <xs:attribute type="xs:byte" name="wisdomSave" use="optional"/>
+      </xs:complexType>
+    </xs:element>
+</xs:schema>

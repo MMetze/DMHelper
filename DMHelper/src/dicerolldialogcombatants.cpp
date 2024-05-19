@@ -2,7 +2,8 @@
 #include "ui_dicerolldialogcombatants.h"
 #include "battlecombatantwidget.h"
 #include "battledialogmodelcombatant.h"
-#include "character.h"
+#include "characterv2.h"
+#include "character.h" // HACK - needed for "AbilityScorePair"
 #include "conditionseditdialog.h"
 #include <QtGlobal>
 #include <QMouseEvent>

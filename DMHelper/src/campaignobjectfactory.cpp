@@ -17,13 +17,38 @@ CampaignObjectFactory::CampaignObjectFactory(QObject *parent) :
 {
     _factoryList.append(new EncounterFactory());
     _factoryList.append(new AudioFactory());
-    _factoryList.append(new CombatantFactory());
+    _factoryList.append(CombatantFactory::Instance());
     _factoryList.append(new MapFactory());
 }
 
 CampaignObjectFactory::~CampaignObjectFactory()
 {
+    if(!CombatantFactory::Instance())
+    {
+        qDebug() << "[CampaignObjectFactory] WARNING: Unable to find the CombatantFactory to remove, likely source of crash in CampaignObjectFactory!";
+    }
+    else
+    {
+        _factoryList.removeAll(CombatantFactory::Instance());
+        CombatantFactory::Shutdown();
+    }
+
     qDeleteAll(_factoryList);
+}
+
+
+CampaignObjectFactory* CampaignObjectFactory::Instance()
+{
+    if(!_instance)
+        _instance = new CampaignObjectFactory;
+
+    return _instance;
+}
+
+void CampaignObjectFactory::Shutdown()
+{
+    delete _instance;
+    _instance = nullptr;
 }
 
 CampaignObjectBase* CampaignObjectFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
@@ -67,21 +92,9 @@ int CampaignObjectFactory::factoryCount() const
 ObjectFactory* CampaignObjectFactory::getFactory(int index) const
 {
     if((index < 0) || index >= _factoryList.count())
-    {
         return nullptr;
-    }
     else
-    {
         return _factoryList.at(index);
-    }
-}
-
-CampaignObjectFactory* CampaignObjectFactory::Instance()
-{
-    if(!_instance)
-        _instance = new CampaignObjectFactory;
-
-    return _instance;
 }
 
 CampaignObjectBase* CampaignObjectFactory::localCreateObject(const QDomElement& element, bool isImport)

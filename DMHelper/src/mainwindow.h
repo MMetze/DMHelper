@@ -15,7 +15,7 @@
 
 class PublishWindow;
 class Campaign;
-class Character;
+class Characterv2;
 class Adventure;
 class Encounter;
 class EncounterTextEdit;

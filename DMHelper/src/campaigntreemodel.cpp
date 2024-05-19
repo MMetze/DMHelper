@@ -1,6 +1,6 @@
 #include "campaigntreemodel.h"
 #include "combatant.h"
-#include "character.h"
+#include "characterv2.h"
 #include "map.h"
 #include "party.h"
 #include "campaigntreeitem.h"
@@ -243,9 +243,9 @@ void CampaignTreeModel::handleItemChanged(QStandardItem *item)
     CampaignTreeItem* campaignItem = dynamic_cast<CampaignTreeItem*>(item);
     if((campaignItem) && (campaignItem->getCampaignItemType() == DMHelper::CampaignType_Combatant))
     {
-        Character* character = dynamic_cast<Character*>(campaignItem->getCampaignItemObject());
+        Characterv2* character = dynamic_cast<Characterv2*>(campaignItem->getCampaignItemObject());
         if(character)
-            character->setActive(item->checkState() == Qt::Checked);
+            character->setBoolValue(QString("active"), item->checkState() == Qt::Checked);
     }
 }
 
@@ -328,9 +328,9 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     }
     else if(object->getObjectType() == DMHelper::CampaignType_Combatant)
     {
-        Character* characterObject = dynamic_cast<Character*>(object);
+        Characterv2* characterObject = dynamic_cast<Characterv2*>(object);
         if(characterObject)
-            connect(characterObject, &Character::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
+            connect(characterObject, &Characterv2::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
     }
     else if(object->getObjectType() == DMHelper::CampaignType_Party)
     {

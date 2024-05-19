@@ -1,7 +1,7 @@
 #include "mapselectdialog.h"
 #include "ui_mapselectdialog.h"
 #include "map.h"
-#include "character.h"
+#include "characterv2.h"
 #include "audiotrack.h"
 #include "campaign.h"
 #include "mapfactory.h"

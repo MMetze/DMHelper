@@ -1,5 +1,4 @@
 #include "campaignexporter.h"
-#include "character.h"
 #include "map.h"
 #include "audiotrack.h"
 #include "combatantreference.h"

@@ -1,7 +1,7 @@
 #include "combatantwidgetinternalscharacter.h"
 #include "battledialogmodelcharacter.h"
 #include "combatantwidgetcharacter.h"
-#include "character.h"
+#include "characterv2.h"
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QLabel>

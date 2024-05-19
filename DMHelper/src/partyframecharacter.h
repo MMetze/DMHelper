@@ -7,14 +7,14 @@ namespace Ui {
 class PartyFrameCharacter;
 }
 
-class Character;
+class Characterv2;
 
 class PartyFrameCharacter : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit PartyFrameCharacter(Character& character, QWidget *parent = nullptr);
+    explicit PartyFrameCharacter(Characterv2& character, QWidget *parent = nullptr);
     virtual ~PartyFrameCharacter();
 
 private:

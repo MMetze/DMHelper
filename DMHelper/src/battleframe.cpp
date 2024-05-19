@@ -13,7 +13,7 @@
 #include "battledialoglogview.h"
 #include "map.h"
 #include "campaign.h"
-#include "character.h"
+#include "characterv2.h"
 #include "mapselectdialog.h"
 #include "combatantdialog.h"
 #include "unselectedpixmap.h"
@@ -1047,7 +1047,7 @@ bool BattleFrame::createNewBattle()
 
     // Add the active characters
     _battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
-    QList<Character*> activeCharacters = campaign->getActiveCharacters();
+    QList<Characterv2*> activeCharacters = campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
         BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
@@ -1147,9 +1147,9 @@ void BattleFrame::addCharacter()
 
     qDebug() << "[Battle Frame] Adding a character to the battle...";
 
-    QList<Character*> characterList;
-    QList<Character*> allCharacters = campaign->findChildren<Character*>();
-    for(Character* character : allCharacters)
+    QList<Characterv2*> characterList;
+    QList<Characterv2*> allCharacters = campaign->findChildren<Characterv2*>();
+    for(Characterv2* character : allCharacters)
     {
         if((!_model->isCombatantInList(character)) &&
            (character->isInParty()))
@@ -1180,9 +1180,9 @@ void BattleFrame::addNPC()
 
     qDebug() << "[Battle Frame] Adding an NPC to the battle...";
 
-    QList<Character*> characterList;
-    QList<Character*> allCharacters = campaign->findChildren<Character*>();
-    for(Character* character : allCharacters)
+    QList<Characterv2*> characterList;
+    QList<Characterv2*> allCharacters = campaign->findChildren<Characterv2*>();
+    for(Characterv2* character : allCharacters)
     {
         if((!_model->isCombatantInList(character)) &&
            (!character->isInParty()))
@@ -3237,7 +3237,7 @@ Map* BattleFrame::selectRelatedMap()
         return mapSelectDlg.getSelectedMap();
 }
 
-void BattleFrame::selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label)
+void BattleFrame::selectAddCharacter(QList<Characterv2*> characters, const QString& title, const QString& label)
 {
     if(characters.isEmpty())
         return;
@@ -3246,10 +3246,10 @@ void BattleFrame::selectAddCharacter(QList<Character*> characters, const QString
     characterSelectDlg.setWindowTitle(title);
     characterSelectDlg.setLabel(label);
 
-    QList<Character*>::iterator i;
+    QList<Characterv2*>::iterator i;
     for(i = characters.begin(); i != characters.end(); ++i)
     {
-        Character* character = *i;
+        Characterv2* character = *i;
         if(character != nullptr)
             characterSelectDlg.addItem(character->getName(), QVariant::fromValue(character));
     }
@@ -3258,7 +3258,7 @@ void BattleFrame::selectAddCharacter(QList<Character*> characters, const QString
     {
         if(characterSelectDlg.exec() == QDialog::Accepted)
         {
-            Character* selectedCharacter = characterSelectDlg.getSelectedData().value<Character*>();
+            Characterv2* selectedCharacter = characterSelectDlg.getSelectedData().value<Characterv2*>();
             if(selectedCharacter)
             {
                 BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(selectedCharacter);
