@@ -2,6 +2,7 @@
 #include "combatantfactory.h"
 #include <QIcon>
 #include <QDomElement>
+#include <QTextDocument>
 #include <QDebug>
 
 Characterv2::Characterv2(const QString& name, QObject *parent) :
@@ -382,7 +383,22 @@ void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
         childElement = childElement.nextSiblingElement();
     }
 
-    setName(getStringValue("name"));
+    handleOldXMLs(element);
+}
+
+void Characterv2::handleOldXMLs(const QDomElement& element)
+{
+    if(element.isNull())
+        return;
+
+    if(element.hasAttribute(QString("equipment")))
+        _allValues.insert(QString("equipment"), Qt::convertFromPlainText(element.attribute(QString("equipment"))));
+
+    if(element.hasAttribute(QString("notes")))
+        _allValues.insert(QString("notes"), Qt::convertFromPlainText(element.attribute(QString("notes"))));
+
+    if(element.hasAttribute(QString("proficiencies")))
+        _allValues.insert(QString("proficiencies"), Qt::convertFromPlainText(element.attribute(QString("proficiencies"))));
 }
 
 bool Characterv2::isAttributeSpecial(const QString& attribute)

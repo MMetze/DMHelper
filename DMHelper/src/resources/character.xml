@@ -71,7 +71,6 @@
     <dmh:attribute type="dmh:integer" name="stealth"/>
     <dmh:attribute type="dmh:integer" name="survival"/>
     <dmh:attribute type="dmh:integer" name="passiveperception"/>
-    <dmh:attribute type="dmh:string" name="proficiencies"/>
 
     <dmh:attribute type="dmh:string" name="pactmagiclevel"/>
     <dmh:attribute type="dmh:resource" name="pactmagicslots"/>
@@ -83,6 +82,7 @@
 
     <dmh:element type="dmh:html" name="spell-data"/>
     <dmh:element type="dmh:html" name="equipment"/>
+    <dmh:element type="dmh:html" name="proficiencies"/>
     <dmh:element type="dmh:html" name="notes"/>
 
     <dmh:element type="dmh:list" name="spellSlots">

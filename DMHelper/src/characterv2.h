@@ -71,6 +71,7 @@ private:
     //void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport);
     //void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
     void readXMLValues(const QDomElement& element, bool isImport);
+    void handleOldXMLs(const QDomElement& element);
     bool isAttributeSpecial(const QString& attribute);
     QVariant readAttributeValue(const QDomElement& element, const QString& name);
 

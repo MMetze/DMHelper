@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
-    <height>224</height>
+    <width>652</width>
+    <height>467</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -663,6 +663,31 @@ color: rgb(50, 50, 50);</string>
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QTextEdit" name="txtProficiencies">
+       <property name="dmhValue" stdset="0">
+        <string>proficiencies</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTextEdit" name="txtEquipment">
+       <property name="dmhValue" stdset="0">
+        <string>equipment</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTextEdit" name="txtNotes">
+       <property name="dmhValue" stdset="0">
+        <string>notes</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

@@ -11,6 +11,7 @@
 #include <QInputDialog>
 #include <QMouseEvent>
 #include <QStandardPaths>
+#include <QTextEdit>
 #include <QDebug>
 
 CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidget *parent) :
@@ -180,6 +181,18 @@ void CharacterTemplateFrame::readCharacterData()
             QString valueString = _character->getValueAsString(keyString);
             if(!valueString.isEmpty())
                 lineEdit->setText(valueString);
+        }
+    }
+
+    QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
+    for(auto textEdit : textEdits)
+    {
+        QString keyString = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+        if(!keyString.isEmpty())
+        {
+            QString valueString = _character->getStringValue(keyString);
+            if(!valueString.isEmpty())
+                textEdit->setHtml(valueString);
         }
     }
 
