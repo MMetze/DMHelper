@@ -201,6 +201,11 @@ ResourcePair Characterv2::getResourceValue(const QString& key) const
     return _allValues.value(key, QVariant()).value<ResourcePair>();
 }
 
+QHash<QString, QVariant> Characterv2::getHashValue(const QString& key) const
+{
+    return _allValues.value(key).toHash();
+}
+
 void Characterv2::setValue(const QString& key, const QVariant& value)
 {
     if(!_allValues.contains(key))
@@ -391,6 +396,8 @@ void Characterv2::handleOldXMLs(const QDomElement& element)
     if(element.isNull())
         return;
 
+    // HACK - need something that is more general and future-proof, need to update the minor version of the campaign file and detect this
+
     if(element.hasAttribute(QString("equipment")))
         _allValues.insert(QString("equipment"), Qt::convertFromPlainText(element.attribute(QString("equipment"))));
 
@@ -399,6 +406,18 @@ void Characterv2::handleOldXMLs(const QDomElement& element)
 
     if(element.hasAttribute(QString("proficiencies")))
         _allValues.insert(QString("proficiencies"), Qt::convertFromPlainText(element.attribute(QString("proficiencies"))));
+
+    if((element.hasAttribute(QString("class2"))) && (element.attribute(QString("class2")) != QString("N/A")) && (!element.attribute(QString("class2")).isEmpty()))
+        _allValues.insert(QString("class"), _allValues.value(QString("class")).toString() + QString("/") + element.attribute(QString("class2")));
+
+    if((element.hasAttribute(QString("class3"))) && (element.attribute(QString("class3")) != QString("N/A")) && (!element.attribute(QString("class3")).isEmpty()))
+        _allValues.insert(QString("class"), _allValues.value(QString("class")).toString() + QString("/") + element.attribute(QString("class3")));
+
+    if((element.hasAttribute(QString("level2"))) && (element.attribute(QString("level2")) != QString("0")) && (!element.attribute(QString("level2")).isEmpty()))
+        _allValues.insert(QString("level"), _allValues.value(QString("level")).toString() + QString("/") + element.attribute(QString("level2")));
+
+    if((element.hasAttribute(QString("level3"))) && (element.attribute(QString("level3")) != QString("0")) && (!element.attribute(QString("level3")).isEmpty()))
+        _allValues.insert(QString("level"), _allValues.value(QString("level")).toString() + QString("/") + element.attribute(QString("level3")));
 }
 
 bool Characterv2::isAttributeSpecial(const QString& attribute)

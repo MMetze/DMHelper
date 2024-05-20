@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>652</width>
-    <height>467</height>
+    <width>422</width>
+    <height>382</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -665,19 +665,63 @@ color: rgb(50, 50, 50);</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,2">
+     <property name="spacing">
+      <number>3</number>
+     </property>
      <item>
-      <widget class="QTextEdit" name="txtProficiencies">
+      <widget class="QTextEdit" name="txtSpellData">
        <property name="dmhValue" stdset="0">
-        <string>proficiencies</string>
+        <string>spell-data</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QTextEdit" name="txtEquipment">
-       <property name="dmhValue" stdset="0">
-        <string>equipment</string>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>3</number>
        </property>
+       <item>
+        <widget class="QTextEdit" name="txtProficiencies">
+         <property name="dmhValue" stdset="0">
+          <string>proficiencies</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="txtEquipment">
+         <property name="dmhValue" stdset="0">
+          <string>equipment</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,2">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>spellSlots</string>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>131</width>
+          <height>68</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
      </item>
      <item>

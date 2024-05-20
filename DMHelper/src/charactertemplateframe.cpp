@@ -196,6 +196,46 @@ void CharacterTemplateFrame::readCharacterData()
         }
     }
 
+    QList<QScrollArea*> scrollAreas = _uiWidget->findChildren<QScrollArea*>();
+    for(auto scrollArea : scrollAreas)
+    {
+        QString keyString = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+        if(!keyString.isEmpty())
+        {
+            QHash<QString, QVariant> hashValue = _character->getHashValue(keyString);
+            if(!hashValue.isEmpty())
+            {
+                if(ui->scrollAreaWidgetContents->layout())
+                {
+                    QLayoutItem *child;
+                    while((child = ui->scrollAreaWidgetContents->layout()->takeAt(0)) != nullptr)
+                    {
+                        if(child->widget())
+                            child->widget()->deleteLater();
+                        delete child;
+                    }
+
+                    delete ui->scrollAreaWidgetContents->layout();
+                }
+
+                QVBoxLayout* scrollLayout = new QVBoxLayout;
+                scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+                ui->scrollAreaWidgetContents->setLayout(scrollLayout);
+
+                QString valueString;
+                for(auto key : hashValue.keys())
+                {
+                    valueString += hashValue.value(key).toString();
+                }
+                if(!valueString.isEmpty())
+                {
+                    QLabel* entryLabel = new QLabel(valueString);
+                    scrollArea->setWidget(entryLabel);
+                }
+            }
+        }
+    }
+
     loadCharacterImage();
     enableDndBeyondSync(_character->getDndBeyondID() != -1);
 
