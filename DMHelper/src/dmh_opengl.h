@@ -5,7 +5,7 @@
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLContext>
 
-#define DMH_DEBUG_OPENGL 0
+#define DMH_DEBUG_OPENGL 1
 
 #if DMH_DEBUG_OPENGL
 
