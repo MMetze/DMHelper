@@ -223,7 +223,8 @@ void CharacterTemplateFrame::readCharacterData()
                 ui->scrollAreaWidgetContents->setLayout(scrollLayout);
 
                 QString valueString;
-                for(auto key : hashValue.keys())
+                QList<QString> hashKeys = hashValue.keys();
+                for(auto key : hashKeys)
                 {
                     valueString += hashValue.value(key).toString();
                 }

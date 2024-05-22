@@ -418,6 +418,45 @@ void Characterv2::handleOldXMLs(const QDomElement& element)
 
     if((element.hasAttribute(QString("level3"))) && (element.attribute(QString("level3")) != QString("0")) && (!element.attribute(QString("level3")).isEmpty()))
         _allValues.insert(QString("level"), _allValues.value(QString("level")).toString() + QString("/") + element.attribute(QString("level3")));
+
+    if(element.hasAttribute(QString("slots1")))
+    {
+        QHash<QString, QVariant> listEntryValues;
+
+        if(element.hasAttribute(QString("slots1")))
+        {
+
+        }
+
+        slots1="4"
+            slots2="3"
+            slots3="3"
+            slots4="3"
+            slots5="2"
+            slots6="1"
+            slots7="1"
+            slots8="1"
+            slotsused1="0"
+            slotsused2="0"
+            slotsused3="1"
+            slotsused4="0"
+            slotsused5="0"
+            slotsused6="0"
+            slotsused7="0"
+            slotsused8="0"
+            // Iterate through the list and create the individual attributes
+            QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(tagName);
+        for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
+        {
+            QVariant attributeValue = readAttributeValue(element, *keyIt);
+            if(!attributeValue.isNull())
+                listEntryValues.insert(*keyIt, attributeValue);
+        }
+
+        // Add the list entry to the main list
+        _allValues.insert(tagName, listEntryValues);
+
+    }
 }
 
 bool Characterv2::isAttributeSpecial(const QString& attribute)
