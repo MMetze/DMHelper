@@ -213,8 +213,12 @@ void PublishGLTextRenderer::paintGL()
 
     if(!_scissorRect.isEmpty())
     {
+        qreal pixelRatio = _targetWidget->devicePixelRatio();
         f->glEnable(GL_SCISSOR_TEST);
-        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+        f->glScissor(static_cast<GLint>(static_cast<qreal>(_scissorRect.x()) * pixelRatio),
+                     static_cast<GLint>(static_cast<qreal>(_scissorRect.y()) * pixelRatio),
+                     static_cast<GLsizei>(static_cast<qreal>(_scissorRect.width()) * pixelRatio),
+                     static_cast<GLsizei>(static_cast<qreal>(_scissorRect.height()) * pixelRatio));
     }
 
     // Draw the scene:
