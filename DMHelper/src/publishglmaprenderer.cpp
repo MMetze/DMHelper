@@ -13,7 +13,7 @@
 #include <QUndoStack>
 #include <QDebug>
 
-// #define DEBUG_MAP_RENDERER
+#define DEBUG_MAP_RENDERER
 
 PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
@@ -257,9 +257,12 @@ void PublishGLMapRenderer::paintGL()
 
     if(!_scissorRect.isEmpty())
     {
-        int pixelRatio = _targetWidget->devicePixelRatio();
+        qreal pixelRatio = _targetWidget->devicePixelRatio();
         f->glEnable(GL_SCISSOR_TEST);
-        f->glScissor(_scissorRect.x()*pixelRatio, _scissorRect.y()*pixelRatio, _scissorRect.width()*pixelRatio, _scissorRect.height()*pixelRatio);
+        f->glScissor(static_cast<GLint>(static_cast<qreal>(_scissorRect.x()) * pixelRatio),
+                     static_cast<GLint>(static_cast<qreal>(_scissorRect.y()) * pixelRatio),
+                     static_cast<GLsizei>(static_cast<qreal>(_scissorRect.width()) * pixelRatio),
+                     static_cast<GLsizei>(static_cast<qreal>(_scissorRect.height()) * pixelRatio));
     }
 
     // Draw the scene

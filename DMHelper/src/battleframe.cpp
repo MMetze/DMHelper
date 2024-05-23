@@ -1845,10 +1845,10 @@ void BattleFrame::showEvent(QShowEvent *event)
         return;
 
     if(_targetSize.isEmpty())
-        _targetSize = primary->availableSize() * primary->devicePixelRatio();
+        _targetSize = (QSizeF(primary->availableSize()) * primary->devicePixelRatio()).toSize();
 
     if(_targetLabelSize.isEmpty())
-        _targetLabelSize = primary->availableSize() * primary->devicePixelRatio();
+        _targetLabelSize = (QSizeF(primary->availableSize()) * primary->devicePixelRatio()).toSize();
 
     int ribbonHeight = primary->availableSize().height() / 15;
     QFontMetrics metrics = ui->lblNext->fontMetrics();
