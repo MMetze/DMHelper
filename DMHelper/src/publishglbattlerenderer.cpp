@@ -17,7 +17,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QDebug>
 
-#define DEBUG_BATTLE_RENDERER
+// #define DEBUG_BATTLE_RENDERER
 
 const int MOVEMENT_TOKEN_SIZE = 512;
 
