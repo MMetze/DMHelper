@@ -13,7 +13,7 @@
 #include <QUndoStack>
 #include <QDebug>
 
-#define DEBUG_MAP_RENDERER
+// #define DEBUG_MAP_RENDERER
 
 PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
