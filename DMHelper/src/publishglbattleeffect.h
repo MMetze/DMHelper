@@ -16,19 +16,19 @@ public:
     virtual ~PublishGLBattleEffect() override;
 
     virtual void cleanup() override;
-    virtual void paintGL() override;
+    virtual void prepareObjectsGL();
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
 
-    BattleDialogModelEffect* getEffect() const;
-    qreal getEffectAlpha() const;
+    virtual BattleDialogModelEffect* getEffect() const;
+    virtual qreal getEffectAlpha() const;
 
 public slots:
-    void effectMoved();
-    void effectChanged();
+    virtual void effectMoved();
+    virtual void effectChanged();
 
 protected:
-    void prepareObjects();
-    void drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth);
-    void drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth);
+    virtual void drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth);
+    virtual void drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth);
 
     BattleDialogModelEffect* _effect;
     BattleDialogModelEffectObject* _childEffect;

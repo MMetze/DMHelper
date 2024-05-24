@@ -18,7 +18,7 @@ public:
     virtual ~PublishGLBattleToken() override;
 
     virtual void cleanup() override;
-    virtual void paintGL() override;
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
     virtual void paintEffects(int shaderModelMatrix);
 
     BattleDialogModelCombatant* getCombatant() const;

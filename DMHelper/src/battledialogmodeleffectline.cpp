@@ -56,7 +56,7 @@ int BattleDialogModelEffectLine::getEffectType() const
     return BattleDialogModelEffect_Line;
 }
 
-BattleDialogEffectSettings* BattleDialogModelEffectLine::getEffectEditor() const
+BattleDialogEffectSettingsBase* BattleDialogModelEffectLine::getEffectEditor() const
 {
     BattleDialogEffectSettings* result = new BattleDialogEffectSettings(*this);
     result->setSizeLabel(QString("Length"));

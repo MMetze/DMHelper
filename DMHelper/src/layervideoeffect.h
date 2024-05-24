@@ -45,7 +45,7 @@ protected:
     const char* getFragmentShaderSource();
 
     bool _recreateShaders;
-    DMHelper::TransparentType _effectType;
+    DMHelper::TransparentType _effectTransparencyType;
     QColor _transparentColor;
     qreal _transparentTolerance;
     bool _colorize;

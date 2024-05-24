@@ -537,6 +537,7 @@ bool VideoPlayer::startPlayer()
                                       playerFormatCallback,
                                       playerCleanupCallback);
 
+    /*
     libvlc_audio_set_callbacks(_vlcPlayer,
                                playerAudioPlayCallback,
                                nullptr,
@@ -544,9 +545,12 @@ bool VideoPlayer::startPlayer()
                                nullptr,
                                nullptr,
                                nullptr);
+*/
+
 
     // And start playback
     int playResult = libvlc_media_player_play(_vlcPlayer);
+    libvlc_audio_set_volume(_vlcPlayer, 0);
 
     qDebug() << "[VideoPlayer] Player started: " << playResult;
 

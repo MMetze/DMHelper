@@ -67,6 +67,7 @@
 #include "ribbontabaudio.h"
 #include "dmhcache.h"
 #include "dmh_vlc.h"
+#include "dmh_opengl.h"
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
 #include "layerimage.h"
@@ -229,6 +230,8 @@ MainWindow::MainWindow(QWidget *parent) :
     f.setPointSize(_options->getFontSize());
     qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
     qApp->setFont(f);
+
+    DMH_DEBUG_OPENGL_Singleton::Initialize();
 
     QScreen* screen = QGuiApplication::primaryScreen();
 
@@ -625,8 +628,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
     connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
     connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
-    connect(_ribbonTabAudio, SIGNAL(volumeChanged(int)), audioTrackEdit, SLOT(setVolume(int)));
-    connect(audioTrackEdit, SIGNAL(volumeChanged(int)), _ribbonTabAudio, SLOT(setVolume(int)));
+    connect(_ribbonTabAudio, SIGNAL(volumeChanged(float)), audioTrackEdit, SLOT(setVolume(float)));
+    connect(audioTrackEdit, SIGNAL(volumeChanged(float)), _ribbonTabAudio, SLOT(setVolume(float)));
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -734,6 +737,7 @@ MainWindow::~MainWindow()
     Bestiary::Shutdown();
     DMH_VLC::Shutdown();
     ScaledPixmap::cleanupDefaultPixmap();
+    DMH_DEBUG_OPENGL_Singleton::Shutdown();
 }
 
 void MainWindow::newCampaign()
@@ -762,7 +766,7 @@ void MainWindow::newCampaign()
 
 bool MainWindow::saveCampaign()
 {
-    return doSaveCampaign(QString());
+    return doSaveCampaign(_campaign ? _campaign->getName() + QString(".xml") : QString());
 }
 
 void MainWindow::saveCampaignAs()
@@ -1160,7 +1164,7 @@ void MainWindow::newMedia()
     QImageReader reader(filename);
     if(reader.canRead())
     {
-        mediaLayer = new LayerImage(QString("Media Image: ") + filename, filename);
+        mediaLayer = new LayerImage(QString("Media Image: ") + QFileInfo(filename).fileName(), filename);
     }
     else
     {
@@ -1168,7 +1172,7 @@ void MainWindow::newMedia()
         if(result != QMessageBox::Yes)
             return;
 
-        mediaLayer = new LayerVideo(QString("Media Video: ") + filename, filename);
+        mediaLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(filename).fileName(), filename);
     }
 
     Map* mediaMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mediaName, false));
@@ -1779,14 +1783,14 @@ void MainWindow::dropEvent(QDropEvent *event)
             {
                 QImageReader reader(filename);
                 if(reader.canRead())
-                    newMap(new LayerImage(QString("Map Image: ") + filename, filename));
+                    newMap(new LayerImage(QString("Map Image: ") + QFileInfo(filename).fileName(), filename));
 
                 event->acceptProposedAction();
                 return;
             }
             else if(mimeType.name().startsWith("video/"))
             {
-                newMap(new LayerVideo(QString("Map Video: ") + filename, filename));
+                newMap(new LayerVideo(QString("Map Video: ") + QFileInfo(filename).fileName(), filename));
                 event->acceptProposedAction();
                 return;
             }
@@ -2259,11 +2263,11 @@ Layer* MainWindow::selectMapFile()
         {
             QImageReader reader(filename);
             if(reader.canRead())
-                return new LayerImage(QString("Map Image: ") + filename, filename);
+                return new LayerImage(QString("Map Image: ") + QFileInfo(filename).fileName(), filename);
         }
         else if(mimeType.name().startsWith("video/"))
         {
-            return new LayerVideo(QString("Map Video: ") + filename, filename);
+            return new LayerVideo(QString("Map Video: ") + QFileInfo(filename).fileName(), filename);
         }
     }
 

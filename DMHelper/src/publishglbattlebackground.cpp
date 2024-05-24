@@ -1,7 +1,6 @@
 #include "publishglbattlebackground.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QDebug>
 
@@ -58,21 +57,20 @@ void PublishGLBattleBackground::cleanup()
     PublishGLBattleObject::cleanup();
 }
 
-void PublishGLBattleBackground::paintGL()
+void PublishGLBattleBackground::paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix)
 {
-    if(!QOpenGLContext::currentContext())
+    Q_UNUSED(projectionMatrix);
+
+    if((!QOpenGLContext::currentContext()) || (!functions))
         return;
 
-    //qDebug() << "[PublishGLBattleBackground]::paintGL context: " << QOpenGLContext::currentContext();
-
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
+    if(!e)
         return;
 
     e->glBindVertexArray(_VAO);
-    f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    functions->glBindTexture(GL_TEXTURE_2D, _textureID);
+    functions->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void PublishGLBattleBackground::setImage(const QImage& image)

@@ -8,6 +8,7 @@
 #include "layervideo.h"
 #include "layervideoeffect.h"
 #include "layerblank.h"
+#include "layereffect.h"
 #include "publishglscene.h"
 #include "campaign.h"
 #include <QRectF>
@@ -74,6 +75,9 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             case DMHelper::LayerType_Blank:
                 newLayer = new LayerBlank();
                 break;
+            case DMHelper::LayerType_Effect:
+                newLayer = new LayerEffect();
+                break;
             default:
                 qDebug() << "[LayerScene] ERROR: unable to read layer for unexpected type: " << layerType;
                 break;
@@ -85,7 +89,6 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             newLayer->inputXML(layerElement, isImport);
             newLayer->setLayerScene(this);
             connectLayer(newLayer);
-            //connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
             _layers.append(newLayer);
         }
 
@@ -148,7 +151,6 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
     {
         Layer* newLayer = otherScene->_layers[i]->clone();
         connectLayer(newLayer);
-        //connect(newLayer, &Layer::dirty, this, &LayerScene::handleLayerDirty);
         _layers.append(newLayer);
         updateLayerScales();
     }
@@ -671,6 +673,8 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
         return;
     }
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i)->getLayerVisiblePlayer()) && (_layers.at(i)->getOpacity() > 0.0))
@@ -685,6 +689,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
 #ifdef DEBUG_LAYERSCENE
                     qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
 #endif
+                    DMH_DEBUG_OPENGL_glUseProgram(shaderProgram);
                     functions->glUseProgram(shaderProgram);
                 }
 
@@ -692,6 +697,9 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
             }
         }
     }
+
+    DMH_DEBUG_OPENGL_glUseProgram(shaderProgram);
+    functions->glUseProgram(shaderProgram);
 }
 
 void LayerScene::playerGLResize(int w, int h)

@@ -1,7 +1,6 @@
 #include "videoplayerglplayer.h"
 #include "videoplayerglvideo.h"
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
+#include "dmh_opengl.h"
 #include <QTimerEvent>
 #include <QDebug>
 
@@ -86,6 +85,8 @@ void VideoPlayerGLPlayer::paintGL()
     QOpenGLExtraFunctions *e = _context->extraFunctions();
     if((!f) || (!e))
         return;
+
+    DMH_DEBUG_OPENGL_PAINTGL();
 
     bool newFrame = _video->isNewFrameAvailable();
     if(newFrame)

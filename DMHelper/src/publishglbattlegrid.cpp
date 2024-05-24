@@ -1,6 +1,6 @@
 #include "publishglbattlegrid.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLExtraFunctions>
 #include <QDebug>
 #include <QImage>
 
@@ -34,18 +34,19 @@ void PublishGLBattleGrid::cleanup()
     PublishGLBattleObject::cleanup();
 }
 
-void PublishGLBattleGrid::paintGL()
+void PublishGLBattleGrid::paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix)
 {
-    if(!QOpenGLContext::currentContext())
+    Q_UNUSED(projectionMatrix);
+
+    if((!QOpenGLContext::currentContext()) || (!functions))
         return;
 
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid]::paintGL context: " << QOpenGLContext::currentContext();
 #endif
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
+    if(!e)
         return;
 
     if(_recreateGrid)
@@ -57,13 +58,17 @@ void PublishGLBattleGrid::paintGL()
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid]::paintGL UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
 #endif
-    f->glUseProgram(_shaderProgram);
-    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
+    functions->glUseProgram(_shaderProgram);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData(), getMatrix());
+    functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
     e->glBindVertexArray(_VAO);
-    f->glLineWidth(_config.getGridPen().width());
-    f->glUniform4f(f->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
+    functions->glLineWidth(_config.getGridPen().width());
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, functions->glGetUniformLocation(_shaderProgram, "gridColor"), "gridColor");
+    DMH_DEBUG_OPENGL_glUniform4f(functions->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
+    functions->glUniform4f(functions->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
 
-    f->glDrawElements(GL_LINES, _indices.count(), GL_UNSIGNED_INT, 0);
+    functions->glDrawElements(GL_LINES, _indices.count(), GL_UNSIGNED_INT, 0);
 }
 
 void PublishGLBattleGrid::setPosition(const QPoint& position)
@@ -96,7 +101,10 @@ void PublishGLBattleGrid::setProjectionMatrix(const GLfloat* projectionMatrix)
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid]::setProjectionMatrix UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
 #endif
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
     f->glUseProgram(_shaderProgram);
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, f->glGetUniformLocation(_shaderProgram, "projection"), "projection");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix);
 }
 
@@ -193,6 +201,7 @@ void PublishGLBattleGrid::createGridObjectsGL()
     }
 
     _shaderProgram = f->glCreateProgram();
+    DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgram, "_shaderProgram");
 
     f->glAttachShader(_shaderProgram, vertexShader);
     f->glAttachShader(_shaderProgram, fragmentShader);
@@ -208,10 +217,12 @@ void PublishGLBattleGrid::createGridObjectsGL()
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid]::createGridObjects Program: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
 #endif
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderModelMatrix, "model");
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
 #endif
@@ -219,10 +230,13 @@ void PublishGLBattleGrid::createGridObjectsGL()
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, f->glGetUniformLocation(_shaderProgram, "view"), "view");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData(), viewMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
 
     rebuildGrid();

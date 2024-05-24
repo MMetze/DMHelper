@@ -1,6 +1,6 @@
 #include "publishglobject.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
 
 PublishGLObject::PublishGLObject(QObject *parent) :
     QObject(parent),
@@ -26,6 +26,11 @@ void PublishGLObject::cleanup()
         }
         _textureID = 0;
     }
+}
+
+bool PublishGLObject::hasCustomShaders() const
+{
+    return false;
 }
 
 unsigned int PublishGLObject::getTextureID() const

@@ -2,7 +2,7 @@
 #include "publishglimage.h"
 #include "battledialogmodeleffect.h"
 #include "scaledpixmap.h"
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 #include <QPainter>
 
 PublishGLTokenHighlightEffect::PublishGLTokenHighlightEffect(PublishGLImage* effectImage, BattleDialogModelEffect* effect, QObject *parent) :
@@ -31,8 +31,9 @@ void PublishGLTokenHighlightEffect::paintGL(QOpenGLFunctions *f, int shaderModel
             return;
     }
 
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, getMatrixData(), getMatrix());
     f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, getMatrixData());
-    _effectImage->paintGL();
+    _effectImage->paintGL(f, nullptr);
 }
 
 

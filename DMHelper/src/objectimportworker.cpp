@@ -183,8 +183,8 @@ void ObjectImportWorker::importObjectAssets(CampaignObjectBase* object)
             Combatant* combatant = dynamic_cast<Combatant*>(object);
             if(combatant)
             {
-                qDebug() << "[ObjectImportWorker] Importing combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
-                combatant->setIcon(importFile(combatant->getIcon()));
+                qDebug() << "[ObjectImportWorker] Importing combatant: " << combatant->getName() << ", icon: " << combatant->getIconFile();
+                combatant->setIcon(importFile(combatant->getIconFile()));
             }
             break;
         }

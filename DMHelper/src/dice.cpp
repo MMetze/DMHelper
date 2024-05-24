@@ -45,14 +45,29 @@ int Dice::getCount() const
     return _dieCount;
 }
 
+void Dice::setCount(int count)
+{
+    _dieCount = count;
+}
+
 int Dice::getType() const
 {
     return _dieType;
 }
 
+void Dice::setType(int type)
+{
+    _dieType = type;
+}
+
 int Dice::getBonus() const
 {
     return _dieBonus;
+}
+
+void Dice::setBonus(int bonus)
+{
+    _dieBonus = bonus;
 }
 
 QString Dice::toString() const

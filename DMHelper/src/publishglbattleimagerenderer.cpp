@@ -1,7 +1,7 @@
 #include "publishglbattleimagerenderer.h"
 #include "publishglbattlebackground.h"
 #include "battledialogmodel.h"
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 
 PublishGLBattleImageRenderer::PublishGLBattleImageRenderer(BattleDialogModel* model, QObject *parent) :
     PublishGLBattleRenderer(model, parent),
@@ -62,6 +62,7 @@ void PublishGLBattleImageRenderer::paintBackground(QOpenGLFunctions* functions)
     if((!_backgroundObject) || (!functions))
         return;
 
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData(), _backgroundObject->getMatrix());
     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData());
-    _backgroundObject->paintGL();
+    _backgroundObject->paintGL(functions, nullptr);
 }

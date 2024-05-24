@@ -5,9 +5,8 @@
 #include "publishgltokenhighlighteffect.h"
 #include "publishgltokenhighlightref.h"
 #include "layertokens.h"
+#include "dmh_opengl.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QPixmap>
 #include <QPainter>
@@ -79,14 +78,15 @@ void PublishGLBattleToken::cleanup()
     PublishGLBattleObject::cleanup();
 }
 
-void PublishGLBattleToken::paintGL()
+void PublishGLBattleToken::paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix)
 {
-    if(!QOpenGLContext::currentContext())
+    Q_UNUSED(projectionMatrix);
+
+    if((!QOpenGLContext::currentContext()) || (!functions))
         return;
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
+    if(!e)
         return;
 
     if(_recreateToken)
@@ -97,8 +97,8 @@ void PublishGLBattleToken::paintGL()
     }
 
     e->glBindVertexArray(_VAO);
-    f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    functions->glBindTexture(GL_TEXTURE_2D, _textureID);
+    functions->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void PublishGLBattleToken::paintEffects(int shaderModelMatrix)

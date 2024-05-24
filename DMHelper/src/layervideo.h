@@ -98,7 +98,6 @@ protected:
     QSize _playerSize;
 #endif
     PublishGLScene* _scene;
-    PublishGLRenderer* _renderer;
 
     // Core contents
     QString _filename;

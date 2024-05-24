@@ -44,6 +44,8 @@ SOURCES += main.cpp\
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
     battlecombatantframe.cpp \
+    battledialogeffectsettingsbase.cpp \
+    battledialogeffectsettingsobjectvideo.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
     battledialogmodeleffectobjectvideo.cpp \
@@ -78,6 +80,7 @@ SOURCES += main.cpp\
     customtableframe.cpp \
     bestiaryfindtokendialog.cpp \
     discordposter.cpp \
+    dmh_opengl.cpp \
     dmh_vlc.cpp \
     dmhcache.cpp \
     dmhelperribbon.cpp \
@@ -93,6 +96,8 @@ SOURCES += main.cpp\
     gridconfig.cpp \
     layer.cpp \
     layerblank.cpp \
+    layereffect.cpp \
+    layereffectsettings.cpp \
     layerfow.cpp \
     layerframe.cpp \
     layergrid.cpp \
@@ -126,6 +131,7 @@ SOURCES += main.cpp\
     publishbuttonribbon.cpp \
     publishglbattlebackground.cpp \
     publishglbattleeffect.cpp \
+    publishglbattleeffectvideo.cpp \
     publishglbattlegrid.cpp \
     publishglbattleimagerenderer.cpp \
     publishglbattleobject.cpp \
@@ -307,6 +313,8 @@ HEADERS  += mainwindow.h \
     audiotrackyoutube.h \
     basicdateserver.h \
     battlecombatantframe.h \
+    battledialogeffectsettingsbase.h \
+    battledialogeffectsettingsobjectvideo.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
     battledialogmodeleffectobjectvideo.h \
@@ -341,6 +349,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     bestiaryfindtokendialog.h \
     discordposter.h \
+    dmh_opengl.h \
     dmh_vlc.h \
     dmhcache.h \
     dmhelperribbon.h \
@@ -357,6 +366,8 @@ HEADERS  += mainwindow.h \
     gridconfig.h \
     layer.h \
     layerblank.h \
+    layereffect.h \
+    layereffectsettings.h \
     layerfow.h \
     layerframe.h \
     layergrid.h \
@@ -390,6 +401,7 @@ HEADERS  += mainwindow.h \
     publishbuttonribbon.h \
     publishglbattlebackground.h \
     publishglbattleeffect.h \
+    publishglbattleeffectvideo.h \
     publishglbattlegrid.h \
     publishglbattleimagerenderer.h \
     publishglbattleobject.h \
@@ -550,6 +562,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
+    battledialogeffectsettingsobjectvideo.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     bestiarypopulatetokensdialog.ui \
@@ -567,6 +580,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    layereffectsettings.ui \
     layerframe.ui \
     layerseditdialog.ui \
     layervideoeffectsettings.ui \

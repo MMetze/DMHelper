@@ -114,16 +114,21 @@ QString Monster::getMonsterClassName() const
     return _monsterClass ? _monsterClass->getName() : QString("");
 }
 
-QString Monster::getIcon(bool localOnly) const
+QString Monster::getIconFile() const
 {
-    if((!localOnly) && (_icon.isEmpty()) && (_monsterClass))
+    if((_icon.isEmpty()) && (_monsterClass))
     {
         return _monsterClass->getIcon();
     }
     else
     {
-        return Combatant::getIcon();
+        return Combatant::getIconFile();
     }
+}
+
+QString Monster::getIconFileLocal() const
+{
+    return Combatant::getIconFile();
 }
 
 QPixmap Monster::getIconPixmap(DMHelper::PixmapSize iconSize)

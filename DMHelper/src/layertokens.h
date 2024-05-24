@@ -79,6 +79,7 @@ public slots:
 
     void addEffect(BattleDialogModelEffect* effect);
     void removeEffect(BattleDialogModelEffect* effect);
+    void effectReady(BattleDialogModelEffect* effect);
     bool containsEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* getEffectItem(BattleDialogModelEffect* effect);
     BattleDialogModelEffect* getEffectFromItem(QGraphicsItem* item);
@@ -141,12 +142,10 @@ protected:
     // Core contents
     BattleDialogModel* _model;
     QList<BattleDialogModelCombatant*> _combatants;
-    QHash<QString, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIconHash;
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokenHash;
 
     QList<BattleDialogModelEffect*> _effects;
-    QHash<QString, PublishGLBattleEffect*> _effectTokens;
     QHash<BattleDialogModelEffect*, QGraphicsItem*> _effectIconHash;
     QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
 

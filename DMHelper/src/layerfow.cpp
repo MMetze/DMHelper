@@ -6,9 +6,9 @@
 #include "undofowpoint.h"
 #include "undofowshape.h"
 #include "undomarker.h"
+#include "dmh_opengl.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
-#include <QOpenGLFunctions>
 #include <QImage>
 #include <QUndoStack>
 #include <QPainter>
@@ -472,6 +472,7 @@ void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* s
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     f->glUseProgram(_shaderProgramRGBA);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -492,13 +493,20 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
     if(!functions)
         return;
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _fowGLObject->getMatrixData(), _fowGLObject->getMatrix());
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _fowGLObject->getMatrixData());
+    DMH_DEBUG_OPENGL_glUniform1f(_shaderAlphaRGBA, _opacityReference);
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
-    _fowGLObject->paintGL();
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
+    _fowGLObject->paintGL(functions, projectionMatrix);
 
     functions->glUseProgram(_shaderProgramRGB);
 }

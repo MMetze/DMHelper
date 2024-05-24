@@ -1,6 +1,6 @@
 #include "publishgltokenhighlightref.h"
 #include "publishglimage.h"
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 
 PublishGLTokenHighlightRef::PublishGLTokenHighlightRef(PublishGLImage& referenceImage, QObject *parent) :
     PublishGLTokenHighlight{parent},
@@ -17,8 +17,9 @@ void PublishGLTokenHighlightRef::paintGL(QOpenGLFunctions *f, int shaderModelMat
     if(!f)
         return;
 
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, getMatrixData(), getMatrix());
     f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, getMatrixData());
-    _referenceImage.paintGL();
+    _referenceImage.paintGL(f, nullptr);
 }
 
 int PublishGLTokenHighlightRef::getWidth() const

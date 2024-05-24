@@ -1,8 +1,8 @@
 #include "publishglimagerenderer.h"
 #include "publishglbattlebackground.h"
+#include "dmh_opengl.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
 
 PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject, const QImage& image, QColor color, QObject *parent) :
     PublishGLRenderer(parent),
@@ -108,6 +108,7 @@ void PublishGLImageRenderer::initializeGL()
     }
 
     _shaderProgram = f->glCreateProgram();
+    DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgram, "_shaderProgram");
 
     f->glAttachShader(_shaderProgram, vertexShader);
     f->glAttachShader(_shaderProgram, fragmentShader);
@@ -120,6 +121,7 @@ void PublishGLImageRenderer::initializeGL()
         return;
     }
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
@@ -131,15 +133,22 @@ void PublishGLImageRenderer::initializeGL()
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, f->glGetUniformLocation(_shaderProgram, "model"), "model");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData(), modelMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
     // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, f->glGetUniformLocation(_shaderProgram, "view"), "view");
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData(), viewMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
     _newProjection = true;
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
     f->glUseProgram(_shaderProgram);
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, f->glGetUniformLocation(_shaderProgram, "texture1"), "texture1");
+    DMH_DEBUG_OPENGL_glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     _initialized = true;
@@ -174,10 +183,13 @@ void PublishGLImageRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    DMH_DEBUG_OPENGL_PAINTGL();
+
     // Draw the scene:
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -189,8 +201,10 @@ void PublishGLImageRenderer::paintGL()
 
     if(_imageGLObject)
     {
+        DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, f->glGetUniformLocation(_shaderProgram, "model"), "model");
+        DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _imageGLObject->getMatrixData(), _imageGLObject->getMatrix());
         f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _imageGLObject->getMatrixData());
-        _imageGLObject->paintGL();
+        _imageGLObject->paintGL(f, nullptr);
     }
 }
 
@@ -217,6 +231,7 @@ void PublishGLImageRenderer::updateProjectionMatrix()
     QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData(), projectionMatrix);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 
     if(_imageGLObject)

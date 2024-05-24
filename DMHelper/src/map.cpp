@@ -107,6 +107,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     }
     else
     {
+        // Backwards compatibility mode
         int partyScale = element.attribute("partyScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
         _layerScene.setScale(partyScale);
 
@@ -114,15 +115,27 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         QString filename = element.attribute("filename");
         if((filename.isEmpty()) || (filename == QString(".")))
         {
+            qDebug() << "[Map] inputXML - empty map file: " << filename << ", creating default image layer.";
+            imageLayer = new LayerImage(QString("Map Image"), QString());
+        }
+        else if(!QFileInfo::exists(filename))
+        {
+            qDebug() << "[Map] inputXML - map file not found: " << filename << ", creating default image layer.";
             imageLayer = new LayerImage(QString("Map Image"), QString());
         }
         else
         {
             QImageReader reader(filename);
             if(reader.canRead())
-                imageLayer = new LayerImage(QString("Map Image: ") + filename, filename);
+            {
+                qDebug() << "[Map] inputXML - QImageReader can read the file: " << filename << ", creating an image layer.";
+                imageLayer = new LayerImage(QString("Map Image: ") + QFileInfo(filename).fileName(), filename);
+            }
             else
-                imageLayer = new LayerVideo(QString("Map Video: ") + filename, filename);
+            {
+                qDebug() << "[Map] inputXML - QImageReader *cannot* read the file: " << filename << ", creating a video layer.";
+                imageLayer = new LayerVideo(QString("Map Video: ") + QFileInfo(filename).fileName(), filename);
+            }
         }
 
         if(imageLayer)

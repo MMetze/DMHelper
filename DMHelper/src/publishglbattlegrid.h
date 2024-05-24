@@ -4,7 +4,7 @@
 #include "publishglbattleobject.h"
 #include "gridconfig.h"
 #include "grid.h"
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 
 //#define DEBUG_BATTLE_GRID
 
@@ -16,7 +16,7 @@ public:
     virtual ~PublishGLBattleGrid() override;
 
     virtual void cleanup() override;
-    virtual void paintGL() override;
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
     QSize getSize() const;
 
     void setPosition(const QPoint& position);

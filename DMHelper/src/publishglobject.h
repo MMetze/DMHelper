@@ -1,6 +1,7 @@
 #ifndef PUBLISHGLOBJECT_H
 #define PUBLISHGLOBJECT_H
 
+#include "dmh_opengl.h"
 #include <QObject>
 #include <QMatrix4x4>
 
@@ -12,7 +13,8 @@ public:
     virtual ~PublishGLObject() override;
 
     virtual void cleanup();
-    virtual void paintGL() = 0;
+    virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) = 0;
+    virtual bool hasCustomShaders() const;
 
     unsigned int getTextureID() const;
     QMatrix4x4 getMatrix() const;

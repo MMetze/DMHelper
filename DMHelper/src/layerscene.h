@@ -2,7 +2,7 @@
 #define LAYERSCENE_H
 
 #include <QList>
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 #include "dmconstants.h"
 #include "campaignobjectbase.h"
 

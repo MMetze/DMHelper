@@ -6,14 +6,14 @@ on:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION: 6.6.0
-  QT_INSTALLER_VERSION: 4.6
+  QT_INSTALLER_VERSION: 4.7
   INSTALLERARTIFACT: DM-Helper-macOS-release-Installer.zip
   ZIPARTIFACT: DMHelper-macOS-release.zip
 
 jobs:
   build-DMH-macos:
 
-    runs-on: macos-latest
+    runs-on: macos-13
 
     steps:
     - name: Install Qt
@@ -25,7 +25,7 @@ jobs:
         target: 'desktop'
         arch: 'clang_64'
         cache: 'true'
-        modules: 'qtmultimedia qtnetworkauth'
+        modules: 'qtmultimedia qtnetworkauth qtimageformats'
         tools: 'tools_ifw'
         add-tools-to-path: 'true'
         archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'

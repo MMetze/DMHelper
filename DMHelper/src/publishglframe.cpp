@@ -1,7 +1,7 @@
 #include "publishglframe.h"
 #include "publishglrenderer.h"
 #include "publishglimagerenderer.h"
-#include <QOpenGLFunctions>
+#include "dmh_opengl.h"
 #include <QMouseEvent>
 #include <QTimer>
 #include <QDebug>
@@ -55,7 +55,7 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
     if(_renderer)
     {
         if(!renderer)
-            renderer = new PublishGLImageRenderer(nullptr, grabFramebuffer(), _renderer->getBackgroundColor());
+            renderer = new PublishGLImageRenderer(nullptr, grab().toImage(), _renderer->getBackgroundColor());
 
         makeCurrent();
         _renderer->cleanupGL();
@@ -172,7 +172,10 @@ void PublishGLFrame::resizeGL(int w, int h)
 void PublishGLFrame::paintGL()
 {
     if(_renderer)
+    {
+        DMH_DEBUG_OPENGL_FRAME_START();
         _renderer->paintGL();
+    }
 }
 
 bool PublishGLFrame::convertMousePosition(QMouseEvent& event, const QRect& scissorRect, QPointF& result)

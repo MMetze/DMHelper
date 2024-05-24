@@ -173,8 +173,6 @@ void BattleCombatantFrame::clearGrid()
     if(!_conditionGrid)
         return;
 
-    qDebug() << "[BattleCombatantFrame] Clearing the condition grid";
-
     // Delete the grid entries
     QLayoutItem *child = nullptr;
     while((child = _conditionGrid->takeAt(0)) != nullptr)

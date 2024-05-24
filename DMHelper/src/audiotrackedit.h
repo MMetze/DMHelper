@@ -29,13 +29,13 @@ signals:
     void playChanged(bool checked);
     void repeatChanged(bool checked);
     void muteChanged(bool checked);
-    void volumeChanged(int volume);
+    void volumeChanged(float volume);
 
 public slots:
     void setPlay(bool checked);
     void setRepeat(bool checked);
     void setMute(bool checked);
-    void setVolume(int volume);
+    void setVolume(float volume);
 
 private slots:
     void unclick();

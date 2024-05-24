@@ -23,7 +23,7 @@
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
-#include "battledialogeffectsettings.h"
+#include "battledialogeffectsettingsbase.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
 #include "itemselectdialog.h"
@@ -41,6 +41,7 @@
 #include "layerreference.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
+#include "dicerolldialogcombatants.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -63,6 +64,8 @@
 #include <QPixmap>
 #include <QScreen>
 #include <QImageReader>
+#include <QMimeDatabase>
+#include <QMimeType>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
@@ -70,15 +73,6 @@
 //#define BATTLE_DIALOG_LOG_MOVEMENT
 
 //#define BATTLE_DIALOG_LOG_VIDEO
-
-/*
- *
- * setCameraRect
- * emit cameraRectChanged ==> renderer
- * changing the size/shape of the CameraRect causes handleItemChanged which calls updateCameraRect
- * updateCameraRect sets CameraRect
- *
- */
 
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
@@ -189,6 +183,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
     connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectObjectVideo, this, &BattleFrame::addEffectObjectVideo);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObjectFile, this, &BattleFrame::addEffectObjectFile);
     connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
@@ -1079,6 +1074,9 @@ void BattleFrame::addMonsters()
         }
 
         recreateCombatantWidgets();
+
+        if(combatantDlg.isSortInitiative())
+            _model->sortCombatants();
     }
     else
     {
@@ -1156,7 +1154,10 @@ void BattleFrame::addEffectObject()
 {
     QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file..."));
     if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
+    {
+        qDebug() << "[BattleFrame] addEffectObject: " << filename << " is not a valid image file.";
         return;
+    }
 
     addEffectObjectFile(filename);
 }
@@ -1167,6 +1168,31 @@ void BattleFrame::addEffectObjectFile(const QString& filename)
         return;
 
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename));
+}
+
+void BattleFrame::addEffectObjectVideo()
+{
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object video file..."));
+    if(filename.isEmpty())
+        return;
+
+    QMimeDatabase db;
+    QMimeType mimeType = db.mimeTypeForFile(filename);
+    if((!mimeType.isValid()) || (!mimeType.name().startsWith("video/")))
+    {
+        qDebug() << "[BattleFrame] addEffectObjectVideo: " << filename << " is not a valid video file. Mime type: " << mimeType.name() << " - " << mimeType.comment();
+        return;
+    }
+
+    addEffectObjectVideoFile(filename);
+}
+
+void BattleFrame::addEffectObjectVideoFile(const QString& filename)
+{
+    if(!validateTokenLayerExists())
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo, 20, 20, QColor(), filename));
 }
 
 void BattleFrame::addLayerImageFile(const QString& filename)
@@ -1180,7 +1206,7 @@ void BattleFrame::addLayerImageFile(const QString& filename)
         return;
     }
 
-    _model->getLayerScene().appendLayer(new LayerImage(QString("Image: ") + filename, filename));
+    _model->getLayerScene().appendLayer(new LayerImage(QString("Image: ") + QFileInfo(filename).fileName(), filename));
 }
 
 void BattleFrame::castSpell()
@@ -1319,7 +1345,7 @@ void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
         return;
     }
 
-    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    BattleDialogEffectSettingsBase* settings = effect->getEffectEditor();
     if(!settings)
     {
         delete effect;
@@ -1819,10 +1845,10 @@ void BattleFrame::showEvent(QShowEvent *event)
         return;
 
     if(_targetSize.isEmpty())
-        _targetSize = primary->availableSize() * primary->devicePixelRatio();
+        _targetSize = (QSizeF(primary->availableSize()) * primary->devicePixelRatio()).toSize();
 
     if(_targetLabelSize.isEmpty())
-        _targetLabelSize = primary->availableSize() * primary->devicePixelRatio();
+        _targetLabelSize = (QSizeF(primary->availableSize()) * primary->devicePixelRatio()).toSize();
 
     int ribbonHeight = primary->availableSize().height() / 15;
     QFontMetrics metrics = ui->lblNext->fontMetrics();
@@ -2311,41 +2337,38 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
-    Q_UNUSED(effect);
-    return;
-    /*
-    if(!effect)
-        return;
+    QList<BattleDialogModelCombatant*> affectedCombatantList;
 
-    QList<BattleDialogModelCombatant*> combatantList;
-
-    QList<QGraphicsPixmapItem*> iconPixmaps = _combatantIcons.values();
-    for(int i = 0; i < iconPixmaps.count(); ++i)
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
     {
-        QGraphicsPixmapItem* item = iconPixmaps.at(i);
-        if((item) && (isItemInEffect(item, effect)))
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
         {
-            BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
-            if(combatant)
-                combatantList.append(combatant);
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
+                if((item) && (isItemInEffect(item, effect)))
+                    affectedCombatantList.append(combatant);
+            }
         }
     }
 
-    if(combatantList.isEmpty())
+    if(affectedCombatantList.isEmpty())
     {
         QMessageBox::information(this, QString("Apply Effect"), QString("No target combatants were found for the selected effect."));
         return;
     }
 
-    DiceRollDialogCombatants* dlg = new DiceRollDialogCombatants(Dice(1, 20, 0), combatantList, 15, this);
+    DiceRollDialogCombatants* dlg = new DiceRollDialogCombatants(Dice(1, 20, 0), affectedCombatantList, 15, this);
     connect(dlg, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SLOT(setSelectedCombatant(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantWidget(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
-    dlg->resize(800, 600);
 
+    dlg->resize(width() * 3 / 4, height() * 3 / 4);
     dlg->fireAndForget();
-    */
 }
 
 void BattleFrame::handleItemLink(BattleDialogModelObject* item)
@@ -3356,6 +3379,9 @@ void BattleFrame::stateUpdated()
 
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)
 {
+    if(!_model)
+        return nullptr;
+
     CombatantWidget* newWidget = nullptr;
 
     if(_combatantWidgets.contains(combatant))
@@ -4241,6 +4267,9 @@ BattleDialogModelEffect* BattleFrame::createEffect(int type, int size, int width
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
             result = BattleDialogModelEffectFactory::createEffectObject(effectPosition, QSize(width, size), color, filename);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
+            result = BattleDialogModelEffectFactory::createEffectObjectVideo(effectPosition, QSize(width, size), color, filename);
             break;
         default:
             break;

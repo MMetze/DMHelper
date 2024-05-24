@@ -7,6 +7,8 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, 
     _legendaryCount(-1),
     _conditions(0)
 {
+    connect(this, &BattleDialogModelMonsterBase::dataChanged, this, &BattleDialogModelMonsterBase::dirty);
+    connect(this, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModelMonsterBase::dirty);
 }
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant) :
@@ -14,6 +16,8 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant)
     _legendaryCount(-1),
     _conditions(0)
 {
+    connect(this, &BattleDialogModelMonsterBase::dataChanged, this, &BattleDialogModelMonsterBase::dirty);
+    connect(this, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModelMonsterBase::dirty);
 }
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant, int initiative, const QPointF& position) :
@@ -21,6 +25,8 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant,
     _legendaryCount(-1),
     _conditions(0)
 {
+    connect(this, &BattleDialogModelMonsterBase::dataChanged, this, &BattleDialogModelMonsterBase::dirty);
+    connect(this, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModelMonsterBase::dirty);
 }
 
 BattleDialogModelMonsterBase::~BattleDialogModelMonsterBase()

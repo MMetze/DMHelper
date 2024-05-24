@@ -69,6 +69,7 @@ signals:
     void addMonsters();
     void addNPC();
     void addEffectObject();
+    void addEffectObjectVideo();
     void addLayerImageFile(const QString& filename);
     void addEffectObjectFile(const QString& filename);
     void castSpell();
@@ -142,7 +143,7 @@ protected:
     bool isMimeDataImage(const QMimeData* mimeData) const;
     QString getMimeDataImageFile(const QMimeData* mimeData) const;
 
-    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
+//    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
 

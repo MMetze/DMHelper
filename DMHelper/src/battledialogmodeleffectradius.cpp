@@ -33,7 +33,7 @@ int BattleDialogModelEffectRadius::getEffectType() const
     return BattleDialogModelEffect_Radius;
 }
 
-BattleDialogEffectSettings* BattleDialogModelEffectRadius::getEffectEditor() const
+BattleDialogEffectSettingsBase* BattleDialogModelEffectRadius::getEffectEditor() const
 {
     BattleDialogEffectSettings* result = new BattleDialogEffectSettings(*this);
     result->setSizeLabel(QString("Radius"));

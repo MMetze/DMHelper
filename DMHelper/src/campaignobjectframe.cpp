@@ -41,12 +41,6 @@ void CampaignObjectFrame::setBackgroundColor(const QColor& color)
     qDebug() << "[CampaignObjectFrame] Unexpected base class call of setBackgroundColor for " << this;
 }
 
-/*
-void CampaignObjectFrame::reloadObject()
-{
-}
-*/
-
 void CampaignObjectFrame::editLayers()
 {
     qDebug() << "[CampaignObjectFrame] Unexpected base class call of editLayers for " << this;
