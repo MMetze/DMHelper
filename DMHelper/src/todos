@@ -1,3 +1,17 @@
+Performance, Memory usage, Delta install, full uninstall
+
+
+Lazy load images for Spells & Monsters
+When starting with only one
+Add an add Video Object button or auto-detect videos and images from the "Add Object" button
+Check the tab order in the video object options dialog
+Crashes when recording/using cloud effect layers
+Crashes when changing the bestiary with a campaign open (e.g. effect layers)
+
+Messed up video with Effects
+Exporter should copy videos and make them local as well
+
+
 Thoughts for templates:
 * Issues for backwards compatibility
     Convert Notes, Equipment and Spells into HTML CDATA

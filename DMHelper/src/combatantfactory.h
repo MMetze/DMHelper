@@ -31,6 +31,7 @@ public:
     };
 
     static const char* TEMPLATE_PROPERTY;
+    static const char* TEMPLATE_WIDGET;
 
     static const char* TEMPLATEVALUES[TEMPLATETYPE_COUNT];
 

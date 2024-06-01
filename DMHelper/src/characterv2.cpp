@@ -201,9 +201,9 @@ ResourcePair Characterv2::getResourceValue(const QString& key) const
     return _allValues.value(key, QVariant()).value<ResourcePair>();
 }
 
-QHash<QString, QVariant> Characterv2::getHashValue(const QString& key) const
+QList<QVariant> Characterv2::getListValue(const QString& key) const
 {
-    return _allValues.value(key).toHash();
+    return _allValues.value(key).toList();
 }
 
 void Characterv2::setValue(const QString& key, const QVariant& value)
@@ -366,19 +366,29 @@ void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
         }
         else if(CombatantFactory::Instance()->hasElementList(tagName))
         {
-            QHash<QString, QVariant> listEntryValues;
+            QList<QVariant> listValues;
 
             // Iterate through the list and create the individual attributes
             QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(tagName);
-            for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
+            QDomElement listEntry = childElement.firstChildElement();
+            while(!listEntry.isNull())
             {
-                QVariant attributeValue = readAttributeValue(element, *keyIt);
-                if(!attributeValue.isNull())
-                    listEntryValues.insert(*keyIt, attributeValue);
+                QHash<QString, QVariant> listEntryValues;
+                for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
+                {
+                    QVariant attributeValue = readAttributeValue(element, *keyIt);
+                    if(!attributeValue.isNull())
+                        listEntryValues.insert(*keyIt, attributeValue);
+                }
+
+                // Add the list entry to the list
+                listValues.append(listEntryValues);
+
+                listEntry = listEntry.nextSiblingElement();
             }
 
             // Add the list entry to the main list
-            _allValues.insert(tagName, listEntryValues);
+            _allValues.insert(tagName, listValues);
         }
         else
         {
@@ -421,41 +431,24 @@ void Characterv2::handleOldXMLs(const QDomElement& element)
 
     if(element.hasAttribute(QString("slots1")))
     {
-        QHash<QString, QVariant> listEntryValues;
+        QList<QVariant> listValues;
 
-        if(element.hasAttribute(QString("slots1")))
+        for(int i = 1; i <= 9; i++)
         {
-
+            QString slotsKey = QString("slots") + QString::number(i);
+            QString slotsUsedKey = QString("slotsused") + QString::number(i);
+            if(element.hasAttribute(slotsKey))
+            {
+                QHash<QString, QVariant> listEntryValues;
+                listEntryValues.insert(QString("level"), QVariant(i));
+                QVariant resourceVariant;
+                resourceVariant.setValue(ResourcePair(element.attribute(slotsUsedKey).toInt(), element.attribute(slotsKey).toInt()));
+                listEntryValues.insert(QString("slots"), resourceVariant);
+                listValues.append(listEntryValues);
+            }
         }
 
-        slots1="4"
-            slots2="3"
-            slots3="3"
-            slots4="3"
-            slots5="2"
-            slots6="1"
-            slots7="1"
-            slots8="1"
-            slotsused1="0"
-            slotsused2="0"
-            slotsused3="1"
-            slotsused4="0"
-            slotsused5="0"
-            slotsused6="0"
-            slotsused7="0"
-            slotsused8="0"
-            // Iterate through the list and create the individual attributes
-            QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(tagName);
-        for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
-        {
-            QVariant attributeValue = readAttributeValue(element, *keyIt);
-            if(!attributeValue.isNull())
-                listEntryValues.insert(*keyIt, attributeValue);
-        }
-
-        // Add the list entry to the main list
-        _allValues.insert(tagName, listEntryValues);
-
+        _allValues.insert(QString("spellSlots"), listValues);
     }
 }
 

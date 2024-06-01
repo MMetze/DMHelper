@@ -712,6 +712,9 @@ color: rgb(50, 50, 50);</string>
        <property name="dmhValue" stdset="0">
         <string>spellSlots</string>
        </property>
+       <property name="dmhWidget" stdset="0">
+        <string>spellSlot.ui</string>
+       </property>
        <widget class="QWidget" name="scrollAreaWidgetContents">
         <property name="geometry">
          <rect>

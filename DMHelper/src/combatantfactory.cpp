@@ -13,6 +13,7 @@
 CombatantFactory* CombatantFactory::_instance = nullptr;
 
 const char* CombatantFactory::TEMPLATE_PROPERTY = "dmhValue";
+const char* CombatantFactory::TEMPLATE_WIDGET = "dmhWidget";
 
 const char* CombatantFactory::TEMPLATEVALUES[TEMPLATETYPE_COUNT] =
 {

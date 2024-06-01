@@ -47,7 +47,7 @@ public:
     bool getBoolValue(const QString& key) const;
     Dice getDiceValue(const QString& key) const;
     ResourcePair getResourceValue(const QString& key) const;
-    QHash<QString, QVariant> getHashValue(const QString& key) const;
+    QList<QVariant> getListValue(const QString& key) const;
 
     void setValue(const QString& key, const QVariant& value);
     void setValue(const QString& key, const QString& value);

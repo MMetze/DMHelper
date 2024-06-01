@@ -622,6 +622,7 @@ FORMS    += mainwindow.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
     resources/ui/character.ui \
+    resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \
     ribbontabbattle.ui \

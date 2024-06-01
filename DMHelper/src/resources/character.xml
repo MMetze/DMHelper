@@ -96,7 +96,7 @@
         <dmh:attribute type="dmh:resource" name="diceCount"/>
     </dmh:element>
 
-    <dmh:element type="dmh:list" name="action">
+    <dmh:element type="dmh:list" name="actions">
         <dmh:element type="dmh:string" name="name"/>
         <dmh:element type="dmh:string" name="desc"/>
         <dmh:element type="dmh:integer" name="attack_bonus"/>
