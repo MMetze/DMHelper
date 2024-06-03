@@ -58,8 +58,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt install \
-          libvlc-dev \
-          libicu66        
+          libicu66 \
+          libvlc-dev
         
     - name: Build DMHelper for Linux
       run: |
