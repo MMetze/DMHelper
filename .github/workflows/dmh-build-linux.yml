@@ -41,8 +41,11 @@ jobs:
         pwd
         echo 'runner.workspace === ${{ runner.workspace }}'
         echo 'github.workspace === ${{ github.workspace }}'
-        ls ${{env.Qt6Dir}}
-        tree ${{ runner.workspace }}
+        # ls ${{env.Qt6Dir}}
+        echo ######## Qt directory tree ##########
+        tree ${{ runner.workspace }}/Qt
+        echo ######## DMH source tree ##########
+        tree ${{ runner.workspace }}/DMHelper
         # Get-ChildItem -Recurse -Directory
         # echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator
         # cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin
