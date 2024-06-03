@@ -49,34 +49,25 @@ jobs:
         # echo STOP!
         # Dosomethingthatbreaks
         
-    - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url:    http://download.qt.io/official_releases/jom/jom.zip
-        target: ${{ runner.temp }}\
-        
-    - name: Unzip JOM
-      working-directory: ${{ runner.temp }}
-      run:  |
-        7z x jom.zip -ojom
-    
     - name: Build DMHelper for Linux
       run: |
         cd DMHelper
         mkdir build-64_bit-release
         cd build-64_bit-release
-        qmake.exe ..\src\DMHelper.pro -spec  linux-g++-64 "CONFIG+=qtquickcompiler" 
-        ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
-        ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
+        qmake.exe ..\src\DMHelper.pro -spec linux-g++-64 "CONFIG+=qtquickcompiler" 
+        # ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
+        # ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
+        make
         
     - name: Zip the build
       run:  |
         cd DMHelper
-        7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
+        7z a -tzip DMHelper-linux-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
     
     - name: Output the workspace directory tree contents
       run: |
-        Get-ChildItem -Recurse
+        # Get-ChildItem -Recurse
+        tree
 
     - name: Save the zip file
       uses: actions/upload-artifact@master
