@@ -58,7 +58,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt install \
-          libicu66 \
+          libicu-dev \
           libvlc-dev
         
     - name: Build DMHelper for Linux
@@ -66,6 +66,7 @@ jobs:
         cd DMHelper
         mkdir build-64_bit-release
         cd build-64_bit-release
+        which qmake
         qmake ..\src\DMHelper.pro -spec linux-g++-64 "CONFIG+=qtquickcompiler" 
         # ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
         # ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
