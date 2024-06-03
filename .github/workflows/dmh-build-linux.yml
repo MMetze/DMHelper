@@ -14,7 +14,7 @@ env:
 jobs:
   build-DMH-linux:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Install Qt
@@ -25,6 +25,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
+        cache: 'true'
         modules: 'qtimageformats qtmultimedia qtnetworkauth'
         tools: 'tools_ifw'
         archives: 'qttranslations qttools qtsvg qtbase'
@@ -48,6 +49,17 @@ jobs:
         # Get-ChildItem -Recurse -Directory
         # echo STOP!
         # Dosomethingthatbreaks
+         
+    #
+    # Install additional dependencies, from:
+    # https://github.com/mapeditor/tiled/blob/master/.github/workflows/packages.yml
+    #
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt install \
+          libvlc-dev \
+          libicu66        
         
     - name: Build DMHelper for Linux
       run: |
