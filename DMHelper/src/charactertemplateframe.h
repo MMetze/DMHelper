@@ -9,6 +9,8 @@ class CharacterTemplateFrame;
 }
 
 class OptionsContainer;
+class QLineEdit;
+class QTextEdit;
 
 class CharacterTemplateFrame : public CampaignObjectFrame
 {
@@ -46,6 +48,10 @@ private slots:
     void syncDndBeyond();
     void importHeroForge();
     void updateCharacterName();
+
+    void handleLineEditFinished(QLineEdit* lineEdit);
+    void handleTextEditChanged(QTextEdit* textEdit);
+    void handleResourceChanged(QFrame* resourceFrame);
 
 private:
     void loadCharacterImage();

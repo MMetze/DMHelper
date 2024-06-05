@@ -49,6 +49,11 @@ public:
     ResourcePair getResourceValue(const QString& key) const;
     QList<QVariant> getListValue(const QString& key) const;
 
+signals:
+    void iconChanged(CampaignObjectBase* character);
+
+public slots:
+    virtual void setIcon(const QString &newIcon) override;
     void setValue(const QString& key, const QVariant& value);
     void setValue(const QString& key, const QString& value);
     void setStringValue(const QString& key, const QString& value);
@@ -56,12 +61,6 @@ public:
     void setBoolValue(const QString& key, bool value);
     void setDiceValue(const QString& key, const Dice& value);
     void setResourceValue(const QString& key, const ResourcePair& value);
-
-signals:
-    void iconChanged(CampaignObjectBase* character);
-
-public slots:
-    virtual void setIcon(const QString &newIcon) override;
 
 protected:
     // From Combatant

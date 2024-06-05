@@ -170,6 +170,11 @@ QHash<QString, QHash<QString, DMHAttribute>> CombatantFactory::getElementLists()
     return _elementLists;
 }
 
+bool CombatantFactory::hasEntry(const QString& name) const
+{
+    return hasAttribute(name) || hasElement(name) || hasElementList(name);
+}
+
 void CombatantFactory::loadCharacterTemplate()
 {
     QString defaultFilename("character.xml");

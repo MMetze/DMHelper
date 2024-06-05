@@ -54,6 +54,8 @@ public:
     QHash<QString, DMHAttribute> getElementList(const QString& name) const;
     QHash<QString, QHash<QString, DMHAttribute>> getElementLists() const;
 
+    bool hasEntry(const QString& name) const;
+
 signals:
 
 public slots:

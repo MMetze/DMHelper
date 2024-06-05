@@ -150,13 +150,14 @@ int Characterv2::getCharisma() const
 
 QString Characterv2::getValueAsString(const QString& key) const
 {
-    if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasAttribute(key)))
+    if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
         qDebug() << "[Characterv2] Attempting to read the value for the unknown key " << key;
 
     DMHAttribute attribute = CombatantFactory::Instance()->getAttribute(key);
     switch(attribute._type)
     {
         case CombatantFactory::TemplateType_string:
+        case CombatantFactory::TemplateType_html:
             return getStringValue(key);
         case CombatantFactory::TemplateType_integer:
             return QString::number(getIntValue(key));
@@ -223,20 +224,24 @@ void Characterv2::setValue(const QString& key, const QVariant& value)
 
 void Characterv2::setValue(const QString& key, const QString& value)
 {
-    if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasAttribute(key)))
+    if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
+    {
         qDebug() << "[Characterv2] Attempting to set the value \"" << value << "\" for the unknown key " << key;
+        return;
+    }
 
     DMHAttribute attribute = CombatantFactory::Instance()->getAttribute(key);
     switch(attribute._type)
     {
         case CombatantFactory::TemplateType_string:
-            setValue(key, value);
+        case CombatantFactory::TemplateType_html:
+            setValue(key, QVariant(value));
             break;
         case CombatantFactory::TemplateType_integer:
-            setValue(key, value.toInt());
+            setValue(key, QVariant(value.toInt()));
             break;
         case CombatantFactory::TemplateType_boolean:
-            setValue(key, static_cast<bool>(value.toInt()));
+            setValue(key, QVariant(static_cast<bool>(value.toInt())));
             break;
         case CombatantFactory::TemplateType_dice:
         {

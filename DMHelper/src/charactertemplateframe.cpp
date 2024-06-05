@@ -142,7 +142,8 @@ void CharacterTemplateFrame::setRotation(int rotation)
 void CharacterTemplateFrame::mousePressEvent(QMouseEvent * event)
 {
     Q_UNUSED(event);
-    ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    if((_character) && (ui->lblIcon->frameGeometry().contains(event->pos())))
+        ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     _mouseDown = true;
 }
 
@@ -176,30 +177,83 @@ void CharacterTemplateFrame::readCharacterData()
     QList<QLineEdit*> lineEdits = _uiWidget->findChildren<QLineEdit*>();
     for(auto lineEdit : lineEdits)
     {
+        if(!lineEdit)
+            continue;
+
         QString keyString = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
         if(!keyString.isEmpty())
         {
             QString valueString = _character->getValueAsString(keyString);
             if(!valueString.isEmpty())
+            {
                 lineEdit->setText(valueString);
+                connect(lineEdit, &QLineEdit::editingFinished, [this, lineEdit](){handleLineEditFinished(lineEdit);});
+            }
         }
     }
 
     QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
     for(auto textEdit : textEdits)
     {
+        if(!textEdit)
+            continue;
+
         QString keyString = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
         if(!keyString.isEmpty())
         {
             QString valueString = _character->getStringValue(keyString);
             if(!valueString.isEmpty())
+            {
                 textEdit->setHtml(valueString);
+                connect(textEdit, &QTextEdit::textChanged, [this, textEdit](){handleTextEditChanged(textEdit);});
+            }
+        }
+    }
+
+    QList<QFrame*> frames = _uiWidget->findChildren<QFrame*>();
+    for(auto frame : frames)
+    {
+        if((!frame) || (dynamic_cast<QTextEdit*>(frame)))
+            continue;
+
+        QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        if(QLayout* oldLayout = frame->layout())
+        {
+            QLayoutItem *child;
+            while((child = frame->layout()->takeAt(0)) != nullptr)
+            {
+                if(child->widget())
+                    child->widget()->deleteLater();
+                delete child;
+            }
+
+            delete oldLayout;
+        }
+
+        QHBoxLayout* frameLayout = new QHBoxLayout;
+        frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        frameLayout->setContentsMargins(0, 0, 0, 0);
+        frame->setLayout(frameLayout);
+
+        ResourcePair valuePair = _character->getResourceValue(keyString);
+        for(int i = 0; i < valuePair.second; ++i)
+        {
+            QCheckBox* checkBox = new QCheckBox();
+            checkBox->setChecked(i < valuePair.first);
+            frameLayout->addWidget(checkBox);
+            connect(checkBox, &QCheckBox::stateChanged, [this, frame](){handleResourceChanged(frame);});
         }
     }
 
     QList<QScrollArea*> scrollAreas = _uiWidget->findChildren<QScrollArea*>();
     for(auto scrollArea : scrollAreas)
     {
+        if(!scrollArea)
+            continue;
+
         QString keyString = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
         QString widgetString = scrollArea->property(CombatantFactory::TEMPLATE_WIDGET).toString();
         if((!keyString.isEmpty()) && (!widgetString.isEmpty()))
@@ -207,7 +261,7 @@ void CharacterTemplateFrame::readCharacterData()
             QList<QVariant> listValue = _character->getListValue(keyString);
             if(!listValue.isEmpty())
             {
-                if(scrollArea->layout())
+                if(QLayout* oldLayout = scrollArea->layout())
                 {
                     QLayoutItem *child;
                     while((child = scrollArea->layout()->takeAt(0)) != nullptr)
@@ -217,7 +271,7 @@ void CharacterTemplateFrame::readCharacterData()
                         delete child;
                     }
 
-                    delete scrollArea->layout();
+                    delete oldLayout;
                 }
 
 #ifdef Q_OS_MAC
@@ -283,21 +337,25 @@ void CharacterTemplateFrame::readCharacterData()
                             QList<QFrame*> frames = newWidget->findChildren<QFrame*>();
                             for(auto frame : frames)
                             {
-                                QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-                                if(!keyString.isEmpty())
-                                {
-                                    QHBoxLayout* frameLayout = new QHBoxLayout;
-                                    frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-                                    frameLayout->setContentsMargins(0, 0, 0, 0);
-                                    frame->setLayout(frameLayout);
+                                if((!frame) || (dynamic_cast<QTextEdit*>(frame)))
+                                    continue;
 
-                                    ResourcePair valuePair = hashValue.value(keyString).value<ResourcePair>();
-                                    for(int i = 0; i < valuePair.second; ++i)
-                                    {
-                                        QCheckBox* checkBox = new QCheckBox();
-                                        checkBox->setChecked(i < valuePair.first);
-                                        frameLayout->addWidget(checkBox);
-                                    }
+                                QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+                                if(keyString.isEmpty())
+                                    continue;
+
+                                QHBoxLayout* frameLayout = new QHBoxLayout;
+                                frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+                                frameLayout->setContentsMargins(0, 0, 0, 0);
+                                frame->setLayout(frameLayout);
+
+                                ResourcePair valuePair = hashValue.value(keyString).value<ResourcePair>();
+                                for(int i = 0; i < valuePair.second; ++i)
+                                {
+                                    QCheckBox* checkBox = new QCheckBox();
+                                    checkBox->setChecked(i < valuePair.first);
+                                    frameLayout->addWidget(checkBox);
+                                    connect(checkBox, &QCheckBox::stateChanged, [this, frame](){handleResourceChanged(frame);});
                                 }
                             }
                         }
@@ -450,6 +508,42 @@ void CharacterTemplateFrame::updateCharacterName()
         return;
 
     //ui->edtName->setText(_character->getName());
+}
+
+void CharacterTemplateFrame::handleLineEditFinished(QLineEdit* lineEdit)
+{
+    if((!_character) || (!lineEdit))
+        return;
+
+    QString keyString = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+    _character->setValue(keyString, lineEdit->text());
+}
+
+void CharacterTemplateFrame::handleTextEditChanged(QTextEdit* textEdit)
+{
+    if((!_character) || (!textEdit))
+        return;
+
+    QString keyString = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+    _character->setValue(keyString, textEdit->toHtml());
+}
+
+void CharacterTemplateFrame::handleResourceChanged(QFrame* resourceFrame)
+{
+    if((!_character) || (!resourceFrame))
+        return;
+
+    int checkboxCount = 0;
+    int checkedCount = 0;
+    for(auto child : resourceFrame->findChildren<QCheckBox*>())
+    {
+        ++checkboxCount;
+        if(child->isChecked())
+            ++checkedCount;
+    }
+
+    QString keyString = resourceFrame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+    _character->setResourceValue(keyString, ResourcePair(checkedCount, checkboxCount));
 }
 
 void CharacterTemplateFrame::loadCharacterImage()
