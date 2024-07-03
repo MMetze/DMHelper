@@ -72,6 +72,8 @@
     <dmh:attribute type="dmh:integer" name="survival"/>
     <dmh:attribute type="dmh:integer" name="passiveperception"/>
 
+    <dmh:attribute type="dmh:resource" name="bardic-inspiration"/>
+
     <dmh:attribute type="dmh:string" name="pactmagiclevel"/>
     <dmh:attribute type="dmh:resource" name="pactmagicslots"/>
 

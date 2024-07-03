@@ -700,7 +700,7 @@ color: rgb(50, 50, 50);</string>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,2">
+    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1,1">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -720,11 +720,24 @@ color: rgb(50, 50, 50);</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>131</width>
+          <width>130</width>
           <height>68</height>
          </rect>
         </property>
        </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="frameInspiration">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>bardic-inspiration</string>
+       </property>
       </widget>
      </item>
      <item>

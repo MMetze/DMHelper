@@ -1,5 +1,6 @@
 #include "charactertemplateframe.h"
 #include "ui_charactertemplateframe.h"
+#include "charactertemplateresourcelayout.h"
 #include "characterimporter.h"
 #include "characterimportheroforgedialog.h"
 #include "tokeneditdialog.h"
@@ -114,6 +115,9 @@ void CharacterTemplateFrame::setCharacter(Characterv2* character)
     if(_character == character)
         return;
 
+    if(_character)
+        disconnectTemplate();
+
     _character = character;
     readCharacterData();
     emit characterChanged();
@@ -166,6 +170,24 @@ void CharacterTemplateFrame::mouseReleaseEvent(QMouseEvent * event)
     loadCharacterImage();
 }
 
+void CharacterTemplateFrame::disconnectTemplate()
+{
+    // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
+    QList<QLineEdit*> lineEdits = _uiWidget->findChildren<QLineEdit*>();
+    for(auto lineEdit : lineEdits)
+    {
+        if(lineEdit)
+            disconnect(lineEdit, &QLineEdit::editingFinished, nullptr, nullptr);
+    }
+
+    QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
+    for(auto textEdit : textEdits)
+    {
+        if(textEdit)
+            disconnect(textEdit, &QTextEdit::textChanged, nullptr, nullptr);
+    }
+}
+
 void CharacterTemplateFrame::readCharacterData()
 {
     if((!_character) || (!_uiWidget))
@@ -213,39 +235,27 @@ void CharacterTemplateFrame::readCharacterData()
     QList<QFrame*> frames = _uiWidget->findChildren<QFrame*>();
     for(auto frame : frames)
     {
-        if((!frame) || (dynamic_cast<QTextEdit*>(frame)))
+        if((!frame) || (dynamic_cast<QTextEdit*>(frame)) || (dynamic_cast<QScrollArea*>(frame)))
             continue;
+
+        if(QLayout* oldLayout = frame->layout())
+        {
+            frame->removeEventFilter(oldLayout);
+            delete oldLayout;
+        }
 
         QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
         if(keyString.isEmpty())
             continue;
 
-        if(QLayout* oldLayout = frame->layout())
-        {
-            QLayoutItem *child;
-            while((child = frame->layout()->takeAt(0)) != nullptr)
-            {
-                if(child->widget())
-                    child->widget()->deleteLater();
-                delete child;
-            }
-
-            delete oldLayout;
-        }
-
-        QHBoxLayout* frameLayout = new QHBoxLayout;
-        frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-        frameLayout->setContentsMargins(0, 0, 0, 0);
-        frame->setLayout(frameLayout);
-
         ResourcePair valuePair = _character->getResourceValue(keyString);
-        for(int i = 0; i < valuePair.second; ++i)
-        {
-            QCheckBox* checkBox = new QCheckBox();
-            checkBox->setChecked(i < valuePair.first);
-            frameLayout->addWidget(checkBox);
-            connect(checkBox, &QCheckBox::stateChanged, [this, frame](){handleResourceChanged(frame);});
-        }
+        if(valuePair.second == 0)
+            continue;
+
+        CharacterTemplateResourceLayout* layout = new CharacterTemplateResourceLayout(keyString, valuePair);
+        connect(layout, &CharacterTemplateResourceLayout::resourceValueChanged, _character, &Characterv2::setResourceValue);
+        frame->installEventFilter(layout);
+        frame->setLayout(layout);
     }
 
     QList<QScrollArea*> scrollAreas = _uiWidget->findChildren<QScrollArea*>();
@@ -293,8 +303,13 @@ void CharacterTemplateFrame::readCharacterData()
                     scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
                     scrollArea->setLayout(scrollLayout);
 
-                    for(auto listEntry : listValue)
+                    //for(auto listEntry : listValue)
+                    for(int i = 0; i < listValue.count(); ++i)
                     {
+                        QVariant listEntry = listValue.at(i);
+                        if(listEntry.isNull())
+                            continue;
+
                         QUiLoader loader;
                         QFile file(appFile);
                         file.open(QFile::ReadOnly);
@@ -304,60 +319,80 @@ void CharacterTemplateFrame::readCharacterData()
                         if(!newWidget)
                         {
                             qDebug() << "[CharacterTemplateFrame] ERROR: UI Widget Template File could not be loaded: " << appFile << ", for scroll area: " << keyString;
+                            continue;
                         }
-                        else
+
+                        QHash<QString, QVariant> hashValue = listEntry.toHash();
+
+                        // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
+                        QList<QLineEdit*> lineEdits = newWidget->findChildren<QLineEdit*>();
+                        for(auto lineEdit : lineEdits)
                         {
-                            QHash<QString, QVariant> hashValue = listEntry.toHash();
-
-                            // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
-                            QList<QLineEdit*> lineEdits = newWidget->findChildren<QLineEdit*>();
-                            for(auto lineEdit : lineEdits)
+                            QString keyString = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+                            if(!keyString.isEmpty())
                             {
-                                QString keyString = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-                                if(!keyString.isEmpty())
-                                {
-                                    QString valueString = hashValue.value(keyString).toString();
-                                    if(!valueString.isEmpty())
-                                        lineEdit->setText(valueString);
-                                }
+                                QString valueString = hashValue.value(keyString).toString();
+                                if(!valueString.isEmpty())
+                                    lineEdit->setText(valueString);
+                            }
+                        }
+
+                        QList<QTextEdit*> textEdits = newWidget->findChildren<QTextEdit*>();
+                        for(auto textEdit : textEdits)
+                        {
+                            QString keyString = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+                            if(!keyString.isEmpty())
+                            {
+                                QString valueString = hashValue.value(keyString).toString();
+                                if(!valueString.isEmpty())
+                                    textEdit->setHtml(valueString);
+                            }
+                        }
+
+                        QList<QFrame*> frames = newWidget->findChildren<QFrame*>();
+                        for(auto frame : frames)
+                        {
+                            if(QLayout* oldLayout = frame->layout())
+                            {
+                                frame->removeEventFilter(oldLayout);
+                                delete oldLayout;
                             }
 
-                            QList<QTextEdit*> textEdits = newWidget->findChildren<QTextEdit*>();
-                            for(auto textEdit : textEdits)
+                            QString listKey = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+                            if(listKey.isEmpty())
+                                continue;
+
+                            ResourcePair valuePair = hashValue.value(listKey).value<ResourcePair>();
+                            if(valuePair.second == 0)
+                                continue;
+
+                            CharacterTemplateResourceLayout* layout = new CharacterTemplateResourceLayout(keyString, i, listKey, valuePair);
+                            connect(layout, &CharacterTemplateResourceLayout::resourceListValueChanged, _character, &Characterv2::setListValue);
+                            frame->installEventFilter(layout);
+                            frame->setLayout(layout);
+
+                            /*
+                            if((!frame) || (dynamic_cast<QTextEdit*>(frame)))
+                                continue;
+
+                            QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+                            if(keyString.isEmpty())
+                                continue;
+
+                            QHBoxLayout* frameLayout = new QHBoxLayout;
+                            frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+                            frameLayout->setContentsMargins(0, 0, 0, 0);
+                            frame->setLayout(frameLayout);
+
+                            ResourcePair valuePair = hashValue.value(keyString).value<ResourcePair>();
+                            for(int i = 0; i < valuePair.second; ++i)
                             {
-                                QString keyString = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-                                if(!keyString.isEmpty())
-                                {
-                                    QString valueString = hashValue.value(keyString).toString();
-                                    if(!valueString.isEmpty())
-                                        textEdit->setHtml(valueString);
-                                }
+                                QCheckBox* checkBox = new QCheckBox();
+                                checkBox->setChecked(i < valuePair.first);
+                                frameLayout->addWidget(checkBox);
+                                connect(checkBox, &QCheckBox::stateChanged, [this, frame](){handleResourceChanged(frame);});
                             }
-
-                            QList<QFrame*> frames = newWidget->findChildren<QFrame*>();
-                            for(auto frame : frames)
-                            {
-                                if((!frame) || (dynamic_cast<QTextEdit*>(frame)))
-                                    continue;
-
-                                QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-                                if(keyString.isEmpty())
-                                    continue;
-
-                                QHBoxLayout* frameLayout = new QHBoxLayout;
-                                frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-                                frameLayout->setContentsMargins(0, 0, 0, 0);
-                                frame->setLayout(frameLayout);
-
-                                ResourcePair valuePair = hashValue.value(keyString).value<ResourcePair>();
-                                for(int i = 0; i < valuePair.second; ++i)
-                                {
-                                    QCheckBox* checkBox = new QCheckBox();
-                                    checkBox->setChecked(i < valuePair.first);
-                                    frameLayout->addWidget(checkBox);
-                                    connect(checkBox, &QCheckBox::stateChanged, [this, frame](){handleResourceChanged(frame);});
-                                }
-                            }
+                            */
                         }
 
                         scrollLayout->addWidget(newWidget);

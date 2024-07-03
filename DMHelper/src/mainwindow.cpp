@@ -246,6 +246,8 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Initializing DMHelper\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
 
+    QImageReader::setAllocationLimit(0);
+
     ui->setupUi(this);
     if(screen)
     {

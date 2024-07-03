@@ -1,4 +1,8 @@
 Performance, Memory usage, Delta install, full uninstall
+QImageReader::setLimit controls and improvements
+Remove then sort --> crash
+Scroll zoom scrolls (shouldn't)
+Middle button moves
 
 
 Lazy load images for Spells & Monsters

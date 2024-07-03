@@ -41,6 +41,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent * event) override;
 
 private slots:
+    void disconnectTemplate();
     void readCharacterData();
     void writeCharacterData();
     void handlePublishClicked();

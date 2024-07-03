@@ -72,6 +72,7 @@ SOURCES += main.cpp\
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
     charactertemplateframe.cpp \
+    charactertemplateresourcelayout.cpp \
     characterv2.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
@@ -351,6 +352,7 @@ HEADERS  += mainwindow.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
     charactertemplateframe.h \
+    charactertemplateresourcelayout.h \
     characterv2.h \
     colorpushbutton.h \
     combatantrolloverframe.h \

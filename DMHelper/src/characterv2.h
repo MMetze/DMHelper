@@ -61,6 +61,7 @@ public slots:
     void setBoolValue(const QString& key, bool value);
     void setDiceValue(const QString& key, const Dice& value);
     void setResourceValue(const QString& key, const ResourcePair& value);
+    void setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue);
 
 protected:
     // From Combatant
@@ -72,7 +73,10 @@ private:
     //void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
     void readXMLValues(const QDomElement& element, bool isImport);
     void handleOldXMLs(const QDomElement& element);
-    bool isAttributeSpecial(const QString& attribute);
+    bool isAttributeSpecial(const QString& attribute) const;
+    QVariant getAttributeSpecial(const QString& attribute) const;
+    QString getAttributeSpecialAsString(const QString& attribute) const;
+    void setAttributeSpecial(const QString& key, const QString& value);
     QVariant readAttributeValue(const QDomElement& element, const QString& name);
 
     int _dndBeyondID;

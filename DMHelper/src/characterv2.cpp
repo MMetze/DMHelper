@@ -150,6 +150,9 @@ int Characterv2::getCharisma() const
 
 QString Characterv2::getValueAsString(const QString& key) const
 {
+    if(isAttributeSpecial(key))
+        return getAttributeSpecialAsString(key);
+
     if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
         qDebug() << "[Characterv2] Attempting to read the value for the unknown key " << key;
 
@@ -178,23 +181,34 @@ QString Characterv2::getValueAsString(const QString& key) const
 
 QString Characterv2::getStringValue(const QString& key) const
 {
-    return _allValues.value(key, QString()).toString();
+    if(isAttributeSpecial(key))
+        return getAttributeSpecialAsString(key);
+    else
+        return _allValues.value(key, QString()).toString();
 }
 
 int Characterv2::getIntValue(const QString& key) const
 {
-    return _allValues.value(key, 0).toInt();
+    if(isAttributeSpecial(key))
+        return getAttributeSpecial(key).toInt();
+    else
+        return _allValues.value(key, 0).toInt();
 }
 
 bool Characterv2::getBoolValue(const QString& key) const
 {
-    return _allValues.value(key, false).toBool();
+    if(isAttributeSpecial(key))
+        return getAttributeSpecial(key).toBool();
+    else
+        return _allValues.value(key, false).toBool();
 }
 
 Dice Characterv2::getDiceValue(const QString& key) const
 {
-
-    return _allValues.value(key, QVariant()).value<Dice>();
+    if(isAttributeSpecial(key))
+        return getAttributeSpecial(key).value<Dice>();
+    else
+        return _allValues.value(key, QVariant()).value<Dice>();
 }
 
 ResourcePair Characterv2::getResourceValue(const QString& key) const
@@ -211,7 +225,7 @@ void Characterv2::setValue(const QString& key, const QVariant& value)
 {
     if(!_allValues.contains(key))
     {
-        qDebug() << "[Characterv2] Attempting to set the value \"" << value << "\" for the unknown key " << key;
+        qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
         return;
     }
 
@@ -224,6 +238,9 @@ void Characterv2::setValue(const QString& key, const QVariant& value)
 
 void Characterv2::setValue(const QString& key, const QString& value)
 {
+    if(isAttributeSpecial(key))
+        setAttributeSpecial(key, value);
+
     if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
     {
         qDebug() << "[Characterv2] Attempting to set the value \"" << value << "\" for the unknown key " << key;
@@ -307,6 +324,19 @@ void Characterv2::internalOutputXML(QDomDocument &doc, QDomElement &element, QDi
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
+void Characterv2::setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue)
+{
+    QList<QVariant> list = getListValue(key);
+
+    if((index < 0) || (index >= list.size()))
+        return;
+
+    QHash<QString, QVariant> listEntryValues = list.at(index).toHash();
+    listEntryValues.insert(listEntryKey, listEntryValue);
+    list.replace(index, listEntryValues);
+    setValue(key, QVariant(list));
+}
+
 bool Characterv2::belongsToObject(QDomElement& element)
 {
     if((CombatantFactory::Instance()) && (CombatantFactory::Instance()->hasElement(element.tagName())))
@@ -335,7 +365,7 @@ void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
     QHash<QString, DMHAttribute> attributeHash = CombatantFactory::Instance()->getAttributes();
     for(auto keyIt = attributeHash.keyBegin(), end = attributeHash.keyEnd(); keyIt != end; ++keyIt)
     {
-        //if(!isAttributeSpecial(*keyIt))
+        if(!isAttributeSpecial(*keyIt))
         {
             QVariant attributeValue = readAttributeValue(element, *keyIt);
             if(!attributeValue.isNull())
@@ -457,7 +487,7 @@ void Characterv2::handleOldXMLs(const QDomElement& element)
     }
 }
 
-bool Characterv2::isAttributeSpecial(const QString& attribute)
+bool Characterv2::isAttributeSpecial(const QString& attribute) const
 {
     return ((attribute == QString("expanded")) ||
             (attribute == QString("row")) ||
@@ -468,8 +498,90 @@ bool Characterv2::isAttributeSpecial(const QString& attribute)
             (attribute == QString("hitDice")) ||
             (attribute == QString("conditions")) ||
             (attribute == QString("initiative")) ||
-            (attribute == QString("icon")) ||
-            (attribute == QString("attacks")));
+            (attribute == QString("icon"))); //||
+            // TODO: (attribute == QString("attacks")));
+}
+
+QVariant Characterv2::getAttributeSpecial(const QString& attribute) const
+{
+    QVariant value;
+
+    if(attribute == QString("expanded"))
+        value = QVariant(getExpanded());
+    else if(attribute == QString("row"))
+        value = QVariant(getRow());
+    else if(attribute == QString("name"))
+        value = QVariant(getName());
+    else if(attribute == QString("base-icon"))
+        value = QVariant(getIconFile());
+    else if(attribute == QString("armorClass"))
+        value = QVariant(getArmorClass());
+    else if(attribute == QString("hitPoints"))
+        value = QVariant(getHitPoints());
+    else if(attribute == QString("hitDice"))
+        value.setValue(getHitDice());
+    else if(attribute == QString("conditions"))
+        value = QVariant(getConditions());
+    else if(attribute == QString("initiative"))
+        value = QVariant(getInitiative());
+    else if(attribute == QString("icon"))
+        value = QVariant(getIconFile());
+// TODO:    else if(attribute == QString("attacks")) ?
+//        value = QVariant(getAttacks());
+
+    return value;
+}
+
+QString Characterv2::getAttributeSpecialAsString(const QString& attribute) const
+{
+    if(attribute == QString("expanded"))
+        return QString::number(getExpanded());
+    else if(attribute == QString("row"))
+        return QString::number(getRow());
+    else if(attribute == QString("name"))
+        return getName();
+    else if(attribute == QString("base-icon"))
+        return getIconFile();
+    else if(attribute == QString("armorClass"))
+        return QString::number(getArmorClass());
+    else if(attribute == QString("hitPoints"))
+        return QString::number(getHitPoints());
+    else if(attribute == QString("hitDice"))
+        return getHitDice().toString();
+    else if(attribute == QString("conditions"))
+        return QString::number(getConditions());
+    else if(attribute == QString("initiative"))
+        return QString::number(getInitiative());
+    else if(attribute == QString("icon"))
+        return getIconFile();
+    else
+        return QString();
+}
+
+void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
+{
+    if(key == QString("expanded"))
+        qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
+    else if(key == QString("row"))
+        qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
+    else if(key == QString("name"))
+        setName(value);
+    else if(key == QString("base-icon"))
+        setIconFile(value);
+    else if(key == QString("armorClass"))
+        setArmorClass(value.toInt());
+    else if(key == QString("hitPoints"))
+        setHitPoints(value.toInt());
+    else if(key == QString("hitDice"))
+        setHitDice(Dice(value));
+    else if(key == QString("conditions"))
+        setConditions(value.toInt()); // TODO: conditions are not well-solved
+    else if(key == QString("initiative"))
+        setInitiative(value.toInt());
+    else if(key == QString("icon"))
+        setIcon(value);
+    else
+        qDebug() << "[Characterv2] ERROR: Attempt to set unknown special attribute " << key << " to " << value;
 }
 
 QVariant Characterv2::readAttributeValue(const QDomElement& element, const QString& name)
