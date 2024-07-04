@@ -787,8 +787,7 @@ void LayerTokens::combatantMoved(BattleDialogModelObject* object)
                             collisionEffect = childEffect;
                     }
 
-                    bool collision = isItemInEffectArea(combatantItem, collisionEffect);
-                    if(!collision)
+                    if((!effect->getEffectActive()) || (!isItemInEffectArea(combatantItem, collisionEffect)))
                     {
                         removeSpecificEffectFromItem(combatantItem, effect);
                         removeEffectFromToken(combatantToken, effect);
