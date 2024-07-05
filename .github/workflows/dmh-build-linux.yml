@@ -53,6 +53,7 @@ jobs:
     #
     - name: Install dependencies
       run: |
+        sudo add-apt-repository ppa:videolan/master-daily
         sudo apt update
         sudo apt list -a libvlc-dev
         sudo apt install libvlc-dev
