@@ -165,8 +165,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Expected Spellbook Version: " << QString::number(DMHelper::SPELLBOOK_MAJOR_VERSION) + "." + QString::number(DMHelper::SPELLBOOK_MINOR_VERSION);
     qDebug() << "[MainWindow]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     qDebug() << "[MainWindow]     OS: MacOS";
+#elseif Q_OS_LINUX
+    qDebug() << "[MainWindow]     OS: Linux";
 #else
     qDebug() << "[MainWindow]     OS: Windows";
 #endif
