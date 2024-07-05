@@ -21,7 +21,7 @@ int AudioTrackSyrinscape::getAudioType() const
 
 void AudioTrackSyrinscape::play()
 {
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
         QMessageBox::information(nullptr, QString("Syrinscape integration"), QString("Syrinscape 3rd party integration is unfortunately only supported on Windows at this time. Audio playback of Syrinscape audio will be integrated into DMHelper as soon as this is supported!"));
 #else
         QDesktopServices::openUrl(getUrl());
