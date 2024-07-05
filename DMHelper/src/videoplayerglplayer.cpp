@@ -504,7 +504,7 @@ bool VideoPlayerGLPlayer::startPlayer()
     qDebug() << "[VideoPlayerGLPlayer] Starting video player with " << _videoFile.toUtf8().constData();
 
     // Create a new Media
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     _vlcMedia = libvlc_media_new_path(_videoFile.toUtf8().constData());
 #else
     _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), _videoFile.toUtf8().constData());
@@ -512,7 +512,7 @@ bool VideoPlayerGLPlayer::startPlayer()
     if (!_vlcMedia)
         return false;
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
 #else
     _vlcPlayer = libvlc_media_player_new_from_media(_vlcMedia);
