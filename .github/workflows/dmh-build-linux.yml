@@ -60,9 +60,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt install \
-          # libicu-dev \
-          libvlc-dev
+        sudo apt install libvlc-dev
         
     - name: Build DMHelper for Linux
       run: |
