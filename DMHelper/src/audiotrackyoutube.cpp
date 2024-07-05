@@ -320,13 +320,13 @@ void AudioTrackYoutube::playDirectUrl()
     if(isPlaying())
         return;
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #else
     libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
 #endif
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
 #else
     _vlcPlayer = libvlc_media_player_new_from_media(vlcMedia);
