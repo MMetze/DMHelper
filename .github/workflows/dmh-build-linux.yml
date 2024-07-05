@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         aqtversion: '==3.1.*'
         version: '6.6.0'
@@ -28,7 +28,7 @@ jobs:
         cache: 'true'
         modules: 'qtimageformats qtmultimedia qtnetworkauth'
         tools: 'tools_ifw'
-        archives: 'qttranslations qttools qtsvg qtbase'
+        archives: 'qttranslations qttools qtsvg qtbase icu'
         
     - name: Check out the DMHelper source tree
       uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
         mkdir build-64_bit-release
         cd build-64_bit-release
         which qmake
-        qmake ..\src\DMHelper.pro -spec linux-g++-64 "CONFIG+=qtquickcompiler" 
+        qmake ..\src\DMHelper.pro -d -Wall -spec linux-g++-64 "CONFIG+=qtquickcompiler" 
         # ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
         # ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
         make
