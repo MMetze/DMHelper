@@ -61,7 +61,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt install \
-          libicu-dev \
+          # libicu-dev \
           libvlc-dev
         
     - name: Build DMHelper for Linux
@@ -70,15 +70,31 @@ jobs:
         mkdir build-64_bit-release
         cd build-64_bit-release
         which qmake
-        qmake ..\src\DMHelper.pro -d -Wall -spec linux-g++-64 "CONFIG+=qtquickcompiler" 
-        # ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
-        # ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
+        qmake ../src/DMHelper.pro -d -Wall -spec linux-g++-64 "CONFIG+=qtquickcompiler" 
         make
-        
+
+    - name: Copy binary resources
+      run: |
+        cd DMHelper
+        cd build-64_bit-release
+        ls
+        cp ./release/DMHelper.exe ../bin64/packages/com.dmhelper.app/data
+        # xcopy D:\a\DMHelper\Qt\6.6.0\msvc2019_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
+        cp -r ../src/bin-win64/ ../bin64/packages/com.dmhelper.app/data
+        cp -r ../src/bestiary/ ../bin64/packages/com.dmhelper.app/data/resources
+        cp -r ../src/doc/ ../bin64/packages/com.dmhelper.app/data/doc
+        cp -r ../src/resources/ ../bin64/packages/com.dmhelper.app/data/resources
+
+    - name: Call Deploy for Qt
+      run: |
+        cd DMHelper
+        cd build-64_bit-release
+        linuxdeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
+
     - name: Zip the build
       run:  |
         cd DMHelper
-        7z a -tzip DMHelper-linux-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
+        7z a -tzip DMHelper-linux-64-bit-release.zip ./bin64/packages/com.dmhelper.app/data/*
     
     - name: Output the workspace directory tree contents
       run: |
