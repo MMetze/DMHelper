@@ -677,12 +677,11 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename, bool* 
     }
 
     QString appFile;
-#ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
+#ifdef Q_OS_MACOS
     fileDirPath.cdUp();
     appFile = fileDirPath.path() + QString("/Resources/") + defaultFilename;
 #else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
     appFile = fileDirPath.path() + QString("/resources/") + defaultFilename;
 #endif
 
@@ -741,7 +740,7 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overw
 
     QString applicationPath = QCoreApplication::applicationDirPath();
     QDir fileDirPath(applicationPath);
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     fileDirPath.cdUp();
     if(!fileDirPath.cd(QString("Resources/") + defaultDir))
         return QString();
