@@ -63,8 +63,11 @@ jobs:
         cd DMHelper
         mkdir -p {build-64_bit-release,bin64/config,bin64/packages/com.dmhelper.app/{meta,data}}
         tree ./bin64
-        tree ./src
-        cp -R ./src/installer/ ./bin64
+        # tree ./src
+        echo ls -alR ./src/installer
+        ls -alR ./src/installer
+        cp -Rv ./src/installer/ ./bin64
+        ls -alR ./bin64
         mv ./bin64/packages/com.dmhelper.app/meta/installscript64.qs ./bin64/packages/com.dmhelper.app/meta/installscript.qs
         # tree ${{ runner.workspace }}/DMHelper/bin64
 
@@ -81,11 +84,11 @@ jobs:
         cd DMHelper
         cd build-64_bit-release
         tree ${{ runner.workspace }}/DMHelper/build-64_bit-release
-        cp ./release/DMHelper ../bin64/packages/com.dmhelper.app/data
+        cp -v ./release/DMHelper ../bin64/packages/com.dmhelper.app/data
         # cp -r ../src/bin-win64/ ../bin64/packages/com.dmhelper.app/data
-        cp -r ../src/bestiary/ ../bin64/packages/com.dmhelper.app/data/resources
-        cp -r ../src/doc/ ../bin64/packages/com.dmhelper.app/data/doc
-        cp -r ../src/resources/ ../bin64/packages/com.dmhelper.app/data/resources
+        cp -Rv ../src/bestiary/ ../bin64/packages/com.dmhelper.app/data/resources
+        cp -Rv ../src/doc/ ../bin64/packages/com.dmhelper.app/data/doc
+        cp -Rv ../src/resources/ ../bin64/packages/com.dmhelper.app/data/resources
 
     - name: Call Deploy for Qt
       run: |
