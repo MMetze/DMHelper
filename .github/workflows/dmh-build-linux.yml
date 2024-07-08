@@ -61,12 +61,12 @@ jobs:
         
     - name: Set up environment for build
       run: |
-        echo "Current environmental path: ${{env.PATH}}"
         cd DMHelper
         mkdir -p {build-64_bit-release,bin64/config,bin64/packages/com.dmhelper.app/{meta,data}}
-        cp -R src/installer/ bin64/
-        mv bin64/packages/com.dmhelper.app/meta/installscript64.qs bin64/packages/com.dmhelper.app/meta/installscript.qs
-        ls -alR
+        cp -R ./src/installer/ ./bin64
+        tree ${{ runner.workspace }}/DMHelper/bin64
+        mv ./bin64/packages/com.dmhelper.app/meta/installscript64.qs ./bin64/packages/com.dmhelper.app/meta/installscript.qs
+        # tree ${{ runner.workspace }}/DMHelper/bin64
 
     - name: Build DMHelper for Linux
       run: |
@@ -80,7 +80,7 @@ jobs:
       run: |
         cd DMHelper
         cd build-64_bit-release
-        ls -alR
+        tree ${{ runner.workspace }}/DMHelper/build-64_bit-release
         cp ./release/DMHelper ../bin64/packages/com.dmhelper.app/data
         # cp -r ../src/bin-win64/ ../bin64/packages/com.dmhelper.app/data
         cp -r ../src/bestiary/ ../bin64/packages/com.dmhelper.app/data/resources
