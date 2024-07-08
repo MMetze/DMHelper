@@ -7,7 +7,6 @@ env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION: 6.6.0
   QT_INSTALLER_VERSION: 4.7
-  # MSVC_VERSION: 2019
   # INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.exe
   # ZIPARTIFACT: DMHelper-64-bit-release.zip
 
@@ -45,7 +44,7 @@ jobs:
         # echo ######## Qt directory tree ##########
         # tree ${{ runner.workspace }}/Qt
         # echo ######## DMH source tree ##########
-        # tree ${{ runner.workspace }}/DMHelper
+        tree ${{ runner.workspace }}/DMHelper
          
     #
     # Install additional dependencies, from:
@@ -63,8 +62,9 @@ jobs:
       run: |
         cd DMHelper
         mkdir -p {build-64_bit-release,bin64/config,bin64/packages/com.dmhelper.app/{meta,data}}
+        tree ./bin64
+        tree ./src
         cp -R ./src/installer/ ./bin64
-        tree ${{ runner.workspace }}/DMHelper/bin64
         mv ./bin64/packages/com.dmhelper.app/meta/installscript64.qs ./bin64/packages/com.dmhelper.app/meta/installscript.qs
         # tree ${{ runner.workspace }}/DMHelper/bin64
 
