@@ -35,11 +35,7 @@ jobs:
     - name: Print current working dir
       run: |
         echo Workspace is: ${{ github.workspace }}
-        ls DMHelper
         cd DMHelper
-        pwd
-        echo 'runner.workspace === ${{ runner.workspace }}'
-        echo 'github.workspace === ${{ github.workspace }}'
         # ls ${{env.Qt6Dir}}
         # echo ######## Qt directory tree ##########
         # tree ${{ runner.workspace }}/Qt
@@ -52,8 +48,7 @@ jobs:
     #
     - name: Install dependencies
       run: |
-        # Uncomment the next line to get LibVLC v4.0
-        sudo add-apt-repository ppa:videolan/master-daily
+        sudo add-apt-repository ppa:videolan/master-daily # Get LibVLC v4.0 from a private archive
         sudo apt update
         sudo apt list -a libvlc-dev
         sudo apt install libvlc-dev
@@ -62,14 +57,9 @@ jobs:
       run: |
         cd DMHelper
         mkdir -p {build-64_bit-release,bin64/config,bin64/packages/com.dmhelper.app/{meta,data}}
-        tree ./bin64
-        # tree ./src
-        echo ls -alR ./src/installer
-        ls -alR ./src/installer
         cp -aRv ./src/installer/. ./bin64
-        ls -alR ./bin64
         mv ./bin64/packages/com.dmhelper.app/meta/installscript64.qs ./bin64/packages/com.dmhelper.app/meta/installscript.qs
-        # tree ${{ runner.workspace }}/DMHelper/bin64
+        ls -alR ./bin64
 
     - name: Build DMHelper for Linux
       run: |
@@ -84,7 +74,7 @@ jobs:
         cd DMHelper
         cd build-64_bit-release
         tree ${{ runner.workspace }}/DMHelper/build-64_bit-release
-        cp -av ./release/DMHelper ../bin64/packages/com.dmhelper.app/data
+        cp -av ./DMHelper ../bin64/packages/com.dmhelper.app/data
         # cp -aRv ../src/bin-win64/. ../bin64/packages/com.dmhelper.app/data
         cp -aRv ../src/bestiary/. ../bin64/packages/com.dmhelper.app/data/resources
         cp -aRv ../src/doc/. ../bin64/packages/com.dmhelper.app/data/doc
