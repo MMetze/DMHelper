@@ -8,7 +8,7 @@ env:
   QT_VERSION: 6.6.0
   QT_INSTALLER_VERSION: 4.7
   # INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.exe
-  # ZIPARTIFACT: DMHelper-64-bit-release.zip
+  ZIPARTIFACT: DMHelper-linux-64-bit-release.zip
 
 jobs:
   build-DMH-linux:
@@ -89,12 +89,12 @@ jobs:
     - name: Zip the build
       run:  |
         cd DMHelper
-        7z a -tzip DMHelper-linux-64-bit-release.zip ./bin64/packages/com.dmhelper.app/data/*
+        7z a -tzip ${{ env.ZIPARTIFACT }} ./bin64/packages/com.dmhelper.app/data/*
     
     - name: Output the workspace directory tree contents
       run: |
-        cd DMHelper
-        ls -alR ./bin64
+        ls -al ./DMHelper
+        ls -alR ./DMHelper/bin64
 
     - name: Save the zip file
       uses: actions/upload-artifact@master
