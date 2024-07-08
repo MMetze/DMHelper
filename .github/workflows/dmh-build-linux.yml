@@ -100,5 +100,5 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.ZIPARTIFACT }}
-        path: ${{ github.workspace }}\DMHelper\${{ env.ZIPARTIFACT }}
+        path: ${{ runner.workspace }}/DMHelper/${{ env.ZIPARTIFACT }}
 
