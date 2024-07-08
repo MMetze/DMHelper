@@ -83,7 +83,8 @@ jobs:
     - name: Call Deploy for Qt
       run: |
         cd DMHelper
-        linuxdeployqt --compiler-runtime --no-opengl-sw --no-svg ./bin64/packages/com.dmhelper.app/data
+        echo Deploy currently not executed
+        # linuxdeployqt --compiler-runtime --no-opengl-sw --no-svg ./bin64/packages/com.dmhelper.app/data
 
     - name: Zip the build
       run:  |
@@ -92,8 +93,7 @@ jobs:
     
     - name: Output the workspace directory tree contents
       run: |
-        # Get-ChildItem -Recurse
-        tree ${{ runner.workspace }}
+        ls -alR ./bin64
 
     - name: Save the zip file
       uses: actions/upload-artifact@master
@@ -101,16 +101,3 @@ jobs:
         name: ${{ env.ZIPARTIFACT }}
         path: ${{ github.workspace }}\DMHelper\${{ env.ZIPARTIFACT }}
 
-    - name: Create the installer
-      run: |
-        cd DMHelper
-        cd bin64
-        ${{ runner.workspace }}/Qt/Tools/QtInstallerFramework/${{ env.QT_INSTALLER_VERSION }}/bin/binarycreator -c ./config/config_linux.xml -p ./packages "DM-Helper-linux-release-Installer"
-        # zip -r ${{ env.INSTALLERARTIFACT }} ./DM-Helper-macOS-release-Installer.app
-        mv ${{ env.INSTALLERARTIFACT }} ../
-
-    - name: Save the install file
-      uses: actions/upload-artifact@master
-      with:
-        name: ${{ env.INSTALLERARTIFACT }}
-        path: ${{ github.workspace }}/DMHelper/${{ env.INSTALLERARTIFACT }}
