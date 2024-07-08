@@ -723,4 +723,8 @@ macx {
     MediaFiles.path = Contents/Frameworks
     QMAKE_BUNDLE_DATA += MediaFiles
 }
+unix {
+    message("Linux VLC")
+    LIBS += -lvlc
+}
 
