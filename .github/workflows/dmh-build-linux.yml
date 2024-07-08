@@ -93,6 +93,7 @@ jobs:
     
     - name: Output the workspace directory tree contents
       run: |
+        cd DMHelper
         ls -alR ./bin64
 
     - name: Save the zip file
