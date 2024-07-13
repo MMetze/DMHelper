@@ -16,30 +16,31 @@
     <dmh:attribute type="dmh:integer" name="conditions"/>
 
     <dmh:attribute type="dmh:integer" name="strength" default="10"/>
-    <dmh:attribute type="dmh:integer" name="strengthMod" default="10"/>
+    <dmh:attribute type="dmh:integer" name="strengthMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="strengthSave"/>
     <dmh:attribute type="dmh:integer" name="dexterity" default="10"/>
-    <dmh:attribute type="dmh:integer" name="dexterityMod" default="10"/>
+    <dmh:attribute type="dmh:integer" name="dexterityMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="dexteritySave"/>
     <dmh:attribute type="dmh:integer" name="constitution" default="10"/>
-    <dmh:attribute type="dmh:integer" name="constitutionMod" default="10"/>
+    <dmh:attribute type="dmh:integer" name="constitutionMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="constitutionSave"/>
     <dmh:attribute type="dmh:integer" name="intelligence" default="10"/>
-    <dmh:attribute type="dmh:integer" name="intelligenceMod" default="10"/>
+    <dmh:attribute type="dmh:integer" name="intelligenceMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="intelligenceSave"/>
     <dmh:attribute type="dmh:integer" name="wisdom" default="10"/>
-    <dmh:attribute type="dmh:integer" name="wisdomMod" default="10"/>
+    <dmh:attribute type="dmh:integer" name="wisdomMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="wisdomSave"/>
     <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
-    <dmh:attribute type="dmh:integer" name="charismaMod" default="10"/>
+    <dmh:attribute type="dmh:integer" name="charismaMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="charismaSave"/>
 
     <dmh:attribute type="dmh:string" name="race"/>
     <dmh:attribute type="dmh:string" name="subrace"/>
+    <dmh:attribute type="dmh:string" name="movement"/>
     <dmh:attribute type="dmh:string" name="class"/>
     <dmh:attribute type="dmh:string" name="level"/>
     <dmh:attribute type="dmh:string" name="experience"/>
-    <dmh:attribute type="dmh:string" name="maximumhp" default="1"/>
+    <dmh:attribute type="dmh:string" name="maximumHp" default="1"/>
     <dmh:attribute type="dmh:string" name="tempHp"/>
     <dmh:attribute type="dmh:string" name="player"/>
     <dmh:attribute type="dmh:string" name="eyes"/>

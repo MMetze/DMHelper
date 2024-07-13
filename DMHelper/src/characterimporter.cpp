@@ -57,6 +57,7 @@ CharacterImporter::CharacterImporter(QObject *parent) :
     _levelCount(0),
     _totalArmor(0),
     _unarmored(0),
+    _speedModifier(0),
     _totalHP(0),
     _halfProficiency(false),
     _overrideList(),
@@ -101,7 +102,7 @@ void CharacterImporter::importCharacter(Campaign* campaign, bool isCharacter)
     startImport(characterId);
 }
 
-void CharacterImporter::updateCharacter(Character* character)
+void CharacterImporter::updateCharacter(Characterv2* character)
 {
     if((!character) || (character->getDndBeyondID() == -1))
     {
@@ -117,7 +118,7 @@ void CharacterImporter::updateCharacter(Character* character)
     startImport();
 }
 
-void CharacterImporter::updateCharacters(QList<Character*> characters)
+void CharacterImporter::updateCharacters(QList<Characterv2*> characters)
 {
     if(characters.isEmpty())
     {
@@ -125,7 +126,7 @@ void CharacterImporter::updateCharacters(QList<Character*> characters)
         return;
     }
 
-    for(Character* character : characters)
+    for(Characterv2* character : characters)
     {
         if((character) && (character->getDndBeyondID() != -1))
             _characterList.append(character);
@@ -150,32 +151,41 @@ void CharacterImporter::campaignChanged()
     _campaign = nullptr;
 }
 
-void CharacterImporter::scanStats(QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Character& character)
+void CharacterImporter::scanStats(QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Characterv2& character)
 {
-    for(int stat = Character::IntValue_strength; stat < Character::IntValue_charisma; ++stat)
-    {
-        Character::IntValue statIntValue = static_cast<Character::IntValue>(stat);
-        int statValue = getStatValue(statsArray, statIntValue);
-        int bonusValue = getStatValue(bonusStatsArray, statIntValue);
-        int overrideValue = getStatValue(overrideStatsArray, statIntValue);
-        if(overrideValue > 0)
-        {
-            _overrideList.append(statIntValue);
-            character.setIntValue(statIntValue, overrideValue);
-        }
-        else
-        {
-            character.setIntValue(statIntValue, statValue + bonusValue);
-        }
-    }
+    scanSingleStat(1, statsArray, bonusStatsArray, overrideStatsArray, character);
+    scanSingleStat(2, statsArray, bonusStatsArray, overrideStatsArray, character);
+    scanSingleStat(3, statsArray, bonusStatsArray, overrideStatsArray, character);
+    scanSingleStat(4, statsArray, bonusStatsArray, overrideStatsArray, character);
+    scanSingleStat(5, statsArray, bonusStatsArray, overrideStatsArray, character);
+    scanSingleStat(6, statsArray, bonusStatsArray, overrideStatsArray, character);
 }
 
-int CharacterImporter::getStatValue(QJsonArray statValueArray, Character::IntValue statIdValue)
+void CharacterImporter::scanSingleStat(int statId, QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Characterv2& character)
+{
+    int finalStatValue = 0;
+    int overrideValue = getStatValue(overrideStatsArray, statId);
+    if(overrideValue > 0)
+    {
+        _overrideList.append(statId);
+        finalStatValue = overrideValue;
+    }
+    else
+    {
+        finalStatValue = getStatValue(statsArray, statId) + getStatValue(bonusStatsArray, statId);
+    }
+
+    QString statName = getStatName(statId);
+    character.setIntValue(statName, finalStatValue);
+    character.setIntValue(statName + QString("Mod"), Combatant::getAbilityMod(finalStatValue));
+}
+
+int CharacterImporter::getStatValue(QJsonArray statValueArray, int statIdValue)
 {
     for(int i = 0; i < statValueArray.count(); ++i)
     {
         QJsonObject statObject = statValueArray.at(i).toObject();
-        Character::IntValue statId = static_cast<Character::IntValue>(statObject["id"].toInt(0) + 2); // adjustment by 2 to fit the IntValue enum
+        int statId = statObject["id"].toInt(0);
         if(statId == statIdValue)
             return statObject["value"].toInt(0);
     }
@@ -183,64 +193,113 @@ int CharacterImporter::getStatValue(QJsonArray statValueArray, Character::IntVal
     return 0;
 }
 
-void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character)
+void CharacterImporter::setStatMods(Characterv2& character)
 {
+    character.setIntValue(QString("strengthMod"), Combatant::getAbilityMod(character.getIntValue(QString("strength"))));
+    character.setIntValue(QString("strengthSave"), character.getIntValue(QString("strengthSave")) + character.getIntValue(QString("strengthMod")));
+
+    character.setIntValue(QString("dexterityMod"), Combatant::getAbilityMod(character.getIntValue(QString("dexterity"))));
+    character.setIntValue(QString("dexteritySave"), character.getIntValue(QString("dexteritySave")) + character.getIntValue(QString("dexterityMod")));
+
+    character.setIntValue(QString("constitutionMod"), Combatant::getAbilityMod(character.getIntValue(QString("constitution"))));
+    character.setIntValue(QString("constitutionSave"), character.getIntValue(QString("constitutionSave")) + character.getIntValue(QString("constitutionMod")));
+
+    character.setIntValue(QString("intelligenceMod"), Combatant::getAbilityMod(character.getIntValue(QString("intelligence"))));
+    character.setIntValue(QString("intelligenceSave"), character.getIntValue(QString("intelligenceSave")) + character.getIntValue(QString("intelligenceMod")));
+
+    character.setIntValue(QString("wisdomMod"), Combatant::getAbilityMod(character.getIntValue(QString("wisdom"))));
+    character.setIntValue(QString("wisdomSave"), character.getIntValue(QString("wisdomSave")) + character.getIntValue(QString("wisdomMod")));
+
+    character.setIntValue(QString("charismaMod"), Combatant::getAbilityMod(character.getIntValue(QString("charisma"))));
+    character.setIntValue(QString("charismaSave"), character.getIntValue(QString("charismaSave")) + character.getIntValue(QString("charismaMod")));
+}
+
+QString CharacterImporter::getStatName(int statId)
+{
+    switch(statId)
+    {
+        case 1: return QString("strength");
+        case 2: return QString("dexterity");
+        case 3: return QString("constitution");
+        case 4: return QString("intelligence");
+        case 5: return QString("wisdom");
+        case 6: return QString("charisma");
+        default: return QString();
+    }
+}
+
+void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString& key, Characterv2& character)
+{
+    int proficiencyBonus = DMHelper::ProficiencyProgression[character.getIntValue(QString("level")) - 1];
+
     QJsonArray modifiersArray = modifiersObject.value(key).toArray();
     for(int i = 0; i < modifiersArray.count(); ++i)
     {
         QJsonObject modObject = modifiersArray.at(i).toObject();
         QString modType = modObject["type"].toString();
-        QString modSubType = modObject["friendlySubtypeName"].toString();
+        QString modSubType = modObject["subType"].toString();
+        QString modFriendlySubType = modObject["friendlySubtypeName"].toString();
         int modValue = modObject["value"].toInt(0);
         if(modObject["entityTypeId"].toInt() == 1472902489) // attribute
         {
-            Character::IntValue statId = static_cast<Character::IntValue>(modObject["entityId"].toInt(0) + 2); // adjustment to fit the IntValue enum
-            if((statId >= Character::IntValue_strength) && (statId <= Character::IntValue_charisma) && (!_overrideList.contains(statId)))
+            int statId = modObject["entityId"].toInt();
+            if((statId >= 1) && (statId <= 6) && (!_overrideList.contains(statId)))
             {
+                QString statName = getStatName(statId);
                 if(modType == QString("set"))
-                {
                     _attributeSetValues[statId] = modValue;
-                }
                 else
-                {
-                    character.setIntValue(statId, character.getIntValue(statId) + modValue);
-                }
+                    character.setIntValue(statName, character.getIntValue(statName) + modValue);
             }
         }
         else if(modType == QString("proficiency"))
         {
-            int skillId = Character::findKeyForSkillName(modSubType);
-            if(skillId >= 0)
+            if(CombatantFactory::Instance()->hasAttribute(modSubType))
             {
-                character.setSkillValue(static_cast<Combatant::Skills>(skillId), true);
+                character.setIntValue(modSubType, character.getIntValue(modSubType) + proficiencyBonus);
+            }
+            else if(modSubType == QString("sleight-of-hand"))
+            {
+                character.setIntValue(QString("sleightOfHand"), character.getIntValue(QString("sleightOfHand")) + proficiencyBonus);
+            }
+            else if(modSubType == QString("animal-handling"))
+            {
+                character.setIntValue(QString("animalHandling"), character.getIntValue(QString("animalHandling")) + proficiencyBonus);
             }
             else
             {
-                if(modSubType == QString("Strength Saving Throws"))
-                    character.setSkillValue(Combatant::Skills_strengthSave, true);
-                else if(modSubType == QString("Dexterity Saving Throws"))
-                    character.setSkillValue(Combatant::Skills_dexteritySave, true);
-                else if(modSubType == QString("Constitution Saving Throws"))
-                    character.setSkillValue(Combatant::Skills_constitutionSave, true);
-                else if(modSubType == QString("Intelligence Saving Throws"))
-                    character.setSkillValue(Combatant::Skills_intelligenceSave, true);
-                else if(modSubType == QString("Wisdom Saving Throws"))
-                    character.setSkillValue(Combatant::Skills_wisdomSave, true);
-                else if(modSubType == QString("Charisma Saving Throws"))
-                    character.setSkillValue(Combatant::Skills_charismaSave, true);
+                if(modFriendlySubType == QString("Strength Saving Throws"))
+                    character.setIntValue("strengthSave", proficiencyBonus);
+                else if(modFriendlySubType == QString("Dexterity Saving Throws"))
+                    character.setIntValue("dexteritySave", proficiencyBonus);
+                else if(modFriendlySubType == QString("Constitution Saving Throws"))
+                    character.setIntValue("constitutionSave", proficiencyBonus);
+                else if(modFriendlySubType == QString("Intelligence Saving Throws"))
+                    character.setIntValue("intelligenceSave", proficiencyBonus);
+                else if(modFriendlySubType == QString("Wisdom Saving Throws"))
+                    character.setIntValue("wisdomSave", proficiencyBonus);
+                else if(modFriendlySubType == QString("Charisma Saving Throws"))
+                    character.setIntValue("charismaSave", proficiencyBonus);
             }
         }
         else if(modType == QString("expertise"))
         {
-            int skillId = Character::findKeyForSkillName(modSubType);
-            if(skillId >= 0)
+            if(CombatantFactory::Instance()->hasAttribute(modSubType))
             {
-                character.setSkillValue(static_cast<Combatant::Skills>(skillId), 2);
+                character.setIntValue(modSubType, character.getIntValue(modSubType) + proficiencyBonus);
+            }
+            else if(modSubType == QString("sleight-of-hand"))
+            {
+                character.setIntValue(QString("sleightOfHand"), character.getIntValue(QString("sleightOfHand")) + proficiencyBonus);
+            }
+            else if(modSubType == QString("animal-handling"))
+            {
+                character.setIntValue(QString("animalHandling"), character.getIntValue(QString("animalHandling")) + proficiencyBonus);
             }
         }
         else if(modType == QString("set"))
         {
-            if(modSubType == QString("Unarmored Armor Class"))
+            if(modFriendlySubType == QString("Unarmored Armor Class"))
             {
                 int statValue = modObject["statId"].toInt(0);
                 if(statValue > 0)
@@ -255,25 +314,29 @@ void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString
         }
         else
         {
-            if((modType == QString("bonus")) && (modSubType == QString("Armor Class")))
+            if((modType == QString("bonus")) && (modFriendlySubType == QString("Armor Class")))
             {
                 _totalArmor += modValue;
 #ifdef IMPORTER_LOG_AC
                 qDebug() << "[CharacterImporter] AC LOG: Armor class bonus: " << modValue << ", total AC: " << _totalArmor;
 #endif
             }
-            else if((modType == QString("bonus")) && (modSubType == QString("Armored Armor Class")))
+            else if((modType == QString("bonus")) && (modFriendlySubType == QString("Armored Armor Class")))
             {
                 _totalArmor++;
 #ifdef IMPORTER_LOG_AC
                 qDebug() << "[CharacterImporter] AC LOG: Armored Armor class bonus: +1, total AC: " << _totalArmor;
 #endif
             }
-            else if((modType == QString("half-proficiency")) && (modSubType == QString("Initiative")))
+            else if((modType == QString("bonus")) && ((modFriendlySubType == QString("speed")) || ((modFriendlySubType == QString("unarmored-movement")))))
+            {
+                _speedModifier += modValue;
+            }
+            else if((modType == QString("half-proficiency")) && (modFriendlySubType == QString("Initiative")))
             {
                 _halfProficiency = true;
             }
-            else if((modType == QString("bonus")) && (modSubType == QString("Hit Points per Level")) && (!_overrideHP))
+            else if((modType == QString("bonus")) && (modFriendlySubType == QString("Hit Points per Level")) && (!_overrideHP))
             {
                 _totalHP += modValue * _levelCount;
 #ifdef IMPORTER_LOG_HP
@@ -284,8 +347,23 @@ void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString
     }
 }
 
-void CharacterImporter::scanChoices(QJsonObject choicesObject, Character& character)
+void CharacterImporter::addAction(QList<QVariant>& actionValues, const QString& actionName, const QString& actionDescription, int attackBonus, Dice damage)
 {
+    QHash<QString, QVariant> actionEntry;
+    actionEntry["name"] = actionName;
+    actionEntry["desc"] = actionDescription;
+    actionEntry["attack_bonus"] = attackBonus;
+    QVariant damageVariant;
+    damageVariant.setValue(damage);
+    actionEntry["damage"] = damageVariant;
+
+    actionValues.append(actionEntry);
+}
+
+void CharacterImporter::scanChoices(QJsonObject choicesObject, Characterv2& character)
+{
+    // TODO: Are choices necessary, don't we find proficiencies elsewhere?
+    /*
     QStringList choicesKeys = choicesObject.keys();
     for(QString key : choicesKeys)
     {
@@ -304,12 +382,18 @@ void CharacterImporter::scanChoices(QJsonObject choicesObject, Character& charac
                     int optionId = optionObject["id"].toInt(0);
                     if(optionId == optionValue)
                     {
-                        QString optionLabel = optionObject["label"].toString();
-                        //qDebug() << "[CharacterImporter]           Proficiency found: " << optionLabel;
-                        int skillId = Character::findKeyForSkillName(optionLabel);
-                        if(skillId >= 0)
+                        QString optionLabel = optionObject["label"].toString().toLower();
+                        if(CombatantFactory::Instance()->hasAttribute(optionLabel))
                         {
-                            character.setSkillValue(static_cast<Combatant::Skills>(skillId), true);
+                            character.setIntValue(modSubType, character.getIntValue(modSubType) + proficiencyBonus);
+                        }
+                        else if(modSubType == QString("sleight of hand"))
+                        {
+                            character.setIntValue(QString("sleightOfHand"), character.getIntValue(QString("sleightOfHand")) + proficiencyBonus);
+                        }
+                        else if(modSubType == QString("animal handling"))
+                        {
+                            character.setIntValue(QString("animalHandling"), character.getIntValue(QString("animalHandling")) + proficiencyBonus);
                         }
                         // TODO: add ELSE for other proficiencies that can be added to the character proficiency list
                     }
@@ -317,6 +401,7 @@ void CharacterImporter::scanChoices(QJsonObject choicesObject, Character& charac
             }
         }
     }
+                        */
 }
 
 QString CharacterImporter::getNotesString(QJsonObject notesParent, const QString& key, const QString& title)
@@ -507,47 +592,69 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         //_character = _campaign->getCharacterOrNPCByDndBeyondId(dndBeyondId);
         if((!_character) && (CombatantFactory::Instance()))
         {
-            _character = dynamic_cast<Character*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, QString(), false));
+            _character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, QString(), false));
             _character->setDndBeyondID(dndBeyondId);
         }
     }
 
     _character->beginBatchChanges();
 
+    /* // TODO: make sure all values are imported
+        <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
+        <dmh:attribute type="dmh:integer" name="conditions"/>
+        <dmh:attribute type="dmh:integer" name="passiveperception"/>
+        <dmh:attribute type="dmh:resource" name="bardic-inspiration"/>
+        <dmh:attribute type="dmh:string" name="pactmagiclevel"/>
+        <dmh:attribute type="dmh:resource" name="pactmagicslots"/>
+        <dmh:element type="dmh:html" name="spell-data"/>
+        <dmh:element type="dmh:html" name="equipment"/>
+        <dmh:element type="dmh:html" name="proficiencies"/>
+        <dmh:element type="dmh:html" name="notes"/>
+        <dmh:element type="dmh:list" name="spellSlots"><dmh:attribute type="dmh:integer" name="level"/><dmh:attribute type="dmh:resource" name="slots"/></dmh:element>
+        <dmh:element type="dmh:list" name="hitDice"><dmh:attribute type="dmh:string" name="class"/><dmh:attribute type="dmh:dice" name="diceType"/><dmh:attribute type="dmh:resource" name="diceCount"/></dmh:element>
+        <dmh:element type="dmh:list" name="actions"><dmh:element type="dmh:string" name="name"/><dmh:element type="dmh:string" name="desc"/><dmh:element type="dmh:integer" name="attack_bonus"/><dmh:element type="dmh:dice" name="damage"/></dmh:element>
+    */
+
     _character->setName(rootObject["name"].toString());
-    _character->setStringValue(Character::StringValue_sex, rootObject["gender"].toString());
-    _character->setStringValue(Character::StringValue_age, QString::number(rootObject["age"].toInt()));
-    _character->setStringValue(Character::StringValue_hair, rootObject["hair"].toString());
-    _character->setStringValue(Character::StringValue_eyes, rootObject["eyes"].toString());
-    _character->setStringValue(Character::StringValue_height, rootObject["height"].toString());
-    _character->setStringValue(Character::StringValue_weight, QString::number(rootObject["weight"].toInt()));
-    _character->setStringValue(Character::StringValue_experience, rootObject["currentXp"].toString());
-    _character->setStringValue(Character::StringValue_sex, rootObject["gender"].toString());
+    _character->setStringValue(QString("sex"), rootObject["gender"].toString());
+    _character->setStringValue(QString("age"), QString::number(rootObject["age"].toInt()));
+    _character->setStringValue(QString("hair"), rootObject["hair"].toString());
+    _character->setStringValue(QString("eyes"), rootObject["eyes"].toString());
+    _character->setStringValue(QString("height"), rootObject["height"].toString());
+    _character->setStringValue(QString("weight"), QString::number(rootObject["weight"].toInt()));
+    _character->setStringValue(QString("experience"), rootObject["currentXp"].toString());
+    _character->setBoolValue(QString("inspiration"), rootObject["inspiration"].toBool(false));
 
     int alignmentId = rootObject["alignmentId"].toInt(1);
     switch(alignmentId)
     {
-        case 1: _character->setStringValue(Character::StringValue_alignment, QString("Lawful Good")); break;
-        case 2: _character->setStringValue(Character::StringValue_alignment, QString("Neutral Good")); break;
-        case 3: _character->setStringValue(Character::StringValue_alignment, QString("Chaotic Good")); break;
-        case 4: _character->setStringValue(Character::StringValue_alignment, QString("Lawful Neutral")); break;
-        case 5: _character->setStringValue(Character::StringValue_alignment, QString("True Neutral")); break;
-        case 6: _character->setStringValue(Character::StringValue_alignment, QString("Chaotic Neutral")); break;
-        case 7: _character->setStringValue(Character::StringValue_alignment, QString("Lawful Evil")); break;
-        case 8: _character->setStringValue(Character::StringValue_alignment, QString("Neutral Evil")); break;
-        case 9: _character->setStringValue(Character::StringValue_alignment, QString("Chaotic Evil")); break;
+        case 1: _character->setStringValue(QString("alignment"), QString("Lawful Good")); break;
+        case 2: _character->setStringValue(QString("alignment"), QString("Neutral Good")); break;
+        case 3: _character->setStringValue(QString("alignment"), QString("Chaotic Good")); break;
+        case 4: _character->setStringValue(QString("alignment"), QString("Lawful Neutral")); break;
+        case 5: _character->setStringValue(QString("alignment"), QString("True Neutral")); break;
+        case 6: _character->setStringValue(QString("alignment"), QString("Chaotic Neutral")); break;
+        case 7: _character->setStringValue(QString("alignment"), QString("Lawful Evil")); break;
+        case 8: _character->setStringValue(QString("alignment"), QString("Neutral Evil")); break;
+        case 9: _character->setStringValue(QString("alignment"), QString("Chaotic Evil")); break;
         default:
             break;
     };
 
     // Read the race
     QJsonObject raceObject = rootObject["race"].toObject();
-    _character->setStringValue(Character::StringValue_race, raceObject["fullName"].toString());
+    _character->setStringValue(QString("race"), raceObject["baseName"].toString()); // Alternatives: "subRaceShortName": and "baseName":
+    _character->setStringValue(QString("subrace"), raceObject["subRaceShortName"].toString()); // Alternatives: "subRaceShortName": and "baseName":
     QJsonObject weightSpeedObj = raceObject["weightSpeeds"].toObject();
     QJsonObject normalSpeedObj = weightSpeedObj["normal"].toObject();
-    _character->setIntValue(Character::IntValue_speed, normalSpeedObj["walk"].toInt(30));
+    int normal_speed_walk = normalSpeedObj["walk"].toInt(30);
+    int normal_speed_fly = normalSpeedObj["fly"].toInt(30);
+    int normal_speed_burrow = normalSpeedObj["burrow"].toInt(30);
+    int normal_speed_swim = normalSpeedObj["swim"].toInt(30);
+    int normal_speed_climb = normalSpeedObj["climb"].toInt(30);
+
     QString sizeString = raceObject["size"].toString();
-    _character->setStringValue(Character::StringValue_size, sizeString);
+    _character->setStringValue(QString("size"), sizeString);
     QString raceFeatureString;
     int i;
     QJsonArray raceFeatureArray = raceObject["racialTraits"].toArray();
@@ -566,7 +673,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     // Read the background
     QJsonObject backgroundObject = rootObject["background"].toObject();
     QJsonObject backgroundDefinitionObject = backgroundObject["definition"].toObject();
-    _character->setStringValue(Character::StringValue_background, backgroundDefinitionObject["name"].toString());
+    _character->setStringValue(QString("background"), backgroundDefinitionObject["name"].toString());
     QString backgroundFeatureString;
     QString backgroundFeatureName = backgroundDefinitionObject["featureName"].toString();
     QString backgroundFeatureDescription = backgroundDefinitionObject["featureDescription"].toString();
@@ -692,8 +799,9 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             }
         }
     }
-    _character->setStringValue(Character::StringValue_class, classString);
-    _character->setIntValue(Character::IntValue_level, _levelCount);
+    _character->setStringValue(QString("class"), classString);
+    _character->setStringValue(QString("level"), QString::number(_levelCount));
+    int proficiencyBonus = DMHelper::ProficiencyProgression[_levelCount - 1];
 
     // Fill in multi-classes spell slots
     if((casterClassCount > 1) && ((multiclassCasterLevel > 0) && (multiclassCasterLevel <= 20)))
@@ -711,12 +819,28 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     scanModifiers(modifiersObject, QString("feat"), *_character);
     scanModifiers(modifiersObject, QString("condition"), *_character);
 
-    // Jack of all trades
-    if(_halfProficiency)
-        _character->setIntValue((static_cast<Character::IntValue>(Character::IntValue_jackofalltrades)), 1);
+    // Jack of all trades - TODO maybe re-add this?
+    //if(_halfProficiency)
+    //    _character->setIntValue((static_cast<Character::IntValue>(Character::IntValue_jackofalltrades)), 1);
+
+    // Set the movement values
+    _character->setIntValue(QString("speed"), normal_speed_walk + _speedModifier);
+    QString movementString = QString("Walk ") + QString::number(normal_speed_walk + _speedModifier);
+    if(normal_speed_swim > 0)
+        movementString += QString(", Swim ") + QString::number(normal_speed_swim + _speedModifier);
+    if(normal_speed_fly > 0)
+        movementString += QString(", Fly ") + QString::number(normal_speed_fly + _speedModifier);
+    if(normal_speed_climb > 0)
+        movementString += QString(", Climb ") + QString::number(normal_speed_climb + _speedModifier);
+    if(normal_speed_burrow > 0)
+        movementString += QString(", Burrow ") + QString::number(normal_speed_burrow + _speedModifier);
+    _character->setStringValue(QString("movement"), movementString);
 
     // Parse the choices section
     scanChoices(rootObject["choices"].toObject(), *_character);
+
+    // The list for collecting "actions"
+    QList<QVariant> actionValues;
 
     // TODO AC - 10 or inventory/definition/armorClass for equipped:true, grantedModifiers, "entityTypeId":112130694 for
     // Scan the inventory
@@ -751,7 +875,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
                 }
 
                 // Get the attack bonus
-                int attackBonus = _character->getProficiencyBonus();
+                int attackBonus = proficiencyBonus;
                 if(ranged)
                     attackBonus += Combatant::getAbilityMod(_character->getDexterity());
                 else
@@ -779,7 +903,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
                 }
                 weaponDamage.setBonus(weaponDamage.getBonus() + magicBonus);
 
-                _character->addAction(MonsterAction(attackBonus + magicBonus, weaponDescription, weaponName, weaponDamage));
+                addAction(actionValues, weaponName, weaponDescription, attackBonus + magicBonus, weaponDamage);
             }
             else
             {
@@ -807,14 +931,36 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         equipmentStr += itemDesc + QChar::LineFeed;
     }
 
+    // Set the currency/coin values
+    QJsonObject currenciesObject = rootObject["currencies"].toObject();
+    _character->setIntValue(QString("platinum"), currenciesObject["pp"].toInt());
+    _character->setIntValue(QString("gold"), currenciesObject["gp"].toInt());
+    _character->setIntValue(QString("electrum"), currenciesObject["ep"].toInt());
+    _character->setIntValue(QString("silver"), currenciesObject["sp"].toInt());
+
+    // Find the player's name in the campaign area
+    QJsonObject campaignObject = rootObject["campaign"].toObject();
+    QJsonArray campaignCharacterArray = campaignObject["characters"].toArray();
+    for(i = 0; i < campaignCharacterArray.count(); ++i)
+    {
+        QJsonObject characterObj = campaignCharacterArray.at(i).toObject();
+        if(characterObj["characterName"].toString() == _character->getName())
+        {
+            _character->setStringValue(QString("player"), characterObj["username"].toString());
+            break;
+        }
+    }
+
     // Calculate the final stats
     // Check if there are any stats set instead of modified
     QMapIterator<int, int> attrIt(_attributeSetValues);
     while(attrIt.hasNext())
     {
         attrIt.next();
-        _character->setIntValue(static_cast<Character::IntValue>(attrIt.key()), attrIt.value());
+        _character->setIntValue(getStatName(attrIt.key()), attrIt.value());
     }
+
+    setStatMods(*_character);
 
     // Calculate the final armor class
     if(armorType == QString("Heavy Armor"))
@@ -853,19 +999,21 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     }
 
     _character->setArmorClass(_totalArmor);
-    _character->setStringValue(Character::StringValue_equipment, equipmentStr);
+    _character->setStringValue(QString("equipment"), equipmentStr);
 
     // Calculate the final initiative modifier
     int initiativeValue = Combatant::getAbilityMod(_character->getDexterity());
     if(_halfProficiency)
-        initiativeValue += _character->getProficiencyBonus() / 2;
+        initiativeValue += proficiencyBonus / 2;
     _character->setInitiative(initiativeValue);
 
     // Spell Overview
     if(casterClassCount >= 1)
     {
         QJsonArray spellSlotArray = rootObject["spellSlots"].toArray();
-        for(i = 0; i < 9; ++i)
+        QList<QVariant> listValues;
+
+        for(int i = 0; i < 9; i++)
         {
             if(spellSlots[i] > 0)
             {
@@ -876,10 +1024,16 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
                     usedSlots += spellSlotObject["used"].toInt();
                 }
 
-                _character->setSpellSlots(i + 1, spellSlots[i]);
-                _character->setSpellSlotsUsed(i + 1, usedSlots);
+                QHash<QString, QVariant> listEntryValues;
+                listEntryValues.insert(QString("level"), QVariant(i + 1));
+                QVariant resourceVariant;
+                resourceVariant.setValue(ResourcePair(usedSlots, spellSlots[i]));
+                listEntryValues.insert(QString("slots"), resourceVariant);
+                listValues.append(listEntryValues);
             }
         }
+
+        _character->setValue(QString("spellSlots"), listValues);
     }
 
     if(warlockCaster)
@@ -891,13 +1045,13 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             QJsonObject spellSlotObject = pactSlotArray.at(pactMagicLevel - 1).toObject();
             pactMagicUsed = (spellSlotObject["used"].toInt() > pactMagicSlots) ? pactMagicSlots : spellSlotObject["used"].toInt();
 
-            _character->setIntValue(Character::IntValue_pactMagicLevel, pactMagicLevel);
-            _character->setIntValue(Character::IntValue_pactMagicSlots, pactMagicSlots);
-            _character->setIntValue(Character::IntValue_pactMagicUsed, pactMagicUsed);
+            _character->setStringValue(QString("pactmagiclevel"), QString::number(pactMagicLevel));
+            _character->setResourceValue(QString("pactmagicslots"), ResourcePair(pactMagicUsed, pactMagicSlots));
         }
     }
 
-    _character->setSpellString(getSpellString(rootObject));
+    //_character->setSpellString(getSpellString(rootObject));
+    _character->setStringValue(QString("spell-data"), getSpellString(rootObject));
 
     // Find actions
     QJsonObject actionsObject = rootObject["actions"].toObject();
@@ -905,19 +1059,19 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     for(i = 0; i < raceActionsArray.count(); ++i)
     {
         QJsonObject actionObject = raceActionsArray.at(i).toObject();
-        _character->addAction(MonsterAction(0, actionObject["snippet"].toString(), actionObject["name"].toString(), Dice()));
+        addAction(actionValues, actionObject["name"].toString(), actionObject["snippet"].toString(), 0, Dice());
     }
     QJsonArray classActionsArray = actionsObject["class"].toArray();
     for(i = 0; i < classActionsArray.count(); ++i)
     {
         QJsonObject actionObject = classActionsArray.at(i).toObject();
-        _character->addAction(MonsterAction(0, actionObject["snippet"].toString(), actionObject["name"].toString(), Dice()));
+        addAction(actionValues, actionObject["name"].toString(), actionObject["snippet"].toString(), 0, Dice());
     }
     QJsonArray featActionsArray = actionsObject["feat"].toArray();
     for(i = 0; i < featActionsArray.count(); ++i)
     {
         QJsonObject actionObject = featActionsArray.at(i).toObject();
-        _character->addAction(MonsterAction(0, actionObject["snippet"].toString(), actionObject["name"].toString(), Dice()));
+        addAction(actionValues, actionObject["name"].toString(), actionObject["snippet"].toString(), 0, Dice());
     }
 
     // Features Overview
@@ -935,7 +1089,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         featuresString += QChar::LineFeed + QString("Racial Traits") + QChar::LineFeed + raceFeatureString;
     if(!backgroundFeatureString.isEmpty())
         featuresString += QChar::LineFeed + QString("Background Features") + QChar::LineFeed + backgroundFeatureString;
-    _character->setStringValue(Character::StringValue_proficiencies, featuresString);
+    _character->setStringValue(QString("proficiencies"), featuresString);
 
     // Calculate the final Hit points
     int currentHP;
@@ -990,6 +1144,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 
         currentHP = _totalHP;
         currentHP += rootObject["temporaryHitPoints"].toInt(0);
+        _character->setIntValue(QString("tempHp"), rootObject["temporaryHitPoints"].toInt(0));
 #ifdef IMPORTER_LOG_HP
         qDebug() << "[CharacterImporter] HP LOG: Temporary hit points: " << rootObject["temporaryHitPoints"].toInt(0) << ", current HP: " << currentHP;
 #endif
@@ -1002,7 +1157,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             currentHP = 1;
     }
     _character->setHitPoints(currentHP);
-    _character->setIntValue(Character::IntValue_maximumHP, _totalHP);
+    _character->setIntValue(QString("maximumHp"), _totalHP);
 
     // Notes
     QString notesStr;
@@ -1014,7 +1169,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     notesStr += getNotesString(notesObject, QString("enemies"), QString("Enemies"));
     notesStr += getNotesString(notesObject, QString("backstory"), QString("Backstory"));
     notesStr += getNotesString(notesObject, QString("otherNotes"), QString("Other Notes"));
-    _character->setStringValue(Character::StringValue_notes, notesStr);
+    _character->setStringValue(QString("notes"), notesStr);
 
     if(!isUpdate)
         emit characterCreated(_character);
@@ -1164,6 +1319,7 @@ void CharacterImporter::initializeValues()
     _attributeSetValues.clear();
     _levelCount = 0;
     _totalArmor = 0;
+    _speedModifier = 0;
     _unarmored = 0;
     _totalHP = 0;
     _halfProficiency = false;

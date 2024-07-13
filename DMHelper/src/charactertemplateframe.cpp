@@ -480,14 +480,12 @@ void CharacterTemplateFrame::syncDndBeyond()
     if(!_character)
         return;
 
-    // HACK
-    /*
     CharacterImporter* importer = new CharacterImporter();
     connect(importer, &CharacterImporter::characterImported, this, &CharacterTemplateFrame::readCharacterData);
+    connect(importer, &CharacterImporter::characterImported, importer, &CharacterImporter::deleteLater);
     connect(this, &CharacterTemplateFrame::characterChanged, importer, &CharacterImporter::campaignChanged);
     importer->updateCharacter(_character);
-    importer->deleteLater();
-*/
+    //importer->deleteLater();
 }
 
 void CharacterTemplateFrame::importHeroForge()

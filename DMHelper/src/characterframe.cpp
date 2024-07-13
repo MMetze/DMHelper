@@ -614,10 +614,12 @@ void CharacterFrame::syncDndBeyond()
     if(!_character)
         return;
 
+    /*
     CharacterImporter* importer = new CharacterImporter();
     connect(importer, &CharacterImporter::characterImported, this, &CharacterFrame::readCharacterData);
     connect(this, &CharacterFrame::characterChanged, importer, &CharacterImporter::campaignChanged);
     importer->updateCharacter(_character);
+*/
 }
 
 void CharacterFrame::importHeroForge()
