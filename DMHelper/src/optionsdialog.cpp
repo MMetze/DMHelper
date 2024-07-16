@@ -43,6 +43,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         connect(ui->edtShops, &QLineEdit::editingFinished, this, &OptionsDialog::editShops);
         connect(ui->btnTables, &QAbstractButton::clicked, this, &OptionsDialog::browseTables);
         connect(ui->edtTables, &QLineEdit::editingFinished, this, &OptionsDialog::editTables);
+        connect(ui->btnCharacterLayout, &QAbstractButton::clicked, this, &OptionsDialog::browseCharacterLayout);
+        connect(ui->edtCharacterLayout, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterLayout);
 
         connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
 
@@ -378,6 +380,33 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
     _options->setTablesDirectory(tablesDirectory);
 }
 
+void OptionsDialog::browseCharacterLayout()
+{
+    setCharacterLayout(QFileDialog::getOpenFileName(this, QString("Select Character Layout File"), QString(), QString("UI files (*.ui)")));
+}
+
+void OptionsDialog::editCharacterLayout()
+{
+    setCharacterLayout(ui->edtCharacterLayout->text());
+}
+
+void OptionsDialog::setCharacterLayout(const QString& characterLayoutFile)
+{
+    if(characterLayoutFile.isEmpty())
+        return;
+
+    if(!QFile::exists(characterLayoutFile))
+    {
+        QMessageBox::critical(this, QString("Character Layout file not found"), QString("The selected character layout file could not be found!") + QChar::LineFeed + characterLayoutFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected character layout file could not be found: " << characterLayoutFile;
+        return;
+    }
+
+    ui->edtCharacterLayout->setText(characterLayoutFile);
+    _options->setCharacterLayoutFileName(characterLayoutFile);
+
+}
+
 void OptionsDialog::handleInitiativeScaleChanged(qreal initiativeScale)
 {
     if(ui->edtInitiativeScale->text().toDouble() != initiativeScale)
@@ -579,6 +608,7 @@ void OptionsDialog::updateFileLocations()
     ui->edtEquipment->setText(_options->getEquipmentFileName());
     ui->edtShops->setText(_options->getShopsFileName());
     ui->edtTables->setText(_options->getTablesDirectory());
+    ui->edtCharacterLayout->setText(_options->getCharacterLayoutFileName());
 }
 
 void OptionsDialog::resetFileLocations()

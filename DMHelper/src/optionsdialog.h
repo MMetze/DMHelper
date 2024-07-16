@@ -50,6 +50,10 @@ private slots:
     void editTables();
     void setTables(const QString& tablesDirectory);
 
+    void browseCharacterLayout();
+    void editCharacterLayout();
+    void setCharacterLayout(const QString& characterLayoutFile);
+
     void handleInitiativeScaleChanged(qreal initiativeScale);
 
     void browsePointerFile();

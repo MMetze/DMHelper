@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
-    <height>382</height>
+    <width>470</width>
+    <height>412</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -353,6 +353,11 @@ color: rgb(50, 50, 50);</string>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>STR</string>
          </property>
@@ -362,9 +367,30 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="strength">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>10</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>strength</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
-          <widget class="QLineEdit" name="strength">
+          <widget class="QLineEdit" name="strengthMod">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -380,17 +406,28 @@ color: rgb(50, 50, 50);</string>
             <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
-            <string>strength</string>
+            <string>strengthMod</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lblStrengthBonus">
+          <widget class="QLineEdit" name="strengthSave">
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
-            <string>(+0)</string>
+            <string>strength</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>strengthSave</string>
            </property>
           </widget>
          </item>
@@ -402,6 +439,11 @@ color: rgb(50, 50, 50);</string>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="QLabel" name="label_5">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>DEX</string>
          </property>
@@ -411,9 +453,31 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="dexterity">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>10</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>dexterity</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
-          <widget class="QLineEdit" name="dexterity">
+          <widget class="QLineEdit" name="dexterityMod">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -429,17 +493,28 @@ color: rgb(50, 50, 50);</string>
             <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
-            <string>dexterity</string>
+            <string>dexterityMod</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lblDexterityBonus">
+          <widget class="QLineEdit" name="dexteritySave">
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
-            <string>(+0)</string>
+            <string>dexterity</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>dexteritySave</string>
            </property>
           </widget>
          </item>
@@ -451,6 +526,11 @@ color: rgb(50, 50, 50);</string>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QLabel" name="label_6">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>CON</string>
          </property>
@@ -460,9 +540,31 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="constitution">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>10</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>constitution</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_14">
          <item>
-          <widget class="QLineEdit" name="constitution">
+          <widget class="QLineEdit" name="constitutionMod">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -478,17 +580,28 @@ color: rgb(50, 50, 50);</string>
             <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
-            <string>constitution</string>
+            <string>constitutionMod</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lblConstitutionBonus">
+          <widget class="QLineEdit" name="constitutionSave">
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
-            <string>(+0)</string>
+            <string>constitution</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>constitutionSave</string>
            </property>
           </widget>
          </item>
@@ -500,6 +613,11 @@ color: rgb(50, 50, 50);</string>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QLabel" name="label_7">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>INT</string>
          </property>
@@ -509,9 +627,31 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="intelligence">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>10</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>intelligence</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_13">
          <item>
-          <widget class="QLineEdit" name="intelligence">
+          <widget class="QLineEdit" name="intelligenceMod">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -527,17 +667,28 @@ color: rgb(50, 50, 50);</string>
             <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
-            <string>intelligence</string>
+            <string>intelligenceMod</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lblIntelligenceBonus">
+          <widget class="QLineEdit" name="intelligenceSave">
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
-            <string>(+0)</string>
+            <string>intelligence</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>intelligenceSave</string>
            </property>
           </widget>
          </item>
@@ -549,6 +700,11 @@ color: rgb(50, 50, 50);</string>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QLabel" name="label_8">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>WIS</string>
          </property>
@@ -558,9 +714,31 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="wisdom">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>10</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>wisdom</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_12">
          <item>
-          <widget class="QLineEdit" name="wisdom">
+          <widget class="QLineEdit" name="wisdomMod">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -576,17 +754,28 @@ color: rgb(50, 50, 50);</string>
             <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
-            <string>wisdom</string>
+            <string>wisdomMod</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lblWisdomBonus">
+          <widget class="QLineEdit" name="wisdomSave">
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
-            <string>(+0)</string>
+            <string>wisdom</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>wisdomSave</string>
            </property>
           </widget>
          </item>
@@ -598,6 +787,11 @@ color: rgb(50, 50, 50);</string>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QLabel" name="label_9">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>CHA</string>
          </property>
@@ -607,9 +801,31 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="charisma">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>10</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>charisma</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QLineEdit" name="charisma">
+          <widget class="QLineEdit" name="charismaMod">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -625,17 +841,28 @@ color: rgb(50, 50, 50);</string>
             <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
-            <string>charisma</string>
+            <string>charismaMod</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lblCharismaBonus">
+          <widget class="QLineEdit" name="charismaSave">
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
-            <string>(+0)</string>
+            <string>charisma</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>charismaSave</string>
            </property>
           </widget>
          </item>
@@ -720,7 +947,7 @@ color: rgb(50, 50, 50);</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>130</width>
+          <width>146</width>
           <height>68</height>
          </rect>
         </property>
@@ -762,12 +989,12 @@ color: rgb(50, 50, 50);</string>
   <tabstop>armorClass</tabstop>
   <tabstop>hitPoints</tabstop>
   <tabstop>maximumhp</tabstop>
-  <tabstop>strength</tabstop>
-  <tabstop>dexterity</tabstop>
-  <tabstop>constitution</tabstop>
-  <tabstop>intelligence</tabstop>
-  <tabstop>wisdom</tabstop>
-  <tabstop>charisma</tabstop>
+  <tabstop>strengthMod</tabstop>
+  <tabstop>dexterityMod</tabstop>
+  <tabstop>constitutionMod</tabstop>
+  <tabstop>intelligenceMod</tabstop>
+  <tabstop>wisdomMod</tabstop>
+  <tabstop>charismaMod</tabstop>
  </tabstops>
  <resources/>
  <connections/>

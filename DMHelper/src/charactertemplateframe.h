@@ -57,6 +57,7 @@ private slots:
 private:
     void loadCharacterImage();
     void enableDndBeyondSync(bool enabled);
+    QString getDefaultValue(const QString& keyString);
 
     Ui::CharacterTemplateFrame *ui;
     QWidget *_uiWidget;

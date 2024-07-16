@@ -190,7 +190,7 @@ void CharacterTemplateFrame::disconnectTemplate()
 
 void CharacterTemplateFrame::readCharacterData()
 {
-    if((!_character) || (!_uiWidget))
+    if((!_character) || (!_uiWidget) || (!CombatantFactory::Instance()))
         return;
 
     _reading = true;
@@ -206,11 +206,9 @@ void CharacterTemplateFrame::readCharacterData()
         if(!keyString.isEmpty())
         {
             QString valueString = _character->getValueAsString(keyString);
+            lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
             if(!valueString.isEmpty())
-            {
-                lineEdit->setText(valueString);
                 connect(lineEdit, &QLineEdit::editingFinished, [this, lineEdit](){handleLineEditFinished(lineEdit);});
-            }
         }
     }
 
@@ -224,11 +222,9 @@ void CharacterTemplateFrame::readCharacterData()
         if(!keyString.isEmpty())
         {
             QString valueString = _character->getStringValue(keyString);
+            textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
             if(!valueString.isEmpty())
-            {
-                textEdit->setHtml(valueString);
                 connect(textEdit, &QTextEdit::textChanged, [this, textEdit](){handleTextEditChanged(textEdit);});
-            }
         }
     }
 
@@ -370,29 +366,6 @@ void CharacterTemplateFrame::readCharacterData()
                             connect(layout, &CharacterTemplateResourceLayout::resourceListValueChanged, _character, &Characterv2::setListValue);
                             frame->installEventFilter(layout);
                             frame->setLayout(layout);
-
-                            /*
-                            if((!frame) || (dynamic_cast<QTextEdit*>(frame)))
-                                continue;
-
-                            QString keyString = frame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-                            if(keyString.isEmpty())
-                                continue;
-
-                            QHBoxLayout* frameLayout = new QHBoxLayout;
-                            frameLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-                            frameLayout->setContentsMargins(0, 0, 0, 0);
-                            frame->setLayout(frameLayout);
-
-                            ResourcePair valuePair = hashValue.value(keyString).value<ResourcePair>();
-                            for(int i = 0; i < valuePair.second; ++i)
-                            {
-                                QCheckBox* checkBox = new QCheckBox();
-                                checkBox->setChecked(i < valuePair.first);
-                                frameLayout->addWidget(checkBox);
-                                connect(checkBox, &QCheckBox::stateChanged, [this, frame](){handleResourceChanged(frame);});
-                            }
-                            */
                         }
 
                         scrollLayout->addWidget(newWidget);
@@ -597,4 +570,14 @@ void CharacterTemplateFrame::enableDndBeyondSync(bool enabled)
         qDebug() << "[CharacterTemplateFrame] Setting Dnd Beyond link for character to: " << fullLink;
         ui->lblDndBeyondLink->setText(fullLink);
     }
+}
+
+QString CharacterTemplateFrame::getDefaultValue(const QString& keyString)
+{
+    if(CombatantFactory::Instance()->hasAttribute(keyString))
+        return CombatantFactory::Instance()->getAttribute(keyString)._default;
+    else if(CombatantFactory::Instance()->hasElement(keyString))
+        return CombatantFactory::Instance()->getElement(keyString)._default;
+    else
+        return QString();
 }
