@@ -411,10 +411,9 @@ QString CharacterImporter::getNotesString(QJsonObject notesParent, const QString
     QString notesStr = notesParent[key].toString();
     if(!notesStr.isEmpty())
     {
-        result += title + QChar::LineFeed;
-        result += notesStr.replace(QString("\\n"), QString(QChar::LineFeed));
-        result += QChar::LineFeed;
-        result += QChar::LineFeed;
+        result += title + QString("<br>");
+        result += notesStr.replace(QString("\n"), QString("<br>"));
+        result += QString("<br>") + QString("<br>");
     }
 
     return result;
@@ -600,17 +599,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     _character->beginBatchChanges();
 
     /* // TODO: make sure all values are imported
-        <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
         <dmh:attribute type="dmh:integer" name="conditions"/>
         <dmh:attribute type="dmh:integer" name="passiveperception"/>
-        <dmh:attribute type="dmh:resource" name="bardic-inspiration"/>
-        <dmh:attribute type="dmh:string" name="pactmagiclevel"/>
-        <dmh:attribute type="dmh:resource" name="pactmagicslots"/>
-        <dmh:element type="dmh:html" name="spell-data"/>
-        <dmh:element type="dmh:html" name="equipment"/>
-        <dmh:element type="dmh:html" name="proficiencies"/>
-        <dmh:element type="dmh:html" name="notes"/>
-        <dmh:element type="dmh:list" name="spellSlots"><dmh:attribute type="dmh:integer" name="level"/><dmh:attribute type="dmh:resource" name="slots"/></dmh:element>
         <dmh:element type="dmh:list" name="hitDice"><dmh:attribute type="dmh:string" name="class"/><dmh:attribute type="dmh:dice" name="diceType"/><dmh:attribute type="dmh:resource" name="diceCount"/></dmh:element>
         <dmh:element type="dmh:list" name="actions"><dmh:element type="dmh:string" name="name"/><dmh:element type="dmh:string" name="desc"/><dmh:element type="dmh:integer" name="attack_bonus"/><dmh:element type="dmh:dice" name="damage"/></dmh:element>
     */
@@ -662,12 +652,13 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     {
         QJsonObject featureObject = raceFeatureArray.at(i).toObject();
         QJsonObject featureDefnObject = featureObject["definition"].toObject();
-        raceFeatureString += featureDefnObject["name"].toString() + QString(": ");
-        raceFeatureString += featureDefnObject["description"].toString();
+        raceFeatureString += QString("<b>") + featureDefnObject["name"].toString() + QString(":</b><br>");
+        QString description = featureDefnObject["description"].toString();
+        if(!description.isEmpty())
+            raceFeatureString += description + QString("<br>");
         QString snippet = featureDefnObject["snippet"].toString();
-        raceFeatureString += QChar::LineFeed;
         if(!snippet.isEmpty())
-            raceFeatureString += snippet + QChar::LineFeed;
+            raceFeatureString += snippet + QString("<br>");
     }
 
     // Read the background
@@ -679,15 +670,15 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QString backgroundFeatureDescription = backgroundDefinitionObject["featureDescription"].toString();
     if(!backgroundFeatureName.isEmpty())
     {
-        backgroundFeatureString += backgroundFeatureName;
+        backgroundFeatureString += QString("<b>") + backgroundFeatureName + QString("</b>");
         if(!backgroundFeatureDescription.isEmpty())
-            backgroundFeatureString += QString(": ") + backgroundFeatureDescription;
-        backgroundFeatureString += QChar::LineFeed;
+            backgroundFeatureString += QString(":<br>") + backgroundFeatureDescription;
+        backgroundFeatureString += QString("<br>");
     }
     QString backgroundTools = backgroundDefinitionObject["toolProficienciesDescription"].toString();
     if(!backgroundTools.isEmpty())
     {
-        backgroundFeatureString += QString("Tools Proficiencies: ") + backgroundTools + QChar::LineFeed;
+        backgroundFeatureString += QString("<b>Tool Proficiencies:</b><br>") + backgroundTools + QString("<br>");
     }
 
     // TODO stats - "entityTypeId":1472902489, bonus stats & override stats?
@@ -748,11 +739,11 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             int levelReq = featureDefnObject["requiredLevel"].toInt();
             if(classLevel >= levelReq)
             {
-                classFeatureString += featureDefnObject["name"].toString();
+                classFeatureString += QString("<b>") + featureDefnObject["name"].toString() + QString("</b>");
                 QString snippet = featureDefnObject["snippet"].toString();
                 if(!snippet.isEmpty())
-                    classFeatureString += QString(": ")+ snippet;
-                classFeatureString += QChar::LineFeed;
+                    classFeatureString += QString(":<br>") + snippet;
+                classFeatureString += QString("<br>");
             }
         }
 
@@ -928,7 +919,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         int quantity = inventoryObj["quantity"].toInt(0);
         if(quantity > 1)
             itemDesc += QString(" (") + QString::number(quantity) + QString(")");
-        equipmentStr += itemDesc + QChar::LineFeed;
+        equipmentStr += itemDesc + QString("<br>");
     }
 
     // Set the currency/coin values
@@ -1066,6 +1057,19 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     {
         QJsonObject actionObject = classActionsArray.at(i).toObject();
         addAction(actionValues, actionObject["name"].toString(), actionObject["snippet"].toString(), 0, Dice());
+
+        // Special case for bardic inspiration
+        if(actionObject["name"].toString() == QString("Bardic Inspiration"))
+        {
+            QJsonObject usageObject = actionObject["limitedUse"].toObject();
+            if(!usageObject.isEmpty())
+            {
+                int numberUsed = usageObject["numberUsed"].toInt();
+                int statModifierUsesId = usageObject["statModifierUsesId"].toInt();
+                int numberUsages = _character->getIntValue(getStatName(statModifierUsesId) + QString("Mod"));
+                _character->setResourceValue(QString("bardic-inspiration"), ResourcePair(numberUsed, numberUsages));
+            }
+        }
     }
     QJsonArray featActionsArray = actionsObject["feat"].toArray();
     for(i = 0; i < featActionsArray.count(); ++i)
@@ -1075,20 +1079,20 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     }
 
     // Features Overview
-    QString featuresString = QString("Feats") + QChar::LineFeed;
+    QString featuresString = QString("<b>Feats</b>") + QString("<br>");
     QJsonArray featsArray = rootObject["feats"].toArray();
     for(i = 0; i < featsArray.count(); ++i)
     {
         QJsonObject featObject = featsArray.at(i).toObject();
         QJsonObject featDefnObject = featObject["definition"].toObject();
-        featuresString += featDefnObject["name"].toString() + QChar::LineFeed;
+        featuresString += featDefnObject["name"].toString() + QString("<br>");
     }
     if(!classFeatureString.isEmpty())
-        featuresString += QChar::LineFeed + QString("Class Traits") + QChar::LineFeed + classFeatureString;
+        featuresString += QString("<br>") + QString("<b>Class Traits</b>") + QString("<br>") + classFeatureString;
     if(!raceFeatureString.isEmpty())
-        featuresString += QChar::LineFeed + QString("Racial Traits") + QChar::LineFeed + raceFeatureString;
+        featuresString += QString("<br>")+ QString("<b>Racial Traits</b>") + QString("<br>") + raceFeatureString;
     if(!backgroundFeatureString.isEmpty())
-        featuresString += QChar::LineFeed + QString("Background Features") + QChar::LineFeed + backgroundFeatureString;
+        featuresString += QString("<br>") + QString("<b>Background Features</b>") + QString("<br>") + backgroundFeatureString;
     _character->setStringValue(QString("proficiencies"), featuresString);
 
     // Calculate the final Hit points
@@ -1162,13 +1166,13 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     // Notes
     QString notesStr;
     QJsonObject notesObject = rootObject["notes"].toObject();
-    notesStr += getNotesString(notesObject, QString("allies"), QString("Allies"));
-    notesStr += getNotesString(notesObject, QString("personalPossessions"), QString("Personal Possessions"));
-    notesStr += getNotesString(notesObject, QString("otherHoldings"), QString("Other Holdings"));
-    notesStr += getNotesString(notesObject, QString("organizations"), QString("Organizations"));
-    notesStr += getNotesString(notesObject, QString("enemies"), QString("Enemies"));
-    notesStr += getNotesString(notesObject, QString("backstory"), QString("Backstory"));
-    notesStr += getNotesString(notesObject, QString("otherNotes"), QString("Other Notes"));
+    notesStr += getNotesString(notesObject, QString("allies"), QString("<b>Allies</b>"));
+    notesStr += getNotesString(notesObject, QString("personalPossessions"), QString("<b>Personal Possessions</b>"));
+    notesStr += getNotesString(notesObject, QString("otherHoldings"), QString("<b>Other Holdings</b>"));
+    notesStr += getNotesString(notesObject, QString("organizations"), QString("<b>Organizations</b>"));
+    notesStr += getNotesString(notesObject, QString("enemies"), QString("<b>Enemies</b>"));
+    notesStr += getNotesString(notesObject, QString("backstory"), QString("<b>Backstory</b>"));
+    notesStr += getNotesString(notesObject, QString("otherNotes"), QString("<b>Other Notes</b>"));
     _character->setStringValue(QString("notes"), notesStr);
 
     if(!isUpdate)

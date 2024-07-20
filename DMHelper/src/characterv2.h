@@ -5,6 +5,7 @@
 #include <QHash>
 
 class MonsterAction;
+class DMHAttribute;
 
 class Characterv2 : public Combatant
 {
@@ -77,7 +78,10 @@ private:
     QVariant getAttributeSpecial(const QString& attribute) const;
     QString getAttributeSpecialAsString(const QString& attribute) const;
     void setAttributeSpecial(const QString& key, const QString& value);
-    QVariant readAttributeValue(const QDomElement& element, const QString& name);
+    QVariant readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name);
+    void writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value);
+    void writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value);
+    void writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value);
 
     int _dndBeyondID;
     bool _iconChanged;

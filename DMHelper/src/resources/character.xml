@@ -80,6 +80,7 @@
 
     <dmh:attribute type="dmh:integer" name="platinum"/>
     <dmh:attribute type="dmh:integer" name="gold"/>
+    <dmh:attribute type="dmh:integer" name="electrum"/>
     <dmh:attribute type="dmh:integer" name="silver"/>
     <dmh:attribute type="dmh:integer" name="copper"/>
 

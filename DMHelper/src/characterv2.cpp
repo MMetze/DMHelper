@@ -154,7 +154,7 @@ QString Characterv2::getValueAsString(const QString& key) const
         return getAttributeSpecialAsString(key);
 
     if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
-        qDebug() << "[Characterv2] Attempting to read the value for the unknown key " << key;
+        qDebug() << "[Characterv2] WARNING: Attempting to read the value for the unknown key " << key;
 
     DMHAttribute attribute = CombatantFactory::Instance()->getAttribute(key);
     switch(attribute._type)
@@ -316,7 +316,19 @@ void Characterv2::internalOutputXML(QDomDocument &doc, QDomElement &element, QDi
 {
     element.setAttribute("dndBeyondID", getDndBeyondID());
 
-    //writeActionList(doc, element, QString("actions"), _actions, isExport);
+    if(CombatantFactory::Instance())
+    {
+        QList<QString> valueKeys = _allValues.keys();
+        for (const auto &key : std::as_const(valueKeys))
+        {
+            if(CombatantFactory::Instance()->hasAttribute(key))
+                writeAttributeValue(CombatantFactory::Instance()->getAttribute(key), element, key, _allValues.value(key));
+            else if(CombatantFactory::Instance()->hasElement(key))
+                writeElementValue(doc, element, key, _allValues.value(key));
+            else if(CombatantFactory::Instance()->hasElementList(key))
+                writeElementListValue(doc, element, key, _allValues.value(key));
+        }
+    }
 
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
@@ -336,19 +348,12 @@ void Characterv2::setListValue(const QString& key, int index, const QString& lis
 
 bool Characterv2::belongsToObject(QDomElement& element)
 {
-    if((CombatantFactory::Instance()) && (CombatantFactory::Instance()->hasElement(element.tagName())))
+    if((CombatantFactory::Instance()) && (CombatantFactory::Instance()->hasEntry(element.tagName())))
         return true;
     else if((element.tagName() == QString("actions")) || (element.tagName() == QString("spell-data"))) // for backwards compatibility
         return true;
     else
         return Combatant::belongsToObject(element);
-
-    /*
-    if((element.tagName() == QString("actions")) || (element.tagName() == QString("spell-data")))
-        return true;
-    else
-        return Combatant::belongsToObject(element);
-    */
 }
 
 void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
@@ -364,7 +369,7 @@ void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
     {
         if(!isAttributeSpecial(*keyIt))
         {
-            QVariant attributeValue = readAttributeValue(element, *keyIt);
+            QVariant attributeValue = readAttributeValue(CombatantFactory::Instance()->getAttribute(*keyIt), element, *keyIt);
             if(!attributeValue.isNull())
                 _allValues.insert(*keyIt, attributeValue);
         }
@@ -408,7 +413,7 @@ void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
                 QHash<QString, QVariant> listEntryValues;
                 for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
                 {
-                    QVariant attributeValue = readAttributeValue(element, *keyIt);
+                    QVariant attributeValue = readAttributeValue(listAttributes.value(*keyIt), listEntry, *keyIt);
                     if(!attributeValue.isNull())
                         listEntryValues.insert(*keyIt, attributeValue);
                 }
@@ -581,11 +586,10 @@ void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
         qDebug() << "[Characterv2] ERROR: Attempt to set unknown special attribute " << key << " to " << value;
 }
 
-QVariant Characterv2::readAttributeValue(const QDomElement& element, const QString& name)
+QVariant Characterv2::readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name)
 {
     QVariant result;
 
-    DMHAttribute attribute = CombatantFactory::Instance()->getAttribute(name);
     switch(attribute._type)
     {
         case CombatantFactory::TemplateType_string:
@@ -617,4 +621,100 @@ QVariant Characterv2::readAttributeValue(const QDomElement& element, const QStri
     }
 
     return result;
+}
+
+void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value)
+{
+    if((key.isEmpty()) || (value.isNull()))
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an invalid/empty attribute. Key: " << key << ", value: " << value;
+        return;
+    }
+
+    switch(attribute._type)
+    {
+        case CombatantFactory::TemplateType_string:
+            element.setAttribute(key, value.toString());
+            break;
+        case CombatantFactory::TemplateType_integer:
+            element.setAttribute(key, QString::number(value.toInt()));
+            break;
+        case CombatantFactory::TemplateType_boolean:
+            element.setAttribute(key, QString::number(value.toInt()));
+            break;
+        case CombatantFactory::TemplateType_dice:
+        {
+            element.setAttribute(key, value.value<Dice>().toString());
+            break;
+        }
+        case CombatantFactory::TemplateType_resource:
+        {
+            ResourcePair resourcePair = value.value<ResourcePair>();
+            element.setAttribute(key, QString::number(resourcePair.first) + QString(",") + QString::number(resourcePair.second));
+            break;
+        }
+        default:
+            qDebug() << "[Characterv2] WARNING: Trying to write an unexpected attribute: " << key << " with type " << attribute._type;
+            break;
+    }
+}
+
+void Characterv2::writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
+{
+    if((key.isEmpty()) || (value.isNull()))
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an invalid/empty element. Key: " << key << ", value: " << value;
+        return;
+    }
+
+    DMHAttribute attribute = CombatantFactory::Instance()->getElement(key);
+    if(attribute._type != CombatantFactory::TemplateType_html)
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an unexpected element: " << key << " with type " << attribute._type;
+        return;
+    }
+
+    QDomElement childElement = doc.createElement(key);
+    QDomCDATASection childData = doc.createCDATASection(value.toString());
+    childElement.appendChild(childData);
+    element.appendChild(childElement);
+}
+
+void Characterv2::writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
+{
+    if((key.isEmpty()) || (value.isNull()))
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an invalid/empty element list. Key: " << key << ", value: " << value;
+        return;
+    }
+
+    if(!CombatantFactory::Instance()->hasElementList(key))
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an unexpected element list: " << key;
+        return;
+    }
+
+    QList<QVariant> listValues = value.toList();
+    if(listValues.isEmpty())
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an empty element list: " << key;
+        return;
+    }
+
+    QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(key);
+    QDomElement listElement = doc.createElement(key);
+    for(const auto &value : std::as_const(listValues))
+    {
+        QDomElement childElement = doc.createElement(QString("entry"));
+
+        QHash<QString, QVariant> valueHash = value.toHash();
+        QList<QString> hashKeys = valueHash.keys();
+        for(const auto &hashKey : std::as_const(hashKeys))
+        {
+            writeAttributeValue(listAttributes.value(hashKey), childElement, hashKey, valueHash.value(hashKey));
+        }
+
+        listElement.appendChild(childElement);
+    }
+    element.appendChild(listElement);
 }

@@ -264,21 +264,22 @@ void CharacterTemplateFrame::readCharacterData()
         QString widgetString = scrollArea->property(CombatantFactory::TEMPLATE_WIDGET).toString();
         if((!keyString.isEmpty()) && (!widgetString.isEmpty()))
         {
+            if(QLayout* oldLayout = scrollArea->layout())
+            {
+                QLayoutItem *child;
+                while((child = scrollArea->layout()->takeAt(0)) != nullptr)
+                {
+                    if(child->widget())
+                        child->widget()->deleteLater();
+                    delete child;
+                }
+
+                delete oldLayout;
+            }
+
             QList<QVariant> listValue = _character->getListValue(keyString);
             if(!listValue.isEmpty())
             {
-                if(QLayout* oldLayout = scrollArea->layout())
-                {
-                    QLayoutItem *child;
-                    while((child = scrollArea->layout()->takeAt(0)) != nullptr)
-                    {
-                        if(child->widget())
-                            child->widget()->deleteLater();
-                        delete child;
-                    }
-
-                    delete oldLayout;
-                }
 
 #ifdef Q_OS_MAC
                 QDir fileDirPath(QCoreApplication::applicationDirPath());
@@ -299,7 +300,6 @@ void CharacterTemplateFrame::readCharacterData()
                     scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
                     scrollArea->setLayout(scrollLayout);
 
-                    //for(auto listEntry : listValue)
                     for(int i = 0; i < listValue.count(); ++i)
                     {
                         QVariant listEntry = listValue.at(i);
