@@ -35,6 +35,10 @@ protected:
     int getStatValue(QJsonArray statValueArray, int statIdValue);
     void setStatMods(Characterv2& character);
     QString getStatName(int statId);
+    void zeroSavingThrows();
+    void zeroSkills();
+    void addHalfProficiencies();
+    void addProficienciesSkillMods();
     void scanModifiers(QJsonObject modifiersObject, const QString& key, Characterv2& character);
     void scanChoices(QJsonObject choicesObject, Characterv2& character);
     void addAction(QList<QVariant>& actionValues, const QString& actionName, const QString& actionDescription, int attackBonus, Dice damage);

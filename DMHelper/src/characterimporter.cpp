@@ -2,7 +2,6 @@
 #include "campaign.h"
 #include "characterimportdialog.h"
 #include "combatantfactory.h"
-#include "spellbook.h"
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -228,6 +227,113 @@ QString CharacterImporter::getStatName(int statId)
     }
 }
 
+void CharacterImporter::zeroSavingThrows()
+{
+    if(!_character)
+        return;
+
+    _character->setIntValue(QString("strengthSave"), 0);
+    _character->setIntValue(QString("dexteritySave"), 0);
+    _character->setIntValue(QString("constitutionSave"), 0);
+    _character->setIntValue(QString("intelligenceSave"), 0);
+    _character->setIntValue(QString("wisdomSave"), 0);
+    _character->setIntValue(QString("charismaSave"), 0);
+}
+
+void CharacterImporter::zeroSkills()
+{
+    if(!_character)
+        return;
+
+    _character->setIntValue(QString("acrobatics"), 0);
+    _character->setIntValue(QString("animalHandling"), 0);
+    _character->setIntValue(QString("arcana"), 0);
+    _character->setIntValue(QString("athletics"), 0);
+    _character->setIntValue(QString("deception"), 0);
+    _character->setIntValue(QString("history"), 0);
+    _character->setIntValue(QString("insight"), 0);
+    _character->setIntValue(QString("intimidation"), 0);
+    _character->setIntValue(QString("investigation"), 0);
+    _character->setIntValue(QString("medicine"), 0);
+    _character->setIntValue(QString("nature"), 0);
+    _character->setIntValue(QString("perception"), 0);
+    _character->setIntValue(QString("performance"), 0);
+    _character->setIntValue(QString("persuasion"), 0);
+    _character->setIntValue(QString("religion"), 0);
+    _character->setIntValue(QString("sleightOfHand"), 0);
+    _character->setIntValue(QString("stealth"), 0);
+    _character->setIntValue(QString("survival"), 0);
+}
+
+void CharacterImporter::addProficienciesSkillMods()
+{
+    if(!_character)
+        return;
+
+    _character->setIntValue(QString("acrobatics"), _character->getIntValue(QString("acrobatics")) + _character->getIntValue(QString("dexterityMod")));
+    _character->setIntValue(QString("animalHandling"), _character->getIntValue(QString("animalHandling")) + _character->getIntValue(QString("wisdomMod")));
+    _character->setIntValue(QString("arcana"), _character->getIntValue(QString("arcana")) + _character->getIntValue(QString("intelligenceMod")));
+    _character->setIntValue(QString("athletics"), _character->getIntValue(QString("athletics")) + _character->getIntValue(QString("strengthMod")));
+    _character->setIntValue(QString("deception"), _character->getIntValue(QString("deception")) + _character->getIntValue(QString("charismaMod")));
+    _character->setIntValue(QString("history"), _character->getIntValue(QString("history")) + _character->getIntValue(QString("intelligenceMod")));
+    _character->setIntValue(QString("insight"), _character->getIntValue(QString("insight")) + _character->getIntValue(QString("wisdomMod")));
+    _character->setIntValue(QString("intimidation"), _character->getIntValue(QString("intimidation")) + _character->getIntValue(QString("charismaMod")));
+    _character->setIntValue(QString("investigation"), _character->getIntValue(QString("investigation")) + _character->getIntValue(QString("intelligenceMod")));
+    _character->setIntValue(QString("medicine"), _character->getIntValue(QString("medicine")) + _character->getIntValue(QString("wisdomMod")));
+    _character->setIntValue(QString("nature"), _character->getIntValue(QString("nature")) + _character->getIntValue(QString("intelligenceMod")));
+    _character->setIntValue(QString("perception"), _character->getIntValue(QString("perception")) + _character->getIntValue(QString("wisdomMod")));
+    _character->setIntValue(QString("performance"), _character->getIntValue(QString("performance")) + _character->getIntValue(QString("charismaMod")));
+    _character->setIntValue(QString("persuasion"), _character->getIntValue(QString("persuasion")) + _character->getIntValue(QString("charismaMod")));
+    _character->setIntValue(QString("religion"), _character->getIntValue(QString("religion")) + _character->getIntValue(QString("intelligenceMod")));
+    _character->setIntValue(QString("sleightOfHand"), _character->getIntValue(QString("sleightOfHand")) + _character->getIntValue(QString("dexterityMod")));
+    _character->setIntValue(QString("stealth"), _character->getIntValue(QString("stealth")) + _character->getIntValue(QString("dexterityMod")));
+    _character->setIntValue(QString("survival"), _character->getIntValue(QString("survival")) + _character->getIntValue(QString("wisdomMod")));
+}
+
+void CharacterImporter::addHalfProficiencies()
+{
+    if(!_character)
+        return;
+
+    int halfProficiencyBonus = DMHelper::ProficiencyProgression[_character->getIntValue(QString("level")) - 1] / 2;
+
+    if(_character->getIntValue(QString("animalHandling")) == 0)
+        _character->setIntValue(QString("animalHandling"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("arcana")) == 0)
+        _character->setIntValue(QString("arcana"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("athletics")) == 0)
+        _character->setIntValue(QString("athletics"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("deception")) == 0)
+        _character->setIntValue(QString("deception"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("history")) == 0)
+        _character->setIntValue(QString("history"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("insight")) == 0)
+        _character->setIntValue(QString("insight"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("intimidation")) == 0)
+        _character->setIntValue(QString("intimidation"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("investigation")) == 0)
+        _character->setIntValue(QString("investigation"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("medicine")) == 0)
+        _character->setIntValue(QString("medicine"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("nature")) == 0)
+        _character->setIntValue(QString("nature"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("perception")) == 0)
+        _character->setIntValue(QString("perception"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("performance")) == 0)
+        _character->setIntValue(QString("performance"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("persuasion")) == 0)
+        _character->setIntValue(QString("persuasion"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("religion")) == 0)
+        _character->setIntValue(QString("religion"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("sleightOfHand")) == 0)
+        _character->setIntValue(QString("sleightOfHand"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("stealth")) == 0)
+        _character->setIntValue(QString("stealth"), halfProficiencyBonus);
+    if(_character->getIntValue(QString("survival")) == 0)
+        _character->setIntValue(QString("survival"), halfProficiencyBonus);
+
+}
+
 void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString& key, Characterv2& character)
 {
     int proficiencyBonus = DMHelper::ProficiencyProgression[character.getIntValue(QString("level")) - 1];
@@ -362,6 +468,9 @@ void CharacterImporter::addAction(QList<QVariant>& actionValues, const QString& 
 
 void CharacterImporter::scanChoices(QJsonObject choicesObject, Characterv2& character)
 {
+    Q_UNUSED(choicesObject);
+    Q_UNUSED(character);
+
     // TODO: Are choices necessary, don't we find proficiencies elsewhere?
     /*
     QStringList choicesKeys = choicesObject.keys();
@@ -801,6 +910,10 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             spellSlots[k] = MulticlassSpellslots[multiclassCasterLevel - 1][k];
     }
 
+    // Set the saving throws to zero
+    zeroSavingThrows();
+    zeroSkills();
+
     // Read various modifiers
     QJsonObject modifiersObject = rootObject["modifiers"].toObject();
     scanModifiers(modifiersObject, QString("race"), *_character);
@@ -810,9 +923,9 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     scanModifiers(modifiersObject, QString("feat"), *_character);
     scanModifiers(modifiersObject, QString("condition"), *_character);
 
-    // Jack of all trades - TODO maybe re-add this?
-    //if(_halfProficiency)
-    //    _character->setIntValue((static_cast<Character::IntValue>(Character::IntValue_jackofalltrades)), 1);
+    // Jack of all trades
+    if(_halfProficiency)
+        addHalfProficiencies();
 
     // Set the movement values
     _character->setIntValue(QString("speed"), normal_speed_walk + _speedModifier);
@@ -952,6 +1065,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     }
 
     setStatMods(*_character);
+    addProficienciesSkillMods();
 
     // Calculate the final armor class
     if(armorType == QString("Heavy Armor"))
