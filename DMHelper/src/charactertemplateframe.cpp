@@ -29,6 +29,7 @@ CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidge
 {
     ui->setupUi(this);
 
+    /*
     QString defaultFilename("character.ui");
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
@@ -38,6 +39,9 @@ CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidge
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     QString appFile = fileDirPath.path() + QString("/resources/ui/") + defaultFilename;
 #endif
+    */
+
+    QString appFile = options->getCharacterLayoutFileName();
 
     if(!QFileInfo::exists(appFile))
     {
@@ -61,6 +65,19 @@ CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidge
             layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
             layout->addWidget(_uiWidget);
             ui->scrollAreaWidgetContents->setLayout(layout);
+
+            // Activate hyperlinks for any included text edits
+            QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
+            for(QTextEdit* edit : textEdits)
+            {
+                auto &clist = edit->children();
+                for(QObject *pObj : clist)
+                {
+                    QString cname = pObj->metaObject()->className();
+                    if(cname == "QWidgetTextControl")
+                        pObj->setProperty("openExternalLinks", true);
+                }
+            }
         }
     }
 
@@ -172,6 +189,9 @@ void CharacterTemplateFrame::mouseReleaseEvent(QMouseEvent * event)
 
 void CharacterTemplateFrame::disconnectTemplate()
 {
+    if(!_uiWidget)
+        return;
+
     // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
     QList<QLineEdit*> lineEdits = _uiWidget->findChildren<QLineEdit*>();
     for(auto lineEdit : lineEdits)

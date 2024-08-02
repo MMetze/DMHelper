@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>470</width>
-    <height>417</height>
+    <height>418</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -918,6 +918,9 @@ color: rgb(50, 50, 50);</string>
      </property>
      <item>
       <widget class="QTextEdit" name="txtSpellData">
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       </property>
        <property name="dmhValue" stdset="0">
         <string>spell-data</string>
        </property>

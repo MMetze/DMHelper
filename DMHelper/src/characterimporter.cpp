@@ -498,7 +498,7 @@ void CharacterImporter::parseSpellSource(QVector<QStringList>& spellVector, QJso
             if(spellLevel > spellVector.size() + 1)
                 spellVector.resize(spellLevel + 1);
 
-            bool spellExists = ((Spellbook::Instance()) && (Spellbook::Instance()->exists(spellName)));
+            bool spellExists = false; // TODO: add internal links to template spellbook ((Spellbook::Instance()) && (Spellbook::Instance()->exists(spellName)));
 
             QString vectorName = QString("   ");
             if(spellExists)
