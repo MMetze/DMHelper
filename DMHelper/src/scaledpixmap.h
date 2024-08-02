@@ -45,6 +45,7 @@ public:
 
 protected:
     QVector<QPixmap> _pixmaps;
+    QString _basePixmap;
 
 private:
     static ScaledPixmap* _defaultPixmap;

@@ -7,12 +7,14 @@
 ScaledPixmap* ScaledPixmap::_defaultPixmap = nullptr;
 
 ScaledPixmap::ScaledPixmap() :
-    _pixmaps(DMHelper::PixmapSize_Count)
+    _pixmaps(DMHelper::PixmapSize_Count),
+    _basePixmap()
 {
 }
 
 ScaledPixmap::ScaledPixmap(const ScaledPixmap &obj) :
-    _pixmaps(obj._pixmaps)
+    _pixmaps(obj._pixmaps),
+    _basePixmap(obj._basePixmap)
 {
 }
 
@@ -39,6 +41,9 @@ void ScaledPixmap::cleanupDefaultPixmap()
 
 bool ScaledPixmap::setBasePixmap(const QString& basePixmap)
 {
+    if(_basePixmap == basePixmap)
+        return false;
+
     if(!QFile::exists(basePixmap))
     {
         qDebug() << "[ScaledPixmap] Invalid Base Pixmap set: " << basePixmap;
@@ -46,12 +51,15 @@ bool ScaledPixmap::setBasePixmap(const QString& basePixmap)
     }
 
     invalidate();
-    return _pixmaps[DMHelper::PixmapSize_Full].load(basePixmap);
+    _basePixmap = basePixmap;
+    return true;
+    //return _pixmaps[DMHelper::PixmapSize_Full].load(basePixmap);
 }
 
 bool ScaledPixmap::isValid() const
 {
-    return _pixmaps.at(DMHelper::PixmapSize_Full).isNull() == false;
+    return !_basePixmap.isEmpty();
+    //return _pixmaps.at(DMHelper::PixmapSize_Full).isNull() == false;
 }
 
 void ScaledPixmap::invalidate()
@@ -64,7 +72,11 @@ QPixmap ScaledPixmap::getPixmap(DMHelper::PixmapSize pixmapSize)
 {
     if(_pixmaps.at(DMHelper::PixmapSize_Full).isNull())
     {
-        return QPixmap();
+        if(!_basePixmap.isEmpty())
+            _pixmaps[DMHelper::PixmapSize_Full].load(_basePixmap);
+
+        if(_pixmaps.at(DMHelper::PixmapSize_Full).isNull())
+            return QPixmap();
     }
 
     if(_pixmaps.at(pixmapSize).isNull())
