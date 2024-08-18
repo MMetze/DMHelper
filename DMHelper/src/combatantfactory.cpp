@@ -125,6 +125,64 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
     return new Characterv2();
 }
 
+QVariant CombatantFactory::convertStringToVariant(const QString& value, TemplateType type)
+{
+    switch(type)
+    {
+        case CombatantFactory::TemplateType_string:
+            return QVariant(value);
+        case CombatantFactory::TemplateType_integer:
+            return QVariant(value.toInt());
+        case CombatantFactory::TemplateType_boolean:
+            return QVariant(value.toInt());
+        case CombatantFactory::TemplateType_dice:
+        {
+            QVariant diceResult;
+            diceResult.setValue(Dice(value));
+            return diceResult;
+        }
+        case CombatantFactory::TemplateType_resource:
+        {
+            QStringList resourceList = value.split(",");
+            if(resourceList.size() != 2)
+            {
+                qDebug() << "[Characterv2] WARNING: Trying to convert the value: " << value << " to a resource pair, but it is not in the correct format";
+                return QVariant();
+            }
+
+            QVariant resourceResult;
+            resourceResult.setValue(ResourcePair(resourceList.at(0).toInt(), resourceList.at(1).toInt()));
+            return resourceResult;
+        }
+        default:
+            qDebug() << "[Characterv2] WARNING: Trying to convert the value: " << value << " to the unexpected attribute type: " << type;
+            return QVariant();
+    }
+}
+
+QString CombatantFactory::convertVariantToString(const QVariant& value, TemplateType type)
+{
+    switch(type)
+    {
+        case CombatantFactory::TemplateType_string:
+            return value.toString();
+        case CombatantFactory::TemplateType_integer:
+            return QString::number(value.toInt());
+        case CombatantFactory::TemplateType_boolean:
+            return QString::number(value.toInt());
+        case CombatantFactory::TemplateType_dice:
+            return value.value<Dice>().toString();
+        case CombatantFactory::TemplateType_resource:
+        {
+            ResourcePair resourcePair = value.value<ResourcePair>();
+            return QString::number(resourcePair.first) + QString(",") + QString::number(resourcePair.second);
+        }
+        default:
+            qDebug() << "[Characterv2] WARNING: Trying to convert the value: " << value << " to the unexpected attribute type: " << type;
+            return QString();
+    }
+}
+
 bool CombatantFactory::hasAttribute(const QString& name) const
 {
     return _attributes.contains(name);

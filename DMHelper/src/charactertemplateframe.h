@@ -37,6 +37,7 @@ public slots:
     virtual void setRotation(int rotation) override;
 
 protected:
+    virtual bool eventFilter(QObject *object, QEvent *event) override;
     virtual void mousePressEvent(QMouseEvent * event) override;
     virtual void mouseReleaseEvent(QMouseEvent * event) override;
 
@@ -54,9 +55,13 @@ private slots:
     void handleTextEditChanged(QTextEdit* textEdit);
     void handleResourceChanged(QFrame* resourceFrame);
 
+    void handleAddResource(QWidget* widget);
+    void handleRemoveResource(QWidget* widget);
+
 private:
     void loadCharacterImage();
     void enableDndBeyondSync(bool enabled);
+    void populateWidget(QWidget* widget, Characterv2* character, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
     QString getDefaultValue(const QString& keyString);
 
     Ui::CharacterTemplateFrame *ui;

@@ -14,7 +14,7 @@
    <string notr="true">background-image: url(:/img/data/parchment.jpg);
 color: rgb(50, 50, 50);</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,10,0">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,10">
    <property name="spacing">
     <number>3</number>
    </property>
@@ -51,7 +51,7 @@ color: rgb(50, 50, 50);</string>
       </font>
      </property>
      <property name="readOnly">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="dmhValue" stdset="0">
       <string>level</string>
@@ -88,19 +88,6 @@ color: rgb(50, 50, 50);</string>
       <string>slots</string>
      </property>
     </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer_14">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

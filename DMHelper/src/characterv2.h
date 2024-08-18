@@ -3,6 +3,7 @@
 
 #include "combatant.h"
 #include <QHash>
+#include <QVariant>
 
 class MonsterAction;
 class DMHAttribute;
@@ -63,6 +64,9 @@ public slots:
     void setDiceValue(const QString& key, const Dice& value);
     void setResourceValue(const QString& key, const ResourcePair& value);
     void setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue);
+    QHash<QString, QVariant> createListEntry(const QString& key, int index);
+    void insertListEntry(const QString& key, int index, QHash<QString, QVariant> listEntryValues);
+    void removeListEntry(const QString& key, int index);
 
 protected:
     // From Combatant
@@ -87,15 +91,7 @@ private:
     bool _iconChanged;
 
     QHash<QString, QVariant> _allValues;
-    /*
-    QHash<QString, QString> _stringValues;
-    QHash<QString, int> _intValues;
-    QHash<QString, bool> _boolValues;
-    QHash<QString, Dice> _diceValues;
-    QHash<QString, ResourcePair> _resourceValues;
-    QHash<QString, QString> _htmlValues;
-    QHash<QString, QList<DMHAttribute>> _elementLists;
-*/
+
 };
 
 #endif // CHARACTERV2_H

@@ -346,6 +346,69 @@ void Characterv2::setListValue(const QString& key, int index, const QString& lis
     setValue(key, QVariant(list));
 }
 
+QHash<QString, QVariant> Characterv2::createListEntry(const QString& key, int index)
+{
+    if(!CombatantFactory::Instance()->hasElementList(key))
+    {
+        qDebug() << "[Characterv2] WARNING: Request to create list entry for an invalid list key: " << key;
+        return QHash<QString, QVariant>();
+    }
+
+    QHash<QString, QVariant> newEntryValues;
+
+    // Iterate through the list and create the individual attributes
+    QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(key);
+    for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
+    {
+        DMHAttribute attribute = listAttributes.value(*keyIt);
+        newEntryValues.insert(*keyIt, CombatantFactory::convertStringToVariant(attribute._default, attribute._type));
+    }
+
+    insertListEntry(key, index, newEntryValues);
+    return newEntryValues;
+}
+
+void Characterv2::insertListEntry(const QString& key, int index, QHash<QString, QVariant> listEntryValues)
+{
+    if(listEntryValues.isEmpty())
+        return;
+
+    QList<QVariant> list = getListValue(key);
+    if(list.isEmpty())
+    {
+        qDebug() << "[Characterv2] WARNING: Request to insert item into unknown list " << key;
+        return;
+    }
+
+    if((index < 0) || (index > list.size()))
+    {
+        qDebug() << "[Characterv2] WARNING: Request to insert invalid index " << index << " into list " << key;
+        return;
+    }
+
+    list.insert(index, QVariant(listEntryValues));
+    setValue(key, QVariant(list));
+}
+
+void Characterv2::removeListEntry(const QString& key, int index)
+{
+    QList<QVariant> list = getListValue(key);
+    if(list.isEmpty())
+    {
+        qDebug() << "[Characterv2] WARNING: Request to remove item from unknown list " << key;
+        return;
+    }
+
+    if((index < 0) || (index >= list.size()))
+    {
+        qDebug() << "[Characterv2] WARNING: Request to move invalid index " << index << " from list " << key;
+        return;
+    }
+
+    list.removeAt(index);
+    setValue(key, QVariant(list));
+}
+
 bool Characterv2::belongsToObject(QDomElement& element)
 {
     if((CombatantFactory::Instance()) && (CombatantFactory::Instance()->hasEntry(element.tagName())))
@@ -588,6 +651,8 @@ void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
 
 QVariant Characterv2::readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name)
 {
+    return CombatantFactory::convertStringToVariant(element.attribute(name, attribute._default), attribute._type);
+    /*
     QVariant result;
 
     switch(attribute._type)
@@ -621,6 +686,7 @@ QVariant Characterv2::readAttributeValue(const DMHAttribute& attribute, const QD
     }
 
     return result;
+*/
 }
 
 void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value)
@@ -631,6 +697,9 @@ void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement
         return;
     }
 
+    element.setAttribute(key, CombatantFactory::convertVariantToString(value, attribute._type));
+
+    /*
     switch(attribute._type)
     {
         case CombatantFactory::TemplateType_string:
@@ -657,6 +726,7 @@ void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement
             qDebug() << "[Characterv2] WARNING: Trying to write an unexpected attribute: " << key << " with type " << attribute._type;
             break;
     }
+*/
 }
 
 void Characterv2::writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)

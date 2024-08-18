@@ -3,6 +3,8 @@
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
 
 CharacterTemplateResourceLayout::CharacterTemplateResourceLayout(const QString& key, const ResourcePair& value) :
     QHBoxLayout(),
@@ -54,6 +56,38 @@ void CharacterTemplateResourceLayout::handleResourceChanged()
     emitChange();
 }
 
+void CharacterTemplateResourceLayout::handleAddResource()
+{
+    emit addResource();
+}
+
+void CharacterTemplateResourceLayout::handleRemoveResource()
+{
+    emit removeResource(this);
+}
+
+void CharacterTemplateResourceLayout::handleEditResource()
+{
+    bool ok;
+    int newValue = QInputDialog::getInt(nullptr,
+                                        tr("Edit Resource Value"),
+                                        tr("Number of Checkboxes:"),
+                                        _value.second,
+                                        0,
+                                        100,
+                                        1,
+                                        &ok);
+    if((ok) && (newValue != _value.second))
+    {
+        _value.second = newValue;
+        if(_value.first > newValue)
+            _value.first = newValue;
+        cleanupLayout();
+        createCheckboxes();
+        emitChange();
+    }
+}
+
 bool CharacterTemplateResourceLayout::eventFilter(QObject *object, QEvent *event)
 {
     // Edit the number of checkboxes in the layout on right click
@@ -62,24 +96,28 @@ bool CharacterTemplateResourceLayout::eventFilter(QObject *object, QEvent *event
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         if(mouseEvent->button() == Qt::RightButton)
         {
-            bool ok;
-            int newValue = QInputDialog::getInt(nullptr,
-                                                tr("Edit Resource Value"),
-                                                tr("Number of Checkboxes:"),
-                                                _value.second,
-                                                0,
-                                                100,
-                                                1,
-                                                &ok);
-            if((ok) && (newValue != _value.second))
+            QMenu* popupMenu = new QMenu();
+
+            QAction* editItem = new QAction(QString("Edit..."), popupMenu);
+            connect(editItem, &QAction::triggered, this, &CharacterTemplateResourceLayout::handleEditResource);
+            popupMenu->addAction(editItem);
+
+            if(_listIndex >= 0)
             {
-                _value.second = newValue;
-                if(_value.first > newValue)
-                    _value.first = newValue;
-                cleanupLayout();
-                createCheckboxes();
-                emitChange();
+                popupMenu->addSeparator();
+
+                QAction* addItem = new QAction(QString("Add..."), popupMenu);
+                connect(addItem, &QAction::triggered, this, &CharacterTemplateResourceLayout::handleAddResource);
+                popupMenu->addAction(addItem);
+
+                QAction* removeItem = new QAction(QString("Remove..."), popupMenu);
+                connect(removeItem, &QAction::triggered, this, &CharacterTemplateResourceLayout::handleRemoveResource);
+                popupMenu->addAction(removeItem);
             }
+
+            popupMenu->popup(mouseEvent->globalPosition().toPoint());
+
+            return true;
         }
     }
 

@@ -42,6 +42,9 @@ public:
 
     static Combatant* createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent = nullptr);
 
+    static QVariant convertStringToVariant(const QString& value, TemplateType type);
+    static QString convertVariantToString(const QVariant& value, TemplateType type);
+
     bool hasAttribute(const QString& name) const;
     DMHAttribute getAttribute(const QString& name) const;
     QHash<QString, DMHAttribute> getAttributes() const;

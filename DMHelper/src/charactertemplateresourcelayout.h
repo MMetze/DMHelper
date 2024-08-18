@@ -15,12 +15,17 @@ public:
 signals:
     void resourceValueChanged(const QString& key, const ResourcePair& value);
     void resourceListValueChanged(const QString& key, int listIndex, const QString& listKey, const QVariant& value);
+    void addResource();
+    void removeResource(CharacterTemplateResourceLayout* layout);
 
 protected slots:
     void handleResourceChanged();
+    void handleAddResource();
+    void handleRemoveResource();
+    void handleEditResource();
 
 protected:
-    bool eventFilter(QObject *object, QEvent *event) override;
+    virtual bool eventFilter(QObject *object, QEvent *event) override;
     void cleanupLayout();
     void createCheckboxes();
     void emitChange();
