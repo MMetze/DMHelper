@@ -25,6 +25,7 @@ public:
 
     bool isEffectActive() const;
     bool isEffectVisible() const;
+    bool isPlayAudio() const;
     QString getTip() const;
     int getHeightValue() const;
     int getWidthValue() const;

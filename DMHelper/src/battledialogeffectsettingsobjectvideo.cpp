@@ -22,6 +22,7 @@ BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(con
     ui->edtName->setText(effect.getTip());
     ui->chkActive->setChecked(effect.getEffectActive());
     ui->chkVisible->setChecked(effect.getEffectVisible());
+    ui->chkPlayAudio->setChecked(effect.isPlayAudio());
     ui->edtHeight->setValidator(new QIntValidator(1, 999, this));
     ui->edtHeight->setText(QString::number(effect.getSize()));
     ui->edtHeight->selectAll();
@@ -118,6 +119,12 @@ void BattleDialogEffectSettingsObjectVideo::mergeValuesToSettings(BattleDialogMo
         ui->chkVisible->setCheckState(Qt::PartiallyChecked);
     }
 
+    if((!ui->chkPlayAudio->isTristate()) && (other->isPlayAudio() != ui->chkVisible->isChecked()))
+    {
+        ui->chkPlayAudio->setTristate();
+        ui->chkPlayAudio->setCheckState(Qt::PartiallyChecked);
+    }
+
     if((!ui->edtHeight->text().isEmpty()) && (QString::number(effect.getSize()) != ui->edtHeight->text()))
         ui->edtHeight->setText(QString());
 
@@ -145,6 +152,9 @@ void BattleDialogEffectSettingsObjectVideo::copyValuesFromSettings(BattleDialogM
 
     if(ui->chkVisible->checkState() != Qt::PartiallyChecked)
         videoEffect->setEffectVisible(isEffectVisible());
+
+    if(ui->chkPlayAudio->checkState() != Qt::PartiallyChecked)
+        videoEffect->setPlayAudio(isPlayAudio());
 
     if(!ui->edtRotation->text().isEmpty())
         videoEffect->setRotation(getRotation());
@@ -195,6 +205,11 @@ bool BattleDialogEffectSettingsObjectVideo::isEffectActive() const
 bool BattleDialogEffectSettingsObjectVideo::isEffectVisible() const
 {
     return ui->chkVisible->isChecked();
+}
+
+bool BattleDialogEffectSettingsObjectVideo::isPlayAudio() const
+{
+    return ui->chkPlayAudio->isChecked();
 }
 
 QString BattleDialogEffectSettingsObjectVideo::getTip() const
