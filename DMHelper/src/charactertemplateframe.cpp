@@ -581,6 +581,7 @@ void CharacterTemplateFrame::updateCharacterName()
     if(!_character)
         return;
 
+    // TODO: Implement me!
     //ui->edtName->setText(_character->getName());
 }
 
@@ -589,8 +590,32 @@ void CharacterTemplateFrame::handleLineEditFinished(QLineEdit* lineEdit)
     if((!_character) || (!lineEdit))
         return;
 
-    QString keyString = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-    _character->setValue(keyString, lineEdit->text());
+    int widgetIndex = 0;
+    QBoxLayout* scrollLayout = nullptr;
+    QScrollArea* scrollArea = nullptr;
+
+    // First parent is the dynamically created frame withing the scroll area
+    if((lineEdit->parentWidget()) &&                                // this
+       (lineEdit->parentWidget()->parentWidget()) &&                // Unknown
+       (lineEdit->parentWidget()->parentWidget()->parentWidget()))  // Scroll Area Viewport
+        scrollArea = dynamic_cast<QScrollArea*>(lineEdit->parentWidget()->parentWidget()->parentWidget()->parentWidget());
+
+    if((scrollArea) && (scrollArea->widget()))
+        scrollLayout = dynamic_cast<QBoxLayout*>(scrollArea->widget()->layout());
+
+    if((scrollLayout) && (scrollLayout->count() > 0))
+        widgetIndex = scrollLayout->indexOf(lineEdit->parentWidget());
+
+    QString lineEditKey = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+    if((scrollLayout) && (widgetIndex >= 0) && (scrollArea))
+    {
+        QString scrollKey = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+        _character->setListValue(scrollKey, widgetIndex, lineEditKey, lineEdit->text());
+    }
+    else
+    {
+        _character->setValue(lineEditKey, lineEdit->text());
+    }
 }
 
 void CharacterTemplateFrame::handleTextEditChanged(QTextEdit* textEdit)
@@ -598,8 +623,32 @@ void CharacterTemplateFrame::handleTextEditChanged(QTextEdit* textEdit)
     if((!_character) || (!textEdit))
         return;
 
-    QString keyString = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-    _character->setValue(keyString, textEdit->toHtml());
+    int widgetIndex = 0;
+    QBoxLayout* scrollLayout = nullptr;
+    QScrollArea* scrollArea = nullptr;
+
+    // First parent is the dynamically created frame withing the scroll area
+    if((textEdit->parentWidget()) &&                                // this
+       (textEdit->parentWidget()->parentWidget()) &&                // Unknown
+       (textEdit->parentWidget()->parentWidget()->parentWidget()))  // Scroll Area Viewport
+        scrollArea = dynamic_cast<QScrollArea*>(textEdit->parentWidget()->parentWidget()->parentWidget()->parentWidget());
+
+    if((scrollArea) && (scrollArea->widget()))
+        scrollLayout = dynamic_cast<QBoxLayout*>(scrollArea->widget()->layout());
+
+    if((scrollLayout) && (scrollLayout->count() > 0))
+        widgetIndex = scrollLayout->indexOf(textEdit->parentWidget());
+
+    QString textEditKey = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+    if((scrollLayout) && (widgetIndex >= 0) && (scrollArea))
+    {
+        QString scrollKey = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+        _character->setListValue(scrollKey, widgetIndex, textEditKey, textEdit->toHtml());
+    }
+    else
+    {
+        _character->setValue(textEditKey, textEdit->toHtml());
+    }
 }
 
 void CharacterTemplateFrame::handleResourceChanged(QFrame* resourceFrame)
@@ -767,7 +816,7 @@ void CharacterTemplateFrame::populateWidget(QWidget* widget, Characterv2* charac
                 valueString = hash->value(keyString).toString();
 
             lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
-            if(!valueString.isEmpty())
+            //if(!valueString.isEmpty())
                 connect(lineEdit, &QLineEdit::editingFinished, [this, lineEdit](){handleLineEditFinished(lineEdit);});
         }
     }
@@ -788,7 +837,7 @@ void CharacterTemplateFrame::populateWidget(QWidget* widget, Characterv2* charac
                 valueString = hash->value(keyString).toString();
 
             textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
-            if(!valueString.isEmpty())
+            //if(!valueString.isEmpty())
                 connect(textEdit, &QTextEdit::textChanged, [this, textEdit](){handleTextEditChanged(textEdit);});
         }
     }
@@ -814,9 +863,6 @@ void CharacterTemplateFrame::populateWidget(QWidget* widget, Characterv2* charac
             valuePair = character->getResourceValue(keyString);
         else if(hash)
             valuePair = hash->value(keyString).value<ResourcePair>();
-
-        //if(valuePair.second == 0)
-        //    continue;
 
         CharacterTemplateResourceLayout* layout = nullptr;
         if(hash)
