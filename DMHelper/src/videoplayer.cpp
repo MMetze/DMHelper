@@ -124,6 +124,8 @@ void VideoPlayer::setPlayingAudio(bool playAudio)
 #endif
 
     _playAudio = playAudio;
+    if(_vlcPlayer)
+        libvlc_audio_set_volume(_vlcPlayer, _playAudio ? 100 : 0);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Playing audio state set";
@@ -550,7 +552,7 @@ bool VideoPlayer::startPlayer()
 
     // And start playback
     int playResult = libvlc_media_player_play(_vlcPlayer);
-    libvlc_audio_set_volume(_vlcPlayer, 0);
+    libvlc_audio_set_volume(_vlcPlayer, _playAudio ? 100 : 0);
 
     qDebug() << "[VideoPlayer] Player started: " << playResult;
 

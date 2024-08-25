@@ -29,6 +29,7 @@ LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, 
 #endif
     _scene(nullptr),
     _filename(filename),
+    _playAudio(true),
     _layerScreenshot(),
     _dmScene(nullptr)
 {
@@ -44,6 +45,9 @@ void LayerVideo::inputXML(const QDomElement &element, bool isImport)
 {
     if(element.hasAttribute("videoFile"))
         _filename = element.attribute("videoFile");
+
+    if(element.hasAttribute("playAudio"))
+        _playAudio = static_cast<bool>(element.attribute("playAudio").toInt());
 
     Layer::inputXML(element, isImport);
 }
@@ -131,6 +135,11 @@ void LayerVideo::applySize(const QSize& size)
 QString LayerVideo::getVideoFile() const
 {
     return _filename;
+}
+
+bool LayerVideo::getPlayAudio() const
+{
+    return _playAudio;
 }
 
 QImage LayerVideo::getScreenshot() const
@@ -305,6 +314,17 @@ void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultM
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 }
 
+void LayerVideo::setPlayAudio(bool playAudio)
+{
+    if(_playAudio == playAudio)
+        return;
+
+    _playAudio = playAudio;
+    if(_videoPlayer)
+        _videoPlayer->setPlayingAudio(playAudio);
+    emit dirty();
+}
+
 void LayerVideo::handleScreenshotReady(const QImage& image)
 {
     if((image.isNull()) || (_layerScreenshot == image))
@@ -367,6 +387,9 @@ void LayerVideo::clearScreenshot()
 void LayerVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("videoFile", targetDirectory.relativeFilePath(_filename));
+
+    if(!_playAudio)
+        element.setAttribute("playAudio", 0);
 
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
@@ -431,7 +454,7 @@ void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)
     connect(_videoGLPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, renderer, &PublishGLRenderer::updateProjectionMatrix);
     _videoGLPlayer->restartPlayer();
 #else
-    _videoPlayer = new VideoPlayer(_filename, QSize(), true, false);
+    _videoPlayer = new VideoPlayer(_filename, QSize(), true, _playAudio);
     connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
     _videoPlayer->restartPlayer();
 #endif
