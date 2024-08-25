@@ -1736,8 +1736,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
-                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) &&
-                   ((widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster) || (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Character)))
+                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
                 {
                     if(_hoverFrame)
                         removeRollover();

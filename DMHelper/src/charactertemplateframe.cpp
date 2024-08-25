@@ -587,68 +587,18 @@ void CharacterTemplateFrame::updateCharacterName()
 
 void CharacterTemplateFrame::handleLineEditFinished(QLineEdit* lineEdit)
 {
-    if((!_character) || (!lineEdit))
+    if(!lineEdit)
         return;
 
-    int widgetIndex = 0;
-    QBoxLayout* scrollLayout = nullptr;
-    QScrollArea* scrollArea = nullptr;
-
-    // First parent is the dynamically created frame withing the scroll area
-    if((lineEdit->parentWidget()) &&                                // this
-       (lineEdit->parentWidget()->parentWidget()) &&                // Unknown
-       (lineEdit->parentWidget()->parentWidget()->parentWidget()))  // Scroll Area Viewport
-        scrollArea = dynamic_cast<QScrollArea*>(lineEdit->parentWidget()->parentWidget()->parentWidget()->parentWidget());
-
-    if((scrollArea) && (scrollArea->widget()))
-        scrollLayout = dynamic_cast<QBoxLayout*>(scrollArea->widget()->layout());
-
-    if((scrollLayout) && (scrollLayout->count() > 0))
-        widgetIndex = scrollLayout->indexOf(lineEdit->parentWidget());
-
-    QString lineEditKey = lineEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-    if((scrollLayout) && (widgetIndex >= 0) && (scrollArea))
-    {
-        QString scrollKey = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-        _character->setListValue(scrollKey, widgetIndex, lineEditKey, lineEdit->text());
-    }
-    else
-    {
-        _character->setValue(lineEditKey, lineEdit->text());
-    }
+    handleEditBoxChange(lineEdit, lineEdit->text());
 }
 
 void CharacterTemplateFrame::handleTextEditChanged(QTextEdit* textEdit)
 {
-    if((!_character) || (!textEdit))
+    if(!textEdit)
         return;
 
-    int widgetIndex = 0;
-    QBoxLayout* scrollLayout = nullptr;
-    QScrollArea* scrollArea = nullptr;
-
-    // First parent is the dynamically created frame withing the scroll area
-    if((textEdit->parentWidget()) &&                                // this
-       (textEdit->parentWidget()->parentWidget()) &&                // Unknown
-       (textEdit->parentWidget()->parentWidget()->parentWidget()))  // Scroll Area Viewport
-        scrollArea = dynamic_cast<QScrollArea*>(textEdit->parentWidget()->parentWidget()->parentWidget()->parentWidget());
-
-    if((scrollArea) && (scrollArea->widget()))
-        scrollLayout = dynamic_cast<QBoxLayout*>(scrollArea->widget()->layout());
-
-    if((scrollLayout) && (scrollLayout->count() > 0))
-        widgetIndex = scrollLayout->indexOf(textEdit->parentWidget());
-
-    QString textEditKey = textEdit->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-    if((scrollLayout) && (widgetIndex >= 0) && (scrollArea))
-    {
-        QString scrollKey = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-        _character->setListValue(scrollKey, widgetIndex, textEditKey, textEdit->toHtml());
-    }
-    else
-    {
-        _character->setValue(textEditKey, textEdit->toHtml());
-    }
+    handleEditBoxChange(textEdit, textEdit->toHtml());
 }
 
 void CharacterTemplateFrame::handleResourceChanged(QFrame* resourceFrame)
@@ -890,4 +840,40 @@ QString CharacterTemplateFrame::getDefaultValue(const QString& keyString)
         return CombatantFactory::Instance()->getElement(keyString)._default;
     else
         return QString();
+}
+
+void CharacterTemplateFrame::handleEditBoxChange(QWidget* editWidget, const QString& value)
+{
+    if((!_character) || (!editWidget))
+        return;
+
+    int widgetIndex = 0;
+    QBoxLayout* scrollLayout = nullptr;
+    QString scrollKey;
+
+    QWidget* parentWidget = editWidget->parentWidget();
+
+    // Traverse up the widget hierarchy until the QScrollArea is found
+    while(parentWidget)
+    {
+        if(QScrollArea* scrollArea = dynamic_cast<QScrollArea*>(parentWidget))
+        {
+            if(scrollArea->widget())
+            {
+                scrollLayout = dynamic_cast<QBoxLayout*>(scrollArea->widget()->layout());
+                scrollKey = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+                break;
+            }
+        }
+        parentWidget = parentWidget->parentWidget();
+    }
+
+    if(scrollLayout)
+        widgetIndex = scrollLayout->indexOf(editWidget->parentWidget());
+
+    QString editWidgetKey = editWidget->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
+    if((!scrollKey.isEmpty()) && (widgetIndex >= 0))
+        _character->setListValue(scrollKey, widgetIndex, editWidgetKey, value);
+    else
+        _character->setValue(editWidgetKey, value);
 }

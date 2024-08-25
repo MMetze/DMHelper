@@ -63,6 +63,7 @@ private:
     void enableDndBeyondSync(bool enabled);
     void populateWidget(QWidget* widget, Characterv2* character, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
     QString getDefaultValue(const QString& keyString);
+    void handleEditBoxChange(QWidget* editWidget, const QString& value);
 
     Ui::CharacterTemplateFrame *ui;
     QWidget *_uiWidget;
