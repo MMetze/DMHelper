@@ -291,6 +291,16 @@ void BattleFrame::setBattle(EncounterBattle* battle)
 {
     _battle = battle;
     setModel(_battle == nullptr ? nullptr : _battle->getBattleDialogModel());
+
+    if(_battle)
+    {
+        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+        if(campaign)
+        {
+            ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+        }
+    }
 }
 
 EncounterBattle* BattleFrame::getBattle()
@@ -514,6 +524,8 @@ void BattleFrame::top()
         return;
     }
 
+    newRound();
+
     BattleDialogModelCombatant* nextCombatant = getFirstLivingCombatant();
     setActiveCombatant(nextCombatant);
     qDebug() << "[Battle Frame] Activated first combatant: " << nextCombatant;
@@ -552,17 +564,27 @@ void BattleFrame::next()
         }
     }
 
-    if(activeInitiative < nextInitiative)
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    RuleInitiative* ruleInitiative = nullptr;
+    if((campaign) && (ruleInitiative = campaign->getRuleset().getRuleInitiative()))
     {
-        if(_logger)
-            _logger->newRound();
-
-        clearDoneFlags();
+        if(ruleInitiative->compareCombatants(nextCombatant, activeCombatant))
+        {
+            newRound();
+            nextCombatant = getFirstLivingCombatant();
+        }
+    }
+    else
+    {
+        qDebug() << "[Battle Frame] WARNING: Unable to find campaign or ruleset!";
     }
 
     setActiveCombatant(nextCombatant);
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
+
+//make sure clear done button is hidden initially
+//make sure all init values are updated properly
 
 void BattleFrame::initiativeRuleChanged()
 {
@@ -1981,16 +2003,6 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->btnSort->setIconSize(QSize(iconSize, iconSize));
     ui->btnRoll->setIconSize(QSize(iconSize, iconSize));
     ui->btnClear->setIconSize(QSize(iconSize, iconSize));
-
-    if(_battle)
-    {
-        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-        if(campaign)
-        {
-            ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-            ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-        }
-    }
 }
 
 void BattleFrame::updateCombatantVisibility()
@@ -3506,6 +3518,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
 //                connect(dynamic_cast<CombatantWidgetCharacter*>(newWidget), SIGNAL(isKnownChanged(bool)), character, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
                 connect(character, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
+                connect(character, &BattleDialogModelCharacter::initiativeChanged, newWidget, &CombatantWidget::updateData);
             }
             break;
         }
@@ -3525,6 +3538,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
 //                connect(dynamic_cast<CombatantWidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
                 connect(monster, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
+                connect(monster, &BattleDialogModelMonsterBase::initiativeChanged, newWidget, &CombatantWidget::updateData);
             }
             break;
         }
@@ -3759,6 +3773,25 @@ void BattleFrame::relocateCombatantIcon(QGraphicsPixmapItem* icon)
         icon->setPos(mapPos - _model->getMapRect().topLeft());
     else
         icon->setPos(_model->getMapRect().center());
+}
+
+void BattleFrame::newRound()
+{
+    if(_logger)
+        _logger->newRound();
+
+    clearDoneFlags();
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(campaign)
+    {
+        RuleInitiative* ruleInitiative = campaign->getRuleset().getRuleInitiative();
+        if(ruleInitiative)
+        {
+            QList<BattleDialogModelCombatant*> combatants = getLivingCombatants();
+            ruleInitiative->newRound(combatants);
+        }
+    }
 }
 
 QWidget* BattleFrame::findCombatantWidgetFromPosition(const QPoint& position) const

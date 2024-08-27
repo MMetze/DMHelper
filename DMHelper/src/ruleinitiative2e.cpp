@@ -1,26 +1,26 @@
-#include "ruleinitiative5e.h"
+#include "ruleinitiative2e.h"
 #include "battledialogmodelcombatant.h"
 #include "initiativelistcombatantwidget.h"
 #include "initiativelistdialog.h"
 
-QString RuleInitiative5e::InitiativeType = QString("5e");
-QString RuleInitiative5e::InitiativeDescription = QString("D&D 5e Standard Initiative");
+QString RuleInitiative2e::InitiativeType = QString("2e");
+QString RuleInitiative2e::InitiativeDescription = QString("D&D 2e Standard Initiative");
 
-RuleInitiative5e::RuleInitiative5e(QObject *parent) :
+RuleInitiative2e::RuleInitiative2e(QObject *parent) :
     RuleInitiative{parent}
 {}
 
-QString RuleInitiative5e::getInitiativeType()
+QString RuleInitiative2e::getInitiativeType()
 {
-    return RuleInitiative5e::InitiativeType;
+    return RuleInitiative2e::InitiativeType;
 }
 
-bool RuleInitiative5e::compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
+bool RuleInitiative2e::compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
 {
-    return RuleInitiative5e::CompareCombatants(a, b);
+    return RuleInitiative2e::CompareCombatants(a, b);
 }
 
-bool RuleInitiative5e::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
+bool RuleInitiative2e::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
 {
     if((combatants.isEmpty()) || (!previousResult))
         return false;
@@ -76,19 +76,21 @@ bool RuleInitiative5e::internalRollInitiative(QList<BattleDialogModelCombatant*>
     return (result == QDialog::Accepted);
 }
 
-void RuleInitiative5e::internalSortInitiative(QList<BattleDialogModelCombatant*>& combatants)
+void RuleInitiative2e::internalSortInitiative(QList<BattleDialogModelCombatant*>& combatants)
 {
     std::sort(combatants.begin(), combatants.end(), CompareCombatants);
 }
 
-bool RuleInitiative5e::CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
+void RuleInitiative2e::internalNewRound(QList<BattleDialogModelCombatant*>& combatants)
+{
+    rollInitiative(combatants);
+}
+
+bool RuleInitiative2e::CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
 {
     if((!a)||(!b))
         return false;
 
-    // Sort by initiative first, then dexterity
-    if(a->getInitiative() == b->getInitiative())
-        return a->getDexterity() > b->getDexterity();
-    else
-        return a->getInitiative() > b->getInitiative();
+    // Sort by lower initiative
+    return a->getInitiative() < b->getInitiative();
 }

@@ -178,6 +178,7 @@ SOURCES += main.cpp\
     ribbontabworldmap.cpp \
     rulefactory.cpp \
     ruleinitiative.cpp \
+    ruleinitiative2e.cpp \
     ruleinitiative5e.cpp \
     ruleinitiativegroup.cpp \
     ruleinitiativegroupmonsters.cpp \
@@ -459,6 +460,7 @@ HEADERS  += mainwindow.h \
     ribbontabworldmap.h \
     rulefactory.h \
     ruleinitiative.h \
+    ruleinitiative2e.h \
     ruleinitiative5e.h \
     ruleinitiativegroup.h \
     ruleinitiativegroupmonsters.h \

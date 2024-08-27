@@ -1,4 +1,5 @@
 #include "rulefactory.h"
+#include "ruleinitiative2e.h"
 #include "ruleinitiative5e.h"
 #include "ruleinitiativegroup.h"
 #include "ruleinitiativegroupmonsters.h"
@@ -18,6 +19,9 @@ RuleInitiative* RuleFactory::createRuleInitiative(const QString& ruleInitiativeT
     if(ruleInitiativeType == RuleInitiativeGroupMonsters::InitiativeType)
         return new RuleInitiativeGroupMonsters(parent);
 
+    if(ruleInitiativeType == RuleInitiative2e::InitiativeType)
+        return new RuleInitiative2e(parent);
+
     return nullptr;
 }
 
@@ -31,6 +35,7 @@ QStringList RuleFactory::getRuleInitiativeNames()
     QStringList result;
 
     result << RuleInitiative5e::InitiativeType << RuleInitiative5e::InitiativeDescription
+           << RuleInitiative2e::InitiativeType << RuleInitiative2e::InitiativeDescription
            << RuleInitiativeGroup::InitiativeType << RuleInitiativeGroup::InitiativeDescription
            << RuleInitiativeGroupMonsters::InitiativeType << RuleInitiativeGroupMonsters::InitiativeDescription;
 

@@ -310,6 +310,8 @@ private:
     void createCombatantIcon(BattleDialogModelCombatant* combatant);
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
+    void newRound();
+
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
     BattleDialogModelObject* getObjectFromItem(QGraphicsItem* item) const;

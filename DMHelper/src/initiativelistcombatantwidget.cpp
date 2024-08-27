@@ -76,3 +76,9 @@ QString InitiativeListCombatantWidget::getName() const
 {
     return ui->lblName->text();
 }
+
+void InitiativeListCombatantWidget::setInitiativeFocus()
+{
+    ui->edtInitiative->setFocus();
+    ui->edtInitiative->selectAll();
+}
