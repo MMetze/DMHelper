@@ -7,6 +7,7 @@
 class QDomElement;
 class CampaignObjectBase;
 class ObjectFactory;
+class Ruleset;
 
 class CampaignObjectFactory : public QObject
 {
@@ -17,6 +18,8 @@ public:
 
     static CampaignObjectFactory* Instance();
     static void Shutdown();
+
+    static void configureFactories(const Ruleset& ruleset);
 
     static CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport);
     static CampaignObjectBase* createObject(const QDomElement& element, bool isImport);

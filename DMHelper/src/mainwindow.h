@@ -45,6 +45,7 @@ class RibbonTabWorldMap;
 class RibbonTabAudio;
 class BattleFrame;
 class MapFrame;
+class CharacterTemplateFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -254,6 +255,7 @@ private:
 
     BattleFrame* _battleFrame;
     MapFrame* _mapFrame;
+    CharacterTemplateFrame* _characterFrame;
 };
 
 #endif // MAINWINDOW_H

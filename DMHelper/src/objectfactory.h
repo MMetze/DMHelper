@@ -4,6 +4,7 @@
 #include <QObject>
 
 class CampaignObjectBase;
+class Ruleset;
 class QDomElement;
 
 class ObjectFactory : public QObject
@@ -17,6 +18,8 @@ signals:
 public slots:
     virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) = 0;
     virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) = 0;
+
+    virtual void configureFactory(const Ruleset& ruleset) = 0;
 
 protected:
     enum OLD_ENCOUNTER_TYPES

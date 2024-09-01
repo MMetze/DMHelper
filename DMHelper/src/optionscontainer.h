@@ -25,7 +25,7 @@ public:
     QString getEquipmentFileName() const;
     QString getShopsFileName() const;
     QString getTablesDirectory() const;
-    QString getCharacterLayoutFileName() const;
+    QString getRulesetFileName() const;
     QString getLastMonster() const;
     QString getLastSpell() const;
     bool getShowAnimations() const;
@@ -99,7 +99,7 @@ signals:
     void equipmentFileNameChanged(const QString& filename);
     void shopsFileNameChanged(const QString& filename);
     void tablesDirectoryChanged();
-    void characterLayoutFileNameChanged();
+    void rulesetFileNameChanged(const QString& filename);
     void showAnimationsChanged(bool showAnimations);
 
     // Font settings
@@ -167,7 +167,7 @@ public slots:
     QString getSettingsFile(OptionsAccessor& settings, const QString& key, const QString& defaultFilename, bool* exists = nullptr);
     QString getStandardFile(const QString& defaultFilename, bool* exists = nullptr);
     void setTablesDirectory(const QString& directory);
-    void setCharacterLayoutFileName(const QString& filename);
+    void setRulesetFileName(const QString& filename);
     QString getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir);
     QString getDataDirectory(const QString& defaultDir, bool overwrite = false);
     QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
@@ -252,7 +252,7 @@ private:
     QString _equipmentFileName;
     QString _shopsFileName;
     QString _tablesDirectory;
-    QString _characterLayoutFileName;
+    QString _rulesetFileName;
     bool _showAnimations;
 
     // Font settings

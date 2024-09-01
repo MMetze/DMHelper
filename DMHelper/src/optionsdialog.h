@@ -50,9 +50,9 @@ private slots:
     void editTables();
     void setTables(const QString& tablesDirectory);
 
-    void browseCharacterLayout();
-    void editCharacterLayout();
-    void setCharacterLayout(const QString& characterLayoutFile);
+    void browseRuleset();
+    void editRuleset();
+    void setRuleset(const QString& rulesetFile);
 
     void handleInitiativeScaleChanged(qreal initiativeScale);
 
@@ -91,6 +91,14 @@ private slots:
 
     void updateFileLocations();
     void resetFileLocations();
+
+    void browseCharacterDataFile();
+    void editCharacterDataFile();
+    void setCharacterDataFile(const QString& characterDataFile);
+
+    void browseCharacterUIFile();
+    void editCharacterUIFile();
+    void setCharacterUIFile(const QString& characterUIFile);
 
 private:
     Ui::OptionsDialog *ui;

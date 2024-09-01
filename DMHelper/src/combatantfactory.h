@@ -40,10 +40,12 @@ public:
     static CombatantFactory* Instance();
     static void Shutdown();
 
-    static Combatant* createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent = nullptr);
+    //static Combatant* createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent = nullptr);
 
     static QVariant convertStringToVariant(const QString& value, TemplateType type);
     static QString convertVariantToString(const QVariant& value, TemplateType type);
+
+    bool isEmpty() const;
 
     bool hasAttribute(const QString& name) const;
     DMHAttribute getAttribute(const QString& name) const;
@@ -65,8 +67,10 @@ public slots:
     virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) override;
     virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) override;
 
-private:
-    void loadCharacterTemplate();
+    virtual void configureFactory(const Ruleset& ruleset) override;
+
+private:    
+    void loadCharacterTemplate(const QString& characterTemplateFile);
 
     static CombatantFactory* _instance;
 

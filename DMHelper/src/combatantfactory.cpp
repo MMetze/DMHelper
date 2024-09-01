@@ -3,6 +3,7 @@
 #include "monster.h"
 #include "dmconstants.h"
 #include "bestiary.h"
+#include "ruleset.h"
 #include "combatantreference.h"
 #include <QDomElement>
 #include <QString>
@@ -44,7 +45,6 @@ CombatantFactory* CombatantFactory::Instance()
     {
         qDebug() << "[CombatantFactory] Initializing Combatant Factory";
         _instance = new CombatantFactory();
-        _instance->loadCharacterTemplate();
     }
 
     return _instance;
@@ -56,6 +56,7 @@ void CombatantFactory::Shutdown()
     _instance = nullptr;
 }
 
+/*
 Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent)
 {
     Combatant* combatant = nullptr;
@@ -82,6 +83,7 @@ Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElemen
 
     return combatant;
 }
+*/
 
 CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
 {
@@ -183,6 +185,11 @@ QString CombatantFactory::convertVariantToString(const QVariant& value, Template
     }
 }
 
+bool CombatantFactory::isEmpty() const
+{
+    return _attributes.isEmpty() && _elements.isEmpty() && _elementLists.isEmpty();
+}
+
 bool CombatantFactory::hasAttribute(const QString& name) const
 {
     return _attributes.contains(name);
@@ -233,16 +240,21 @@ bool CombatantFactory::hasEntry(const QString& name) const
     return hasAttribute(name) || hasElement(name) || hasElementList(name);
 }
 
-void CombatantFactory::loadCharacterTemplate()
+void CombatantFactory::configureFactory(const Ruleset& ruleset)
 {
-    QString defaultFilename("character.xml");
+    loadCharacterTemplate(ruleset.getCharacterDataFile());
+    connect(&ruleset, &Ruleset::characterDataFileChanged, this, &CombatantFactory::loadCharacterTemplate);
+}
+
+void CombatantFactory::loadCharacterTemplate(const QString& characterTemplateFile)
+{
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
-    QString appFile = fileDirPath.path() + QString("/Resources/") + defaultFilename;
+    QString appFile = fileDirPath.path() + QString("/Resources/") + characterTemplateFile;
 #else
     QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString appFile = fileDirPath.path() + QString("/resources/") + defaultFilename;
+    QString appFile = fileDirPath.path() + QString("/resources/") + characterTemplateFile;
 #endif
 
     if(!QFileInfo::exists(appFile))
@@ -276,6 +288,10 @@ void CombatantFactory::loadCharacterTemplate()
         QMessageBox::critical(nullptr, QString("Character template invalid"), QString("Unable to read the character template: ") + appFile + QString(", the XML is invalid"));
         return;
     }
+
+    _attributes.clear();
+    _elements.clear();
+    _elementLists.clear();
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != TEMPLATEVALUES[TemplateType_template]))

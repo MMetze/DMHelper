@@ -20,13 +20,19 @@ public:
     // Local accessors
     RuleInitiative* getRuleInitiative();
     QString getRuleInitiativeType();
+    QString getCharacterDataFile() const;
+    QString getCharacterUIFile() const;
     bool getCombatantDoneCheckbox() const;
 
 signals:
     void initiativeRuleChanged();
+    void characterDataFileChanged(const QString& characterDataFile);
+    void characterUIFileChanged(const QString& characterUIFile);
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
+    void setCharacterDataFile(const QString& characterDataFile);
+    void setCharacterUIFile(const QString& characterUIFile);
     void setCombatantDoneCheckbox(bool checked);
 
 protected slots:
@@ -37,6 +43,8 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     RuleInitiative* _ruleInitiative;
+    QString _characterDataFile;
+    QString _characterUIFile;
     bool _combatantDoneCheckbox;
 };
 

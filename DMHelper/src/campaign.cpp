@@ -9,6 +9,7 @@
 #include "bestiary.h"
 #include "basicdateserver.h"
 #include "soundboardgroup.h"
+#include "campaignobjectfactory.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QHash>
@@ -94,9 +95,17 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     qDebug() << "[Campaign]    Campaign file version: " << majorVersion << "." << minorVersion;
     if(!isVersionCompatible(majorVersion, minorVersion))
     {
-        qDebug() << "[Campaign]    ERROR: The camapaign file version is not compatible with this version of DMHelper.";
+        qDebug() << "[Campaign]    ERROR: The campaign file version is not compatible with this version of DMHelper.";
         return;
     }
+
+    // Load the ruleset; without this we can't load the rest of the campaign
+    QDomElement rulesetElement = element.firstChildElement(QString("ruleset"));
+    if(!rulesetElement.isNull())
+        _ruleset.inputXML(rulesetElement, isImport);
+
+    // Configure the campaign object factories based on the ruleset
+    CampaignObjectFactory::configureFactories(_ruleset);
 
     QString calendarName = element.attribute("calendar", QString("Gregorian"));
     if(BasicDateServer::Instance())
@@ -105,10 +114,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     setDate(inputDate);
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time", QString::number(0)).toInt()));
 
-    QDomElement rulesetElement = element.firstChildElement(QString("ruleset"));
-    if(!rulesetElement.isNull())
-        _ruleset.inputXML(rulesetElement, isImport);
-
+    // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
 
     QDomElement notesElement = element.firstChildElement(QString("notes"));

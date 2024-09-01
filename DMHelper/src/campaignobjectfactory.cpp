@@ -51,6 +51,19 @@ void CampaignObjectFactory::Shutdown()
     _instance = nullptr;
 }
 
+void CampaignObjectFactory::configureFactories(const Ruleset& ruleset)
+{
+    CampaignObjectFactory* factory = CampaignObjectFactory::Instance();
+    if(!factory)
+        return;
+
+    for(int i = 0; i < factory->factoryCount(); ++i)
+    {
+        if(factory->getFactory(i))
+            factory->getFactory(i)->configureFactory(ruleset);
+    }
+}
+
 CampaignObjectBase* CampaignObjectFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
 {
     CampaignObjectFactory* factory = CampaignObjectFactory::Instance();

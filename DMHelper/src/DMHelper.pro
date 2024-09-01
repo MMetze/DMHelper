@@ -127,6 +127,7 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    newcampaigndialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
     objectimportworker.cpp \
@@ -409,6 +410,7 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    newcampaigndialog.h \
     objectfactory.h \
     objectimportdialog.h \
     objectimportworker.h \
@@ -617,6 +619,7 @@ FORMS    += mainwindow.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
+    newcampaigndialog.ui \
     objectimportdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
@@ -625,7 +628,6 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
-    resources/ui/character.ui \
     resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \

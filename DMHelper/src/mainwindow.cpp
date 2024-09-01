@@ -38,6 +38,7 @@
 #include "bestiaryexportdialog.h"
 #include "exportdialog.h"
 #include "equipmentserver.h"
+#include "rulefactory.h"
 #include "randommarketdialog.h"
 #include "quickref.h"
 #include "quickrefframe.h"
@@ -50,6 +51,7 @@
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
+#include "newcampaigndialog.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"
@@ -157,7 +159,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabWorldMap(nullptr),
     _ribbonTabAudio(nullptr),
     _battleFrame(nullptr),
-    _mapFrame(nullptr)
+    _mapFrame(nullptr),
+    _characterFrame(nullptr)
 {
     qDebug() << "[MainWindow] Initializing Main";
 
@@ -271,6 +274,12 @@ MainWindow::MainWindow(QWidget *parent) :
     BasicDateServer* dateServer = BasicDateServer::Instance();
     connect(_options, &OptionsContainer::calendarFileNameChanged, dateServer, &BasicDateServer::readDateInformation);
     qDebug() << "[MainWindow] BasicDateServer Initialized";
+
+    qDebug() << "[MainWindow] Initializing Rule Factory";
+    RuleFactory::Initialize(_options->getRulesetFileName());
+    RuleFactory* ruleFactory = RuleFactory::Instance();
+    connect(_options, &OptionsContainer::rulesetFileNameChanged, ruleFactory, &RuleFactory::readRuleset);
+    qDebug() << "[MainWindow] Rule Factory Initialized";
 
     qDebug() << "[MainWindow] Initializing EquipmentServer";
     EquipmentServer::Initialize(_options->getEquipmentFileName());
@@ -551,15 +560,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_Character
     //CharacterFrame* charFrame = new CharacterFrame(_options);
-    CharacterTemplateFrame* charFrame = new CharacterTemplateFrame(_options);
-    charFrame->setHeroForgeToken(_options->getHeroForgeToken());
+    _characterFrame = new CharacterTemplateFrame(_options);
+    _characterFrame->setHeroForgeToken(_options->getHeroForgeToken());
     //connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
     //connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
-    connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterTemplateFrame::setHeroForgeToken);
-    connect(charFrame, &CharacterTemplateFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
+    connect(_options, &OptionsContainer::heroForgeTokenChanged, _characterFrame, &CharacterTemplateFrame::setHeroForgeToken);
+    connect(_characterFrame, &CharacterTemplateFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, _characterFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(_characterFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     //connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
 
     PartyFrame* partyFrame = new PartyFrame;
@@ -754,14 +763,21 @@ void MainWindow::newCampaign()
     if(!closeCampaign())
         return;
 
-    bool ok;
-    QString campaignName = QInputDialog::getText(this, QString("Enter New Campaign Name"), QString("Campaign"), QLineEdit::Normal, QString(), &ok);
-    if(ok)
+    NewCampaignDialog* newCampaignDialog = new NewCampaignDialog(this);
+    int result = newCampaignDialog->exec();
+    if(result == QDialog::Accepted)
     {
+        QString campaignName = newCampaignDialog->getCampaignName();
         if(campaignName.isEmpty())
             campaignName = QString("Campaign");
 
         _campaign = new Campaign(campaignName);
+
+        _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
+        _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
+        _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        CampaignObjectFactory::configureFactories(_campaign->getRuleset());
+
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
@@ -771,6 +787,8 @@ void MainWindow::newCampaign()
         emit campaignLoaded(_campaign);
         setDirty();
     }
+
+    newCampaignDialog->deleteLater();
 }
 
 bool MainWindow::saveCampaign()
@@ -2104,7 +2122,7 @@ void MainWindow::deleteCampaign()
     {
         Campaign* oldCampaign = _campaign;
         _campaign = nullptr;
-        emit campaignLoaded(_campaign);
+        emit campaignLoaded(nullptr);
 
         // Clear the campaign itself
         delete oldCampaign;
@@ -2409,7 +2427,10 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(campaign, &Campaign::dirty, this, &MainWindow::setDirty);
         connect(campaign, &Campaign::nameChanged, this, &MainWindow::setDirty);
 
+        _characterFrame->loadCharacterUITemplate(campaign->getRuleset().getCharacterUIFile());
         connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
+        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
+        connect(&campaign->getRuleset(), &Ruleset::characterUIFileChanged, _characterFrame, &CharacterTemplateFrame::loadCharacterUITemplate);
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));

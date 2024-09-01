@@ -30,18 +30,6 @@ void DMScreenTabWidget::readEquipment(const QString& equipmentFile)
 {
     qDebug() << "[DMScreen] Reading equipment for DM Screen";
 
-    /*
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    QString equipmentFileName = fileDirPath.path() + QString("/equipment.xml");
-#else
-    QString equipmentFileName("equipment.xml");
-#endif
-*/
-
     QDomDocument doc("DMHelperDataXML");
     QFile file(equipmentFile);
     qDebug() << "[DMScreen] Equipment file: " << QFileInfo(file).filePath();

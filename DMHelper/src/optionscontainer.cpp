@@ -25,7 +25,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _equipmentFileName(),
     _shopsFileName(),
     _tablesDirectory(),
-    _characterLayoutFileName(),
+    _rulesetFileName(),
     _showAnimations(false),
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
@@ -112,9 +112,9 @@ QString OptionsContainer::getTablesDirectory() const
     return _tablesDirectory;
 }
 
-QString OptionsContainer::getCharacterLayoutFileName() const
+QString OptionsContainer::getRulesetFileName() const
 {
-    return _characterLayoutFileName;
+    return _rulesetFileName;
 }
 
 QString OptionsContainer::getLastMonster() const
@@ -420,10 +420,10 @@ void OptionsContainer::readSettings()
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
-    bool characterLayoutExists = true;
-    setCharacterLayoutFileName(getSettingsFile(settings, QString("characterLayout"), QString("ui/character.ui"), &characterLayoutExists));
-    if((!settings.contains(QString("characterLayout"))) || (!characterLayoutExists))
-        getDataDirectory(QString("ui"), true);
+    bool rulesetExists = true;
+    setRulesetFileName(getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists));
+//    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
+//        getDataDirectory(QString("ui"), true);
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
@@ -510,7 +510,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("equipment", getEquipmentFileName());
     settings.setValue("shops", getShopsFileName());
     settings.setValue("tables", getTablesDirectory());
-    settings.setValue("characterLayout", getCharacterLayoutFileName());
+    settings.setValue("ruleset", getRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
@@ -727,13 +727,13 @@ void OptionsContainer::setTablesDirectory(const QString& directory)
     }
 }
 
-void OptionsContainer::setCharacterLayoutFileName(const QString& filename)
+void OptionsContainer::setRulesetFileName(const QString& filename)
 {
-    if(_characterLayoutFileName != filename)
+    if(_rulesetFileName != filename)
     {
-        _characterLayoutFileName = filename;
-        qDebug() << "[OptionsContainer] Character Layout set to: " << filename;
-        emit characterLayoutFileNameChanged();
+        _rulesetFileName = filename;
+        qDebug() << "[OptionsContainer] Ruleset file set to: " << filename;
+        emit rulesetFileNameChanged(_rulesetFileName);
     }
 }
 
@@ -852,7 +852,7 @@ void OptionsContainer::resetFileSettings()
     setShopsFileName(getStandardFile(QString("shops.xml")));
     setTablesDirectory(getDataDirectory(QString("tables"), true));
     getDataDirectory(QString("ui"), true);
-    setCharacterLayoutFileName(getStandardFile(QString("ui/character.ui")));
+    setRulesetFileName(getStandardFile(QString("ruleset.xml")));
     getDataDirectory(QString("Images"), true);
 }
 
@@ -1270,7 +1270,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setEquipmentFileName(other->_equipmentFileName);
         setShopsFileName(other->_shopsFileName);
         setTablesDirectory(other->_tablesDirectory);
-        setCharacterLayoutFileName(other->_characterLayoutFileName);
+        setRulesetFileName(other->_rulesetFileName);
         setLastMonster(other->_lastMonster);
         setLastSpell(other->_lastSpell);
         setShowAnimations(other->_showAnimations);

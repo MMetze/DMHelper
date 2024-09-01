@@ -30,58 +30,6 @@ CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidge
 {
     ui->setupUi(this);
 
-    /*
-    QString defaultFilename("character.ui");
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    QString appFile = fileDirPath.path() + QString("/Resources/ui/") + defaultFilename;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString appFile = fileDirPath.path() + QString("/resources/ui/") + defaultFilename;
-#endif
-    */
-
-    QString appFile = options->getCharacterLayoutFileName();
-
-    if(!QFileInfo::exists(appFile))
-    {
-        qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File not found: " << appFile;
-    }
-    else
-    {
-        QUiLoader loader;
-        QFile file(appFile);
-        file.open(QFile::ReadOnly);
-        _uiWidget = loader.load(&file, this);
-        file.close();
-
-        if(!_uiWidget)
-        {
-            qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File could not be loaded: " << loader.errorString();
-        }
-        else
-        {
-            QVBoxLayout *layout = new QVBoxLayout;
-            layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-            layout->addWidget(_uiWidget);
-            ui->scrollAreaWidgetContents->setLayout(layout);
-
-            // Activate hyperlinks for any included text edits
-            QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
-            for(QTextEdit* edit : textEdits)
-            {
-                auto &clist = edit->children();
-                for(QObject *pObj : clist)
-                {
-                    QString cname = pObj->metaObject()->className();
-                    if(cname == "QWidgetTextControl")
-                        pObj->setProperty("openExternalLinks", true);
-                }
-            }
-        }
-    }
-
     connect(ui->btnEditIcon, &QAbstractButton::clicked, this, &CharacterTemplateFrame::editCharacterIcon);
     connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterTemplateFrame::syncDndBeyond);
     enableDndBeyondSync(false);
@@ -144,6 +92,66 @@ void CharacterTemplateFrame::setCharacter(Characterv2* character)
 void CharacterTemplateFrame::setHeroForgeToken(const QString& token)
 {
     _heroForgeToken = token;
+}
+
+void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile)
+{
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    QString appFile = fileDirPath.path() + QString("/Resources/") + templateFile;
+#else
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    QString appFile = fileDirPath.path() + QString("/resources/") + templateFile;
+#endif
+
+    if(!QFileInfo::exists(appFile))
+    {
+        qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File not found: " << appFile;
+        return;
+    }
+
+    QUiLoader loader;
+    QFile file(appFile);
+    file.open(QFile::ReadOnly);
+    QWidget* newWidget = loader.load(&file, this);
+    file.close();
+
+    if(!newWidget)
+    {
+        qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File " << appFile << " could not be loaded: " << loader.errorString();
+        return;
+    }
+
+    if(_character)
+        disconnectTemplate();
+
+    delete _uiWidget;
+    if(ui->scrollAreaWidgetContents->layout())
+        delete ui->scrollAreaWidgetContents->layout();
+
+    _uiWidget = newWidget;
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    layout->addWidget(_uiWidget);
+    ui->scrollAreaWidgetContents->setLayout(layout);
+
+    // Activate hyperlinks for any included text edits
+    QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
+    for(QTextEdit* edit : textEdits)
+    {
+        auto &clist = edit->children();
+        for(QObject *pObj : clist)
+        {
+            QString cname = pObj->metaObject()->className();
+            if(cname == "QWidgetTextControl")
+                pObj->setProperty("openExternalLinks", true);
+        }
+    }
+
+    if(_character)
+        readCharacterData();
 }
 
 void CharacterTemplateFrame::publishClicked(bool checked)

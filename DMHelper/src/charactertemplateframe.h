@@ -33,6 +33,7 @@ signals:
 
 public slots:
     // Publish slots from CampaignObjectFrame
+    virtual void loadCharacterUITemplate(const QString& templateFile);
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
 
