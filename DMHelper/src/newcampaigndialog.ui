@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New CAmpaign</string>
+   <string>New Campaign</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -189,6 +189,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>edtCampaignName</tabstop>
+  <tabstop>cmbRulesets</tabstop>
+  <tabstop>cmbInitiative</tabstop>
+  <tabstop>edtCharacterData</tabstop>
+  <tabstop>btnBrowseCharacterData</tabstop>
+  <tabstop>edtCharacterUI</tabstop>
+  <tabstop>btnBrowseCharacterUI</tabstop>
+  <tabstop>chkCombatantDone</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

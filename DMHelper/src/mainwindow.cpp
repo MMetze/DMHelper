@@ -773,6 +773,7 @@ void MainWindow::newCampaign()
 
         _campaign = new Campaign(campaignName);
 
+        _campaign->getRuleset().setRuleInitiative(newCampaignDialog->getInitiativeType());
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());

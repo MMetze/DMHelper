@@ -710,8 +710,11 @@ DISTFILES += \
     release_notes.txt \
     resources/calendar.xml \
     resources/character.xml \
+    resources/character2e.xml \
+    resources/character5e.xml \
     resources/equipment.xml \
     resources/quickref_data.xml \
+    resources/ruleset.xml \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
     resources/tables/Indefinite Madness.xml \

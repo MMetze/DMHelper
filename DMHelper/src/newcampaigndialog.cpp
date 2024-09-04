@@ -25,7 +25,7 @@ NewCampaignDialog::NewCampaignDialog(QWidget *parent)
     connect(ui->btnBrowseCharacterData, &QPushButton::clicked, this, &NewCampaignDialog::handleCharacterDataBrowse);
     connect(ui->btnBrowseCharacterUI, &QPushButton::clicked, this, &NewCampaignDialog::handleCharacterUIBrowse);
 
-    ui->cmbRulesets->setCurrentIndex(0);
+    handleRulesetSelected();
 }
 
 NewCampaignDialog::~NewCampaignDialog()
@@ -38,7 +38,12 @@ QString NewCampaignDialog::getCampaignName() const
     return ui->edtCampaignName->text();
 }
 
-QString NewCampaignDialog::getInitiative() const
+QString NewCampaignDialog::getInitiativeType() const
+{
+    return ui->cmbInitiative->currentData().toString();
+}
+
+QString NewCampaignDialog::getInitiativeDescription() const
 {
     return ui->cmbInitiative->currentText();
 }
@@ -69,7 +74,9 @@ void NewCampaignDialog::handleRulesetSelected()
         return;
     }
 
-    ui->cmbInitiative->setCurrentText(ruleset._initiative);
+    int initiativeIndex = ui->cmbInitiative->findData(ruleset._initiative);
+    if(initiativeIndex != -1)
+        ui->cmbInitiative->setCurrentIndex(initiativeIndex);
     ui->edtCharacterData->setText(ruleset._characterData);
     ui->edtCharacterUI->setText(ruleset._characterUI);
 }

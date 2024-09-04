@@ -16,7 +16,8 @@ public:
     ~NewCampaignDialog();
 
     QString getCampaignName() const;
-    QString getInitiative() const;
+    QString getInitiativeType() const;
+    QString getInitiativeDescription() const;
     QString getCharacterDataFile() const;
     QString getCharacterUIFile() const;
     bool isCombatantDone() const;
