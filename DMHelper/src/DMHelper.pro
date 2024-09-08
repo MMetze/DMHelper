@@ -628,6 +628,8 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/character2e.ui \
+    resources/ui/character5e.ui \
     resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \

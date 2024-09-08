@@ -12,7 +12,7 @@
     <dmh:attribute type="dmh:string" name="size" default="medium"/>
     <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
     <dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>
-    <dmh:attribute type="dmh:integer" name="speed" default="30"/>
+    <dmh:attribute type="dmh:integer" name="speed" default="12"/>
     <dmh:attribute type="dmh:integer" name="conditions"/>
 
     <dmh:attribute type="dmh:integer" name="strength" default="10"/>
@@ -55,7 +55,6 @@
 
     <dmh:attribute type="dmh:string" name="race"/>
     <dmh:attribute type="dmh:string" name="subrace"/>
-    <dmh:attribute type="dmh:string" name="movement"/>
     <dmh:attribute type="dmh:string" name="class"/>
     <dmh:attribute type="dmh:string" name="level"/>
     <dmh:attribute type="dmh:string" name="experience"/>
@@ -69,26 +68,6 @@
     <dmh:attribute type="dmh:string" name="height"/>
     <dmh:attribute type="dmh:string" name="weight"/>
     <dmh:attribute type="dmh:string" name="alignment"/>
-
-    <dmh:attribute type="dmh:integer" name="acrobatics"/>
-    <dmh:attribute type="dmh:integer" name="animalHandling"/>
-    <dmh:attribute type="dmh:integer" name="arcana"/>
-    <dmh:attribute type="dmh:integer" name="athletics"/>
-    <dmh:attribute type="dmh:integer" name="deception"/>
-    <dmh:attribute type="dmh:integer" name="history"/>
-    <dmh:attribute type="dmh:integer" name="insight"/>
-    <dmh:attribute type="dmh:integer" name="intimidation"/>
-    <dmh:attribute type="dmh:integer" name="investigation"/>
-    <dmh:attribute type="dmh:integer" name="medicine"/>
-    <dmh:attribute type="dmh:integer" name="nature"/>
-    <dmh:attribute type="dmh:integer" name="perception"/>
-    <dmh:attribute type="dmh:integer" name="performance"/>
-    <dmh:attribute type="dmh:integer" name="persuasion"/>
-    <dmh:attribute type="dmh:integer" name="religion"/>
-    <dmh:attribute type="dmh:integer" name="sleightOfHand"/>
-    <dmh:attribute type="dmh:integer" name="stealth"/>
-    <dmh:attribute type="dmh:integer" name="survival"/>
-    <dmh:attribute type="dmh:integer" name="passiveperception"/>
 
     <dmh:attribute type="dmh:integer" name="platinum"/>
     <dmh:attribute type="dmh:integer" name="gold"/>
