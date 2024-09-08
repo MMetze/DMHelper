@@ -629,6 +629,7 @@ FORMS    += mainwindow.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
     resources/ui/character2e.ui \
+    resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \
     resources/ui/spellSlot.ui \
     ribbonframetext.ui \
@@ -713,6 +714,7 @@ DISTFILES += \
     resources/calendar.xml \
     resources/character.xml \
     resources/character2e.xml \
+    resources/character5e-2024.xml \
     resources/character5e.xml \
     resources/equipment.xml \
     resources/quickref_data.xml \
