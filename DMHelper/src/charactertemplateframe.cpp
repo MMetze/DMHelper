@@ -282,6 +282,13 @@ void CharacterTemplateFrame::readCharacterData()
                 oldWidget->deleteLater();
             }
 
+            scrollArea->setWidgetResizable(true);
+            QFrame* scrollWidget = new QFrame;
+            QVBoxLayout* scrollLayout = new QVBoxLayout;
+            scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+            scrollWidget->setLayout(scrollLayout);
+            scrollArea->setWidget(scrollWidget);
+
             QList<QVariant> listValue = _character->getListValue(keyString);
             if(!listValue.isEmpty())
             {
@@ -302,13 +309,6 @@ void CharacterTemplateFrame::readCharacterData()
                 else
                 {
 */
-                    scrollArea->setWidgetResizable(true);
-                    QFrame* scrollWidget = new QFrame;
-                    QVBoxLayout* scrollLayout = new QVBoxLayout;
-                    scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-                    scrollWidget->setLayout(scrollLayout);
-                    scrollArea->setWidget(scrollWidget);
-
                     for(int i = 0; i < listValue.count(); ++i)
                     {
                         QVariant listEntry = listValue.at(i);
@@ -345,8 +345,8 @@ void CharacterTemplateFrame::readCharacterData()
                     }
                 // }
 
-                scrollArea->installEventFilter(this);
             }
+            scrollArea->installEventFilter(this);
         }
     }
 

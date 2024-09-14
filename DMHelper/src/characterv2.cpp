@@ -375,10 +375,7 @@ void Characterv2::insertListEntry(const QString& key, int index, QHash<QString, 
 
     QList<QVariant> list = getListValue(key);
     if(list.isEmpty())
-    {
-        qDebug() << "[Characterv2] WARNING: Request to insert item into unknown list " << key;
-        return;
-    }
+        qDebug() << "[Characterv2] WARNING: Request to insert item into unknown list, will create a new entry: " << key;
 
     if((index < 0) || (index > list.size()))
     {
