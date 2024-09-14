@@ -292,59 +292,27 @@ void CharacterTemplateFrame::readCharacterData()
             QList<QVariant> listValue = _character->getListValue(keyString);
             if(!listValue.isEmpty())
             {
-/*
-#ifdef Q_OS_MAC
-                QDir fileDirPath(QCoreApplication::applicationDirPath());
-                fileDirPath.cdUp();
-                QString appFile = fileDirPath.path() + QString("/Resources/ui/") + widgetString;
-#else
-                QDir fileDirPath(QCoreApplication::applicationDirPath());
-                QString appFile = fileDirPath.path() + QString("/resources/ui/") + widgetString;
-#endif
+                for(int i = 0; i < listValue.count(); ++i)
+                {
+                    QVariant listEntry = listValue.at(i);
+                    if(listEntry.isNull())
+                        continue;
 
-                if(!QFileInfo::exists(appFile))
-                {
-                    qDebug() << "[CharacterTemplateFrame] ERROR: UI Widget Template File not found: " << appFile << ", for scroll area: " << keyString;
-                }
-                else
-                {
-*/
-                    for(int i = 0; i < listValue.count(); ++i)
+                    QWidget* newWidget = createResourceWidget(keyString, widgetString);
+                    if(!newWidget)
                     {
-                        QVariant listEntry = listValue.at(i);
-                        if(listEntry.isNull())
-                            continue;
-
-                        QWidget* newWidget = createResourceWidget(keyString, widgetString);
-                        if(!newWidget)
-                        {
-                            qDebug() << "[CharacterTemplateFrame] ERROR: Unable to create the character widget: " << widgetString << ", for scroll area: " << keyString;
-                            return;
-                        }
-                        /*
-                        QUiLoader loader;
-                        QFile file(appFile);
-                        file.open(QFile::ReadOnly);
-                        QWidget* newWidget = loader.load(&file, this);
-                        file.close();
-
-                        if(!newWidget)
-                        {
-                            qDebug() << "[CharacterTemplateFrame] ERROR: UI Widget Template File could not be loaded: " << appFile << ", for scroll area: " << keyString;
-                            continue;
-                        }
-                        */
-
-                        QHash<QString, QVariant> hashValue = listEntry.toHash();
-
-                        // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
-                        populateWidget(newWidget, nullptr, &hashValue, i, keyString);
-
-                        newWidget->installEventFilter(this);
-                        scrollLayout->addWidget(newWidget);
+                        qDebug() << "[CharacterTemplateFrame] ERROR: Unable to create the character widget: " << widgetString << ", for scroll area: " << keyString;
+                        return;
                     }
-                // }
 
+                    QHash<QString, QVariant> hashValue = listEntry.toHash();
+
+                    // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
+                    populateWidget(newWidget, nullptr, &hashValue, i, keyString);
+
+                    newWidget->installEventFilter(this);
+                    scrollLayout->addWidget(newWidget);
+                }
             }
             scrollArea->installEventFilter(this);
         }
@@ -562,28 +530,7 @@ void CharacterTemplateFrame::handleAddResource(QWidget* widget)
 
     QString keyString = scrollArea->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
     QString widgetString = scrollArea->property(CombatantFactory::TEMPLATE_WIDGET).toString();
-/*
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    QString appFile = fileDirPath.path() + QString("/Resources/ui/") + widgetString;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString appFile = fileDirPath.path() + QString("/resources/ui/") + widgetString;
-#endif
 
-    if(!QFileInfo::exists(appFile))
-    {
-        qDebug() << "[CharacterTemplateFrame] ERROR: UI Widget Template File not found: " << appFile << ", for new resource add: " << keyString;
-        return;
-    }
-
-    QUiLoader loader;
-    QFile file(appFile);
-    file.open(QFile::ReadOnly);
-    QWidget* newWidget = loader.load(&file, this);
-    file.close();
-*/
     QWidget* newWidget = createResourceWidget(keyString, widgetString);
     if(!newWidget)
     {

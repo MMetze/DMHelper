@@ -9,13 +9,6 @@ Characterv2::Characterv2(const QString& name, QObject *parent) :
     Combatant(name, parent),
     _dndBeyondID(-1),
     _iconChanged(false),
-/*
-    _stringValues(),
-    _intValues(),
-    _boolValues(),
-    _diceValues(),
-    _resourceValues()
-*/
     _allValues()
 {
 }
@@ -28,8 +21,6 @@ void Characterv2::inputXML(const QDomElement &element, bool isImport)
     readXMLValues(element, isImport);
 
     Combatant::inputXML(element, isImport);
-
-    //readActionList(element, QString("actions"), _actions, isImport);
 
     endBatchChanges();
 }
@@ -649,41 +640,6 @@ void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
 QVariant Characterv2::readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name)
 {
     return CombatantFactory::convertStringToVariant(element.attribute(name, attribute._default), attribute._type);
-    /*
-    QVariant result;
-
-    switch(attribute._type)
-    {
-        case CombatantFactory::TemplateType_string:
-            result = element.attribute(name, attribute._default);
-            break;
-        case CombatantFactory::TemplateType_integer:
-            result = element.attribute(name, attribute._default).toInt();
-            break;
-        case CombatantFactory::TemplateType_boolean:
-            result = static_cast<bool>(element.attribute(name, attribute._default).toInt());
-            break;
-        case CombatantFactory::TemplateType_dice:
-        {
-            result.setValue(Dice(element.attribute(name, attribute._default)));
-            break;
-        }
-        case CombatantFactory::TemplateType_resource:
-        {
-            QStringList resourceString = element.attribute(name, attribute._default).split(QString(","));
-            if(resourceString.size() == 2)
-                result.setValue(ResourcePair(resourceString.at(0).toInt(), resourceString.at(1).toInt()));
-            else
-                qDebug() << "[Characterv2] WARNING: Resource attribute missing values: " << name << " with type " << attribute._type << ": " << element.attribute(name, attribute._default);
-            break;
-        }
-        default:
-            qDebug() << "[Characterv2] WARNING: Unexpected attribute: " << name << " with type " << attribute._type;
-            break;
-    }
-
-    return result;
-*/
 }
 
 void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value)
@@ -695,35 +651,6 @@ void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement
     }
 
     element.setAttribute(key, CombatantFactory::convertVariantToString(value, attribute._type));
-
-    /*
-    switch(attribute._type)
-    {
-        case CombatantFactory::TemplateType_string:
-            element.setAttribute(key, value.toString());
-            break;
-        case CombatantFactory::TemplateType_integer:
-            element.setAttribute(key, QString::number(value.toInt()));
-            break;
-        case CombatantFactory::TemplateType_boolean:
-            element.setAttribute(key, QString::number(value.toInt()));
-            break;
-        case CombatantFactory::TemplateType_dice:
-        {
-            element.setAttribute(key, value.value<Dice>().toString());
-            break;
-        }
-        case CombatantFactory::TemplateType_resource:
-        {
-            ResourcePair resourcePair = value.value<ResourcePair>();
-            element.setAttribute(key, QString::number(resourcePair.first) + QString(",") + QString::number(resourcePair.second));
-            break;
-        }
-        default:
-            qDebug() << "[Characterv2] WARNING: Trying to write an unexpected attribute: " << key << " with type " << attribute._type;
-            break;
-    }
-*/
 }
 
 void Characterv2::writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
