@@ -44,6 +44,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 
     ui->edtName->installEventFilter(this);
     ui->btnSettings->setVisible((layer.getType() == DMHelper::LayerType_VideoEffect) || (layer.getType() == DMHelper::LayerType_Effect));
+    ui->btnPlayAudio->setVisible((layer.getType() == DMHelper::LayerType_Video) || (layer.getType() == DMHelper::LayerType_VideoEffect));
 
     setLineWidth(5);
     setAutoFillBackground(true);
@@ -66,7 +67,13 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     {
         LayerVideo* layerVideo = dynamic_cast<LayerVideo*>(&layer);
         if(layerVideo)
+        {
+            setPlayAudio(layerVideo->getPlayAudio());
+            updateAudioIcon();
             connect(layerVideo, &LayerVideo::screenshotAvailable, this, &LayerFrame::updateLayerData);
+            connect(ui->btnPlayAudio, &QAbstractButton::clicked, this, &LayerFrame::handlePlayAudioClicked);
+            connect(this, &LayerFrame::playAudioChanged, layerVideo, &LayerVideo::setPlayAudio);
+        }
     }
 }
 
@@ -164,6 +171,12 @@ void LayerFrame::setHeight(int height)
 
     if(ui->spinHeight->value() != height)
         ui->spinHeight->setValue(height);
+}
+
+void LayerFrame::setPlayAudio(bool playAudio)
+{
+    if(ui->btnPlayAudio->isChecked() != playAudio)
+        ui->btnPlayAudio->setChecked(playAudio);
 }
 
 void LayerFrame::setSelected(bool selected)
@@ -286,6 +299,13 @@ void LayerFrame::handleHeightChanged()
     emit refreshPlayer();
 }
 
+void LayerFrame::handlePlayAudioClicked()
+{
+    updateAudioIcon();
+    emit selectMe(this);
+    emit playAudioChanged(ui->btnPlayAudio->isChecked());
+}
+
 void LayerFrame::handleLockClicked()
 {
     emit selectMe(this);
@@ -356,4 +376,12 @@ void LayerFrame::updateSize(int width, int height)
         ui->spinHeight->setValue(height);
 
     emit sizeChanged(QSize(width, height));
+}
+
+void LayerFrame::updateAudioIcon()
+{
+    if(ui->btnPlayAudio->isChecked())
+        ui->btnPlayAudio->setIcon(QIcon(":/img/data/icon_volumeon.png"));
+    else
+        ui->btnPlayAudio->setIcon(QIcon(":/img/data/icon_volumeoff.png"));
 }

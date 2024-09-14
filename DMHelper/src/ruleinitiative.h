@@ -15,6 +15,8 @@ public:
 
     bool rollInitiative(QList<BattleDialogModelCombatant*>& combatants);
     void sortInitiative(QList<BattleDialogModelCombatant*>& combatants);
+    void newRound(QList<BattleDialogModelCombatant*>& combatants);
+    virtual bool compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b) = 0;
 
 protected:
     virtual bool preRollInitiative(QList<BattleDialogModelCombatant*>& combatants);
@@ -24,6 +26,8 @@ protected:
     virtual void preSortInitiative(QList<BattleDialogModelCombatant*>& combatants);
     virtual void internalSortInitiative(QList<BattleDialogModelCombatant*>& combatants) = 0;
     virtual void postSortInitiative(QList<BattleDialogModelCombatant*>& combatants);
+
+    virtual void internalNewRound(QList<BattleDialogModelCombatant*>& combatants);
 
     void resetCombatantSortValues(QList<BattleDialogModelCombatant*> combatants);
 

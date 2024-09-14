@@ -15,6 +15,8 @@ public slots:
     virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) override;
     virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) override;
 
+    virtual void configureFactory(const Ruleset& ruleset) override;
+
     AudioTrack* createTrackFromUrl(const QUrl& url, const QString& objectName);
     int identifyAudioSubtype(const QUrl& url);
 };

@@ -7,7 +7,7 @@
 #include <QTime>
 #include <QList>
 
-class Character;
+class Characterv2;
 class Combatant;
 class Adventure;
 class Encounter;
@@ -33,13 +33,13 @@ public:
     virtual void beginBatchChanges();
     virtual void endBatchChanges();
 
-    Character* getCharacterById(QUuid id);
-    const Character* getCharacterById(QUuid id) const;
-    Character* getCharacterByDndBeyondId(int id);
-    Character* getCharacterOrNPCByDndBeyondId(int id);
-    QList<Character*> getActiveCharacters();
-    Character* getNPCById(QUuid id);
-    const Character* getNPCById(QUuid id) const;
+    Characterv2* getCharacterById(QUuid id);
+    const Characterv2* getCharacterById(QUuid id) const;
+    Characterv2* getCharacterByDndBeyondId(int id);
+    Characterv2* getCharacterOrNPCByDndBeyondId(int id);
+    QList<Characterv2*> getActiveCharacters();
+    Characterv2* getNPCById(QUuid id);
+    const Characterv2* getNPCById(QUuid id) const;
     AudioTrack* getTrackById(QUuid id);
 
     QList<SoundboardGroup*> getSoundboardGroups() const;

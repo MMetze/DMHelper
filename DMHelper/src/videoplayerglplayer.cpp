@@ -618,9 +618,12 @@ void VideoPlayerGLPlayer::internalAudioCheck(int newStatus)
 
     qDebug() << "[VideoPlayerGLPlayer] Internal Audio Check identified audio, shall be turned off";
 
+    /* // TODO: Mute video or set it's audio
     _originalTrack = libvlc_audio_get_track(_vlcPlayer);
     if(_originalTrack != -1)
         libvlc_audio_set_track(_vlcPlayer, -1);
+    */
+    libvlc_audio_set_volume(_vlcPlayer, 0);
 
     qDebug() << "[VideoPlayerGLPlayer] Audio turning off completed";
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
+    <width>1146</width>
     <height>67</height>
    </rect>
   </property>
@@ -751,7 +751,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Remove the current item from the campaign</string>
+        <string>View the campaign's quick notes (Ctrl+Alt+N to create a short note)</string>
        </property>
        <property name="text">
         <string/>

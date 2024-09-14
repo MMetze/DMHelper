@@ -1,6 +1,6 @@
 #include "dicerolldialog.h"
 #include "ui_dicerolldialog.h"
-#include "character.h"
+#include "characterv2.h"
 #include "dice.h"
 #include <QtGlobal>
 #include <QMouseEvent>

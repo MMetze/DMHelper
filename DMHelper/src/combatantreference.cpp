@@ -1,6 +1,6 @@
 #include "combatantreference.h"
 #include "campaign.h"
-#include "character.h"
+#include "characterv2.h"
 #include <QDomElement>
 
 CombatantReference::CombatantReference(const QString& name, QObject *parent) :
@@ -43,7 +43,7 @@ Combatant* CombatantReference::getReference()
     if(!campaign)
         return nullptr;
 
-    Character* result = campaign->getCharacterById(referenceId);
+    Characterv2* result = campaign->getCharacterById(referenceId);
     if(result)
         return result;
 
@@ -64,7 +64,7 @@ const Combatant* CombatantReference::getReference() const
     if(!campaign)
         return nullptr;
 
-    const Character* result = campaign->getCharacterById(referenceId);
+    const Characterv2* result = campaign->getCharacterById(referenceId);
     if(result)
         return result;
 

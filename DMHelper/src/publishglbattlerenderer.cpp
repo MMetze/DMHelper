@@ -7,7 +7,7 @@
 #include "battledialogmodelcombatant.h"
 #include "layer.h"
 #include "layertokens.h"
-#include "character.h"
+#include "characterv2.h"
 #include "dmh_opengl.h"
 #include <QOpenGLWidget>
 #include <QMatrix4x4>

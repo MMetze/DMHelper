@@ -214,6 +214,15 @@ Layer* LayerVideoEffect::clone() const
 
     copyBaseValues(newLayer);
 
+    newLayer->_playAudio = _playAudio;
+    newLayer->_effectTransparencyType = _effectTransparencyType;
+    newLayer->_transparentColor = _transparentColor;
+    newLayer->_transparentTolerance = _transparentTolerance;
+    newLayer->_colorize = _colorize;
+    newLayer->_colorizeColor = _colorizeColor;
+    newLayer->_effectScreenshot = _effectScreenshot;
+    newLayer->_effectDirty = _effectDirty;
+
     return newLayer;
 }
 

@@ -15,6 +15,11 @@ QString RuleInitiativeGroupMonsters::getInitiativeType()
     return RuleInitiativeGroupMonsters::InitiativeType;
 }
 
+bool RuleInitiativeGroupMonsters::compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
+{
+    return RuleInitiativeGroupMonsters::CompareCombatants(a, b);
+}
+
 bool RuleInitiativeGroupMonsters::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
 {
     if((combatants.isEmpty()) || (!previousResult))
@@ -34,6 +39,8 @@ bool RuleInitiativeGroupMonsters::internalRollInitiative(QList<BattleDialogModel
             dlg->addCombatantWidget(widget);
         }
     }
+
+    widgetMonsters->setInitiativeFocus();
 
     int result = dlg->exec();
     if(result == QDialog::Accepted)
@@ -86,4 +93,3 @@ bool RuleInitiativeGroupMonsters::CompareCombatants(const BattleDialogModelComba
         return a->getInitiative() > b->getInitiative();
     }
 }
-

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets
+QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets uitools
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -71,6 +71,9 @@ SOURCES += main.cpp\
     characterimportheroforge.cpp \
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
+    charactertemplateframe.cpp \
+    charactertemplateresourcelayout.cpp \
+    characterv2.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
@@ -124,6 +127,7 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    newcampaigndialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
     objectimportworker.cpp \
@@ -175,6 +179,7 @@ SOURCES += main.cpp\
     ribbontabworldmap.cpp \
     rulefactory.cpp \
     ruleinitiative.cpp \
+    ruleinitiative2e.cpp \
     ruleinitiative5e.cpp \
     ruleinitiativegroup.cpp \
     ruleinitiativegroupmonsters.cpp \
@@ -348,6 +353,9 @@ HEADERS  += mainwindow.h \
     characterimportheroforge.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
+    charactertemplateframe.h \
+    charactertemplateresourcelayout.h \
+    characterv2.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \
@@ -402,6 +410,7 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    newcampaigndialog.h \
     objectfactory.h \
     objectimportdialog.h \
     objectimportworker.h \
@@ -453,6 +462,7 @@ HEADERS  += mainwindow.h \
     ribbontabworldmap.h \
     rulefactory.h \
     ruleinitiative.h \
+    ruleinitiative2e.h \
     ruleinitiative5e.h \
     ruleinitiativegroup.h \
     ruleinitiativegroupmonsters.h \
@@ -586,6 +596,7 @@ FORMS    += mainwindow.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
+    charactertemplateframe.ui \
     combatantrolloverframe.ui \
     combatantwidgetcharacter.ui \
     combatantwidgetmonster.ui \
@@ -608,6 +619,7 @@ FORMS    += mainwindow.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
+    newcampaigndialog.ui \
     objectimportdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
@@ -616,6 +628,10 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/character2e.ui \
+    resources/ui/character5e-2024.ui \
+    resources/ui/character5e.ui \
+    resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \
     ribbontabbattle.ui \
@@ -696,12 +712,21 @@ DISTFILES += \
     preparebuilddirectory_msvc64.cmd \
     release_notes.txt \
     resources/calendar.xml \
+    resources/character.xml \
+    resources/character2e.xml \
+    resources/character5e-2024.xml \
+    resources/character5e.xml \
     resources/equipment.xml \
     resources/quickref_data.xml \
+    resources/ruleset.xml \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
+    resources/tables/Indefinite Madness.xml \
+    resources/tables/Long Term Madness.xml \
     resources/tables/Long Term Madness.xml \
     resources/tables/Short Term Madness.xml \
+    resources/tables/Short Term Madness.xml \
+    resources/tables/table.xsd \
     todos
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc

@@ -27,6 +27,8 @@ public:
     BattleDialogModelCombatant* getCombatant() const;
     QString getName() const;
 
+    void setInitiativeFocus();
+
 signals:
     void initiativeChanged(int initiative, BattleDialogModelCombatant* combatant);
 

@@ -15,12 +15,18 @@ QString RuleInitiative5e::getInitiativeType()
     return RuleInitiative5e::InitiativeType;
 }
 
+bool RuleInitiative5e::compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
+{
+    return RuleInitiative5e::CompareCombatants(a, b);
+}
+
 bool RuleInitiative5e::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
 {
     if((combatants.isEmpty()) || (!previousResult))
         return false;
 
     InitiativeListDialog* dlg = new InitiativeListDialog();
+    InitiativeListCombatantWidget* firstWidget = nullptr;
 
     // First add all non-monsters
     for(int i = 0; i < combatants.count(); ++i)
@@ -30,6 +36,8 @@ bool RuleInitiative5e::internalRollInitiative(QList<BattleDialogModelCombatant*>
         {
             InitiativeListCombatantWidget* widget = new InitiativeListCombatantWidget(combatant);
             dlg->addCombatantWidget(widget);
+            if(!firstWidget)
+                firstWidget = widget;
         }
     }
 
@@ -41,8 +49,13 @@ bool RuleInitiative5e::internalRollInitiative(QList<BattleDialogModelCombatant*>
         {
             InitiativeListCombatantWidget* widget = new InitiativeListCombatantWidget(combatant);
             dlg->addCombatantWidget(widget);
+            if(!firstWidget)
+                firstWidget = widget;
         }
     }
+
+    if(firstWidget)
+        firstWidget->setInitiativeFocus();
 
     int result = dlg->exec();
     if(result == QDialog::Accepted)
@@ -79,4 +92,3 @@ bool RuleInitiative5e::CompareCombatants(const BattleDialogModelCombatant* a, co
     else
         return a->getInitiative() > b->getInitiative();
 }
-

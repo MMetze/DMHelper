@@ -5,6 +5,7 @@
 
 BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(const QString& name, QObject *parent) :
     BattleDialogModelEffectObject{name, parent},
+    _playAudio(true),
     _effectTransparencyType(DMHelper::TransparentType_None),
     _transparentColor(),
     _transparentTolerance(0.15),
@@ -16,6 +17,7 @@ BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(const QSt
 
 BattleDialogModelEffectObjectVideo::BattleDialogModelEffectObjectVideo(int size, int width, const QPointF& position, qreal rotation, const QString& videoFile, const QString& tip) :
     BattleDialogModelEffectObject{size, width, position, rotation, videoFile, tip},
+    _playAudio(true),
     _effectTransparencyType(DMHelper::TransparentType_None),
     _transparentColor(),
     _transparentTolerance(0.15),
@@ -30,6 +32,9 @@ BattleDialogModelEffectObjectVideo::~BattleDialogModelEffectObjectVideo()
 
 void BattleDialogModelEffectObjectVideo::inputXML(const QDomElement &element, bool isImport)
 {
+    if(element.hasAttribute("playAudio"))
+        _playAudio = static_cast<bool>(element.attribute("playAudio").toInt());
+
     if(element.hasAttribute("effect"))
         _effectTransparencyType = static_cast<DMHelper::TransparentType>(element.attribute("effect").toInt());
 
@@ -53,6 +58,13 @@ void BattleDialogModelEffectObjectVideo::copyValues(const CampaignObjectBase* ot
     const BattleDialogModelEffectObjectVideo* otherEffect = dynamic_cast<const BattleDialogModelEffectObjectVideo*>(other);
     if(!otherEffect)
         return;
+
+    _playAudio = otherEffect->_playAudio;
+    _effectTransparencyType = otherEffect->_effectTransparencyType;
+    _transparentColor = otherEffect->_transparentColor;
+    _transparentTolerance = otherEffect->_transparentTolerance;
+    _colorize = otherEffect->_colorize;
+    _colorizeColor = otherEffect->_colorizeColor;
 
     BattleDialogModelEffectObject::copyValues(other);
 }
@@ -115,6 +127,11 @@ QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridS
     return pixmapShape;
 }
 
+bool BattleDialogModelEffectObjectVideo::isPlayAudio() const
+{
+    return _playAudio;
+}
+
 DMHelper::TransparentType BattleDialogModelEffectObjectVideo::getEffectTransparencyType() const
 {
     return _effectTransparencyType;
@@ -143,6 +160,15 @@ QColor BattleDialogModelEffectObjectVideo::getColorizeColor() const
 QPixmap BattleDialogModelEffectObjectVideo::getPixmap() const
 {
     return _pixmap;
+}
+
+void BattleDialogModelEffectObjectVideo::setPlayAudio(bool playAudio)
+{
+    if(_playAudio == playAudio)
+        return;
+
+    _playAudio = playAudio;
+    emit dirty();
 }
 
 void BattleDialogModelEffectObjectVideo::setEffectTransparencyType(DMHelper::TransparentType effectType)
@@ -201,6 +227,9 @@ void BattleDialogModelEffectObjectVideo::onScreenshotReady(const QImage& image)
 
 void BattleDialogModelEffectObjectVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
+    if(!_playAudio)
+        element.setAttribute("playAudio", 0);
+
     if(_effectTransparencyType != DMHelper::TransparentType_None)
         element.setAttribute("effect", static_cast<int>(_effectTransparencyType));
 

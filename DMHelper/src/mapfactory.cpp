@@ -1,6 +1,6 @@
 #include "mapfactory.h"
 #include "map.h"
-
+#include "ruleset.h"
 
 MapFactory::MapFactory(QObject *parent) :
     ObjectFactory(parent)
@@ -29,4 +29,9 @@ CampaignObjectBase* MapFactory::createObject(const QDomElement& element, bool is
         return new Map();
     else
         return nullptr;
+}
+
+void MapFactory::configureFactory(const Ruleset& ruleset)
+{
+    Q_UNUSED(ruleset);
 }

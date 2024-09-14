@@ -11,7 +11,7 @@ class ExportWorker;
 class DMHWaitingDialog;
 class MonsterClass;
 class Spell;
-class Character;
+class Characterv2;
 class QThread;
 
 namespace Ui {
@@ -52,7 +52,7 @@ private:
     void checkItem(QUuid id);
     QTreeWidgetItem* findItem(QTreeWidgetItem *item, QUuid id);
 
-    void addCharacter(Character* character);
+    void addCharacter(Characterv2* character);
     void addMonster(MonsterClass* monsterClass);
     void addSpell(Spell* spell);
 
@@ -62,7 +62,7 @@ private:
     const QUuid& _selectedItem;
     QStringList _monsters;
     QStringList _spells;
-    QList<Character*> _characters;
+    QList<Characterv2*> _characters;
 
     QThread* _workerThread;
     ExportWorker* _worker;

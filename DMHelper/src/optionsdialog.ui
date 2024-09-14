@@ -459,17 +459,10 @@
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="3" column="0">
-          <widget class="QLabel" name="lblCalendar">
+         <item row="5" column="3">
+          <widget class="QPushButton" name="btnShops">
            <property name="text">
-            <string>Calendar File</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="lblShops">
-           <property name="text">
-            <string>Shops File</string>
+            <string>Browse...</string>
            </property>
           </widget>
          </item>
@@ -480,12 +473,72 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="edtSpellbook"/>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="lblBestiary">
            <property name="text">
             <string>Bestiary File</string>
            </property>
           </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="btnSpellbook">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QLineEdit" name="edtTables"/>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="btnQuickReference">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="edtCalendar"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="lblShops">
+           <property name="text">
+            <string>Shops File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLineEdit" name="edtQuickReference"/>
+         </item>
+         <item row="6" column="3">
+          <widget class="QPushButton" name="btnTables">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="lblTables">
+           <property name="text">
+            <string>Tables Directory</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLineEdit" name="edtBestiary"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblSpellbook">
+           <property name="text">
+            <string>Spellbook File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QLineEdit" name="edtShops"/>
          </item>
          <item row="0" column="3">
           <widget class="QPushButton" name="btnBestiary">
@@ -497,32 +550,6 @@
          <item row="4" column="2">
           <widget class="QLineEdit" name="edtEquipment"/>
          </item>
-         <item row="6" column="2">
-          <widget class="QLineEdit" name="edtTables"/>
-         </item>
-         <item row="6" column="3">
-          <widget class="QPushButton" name="btnTables">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QLineEdit" name="edtShops"/>
-         </item>
-         <item row="3" column="2">
-          <widget class="QLineEdit" name="edtCalendar"/>
-         </item>
-         <item row="2" column="3">
-          <widget class="QPushButton" name="btnQuickReference">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QLineEdit" name="edtQuickReference"/>
-         </item>
          <item row="4" column="3">
           <widget class="QPushButton" name="btnEquipment">
            <property name="text">
@@ -530,8 +557,12 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
-          <widget class="QLineEdit" name="edtBestiary"/>
+         <item row="3" column="0">
+          <widget class="QLabel" name="lblCalendar">
+           <property name="text">
+            <string>Calendar File</string>
+           </property>
+          </widget>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="lblQuickReference">
@@ -547,32 +578,18 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="3">
-          <widget class="QPushButton" name="btnShops">
+         <item row="7" column="0">
+          <widget class="QLabel" name="lblRuleset">
            <property name="text">
-            <string>Browse...</string>
+            <string>Ruleset File</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="lblSpellbook">
-           <property name="text">
-            <string>Spellbook File</string>
-           </property>
-          </widget>
+         <item row="7" column="2">
+          <widget class="QLineEdit" name="edtRuleset"/>
          </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="lblTables">
-           <property name="text">
-            <string>Tables Directory</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLineEdit" name="edtSpellbook"/>
-         </item>
-         <item row="1" column="3">
-          <widget class="QPushButton" name="btnSpellbook">
+         <item row="7" column="3">
+          <widget class="QPushButton" name="btnRuleset">
            <property name="text">
             <string>Browse...</string>
            </property>
@@ -833,11 +850,17 @@
       <attribute name="title">
        <string>Campaign</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_11">
+      <layout class="QVBoxLayout" name="verticalLayout_15" stretch="0,0,10">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_17">
          <item>
           <widget class="QLabel" name="label_15">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Campaign Name</string>
            </property>
@@ -853,11 +876,17 @@
          <property name="title">
           <string>Rules</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
+         <layout class="QVBoxLayout" name="verticalLayout_14">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_18" stretch="0,1,2">
             <item>
              <widget class="QLabel" name="label_14">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>Initiative</string>
               </property>
@@ -885,6 +914,56 @@
            </layout>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_19">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <widget class="QLabel" name="lblCharacterData">
+                <property name="text">
+                 <string>Character Data Template:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblCharacterUI">
+                <property name="text">
+                 <string>Character UI Template:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_12">
+              <item>
+               <widget class="QLineEdit" name="edtCharacterData"/>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="edtCharacterUI"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <item>
+               <widget class="QPushButton" name="btnCharacterData">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnCharacterUI">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
            <widget class="QCheckBox" name="chkCombatantDone">
             <property name="text">
              <string>Show a checkbox for whether a combatant has been active this round</string>
@@ -902,6 +981,9 @@
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>

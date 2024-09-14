@@ -4,7 +4,7 @@
 #include "encountertext.h"
 #include "scaledpixmap.h"
 
-class Character;
+class Characterv2;
 
 class Party : public EncounterText
 {
@@ -22,7 +22,7 @@ public:
     virtual QString getPartyIcon(bool localOnly = false) const;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
 
-    QList<Character*> getActiveCharacters();
+    QList<Characterv2*> getActiveCharacters();
 
 signals:
     void iconChanged(CampaignObjectBase* party);

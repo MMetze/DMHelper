@@ -43,6 +43,12 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         connect(ui->edtShops, &QLineEdit::editingFinished, this, &OptionsDialog::editShops);
         connect(ui->btnTables, &QAbstractButton::clicked, this, &OptionsDialog::browseTables);
         connect(ui->edtTables, &QLineEdit::editingFinished, this, &OptionsDialog::editTables);
+        connect(ui->btnRuleset, &QAbstractButton::clicked, this, &OptionsDialog::browseRuleset);
+        connect(ui->edtRuleset, &QLineEdit::editingFinished, this, &OptionsDialog::editRuleset);
+        connect(ui->btnCharacterData, &QAbstractButton::clicked, this, &OptionsDialog::browseCharacterDataFile);
+        connect(ui->edtCharacterData, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterDataFile);
+        connect(ui->btnCharacterUI, &QAbstractButton::clicked, this, &OptionsDialog::browseCharacterUIFile);
+        connect(ui->edtCharacterUI, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterUIFile);
 
         connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
 
@@ -86,6 +92,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
                 }
             }
 
+            ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
+            ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
         }
         else
@@ -192,6 +200,8 @@ void OptionsDialog::applyCampaignChanges()
 
     _campaign->setName(ui->edtCampaignName->text());
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
+    _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
+    _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());
     _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
 }
 
@@ -328,7 +338,6 @@ void OptionsDialog::setEquipment(const QString& equipmentFile)
 void OptionsDialog::browseShops()
 {
     setShops(QFileDialog::getOpenFileName(this, QString("Select Shops File"), QString(), QString("XML files (*.xml)")));
-
 }
 
 void OptionsDialog::editShops()
@@ -376,6 +385,33 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
 
     ui->edtTables->setText(tablesDirectory);
     _options->setTablesDirectory(tablesDirectory);
+}
+
+void OptionsDialog::browseRuleset()
+{
+    setRuleset(QFileDialog::getOpenFileName(this, QString("Select Ruleset File"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editRuleset()
+{
+    setRuleset(ui->edtRuleset->text());
+}
+
+void OptionsDialog::setRuleset(const QString& rulesetFile)
+{
+    if(rulesetFile.isEmpty())
+        return;
+
+    if(!QFile::exists(rulesetFile))
+    {
+        QMessageBox::critical(this, QString("Ruleset file not found"), QString("The selected ruleset file could not be found!") + QChar::LineFeed + rulesetFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected ruleset file could not be found: " << rulesetFile;
+        return;
+    }
+
+    ui->edtRuleset->setText(rulesetFile);
+    _options->setRulesetFileName(rulesetFile);
+
 }
 
 void OptionsDialog::handleInitiativeScaleChanged(qreal initiativeScale)
@@ -579,6 +615,7 @@ void OptionsDialog::updateFileLocations()
     ui->edtEquipment->setText(_options->getEquipmentFileName());
     ui->edtShops->setText(_options->getShopsFileName());
     ui->edtTables->setText(_options->getTablesDirectory());
+    ui->edtRuleset->setText(_options->getRulesetFileName());
 }
 
 void OptionsDialog::resetFileLocations()
@@ -596,4 +633,42 @@ void OptionsDialog::resetFileLocations()
 
     _options->resetFileSettings();
     updateFileLocations();
+}
+
+void OptionsDialog::browseCharacterDataFile()
+{
+    setCharacterDataFile(QFileDialog::getOpenFileName(this, QString("Select the character data template file"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editCharacterDataFile()
+{
+    setCharacterDataFile(ui->edtCharacterData->text());
+}
+
+void OptionsDialog::setCharacterDataFile(const QString& characterDataFile)
+{
+    QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                               QString("Confirm Character Data Format Change"),
+                                                               QString("You are about to chnage the path for the character data definition of a campaign. This will result in a loss of any data that is not reflected in the new template!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QMessageBox::Yes | QMessageBox::No);
+
+    if(result != QMessageBox::Yes)
+        return;
+
+    ui->edtCharacterData->setText(characterDataFile);
+}
+
+void OptionsDialog::browseCharacterUIFile()
+{
+    setCharacterUIFile(QFileDialog::getOpenFileName(this, QString("Select the character UI file"), QString(), QString("UI files (*.ui)")));
+}
+
+void OptionsDialog::editCharacterUIFile()
+{
+    setCharacterUIFile(ui->edtCharacterUI->text());
+}
+
+void OptionsDialog::setCharacterUIFile(const QString& characterUIFile)
+{
+    ui->edtCharacterUI->setText(characterUIFile);
 }

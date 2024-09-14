@@ -15,6 +15,11 @@ QString RuleInitiativeGroup::getInitiativeType()
     return RuleInitiativeGroup::InitiativeType;
 }
 
+bool RuleInitiativeGroup::compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
+{
+    return RuleInitiativeGroup::CompareCombatants(a, b);
+}
+
 bool RuleInitiativeGroup::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
 {
     if((combatants.isEmpty()) || (!previousResult))
@@ -24,9 +29,11 @@ bool RuleInitiativeGroup::internalRollInitiative(QList<BattleDialogModelCombatan
     
     InitiativeListCombatantWidget* widgetPCs = new InitiativeListCombatantWidget(0, QPixmap(":/img/data/icon_contentcharacter.png"), QString("PCs"));
     dlg->addCombatantWidget(widgetPCs);
-    
+
     InitiativeListCombatantWidget* widgetMonsters = new InitiativeListCombatantWidget(0, QPixmap(":/img/data/icon_bestiary.png"), QString("Monsters"));
     dlg->addCombatantWidget(widgetMonsters);
+
+    widgetPCs->setInitiativeFocus();
 
     int result = dlg->exec();
     if(result == QDialog::Accepted)
@@ -66,4 +73,3 @@ bool RuleInitiativeGroup::CompareCombatants(const BattleDialogModelCombatant* a,
         return a->getInitiative() > b->getInitiative();
     }
 }
-

@@ -25,6 +25,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _equipmentFileName(),
     _shopsFileName(),
     _tablesDirectory(),
+    _rulesetFileName(),
     _showAnimations(false),
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
@@ -109,6 +110,11 @@ QString OptionsContainer::getShopsFileName() const
 QString OptionsContainer::getTablesDirectory() const
 {
     return _tablesDirectory;
+}
+
+QString OptionsContainer::getRulesetFileName() const
+{
+    return _rulesetFileName;
 }
 
 QString OptionsContainer::getLastMonster() const
@@ -414,6 +420,11 @@ void OptionsContainer::readSettings()
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
+    bool rulesetExists = true;
+    setRulesetFileName(getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists));
+//    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
+//        getDataDirectory(QString("ui"), true);
+
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
 
@@ -499,6 +510,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("equipment", getEquipmentFileName());
     settings.setValue("shops", getShopsFileName());
     settings.setValue("tables", getTablesDirectory());
+    settings.setValue("ruleset", getRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
@@ -688,6 +700,7 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename, bool* 
 #endif
 
     QDir().mkpath(standardPath);
+    QDir().mkpath(standardPath + QString("/ui"));
 
     if(exists)
         *exists = false;
@@ -711,6 +724,16 @@ void OptionsContainer::setTablesDirectory(const QString& directory)
         _tablesDirectory = directory;
         qDebug() << "[OptionsContainer] Tables directory set to: " << directory;
         emit tablesDirectoryChanged();
+    }
+}
+
+void OptionsContainer::setRulesetFileName(const QString& filename)
+{
+    if(_rulesetFileName != filename)
+    {
+        _rulesetFileName = filename;
+        qDebug() << "[OptionsContainer] Ruleset file set to: " << filename;
+        emit rulesetFileNameChanged(_rulesetFileName);
     }
 }
 
@@ -752,7 +775,7 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overw
 #endif
 
     QStringList filters;
-    filters << "*.xml" << "*.png" << "*.jpg";
+    filters << "*.xml" << "*.png" << "*.jpg" << "*.ui";
     QStringList fileEntries = fileDirPath.entryList(filters);
     for(int i = 0; i < fileEntries.size(); ++i)
     {
@@ -828,6 +851,8 @@ void OptionsContainer::resetFileSettings()
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
     setShopsFileName(getStandardFile(QString("shops.xml")));
     setTablesDirectory(getDataDirectory(QString("tables"), true));
+    getDataDirectory(QString("ui"), true);
+    setRulesetFileName(getStandardFile(QString("ruleset.xml")));
     getDataDirectory(QString("Images"), true);
 }
 
@@ -1245,6 +1270,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setEquipmentFileName(other->_equipmentFileName);
         setShopsFileName(other->_shopsFileName);
         setTablesDirectory(other->_tablesDirectory);
+        setRulesetFileName(other->_rulesetFileName);
         setLastMonster(other->_lastMonster);
         setLastSpell(other->_lastSpell);
         setShowAnimations(other->_showAnimations);

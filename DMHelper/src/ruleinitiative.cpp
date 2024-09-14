@@ -13,8 +13,8 @@ QString RuleInitiative::getInitiativeType()
 bool RuleInitiative::rollInitiative(QList<BattleDialogModelCombatant*>& combatants)
 {
     bool result = preRollInitiative(combatants);
-    result = result || internalRollInitiative(combatants, result);
-    result = result || postRollInitiative(combatants, result);
+    result = internalRollInitiative(combatants, result) || result;
+    result = postRollInitiative(combatants, result) || result;
     return result;
 }
 
@@ -25,6 +25,11 @@ void RuleInitiative::sortInitiative(QList<BattleDialogModelCombatant*>& combatan
     postSortInitiative(combatants);
 
     resetCombatantSortValues(combatants);
+}
+
+void RuleInitiative::newRound(QList<BattleDialogModelCombatant*>& combatants)
+{
+    internalNewRound(combatants);
 }
 
 bool RuleInitiative::preRollInitiative(QList<BattleDialogModelCombatant*>& combatants)
@@ -46,6 +51,11 @@ void RuleInitiative::preSortInitiative(QList<BattleDialogModelCombatant*>& comba
 }
 
 void RuleInitiative::postSortInitiative(QList<BattleDialogModelCombatant*>& combatants)
+{
+    Q_UNUSED(combatants);
+}
+
+void RuleInitiative::internalNewRound(QList<BattleDialogModelCombatant*>& combatants)
 {
     Q_UNUSED(combatants);
 }

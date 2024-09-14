@@ -1,7 +1,7 @@
 #include "campaigntreeitem.h"
 #include "campaignobjectbase.h"
 #include "dmconstants.h"
-#include "character.h"
+#include "characterv2.h"
 #include "audiotrack.h"
 #include <QUuid>
 
@@ -153,11 +153,11 @@ void CampaignTreeItem::setVisualization()
     // Set the check-box for
     if(object->getObjectType() == DMHelper::CampaignType_Combatant)
     {
-        Character* character = dynamic_cast<Character*>(object);
+        Characterv2* character = dynamic_cast<Characterv2*>(object);
         bool isPC = ((character) && (character->isInParty()));
         setCheckable(isPC);
         if(isPC)
-            setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);
+            setCheckState(character->getBoolValue(QString("active")) ? Qt::Checked : Qt::Unchecked);
         else
             setData(QVariant(), Qt::CheckStateRole); // Needed to actively remove the checkbox on the entry
     }
@@ -170,12 +170,12 @@ void CampaignTreeItem::setVisualization()
             break;
         case DMHelper::CampaignType_Combatant:
             {
-                Character* character = dynamic_cast<Character*>(object);
+                Characterv2* character = dynamic_cast<Characterv2*>(object);
                 bool isPC = ((character) && (character->isInParty()));
                 setIcon(isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
                 setCheckable(isPC);
                 if(isPC)
-                    setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);
+                    setCheckState(character->getBoolValue(QString("active")) ? Qt::Checked : Qt::Unchecked);
                 else
                     setData(QVariant(), Qt::CheckStateRole); // Needed to actively remove the checkbox on the entry
             }

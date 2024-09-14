@@ -1,3 +1,14 @@
+v3.3
+Character sheet is now template and dynamically loading visualization - supports any system, not just D&D 5e!
+Generalized initiative - characters and/or monsters as a single block
+Optional flags on initiative order to mark if a combatant has acted or not
+Made app start-up much faster
+Improved DnDBeyond importer
+Fixes:
+Spellbook works again
+Applying effects to moved tokens works again
+Size limit on images removed - user beware!
+
 v3.0
 LAYERS
 Text formatting significantly improved (it actually works now)
