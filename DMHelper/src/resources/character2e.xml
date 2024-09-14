@@ -37,12 +37,12 @@
     <dmh:attribute type="dmh:integer" name="intelligenceSpellLevel" default="5"/>
     <dmh:attribute type="dmh:integer" name="intelligenceChanceToLearnSpell" default="40"/>
     <dmh:attribute type="dmh:string" name="intelligenceMaxNumberOfSpells" default="7"/>
-    <dmh:attribute type="dmh:string" name="intelligenceSpellImmunity" default=""/>
+    <dmh:attribute type="dmh:string" name="intelligenceSpellImmunity" default="Nil"/>
     <dmh:attribute type="dmh:integer" name="wisdom" default="10"/>
     <dmh:attribute type="dmh:integer" name="wisdomMagicalDefenseAdjustment"/>
     <dmh:attribute type="dmh:string" name="wisdomBonusSpells" default="0"/>
     <dmh:attribute type="dmh:integer" name="wisdomChanceOfSpellFailure" default="15"/>
-    <dmh:attribute type="dmh:string" name="wisdomSpellImmunity"/>
+    <dmh:attribute type="dmh:string" name="wisdomSpellImmunity" default="Nil"/>
     <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
     <dmh:attribute type="dmh:integer" name="charismaMaximumNumberOfHenchmen" default="4"/>
     <dmh:attribute type="dmh:integer" name="charismaLoyaltyBase"/>

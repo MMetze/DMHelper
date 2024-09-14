@@ -238,7 +238,7 @@ void Characterv2::setValue(const QString& key, const QString& value)
     if(isAttributeSpecial(key))
         setAttributeSpecial(key, value);
 
-    if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
+    if((!_allValues.contains(key)) && (!CombatantFactory::Instance()->hasEntry(key)))
     {
         qDebug() << "[Characterv2] Attempting to set the value \"" << value << "\" for the unknown key " << key;
         return;

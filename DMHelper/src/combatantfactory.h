@@ -71,6 +71,7 @@ public slots:
 
 private:    
     void loadCharacterTemplate(const QString& characterTemplateFile);
+    CampaignObjectBase* setDefaultValues(CampaignObjectBase* object);
 
     static CombatantFactory* _instance;
 

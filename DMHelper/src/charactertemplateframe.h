@@ -62,6 +62,9 @@ private slots:
 private:
     void loadCharacterImage();
     void enableDndBeyondSync(bool enabled);
+    QWidget* createResourceWidget(const QString& keyString, const QString& widgetString);
+    QWidget* createResourceWidgetFile(const QString& widgetFilename);
+    QWidget* createResourceWidgetInternal(const QString& keyString);
     void populateWidget(QWidget* widget, Characterv2* character, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
     QString getDefaultValue(const QString& keyString);
     void handleEditBoxChange(QWidget* editWidget, const QString& value);

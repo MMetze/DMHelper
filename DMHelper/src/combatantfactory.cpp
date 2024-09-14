@@ -98,7 +98,7 @@ CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, 
     switch(subType)
     {
         case DMHelper::CombatantType_Character:
-            return new Characterv2(objectName);
+            return setDefaultValues(new Characterv2(objectName));
         case DMHelper::CombatantType_Reference:
             return new CombatantReference();
         case DMHelper::CombatantType_Base:
@@ -124,7 +124,7 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
         return nullptr;
     }
 
-    return new Characterv2();
+    return setDefaultValues(new Characterv2());
 }
 
 QVariant CombatantFactory::convertStringToVariant(const QString& value, TemplateType type)
@@ -377,4 +377,28 @@ void CombatantFactory::loadCharacterTemplate(const QString& characterTemplateFil
     // Validate that each entry has a name attribute
     if(!hasAttribute(QString("name")))
         qDebug() << "[CombatantFactory] ERROR: Combatant template has no 'name' attribute";
+}
+
+CampaignObjectBase* CombatantFactory::setDefaultValues(CampaignObjectBase* object)
+{
+    if((!object) || (object->getObjectType() != DMHelper::CampaignType_Combatant))
+        return object;
+
+    Characterv2* character = dynamic_cast<Characterv2*>(object);
+    if(!character)
+        return object;
+
+    QHash<QString, DMHAttribute> attributes = getAttributes();
+    for(auto it = attributes.begin(); it != attributes.end(); ++it)
+    {
+        character->setValue(it.key(), it->_default);
+    }
+
+    QHash<QString, DMHAttribute> elements = getElements();
+    for(auto it = elements.begin(); it != elements.end(); ++it)
+    {
+        character->setValue(it.key(), it->_default);
+    }
+
+    return character;
 }
