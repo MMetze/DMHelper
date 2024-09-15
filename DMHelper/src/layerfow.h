@@ -76,6 +76,7 @@ protected:
 
     // Player Window Methods
     void cleanupPlayer();
+    void fillFoWImage();
 
     // Generic Methods
     void initializeUndoStack();

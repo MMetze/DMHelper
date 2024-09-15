@@ -75,6 +75,18 @@ bool Ruleset::getCombatantDoneCheckbox() const
     return _combatantDoneCheckbox;
 }
 
+void Ruleset::setDefaultValues()
+{
+    remove
+    QString initiativeType = element.attribute("initiative", RuleFactory::getRuleInitiativeDefault());
+    _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
+
+    _characterDataFile = element.attribute("characterData", DEFAULT_CHARACTER_DATA);
+    _characterUIFile = element.attribute("characterUI", DEFAULT_CHARACTER_UI);
+
+    _combatantDoneCheckbox = static_cast<bool>(element.attribute("done", QString::number(1)).toInt());
+}
+
 void Ruleset::setRuleInitiative(const QString& initiativeType)
 {
     if((_ruleInitiative) && (_ruleInitiative->getInitiativeType() == initiativeType))
