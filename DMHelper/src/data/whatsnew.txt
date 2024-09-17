@@ -12,10 +12,12 @@
 <h2>What's New: Version 3.3</h2>
 
 <h3>IMPORTANT: PLEASE READ</h3>
-Starting with version 3.3, DMHelper has a more flexible character data and UI template system to support different game systems. As a result, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.<br>
-DM Helper will try to update the math to transition to the new format, but we encourage you to double-check the PC and NPC stats. <br>
-If you are using the automatic D&D Beyond importer, it has been updated to reflect the new formats and has even gotten a few improvements along the way. We would recommend updating your D&D Beyond characters in the app.<br>
-
+<p>
+Starting with version 3.3, DMHelper has a more flexible character data and UI template system to support different game systems. As a result, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.
+<p>
+DM Helper will try to update the math to transition to the new format, but we encourage you to double-check the PC and NPC stats.
+<p>
+If you are using the automatic D&D Beyond importer, it has been updated to reflect the new formats and has even gotten a few improvements along the way. We would recommend updating your D&D Beyond characters in the app.
 <p>
 Just to be 100% safe, we recommend backing up your campaign XML files before opening them.
 <p>
