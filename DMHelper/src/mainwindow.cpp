@@ -777,7 +777,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
-        CampaignObjectFactory::configureFactories(_campaign->getRuleset());
+        CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -2359,6 +2359,28 @@ void MainWindow::openCampaign(const QString& filename)
                               QString("Unable to find the campaign entry in the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
+    }
+
+    // Character template compatibility check
+    int majorVersion = campaignElement.attribute("majorVersion", QString::number(0)).toInt();
+    int minorVersion = campaignElement.attribute("minorVersion", QString::number(0)).toInt();
+    if((majorVersion < 2) || ((majorVersion == 2) && (minorVersion < 4)))
+    {
+        qDebug() << "[Campaign] WARNING: Campaign file is an older format, informing user of character template conversion.";
+        QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                                   QString("Campaign file version check"),
+                                                                   QString("PLEASE READ: IMPORTANT!") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("Starting with version 3.3, DMHelper has a more flexible character data and UI template system to support different game systems. As a result, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("DM Helper will try to update the math to transition to the new format, but we encourage you to double-check the PC and NPC stats. ") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("If you are using the automatic D&D Beyond importer, it has been updated to reflect the new formats and has even gotten a few improvements along the way. We would recommend updating your D&D Beyond characters in the app.") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("Once you save the campaign file again, it will be stored in the new format going forward.") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("Do you want to continue opening this campaign file?"),
+                                                                   QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[Campaign] INFO: User chose not to open campaign file due to version incompatibility: " << majorVersion << "." << minorVersion << ", " << filename;
+            return;
+        }
     }
 
     QUuid lastElementId = QUuid(campaignElement.attribute(QString("lastElement")));

@@ -31,7 +31,9 @@ CampaignObjectBase* MapFactory::createObject(const QDomElement& element, bool is
         return nullptr;
 }
 
-void MapFactory::configureFactory(const Ruleset& ruleset)
+void MapFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     Q_UNUSED(ruleset);
+    Q_UNUSED(inputMajorVersion);
+    Q_UNUSED(inputMinorVersion);
 }

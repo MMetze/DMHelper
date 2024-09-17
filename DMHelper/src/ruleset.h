@@ -24,6 +24,8 @@ public:
     QString getCharacterUIFile() const;
     bool getCombatantDoneCheckbox() const;
 
+    void setDefaultValues();
+
 signals:
     void initiativeRuleChanged();
     void characterDataFileChanged(const QString& characterDataFile);
