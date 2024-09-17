@@ -187,7 +187,7 @@ void BattleFrameMapDrawer::resetFoW()
     LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
-        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 0, 0, 255)));
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 128, 0, 255)));
         layer->getUndoStack()->push(undoFill);
         emit dirty();
     }
@@ -215,7 +215,7 @@ void BattleFrameMapDrawer::clearFoW()
     LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
-        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 0, 0, 0)));
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 128, 0, 0)));
         layer->getUndoStack()->push(undoFill);
         emit dirty();
     }

@@ -217,7 +217,7 @@ void LayerFow::applyPaintTo(int index, int startIndex)
         index = _undoStack->count();
 
     if(startIndex == 0)
-        _imageFow.fill(Qt::black);
+        fillFoWImage();
 
     // Need to add some batch processing to avoid updating every step
     for(int i = startIndex; i < index; ++i)
@@ -256,12 +256,12 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
             {
                 p.setBrush(QColor(0, 0, 0, 0));
             }
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            //p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         }
         else
         {
             p.setBrush(QColor(0, 0, 0, 255));
-            p.setCompositionMode(QPainter::CompositionMode_Source);
+            //p.setCompositionMode(QPainter::CompositionMode_Source);
         }
 
         p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
@@ -270,7 +270,7 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
     {
         if(mapDraw.erase())
         {
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            //p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
             if(mapDraw.smooth())
             {
                 qreal border = static_cast<qreal>(mapDraw.radius()) / 20.0;
@@ -299,7 +299,7 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
         else
         {
             p.setBrush(QColor(0, 0, 0, 255));
-            p.setCompositionMode(QPainter::CompositionMode_Source);
+            //p.setCompositionMode(QPainter::CompositionMode_Source);
             p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
         }
     }
@@ -316,7 +316,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
 
     if(mapEditShape.erase())
     {
-        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        //p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         if(mapEditShape.smooth())
         {
             qreal rectWidth = rect.width() / 80;
@@ -357,7 +357,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     else
     {
         p.setBrush(QColor(0, 0, 0, 255));
-        p.setCompositionMode(QPainter::CompositionMode_Source);
+        //p.setCompositionMode(QPainter::CompositionMode_Source);
         p.drawRect(rect);
     }
 
@@ -385,10 +385,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(i = 0; (i < _imageFow.width()) && (top == -1); ++i)
         {
-            if(_imageFow.pixelColor(i, j) != Qt::black)
-            {
+            if(_imageFow.pixelColor(i, j).alpha() > 0)
                 top = j;
-            }
         }
     }
 
@@ -396,10 +394,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(i = 0; (i < _imageFow.width()) && (bottom == -1); ++i)
         {
-            if(_imageFow.pixelColor(i, j) != Qt::black)
-            {
+            if(_imageFow.pixelColor(i, j).alpha() > 0)
                 bottom = j;
-            }
         }
     }
 
@@ -407,10 +403,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(j = top; (j < bottom) && (left == -1); ++j)
         {
-            if(_imageFow.pixelColor(i, j) != Qt::black)
-            {
+            if(_imageFow.pixelColor(i, j).alpha() > 0)
                 left = i;
-            }
         }
     }
 
@@ -418,10 +412,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(j = top; (j < bottom) && (right == -1); ++j)
         {
-            if(_imageFow.pixelColor(i, j) != Qt::black)
-            {
+            if(_imageFow.pixelColor(i, j).alpha() > 0)
                 right = i;
-            }
         }
     }
 
@@ -531,7 +523,7 @@ void LayerFow::initialize(const QSize& sceneSize)
         setSize(sceneSize);
 
     _imageFow = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
-    _imageFow.fill(Qt::black);
+    fillFoWImage();
 
     initializeUndoStack();
 }
@@ -644,6 +636,13 @@ void LayerFow::cleanupPlayer()
     _scene = nullptr;
 }
 
+void LayerFow::fillFoWImage()
+{
+    // Todo: Use QBrush to draw tiled scaled images to the image
+    QImage fillImage(":/img/data/dmc_background.png");
+    _imageFow = fillImage.scaled(_imageFow.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}
+
 void LayerFow::initializeUndoStack()
 {
     if(_undoItems.count() > 0)
@@ -663,3 +662,5 @@ void LayerFow::initializeUndoStack()
         applyPaintTo(getUndoStack()->index());
     }
 }
+
+
