@@ -7,13 +7,14 @@
 
 const char* DEFAULT_CHARACTER_DATA = "character5e.xml";
 const char* DEFAULT_CHARACTER_UI = "./ui/character5e.ui";
+bool DEFAULT_CHARACTER_DONE_CHECKBOX = true;
 
 Ruleset::Ruleset(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
     _ruleInitiative(nullptr),
-    _characterDataFile(),
-    _characterUIFile(),
-    _combatantDoneCheckbox(false)
+    _characterDataFile(DEFAULT_CHARACTER_DATA),
+    _characterUIFile(DEFAULT_CHARACTER_UI),
+    _combatantDoneCheckbox(DEFAULT_CHARACTER_DONE_CHECKBOX)
 {
 }
 
@@ -28,8 +29,7 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
 
     _characterDataFile = element.attribute("characterData", DEFAULT_CHARACTER_DATA);
     _characterUIFile = element.attribute("characterUI", DEFAULT_CHARACTER_UI);
-
-    _combatantDoneCheckbox = static_cast<bool>(element.attribute("done", QString::number(1)).toInt());
+    _combatantDoneCheckbox = static_cast<bool>(element.attribute("done", QString::number(DEFAULT_CHARACTER_DONE_CHECKBOX)).toInt());
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -73,6 +73,14 @@ QString Ruleset::getCharacterUIFile() const
 bool Ruleset::getCombatantDoneCheckbox() const
 {
     return _combatantDoneCheckbox;
+}
+
+void Ruleset::setDefaultValues()
+{
+    _ruleInitiative = RuleFactory::createRuleInitiative(RuleFactory::getRuleInitiativeDefault(), this);
+    _characterDataFile = DEFAULT_CHARACTER_DATA;
+    _characterUIFile = DEFAULT_CHARACTER_UI;
+    _combatantDoneCheckbox = DEFAULT_CHARACTER_DONE_CHECKBOX;
 }
 
 void Ruleset::setRuleInitiative(const QString& initiativeType)

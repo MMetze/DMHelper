@@ -74,6 +74,7 @@ SOURCES += main.cpp\
     charactertemplateframe.cpp \
     charactertemplateresourcelayout.cpp \
     characterv2.cpp \
+    characterv2converter.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
@@ -356,6 +357,7 @@ HEADERS  += mainwindow.h \
     charactertemplateframe.h \
     charactertemplateresourcelayout.h \
     characterv2.h \
+    characterv2converter.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \

@@ -19,7 +19,7 @@ public slots:
     virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) = 0;
     virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) = 0;
 
-    virtual void configureFactory(const Ruleset& ruleset) = 0;
+    virtual void configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion) = 0;
 
 protected:
     enum OLD_ENCOUNTER_TYPES
