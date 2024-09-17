@@ -1,5 +1,6 @@
 #include "combatantfactory.h"
 #include "characterv2.h"
+#include "characterv2converter.h"
 #include "monster.h"
 #include "dmconstants.h"
 #include "bestiary.h"
@@ -35,7 +36,8 @@ CombatantFactory::CombatantFactory(QObject *parent) :
     ObjectFactory(parent),
     _attributes(),
     _elements(),
-    _elementLists()
+    _elementLists(),
+    _compatibilityMode(false)
 {
 }
 
@@ -55,35 +57,6 @@ void CombatantFactory::Shutdown()
     delete _instance;
     _instance = nullptr;
 }
-
-/*
-Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent)
-{
-    Combatant* combatant = nullptr;
-
-    switch(combatantType)
-    {
-        case DMHelper::CombatantType_Monster:
-            combatant = Bestiary::Instance()->createMonster(element, isImport);
-            break;
-        case DMHelper::CombatantType_Reference:
-            combatant = new CombatantReference(QString(), parent);
-            break;
-        case DMHelper::CombatantType_Base:
-        case DMHelper::CombatantType_Character:
-            //combatant = new Characterv2(parent);
-            //break;
-        default:
-            qDebug() << "[CombatantFactory] ERROR: unexpected creation of battle combatant type: " << combatantType;
-            break;
-   }
-
-    if(combatant)
-        combatant->inputXML(element, isImport);
-
-    return combatant;
-}
-*/
 
 CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
 {
@@ -124,7 +97,10 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
         return nullptr;
     }
 
-    return setDefaultValues(new Characterv2());
+    if(_compatibilityMode)
+        return setDefaultValues(new Characterv2Converter());
+    else
+        return setDefaultValues(new Characterv2());
 }
 
 QVariant CombatantFactory::convertStringToVariant(const QString& value, TemplateType type)
@@ -240,10 +216,12 @@ bool CombatantFactory::hasEntry(const QString& name) const
     return hasAttribute(name) || hasElement(name) || hasElementList(name);
 }
 
-void CombatantFactory::configureFactory(const Ruleset& ruleset)
+void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     loadCharacterTemplate(ruleset.getCharacterDataFile());
     connect(&ruleset, &Ruleset::characterDataFileChanged, this, &CombatantFactory::loadCharacterTemplate);
+
+    _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 4));
 }
 
 void CombatantFactory::loadCharacterTemplate(const QString& characterTemplateFile)

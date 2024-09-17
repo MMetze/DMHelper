@@ -51,7 +51,7 @@ void CampaignObjectFactory::Shutdown()
     _instance = nullptr;
 }
 
-void CampaignObjectFactory::configureFactories(const Ruleset& ruleset)
+void CampaignObjectFactory::configureFactories(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     CampaignObjectFactory* factory = CampaignObjectFactory::Instance();
     if(!factory)
@@ -60,7 +60,7 @@ void CampaignObjectFactory::configureFactories(const Ruleset& ruleset)
     for(int i = 0; i < factory->factoryCount(); ++i)
     {
         if(factory->getFactory(i))
-            factory->getFactory(i)->configureFactory(ruleset);
+            factory->getFactory(i)->configureFactory(ruleset, inputMajorVersion, inputMinorVersion);
     }
 }
 

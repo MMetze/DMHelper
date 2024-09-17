@@ -73,9 +73,11 @@ CampaignObjectBase* AudioFactory::createObject(const QDomElement& element, bool 
     }
 }
 
-void AudioFactory::configureFactory(const Ruleset& ruleset)
+void AudioFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     Q_UNUSED(ruleset);
+    Q_UNUSED(inputMajorVersion);
+    Q_UNUSED(inputMinorVersion);
 }
 
 AudioTrack* AudioFactory::createTrackFromUrl(const QUrl& url, const QString& objectName)
