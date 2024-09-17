@@ -100,7 +100,9 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     return nullptr;
 }
 
-void EncounterFactory::configureFactory(const Ruleset& ruleset)
+void EncounterFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     Q_UNUSED(ruleset);
+    Q_UNUSED(inputMajorVersion);
+    Q_UNUSED(inputMinorVersion);
 }

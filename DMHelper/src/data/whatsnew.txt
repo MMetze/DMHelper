@@ -9,24 +9,29 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.2</h2>
+<h2>What's New: Version 3.3</h2>
 
-<h3>New v3.2 Features:</h3>
+<h3>IMPORTANT: PLEASE READ</h3>
+Starting with version 3.3, DMHelper has a more flexible character data and UI template system to support different game systems. As a result, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.<br>
+DM Helper will try to update the math to transition to the new format, but we encourage you to double-check the PC and NPC stats. <br>
+If you are using the automatic D&D Beyond importer, it has been updated to reflect the new formats and has even gotten a few improvements along the way. We would recommend updating your D&D Beyond characters in the app.<br>
+
+<p>
+Just to be 100% safe, we recommend backing up your campaign XML files before opening them.
+<p>
+
+<h3>New v3.3 Features:</h3>
 <ul>
-<li><b>Video Effects:</b> Last time it was cool animated layers, now you can add a video as a local effect and move it around. Same editing abilities as before. Get those Spirit Guardians swirling around the cleric
-<li><b>Cloud Effects:</b> But that's not all... add a layer of animated clouds with a variety of settings to make your maps more dynamic
-<li><b>Rotatable Tokens:</b> Right click on a token in a combat and rotate it to any angle you want
-<li><b>Improved Character Actions:</b> PC/NPC actions can be importing from DnD Beyond, edited, inherited from creatures and show up in the mouse-over pop-up in battles. Click on an item in that pop-up to expand and see the description. No more jumping back and forth to character pages!
+<li><b>Configurable Rulesets:</b> DMH now supports multiple game system rules and you can configure as many more as you want. Currently, each ruleset can have its own initiative rules, character sheet template and UI layout. Each campaign can have a different ruleset, so you don't have to do anything to switch between them. The default ruleset is 5E, but you can add your own or modify the existing ones. In upcoming versions, we'll add more flexibility for other parts of the app including monsters, spells, and items.
+<li><b>Combatant Done:</b> As part of a ruleset, you can now decide you want to be able to mark a combatant as "Done" as you go through the initiative order. This will help you keep track of who has taken their turn and who hasn't.
+<li><b>Configurable Audio for Animated Maps:</b> It's overdue, but here - you can decide yourself whether or not you want to play the audio from an animated map.
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Audio playback of sounds fixed - thanks for pointing this one out, friends (you know who you are)!
-<li>"Apply Effect..." fixed, you can go ahead and fireball the party again
-<li>Saving of initiative order fixed
-<li>Crash-bug with opening campaign files from v2.5 fixed
+<li> TBD
 </ul>
 
 <!--
@@ -34,7 +39,7 @@
 
 <h3>Other Improvements:</h3>
 <ul>
-<li> Added an option to automatically sort monsters in initiative when they are added
+<li> TBD
 </ul>
 //-->
 

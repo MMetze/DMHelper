@@ -103,9 +103,11 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     QDomElement rulesetElement = element.firstChildElement(QString("ruleset"));
     if(!rulesetElement.isNull())
         _ruleset.inputXML(rulesetElement, isImport);
+    else
+        _ruleset.setDefaultValues();
 
     // Configure the campaign object factories based on the ruleset
-    CampaignObjectFactory::configureFactories(_ruleset);
+    CampaignObjectFactory::configureFactories(_ruleset, majorVersion, minorVersion);
 
     QString calendarName = element.attribute("calendar", QString("Gregorian"));
     if(BasicDateServer::Instance())
@@ -140,6 +142,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     //qDebug() << "           Audio Tracks: " << tracks.count();
 
     validateCampaignIds();
+
+    CampaignObjectFactory::configureFactories(_ruleset, DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 }
 
 void Campaign::postProcessXML(const QDomElement &element, bool isImport)

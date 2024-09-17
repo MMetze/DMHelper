@@ -1192,6 +1192,9 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         addAction(actionValues, actionObject["name"].toString(), actionObject["snippet"].toString(), 0, Dice());
     }
 
+    // Add the actions to the character
+    _character->setValue(QString("actions"), actionValues);
+
     // Features Overview
     QString featuresString = QString("<b>Feats</b>") + QString("<br>");
     QJsonArray featsArray = rootObject["feats"].toArray();
