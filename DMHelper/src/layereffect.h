@@ -18,6 +18,7 @@ public:
     virtual QRectF boundingRect() const override;
     virtual QImage getLayerIcon() const override;
     virtual bool defaultShader() const override;
+    virtual bool hasSettings() const override;
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 

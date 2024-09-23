@@ -25,6 +25,7 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 <h3>New v3.3 Features:</h3>
 <ul>
 <li><b>Configurable Rulesets:</b> DMH now supports multiple game system rules and you can configure as many more as you want. Currently, each ruleset can have its own initiative rules, character sheet template and UI layout. Each campaign can have a different ruleset, so you don't have to do anything to switch between them. The default ruleset is 5E, but you can add your own or modify the existing ones. In upcoming versions, we'll add more flexibility for other parts of the app including monsters, spells, and items.
+<li><b>Textured FoW:</b> You can add a texture or a color to your Fog of War. Try making it a real fog, or gradually clear away the roof of a building as your players explore it!
 <li><b>Combatant Done:</b> As part of a ruleset, you can now decide you want to be able to mark a combatant as "Done" as you go through the initiative order. This will help you keep track of who has taken their turn and who hasn't.
 <li><b>Configurable Audio for Animated Maps:</b> It's overdue, but here - you can decide yourself whether or not you want to play the audio from an animated map.
 </ul>

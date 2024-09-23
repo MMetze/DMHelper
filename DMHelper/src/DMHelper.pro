@@ -111,6 +111,7 @@ SOURCES += main.cpp\
     layereffect.cpp \
     layereffectsettings.cpp \
     layerfow.cpp \
+    layerfowsettings.cpp \
     layerframe.cpp \
     layergrid.cpp \
     layerimage.cpp \
@@ -395,6 +396,7 @@ HEADERS  += mainwindow.h \
     layereffect.h \
     layereffectsettings.h \
     layerfow.h \
+    layerfowsettings.h \
     layerframe.h \
     layergrid.h \
     layerimage.h \
@@ -615,6 +617,7 @@ FORMS    += mainwindow.ui \
     initiativelistcombatantwidget.ui \
     initiativelistdialog.ui \
     layereffectsettings.ui \
+    layerfowsettings.ui \
     layerframe.ui \
     layerseditdialog.ui \
     layervideoeffectsettings.ui \

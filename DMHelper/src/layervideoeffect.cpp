@@ -203,6 +203,11 @@ void LayerVideoEffect::inputXML(const QDomElement &element, bool isImport)
     LayerVideo::inputXML(element, isImport);
 }
 
+bool LayerVideoEffect::hasSettings() const
+{
+    return true;
+}
+
 DMHelper::LayerType LayerVideoEffect::getType() const
 {
     return DMHelper::LayerType_VideoEffect;

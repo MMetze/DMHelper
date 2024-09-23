@@ -201,6 +201,11 @@ bool LayerEffect::defaultShader() const
     return false;
 }
 
+bool LayerEffect::hasSettings() const
+{
+    return true;
+}
+
 DMHelper::LayerType LayerEffect::getType() const
 {
     return DMHelper::LayerType_Effect;

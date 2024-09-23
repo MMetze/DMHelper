@@ -63,6 +63,11 @@ QImage LayerVideo::getLayerIcon() const
     return screenshot.isNull() ? QImage(":/img/data/icon_play.png") : screenshot;
 }
 
+bool LayerVideo::hasAudio() const
+{
+    return true;
+}
+
 DMHelper::LayerType LayerVideo::getType() const
 {
     return DMHelper::LayerType_Video;

@@ -22,6 +22,7 @@ public:
 
     virtual QRectF boundingRect() const override;
     virtual QImage getLayerIcon() const override;
+    virtual bool hasSettings() const override;
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
@@ -61,6 +62,7 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
+    virtual void editSettings() override;
 
 protected slots:
     // Local Interface
@@ -89,7 +91,11 @@ protected:
     PublishGLScene* _scene;
 
     // Core contents
+    QColor _fowColor;
     QImage _imageFow;
+    QImage _imageFowTexture;
+    QString _fowTextureFile;
+    int _fowTextureScale;
     QUndoStack* _undoStack;
     QList<UndoFowBase*> _undoItems;
 

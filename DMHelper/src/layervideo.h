@@ -26,6 +26,8 @@ public:
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
+    virtual bool hasAudio() const override;
+
     virtual QRectF boundingRect() const override;
     virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;

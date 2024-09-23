@@ -122,6 +122,16 @@ bool Layer::defaultShader() const
     return true;
 }
 
+bool Layer::hasSettings() const
+{
+    return false;
+}
+
+bool Layer::hasAudio() const
+{
+    return false;
+}
+
 DMHelper::LayerType Layer::getFinalType() const
 {
     return getType();
