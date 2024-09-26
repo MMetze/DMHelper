@@ -16,6 +16,7 @@ RibbonTabTools::RibbonTabTools(QWidget *parent) :
     connect(ui->btnQuickRef, SIGNAL(clicked(bool)), this, SIGNAL(referenceClicked()));
     connect(ui->btnSoundboard, SIGNAL(clicked(bool)), this, SIGNAL(soundboardClicked()));
     connect(ui->btnSpellbook, SIGNAL(clicked(bool)), this, SIGNAL(spellbookClicked()));
+    connect(ui->btnSearch, SIGNAL(clicked(bool)), this, SIGNAL(searchClicked()));
 
     connect(ui->btnRollDice, SIGNAL(clicked(bool)), this, SIGNAL(rollDiceClicked()));
     connect(ui->btnRandomMarket, SIGNAL(clicked(bool)), this, SIGNAL(randomMarketClicked()));
@@ -59,6 +60,7 @@ void RibbonTabTools::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblScreen, *ui->btnScreen, frameHeight);
     setStandardButtonSize(*ui->lblTables, *ui->btnTables, frameHeight);
     setStandardButtonSize(*ui->lblQuickRef, *ui->btnQuickRef, frameHeight);
+    setStandardButtonSize(*ui->lblSearch, *ui->btnSearch, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
     setStandardButtonSize(*ui->lblRollDice, *ui->btnRollDice, frameHeight);
     setStandardButtonSize(*ui->lblRandomMarket, *ui->btnRandomMarket, frameHeight);

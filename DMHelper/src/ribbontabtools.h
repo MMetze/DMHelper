@@ -30,6 +30,7 @@ signals:
     void referenceClicked();
     void soundboardClicked();
     void spellbookClicked();
+    void searchClicked();
 
     void rollDiceClicked();
     void randomMarketClicked();

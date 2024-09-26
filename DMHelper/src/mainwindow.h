@@ -20,6 +20,7 @@ class Adventure;
 class Encounter;
 class EncounterTextEdit;
 class TimeAndDateFrame;
+class GlobalSearchFrame;
 class Map;
 class Layer;
 class MRUHandler;
@@ -173,6 +174,13 @@ protected slots:
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
     void handleEditSettings();
 
+    void handleOpenDMScreen();
+    void handleOpenTables();
+    void handleOpenSoundboard();
+    void handleOpenCalendar();
+    void handleOpenCountdown();
+    void handleOpenGlobalSearch();
+
     void handleAnimationStarted();
 
     bool selectItemFromStack(const QUuid& itemId);
@@ -209,6 +217,8 @@ private:
     TimeAndDateFrame* _timeAndDateFrame;
     QDialog* _calendarDlg;
     QDialog* _countdownDlg;
+    GlobalSearchFrame* _globalSearchFrame;
+    QDialog* _globalSearchDlg;
 
     EncounterTextEdit* _encounterTextEdit;
 

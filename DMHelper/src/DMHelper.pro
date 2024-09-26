@@ -103,6 +103,7 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    globalsearchframe.cpp \
     gridconfig.cpp \
     initiativelistcombatantwidget.cpp \
     initiativelistdialog.cpp \
@@ -388,6 +389,7 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    globalsearchframe.h \
     gridconfig.h \
     initiativelistcombatantwidget.h \
     initiativelistdialog.h \
@@ -614,6 +616,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    globalsearchframe.ui \
     initiativelistcombatantwidget.ui \
     initiativelistdialog.ui \
     layereffectsettings.ui \
