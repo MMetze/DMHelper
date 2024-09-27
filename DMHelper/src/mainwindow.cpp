@@ -2503,6 +2503,9 @@ void MainWindow::updateMapFiles()
 
 void MainWindow::updateClock()
 {
+    if(!_timeAndDateFrame)
+        return;
+
     if(_campaign)
     {
         connect(_timeAndDateFrame, SIGNAL(dateChanged(BasicDate)), _campaign, SLOT(setDate(BasicDate)));
@@ -2784,7 +2787,8 @@ void MainWindow::handleOpenGlobalSearch()
     if((!_globalSearchDlg) || (!_globalSearchFrame))
     {
         _globalSearchFrame = new GlobalSearchFrame(this);
-        _globalSearchDlg = createDialog(_globalSearchFrame);
+        _globalSearchDlg = createDialog(_globalSearchFrame, QSize(width() / 2, height() * 9 / 10));
+        connect(_globalSearchFrame, &GlobalSearchFrame::monsterSelected, this, &MainWindow::openMonster);
     }
 
     _globalSearchFrame->setCampaign(_campaign);

@@ -8,6 +8,7 @@ class GlobalSearchFrame;
 }
 
 class Campaign;
+class QTreeWidgetItem;
 
 class GlobalSearchFrame : public QFrame
 {
@@ -18,6 +19,14 @@ public:
     ~GlobalSearchFrame();
 
     void setCampaign(Campaign* campaign);
+
+signals:
+    void monsterSelected(const QString& monsterClass);
+
+protected slots:
+    void executeSearch();
+    void handleItemClicked(QTreeWidgetItem *item, int column);
+    void handleItemDoubleClicked(QTreeWidgetItem *item, int column);
 
 private:
     Ui::GlobalSearchFrame *ui;

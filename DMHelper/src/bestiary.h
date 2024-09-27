@@ -1,6 +1,7 @@
 #ifndef BESTIARY_H
 #define BESTIARY_H
 
+#include "globalsearch.h"
 #include <QObject>
 #include <QMap>
 #include <QDir>
@@ -13,17 +14,22 @@ class QDomElement;
 
 typedef QMap<QString, MonsterClass*> BestiaryMap;
 
-class Bestiary : public QObject
+class Bestiary : public QObject, public GlobalSearch_Interface
 {
     Q_OBJECT
 public:
     explicit Bestiary(QObject *parent = nullptr);
     virtual ~Bestiary();
 
+    // Static interface
     static Bestiary* Instance();
     static void Initialize();
     static void Shutdown();
 
+    // GlobalSearch_Interface
+    QStringList search(const QString& searchString) override;
+
+    // Local Interface
     bool writeBestiary(const QString& targetFilename);
     bool readBestiary(const QString& targetFilename);
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
@@ -79,6 +85,7 @@ private:
     void loadBestiary(const QDomElement& bestiaryElement);
     void importBestiary(const QDomElement& bestiaryElement, const QString& importFile);
     void importMonsterImage(const QDomElement& monsterElement, const QString& importFile);
+    bool searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const;
 
     static Bestiary* _instance;
 

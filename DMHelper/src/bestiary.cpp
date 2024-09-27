@@ -52,6 +52,33 @@ void Bestiary::Shutdown()
     _instance = nullptr;
 }
 
+QStringList Bestiary::search(const QString& searchString)
+{
+    QStringList results;
+    if(searchString.isEmpty())
+        return results;
+
+    QList<QString> keys = _bestiaryMap.keys();
+
+    for(auto it = keys.begin(); it != keys.end(); ++it)
+    {
+        if(it->contains(searchString, Qt::CaseInsensitive))
+        {
+            results << *it;
+            continue;
+        }
+
+        MonsterClass* monsterClass = _bestiaryMap.value(*it);
+        if(!monsterClass)
+            continue;
+
+        if(searchMonsterClass(monsterClass, searchString))
+            results << monsterClass->getName();
+    }
+
+    return results;
+}
+
 bool Bestiary::writeBestiary(const QString& targetFilename)
 {
     if(targetFilename.isEmpty())
@@ -671,4 +698,56 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
 
         qDebug() << "[Bestiary] Copied " << currentFile.fileName() << " to " << targetFile << ", result: " << result;
     }
+}
+
+bool Bestiary::searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const
+{
+    if((!monsterClass) || searchString.isEmpty())
+        return false;
+
+    if((monsterClass->getName().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getMonsterType().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getMonsterSubType().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getAlignment().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getLanguages().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getConditionImmunities().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getDamageImmunities().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getDamageResistances().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getDamageVulnerabilities().contains(searchString, Qt::CaseInsensitive)) ||
+       (monsterClass->getSenses().contains(searchString, Qt::CaseInsensitive)))
+    {
+        return true;
+    }
+
+    QList<MonsterAction> actions = monsterClass->getActions();
+    for(auto it = actions.begin(); it != actions.end(); ++it)
+    {
+        if((it->getName().contains(searchString, Qt::CaseInsensitive)) ||
+           (it->getDescription().contains(searchString, Qt::CaseInsensitive)))
+        {
+            return true;
+        }
+    }
+
+    QList<MonsterAction> legendaryActions = monsterClass->getLegendaryActions();
+    for(auto it = legendaryActions.begin(); it != legendaryActions.end(); ++it)
+    {
+        if((it->getName().contains(searchString, Qt::CaseInsensitive)) ||
+           (it->getDescription().contains(searchString, Qt::CaseInsensitive)))
+        {
+            return true;
+        }
+    }
+
+    QList<MonsterAction> specialAbilities = monsterClass->getSpecialAbilities();
+    for(auto it = specialAbilities.begin(); it != specialAbilities.end(); ++it)
+    {
+        if((it->getName().contains(searchString, Qt::CaseInsensitive)) ||
+           (it->getDescription().contains(searchString, Qt::CaseInsensitive)))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

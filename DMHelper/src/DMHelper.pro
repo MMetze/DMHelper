@@ -389,6 +389,7 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    globalsearch.h \
     globalsearchframe.h \
     gridconfig.h \
     initiativelistcombatantwidget.h \
