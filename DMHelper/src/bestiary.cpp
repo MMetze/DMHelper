@@ -58,22 +58,20 @@ QStringList Bestiary::search(const QString& searchString)
     if(searchString.isEmpty())
         return results;
 
-    QList<QString> keys = _bestiaryMap.keys();
-
-    for(auto it = keys.begin(); it != keys.end(); ++it)
+    // Iterate directly over the keys in the map
+    for (auto it = _bestiaryMap.constBegin(); it != _bestiaryMap.constEnd(); ++it)
     {
-        if(it->contains(searchString, Qt::CaseInsensitive))
+        const QString& key = it.key();
+        if(key.contains(searchString, Qt::CaseInsensitive))
         {
-            results << *it;
-            continue;
+            results << key;
         }
-
-        MonsterClass* monsterClass = _bestiaryMap.value(*it);
-        if(!monsterClass)
-            continue;
-
-        if(searchMonsterClass(monsterClass, searchString))
-            results << monsterClass->getName();
+        else
+        {
+            MonsterClass* monsterClass = it.value();
+            if(searchMonsterClass(monsterClass, searchString))
+                results << key;
+        }
     }
 
     return results;
@@ -702,7 +700,7 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
 
 bool Bestiary::searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const
 {
-    if((!monsterClass) || searchString.isEmpty())
+    if((!monsterClass) || (searchString.isEmpty()))
         return false;
 
     if((monsterClass->getName().contains(searchString, Qt::CaseInsensitive)) ||

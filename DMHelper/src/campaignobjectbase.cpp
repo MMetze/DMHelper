@@ -391,6 +391,11 @@ const CampaignObjectBase* CampaignObjectBase::getObjectById(QUuid id) const
     return nullptr;
 }
 
+bool CampaignObjectBase::matchSearch(const QString& searchString) const
+{
+    return getName().contains(searchString, Qt::CaseInsensitive);
+}
+
 void CampaignObjectBase::setExpanded(bool expanded)
 {
     if(_expanded != expanded)

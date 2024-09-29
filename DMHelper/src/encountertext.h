@@ -21,6 +21,9 @@ public:
     virtual int getObjectType() const override;
     virtual QIcon getDefaultIcon() override;
 
+    // For support of GlobalSearch_Interface
+    virtual bool matchSearch(const QString& searchString) const override;
+
     // Text
     virtual QString getText() const;
     virtual QString getImageFile() const;

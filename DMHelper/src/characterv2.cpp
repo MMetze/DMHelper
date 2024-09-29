@@ -44,6 +44,26 @@ QIcon Characterv2::getDefaultIcon()
         return isInParty() ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png");
 }
 
+bool Characterv2::matchSearch(const QString& searchString) const
+{
+    if(Combatant::matchSearch(searchString))
+        return true;
+
+    QHash<QString, DMHAttribute> elementAttributes = CombatantFactory::Instance()->getElements();
+    for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
+    {
+        DMHAttribute attribute = elementAttributes.value(*keyIt);
+        if(attribute._type == CombatantFactory::TemplateType_html)
+        {
+            QString value = getStringValue(*keyIt);
+            if(value.contains(searchString, Qt::CaseInsensitive))
+                return true;
+        }
+    }
+
+    return false;
+}
+
 void Characterv2::beginBatchChanges()
 {
     _iconChanged = false;

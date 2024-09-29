@@ -2788,7 +2788,9 @@ void MainWindow::handleOpenGlobalSearch()
     {
         _globalSearchFrame = new GlobalSearchFrame(this);
         _globalSearchDlg = createDialog(_globalSearchFrame, QSize(width() / 2, height() * 9 / 10));
+        connect(_globalSearchFrame, &GlobalSearchFrame::campaignObjectSelected, this, &MainWindow::selectItemFromStack);
         connect(_globalSearchFrame, &GlobalSearchFrame::monsterSelected, this, &MainWindow::openMonster);
+        connect(_globalSearchFrame, &GlobalSearchFrame::spellSelected, this, &MainWindow::openSpell);
     }
 
     _globalSearchFrame->setCampaign(_campaign);

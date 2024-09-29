@@ -142,6 +142,11 @@ QIcon EncounterText::getDefaultIcon()
     return QIcon(":/img/data/icon_contenttextencounter.png");
 }
 
+bool EncounterText::matchSearch(const QString& searchString) const
+{
+    return ((CampaignObjectBase::matchSearch(searchString)) || (_text.contains(searchString, Qt::CaseInsensitive)));
+}
+
 QString EncounterText::getText() const
 {
     return _text;

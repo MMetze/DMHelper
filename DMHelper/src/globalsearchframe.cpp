@@ -1,6 +1,8 @@
 #include "globalsearchframe.h"
 #include "ui_globalsearchframe.h"
+#include "campaign.h"
 #include "bestiary.h"
+#include "spellbook.h"
 
 const int GlobalSearchType_None = QTreeWidgetItem::UserType;
 const int GlobalSearchType_Campaign = QTreeWidgetItem::UserType + 1;
@@ -38,8 +40,21 @@ void GlobalSearchFrame::executeSearch()
     // Search the Campaign
     if(_campaign)
     {
-        QTreeWidgetItem* campaignRootItem = new QTreeWidgetItem(QStringList() << tr("Campaign"), GlobalSearchType_None);
-        ui->treeResults->addTopLevelItem(campaignRootItem);
+        QTreeWidgetItem* campaignRootItem = nullptr;
+        QList<CampaignObjectBase*> campaignObjects = _campaign->getChildObjects();
+        for(CampaignObjectBase* object : campaignObjects)
+        {
+            QTreeWidgetItem* objectItem = searchCampaignObject(object, ui->edtSearch->text());
+            if(objectItem)
+            {
+                if(!campaignRootItem)
+                    campaignRootItem = new QTreeWidgetItem(QStringList() << tr("Campaign"), GlobalSearchType_None);
+                campaignRootItem->addChild(objectItem);
+            }
+        }
+
+        if(campaignRootItem)
+            ui->treeResults->addTopLevelItem(campaignRootItem);
     }
 
     // Search the Bestiary
@@ -53,12 +68,20 @@ void GlobalSearchFrame::executeSearch()
             bestiaryRootItem->addChild(monsterItem);
         }
         ui->treeResults->addTopLevelItem(bestiaryRootItem);
-        ui->treeResults->expandItem(bestiaryRootItem);
     }
 
     // Search the Spellbook
-    QTreeWidgetItem* spellBookRootItem = new QTreeWidgetItem(QStringList() << tr("Spellbook"), GlobalSearchType_None);
-    ui->treeResults->addTopLevelItem(spellBookRootItem);
+    QStringList spellbookList = Spellbook::Instance()->search(ui->edtSearch->text());
+    if(!spellbookList.isEmpty())
+    {
+        QTreeWidgetItem* spellbookRootItem = new QTreeWidgetItem(QStringList() << tr("Spellbook"), GlobalSearchType_None);
+        for(const QString& spellName : spellbookList)
+        {
+            QTreeWidgetItem* spellItem = new QTreeWidgetItem(QStringList() << spellName, GlobalSearchType_SpellBook);
+            spellbookRootItem->addChild(spellItem);
+        }
+        ui->treeResults->addTopLevelItem(spellbookRootItem);
+    }
 
     // Search the Items
     QTreeWidgetItem* itemsRootItem = new QTreeWidgetItem(QStringList() << tr("Items"), GlobalSearchType_None);
@@ -68,6 +91,7 @@ void GlobalSearchFrame::executeSearch()
     QTreeWidgetItem* toolsRootItem = new QTreeWidgetItem(QStringList() << tr("Other Tools"), GlobalSearchType_None);
     ui->treeResults->addTopLevelItem(toolsRootItem);
 
+    ui->treeResults->expandAll();
 }
 
 void GlobalSearchFrame::handleItemClicked(QTreeWidgetItem *item, int column)
@@ -77,9 +101,21 @@ void GlobalSearchFrame::handleItemClicked(QTreeWidgetItem *item, int column)
     if((!item) || (item->type() <= GlobalSearchType_None))
         return;
 
+    // TODO: Add support to show more details about the selected item when clicked
     switch(item->type())
     {
+        case GlobalSearchType_Campaign:
         case GlobalSearchType_Bestiary:
+            /* TODO: This sort of thing will work
+        {
+            QTreeWidgetItem* testItem = new QTreeWidgetItem(QStringList() << tr("Here is a test description under the item!"), GlobalSearchType_None);
+            item->insertChild(0, testItem);
+            break;
+        }
+*/
+        case GlobalSearchType_SpellBook:
+        case GlobalSearchType_Items:
+        case GlobalSearchType_Tools:
         default:
             break;
     }
@@ -94,10 +130,51 @@ void GlobalSearchFrame::handleItemDoubleClicked(QTreeWidgetItem *item, int colum
 
     switch(item->type())
     {
+        case GlobalSearchType_Campaign:
+            emit campaignObjectSelected(item->data(0, Qt::UserRole).toUuid());
         case GlobalSearchType_Bestiary:
             emit monsterSelected(item->text(0));
             break;
+        case GlobalSearchType_SpellBook:
+            emit spellSelected(item->text(0));
+            break;
+        case GlobalSearchType_Items:
+        case GlobalSearchType_Tools:
         default:
             break;
     }
+}
+
+QTreeWidgetItem* GlobalSearchFrame::searchCampaignObject(CampaignObjectBase* object, const QString& searchString)
+{
+    QTreeWidgetItem* newItem = nullptr;
+
+    if(!object)
+        return newItem;
+
+    if(object->matchSearch(searchString))
+    {
+        newItem = new QTreeWidgetItem(QStringList() << object->getName(), GlobalSearchType_Campaign);
+        newItem->setIcon(0, object->getIcon());
+        newItem->setData(0, Qt::UserRole, QVariant(object->getID()));
+    }
+
+    QList<CampaignObjectBase*> childObjects = object->getChildObjects();
+    for(CampaignObjectBase* childObject : childObjects)
+    {
+        QTreeWidgetItem* childItem = searchCampaignObject(childObject, searchString);
+        if(childItem)
+        {
+            if(!newItem)
+            {
+                newItem = new QTreeWidgetItem(QStringList() << object->getName(), GlobalSearchType_Campaign);
+                newItem->setIcon(0, object->getIcon());
+                newItem->setData(0, Qt::UserRole, QVariant(object->getID()));
+                newItem->setForeground(0, QBrush(Qt::gray));
+            }
+            newItem->addChild(childItem);
+        }
+    }
+
+    return newItem;
 }

@@ -20,6 +20,9 @@ public:
     virtual void copyValues(const CampaignObjectBase* other) override;
     virtual QIcon getDefaultIcon() override;
 
+    // For support of GlobalSearch_Interface
+    virtual bool matchSearch(const QString& searchString) const override;
+
     // From Combatant
     virtual void beginBatchChanges() override;
     virtual void endBatchChanges() override;
