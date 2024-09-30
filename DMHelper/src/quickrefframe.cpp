@@ -42,6 +42,12 @@ void QuickRefFrame::refreshQuickRef()
         ui->cmbQuickRef->setCurrentIndex(0);
 }
 
+void QuickRefFrame::setQuickRefSection(const QString& sectionName)
+{
+    if((!sectionName.isEmpty()) && (ui->cmbQuickRef->findText(sectionName) >= 0))
+        ui->cmbQuickRef->setCurrentText(sectionName);
+}
+
 void QuickRefFrame::handleQuickRefChange(int selection)
 {
     if((!QuickRef::Instance()) || (selection < 0) || (selection >= QuickRef::Instance()->count()))

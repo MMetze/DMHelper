@@ -3,13 +3,13 @@
 #include "campaign.h"
 #include "bestiary.h"
 #include "spellbook.h"
+#include "quickref.h"
 
 const int GlobalSearchType_None = QTreeWidgetItem::UserType;
 const int GlobalSearchType_Campaign = QTreeWidgetItem::UserType + 1;
 const int GlobalSearchType_Bestiary = QTreeWidgetItem::UserType + 2;
 const int GlobalSearchType_SpellBook = QTreeWidgetItem::UserType + 3;
-const int GlobalSearchType_Items = QTreeWidgetItem::UserType + 4;
-const int GlobalSearchType_Tools = QTreeWidgetItem::UserType + 5;
+const int GlobalSearchType_Tools = QTreeWidgetItem::UserType + 4;
 
 GlobalSearchFrame::GlobalSearchFrame(QWidget *parent) :
     QFrame(parent),
@@ -83,13 +83,29 @@ void GlobalSearchFrame::executeSearch()
         ui->treeResults->addTopLevelItem(spellbookRootItem);
     }
 
-    // Search the Items
-    QTreeWidgetItem* itemsRootItem = new QTreeWidgetItem(QStringList() << tr("Items"), GlobalSearchType_None);
-    ui->treeResults->addTopLevelItem(itemsRootItem);
-
     // Search the Tools
-    QTreeWidgetItem* toolsRootItem = new QTreeWidgetItem(QStringList() << tr("Other Tools"), GlobalSearchType_None);
-    ui->treeResults->addTopLevelItem(toolsRootItem);
+    if(QuickRef::Instance())
+    {
+        QStringList quickRefList = QuickRef::Instance()->search(ui->edtSearch->text());
+        if(!quickRefList.isEmpty())
+        {
+            QTreeWidgetItem* toolsRootItem = new QTreeWidgetItem(QStringList() << tr("Tools"), GlobalSearchType_None);
+            for(int i = 0; i < quickRefList.size() / 2; i++)
+            {
+                QString sectionName = quickRefList.at(i*2);
+                QString subsectionTitle = quickRefList.at(i*2 + 1);
+                QString widgetText = sectionName + (subsectionTitle.isEmpty() ? QString("") : QString(" - ") + subsectionTitle);
+
+                if(sectionName.isEmpty())
+                    continue;
+
+                QTreeWidgetItem* toolItem = new QTreeWidgetItem(QStringList() << widgetText, GlobalSearchType_Tools);
+                toolItem->setData(0, Qt::UserRole, QVariant(sectionName));
+                toolsRootItem->addChild(toolItem);
+            }
+            ui->treeResults->addTopLevelItem(toolsRootItem);
+        }
+    }
 
     ui->treeResults->expandAll();
 }
@@ -114,7 +130,6 @@ void GlobalSearchFrame::handleItemClicked(QTreeWidgetItem *item, int column)
         }
 */
         case GlobalSearchType_SpellBook:
-        case GlobalSearchType_Items:
         case GlobalSearchType_Tools:
         default:
             break;
@@ -138,11 +153,14 @@ void GlobalSearchFrame::handleItemDoubleClicked(QTreeWidgetItem *item, int colum
         case GlobalSearchType_SpellBook:
             emit spellSelected(item->text(0));
             break;
-        case GlobalSearchType_Items:
         case GlobalSearchType_Tools:
+            emit toolSelected(item->data(0, Qt::UserRole).toString());
+            break;
         default:
             break;
     }
+
+    emit frameAccept();
 }
 
 QTreeWidgetItem* GlobalSearchFrame::searchCampaignObject(CampaignObjectBase* object, const QString& searchString)

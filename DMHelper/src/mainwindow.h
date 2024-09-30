@@ -32,6 +32,7 @@ class BattleDialogManager;
 class AudioPlayer;
 class AudioTrack;
 class PublishFrame;
+class QuickRefFrame;
 class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
@@ -77,6 +78,7 @@ public slots:
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
     void openSpell(const QString& spellName);
+    void openQuickref(const QString& quickRefSection);
 
     void newCharacter();
     void importCharacter();
@@ -212,6 +214,7 @@ private:
     PublishWindow* _pubWindow;
     QDialog* _dmScreenDlg;
     QDialog* _tableDlg;
+    QuickRefFrame* _quickRefFrame;
     QDialog* _quickRefDlg;
     QDialog* _soundDlg;
     TimeAndDateFrame* _timeAndDateFrame;

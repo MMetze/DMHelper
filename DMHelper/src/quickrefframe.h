@@ -20,6 +20,7 @@ public:
 
 public slots:
     void refreshQuickRef();
+    void setQuickRefSection(const QString& sectionName);
 
 protected slots:
     void handleQuickRefChange(int selection);

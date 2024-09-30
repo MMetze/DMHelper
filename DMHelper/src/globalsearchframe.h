@@ -26,6 +26,9 @@ signals:
     void campaignObjectSelected(const QUuid& itemId);
     void monsterSelected(const QString& monsterClass);
     void spellSelected(const QString& spellName);
+    void toolSelected(const QString& toolName);
+
+    void frameAccept();
 
 protected slots:
     void executeSearch();

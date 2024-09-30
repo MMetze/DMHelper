@@ -122,6 +122,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _pubWindow(nullptr),
     _dmScreenDlg(nullptr),
     _tableDlg(nullptr),
+    _quickRefFrame(nullptr),
     _quickRefDlg(nullptr),
     _soundDlg(nullptr),
     _timeAndDateFrame(nullptr),
@@ -668,10 +669,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Creating Reference Tabs";
 
     QuickRef::Initialize();
-    QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
-    _quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    _quickRefFrame = new QuickRefFrame(this);
+    _quickRefDlg = createDialog(_quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
-    connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
+    connect(QuickRef::Instance(), &QuickRef::changed, _quickRefFrame, &QuickRefFrame::refreshQuickRef);
     readQuickRef();
 
     connect(_ribbonTabTools, &RibbonTabTools::screenClicked, this, &MainWindow::handleOpenDMScreen);
@@ -684,7 +685,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(_ribbonTabTools, &RibbonTabTools::referenceClicked, _quickRefDlg, &QDialog::exec);
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
-    connect(referenceShortcut, &QShortcut::activated, _quickRefDlg, &QDialog::exec);
+    connect(referenceShortcut, &QShortcut::activated, this, [=]() {openQuickref(QString());});
 
     connect(_ribbonTabTools, &RibbonTabTools::soundboardClicked, this, &MainWindow::handleOpenSoundboard);
     QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
@@ -882,6 +883,12 @@ void MainWindow::openSpell(const QString& spellName)
 
     _spellDlg.setSpell(spellName);
     openSpellbook();
+}
+
+void MainWindow::openQuickref(const QString& quickRefSection)
+{
+    _quickRefFrame->setQuickRefSection(quickRefSection);
+    _quickRefDlg->exec();
 }
 
 void MainWindow::newCharacter()
@@ -2788,9 +2795,11 @@ void MainWindow::handleOpenGlobalSearch()
     {
         _globalSearchFrame = new GlobalSearchFrame(this);
         _globalSearchDlg = createDialog(_globalSearchFrame, QSize(width() / 2, height() * 9 / 10));
+        connect(_globalSearchFrame, &GlobalSearchFrame::frameAccept, _globalSearchDlg, &QDialog::accept);
         connect(_globalSearchFrame, &GlobalSearchFrame::campaignObjectSelected, this, &MainWindow::selectItemFromStack);
         connect(_globalSearchFrame, &GlobalSearchFrame::monsterSelected, this, &MainWindow::openMonster);
         connect(_globalSearchFrame, &GlobalSearchFrame::spellSelected, this, &MainWindow::openSpell);
+        connect(_globalSearchFrame, &GlobalSearchFrame::toolSelected, this, &MainWindow::openQuickref);
     }
 
     _globalSearchFrame->setCampaign(_campaign);
