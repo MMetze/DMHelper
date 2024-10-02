@@ -108,13 +108,14 @@ QStringList Spellbook::search(const QString& searchString)
         const QString& key = it.key();
         if(key.contains(searchString, Qt::CaseInsensitive))
         {
-            results << key;
+            results << key << QString();
         }
         else
         {
             Spell* spell = it.value();
-            if(searchSpell(spell, searchString))
-                results << key;
+            QString matchString = searchSpell(spell, searchString);
+            if(!matchString.isEmpty())
+                results << key << matchString;
         }
     }
 
@@ -630,11 +631,18 @@ void Spellbook::showSpellWarning(const QString& spell)
     }
 }
 
-bool Spellbook::searchSpell(const Spell* spell, const QString& searchString) const
+QString Spellbook::searchSpell(const Spell* spell, const QString& searchString) const
 {
-    if((!spell) || searchString.isEmpty())
-        return false;
+    QString result;
 
-    return ((spell->getDescription().contains(searchString, Qt::CaseInsensitive)) ||
-            (spell->getSchool().contains(searchString, Qt::CaseInsensitive)));
+    if((!spell) || (searchString.isEmpty()))
+        return QString();
+
+    if(compareStringValue(spell->getDescription(), searchString, result))
+        return QString("Description: ") + result;
+
+    if(compareStringValue(spell->getSchool(), searchString, result))
+        return QString("School: ") + result;
+
+    return QString();
 }

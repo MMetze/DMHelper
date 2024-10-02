@@ -77,7 +77,7 @@ public slots:
 
 private:
     void showSpellWarning(const QString& spell);
-    bool searchSpell(const Spell* spell, const QString& searchString) const;
+    QString searchSpell(const Spell* spell, const QString& searchString) const;
 
     static Spellbook* _instance;
 

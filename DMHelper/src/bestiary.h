@@ -85,7 +85,7 @@ private:
     void loadBestiary(const QDomElement& bestiaryElement);
     void importBestiary(const QDomElement& bestiaryElement, const QString& importFile);
     void importMonsterImage(const QDomElement& monsterElement, const QString& importFile);
-    bool searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const;
+    QString searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const;
 
     static Bestiary* _instance;
 

@@ -62,9 +62,10 @@ void GlobalSearchFrame::executeSearch()
     if(!bestiaryList.isEmpty())
     {
         QTreeWidgetItem* bestiaryRootItem = new QTreeWidgetItem(QStringList() << tr("Bestiary"), GlobalSearchType_None);
-        for(const QString& monsterName : bestiaryList)
+        for(int i = 0; i < bestiaryList.size() / 2; ++i)
         {
-            QTreeWidgetItem* monsterItem = new QTreeWidgetItem(QStringList() << monsterName, GlobalSearchType_Bestiary);
+            QTreeWidgetItem* monsterItem = new QTreeWidgetItem(QStringList() << bestiaryList.at(i*2), GlobalSearchType_Bestiary);
+            monsterItem->setData(0, Qt::UserRole, bestiaryList.at(i*2+1));
             bestiaryRootItem->addChild(monsterItem);
         }
         ui->treeResults->addTopLevelItem(bestiaryRootItem);
@@ -75,9 +76,10 @@ void GlobalSearchFrame::executeSearch()
     if(!spellbookList.isEmpty())
     {
         QTreeWidgetItem* spellbookRootItem = new QTreeWidgetItem(QStringList() << tr("Spellbook"), GlobalSearchType_None);
-        for(const QString& spellName : spellbookList)
+        for(int i = 0; i < spellbookList.size() / 2; ++i)
         {
-            QTreeWidgetItem* spellItem = new QTreeWidgetItem(QStringList() << spellName, GlobalSearchType_SpellBook);
+            QTreeWidgetItem* spellItem = new QTreeWidgetItem(QStringList() << spellbookList.at(i*2), GlobalSearchType_SpellBook);
+            spellItem->setData(0, Qt::UserRole, spellbookList.at(i*2+1));
             spellbookRootItem->addChild(spellItem);
         }
         ui->treeResults->addTopLevelItem(spellbookRootItem);
@@ -121,15 +123,24 @@ void GlobalSearchFrame::handleItemClicked(QTreeWidgetItem *item, int column)
     switch(item->type())
     {
         case GlobalSearchType_Campaign:
-        case GlobalSearchType_Bestiary:
-            /* TODO: This sort of thing will work
-        {
-            QTreeWidgetItem* testItem = new QTreeWidgetItem(QStringList() << tr("Here is a test description under the item!"), GlobalSearchType_None);
-            item->insertChild(0, testItem);
             break;
-        }
-*/
+        case GlobalSearchType_Bestiary:
         case GlobalSearchType_SpellBook:
+            if(item->childCount() > 0)
+            {
+                QTreeWidgetItem* subItem = item->child(0);
+                delete subItem;
+            }
+            else
+            {
+                QString subText = item->data(0, Qt::UserRole).toString();
+                if(!subText.isEmpty())
+                {
+                    QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList() << subText, GlobalSearchType_None);
+                    item->insertChild(0, subItem);
+                }
+            }
+            break;
         case GlobalSearchType_Tools:
         default:
             break;

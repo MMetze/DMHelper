@@ -103,6 +103,7 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    globalsearch.cpp \
     globalsearchframe.cpp \
     gridconfig.cpp \
     initiativelistcombatantwidget.cpp \

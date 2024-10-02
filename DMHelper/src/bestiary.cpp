@@ -64,13 +64,14 @@ QStringList Bestiary::search(const QString& searchString)
         const QString& key = it.key();
         if(key.contains(searchString, Qt::CaseInsensitive))
         {
-            results << key;
+            results << key << QString();
         }
         else
         {
             MonsterClass* monsterClass = it.value();
-            if(searchMonsterClass(monsterClass, searchString))
-                results << key;
+            QString matchString = searchMonsterClass(monsterClass, searchString);
+            if(!matchString.isEmpty())
+                results << key << matchString;
         }
     }
 
@@ -698,54 +699,72 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
     }
 }
 
-bool Bestiary::searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const
+QString Bestiary::searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const
 {
-    if((!monsterClass) || (searchString.isEmpty()))
-        return false;
+    QString result;
 
-    if((monsterClass->getName().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getMonsterType().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getMonsterSubType().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getAlignment().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getLanguages().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getConditionImmunities().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getDamageImmunities().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getDamageResistances().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getDamageVulnerabilities().contains(searchString, Qt::CaseInsensitive)) ||
-       (monsterClass->getSenses().contains(searchString, Qt::CaseInsensitive)))
-    {
-        return true;
-    }
+    if((!monsterClass) || (searchString.isEmpty()))
+        return QString();
+
+    if(compareStringValue(monsterClass->getName(), searchString, result))
+        return QString("Name: ") + result;
+
+    if(compareStringValue(monsterClass->getMonsterType(), searchString, result))
+        return QString("Type: ") + result;
+
+    if(compareStringValue(monsterClass->getMonsterSubType(), searchString, result))
+        return QString("Subtype: ") + result;
+
+    if(compareStringValue(monsterClass->getAlignment(), searchString, result))
+        return QString("Alignment: ") + result;
+
+    if(compareStringValue(monsterClass->getLanguages(), searchString, result))
+        return QString("Languages: ") + result;
+
+    if(compareStringValue(monsterClass->getConditionImmunities(), searchString, result))
+        return QString("Condition Immunities: ") + result;
+
+    if(compareStringValue(monsterClass->getDamageImmunities(), searchString, result))
+        return QString("Damage Immunities: ") + result;
+
+    if(compareStringValue(monsterClass->getDamageResistances(), searchString, result))
+        return QString("Damage Resistances: ") + result;
+
+    if(compareStringValue(monsterClass->getDamageVulnerabilities(), searchString, result))
+        return QString("Damage Vulnerabilities: ") + result;
+
+    if(compareStringValue(monsterClass->getSenses(), searchString, result))
+        return QString("Senses: ") + result;
 
     QList<MonsterAction> actions = monsterClass->getActions();
     for(auto it = actions.begin(); it != actions.end(); ++it)
     {
-        if((it->getName().contains(searchString, Qt::CaseInsensitive)) ||
-           (it->getDescription().contains(searchString, Qt::CaseInsensitive)))
-        {
-            return true;
-        }
+        if(compareStringValue(it->getName(), searchString, result))
+            return QString("Action: ") + it->getName();
+
+        if(compareStringValue(it->getDescription(), searchString, result))
+            return QString("Action ") + it->getName() + QString(": ") + result;
     }
 
     QList<MonsterAction> legendaryActions = monsterClass->getLegendaryActions();
     for(auto it = legendaryActions.begin(); it != legendaryActions.end(); ++it)
     {
-        if((it->getName().contains(searchString, Qt::CaseInsensitive)) ||
-           (it->getDescription().contains(searchString, Qt::CaseInsensitive)))
-        {
-            return true;
-        }
+        if(compareStringValue(it->getName(), searchString, result))
+            return QString("Legendary Action: ") + it->getName();
+
+        if(compareStringValue(it->getDescription(), searchString, result))
+            return QString("Legendary Action ") + it->getName() + QString(": ") + result;
     }
 
     QList<MonsterAction> specialAbilities = monsterClass->getSpecialAbilities();
     for(auto it = specialAbilities.begin(); it != specialAbilities.end(); ++it)
     {
-        if((it->getName().contains(searchString, Qt::CaseInsensitive)) ||
-           (it->getDescription().contains(searchString, Qt::CaseInsensitive)))
-        {
-            return true;
-        }
+        if(compareStringValue(it->getName(), searchString, result))
+            return QString("Special Ability: ") + it->getName();
+
+        if(compareStringValue(it->getDescription(), searchString, result))
+            return QString("Special Ability ") + it->getName() + QString(": ") + result;
     }
 
-    return false;
+    return QString();
 }
