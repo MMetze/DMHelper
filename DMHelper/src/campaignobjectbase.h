@@ -52,7 +52,7 @@ public:
     const CampaignObjectBase* getObjectById(QUuid id) const;
 
     // For support of GlobalSearch_Interface
-    virtual bool matchSearch(const QString& searchString) const;
+    virtual bool matchSearch(const QString& searchString, QString& result) const;
 
 signals:
     void changed();

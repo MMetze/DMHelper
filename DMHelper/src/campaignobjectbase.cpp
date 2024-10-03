@@ -391,8 +391,9 @@ const CampaignObjectBase* CampaignObjectBase::getObjectById(QUuid id) const
     return nullptr;
 }
 
-bool CampaignObjectBase::matchSearch(const QString& searchString) const
+bool CampaignObjectBase::matchSearch(const QString& searchString, QString& result) const
 {
+    Q_UNUSED(result);
     return getName().contains(searchString, Qt::CaseInsensitive);
 }
 

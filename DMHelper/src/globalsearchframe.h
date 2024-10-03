@@ -36,6 +36,7 @@ protected slots:
     void handleItemDoubleClicked(QTreeWidgetItem *item, int column);
 
     QTreeWidgetItem* searchCampaignObject(CampaignObjectBase* object, const QString& searchString);
+    QTreeWidgetItem* createTreeWidget(const QString& widgetName, int widgetType, const QIcon &widgetIcon = QIcon(), const QString& expandedText = QString(), const QVariant& data = QVariant());
 
 private:
     Ui::GlobalSearchFrame *ui;

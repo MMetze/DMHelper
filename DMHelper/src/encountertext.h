@@ -22,7 +22,7 @@ public:
     virtual QIcon getDefaultIcon() override;
 
     // For support of GlobalSearch_Interface
-    virtual bool matchSearch(const QString& searchString) const override;
+    virtual bool matchSearch(const QString& searchString, QString& result) const override;
 
     // Text
     virtual QString getText() const;

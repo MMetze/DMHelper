@@ -4,12 +4,18 @@
 #include "bestiary.h"
 #include "spellbook.h"
 #include "quickref.h"
+#include "monsterclass.h"
+#include "scaledpixmap.h"
 
 const int GlobalSearchType_None = QTreeWidgetItem::UserType;
 const int GlobalSearchType_Campaign = QTreeWidgetItem::UserType + 1;
 const int GlobalSearchType_Bestiary = QTreeWidgetItem::UserType + 2;
 const int GlobalSearchType_SpellBook = QTreeWidgetItem::UserType + 3;
 const int GlobalSearchType_Tools = QTreeWidgetItem::UserType + 4;
+
+const int GlobalSearchData_ObjectName = Qt::UserRole;
+const int GlobalSearchData_ExpandedText = Qt::UserRole + 1;
+const int GlobalSearchData_LinkedData = Qt::UserRole + 2;
 
 GlobalSearchFrame::GlobalSearchFrame(QWidget *parent) :
     QFrame(parent),
@@ -64,9 +70,14 @@ void GlobalSearchFrame::executeSearch()
         QTreeWidgetItem* bestiaryRootItem = new QTreeWidgetItem(QStringList() << tr("Bestiary"), GlobalSearchType_None);
         for(int i = 0; i < bestiaryList.size() / 2; ++i)
         {
-            QTreeWidgetItem* monsterItem = new QTreeWidgetItem(QStringList() << bestiaryList.at(i*2), GlobalSearchType_Bestiary);
-            monsterItem->setData(0, Qt::UserRole, bestiaryList.at(i*2+1));
-            bestiaryRootItem->addChild(monsterItem);
+            /*
+             * TODO: check whether the performance is relevant here, makes a lot of difference in debug mode...
+            QIcon monsterIcon;
+            MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(bestiaryList.at(i*2));
+            if(monsterClass)
+                monsterIcon = QIcon(monsterClass->getIconPixmap(DMHelper::PixmapSize_Thumb));
+            */
+            bestiaryRootItem->addChild(createTreeWidget(bestiaryList.at(i*2), GlobalSearchType_Bestiary, QIcon(), bestiaryList.at(i*2+1)));
         }
         ui->treeResults->addTopLevelItem(bestiaryRootItem);
     }
@@ -78,9 +89,7 @@ void GlobalSearchFrame::executeSearch()
         QTreeWidgetItem* spellbookRootItem = new QTreeWidgetItem(QStringList() << tr("Spellbook"), GlobalSearchType_None);
         for(int i = 0; i < spellbookList.size() / 2; ++i)
         {
-            QTreeWidgetItem* spellItem = new QTreeWidgetItem(QStringList() << spellbookList.at(i*2), GlobalSearchType_SpellBook);
-            spellItem->setData(0, Qt::UserRole, spellbookList.at(i*2+1));
-            spellbookRootItem->addChild(spellItem);
+            spellbookRootItem->addChild(createTreeWidget(spellbookList.at(i*2), GlobalSearchType_SpellBook, QIcon(), spellbookList.at(i*2+1)));
         }
         ui->treeResults->addTopLevelItem(spellbookRootItem);
     }
@@ -101,9 +110,7 @@ void GlobalSearchFrame::executeSearch()
                 if(sectionName.isEmpty())
                     continue;
 
-                QTreeWidgetItem* toolItem = new QTreeWidgetItem(QStringList() << widgetText, GlobalSearchType_Tools);
-                toolItem->setData(0, Qt::UserRole, QVariant(sectionName));
-                toolsRootItem->addChild(toolItem);
+                toolsRootItem->addChild(createTreeWidget(widgetText, GlobalSearchType_Tools, QIcon(), subsectionTitle, QVariant(sectionName)));
             }
             ui->treeResults->addTopLevelItem(toolsRootItem);
         }
@@ -123,21 +130,15 @@ void GlobalSearchFrame::handleItemClicked(QTreeWidgetItem *item, int column)
     switch(item->type())
     {
         case GlobalSearchType_Campaign:
-            break;
         case GlobalSearchType_Bestiary:
         case GlobalSearchType_SpellBook:
-            if(item->childCount() > 0)
             {
-                QTreeWidgetItem* subItem = item->child(0);
-                delete subItem;
-            }
-            else
-            {
-                QString subText = item->data(0, Qt::UserRole).toString();
-                if(!subText.isEmpty())
+                if(!item->data(0, GlobalSearchData_ExpandedText).isNull())
                 {
-                    QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList() << subText, GlobalSearchType_None);
-                    item->insertChild(0, subItem);
+                    if(item->text(0) == item->data(0, GlobalSearchData_ObjectName).toString())
+                        item->setText(0, item->data(0, GlobalSearchData_ObjectName).toString() + QChar::LineFeed + item->data(0, GlobalSearchData_ExpandedText).toString());
+                    else
+                        item->setText(0, item->data(0, GlobalSearchData_ObjectName).toString());
                 }
             }
             break;
@@ -157,15 +158,15 @@ void GlobalSearchFrame::handleItemDoubleClicked(QTreeWidgetItem *item, int colum
     switch(item->type())
     {
         case GlobalSearchType_Campaign:
-            emit campaignObjectSelected(item->data(0, Qt::UserRole).toUuid());
+            emit campaignObjectSelected(item->data(0, GlobalSearchData_LinkedData).toUuid());
         case GlobalSearchType_Bestiary:
-            emit monsterSelected(item->text(0));
+            emit monsterSelected(item->data(0, GlobalSearchData_ObjectName).toString());
             break;
         case GlobalSearchType_SpellBook:
-            emit spellSelected(item->text(0));
+            emit spellSelected(item->data(0, GlobalSearchData_ObjectName).toString());
             break;
         case GlobalSearchType_Tools:
-            emit toolSelected(item->data(0, Qt::UserRole).toString());
+            emit toolSelected(item->data(0, GlobalSearchData_LinkedData).toString());
             break;
         default:
             break;
@@ -181,12 +182,9 @@ QTreeWidgetItem* GlobalSearchFrame::searchCampaignObject(CampaignObjectBase* obj
     if(!object)
         return newItem;
 
-    if(object->matchSearch(searchString))
-    {
-        newItem = new QTreeWidgetItem(QStringList() << object->getName(), GlobalSearchType_Campaign);
-        newItem->setIcon(0, object->getIcon());
-        newItem->setData(0, Qt::UserRole, QVariant(object->getID()));
-    }
+    QString searchResult;
+    if(object->matchSearch(searchString, searchResult))
+        newItem = createTreeWidget(object->getName(), GlobalSearchType_Campaign, object->getIcon(), searchResult, QVariant(object->getID()));
 
     QList<CampaignObjectBase*> childObjects = object->getChildObjects();
     for(CampaignObjectBase* childObject : childObjects)
@@ -196,9 +194,7 @@ QTreeWidgetItem* GlobalSearchFrame::searchCampaignObject(CampaignObjectBase* obj
         {
             if(!newItem)
             {
-                newItem = new QTreeWidgetItem(QStringList() << object->getName(), GlobalSearchType_Campaign);
-                newItem->setIcon(0, object->getIcon());
-                newItem->setData(0, Qt::UserRole, QVariant(object->getID()));
+                newItem = createTreeWidget(object->getName(), GlobalSearchType_Campaign, object->getIcon(), QString(), QVariant(object->getID()));
                 newItem->setForeground(0, QBrush(Qt::gray));
             }
             newItem->addChild(childItem);
@@ -206,4 +202,18 @@ QTreeWidgetItem* GlobalSearchFrame::searchCampaignObject(CampaignObjectBase* obj
     }
 
     return newItem;
+}
+
+QTreeWidgetItem* GlobalSearchFrame::createTreeWidget(const QString& widgetName, int widgetType, const QIcon &widgetIcon, const QString& expandedText, const QVariant& data)
+{
+    QTreeWidgetItem* newWidget = new QTreeWidgetItem(QStringList() << widgetName, widgetType);
+    newWidget->setData(0, GlobalSearchData_ObjectName, widgetName);
+    if(!expandedText.isEmpty())
+        newWidget->setData(0, GlobalSearchData_ExpandedText, expandedText);
+    if(!data.isNull())
+        newWidget->setData(0, GlobalSearchData_LinkedData, data);
+    if(!widgetIcon.isNull())
+        newWidget->setIcon(0, widgetIcon);
+
+    return newWidget;
 }
