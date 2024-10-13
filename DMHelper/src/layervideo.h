@@ -26,6 +26,8 @@ public:
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
+    virtual bool hasAudio() const override;
+
     virtual QRectF boundingRect() const override;
     virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;
@@ -40,6 +42,7 @@ public:
     virtual void applySize(const QSize& size) override;
 
     virtual QString getVideoFile() const;
+    virtual bool getPlayAudio() const;
     virtual QImage getScreenshot() const;
 
 public slots:
@@ -60,6 +63,7 @@ public slots:
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
     virtual void playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
+    virtual void setPlayAudio(bool playAudio);
 
 signals:
     void updateProjectionMatrix();
@@ -101,6 +105,7 @@ protected:
 
     // Core contents
     QString _filename;
+    bool _playAudio;
     QImage _layerScreenshot;
     QGraphicsScene* _dmScene;
 };

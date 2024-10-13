@@ -1,7 +1,7 @@
 #include "mapmarkerdialog.h"
 #include "ui_mapmarkerdialog.h"
 #include "campaign.h"
-#include "character.h"
+#include "characterv2.h"
 #include "audiotrack.h"
 #include "optionsaccessor.h"
 #include "ribbonframe.h"

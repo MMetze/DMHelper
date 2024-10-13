@@ -1,7 +1,7 @@
 #ifndef CHARACTERIMPORTER_H
 #define CHARACTERIMPORTER_H
 
-#include "character.h"
+#include "characterv2.h"
 #include <QObject>
 #include <QUuid>
 #include <QMessageBox>
@@ -24,16 +24,24 @@ signals:
 
 public slots:
     void importCharacter(Campaign* campaign, bool isCharacter = true);
-    void updateCharacter(Character* character);
-    void updateCharacters(QList<Character*> characters);
+    void updateCharacter(Characterv2* character);
+    void updateCharacters(QList<Characterv2*> characters);
 
     void campaignChanged();
 
 protected:
-    void scanStats(QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Character& character);
-    int getStatValue(QJsonArray statValueArray, Character::IntValue statIdValue);
-    void scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character);
-    void scanChoices(QJsonObject choicesObject, Character& character);
+    void scanStats(QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Characterv2& character);
+    void scanSingleStat(int statId, QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Characterv2& character);
+    int getStatValue(QJsonArray statValueArray, int statIdValue);
+    void setStatMods(Characterv2& character);
+    QString getStatName(int statId);
+    void zeroSavingThrows();
+    void zeroSkills();
+    void addHalfProficiencies();
+    void addProficienciesSkillMods();
+    void scanModifiers(QJsonObject modifiersObject, const QString& key, Characterv2& character);
+    void scanChoices(QJsonObject choicesObject, Characterv2& character);
+    void addAction(QList<QVariant>& actionValues, const QString& actionName, const QString& actionDescription, int attackBonus, Dice damage);
     QString getNotesString(QJsonObject notesParent, const QString& key, const QString& title);
     QString getSpellString(QJsonObject rootObject);
     void parseSpellSource(QVector<QStringList>& spellVector, QJsonObject rootObject, QJsonArray spellSource, bool autoPrepared);
@@ -55,8 +63,8 @@ private:
     QNetworkAccessManager *_manager;
     QNetworkReply* _reply;
     Campaign* _campaign;
-    Character* _character;
-    QList<Character*> _characterList;
+    Characterv2* _character;
+    QList<Characterv2*> _characterList;
     bool _isCharacter;
     QMessageBox* _msgBox;
 
@@ -64,9 +72,10 @@ private:
     int _levelCount;
     int _totalArmor;
     int _unarmored;
+    int _speedModifier;
     int _totalHP;
     bool _halfProficiency;
-    QList<Character::IntValue> _overrideList;
+    QList<int> _overrideList;
     bool _overrideHP;
 };
 

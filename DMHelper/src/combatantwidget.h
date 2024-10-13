@@ -24,6 +24,8 @@ public:
     virtual bool isShown();
     virtual bool isKnown();
 
+    virtual void setShowDone(bool showDone) = 0;
+
 signals:
 
     void contextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);

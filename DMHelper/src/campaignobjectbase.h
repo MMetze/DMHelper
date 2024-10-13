@@ -5,14 +5,11 @@
 #include <QList>
 #include <QDataStream>
 
-class Campaign;
-
 class CampaignObjectBase : public DMHObjectBase
 {
     Q_OBJECT
 public:
 
-    // Allow full access to the Campaign class
     explicit CampaignObjectBase(const QString& name = QString(), QObject *parent = nullptr);
     virtual ~CampaignObjectBase() override;
 
@@ -53,6 +50,9 @@ public:
 
     CampaignObjectBase* getObjectById(QUuid id);
     const CampaignObjectBase* getObjectById(QUuid id) const;
+
+    // For support of GlobalSearch_Interface
+    virtual bool matchSearch(const QString& searchString, QString& result) const;
 
 signals:
     void changed();

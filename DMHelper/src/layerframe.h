@@ -30,6 +30,7 @@ public:
     void setSize(const QSize& size);
     void setWidth(int width);
     void setHeight(int height);
+    void setPlayAudio(bool playAudio);
     void setSelected(bool selected);
 
     const Layer& getLayer() const;
@@ -48,6 +49,7 @@ signals:
     void opacityChanged(qreal opacity);
     void positionChanged(const QPoint& position);
     void sizeChanged(const QSize& size);
+    void playAudioChanged(bool playAudio);
 
     void linkedUp(LayerFrame* layerFrame);
     void visibilityChanged(LayerFrame* layerFrame);
@@ -66,6 +68,7 @@ protected slots:
     void handleYChanged();
     void handleWidthChanged();
     void handleHeightChanged();
+    void handlePlayAudioClicked();
     void handleLockClicked();
 
     void updateLayerData();
@@ -78,6 +81,8 @@ protected:
     void updateSize(int width, int height);
 
 private:
+    void updateAudioIcon();
+
     Ui::LayerFrame *ui;
 
     Layer& _layer;

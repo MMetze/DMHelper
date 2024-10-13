@@ -1,7 +1,7 @@
 #include "partyframe.h"
 #include "ui_partyframe.h"
 #include "party.h"
-#include "character.h"
+#include "characterv2.h"
 #include "partycharactergridframe.h"
 #include "characterimporter.h"
 #include <QFileDialog>
@@ -95,7 +95,7 @@ void PartyFrame::handleCharacterChanged(QUuid id)
     if(!_party)
         return;
 
-    Character* character = dynamic_cast<Character*>(_party->searchChildrenById(id));
+    Characterv2* character = dynamic_cast<Characterv2*>(_party->searchChildrenById(id));
     if(!character)
         return;
 
@@ -156,9 +156,11 @@ void PartyFrame::updateAll()
     if(!_party)
         return;
 
-    QList<Character*> updateCharacters;
-    QList<Character*> allCharacters = _party->findChildren<Character*>();
-    for(Character* character : allCharacters)
+    // HACK
+    /*
+    QList<Characterv2*> updateCharacters;
+    QList<Characterv2*> allCharacters = _party->findChildren<Characterv2*>();
+    for(Characterv2* character : allCharacters)
     {
         if((character) &&(character->getDndBeyondID() != -1))
             updateCharacters.append(character);
@@ -170,6 +172,7 @@ void PartyFrame::updateAll()
     CharacterImporter* importer = new CharacterImporter();
     connect(importer, &CharacterImporter::characterImported, this, &PartyFrame::handleCharacterChanged);
     importer->updateCharacters(updateCharacters);
+*/
 }
 
 void PartyFrame::clearGrid()
@@ -222,8 +225,8 @@ void PartyFrame::loadCharacters()
     clearList();
 
     bool canUpdate = false;
-    QList<Character*> allCharacters = _party->findChildren<Character*>();
-    for(Character* character : allCharacters)
+    QList<Characterv2*> allCharacters = _party->findChildren<Characterv2*>();
+    for(Characterv2* character : allCharacters)
     {
         if(character)
         {
@@ -298,10 +301,12 @@ void PartyFrame::calculateThresholds()
 
     int thresholds[4] = {0, 0, 0, 0};
 
-    QList<Character*> activeCharacters = _party->getActiveCharacters();
+    // HACK
+    /*
+    QList<Characterv2*> activeCharacters = _party->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
-        Character* character = activeCharacters.at(i);
+        Characterv2* character = activeCharacters.at(i);
         if(character)
         {
             for(int j = 0; j < 4; ++j)
@@ -310,6 +315,7 @@ void PartyFrame::calculateThresholds()
             }
         }
     }
+*/
 
     ui->lblEasy->setText(QString::number(thresholds[DMHelper::XPThreshold_Easy]));
     ui->lblMedium->setText(QString::number(thresholds[DMHelper::XPThreshold_Medium]));

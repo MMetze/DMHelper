@@ -1,6 +1,7 @@
 #ifndef SPELLBOOK_H
 #define SPELLBOOK_H
 
+#include "globalsearch.h"
 #include <QObject>
 #include <QMap>
 #include <QDir>
@@ -13,17 +14,22 @@ class QDomElement;
 
 typedef QMap<QString, Spell*> SpellbookMap;
 
-class Spellbook : public QObject
+class Spellbook : public QObject, public GlobalSearch_Interface
 {
     Q_OBJECT
 public:
     explicit Spellbook(QObject *parent = nullptr);
     ~Spellbook();
 
+    // Static Interface
     static Spellbook* Instance();
     static void Initialize();
-    static void Shutdown();
+    static void Shutdown();    
 
+    // GlobalSearch_Interface
+    QStringList search(const QString& searchString) override;
+
+    // Local Interface
     bool writeSpellbook(const QString& targetFilename);
     bool readSpellbook(const QString& targetFilename);
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
@@ -71,6 +77,7 @@ public slots:
 
 private:
     void showSpellWarning(const QString& spell);
+    QString searchSpell(const Spell* spell, const QString& searchString) const;
 
     static Spellbook* _instance;
 

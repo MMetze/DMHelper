@@ -29,6 +29,7 @@ public:
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
 
     // Local Layer Interface
+    virtual bool isPlayAudio() const;
     virtual DMHelper::TransparentType getEffectTransparencyType() const;
     virtual QColor getTransparentColor() const;
     virtual qreal getTransparentTolerance() const;
@@ -40,6 +41,7 @@ signals:
     void effectReady(BattleDialogModelEffect* effect);
 
 public slots:
+    void setPlayAudio(bool playAudio);
     void setEffectTransparencyType(DMHelper::TransparentType effectType);
     void setTransparentColor(const QColor& transparentColor);
     void setTransparentTolerance(qreal transparentTolerance);
@@ -52,6 +54,7 @@ protected slots:
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    bool _playAudio;
     DMHelper::TransparentType _effectTransparencyType;
     QColor _transparentColor;
     qreal _transparentTolerance;

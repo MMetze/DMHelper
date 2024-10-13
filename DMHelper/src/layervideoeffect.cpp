@@ -203,6 +203,11 @@ void LayerVideoEffect::inputXML(const QDomElement &element, bool isImport)
     LayerVideo::inputXML(element, isImport);
 }
 
+bool LayerVideoEffect::hasSettings() const
+{
+    return true;
+}
+
 DMHelper::LayerType LayerVideoEffect::getType() const
 {
     return DMHelper::LayerType_VideoEffect;
@@ -213,6 +218,15 @@ Layer* LayerVideoEffect::clone() const
     LayerVideoEffect* newLayer = new LayerVideoEffect(_name, _filename, _order);
 
     copyBaseValues(newLayer);
+
+    newLayer->_playAudio = _playAudio;
+    newLayer->_effectTransparencyType = _effectTransparencyType;
+    newLayer->_transparentColor = _transparentColor;
+    newLayer->_transparentTolerance = _transparentTolerance;
+    newLayer->_colorize = _colorize;
+    newLayer->_colorizeColor = _colorizeColor;
+    newLayer->_effectScreenshot = _effectScreenshot;
+    newLayer->_effectDirty = _effectDirty;
 
     return newLayer;
 }

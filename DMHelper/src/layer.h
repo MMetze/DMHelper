@@ -38,6 +38,8 @@ public:
     virtual QSize getSize() const;
     virtual QImage getLayerIcon() const;
     virtual bool defaultShader() const;
+    virtual bool hasSettings() const;
+    virtual bool hasAudio() const;
 
     virtual DMHelper::LayerType getType() const = 0;
     virtual DMHelper::LayerType getFinalType() const;

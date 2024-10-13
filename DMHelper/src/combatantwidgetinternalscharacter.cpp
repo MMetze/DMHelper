@@ -1,9 +1,7 @@
-#include "widgetcharacterinternal.h"
-#include "dmconstants.h"
-#include "battledialogmodel.h"
+#include "combatantwidgetinternalscharacter.h"
 #include "battledialogmodelcharacter.h"
-#include "widgetcharacter.h"
-#include "character.h"
+#include "combatantwidgetcharacter.h"
+#include "characterv2.h"
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QLabel>
@@ -11,8 +9,8 @@
 #include <QTimer>
 #include <QDebug>
 
-WidgetCharacterInternal::WidgetCharacterInternal(BattleDialogModelCharacter* character, WidgetCharacter *parent) :
-    WidgetCombatantBase(parent),
+CombatantWidgetInternalsCharacter::CombatantWidgetInternalsCharacter(BattleDialogModelCharacter* character, CombatantWidgetCharacter *parent) :
+    CombatantWidgetInternals(parent),
     _widgetParent(parent),
     _character(character)
 {
@@ -20,22 +18,22 @@ WidgetCharacterInternal::WidgetCharacterInternal(BattleDialogModelCharacter* cha
         _widgetParent->setInternals(this);
 }
 
-BattleDialogModelCombatant* WidgetCharacterInternal::getCombatant()
+BattleDialogModelCombatant* CombatantWidgetInternalsCharacter::getCombatant()
 {
     return _character;
 }
 
-QFrame* WidgetCharacterInternal::getFrame()
+QFrame* CombatantWidgetInternalsCharacter::getFrame()
 {
     return _widgetParent;
 }
 
-int WidgetCharacterInternal::getInitiative() const
+int CombatantWidgetInternalsCharacter::getInitiative() const
 {
     return _character->getInitiative();
 }
 
-bool WidgetCharacterInternal::isShown()
+bool CombatantWidgetInternalsCharacter::isShown()
 {
     if(_character)
         return _character->getShown();
@@ -43,7 +41,7 @@ bool WidgetCharacterInternal::isShown()
         return true;
 }
 
-bool WidgetCharacterInternal::isKnown()
+bool CombatantWidgetInternalsCharacter::isKnown()
 {
     if(_character)
         return _character->getKnown();
@@ -51,18 +49,18 @@ bool WidgetCharacterInternal::isKnown()
         return true;
 }
 
-void WidgetCharacterInternal::updateImage()
+void CombatantWidgetInternalsCharacter::updateImage()
 {
     updateData();
 }
 
-void WidgetCharacterInternal::updateData()
+void CombatantWidgetInternalsCharacter::updateData()
 {
     if(_widgetParent)
         _widgetParent->updateData();
 }
 
-void WidgetCharacterInternal::setInitiative(int initiative)
+void CombatantWidgetInternalsCharacter::setInitiative(int initiative)
 {
     Q_UNUSED(initiative);
 
@@ -75,7 +73,7 @@ void WidgetCharacterInternal::setInitiative(int initiative)
     updateData();
 }
 
-void WidgetCharacterInternal::setHitPoints(int hp)
+void CombatantWidgetInternalsCharacter::setHitPoints(int hp)
 {
     Q_UNUSED(hp);
 
@@ -88,7 +86,7 @@ void WidgetCharacterInternal::setHitPoints(int hp)
     updateData();
 }
 
-void WidgetCharacterInternal::executeDoubleClick()
+void CombatantWidgetInternalsCharacter::executeDoubleClick()
 {
     if((_character) && (_character->getCharacter()))
         emit clicked(_character->getCharacter()->getID());

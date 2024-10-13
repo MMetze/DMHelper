@@ -79,7 +79,7 @@ Spell* SpellbookDialog::getSpell() const
 
 void SpellbookDialog::setSpell(Spell* spell)
 {
-    if(!spell)
+    if((!spell) || (spell == _spell))
         return;
 
     qDebug() << "[Spellbook Dialog] Set Spell to " << spell->getName();

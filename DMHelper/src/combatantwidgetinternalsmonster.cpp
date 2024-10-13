@@ -1,8 +1,6 @@
-#include "widgetmonsterinternal.h"
-#include "dmconstants.h"
-#include "battledialogmodel.h"
+#include "combatantwidgetinternalsmonster.h"
 #include "battledialogmodelmonsterbase.h"
-#include "widgetmonster.h"
+#include "combatantwidgetmonster.h"
 #include "monsterclass.h"
 #include <QLineEdit>
 #include <QMouseEvent>
@@ -11,8 +9,8 @@
 #include <QTimer>
 #include <QDebug>
 
-WidgetMonsterInternal::WidgetMonsterInternal(BattleDialogModelMonsterBase* monster, WidgetMonster* parent) :
-    WidgetCombatantBase(parent),
+CombatantWidgetInternalsMonster::CombatantWidgetInternalsMonster(BattleDialogModelMonsterBase* monster, CombatantWidgetMonster* parent) :
+    CombatantWidgetInternals(parent),
     _widgetParent(parent),
     _monster(monster),
     _legendaryMaximum(3)
@@ -22,23 +20,23 @@ WidgetMonsterInternal::WidgetMonsterInternal(BattleDialogModelMonsterBase* monst
 
     if(_monster)
     {
-        connect(_monster, &BattleDialogModelMonsterBase::dataChanged, this, &WidgetMonsterInternal::updateData);
-        connect(_monster, &BattleDialogModelMonsterBase::imageChanged, this, &WidgetMonsterInternal::updateImage);
-        connect(_monster, &BattleDialogModelCombatant::initiativeChanged, this, &WidgetMonsterInternal::updateData);
+        connect(_monster, &BattleDialogModelMonsterBase::dataChanged, this, &CombatantWidgetInternalsMonster::updateData);
+        connect(_monster, &BattleDialogModelMonsterBase::imageChanged, this, &CombatantWidgetInternalsMonster::updateImage);
+        connect(_monster, &BattleDialogModelCombatant::initiativeChanged, this, &CombatantWidgetInternalsMonster::updateData);
     }
 }
 
-BattleDialogModelCombatant* WidgetMonsterInternal::getCombatant()
+BattleDialogModelCombatant* CombatantWidgetInternalsMonster::getCombatant()
 {
     return _monster;
 }
 
-QFrame* WidgetMonsterInternal::getFrame()
+QFrame* CombatantWidgetInternalsMonster::getFrame()
 {
     return _widgetParent;
 }
 
-int WidgetMonsterInternal::getInitiative() const
+int CombatantWidgetInternalsMonster::getInitiative() const
 {
     if(_monster)
         return _monster->getInitiative();
@@ -46,7 +44,7 @@ int WidgetMonsterInternal::getInitiative() const
         return 0;
 }
 
-bool WidgetMonsterInternal::isShown()
+bool CombatantWidgetInternalsMonster::isShown()
 {
     if(_monster)
         return _monster->getShown();
@@ -54,7 +52,7 @@ bool WidgetMonsterInternal::isShown()
         return true;
 }
 
-bool WidgetMonsterInternal::isKnown()
+bool CombatantWidgetInternalsMonster::isKnown()
 {
     if(_monster)
         return _monster->getKnown();
@@ -62,18 +60,18 @@ bool WidgetMonsterInternal::isKnown()
         return true;
 }
 
-void WidgetMonsterInternal::setLegendaryMaximum(int legendaryMaximum)
+void CombatantWidgetInternalsMonster::setLegendaryMaximum(int legendaryMaximum)
 {
     _legendaryMaximum = legendaryMaximum;
     resetLegendary();
 }
 
-int WidgetMonsterInternal::getLegendaryMaximum() const
+int CombatantWidgetInternalsMonster::getLegendaryMaximum() const
 {
     return _legendaryMaximum;
 }
 
-void WidgetMonsterInternal::updateImage()
+void CombatantWidgetInternalsMonster::updateImage()
 {
     if(_widgetParent)
     {
@@ -82,13 +80,13 @@ void WidgetMonsterInternal::updateImage()
     }
 }
 
-void WidgetMonsterInternal::updateData()
+void CombatantWidgetInternalsMonster::updateData()
 {
     if(_widgetParent)
         _widgetParent->updateData();
 }
 
-void WidgetMonsterInternal::setInitiative(int initiative)
+void CombatantWidgetInternalsMonster::setInitiative(int initiative)
 {
     Q_UNUSED(initiative);
 
@@ -99,7 +97,7 @@ void WidgetMonsterInternal::setInitiative(int initiative)
         _monster->setInitiative(initiative);
 }
 
-void WidgetMonsterInternal::setHitPoints(int hp)
+void CombatantWidgetInternalsMonster::setHitPoints(int hp)
 {
     if(!_widgetParent || !_monster)
         return;
@@ -108,7 +106,7 @@ void WidgetMonsterInternal::setHitPoints(int hp)
         _monster->setHitPoints(hp);
 }
 
-void WidgetMonsterInternal::executeDoubleClick()
+void CombatantWidgetInternalsMonster::executeDoubleClick()
 {
     if((_monster) && (_monster->getMonsterClass()))
         emit clicked(_monster->getMonsterClass()->getName());
@@ -116,7 +114,7 @@ void WidgetMonsterInternal::executeDoubleClick()
         qDebug() << "[Widget Monster Internal] no valid monster class found!";
 }
 
-void WidgetMonsterInternal::decrementLegendary()
+void CombatantWidgetInternalsMonster::decrementLegendary()
 {
     if(!_monster)
         return;
@@ -127,7 +125,7 @@ void WidgetMonsterInternal::decrementLegendary()
         _monster->setLegendaryCount(_monster->getLegendaryCount() - 1);
 }
 
-void WidgetMonsterInternal::resetLegendary()
+void CombatantWidgetInternalsMonster::resetLegendary()
 {
     _monster->setLegendaryCount(_legendaryMaximum);
 }

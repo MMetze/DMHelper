@@ -14,6 +14,8 @@ public:
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
+    virtual bool hasSettings() const override;
+
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 

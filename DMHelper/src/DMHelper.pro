@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets
+QT       += core gui xml multimedia multimediawidgets opengl network openglwidgets uitools
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -44,6 +44,7 @@ SOURCES += main.cpp\
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
     battlecombatantframe.cpp \
+    battlecombatantwidget.cpp \
     battledialogeffectsettingsbase.cpp \
     battledialogeffectsettingsobjectvideo.cpp \
     battledialoggraphicsscenemousehandler.cpp \
@@ -70,9 +71,18 @@ SOURCES += main.cpp\
     characterimportheroforge.cpp \
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
+    charactertemplateframe.cpp \
+    charactertemplateresourcelayout.cpp \
+    characterv2.cpp \
+    characterv2converter.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
+    combatantwidgetcharacter.cpp \
+    combatantwidgetinternals.cpp \
+    combatantwidgetinternalscharacter.cpp \
+    combatantwidgetinternalsmonster.cpp \
+    combatantwidgetmonster.cpp \
     conditionseditdialog.cpp \
     configurelockedgriddialog.cpp \
     customtable.cpp \
@@ -93,12 +103,17 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    globalsearch.cpp \
+    globalsearchframe.cpp \
     gridconfig.cpp \
+    initiativelistcombatantwidget.cpp \
+    initiativelistdialog.cpp \
     layer.cpp \
     layerblank.cpp \
     layereffect.cpp \
     layereffectsettings.cpp \
     layerfow.cpp \
+    layerfowsettings.cpp \
     layerframe.cpp \
     layergrid.cpp \
     layerimage.cpp \
@@ -116,6 +131,7 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    newcampaigndialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
     objectimportworker.cpp \
@@ -165,6 +181,13 @@ SOURCES += main.cpp\
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
+    rulefactory.cpp \
+    ruleinitiative.cpp \
+    ruleinitiative2e.cpp \
+    ruleinitiative5e.cpp \
+    ruleinitiativegroup.cpp \
+    ruleinitiativegroupmonsters.cpp \
+    ruleset.cpp \
     selectcombatantdialog.cpp \
     selectitemdialog.cpp \
     selectstringdialog.cpp \
@@ -248,13 +271,7 @@ SOURCES += main.cpp\
     videoplayerscreenshot.cpp \
     welcomeframe.cpp \
     whatsnewdialog.cpp \
-    widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
-    widgetcharacter.cpp \
-    widgetcombatantbase.cpp \
-    widgetcharacterinternal.cpp \
-    widgetmonster.cpp \
-    widgetmonsterinternal.cpp \
     battledialogmodelcharacter.cpp \
     battledialogmodelcombatant.cpp \
     battledialogmodelmonsterbase.cpp \
@@ -313,6 +330,7 @@ HEADERS  += mainwindow.h \
     audiotrackyoutube.h \
     basicdateserver.h \
     battlecombatantframe.h \
+    battlecombatantwidget.h \
     battledialogeffectsettingsbase.h \
     battledialogeffectsettingsobjectvideo.h \
     battledialoggraphicsscenemousehandler.h \
@@ -339,9 +357,18 @@ HEADERS  += mainwindow.h \
     characterimportheroforge.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
+    charactertemplateframe.h \
+    charactertemplateresourcelayout.h \
+    characterv2.h \
+    characterv2converter.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \
+    combatantwidgetcharacter.h \
+    combatantwidgetinternals.h \
+    combatantwidgetinternalscharacter.h \
+    combatantwidgetinternalsmonster.h \
+    combatantwidgetmonster.h \
     conditionseditdialog.h \
     configurelockedgriddialog.h \
     customtable.h \
@@ -363,12 +390,17 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    globalsearch.h \
+    globalsearchframe.h \
     gridconfig.h \
+    initiativelistcombatantwidget.h \
+    initiativelistdialog.h \
     layer.h \
     layerblank.h \
     layereffect.h \
     layereffectsettings.h \
     layerfow.h \
+    layerfowsettings.h \
     layerframe.h \
     layergrid.h \
     layerimage.h \
@@ -386,6 +418,7 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    newcampaigndialog.h \
     objectfactory.h \
     objectimportdialog.h \
     objectimportworker.h \
@@ -435,6 +468,13 @@ HEADERS  += mainwindow.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
+    rulefactory.h \
+    ruleinitiative.h \
+    ruleinitiative2e.h \
+    ruleinitiative5e.h \
+    ruleinitiativegroup.h \
+    ruleinitiativegroupmonsters.h \
+    ruleset.h \
     selectcombatantdialog.h \
     selectitemdialog.h \
     selectstringdialog.h \
@@ -519,13 +559,7 @@ HEADERS  += mainwindow.h \
     videoplayerscreenshot.h \
     welcomeframe.h \
     whatsnewdialog.h \
-    widgetbattlecombatant.h \
     dicerolldialogcombatants.h \
-    widgetcharacter.h \
-    widgetcombatantbase.h \
-    widgetcharacterinternal.h \
-    widgetmonster.h \
-    widgetmonsterinternal.h \
     battledialogmodelcharacter.h \
     battledialogmodelcombatant.h \
     battledialogmodelmonsterbase.h \
@@ -562,6 +596,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
+    battlecombatantwidget.ui \
     battledialogeffectsettingsobjectvideo.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
@@ -569,7 +604,10 @@ FORMS    += mainwindow.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
+    charactertemplateframe.ui \
     combatantrolloverframe.ui \
+    combatantwidgetcharacter.ui \
+    combatantwidgetmonster.ui \
     conditionseditdialog.ui \
     configurelockedgriddialog.ui \
     customtableframe.ui \
@@ -580,13 +618,18 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    globalsearchframe.ui \
+    initiativelistcombatantwidget.ui \
+    initiativelistdialog.ui \
     layereffectsettings.ui \
+    layerfowsettings.ui \
     layerframe.ui \
     layerseditdialog.ui \
     layervideoeffectsettings.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
+    newcampaigndialog.ui \
     objectimportdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
@@ -595,6 +638,10 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/character2e.ui \
+    resources/ui/character5e-2024.ui \
+    resources/ui/character5e.ui \
+    resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \
     ribbontabbattle.ui \
@@ -631,10 +678,7 @@ FORMS    += mainwindow.ui \
     tokeneditdialog.ui \
     welcomeframe.ui \
     whatsnewdialog.ui \
-    widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
-    widgetcharacter.ui \
-    widgetmonster.ui \
     encountertextedit.ui \
     mapselectdialog.ui \
     countdownframe.ui \
@@ -678,12 +722,21 @@ DISTFILES += \
     preparebuilddirectory_msvc64.cmd \
     release_notes.txt \
     resources/calendar.xml \
+    resources/character.xml \
+    resources/character2e.xml \
+    resources/character5e-2024.xml \
+    resources/character5e.xml \
     resources/equipment.xml \
     resources/quickref_data.xml \
+    resources/ruleset.xml \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
+    resources/tables/Indefinite Madness.xml \
+    resources/tables/Long Term Madness.xml \
     resources/tables/Long Term Madness.xml \
     resources/tables/Short Term Madness.xml \
+    resources/tables/Short Term Madness.xml \
+    resources/tables/table.xsd \
     todos
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc

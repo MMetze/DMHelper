@@ -10,7 +10,7 @@ namespace Ui {
 class DiceRollDialogCombatants;
 }
 
-class WidgetBattleCombatant;
+class BattleCombatantWidget;
 class BattleDialogModelCombatant;
 
 class DiceRollDialogCombatants : public QDialog
@@ -31,7 +31,7 @@ signals:
 public slots:
     void rollDice();
     void applyDamage();
-    void rerollWidget(WidgetBattleCombatant* widget);
+    void rerollWidget(BattleCombatantWidget* widget);
     void setWidgetVisibility();
 
 protected:
@@ -47,7 +47,7 @@ private:
     void createCombatantWidgets();
 
     int rollOnce(const Dice& dice, int modifier, QString& resultStr);
-    void rollForWidget(WidgetBattleCombatant* widget, const Dice& dice, int modifier);
+    void rollForWidget(BattleCombatantWidget* widget, const Dice& dice, int modifier);
     Dice readDice();
 
     Ui::DiceRollDialogCombatants *ui;

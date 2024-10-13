@@ -127,7 +127,7 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
 
 private:
-    static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
+//    static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
     static bool CompareCombatantsBySortValue(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
 
     // Encounter

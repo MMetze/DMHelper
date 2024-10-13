@@ -16,7 +16,7 @@ class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
 class GridConfig;
-class Character;
+class Characterv2;
 class Map;
 class QTimer;
 class CameraRect;
@@ -75,9 +75,11 @@ public:
 
 public slots:
     void clear();
+    void roll();
     void sort();
     void top();
     void next();
+    void initiativeRuleChanged();
 
     void setTargetSize(const QSize& targetSize);
     void setTargetLabelSize(const QSize& targetSize);
@@ -283,13 +285,14 @@ private slots:
 
     void setModel(BattleDialogModel* model);
     Map* selectRelatedMap();
-    void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
+    void selectAddCharacter(QList<Characterv2*> characters, const QString& title, const QString& label);
 
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
     void setItemsInert(bool inert);
 
     void removeRollover();
+    void clearDoneFlags();
 
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
@@ -298,7 +301,7 @@ private slots:
     void stateUpdated();
 
 private:
-
+    
     CombatantWidget* createCombatantWidget(BattleDialogModelCombatant* combatant);
     void clearCombatantWidgets();
     void buildCombatantWidgets();
@@ -306,6 +309,8 @@ private:
     void setActiveCombatant(BattleDialogModelCombatant* active);
     void createCombatantIcon(BattleDialogModelCombatant* combatant);
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
+
+    void newRound();
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
@@ -364,7 +369,7 @@ private:
     BattleDialogModel* _model;
     QVBoxLayout* _combatantLayout;
     BattleDialogLogger* _logger;
-
+    
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
 
     BattleFrameStateMachine _stateMachine;

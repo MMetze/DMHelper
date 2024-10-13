@@ -108,6 +108,32 @@ QuickRefData* QuickRef::getData(const QString& sectionName, int subSectionIndex,
     return subSection->getData(dataTitle);
 }
 
+QStringList QuickRef::search(const QString& searchString)
+{
+    QStringList results;
+    foreach(QuickRefSection* section, _quickRefData)
+    {
+        if(section)
+        {
+            if(section->getName().contains(searchString, Qt::CaseInsensitive))
+                results << section->getName() << QString("");
+
+            foreach(QuickRefSubsection* subSection, section->getSubsections())
+            {
+                if(subSection)
+                {
+                    foreach(const QString& data, subSection->getDataTitles())
+                    {
+                        if(data.contains(searchString, Qt::CaseInsensitive))
+                            results << section->getName() << data;
+                    }
+                }
+            }
+        }
+    }
+
+    return results;
+}
 
 void QuickRef::readQuickRef(const QString& quickRefFile)
 {

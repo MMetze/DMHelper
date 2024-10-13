@@ -3,6 +3,7 @@
 #include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "party.h"
+#include "ruleset.h"
 #include "dmconstants.h"
 #include <QDomElement>
 #include <QString>
@@ -97,4 +98,11 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     }
 
     return nullptr;
+}
+
+void EncounterFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
+{
+    Q_UNUSED(ruleset);
+    Q_UNUSED(inputMajorVersion);
+    Q_UNUSED(inputMinorVersion);
 }

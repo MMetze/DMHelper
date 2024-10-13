@@ -1,7 +1,7 @@
 #include "battlecombatantframe.h"
 #include "ui_battlecombatantframe.h"
 #include "battledialogmodelcombatant.h"
-#include "character.h"
+#include "characterv2.h"
 #include "conditionseditdialog.h"
 #include "quickref.h"
 #include <QDebug>

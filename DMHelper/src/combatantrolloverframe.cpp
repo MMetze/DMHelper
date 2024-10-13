@@ -2,7 +2,7 @@
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterbase.h"
-#include "character.h"
+#include "characterv2.h"
 #include "monsterclass.h"
 #include "monsteraction.h"
 #include "combatantwidget.h"
@@ -144,10 +144,12 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
     if(!character)
         return;
 
-    Character* characterBase = character->getCharacter();
+    Characterv2* characterBase = character->getCharacter();
     if(!characterBase)
         return;
 
+    // HACK - should be a template
+    /*
     const QList<MonsterAction>& actionList = characterBase->getActions();
 
     addSectionTitle(QString("Attacks"));
@@ -176,6 +178,7 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
             ui->listActions->addItem(item);
         }
     }
+*/
 }
 
 void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)

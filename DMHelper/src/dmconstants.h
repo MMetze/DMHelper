@@ -30,6 +30,7 @@ namespace DMHelper
         CampaignType_LinkedText,
         CampaignType_BattleContentCombatant,
         CampaignType_BattleContentEffect,
+        CampaignType_Ruleset,
 
         CampaignType_Placeholder = 0xffff
     };

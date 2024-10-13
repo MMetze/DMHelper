@@ -1,5 +1,12 @@
 Next version
 =======
+
+and one that aims to even out the playing field. again first rolled initiative counts and from there it's taking turns - even if the numbers are uneven. 2 enemies, 4 players, means each player takes a turn once and the 2 enemies take turns twice
+3 enemies, 2 players - 1 turn per enemy and one of the players gets to go twice - next round it would be the other player twice
+in a sense you are keeping two initiative orders and are just switching between them every time
+
+The second is tricky, but there's a clear algorithm, easy enough: split into two, sort each by normal methods, then recombine with equal parts
+
 Mouse status not always exclusive
 Open log directory button
 Clear cache button

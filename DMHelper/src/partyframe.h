@@ -10,7 +10,7 @@ class PartyFrame;
 }
 
 class Party;
-class Character;
+class Characterv2;
 class QGridLayout;
 class PartyCharacterGridFrame;
 

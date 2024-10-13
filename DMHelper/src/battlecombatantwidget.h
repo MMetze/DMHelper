@@ -1,21 +1,21 @@
-#ifndef WIDGETBATTLECOMBATANT_H
-#define WIDGETBATTLECOMBATANT_H
+#ifndef BATTLECOMBATANTWIDGET_H
+#define BATTLECOMBATANTWIDGET_H
 
 #include <QWidget>
 
 class BattleDialogModelCombatant;
 
 namespace Ui {
-class WidgetBattleCombatant;
+class BattleCombatantWidget;
 }
 
-class WidgetBattleCombatant : public QWidget
+class BattleCombatantWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit WidgetBattleCombatant(BattleDialogModelCombatant* combatant, QWidget *parent = nullptr);
-    ~WidgetBattleCombatant();
+    explicit BattleCombatantWidget(BattleDialogModelCombatant* combatant, QWidget *parent = nullptr);
+    ~BattleCombatantWidget();
 
     bool hasAdvantage() const;
     bool hasDisadvantage() const;
@@ -32,7 +32,7 @@ public:
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
     void combatantChanged(BattleDialogModelCombatant* combatant);
-    void rerollNeeded(WidgetBattleCombatant* widget);
+    void rerollNeeded(BattleCombatantWidget* widget);
     void hitPointsChanged(BattleDialogModelCombatant* combatant, int change);
 
 protected:
@@ -50,7 +50,7 @@ protected slots:
 private:
     void setCombatantValues();
 
-    Ui::WidgetBattleCombatant *ui;
+    Ui::BattleCombatantWidget *ui;
 
     BattleDialogModelCombatant* _combatant;
 
@@ -59,4 +59,4 @@ private:
     int _result;
 };
 
-#endif // WIDGETBATTLECOMBATANT_H
+#endif // BATTLECOMBATANTWIDGET_H

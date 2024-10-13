@@ -96,6 +96,32 @@ void Spellbook::Shutdown()
     _instance = nullptr;
 }
 
+QStringList Spellbook::search(const QString& searchString)
+{
+    QStringList results;
+    if(searchString.isEmpty())
+        return results;
+
+    // Iterate directly over the keys in the map
+    for (auto it = _spellbookMap.constBegin(); it != _spellbookMap.constEnd(); ++it)
+    {
+        const QString& key = it.key();
+        if(key.contains(searchString, Qt::CaseInsensitive))
+        {
+            results << key << QString();
+        }
+        else
+        {
+            Spell* spell = it.value();
+            QString matchString = searchSpell(spell, searchString);
+            if(!matchString.isEmpty())
+                results << key << matchString;
+        }
+    }
+
+    return results;
+}
+
 bool Spellbook::writeSpellbook(const QString& targetFilename)
 {
     if(targetFilename.isEmpty())
@@ -603,4 +629,20 @@ void Spellbook::showSpellWarning(const QString& spell)
     {
         QMessageBox::critical(nullptr, QString("Unknown spell"), QString("WARNING: The spell """) + spell + QString(""" was not found in the current spellbook! If you save the current campaign, all references to this spell will be lost!"));
     }
+}
+
+QString Spellbook::searchSpell(const Spell* spell, const QString& searchString) const
+{
+    QString result;
+
+    if((!spell) || (searchString.isEmpty()))
+        return QString();
+
+    if(compareStringValue(spell->getDescription(), searchString, result))
+        return QString("Description: ") + result;
+
+    if(compareStringValue(spell->getSchool(), searchString, result))
+        return QString("School: ") + result;
+
+    return QString();
 }

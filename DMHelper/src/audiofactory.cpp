@@ -3,6 +3,7 @@
 #include "audiotracksyrinscape.h"
 #include "audiotracksyrinscapeonline.h"
 #include "audiotrackyoutube.h"
+#include "ruleset.h"
 #include "dmconstants.h"
 #include <QDomElement>
 #include <QDebug>
@@ -70,6 +71,13 @@ CampaignObjectBase* AudioFactory::createObject(const QDomElement& element, bool 
         default:
             return nullptr;
     }
+}
+
+void AudioFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
+{
+    Q_UNUSED(ruleset);
+    Q_UNUSED(inputMajorVersion);
+    Q_UNUSED(inputMinorVersion);
 }
 
 AudioTrack* AudioFactory::createTrackFromUrl(const QUrl& url, const QString& objectName)

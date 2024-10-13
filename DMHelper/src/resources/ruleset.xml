@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ruleset.xsd">
+  <ruleset name="DnD 5e 2014" initiative="5e" characterdata="./character5e.xml" characterui="./ui/character5e.ui"/>
+  <ruleset name="DnD 5e 2024" initiative="5e" characterdata="./character5e-2024.xml" characterui="./ui/character5e-2024.ui"/>
+  <ruleset name="DnD 2e" initiative="2e" characterdata="./character2e.xml" characterui="./ui/character2e.ui"/>
+</root>

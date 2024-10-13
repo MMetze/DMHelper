@@ -2,7 +2,7 @@
 #include "ui_objectimportdialog.h"
 #include "dmconstants.h"
 #include "campaign.h"
-#include "character.h"
+#include "characterv2.h"
 #include "audiotrack.h"
 #include "objectimportworker.h"
 #include "dmhwaitingdialog.h"

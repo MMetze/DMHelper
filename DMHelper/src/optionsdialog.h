@@ -3,21 +3,23 @@
 
 #include <QDialog>
 #include "optionscontainer.h"
-#include "dmconstants.h"
 
 namespace Ui {
 class OptionsDialog;
 }
+
+class Campaign;
 
 class OptionsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit OptionsDialog(OptionsContainer* options, QWidget *parent = nullptr);
+    explicit OptionsDialog(OptionsContainer* options, Campaign* campaign, QWidget *parent = nullptr);
     ~OptionsDialog();
 
     OptionsContainer* getOptions() const;
+    void applyCampaignChanges();
 
 private slots:
     void browseBestiary();
@@ -47,6 +49,10 @@ private slots:
     void browseTables();
     void editTables();
     void setTables(const QString& tablesDirectory);
+
+    void browseRuleset();
+    void editRuleset();
+    void setRuleset(const QString& rulesetFile);
 
     void handleInitiativeScaleChanged(qreal initiativeScale);
 
@@ -86,10 +92,19 @@ private slots:
     void updateFileLocations();
     void resetFileLocations();
 
+    void browseCharacterDataFile();
+    void editCharacterDataFile();
+    void setCharacterDataFile(const QString& characterDataFile);
+
+    void browseCharacterUIFile();
+    void editCharacterUIFile();
+    void setCharacterUIFile(const QString& characterUIFile);
+
 private:
     Ui::OptionsDialog *ui;
 
     OptionsContainer* _options;
+    Campaign* _campaign;
 };
 
 #endif // OPTIONSDIALOG_H

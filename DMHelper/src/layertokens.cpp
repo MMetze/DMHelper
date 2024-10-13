@@ -7,7 +7,7 @@
 #include "publishglbattleeffect.h"
 #include "publishglbattleeffectvideo.h"
 #include "campaign.h"
-#include "character.h"
+#include "characterv2.h"
 #include "bestiary.h"
 #include "monster.h"
 #include "monsterclass.h"
@@ -67,7 +67,7 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
             if(combatantType == DMHelper::CombatantType_Character)
             {
                 QUuid combatantId = QUuid(combatantElement.attribute("combatantId"));
-                Character* character = campaign->getCharacterById(combatantId);
+                Characterv2* character = campaign->getCharacterById(combatantId);
                 if(!character)
                     character = campaign->getNPCById(combatantId);
 
@@ -787,8 +787,7 @@ void LayerTokens::combatantMoved(BattleDialogModelObject* object)
                             collisionEffect = childEffect;
                     }
 
-                    bool collision = isItemInEffectArea(combatantItem, collisionEffect);
-                    if(!collision)
+                    if((!effect->getEffectActive()) || (!isItemInEffectArea(combatantItem, collisionEffect)))
                     {
                         removeSpecificEffectFromItem(combatantItem, effect);
                         removeEffectFromToken(combatantToken, effect);

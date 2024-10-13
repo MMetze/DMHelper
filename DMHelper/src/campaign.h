@@ -3,10 +3,11 @@
 
 #include "campaignobjectbase.h"
 #include "basicdate.h"
+#include "ruleset.h"
 #include <QTime>
 #include <QList>
 
-class Character;
+class Characterv2;
 class Combatant;
 class Adventure;
 class Encounter;
@@ -26,19 +27,19 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void postProcessXML(const QDomElement &element, bool isImport) override;
-
     virtual int getObjectType() const override;
 
+    // Local Interface
     virtual void beginBatchChanges();
     virtual void endBatchChanges();
 
-    Character* getCharacterById(QUuid id);
-    const Character* getCharacterById(QUuid id) const;
-    Character* getCharacterByDndBeyondId(int id);
-    Character* getCharacterOrNPCByDndBeyondId(int id);
-    QList<Character*> getActiveCharacters();
-    Character* getNPCById(QUuid id);
-    const Character* getNPCById(QUuid id) const;
+    Characterv2* getCharacterById(QUuid id);
+    const Characterv2* getCharacterById(QUuid id) const;
+    Characterv2* getCharacterByDndBeyondId(int id);
+    Characterv2* getCharacterOrNPCByDndBeyondId(int id);
+    QList<Characterv2*> getActiveCharacters();
+    Characterv2* getNPCById(QUuid id);
+    const Characterv2* getNPCById(QUuid id) const;
     AudioTrack* getTrackById(QUuid id);
 
     QList<SoundboardGroup*> getSoundboardGroups() const;
@@ -48,6 +49,9 @@ public:
     BasicDate getDate() const;
     QTime getTime() const;
     QStringList getNotes() const;
+
+    Ruleset& getRuleset();
+    const Ruleset& getRuleset() const;
 
     bool isValid() const;
     void cleanupCampaign(bool deleteAll);
@@ -80,6 +84,8 @@ protected:
     BasicDate _date;
     QTime _time;
     QStringList _notes;
+
+    Ruleset _ruleset;
 
     bool _batchChanges;
     bool _changesMade;

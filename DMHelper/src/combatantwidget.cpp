@@ -72,9 +72,7 @@ void CombatantWidget::setInitiative(int initiative)
 void CombatantWidget::initiativeChanged()
 {
     if((_edtInit)&&(getCombatant()))
-    {
         getCombatant()->setInitiative(_edtInit->text().toInt());
-    }
 }
 
 void CombatantWidget::setActive(bool active)

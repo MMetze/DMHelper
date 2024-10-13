@@ -1,17 +1,17 @@
-#ifndef WIDGETMONSTERINTERNAL_H
-#define WIDGETMONSTERINTERNAL_H
+#ifndef COMBATANTWIDGETINTERNALSMONSTER_H
+#define COMBATANTWIDGETINTERNALSMONSTER_H
 
-#include "widgetcombatantbase.h"
+#include "combatantwidgetinternals.h"
 
 class BattleDialogModelMonsterBase;
 class QTimer;
-class WidgetMonster;
+class CombatantWidgetMonster;
 
-class WidgetMonsterInternal : public WidgetCombatantBase
+class CombatantWidgetInternalsMonster : public CombatantWidgetInternals
 {
     Q_OBJECT
 public:
-    explicit WidgetMonsterInternal(BattleDialogModelMonsterBase* monster, WidgetMonster* parent);
+    explicit CombatantWidgetInternalsMonster(BattleDialogModelMonsterBase* monster, CombatantWidgetMonster* parent);
 
     virtual BattleDialogModelCombatant* getCombatant() override;
     virtual QFrame* getFrame() override;
@@ -24,7 +24,6 @@ public:
     int getLegendaryMaximum() const;
 
 signals:
-
     void clicked(const QString& monsterClass);
 
 public slots:
@@ -40,10 +39,10 @@ public slots:
 protected:
 
     // Data
-    WidgetMonster* _widgetParent;
+    CombatantWidgetMonster* _widgetParent;
     BattleDialogModelMonsterBase* _monster;
 
     int _legendaryMaximum;
 };
 
-#endif // WIDGETMONSTERINTERNAL_H
+#endif // COMBATANTWIDGETINTERNALSMONSTER_H

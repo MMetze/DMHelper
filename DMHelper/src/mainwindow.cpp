@@ -4,14 +4,17 @@
 #include "publishwindow.h"
 #include "dicerolldialog.h"
 #include "countdownframe.h"
+#include "globalsearchframe.h"
 #include "party.h"
-#include "character.h"
+#include "characterv2.h"
 #include "characterimporter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
 #include "characterframe.h"
+#include "charactertemplateframe.h"
 #include "campaign.h"
 #include "combatantfactory.h"
+#include "campaignobjectfactory.h"
 #include "map.h"
 #include "mapfactory.h"
 #include "mapframe.h"
@@ -36,6 +39,7 @@
 #include "bestiaryexportdialog.h"
 #include "exportdialog.h"
 #include "equipmentserver.h"
+#include "rulefactory.h"
 #include "randommarketdialog.h"
 #include "quickref.h"
 #include "quickrefframe.h"
@@ -48,6 +52,7 @@
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
+#include "newcampaigndialog.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"
@@ -117,11 +122,14 @@ MainWindow::MainWindow(QWidget *parent) :
     _pubWindow(nullptr),
     _dmScreenDlg(nullptr),
     _tableDlg(nullptr),
+    _quickRefFrame(nullptr),
     _quickRefDlg(nullptr),
     _soundDlg(nullptr),
     _timeAndDateFrame(nullptr),
     _calendarDlg(nullptr),
     _countdownDlg(nullptr),
+    _globalSearchFrame(nullptr),
+    _globalSearchDlg(nullptr),
     _encounterTextEdit(nullptr),
     _treeModel(nullptr),
     _activeItems(nullptr),
@@ -155,7 +163,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabWorldMap(nullptr),
     _ribbonTabAudio(nullptr),
     _battleFrame(nullptr),
-    _mapFrame(nullptr)
+    _mapFrame(nullptr),
+    _characterFrame(nullptr)
 {
     qDebug() << "[MainWindow] Initializing Main";
 
@@ -244,6 +253,8 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Initializing DMHelper\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
 
+    QImageReader::setAllocationLimit(0);
+
     ui->setupUi(this);
     if(screen)
     {
@@ -268,6 +279,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, &OptionsContainer::calendarFileNameChanged, dateServer, &BasicDateServer::readDateInformation);
     qDebug() << "[MainWindow] BasicDateServer Initialized";
 
+    qDebug() << "[MainWindow] Initializing Rule Factory";
+    RuleFactory::Initialize(_options->getRulesetFileName());
+    RuleFactory* ruleFactory = RuleFactory::Instance();
+    connect(_options, &OptionsContainer::rulesetFileNameChanged, ruleFactory, &RuleFactory::readRuleset);
+    qDebug() << "[MainWindow] Rule Factory Initialized";
+
     qDebug() << "[MainWindow] Initializing EquipmentServer";
     EquipmentServer::Initialize(_options->getEquipmentFileName());
     EquipmentServer* equipmentServer = EquipmentServer::Instance();
@@ -283,7 +300,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
     connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveCampaign);
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
-    connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
+    connect(_ribbonTabFile, &RibbonTabFile::optionsClicked, this, &MainWindow::handleEditSettings);
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
     QShortcut* quitShortcut = new QShortcut(QKeySequence(tr("Ctrl+Q", "Quit")), this);
     connect(quitShortcut, SIGNAL(activated()), this, SLOT(close()));
@@ -546,14 +563,17 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
-    CharacterFrame* charFrame = new CharacterFrame(_options);
-    charFrame->setHeroForgeToken(_options->getHeroForgeToken());
-    connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
-    connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
+    //CharacterFrame* charFrame = new CharacterFrame(_options);
+    _characterFrame = new CharacterTemplateFrame(_options);
+    _characterFrame->setHeroForgeToken(_options->getHeroForgeToken());
+    //connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
+    //connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
+    connect(_options, &OptionsContainer::heroForgeTokenChanged, _characterFrame, &CharacterTemplateFrame::setHeroForgeToken);
+    connect(_characterFrame, &CharacterTemplateFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, _characterFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
-    connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
+    connect(_characterFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    //connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
 
     PartyFrame* partyFrame = new PartyFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
@@ -648,43 +668,39 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->processEvents();
     qDebug() << "[MainWindow] Creating Reference Tabs";
 
-    _dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-    _tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-
     QuickRef::Initialize();
-    QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
-    _quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    _quickRefFrame = new QuickRefFrame(this);
+    _quickRefDlg = createDialog(_quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
-    connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
+    connect(QuickRef::Instance(), &QuickRef::changed, _quickRefFrame, &QuickRefFrame::refreshQuickRef);
     readQuickRef();
 
-    SoundboardFrame* soundboard = new SoundboardFrame(this);
-    connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
-    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
-    connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
-// TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
-    _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
-
-    _timeAndDateFrame = new TimeAndDateFrame(this);
-    _calendarDlg = createDialog(_timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
-    _countdownDlg = createDialog(new CountdownFrame(this));
-
-    connect(_ribbonTabTools, SIGNAL(screenClicked()), _dmScreenDlg, SLOT(exec()));
+    connect(_ribbonTabTools, &RibbonTabTools::screenClicked, this, &MainWindow::handleOpenDMScreen);
     QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+E", "DM Screen")), this);
-    connect(dmScreenShortcut, SIGNAL(activated()), _dmScreenDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(tablesClicked()), _tableDlg, SLOT(show()));
+    connect(dmScreenShortcut, &QShortcut::activated, this, &MainWindow::handleOpenDMScreen);
+
+    connect(_ribbonTabTools, &RibbonTabTools::tablesClicked, this, &MainWindow::handleOpenTables);
     QShortcut* tablesShortcut = new QShortcut(QKeySequence(tr("Ctrl+T", "Tables")), this);
-    connect(tablesShortcut, SIGNAL(activated()), _tableDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(referenceClicked()), _quickRefDlg, SLOT(exec()));
+    connect(tablesShortcut, &QShortcut::activated, this, &MainWindow::handleOpenTables);
+
+    connect(_ribbonTabTools, &RibbonTabTools::referenceClicked, _quickRefDlg, &QDialog::exec);
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
-    connect(referenceShortcut, SIGNAL(activated()), _quickRefDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(soundboardClicked()), _soundDlg, SLOT(exec()));
+    connect(referenceShortcut, &QShortcut::activated, this, [=]() {openQuickref(QString());});
+
+    connect(_ribbonTabTools, &RibbonTabTools::soundboardClicked, this, &MainWindow::handleOpenSoundboard);
     QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
-    connect(soundboardShortcut, SIGNAL(activated()), _soundDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(calendarClicked()), _calendarDlg, SLOT(exec()));
+    connect(soundboardShortcut, &QShortcut::activated, this, &MainWindow::handleOpenSoundboard);
+
+    connect(_ribbonTabTools, &RibbonTabTools::calendarClicked, this, &MainWindow::handleOpenCalendar);
     QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
-    connect(calendarShortcut, SIGNAL(activated()), _calendarDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(countdownClicked()), _countdownDlg, SLOT(exec()));
+    connect(calendarShortcut, &QShortcut::activated, this, &MainWindow::handleOpenCalendar);
+
+    connect(_ribbonTabTools, &RibbonTabTools::countdownClicked, this, &MainWindow::handleOpenCountdown);
+
+    connect(_ribbonTabTools, &RibbonTabTools::searchClicked, this, &MainWindow::handleOpenGlobalSearch);
+    QShortcut* searchShortcut = new QShortcut(QKeySequence(tr("Ctrl+F", "Search")), this);
+    connect(searchShortcut, &QShortcut::activated, this, &MainWindow::handleOpenGlobalSearch);
+
 
     qDebug() << "[MainWindow] Reference Tabs Created";
 
@@ -734,6 +750,8 @@ MainWindow::~MainWindow()
 
     delete ui;
 
+    CampaignObjectFactory::Shutdown(); //CombatantFactory::Shutdown(); is handled by the CampaignObjectFactory
+
     Bestiary::Shutdown();
     DMH_VLC::Shutdown();
     ScaledPixmap::cleanupDefaultPixmap();
@@ -745,14 +763,22 @@ void MainWindow::newCampaign()
     if(!closeCampaign())
         return;
 
-    bool ok;
-    QString campaignName = QInputDialog::getText(this, QString("Enter New Campaign Name"), QString("Campaign"), QLineEdit::Normal, QString(), &ok);
-    if(ok)
+    NewCampaignDialog* newCampaignDialog = new NewCampaignDialog(this);
+    int result = newCampaignDialog->exec();
+    if(result == QDialog::Accepted)
     {
+        QString campaignName = newCampaignDialog->getCampaignName();
         if(campaignName.isEmpty())
             campaignName = QString("Campaign");
 
         _campaign = new Campaign(campaignName);
+
+        _campaign->getRuleset().setRuleInitiative(newCampaignDialog->getInitiativeType());
+        _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
+        _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
+        _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
@@ -762,6 +788,8 @@ void MainWindow::newCampaign()
         emit campaignLoaded(_campaign);
         setDirty();
     }
+
+    newCampaignDialog->deleteLater();
 }
 
 bool MainWindow::saveCampaign()
@@ -857,6 +885,12 @@ void MainWindow::openSpell(const QString& spellName)
     openSpellbook();
 }
 
+void MainWindow::openQuickref(const QString& quickRefSection)
+{
+    _quickRefFrame->setQuickRefSection(quickRefSection);
+    _quickRefDlg->exec();
+}
+
 void MainWindow::newCharacter()
 {
     qDebug() << "[MainWindow] Creating a new character...";
@@ -880,7 +914,13 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Character* character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
+    if(!CombatantFactory::Instance())
+    {
+        qDebug() << "[MainWindow] New character not created because the combatant factory could not be found";
+        return;
+    }
+
+    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -910,7 +950,8 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            character->copyMonsterValues(*monsterClass);
+            // HACK
+            //character->copyMonsterValues(*monsterClass);
         }
     }
 
@@ -1086,7 +1127,7 @@ void MainWindow::newBattleEncounter()
     if(mapCenter.isNull())
             mapCenter = QPointF(gridScale, gridScale);
     QPointF multiplePos(gridScale / 10.0, gridScale / 10.0);
-    QList<Character*> activeCharacters = _campaign->getActiveCharacters();
+    QList<Characterv2*> activeCharacters = _campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
         BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
@@ -2088,7 +2129,7 @@ void MainWindow::deleteCampaign()
     {
         Campaign* oldCampaign = _campaign;
         _campaign = nullptr;
-        emit campaignLoaded(_campaign);
+        emit campaignLoaded(nullptr);
 
         // Clear the campaign itself
         delete oldCampaign;
@@ -2326,6 +2367,28 @@ void MainWindow::openCampaign(const QString& filename)
         return;
     }
 
+    // Character template compatibility check
+    int majorVersion = campaignElement.attribute("majorVersion", QString::number(0)).toInt();
+    int minorVersion = campaignElement.attribute("minorVersion", QString::number(0)).toInt();
+    if((majorVersion < 2) || ((majorVersion == 2) && (minorVersion < 4)))
+    {
+        qDebug() << "[Campaign] WARNING: Campaign file is an older format, informing user of character template conversion.";
+        QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                                   QString("Campaign file version check"),
+                                                                   QString("PLEASE READ: IMPORTANT!") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("Starting with version 3.3, DMHelper has a more flexible character data and UI template system to support different game systems. As a result, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("DM Helper will try to update the math to transition to the new format, but we encourage you to double-check the PC and NPC stats. ") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("If you are using the automatic D&D Beyond importer, it has been updated to reflect the new formats and has even gotten a few improvements along the way. We would recommend updating your D&D Beyond characters in the app.") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("Once you save the campaign file again, it will be stored in the new format going forward.") + QChar::LineFeed + QChar::LineFeed +
+                                                                       QString("Do you want to continue opening this campaign file?"),
+                                                                   QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[Campaign] INFO: User chose not to open campaign file due to version incompatibility: " << majorVersion << "." << minorVersion << ", " << filename;
+            return;
+        }
+    }
+
     QUuid lastElementId = QUuid(campaignElement.attribute(QString("lastElement")));
 
     _campaignFileName = filename;
@@ -2390,8 +2453,17 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
             selectIndex(firstIndex); //ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
-        connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
+        connect(campaign, &Campaign::dirty, this, &MainWindow::setDirty);
+        connect(campaign, &Campaign::nameChanged, this, &MainWindow::setDirty);
+
+        _characterFrame->loadCharacterUITemplate(campaign->getRuleset().getCharacterUIFile());
+        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
+        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
+        connect(&campaign->getRuleset(), &Ruleset::characterUIFileChanged, _characterFrame, &CharacterTemplateFrame::loadCharacterUITemplate);
+
+        connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
+
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
         QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);
         for(CampaignObjectBase* party : parties)
@@ -2438,6 +2510,9 @@ void MainWindow::updateMapFiles()
 
 void MainWindow::updateClock()
 {
+    if(!_timeAndDateFrame)
+        return;
+
     if(_campaign)
     {
         connect(_timeAndDateFrame, SIGNAL(dateChanged(BasicDate)), _campaign, SLOT(setDate(BasicDate)));
@@ -2656,6 +2731,79 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
         return;
 
     object->setExpanded(expanded);
+}
+
+void MainWindow::handleEditSettings()
+{
+    _options->editSettings(_campaign);
+}
+
+void MainWindow::handleOpenDMScreen()
+{
+    if(!_dmScreenDlg)
+        _dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+
+    _dmScreenDlg->exec();
+}
+
+void MainWindow::handleOpenTables()
+{
+    if(!_tableDlg)
+        _tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+
+    _tableDlg->exec();
+}
+
+void MainWindow::handleOpenSoundboard()
+{
+    if(!_soundDlg)
+    {
+        SoundboardFrame* soundboard = new SoundboardFrame(this);
+        connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
+        connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
+        connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+        // TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
+        _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+    }
+
+    _soundDlg->exec();
+}
+
+void MainWindow::handleOpenCalendar()
+{
+    if((!_calendarDlg) || (!_timeAndDateFrame))
+    {
+        _timeAndDateFrame = new TimeAndDateFrame(this);
+        _calendarDlg = createDialog(_timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
+        updateClock();
+    }
+
+    _calendarDlg->exec();
+}
+
+void MainWindow::handleOpenCountdown()
+{
+    if(!_countdownDlg)
+        _countdownDlg = createDialog(new CountdownFrame(this));
+
+    _countdownDlg->exec();
+}
+
+void MainWindow::handleOpenGlobalSearch()
+{
+    if((!_globalSearchDlg) || (!_globalSearchFrame))
+    {
+        _globalSearchFrame = new GlobalSearchFrame(this);
+        _globalSearchDlg = createDialog(_globalSearchFrame, QSize(width() / 2, height() * 9 / 10));
+        connect(_globalSearchFrame, &GlobalSearchFrame::frameAccept, _globalSearchDlg, &QDialog::accept);
+        connect(_globalSearchFrame, &GlobalSearchFrame::campaignObjectSelected, this, &MainWindow::selectItemFromStack);
+        connect(_globalSearchFrame, &GlobalSearchFrame::monsterSelected, this, &MainWindow::openMonster);
+        connect(_globalSearchFrame, &GlobalSearchFrame::spellSelected, this, &MainWindow::openSpell);
+        connect(_globalSearchFrame, &GlobalSearchFrame::toolSelected, this, &MainWindow::openQuickref);
+    }
+
+    _globalSearchFrame->setCampaign(_campaign);
+    _globalSearchDlg->exec();
 }
 
 void MainWindow::handleAnimationStarted()

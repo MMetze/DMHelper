@@ -1,16 +1,15 @@
-#include "widgetmonster.h"
-#include "ui_widgetmonster.h"
-#include "widgetmonsterinternal.h"
+#include "combatantwidgetcharacter.h"
+#include "ui_combatantwidgetcharacter.h"
+#include "combatantwidgetinternalscharacter.h"
 #include "dmconstants.h"
-#include "battledialogmodel.h"
-#include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "battledialogmodelcharacter.h"
+#include "campaign.h"
 #include <QIntValidator>
 #include <QDebug>
 
-WidgetMonster::WidgetMonster(QWidget *parent) :
+CombatantWidgetCharacter::CombatantWidgetCharacter(bool showDone, QWidget *parent) :
     CombatantWidget(parent),
-    ui(new Ui::WidgetMonster),
+    ui(new Ui::CombatantWidgetCharacter),
     _internals(nullptr)
 {
     ui->setupUi(this);
@@ -22,19 +21,21 @@ WidgetMonster::WidgetMonster(QWidget *parent) :
     connect(ui->chkKnown, SIGNAL(clicked(bool)), this, SIGNAL(isKnownChanged(bool)));
     connect(ui->chkVisible, SIGNAL(clicked(bool)), this, SIGNAL(isShownChanged(bool)));
 
+    CombatantWidgetCharacter::setShowDone(showDone);
+
     QValidator* valInit = new QIntValidator(-99, 99, this);
     ui->edtInit->setValidator(valInit);
     QValidator* valHitPoints = new QIntValidator(-10, 9999, this);
     ui->edtHP->setValidator(valHitPoints);
 }
 
-WidgetMonster::~WidgetMonster()
+CombatantWidgetCharacter::~CombatantWidgetCharacter()
 {
     delete _internals;
     delete ui;
 }
 
-BattleDialogModelCombatant* WidgetMonster::getCombatant()
+BattleDialogModelCombatant* CombatantWidgetCharacter::getCombatant()
 {
     if(_internals)
         return _internals->getCombatant();
@@ -42,9 +43,9 @@ BattleDialogModelCombatant* WidgetMonster::getCombatant()
         return nullptr;
 }
 
-void WidgetMonster::setInternals(WidgetMonsterInternal* internals)
+void CombatantWidgetCharacter::setInternals(CombatantWidgetInternalsCharacter* internals)
 {
-    if((!internals) || !internals->getCombatant())
+    if(!internals)
         return;
 
     if(_internals)
@@ -52,50 +53,41 @@ void WidgetMonster::setInternals(WidgetMonsterInternal* internals)
 
     _internals = internals;
 
-    BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
-    if(monsterCombatant)
+    BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(_internals->getCombatant());
+    if(characterCombatant)
     {
-        connect(ui->chkKnown, SIGNAL(clicked(bool)), monsterCombatant, SLOT(setKnown(bool)));
-        connect(ui->chkVisible, SIGNAL(clicked(bool)), monsterCombatant, SLOT(setShown(bool)));
+        connect(ui->chkKnown, SIGNAL(clicked(bool)), characterCombatant, SLOT(setKnown(bool)));
+        connect(ui->chkVisible, SIGNAL(clicked(bool)), characterCombatant, SLOT(setShown(bool)));
+        connect(ui->chkDone, SIGNAL(clicked(bool)), characterCombatant, SLOT(setDone(bool)));
+        //connect(characterCombatant, SIGNAL(combatantDoneChanged()), this, SLOT(updateData()));
+        connect(characterCombatant, &BattleDialogModelCharacter::combatantDoneChanged, this, &CombatantWidgetCharacter::updateData);
 
-        if(monsterCombatant->getCombatant())
-            connect(monsterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
-        else if (monsterCombatant->getMonsterClass())
-            connect(monsterCombatant->getMonsterClass(), SIGNAL(dirty()), this, SLOT(updateData()));
+        if(characterCombatant->getCombatant())
+            connect(characterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
         else
-            qDebug() << "[Monster Widget] neither valid combatant nor monster class found!";
-
-        if((monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getLegendary()))
-        {
-            _internals->resetLegendary();
-            connect(ui->btnLegendary, SIGNAL(clicked(bool)), _internals, SLOT(decrementLegendary()));
-            ui->btnLegendary->show();
-        }
-        else
-        {
-            ui->btnLegendary->hide();
-        }
+            qDebug() << "[Character Widget] a valid combatant could not be found!";
     }
 
     readInternals();
 }
 
-bool WidgetMonster::isShown()
+bool CombatantWidgetCharacter::isShown()
 {
     return ui->chkVisible->isChecked();
 }
 
-bool WidgetMonster::isKnown()
+bool CombatantWidgetCharacter::isKnown()
 {
     return ui->chkKnown->isChecked();
 }
 
-void WidgetMonster::clearImage()
+void CombatantWidgetCharacter::setShowDone(bool showDone)
 {
-    ui->lblIcon->clear();
+    ui->lblDone->setVisible(showDone);
+    ui->chkDone->setVisible(showDone);
 }
 
-void WidgetMonster::updateData()
+void CombatantWidgetCharacter::updateData()
 {
     if((!_internals) || (!_internals->getCombatant()))
         return;
@@ -104,7 +96,7 @@ void WidgetMonster::updateData()
     update();
 }
 
-void WidgetMonster::updateMove()
+void CombatantWidgetCharacter::updateMove()
 {
     if((!_internals) || (!_internals->getCombatant()))
         return;
@@ -112,71 +104,63 @@ void WidgetMonster::updateMove()
     ui->edtMove->setText(QString::number(static_cast<int>(_internals->getCombatant()->getMoved())));
 }
 
-void WidgetMonster::setActive(bool active)
-{
-    if(_internals)
-        _internals->resetLegendary();
-
-    CombatantWidget::setActive(active);
-}
-
-void WidgetMonster::selectCombatant()
+void CombatantWidgetCharacter::selectCombatant()
 {
     if(_internals)
         _internals->executeDoubleClick();
 }
 
-void WidgetMonster::leaveEvent(QEvent * event)
+void CombatantWidgetCharacter::leaveEvent(QEvent * event)
 {
     if(_internals)
         _internals->leaveEvent(event);
-
+    
     CombatantWidget::leaveEvent(event);
 }
 
-void WidgetMonster::mousePressEvent(QMouseEvent * event)
+void CombatantWidgetCharacter::mousePressEvent(QMouseEvent * event)
 {
     if(_internals)
         _internals->mousePressEvent(event);
-
+    
     CombatantWidget::mousePressEvent(event);
 }
 
-void WidgetMonster::mouseReleaseEvent(QMouseEvent * event)
+void CombatantWidgetCharacter::mouseReleaseEvent(QMouseEvent * event)
 {
     if(_internals)
         _internals->mouseReleaseEvent(event);
-
+    
     CombatantWidget::mouseReleaseEvent(event);
 }
 
-void WidgetMonster::mouseDoubleClickEvent(QMouseEvent *event)
+void CombatantWidgetCharacter::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if(_internals)
         _internals->mouseDoubleClickEvent(event);
-
+    
     CombatantWidget::mouseDoubleClickEvent(event);
 }
 
-void WidgetMonster::edtInitiativeChanged()
+void CombatantWidgetCharacter::edtInitiativeChanged()
 {
     if(_internals)
         _internals->initiativeChanged(ui->edtInit->text().toInt());
 }
 
-void WidgetMonster::edtMoveChanged()
+void CombatantWidgetCharacter::edtMoveChanged()
 {
     if(_internals)
         _internals->moveChanged(ui->edtMove->text().toInt());
 }
 
-void WidgetMonster::edtHPChanged()
+void CombatantWidgetCharacter::edtHPChanged()
 {
     if(_internals)
         _internals->handleHitPointsChanged(ui->edtHP->text().toInt());
 }
 
-void WidgetMonster::readInternals()
+void CombatantWidgetCharacter::readInternals()
 {
     if((!_internals) || (!_internals->getCombatant()))
         return;
@@ -192,28 +176,23 @@ void WidgetMonster::readInternals()
     ui->edtInit->setText(QString::number(_internals->getCombatant()->getInitiative()));
     ui->chkKnown->setChecked(_internals->getCombatant()->getKnown());
     ui->chkVisible->setChecked(_internals->getCombatant()->getShown());
-
-    BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
-    if((monsterCombatant) && (monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getLegendary()))
-        ui->btnLegendary->setText(QString("L: ") + QString::number(monsterCombatant->getLegendaryCount()));
+    ui->chkDone->setChecked(_internals->getCombatant()->getDone());
 }
 
-void WidgetMonster::loadImage()
+void CombatantWidgetCharacter::loadImage()
 {
-    if(!ui->lblIcon->pixmap(Qt::ReturnByValue).isNull())
-        return;
-
     if((_internals) && (_internals->getCombatant()))
     {
         ui->lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
+        //ui->lblIcon->setPixmap(_internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
         QPixmap iconPixmap = _internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb);
-        if(_internals->getCombatant()->hasCondition(Combatant::Condition_Unconscious))
+        //if(_internals->getCombatant()->getHitPoints() <= 0)
+        if(_internals->getCombatant()->getConditions() & Combatant::Condition_Unconscious)
         {
             QImage originalImage = iconPixmap.toImage();
             QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
             iconPixmap = QPixmap::fromImage(grayscaleImage);
         }
         ui->lblIcon->setPixmap(iconPixmap);
-        emit imageChanged(_internals->getCombatant());
     }
 }

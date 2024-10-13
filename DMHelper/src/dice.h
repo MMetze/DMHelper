@@ -2,6 +2,7 @@
 #define DICE_H
 
 #include <QString>
+#include <QMetaType>
 
 class Dice
 {
@@ -55,5 +56,7 @@ inline bool operator!=(const Dice& lhs, const Dice& rhs)
 {
     return !(lhs == rhs);
 }
+
+Q_DECLARE_METATYPE(Dice);
 
 #endif // DICE_H

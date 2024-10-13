@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetBattleCombatant</class>
- <widget class="QWidget" name="WidgetBattleCombatant">
+ <class>BattleCombatantWidget</class>
+ <widget class="QWidget" name="BattleCombatantWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -215,7 +215,6 @@
             <property name="font">
              <font>
               <pointsize>9</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -267,7 +266,6 @@
         <property name="font">
          <font>
           <pointsize>9</pointsize>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>

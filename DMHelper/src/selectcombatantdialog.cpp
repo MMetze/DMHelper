@@ -1,6 +1,6 @@
 #include "selectcombatantdialog.h"
 #include "ui_selectcombatantdialog.h"
-#include "character.h"
+#include "characterv2.h"
 #include "layertokens.h"
 #include <QGraphicsItem>
 #include <QPainter>
@@ -61,7 +61,7 @@ void SelectCombatantDialog::readModel()
     {
         if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
         {
-            Character* character = dynamic_cast<Character*>(combatant->getCombatant());
+            Characterv2* character = dynamic_cast<Characterv2*>(combatant->getCombatant());
             if((character) && (character->isInParty()))
                 addCombatant(combatant);
         }
@@ -78,7 +78,7 @@ void SelectCombatantDialog::readModel()
             }
             else
             {
-                Character* character = dynamic_cast<Character*>(combatant->getCombatant());
+                Characterv2* character = dynamic_cast<Characterv2*>(combatant->getCombatant());
                 if((!character) || (!character->isInParty()))
                     addCombatant(combatant);
             }
