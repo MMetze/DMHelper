@@ -8,7 +8,8 @@
 QuickRefFrame::QuickRefFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::QuickRefFrame),
-    _quickRefLayout(nullptr)
+    _quickRefLayout(nullptr),
+    _startSection()
 {
     ui->setupUi(this);
 
@@ -39,7 +40,24 @@ void QuickRefFrame::refreshQuickRef()
     }
 
     if(QuickRef::Instance()->count() > 0)
-        ui->cmbQuickRef->setCurrentIndex(0);
+    {
+        if(_startSection.isEmpty())
+        {
+            ui->cmbQuickRef->setCurrentIndex(0);
+        }
+        else
+        {
+            if(ui->cmbQuickRef->findText(_startSection) != -1)
+                ui->cmbQuickRef->setCurrentText(_startSection);
+
+            _startSection = QString();
+        }
+    }
+}
+
+void QuickRefFrame::setQuickRefSection(const QString& sectionName)
+{
+    _startSection = sectionName;
 }
 
 void QuickRefFrame::handleQuickRefChange(int selection)

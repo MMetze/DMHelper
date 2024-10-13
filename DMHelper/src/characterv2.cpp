@@ -1,5 +1,6 @@
 #include "characterv2.h"
 #include "combatantfactory.h"
+#include "globalsearch.h"
 #include <QIcon>
 #include <QDomElement>
 #include <QTextDocument>
@@ -42,6 +43,30 @@ QIcon Characterv2::getDefaultIcon()
         return QIcon(_iconPixmap.getPixmap(DMHelper::PixmapSize_Battle).scaled(128,128, Qt::KeepAspectRatio));
     else
         return isInParty() ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png");
+}
+
+bool Characterv2::matchSearch(const QString& searchString, QString& result) const
+{
+    if(Combatant::matchSearch(searchString, result))
+        return true;
+
+    QHash<QString, DMHAttribute> elementAttributes = CombatantFactory::Instance()->getElements();
+    QString searchResult;
+    for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
+    {
+        DMHAttribute attribute = elementAttributes.value(*keyIt);
+        if(attribute._type == CombatantFactory::TemplateType_html)
+        {
+            QString value = getStringValue(*keyIt);
+            if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
+            {
+                result = *keyIt + ": " + searchResult;
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void Characterv2::beginBatchChanges()

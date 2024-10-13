@@ -51,6 +51,9 @@ public:
     CampaignObjectBase* getObjectById(QUuid id);
     const CampaignObjectBase* getObjectById(QUuid id) const;
 
+    // For support of GlobalSearch_Interface
+    virtual bool matchSearch(const QString& searchString, QString& result) const;
+
 signals:
     void changed();
     void dirty();

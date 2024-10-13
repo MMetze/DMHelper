@@ -20,6 +20,7 @@ class Adventure;
 class Encounter;
 class EncounterTextEdit;
 class TimeAndDateFrame;
+class GlobalSearchFrame;
 class Map;
 class Layer;
 class MRUHandler;
@@ -31,6 +32,7 @@ class BattleDialogManager;
 class AudioPlayer;
 class AudioTrack;
 class PublishFrame;
+class QuickRefFrame;
 class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
@@ -76,6 +78,7 @@ public slots:
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
     void openSpell(const QString& spellName);
+    void openQuickref(const QString& quickRefSection);
 
     void newCharacter();
     void importCharacter();
@@ -173,6 +176,13 @@ protected slots:
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
     void handleEditSettings();
 
+    void handleOpenDMScreen();
+    void handleOpenTables();
+    void handleOpenSoundboard();
+    void handleOpenCalendar();
+    void handleOpenCountdown();
+    void handleOpenGlobalSearch();
+
     void handleAnimationStarted();
 
     bool selectItemFromStack(const QUuid& itemId);
@@ -204,11 +214,14 @@ private:
     PublishWindow* _pubWindow;
     QDialog* _dmScreenDlg;
     QDialog* _tableDlg;
+    QuickRefFrame* _quickRefFrame;
     QDialog* _quickRefDlg;
     QDialog* _soundDlg;
     TimeAndDateFrame* _timeAndDateFrame;
     QDialog* _calendarDlg;
     QDialog* _countdownDlg;
+    GlobalSearchFrame* _globalSearchFrame;
+    QDialog* _globalSearchDlg;
 
     EncounterTextEdit* _encounterTextEdit;
 

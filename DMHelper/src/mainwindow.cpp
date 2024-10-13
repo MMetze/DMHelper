@@ -4,6 +4,7 @@
 #include "publishwindow.h"
 #include "dicerolldialog.h"
 #include "countdownframe.h"
+#include "globalsearchframe.h"
 #include "party.h"
 #include "characterv2.h"
 #include "characterimporter.h"
@@ -121,11 +122,14 @@ MainWindow::MainWindow(QWidget *parent) :
     _pubWindow(nullptr),
     _dmScreenDlg(nullptr),
     _tableDlg(nullptr),
+    _quickRefFrame(nullptr),
     _quickRefDlg(nullptr),
     _soundDlg(nullptr),
     _timeAndDateFrame(nullptr),
     _calendarDlg(nullptr),
     _countdownDlg(nullptr),
+    _globalSearchFrame(nullptr),
+    _globalSearchDlg(nullptr),
     _encounterTextEdit(nullptr),
     _treeModel(nullptr),
     _activeItems(nullptr),
@@ -664,43 +668,39 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->processEvents();
     qDebug() << "[MainWindow] Creating Reference Tabs";
 
-    _dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-    _tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-
     QuickRef::Initialize();
-    QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
-    _quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    _quickRefFrame = new QuickRefFrame(this);
+    _quickRefDlg = createDialog(_quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
-    connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
+    connect(QuickRef::Instance(), &QuickRef::changed, _quickRefFrame, &QuickRefFrame::refreshQuickRef);
     readQuickRef();
 
-    SoundboardFrame* soundboard = new SoundboardFrame(this);
-    connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
-    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
-    connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
-// TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
-    _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
-
-    _timeAndDateFrame = new TimeAndDateFrame(this);
-    _calendarDlg = createDialog(_timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
-    _countdownDlg = createDialog(new CountdownFrame(this));
-
-    connect(_ribbonTabTools, SIGNAL(screenClicked()), _dmScreenDlg, SLOT(exec()));
+    connect(_ribbonTabTools, &RibbonTabTools::screenClicked, this, &MainWindow::handleOpenDMScreen);
     QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+E", "DM Screen")), this);
-    connect(dmScreenShortcut, SIGNAL(activated()), _dmScreenDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(tablesClicked()), _tableDlg, SLOT(show()));
+    connect(dmScreenShortcut, &QShortcut::activated, this, &MainWindow::handleOpenDMScreen);
+
+    connect(_ribbonTabTools, &RibbonTabTools::tablesClicked, this, &MainWindow::handleOpenTables);
     QShortcut* tablesShortcut = new QShortcut(QKeySequence(tr("Ctrl+T", "Tables")), this);
-    connect(tablesShortcut, SIGNAL(activated()), _tableDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(referenceClicked()), _quickRefDlg, SLOT(exec()));
+    connect(tablesShortcut, &QShortcut::activated, this, &MainWindow::handleOpenTables);
+
+    connect(_ribbonTabTools, &RibbonTabTools::referenceClicked, _quickRefDlg, &QDialog::exec);
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
-    connect(referenceShortcut, SIGNAL(activated()), _quickRefDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(soundboardClicked()), _soundDlg, SLOT(exec()));
+    connect(referenceShortcut, &QShortcut::activated, this, [=]() {openQuickref(QString());});
+
+    connect(_ribbonTabTools, &RibbonTabTools::soundboardClicked, this, &MainWindow::handleOpenSoundboard);
     QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
-    connect(soundboardShortcut, SIGNAL(activated()), _soundDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(calendarClicked()), _calendarDlg, SLOT(exec()));
+    connect(soundboardShortcut, &QShortcut::activated, this, &MainWindow::handleOpenSoundboard);
+
+    connect(_ribbonTabTools, &RibbonTabTools::calendarClicked, this, &MainWindow::handleOpenCalendar);
     QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
-    connect(calendarShortcut, SIGNAL(activated()), _calendarDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(countdownClicked()), _countdownDlg, SLOT(exec()));
+    connect(calendarShortcut, &QShortcut::activated, this, &MainWindow::handleOpenCalendar);
+
+    connect(_ribbonTabTools, &RibbonTabTools::countdownClicked, this, &MainWindow::handleOpenCountdown);
+
+    connect(_ribbonTabTools, &RibbonTabTools::searchClicked, this, &MainWindow::handleOpenGlobalSearch);
+    QShortcut* searchShortcut = new QShortcut(QKeySequence(tr("Ctrl+F", "Search")), this);
+    connect(searchShortcut, &QShortcut::activated, this, &MainWindow::handleOpenGlobalSearch);
+
 
     qDebug() << "[MainWindow] Reference Tabs Created";
 
@@ -883,6 +883,12 @@ void MainWindow::openSpell(const QString& spellName)
 
     _spellDlg.setSpell(spellName);
     openSpellbook();
+}
+
+void MainWindow::openQuickref(const QString& quickRefSection)
+{
+    _quickRefFrame->setQuickRefSection(quickRefSection);
+    _quickRefDlg->exec();
 }
 
 void MainWindow::newCharacter()
@@ -2504,6 +2510,9 @@ void MainWindow::updateMapFiles()
 
 void MainWindow::updateClock()
 {
+    if(!_timeAndDateFrame)
+        return;
+
     if(_campaign)
     {
         connect(_timeAndDateFrame, SIGNAL(dateChanged(BasicDate)), _campaign, SLOT(setDate(BasicDate)));
@@ -2727,6 +2736,74 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
 void MainWindow::handleEditSettings()
 {
     _options->editSettings(_campaign);
+}
+
+void MainWindow::handleOpenDMScreen()
+{
+    if(!_dmScreenDlg)
+        _dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+
+    _dmScreenDlg->exec();
+}
+
+void MainWindow::handleOpenTables()
+{
+    if(!_tableDlg)
+        _tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+
+    _tableDlg->exec();
+}
+
+void MainWindow::handleOpenSoundboard()
+{
+    if(!_soundDlg)
+    {
+        SoundboardFrame* soundboard = new SoundboardFrame(this);
+        connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
+        connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
+        connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+        // TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
+        _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+    }
+
+    _soundDlg->exec();
+}
+
+void MainWindow::handleOpenCalendar()
+{
+    if((!_calendarDlg) || (!_timeAndDateFrame))
+    {
+        _timeAndDateFrame = new TimeAndDateFrame(this);
+        _calendarDlg = createDialog(_timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
+        updateClock();
+    }
+
+    _calendarDlg->exec();
+}
+
+void MainWindow::handleOpenCountdown()
+{
+    if(!_countdownDlg)
+        _countdownDlg = createDialog(new CountdownFrame(this));
+
+    _countdownDlg->exec();
+}
+
+void MainWindow::handleOpenGlobalSearch()
+{
+    if((!_globalSearchDlg) || (!_globalSearchFrame))
+    {
+        _globalSearchFrame = new GlobalSearchFrame(this);
+        _globalSearchDlg = createDialog(_globalSearchFrame, QSize(width() / 2, height() * 9 / 10));
+        connect(_globalSearchFrame, &GlobalSearchFrame::frameAccept, _globalSearchDlg, &QDialog::accept);
+        connect(_globalSearchFrame, &GlobalSearchFrame::campaignObjectSelected, this, &MainWindow::selectItemFromStack);
+        connect(_globalSearchFrame, &GlobalSearchFrame::monsterSelected, this, &MainWindow::openMonster);
+        connect(_globalSearchFrame, &GlobalSearchFrame::spellSelected, this, &MainWindow::openSpell);
+        connect(_globalSearchFrame, &GlobalSearchFrame::toolSelected, this, &MainWindow::openQuickref);
+    }
+
+    _globalSearchFrame->setCampaign(_campaign);
+    _globalSearchDlg->exec();
 }
 
 void MainWindow::handleAnimationStarted()

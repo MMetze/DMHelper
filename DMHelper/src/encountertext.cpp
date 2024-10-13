@@ -3,6 +3,7 @@
 #include "encountertextedit.h"
 #include "layerimage.h"
 #include "layervideo.h"
+#include "globalsearch.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomCDATASection>
@@ -140,6 +141,14 @@ int EncounterText::getObjectType() const
 QIcon EncounterText::getDefaultIcon()
 {
     return QIcon(":/img/data/icon_contenttextencounter.png");
+}
+
+bool EncounterText::matchSearch(const QString& searchString, QString& result) const
+{
+    if(CampaignObjectBase::matchSearch(searchString, result))
+        return true;
+
+    return GlobalSearch_Interface::compareStringValue(_text, searchString, result);
 }
 
 QString EncounterText::getText() const

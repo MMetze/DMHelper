@@ -20,6 +20,7 @@ public:
 
 public slots:
     void refreshQuickRef();
+    void setQuickRefSection(const QString& sectionName);
 
 protected slots:
     void handleQuickRefChange(int selection);
@@ -28,6 +29,7 @@ private:
     Ui::QuickRefFrame *ui;
 
     QVBoxLayout* _quickRefLayout;
+    QString _startSection;
 };
 
 #endif // QUICKREFFRAME_H

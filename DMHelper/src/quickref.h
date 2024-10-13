@@ -1,6 +1,7 @@
 #ifndef QUICKREF_H
 #define QUICKREF_H
 
+#include "globalsearch.h"
 #include <QObject>
 #include <QStringList>
 #include <QDomElement>
@@ -10,7 +11,7 @@ class QuickRefSection;
 class QuickRefSubsection;
 class QuickRefData;
 
-class QuickRef : public QObject
+class QuickRef : public QObject, public GlobalSearch_Interface
 {
     Q_OBJECT
 public:
@@ -34,6 +35,8 @@ public:
     QuickRefSection* getSection(const QString& sectionName);
     QuickRefSubsection* getSubsection(const QString& sectionName, int subSectionIndex);
     QuickRefData* getData(const QString& sectionName, int subSectionIndex, const QString& dataTitle);
+
+    QStringList search(const QString& searchString) override;
 
 signals:
     void changed();
