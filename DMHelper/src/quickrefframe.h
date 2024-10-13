@@ -29,6 +29,7 @@ private:
     Ui::QuickRefFrame *ui;
 
     QVBoxLayout* _quickRefLayout;
+    QString _startSection;
 };
 
 #endif // QUICKREFFRAME_H
