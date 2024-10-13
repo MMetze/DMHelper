@@ -39,6 +39,13 @@ void GlobalSearchFrame::setCampaign(Campaign* campaign)
     _campaign = campaign;
 }
 
+void GlobalSearchFrame::showEvent(QShowEvent *event)
+{
+    ui->edtSearch->selectAll();
+    ui->edtSearch->setFocus();
+    QFrame::showEvent(event);
+}
+
 void GlobalSearchFrame::executeSearch()
 {
     ui->treeResults->clear();

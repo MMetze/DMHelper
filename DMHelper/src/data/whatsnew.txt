@@ -24,17 +24,21 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 
 <h3>New v3.3 Features:</h3>
 <ul>
+<li><b>Search <i>Everything</i>:</b> Press <b>Ctrl+F</b> to search for a topic in the entire app, including throughout your campaign, the bestiary, the spellbook, and other tools in the app! This is a great way to quickly find the information you need.
 <li><b>Configurable Rulesets:</b> DMH now supports multiple game system rules and you can configure as many more as you want. Currently, each ruleset can have its own initiative rules, character sheet template and UI layout. Each campaign can have a different ruleset, so you don't have to do anything to switch between them. The default ruleset is 5E, but you can add your own or modify the existing ones. In upcoming versions, we'll add more flexibility for other parts of the app including monsters, spells, and items.
 <li><b>Textured FoW:</b> You can add a texture or a color to your Fog of War. Try making it a real fog, or gradually clear away the roof of a building as your players explore it!
 <li><b>Combatant Done:</b> As part of a ruleset, you can now decide you want to be able to mark a combatant as "Done" as you go through the initiative order. This will help you keep track of who has taken their turn and who hasn't.
 <li><b>Configurable Audio for Animated Maps:</b> It's overdue, but here - you can decide yourself whether or not you want to play the audio from an animated map.
+<li><b>Improved DnDBeyond importer:</b> The importer now supports more character information, including the new format. It also now imports spells and items.
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li> TBD
+<li>The Spellbook works again
+<li>Applying effects to moved tokens works again
+<li>Size limit on images removed - user beware! Very, very large images may really slow down the app
 </ul>
 
 <!--

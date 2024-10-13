@@ -31,6 +31,8 @@ signals:
     void frameAccept();
 
 protected slots:
+    virtual void showEvent(QShowEvent *event) override;
+
     void executeSearch();
     void handleItemClicked(QTreeWidgetItem *item, int column);
     void handleItemDoubleClicked(QTreeWidgetItem *item, int column);
