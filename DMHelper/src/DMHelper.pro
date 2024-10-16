@@ -106,6 +106,7 @@ SOURCES += main.cpp\
     globalsearch.cpp \
     globalsearchframe.cpp \
     gridconfig.cpp \
+    helpdialog.cpp \
     initiativelistcombatantwidget.cpp \
     initiativelistdialog.cpp \
     layer.cpp \
@@ -393,6 +394,7 @@ HEADERS  += mainwindow.h \
     globalsearch.h \
     globalsearchframe.h \
     gridconfig.h \
+    helpdialog.h \
     initiativelistcombatantwidget.h \
     initiativelistdialog.h \
     layer.h \
@@ -619,6 +621,7 @@ FORMS    += mainwindow.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     globalsearchframe.ui \
+    helpdialog.ui \
     initiativelistcombatantwidget.ui \
     initiativelistdialog.ui \
     layereffectsettings.ui \

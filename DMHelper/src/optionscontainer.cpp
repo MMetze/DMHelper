@@ -827,18 +827,35 @@ void OptionsContainer::backupFile(const QString& filename)
         QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
         QFileInfo backupFileInfo(previousBackup);
         qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
-        if((!backupFileInfo.exists()) || (backupFileInfo.size() != fileInfo.size()))
+
+        if(backupFileInfo.exists())
         {
-            if(backupFileInfo.exists())
+            if(backupFileInfo.size() == fileInfo.size())
+            {
+                qDebug() << "[OptionsContainer] Backup file and current file are the same size, no further action needed.";
+                return;
+            }
+
+            if(backupFileInfo.size() > fileInfo.size())
+            {
+                qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup!";
+                previousBackup.rename(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+            }
+            else if(backupFileInfo.size() < fileInfo.size() * 2)
+            {
+                qDebug() << "[OptionsContainer] WARNING: Recent save file is over twice as large as the previous backup, keeping previous backup!";
+                previousBackup.rename(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+            }
+            else
             {
                 qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
                 previousBackup.remove();
             }
-
-            qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
-            QFile file(filename);
-            file.copy(backupDir.filePath(fileInfo.fileName()));
         }
+
+        qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
+        QFile file(filename);
+        file.copy(backupDir.filePath(fileInfo.fileName()));
     }
 }
 
