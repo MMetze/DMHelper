@@ -52,6 +52,8 @@
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
+#include "helpdialog.h"
+#include "dmhlogger.h"
 #include "newcampaigndialog.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
@@ -348,6 +350,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Help Menu
     connect(_ribbonTabFile, SIGNAL(checkForUpdatesClicked()), this, SLOT(checkForUpdates()));
     connect(_ribbonTabFile, SIGNAL(aboutClicked()), this, SLOT(openAboutDialog()));
+    connect(_ribbonTabFile, SIGNAL(helpClicked()), this, SLOT(openHelpDialog()));
     connect(ui->treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView, SIGNAL(collapsed(QModelIndex)), this, SLOT(handleTreeItemCollapsed(QModelIndex)));
 
@@ -654,7 +657,12 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
     connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openCampaign(QString)));
+    connect(_ribbonTabFile, &RibbonTabFile::userGuideClicked, this, &MainWindow::openUsersGuide);
+    connect(this, &MainWindow::openUsersGuide, welcomeFrame, &WelcomeFrame::openUsersGuide);
+    connect(_ribbonTabFile, &RibbonTabFile::gettingStartedClicked, this, &MainWindow::openGettingStarted);
+    connect(this, &MainWindow::openGettingStarted, welcomeFrame, &WelcomeFrame::openGettingStarted);
     connect(_ribbonTabFile, SIGNAL(userGuideClicked()), welcomeFrame, SLOT(openUsersGuide()));
+    connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_WelcomeScreen, welcomeFrame);
     qDebug() << "[MainWindow]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
@@ -2942,6 +2950,32 @@ void MainWindow::openAboutDialog()
     AboutDialog dlg;
     dlg.resize(qMax(dlg.width(), width() * 3 / 4), qMax(dlg.height(), height() * 3 / 4));
     dlg.exec();
+}
+
+void MainWindow::openHelpDialog()
+{
+    qDebug() << "[MainWindow] Opening Help Dialog";
+
+    HelpDialog dlg;
+    connect(&dlg, &HelpDialog::openGettingStarted, this, &MainWindow::openGettingStarted);
+    connect(&dlg, &HelpDialog::openUsersGuide, this, &MainWindow::openUsersGuide);
+    connect(&dlg, &HelpDialog::openBackupDirectory, this, &MainWindow::openBackupDirectory);
+    connect(&dlg, &HelpDialog::openLogsDirectory, this, &MainWindow::openLogsDirectory);
+    dlg.exec();
+}
+
+void MainWindow::openBackupDirectory()
+{
+    QString backupPath = _options->getStandardDirectory("backup");
+    if(!backupPath.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(backupPath));
+}
+
+void MainWindow::openLogsDirectory()
+{
+    QString logsPath = DMHLogger::getLogDirPath();
+    if(!logsPath.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(logsPath));
 }
 
 void MainWindow::openRandomMarkets()

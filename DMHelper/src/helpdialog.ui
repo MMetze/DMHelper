@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
+    <width>654</width>
     <height>358</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -62,14 +62,14 @@
        <item>
         <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>          </string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>          </string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -100,6 +100,12 @@
          </item>
          <item row="1" column="1">
           <widget class="QPushButton" name="btnGettingStarted">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Getting Started...</string>
            </property>
@@ -114,6 +120,12 @@
          </item>
          <item row="2" column="1">
           <widget class="QPushButton" name="btnUsersGuide">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>User's Guide...</string>
            </property>
@@ -128,6 +140,12 @@
          </item>
          <item row="4" column="1">
           <widget class="QPushButton" name="btnOpenLogsDir">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Open Logs Directory...</string>
            </property>
@@ -142,6 +160,12 @@
          </item>
          <item row="5" column="1">
           <widget class="QPushButton" name="btnOpenBackupDir">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Open Backup Directory...</string>
            </property>
@@ -150,14 +174,14 @@
          <item row="3" column="0">
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>           </string>
+            <string/>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_7">
            <property name="text">
-            <string>           </string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -177,6 +201,19 @@
         </spacer>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

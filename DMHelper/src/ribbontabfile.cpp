@@ -22,6 +22,7 @@ RibbonTabFile::RibbonTabFile(QWidget *parent) :
     connect(ui->btnGettingStarted, SIGNAL(clicked(bool)), this, SIGNAL(gettingStartedClicked()));
     connect(ui->btnPreferences, SIGNAL(clicked(bool)), this, SIGNAL(optionsClicked()));
     connect(ui->btnCheckForUpdates, SIGNAL(clicked(bool)), this, SIGNAL(checkForUpdatesClicked()));
+    connect(ui->btnHelp, SIGNAL(clicked(bool)), this, SIGNAL(helpClicked()));
     connect(ui->btnAbout, SIGNAL(clicked(bool)), this, SIGNAL(aboutClicked()));
 }
 
@@ -66,6 +67,7 @@ void RibbonTabFile::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblGettingStarted, *ui->btnGettingStarted, frameHeight);
     setStandardButtonSize(*ui->lblPreferences, *ui->btnPreferences, frameHeight);
     setStandardButtonSize(*ui->lblCheckForUpdates, *ui->btnCheckForUpdates, frameHeight);
+    setStandardButtonSize(*ui->lblHelp, *ui->btnHelp, frameHeight);
     setStandardButtonSize(*ui->lblAbout, *ui->btnAbout, frameHeight);
 }
 

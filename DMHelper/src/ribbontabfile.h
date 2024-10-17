@@ -31,6 +31,7 @@ signals:
     void gettingStartedClicked();
     void optionsClicked();
     void checkForUpdatesClicked();
+    void helpClicked();
     void aboutClicked();
 
 protected:

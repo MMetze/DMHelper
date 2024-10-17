@@ -126,6 +126,9 @@ signals:
     void characterChanged(QUuid id);
     void audioTrackAdded(AudioTrack* track);
 
+    void openGettingStarted();
+    void openUsersGuide();
+
 protected:
     virtual void showEvent(QShowEvent * event);
     virtual void closeEvent(QCloseEvent * event);
@@ -197,6 +200,9 @@ protected slots:
     void importSpellbook();
 
     void openAboutDialog();
+    void openHelpDialog();
+    void openBackupDirectory();
+    void openLogsDirectory();
     void openRandomMarkets();
     void configureGridLock();
 

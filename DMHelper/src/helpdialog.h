@@ -15,6 +15,12 @@ public:
     explicit HelpDialog(QWidget *parent = nullptr);
     ~HelpDialog();
 
+signals:
+    void openGettingStarted();
+    void openUsersGuide();
+    void openBackupDirectory();
+    void openLogsDirectory();
+
 private:
     Ui::HelpDialog *ui;
 };
