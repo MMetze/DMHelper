@@ -15,6 +15,8 @@
 #include <QPainter>
 #include <QDebug>
 
+const qreal LAYER_FOW_DM_OPACITY = 0.6;
+
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
@@ -171,7 +173,7 @@ void LayerFow::applyOpacity(qreal opacity)
     _opacityReference = opacity;
 
     if(_graphicsItem)
-        _graphicsItem->setOpacity(opacity * 0.75);
+        _graphicsItem->setOpacity(opacity * LAYER_FOW_DM_OPACITY);
 }
 
 void LayerFow::applyPosition(const QPoint& position)

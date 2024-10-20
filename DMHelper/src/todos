@@ -1,9 +1,15 @@
 Main 3.3.1 Todos:
 DONE - to be tested 1) any time the backup file is bigger than the current file or twice as small, rename it rather than replacing it, might lead to a bit of bloat, but generally the files grow and hence they extra backups would be useful
 DONE - to be tested 2) add a date/timestamp to the backup names that are kept
-3) add a "open the backup folder" button
-4) add a "open the logs folders" button
-5) Combine those all into a "Help" dialog and put the links to the User Guide and Getting Started Guide in there as well
+DONE - 3) add a "open the backup folder" button
+DONE - 4) add a "open the logs folders" button
+DONE - 5) Combine those all into a "Help" dialog and put the links to the User Guide and Getting Started Guide in there as well
+
+Add a refresh button to files in the options dialog
+BUG: custom UI files path is wrong
+BUG: moving an FOW texture crashes the app
+
+
 
 
 Performance, Memory usage, Delta install, full uninstall
