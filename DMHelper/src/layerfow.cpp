@@ -20,7 +20,7 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     _graphicsItem(nullptr),
     _fowGLObject(nullptr),
     _scene(nullptr),
-    _fowColor(Qt::blue),
+    _fowColor(Qt::black),
     _imageFow(),
     _imageFowTexture(),
     _fowTextureFile(),
