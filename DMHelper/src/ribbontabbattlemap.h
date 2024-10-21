@@ -24,7 +24,6 @@ public:
 
 public slots:
     void setGridConfig(const GridConfig& config);
-    //void setGridOn(bool checked);
     void setGridType(int gridType);
     void setGridScale(int scale);
     void setGridAngle(int angle);
@@ -40,9 +39,7 @@ public slots:
     void setSelectFoW(bool checked);
 
 signals:
-    void newMapClicked();
     void reloadMapClicked();
-    //void gridClicked(bool checked);
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);
     void gridScaleSetClicked();

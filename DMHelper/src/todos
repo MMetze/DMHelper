@@ -8,8 +8,9 @@ DONE - 5) Combine those all into a "Help" dialog and put the links to the User G
 Add a refresh button to files in the options dialog
 BUG: custom UI files path is wrong
 BUG: moving an FOW texture crashes the app
-
-
+BUG: New Map (in combat) button doesn't do anything - remove it
+Create new map/combat dialogs
+Update docs
 
 
 Performance, Memory usage, Delta install, full uninstall
