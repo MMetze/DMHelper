@@ -6,6 +6,7 @@
 #include "tokeneditdialog.h"
 #include "optionscontainer.h"
 #include "combatantfactory.h"
+#include "rulefactory.h"
 #include <QUiLoader>
 #include <QFile>
 #include <QFileDialog>
@@ -96,19 +97,43 @@ void CharacterTemplateFrame::setHeroForgeToken(const QString& token)
 
 void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile)
 {
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    QString appFile = fileDirPath.path() + QString("/Resources/") + templateFile;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString appFile = fileDirPath.path() + QString("/resources/") + templateFile;
-#endif
-
-    if(!QFileInfo::exists(appFile))
+    if(!RuleFactory::Instance())
     {
-        qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File not found: " << appFile;
+        qDebug() << "[CharacterTemplateFrame] ERROR: No rule factory exists, cannot load the character UI template file: " << templateFile;
         return;
+    }
+
+    // Try our best to load the given character template file
+    QString appFile;
+    if(QFileInfo(templateFile).isRelative())
+    {
+        QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
+        appFile = relativeDir.absoluteFilePath(templateFile);
+        if(!QFileInfo::exists(appFile))
+        {
+#ifdef Q_OS_MAC
+            QDir fileDirPath(QCoreApplication::applicationDirPath());
+            fileDirPath.cdUp();
+            appFile = fileDirPath.path() + QString("/Resources/") + templateFile;
+#else
+            QDir fileDirPath(QCoreApplication::applicationDirPath());
+            appFile = fileDirPath.path() + QString("/resources/") + templateFile;
+#endif
+            if(!QFileInfo::exists(appFile))
+            {
+                qDebug() << "[CharacterTemplateFrame] ERROR: Relative Character UI Template File not found: " << templateFile;
+                return;
+            }
+        }
+    }
+    else
+    {
+        appFile = templateFile;
+        if(!QFileInfo::exists(appFile))
+        {
+            qDebug() << "[CharacterTemplateFrame] ERROR: Absolute Character UI Template File not found: " << templateFile;
+            return;
+        }
     }
 
     QUiLoader loader;

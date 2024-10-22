@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QDir>
 
 class RuleInitiative;
 
@@ -24,6 +25,7 @@ public:
     QList<QString> getRulesetNames() const;
     QList<RulesetTemplate> getRulesetTemplates() const;
     RulesetTemplate getRulesetTemplate(const QString& rulesetName) const;
+    QDir getRulesetDir() const;
 
 signals:
 
@@ -32,6 +34,7 @@ public slots:
 
 private:
     static RuleFactory* _instance;
+    QDir _rulesetDir;
 
     QHash<QString, RulesetTemplate> _rulesetTemplates;
 

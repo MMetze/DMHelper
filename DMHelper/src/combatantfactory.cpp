@@ -4,6 +4,7 @@
 #include "monster.h"
 #include "dmconstants.h"
 #include "bestiary.h"
+#include "rulefactory.h"
 #include "ruleset.h"
 #include "combatantreference.h"
 #include <QDomElement>
@@ -226,19 +227,43 @@ void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVe
 
 void CombatantFactory::loadCharacterTemplate(const QString& characterTemplateFile)
 {
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    QString appFile = fileDirPath.path() + QString("/Resources/") + characterTemplateFile;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString appFile = fileDirPath.path() + QString("/resources/") + characterTemplateFile;
-#endif
-
-    if(!QFileInfo::exists(appFile))
+    if(!RuleFactory::Instance())
     {
-        qDebug() << "[CombatantFactory] ERROR: Character Template File not found: " << appFile;
+        qDebug() << "[CombatantFactory] ERROR: No rule factory exists, cannot load the character template file: " << characterTemplateFile;
         return;
+    }
+
+    // Try our best to load the given character template file
+    QString appFile;
+    if(QFileInfo(characterTemplateFile).isRelative())
+    {
+        QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
+        appFile = relativeDir.absoluteFilePath(characterTemplateFile);
+        if(!QFileInfo::exists(appFile))
+        {
+#ifdef Q_OS_MAC
+            QDir fileDirPath(QCoreApplication::applicationDirPath());
+            fileDirPath.cdUp();
+            appFile = fileDirPath.path() + QString("/Resources/") + characterTemplateFile;
+#else
+            QDir fileDirPath(QCoreApplication::applicationDirPath());
+            appFile = fileDirPath.path() + QString("/resources/") + characterTemplateFile;
+#endif
+            if(!QFileInfo::exists(appFile))
+            {
+                qDebug() << "[CombatantFactory] ERROR: Relative Character Template File not found: " << characterTemplateFile;
+                return;
+            }
+        }
+    }
+    else
+    {
+        appFile = characterTemplateFile;
+        if(!QFileInfo::exists(appFile))
+        {
+            qDebug() << "[CombatantFactory] ERROR: Absolute Character Template File not found: " << characterTemplateFile;
+            return;
+        }
     }
 
     QDomDocument doc;
