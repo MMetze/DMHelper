@@ -161,7 +161,7 @@ public slots:
     void setHeight(qreal height);
 
     void setFoWEdit(bool enabled);
-    void setFoWSelect(bool enabled);
+    void setFoWSelect(bool enabled);   
 
     void setPointerOn(bool enabled);
     void showStatistics();
@@ -196,6 +196,8 @@ signals:
     void distanceToggled(bool enabled);
     void freeDistanceToggled(bool enabled);
     void distanceChanged(const QString&);
+
+    void mapMoveToggled();
 
     void foWEditToggled(bool enabled);
     void foWSelectToggled(bool enabled);

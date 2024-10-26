@@ -26,7 +26,6 @@ signals:
 public slots:
     void setImage(QImage img);
     void setImage(QImage img, const QColor& color);
-    //void setImageNoScale(QImage img);
     void setBackgroundColor();
     void setBackgroundColor(const QColor& color);
 

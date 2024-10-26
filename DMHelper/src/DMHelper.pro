@@ -740,7 +740,8 @@ DISTFILES += \
     resources/tables/Short Term Madness.xml \
     resources/tables/Short Term Madness.xml \
     resources/tables/table.xsd \
-    todos
+    todos \
+    todos_new_bugs
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc

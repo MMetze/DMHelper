@@ -6,9 +6,9 @@ DONE - 4) add a "open the logs folders" button
 DONE - 5) Combine those all into a "Help" dialog and put the links to the User Guide and Getting Started Guide in there as well
 
 Add a refresh button to files in the options dialog
-BUG: custom UI files path is wrong
-BUG: moving an FOW texture crashes the app
-BUG: New Map (in combat) button doesn't do anything - remove it
+DONE - BUG: custom UI files path is wrong
+NOT REPRODUCED BUG: moving an FOW texture crashes the app
+DONE - BUG: New Map (in combat) button doesn't do anything - remove it
 Create new map/combat dialogs
 Update docs
 

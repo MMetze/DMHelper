@@ -1084,6 +1084,12 @@ void MapFrame::keyReleaseEvent(QKeyEvent *event)
             event->accept();
             return;
         }
+        else if(event->key() == Qt::Key_A)
+        {
+            editModeToggled(_editMode == DMHelper::EditMode_Pointer ? DMHelper::EditMode_Move : DMHelper::EditMode_Pointer);
+            event->accept();
+            return;
+        }
         else if(event->key() == Qt::Key_Escape)
         {
             editModeToggled(DMHelper::EditMode_Move);

@@ -1069,16 +1069,22 @@ void BattleDialogGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
 
 void BattleDialogGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 {
-    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+    if((!_spaceDown) && (keyEvent) && (!keyEvent->isAutoRepeat()) && (keyEvent->key() == Qt::Key_Space))
+    {
         _spaceDown = true;
+        emit mapMoveToggled();
+    }
 
     QGraphicsScene::keyPressEvent(keyEvent);
 }
 
 void BattleDialogGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 {
-    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+    if((_spaceDown) && (keyEvent) && (!keyEvent->isAutoRepeat()) && (keyEvent->key() == Qt::Key_Space))
+    {
         _spaceDown = false;
+        emit mapMoveToggled();
+    }
 
     QGraphicsScene::keyReleaseEvent(keyEvent);
 }
@@ -1228,7 +1234,7 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
 {
     BattleDialogGraphicsSceneMouseHandlerBase* result = nullptr;
 
-    if((mouseEvent) && ((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton))
+    if((mouseEvent) && (((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton) || (_spaceDown)))
     {
         result = &_mapsMouseHandler;
     }

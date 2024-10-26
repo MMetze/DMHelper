@@ -145,7 +145,8 @@ namespace DMHelper
         BattleFrameState_FreeDistance,
         BattleFrameState_Pointer,
         BattleFrameState_FoWSelect,
-        BattleFrameState_FoWEdit
+        BattleFrameState_FoWEdit,
+        BattleFrameState_MapMove
     };
 
     enum AudioType

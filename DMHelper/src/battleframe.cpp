@@ -1657,14 +1657,14 @@ void BattleFrame::setPointerOn(bool enabled)
 
 void BattleFrame::keyPressEvent(QKeyEvent * e)
 {
-    if(e->key() == Qt::Key_Space)
-    {
-        next();
-        return;
-    }
-    else if(e->key() == Qt::Key_Escape)
+    if(e->key() == Qt::Key_Escape)
     {
         cancelSelect();
+        return;
+    }
+    else if(e->key() == Qt::Key_A)
+    {
+        _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
         return;
     }
     else if((e->key() == Qt::Key_C) && (e->modifiers() == Qt::ControlModifier))
@@ -2675,6 +2675,7 @@ void BattleFrame::handleMapMousePress(const QPointF& pos)
 {
     _mouseDown = true;
     _mouseDownPos = ui->graphicsView->mapFromScene(pos);
+    emit mapMoveToggled();
 }
 
 void BattleFrame::handleMapMouseMove(const QPointF& pos)
@@ -2699,6 +2700,7 @@ void BattleFrame::handleMapMouseRelease(const QPointF& pos)
 {
     Q_UNUSED(pos);
     _mouseDown = false;
+    emit mapMoveToggled();
 }
 
 void BattleFrame::handleSceneChanged(const QList<QRectF> &region)
@@ -4594,6 +4596,13 @@ instead move the player view
     connect(_mapDrawer, SIGNAL(cursorChanged(const QCursor&)), fowEditState, SLOT(setCursor(const QCursor&)));
     connect(fowEditState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
     _stateMachine.addState(fowEditState);
+
+    BattleFrameState* mapMoveState = new BattleFrameState(DMHelper::BattleFrameState_MapMove, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 32, 32);
+    mapMoveState->setCursor(QCursor(Qt::OpenHandCursor));
+    connect(_scene, &BattleDialogGraphicsScene::mapMoveToggled, this, [=]() {_stateMachine.toggleState(DMHelper::BattleFrameState_MapMove);});
+    connect(this, &BattleFrame::mapMoveToggled, this, [this, mapMoveState]() {mapMoveState->setCursor(this->_mouseDown ? QCursor(Qt::ClosedHandCursor) : QCursor(Qt::OpenHandCursor));});
+    connect(mapMoveState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
+    _stateMachine.addState(mapMoveState);
 
     _stateMachine.reset();
 }

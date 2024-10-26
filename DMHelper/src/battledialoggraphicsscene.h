@@ -86,6 +86,7 @@ signals:
     void battleMouseMove(const QPointF& pos);
     void battleMouseRelease(const QPointF& pos);
 
+    void mapMoveToggled();
     void mapMousePress(const QPointF& pos);
     void mapMouseMove(const QPointF& pos);
     void mapMouseRelease(const QPointF& pos);
