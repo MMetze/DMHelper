@@ -32,6 +32,7 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 <h3>Fixes:</h3>
 <ul>
 <li><b>TBD:</b> TBD
+Space bar to move a map around, A-key to toggle the pointer.
 </ul>
 
 <p>
