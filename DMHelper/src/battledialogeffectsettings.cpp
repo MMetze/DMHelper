@@ -143,6 +143,7 @@ void BattleDialogEffectSettings::setSizeLabel(const QString& sizeLabel)
 void BattleDialogEffectSettings::setShowActive(bool show)
 {
     ui->chkActive->setVisible(show);
+    ui->lblActive->setVisible(show);
 }
 
 void BattleDialogEffectSettings::setShowWidth(bool show)

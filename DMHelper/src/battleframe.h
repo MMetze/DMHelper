@@ -10,6 +10,7 @@
 
 class BattleDialogModelCombatant;
 class CombatantWidget;
+class CombatantDialog;
 class QVBoxLayout;
 class EncounterBattle;
 class BattleDialogModel;
@@ -268,6 +269,7 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
+    void addMonsterFinished(CombatantDialog* combatantDlg, int result);
     void copyMonsters();
     void clearCopy();
     void pasteMonsters();

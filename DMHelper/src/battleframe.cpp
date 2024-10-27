@@ -1081,66 +1081,15 @@ void BattleFrame::reloadMap()
 
 void BattleFrame::addMonsters()
 {
-    if((!_battle) || (!_model))
-        return;
-
-    QPointF combatantPos = viewportCenter();
-
     if(!validateTokenLayerExists())
         return;
 
     qDebug() << "[Battle Frame] Adding monsters ...";
 
-    CombatantDialog combatantDlg(_model->getLayerScene(), QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(&combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
-
-    int result = combatantDlg.exec();
-    if(result == QDialog::Accepted)
-    {
-        MonsterClass* monsterClass = combatantDlg.getMonsterClass();
-        if(monsterClass == nullptr)
-        {
-            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
-            return;
-        }
-
-        QString baseName = combatantDlg.getName();
-        int monsterCount = combatantDlg.getCount();
-        int localInitiative = combatantDlg.getInitiative().toInt();
-
-        qreal sizeFactor = 0.0;
-        bool conversionResult = false;
-        sizeFactor = combatantDlg.getSizeFactor().toDouble(&conversionResult);
-        if(!conversionResult)
-            sizeFactor = 0.0;
-
-        qreal multipleShift = _model->getLayerScene().getScale() / 10.0;
-        QPointF multiplePos(multipleShift, multipleShift);
-        qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
-
-        for(int i = 0; i < monsterCount; ++i)
-        {
-            BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
-            monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
-            monster->setHitPoints(combatantDlg.getCombatantHitPoints());
-            monster->setInitiative(combatantDlg.isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
-            monster->setKnown(combatantDlg.isKnown());
-            monster->setShown(combatantDlg.isShown());
-            monster->setSizeFactor(sizeFactor);
-            monster->setPosition(combatantPos + (multiplePos * i));
-            monster->setIconIndex(combatantDlg.getIconIndex());
-            addCombatant(monster, combatantDlg.getLayer());
-        }
-
-        recreateCombatantWidgets();
-
-        if(combatantDlg.isSortInitiative())
-            _model->sortCombatants();
-    }
-    else
-    {
-        qDebug() << "[Battle Dialog Manager] ... add monsters dialog cancelled";
-    }
+    CombatantDialog* combatantDlg = new CombatantDialog(_model->getLayerScene(), QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
+    connect(combatantDlg, &CombatantDialog::finished, this, [this, combatantDlg](int result) {this->addMonsterFinished(combatantDlg, result);});
+    combatantDlg->open();
 }
 
 void BattleFrame::addCharacter()
@@ -2895,6 +2844,56 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
 
     if(_logger)
         _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
+}
+
+void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
+{
+    if((_battle) && (_model) && (result == QDialog::Accepted))
+    {
+        MonsterClass* monsterClass = combatantDlg->getMonsterClass();
+        if(monsterClass == nullptr)
+        {
+            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
+        }
+        else
+        {
+            QString baseName = combatantDlg->getName();
+            int monsterCount = combatantDlg->getCount();
+            int localInitiative = combatantDlg->getInitiative().toInt();
+
+            qreal sizeFactor = 0.0;
+            bool conversionResult = false;
+            sizeFactor = combatantDlg->getSizeFactor().toDouble(&conversionResult);
+            if(!conversionResult)
+                sizeFactor = 0.0;
+
+            qreal multipleShift = _model->getLayerScene().getScale() / 10.0;
+            QPointF multiplePos(multipleShift, multipleShift);
+            qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
+            QPointF combatantPos = viewportCenter();
+
+            for(int i = 0; i < monsterCount; ++i)
+            {
+                BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
+                monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
+                monster->setHitPoints(combatantDlg->getCombatantHitPoints());
+                monster->setInitiative(combatantDlg->isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
+                monster->setKnown(combatantDlg->isKnown());
+                monster->setShown(combatantDlg->isShown());
+                monster->setSizeFactor(sizeFactor);
+                monster->setPosition(combatantPos + (multiplePos * i));
+                monster->setIconIndex(combatantDlg->getIconIndex());
+                addCombatant(monster, combatantDlg->getLayer());
+            }
+
+            recreateCombatantWidgets();
+
+            if(combatantDlg->isSortInitiative())
+                _model->sortCombatants();
+        }
+    }
+
+    combatantDlg->deleteLater();
 }
 
 void BattleFrame::copyMonsters()
