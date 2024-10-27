@@ -552,11 +552,11 @@ void BattleFrame::next()
         return;
     }
 
-    int activeInitiative = activeCombatant->getInitiative();
-    int nextInitiative = nextCombatant->getInitiative();
-
     if(_model->getShowLairActions())
     {
+        int activeInitiative = activeCombatant->getInitiative();
+        int nextInitiative = nextCombatant->getInitiative();
+
         if((activeInitiative >= 20) && (nextInitiative < 20))
         {
             qDebug() << "[Battle Frame] Triggering Lair Action request.";
@@ -564,20 +564,8 @@ void BattleFrame::next()
         }
     }
 
-    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-    RuleInitiative* ruleInitiative = nullptr;
-    if((campaign) && (ruleInitiative = campaign->getRuleset().getRuleInitiative()))
-    {
-        if(ruleInitiative->compareCombatants(nextCombatant, activeCombatant))
-        {
-            newRound();
-            nextCombatant = getFirstLivingCombatant();
-        }
-    }
-    else
-    {
-        qDebug() << "[Battle Frame] WARNING: Unable to find campaign or ruleset!";
-    }
+    if(_model->getCombatantIndex(nextCombatant) <= _model->getCombatantIndex(activeCombatant))
+        newRound();
 
     setActiveCombatant(nextCombatant);
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
@@ -3929,20 +3917,20 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     if(!combatant)
         return nullptr;
 
-    int nextHighlight = _model->getCombatantList().indexOf(combatant);
+    int nextCombatant = _model->getCombatantList().indexOf(combatant);
 
     if(_combatantLayout->count() <= 1)
         return nullptr;
 
     do
     {
-        if(++nextHighlight >= _model->getCombatantCount())
-            nextHighlight = 0;
-    } while(((_model->getCombatant(nextHighlight)->getHitPoints() <= 0) ||
-             (!_model->getCombatant(nextHighlight)->getKnown())) &&
-            (_model->getCombatant(nextHighlight) != _model->getActiveCombatant()));
+        if(++nextCombatant >= _model->getCombatantCount())
+            nextCombatant = 0;
+    } while(((_model->getCombatant(nextCombatant)->getHitPoints() <= 0) ||
+             (!_model->getCombatant(nextCombatant)->getKnown())) &&
+            (_model->getCombatant(nextCombatant) != _model->getActiveCombatant()));
 
-    return _model->getCombatant(nextHighlight);
+    return _model->getCombatant(nextCombatant);
 }
 
 void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)

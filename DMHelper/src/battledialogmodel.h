@@ -39,6 +39,7 @@ public:
     int getCombatantCount() const;
     BattleDialogModelCombatant* getCombatant(int index) const;
     BattleDialogModelCombatant* getCombatantById(QUuid combatantId) const;
+    int getCombatantIndex(BattleDialogModelCombatant* combatant) const;
     void moveCombatant(int fromIndex, int toIndex);
     void removeCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatant(BattleDialogModelCombatant* combatant, LayerTokens* targetLayer = nullptr);
@@ -73,7 +74,6 @@ public:
     bool getShowLairActions() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
-    int getActiveCombatantIndex() const;
     QImage getBackgroundImage() const;
 
     LayerScene& getLayerScene();
