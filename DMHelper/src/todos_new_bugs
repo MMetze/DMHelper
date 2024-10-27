@@ -36,7 +36,7 @@ ENHANCEMENTS
 DONE Space bar to move a map around, A-key to toggle the pointer.
 Apply Effects would be nice if it roll damage and knew what kind of save/roll it was.
 
-CHECK --> R Click remove mobs from initiative list crashes program.
+NOT REPRODUCIBLE, HOW IS THIS DONE --> R Click remove mobs from initiative list crashes program.
 NOT REPRODUCIBLE, HOW IS THIS DONE --> If I select no FoW at the beginning, it won’t let me add it later.
 AS DESIGNED --> If a mob is visible but not known it doesn’t show up in Player view (seems like known overrides visibility if off). So when I go “and you see..” I have to click two check boxes per mob. Also I might want to have something visible but not them be aware its a mob, like an animated table for example.
 NOT REPRODUCIBLE, HOW IS THIS DONE --> Grid does not display on Player Window.
