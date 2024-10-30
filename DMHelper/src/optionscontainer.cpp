@@ -27,6 +27,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _tablesDirectory(),
     _rulesetFileName(),
     _showAnimations(false),
+    _autoSave(true),
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
     _logicalDPI(0.0),
@@ -130,6 +131,11 @@ QString OptionsContainer::getLastSpell() const
 bool OptionsContainer::getShowAnimations() const
 {
     return _showAnimations;
+}
+
+bool OptionsContainer::getAutoSave() const
+{
+    return _autoSave;
 }
 
 QString OptionsContainer::getFontFamily() const
@@ -426,6 +432,7 @@ void OptionsContainer::readSettings()
 //        getDataDirectory(QString("ui"), true);
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
+    setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
     setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
 
     //12*96/72 = 16 Pixels
@@ -512,6 +519,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("tables", getTablesDirectory());
     settings.setValue("ruleset", getRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
+    settings.setValue("autoSave", getAutoSave());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
     settings.setValue("pasteRich", getPasteRich());
@@ -895,6 +903,15 @@ void OptionsContainer::setShowAnimations(bool showAnimations)
     {
         _showAnimations = showAnimations;
         emit showAnimationsChanged(_showAnimations);
+    }
+}
+
+void OptionsContainer::setAutoSave(bool autoSave)
+{
+    if(_autoSave != autoSave)
+    {
+        _autoSave = autoSave;
+        emit autoSaveChanged(_autoSave);
     }
 }
 
@@ -1291,6 +1308,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setLastMonster(other->_lastMonster);
         setLastSpell(other->_lastSpell);
         setShowAnimations(other->_showAnimations);
+        setAutoSave(other->_autoSave);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);

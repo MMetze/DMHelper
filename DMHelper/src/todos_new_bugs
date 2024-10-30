@@ -21,7 +21,7 @@ DONE Pointer still doesn’t come up with spacebar and not perfectly lined up wi
 DONE Combat - New Map button doesn’t do anything.
 DONE When initiative list is not sorted it will trigger a new round each time it hits a player with higher initiative also messing with lair actions. I understand it is probably coded this way for simplicity. Maybe either always auto sort or have a new round trigger only when it jumps back to the top of the list.
 DONE (SLIGHTLY IMPROVED, BIGGER IMPROVEMENT NEEDS MORE EFFORT) - When adding an object to a combat encounter, the height/width/rotation fields are offset from the labels.
-When adding a monster to a combat map, clicking on … to get info of selected drop down monster, details window pops up behind add window and is non-intractable.
+DONE When adding a monster to a combat map, clicking on … to get info of selected drop down monster, details window pops up behind add window and is non-intractable.
 Effects highlight players even when not active if you move players. Moving effect clears it but then reactivates on player movement. Sucks when I have a trap or status effect I don't want players to know about but gives away that something is up when their token suddenly lights up.
 Map Markers
     Map Markers only 1/4 of it visible to players
@@ -36,6 +36,7 @@ ENHANCEMENTS
 DONE Space bar to move a map around, A-key to toggle the pointer.
 Apply Effects would be nice if it roll damage and knew what kind of save/roll it was.
 Dedicated effect settings dialogs for each setting type
+Autosave timer
 
 NOT REPRODUCIBLE, HOW IS THIS DONE --> R Click remove mobs from initiative list crashes program.
 NOT REPRODUCIBLE, HOW IS THIS DONE --> If I select no FoW at the beginning, it won’t let me add it later.

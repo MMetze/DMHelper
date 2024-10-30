@@ -29,6 +29,7 @@ public:
     QString getLastMonster() const;
     QString getLastSpell() const;
     bool getShowAnimations() const;
+    bool getAutoSave() const;
 
     // Font settings
     QString getFontFamily() const;
@@ -101,6 +102,7 @@ signals:
     void tablesDirectoryChanged();
     void rulesetFileNameChanged(const QString& filename);
     void showAnimationsChanged(bool showAnimations);
+    void autoSaveChanged(bool autoSave);
 
     // Font settings
     void fontFamilyChanged(const QString& fontFamily);
@@ -177,6 +179,7 @@ public slots:
     void setLastMonster(const QString& lastMonster);
     void setLastSpell(const QString& lastSpell);
     void setShowAnimations(bool showAnimations);
+    void setAutoSave(bool autoSave);
 
     // Font settings
     void setFontFamily(const QString& fontFamily);
@@ -254,6 +257,7 @@ private:
     QString _tablesDirectory;
     QString _rulesetFileName;
     bool _showAnimations;
+    bool _autoSave;
 
     // Font settings
     QString _fontFamily;

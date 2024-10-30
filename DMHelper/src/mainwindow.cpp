@@ -114,9 +114,12 @@
 #include <QShortcut>
 #include <QFontDatabase>
 #include <QSurfaceFormat>
+#include <QTimer>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
+
+const int AUTOSAVE_TIMER_INTERVAL = 60000; // 1 minute
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -138,6 +141,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _characterLayout(nullptr),
     _campaign(nullptr),
     _campaignFileName(),
+    _autoSaveTimer(nullptr),
     _options(nullptr),
     _bestiaryDlg(),
     _spellDlg(),
@@ -241,6 +245,9 @@ MainWindow::MainWindow(QWidget *parent) :
     f.setPointSize(_options->getFontSize());
     qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
     qApp->setFont(f);
+
+    connect(_options, &OptionsContainer::autoSaveChanged, this, &MainWindow::handleAutoSaveChanged);
+    connect(this, &MainWindow::campaignLoaded, this, &MainWindow::handleAutoSaveChanged);
 
     DMH_DEBUG_OPENGL_Singleton::Initialize();
 
@@ -2809,6 +2816,38 @@ void MainWindow::handleOpenGlobalSearch()
 
     _globalSearchFrame->setCampaign(_campaign);
     _globalSearchDlg->exec();
+}
+
+void MainWindow::handleAutoSaveExpired()
+{
+    if((_campaign) && (_dirty) && (_options->getAutoSave()))
+        saveCampaign();
+
+    handleAutoSaveChanged();
+}
+
+void MainWindow::handleAutoSaveChanged()
+{
+    if(!_campaign)
+        return;
+
+    if(_options->getAutoSave())
+    {
+        if(!_autoSaveTimer)
+        {
+            _autoSaveTimer = new QTimer(this);
+            _autoSaveTimer->setSingleShot(true);
+            connect(_autoSaveTimer, &QTimer::timeout, this, &MainWindow::handleAutoSaveExpired);
+        }
+
+        _autoSaveTimer->start(AUTOSAVE_TIMER_INTERVAL);
+
+    }
+    else
+    {
+        if(_autoSaveTimer)
+            _autoSaveTimer->stop();
+    }
 }
 
 void MainWindow::handleAnimationStarted()

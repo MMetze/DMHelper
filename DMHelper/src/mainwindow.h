@@ -186,6 +186,8 @@ protected slots:
     void handleOpenCountdown();
     void handleOpenGlobalSearch();
 
+    void handleAutoSaveExpired();
+    void handleAutoSaveChanged();
     void handleAnimationStarted();
 
     bool selectItemFromStack(const QUuid& itemId);
@@ -236,6 +238,7 @@ private:
     QVBoxLayout* _characterLayout;
     Campaign* _campaign;
     QString _campaignFileName;
+    QTimer* _autoSaveTimer;
 
     OptionsContainer* _options;
 
