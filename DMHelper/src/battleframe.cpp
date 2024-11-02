@@ -43,6 +43,7 @@
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
+#include "spellbook.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -191,7 +192,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
-    connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, &BattleDialogGraphicsScene::itemChangeLayer, this, &BattleFrame::handleItemChangeLayer);
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
@@ -2161,20 +2161,6 @@ void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
     */
 }
 
-void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
-{
-    Q_UNUSED(effectItem);
-
-    /*
-    for(QGraphicsPixmapItem* item : _combatantIcons.values())
-    {
-        // TODO: Optimize to only remove effects if not still relevant
-        if(item)
-            removeEffectsFromItem(item);
-    }
-    */
-}
-
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
     Q_UNUSED(object);
@@ -2366,6 +2352,9 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    if((!effect) || (!_model))
+        return;
+
     QList<BattleDialogModelCombatant*> affectedCombatantList;
 
     QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
@@ -2390,11 +2379,23 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
         return;
     }
 
+    BattleDialogModelEffect* finalEffect = BattleDialogModelEffect::getFinalEffect(BattleDialogModelEffect::getEffectFromItem(effect));
+
     DiceRollDialogCombatants* dlg = new DiceRollDialogCombatants(Dice(1, 20, 0), affectedCombatantList, 15, this);
     connect(dlg, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SLOT(setSelectedCombatant(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantWidget(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
+    connect(dlg, &DiceRollDialogCombatants::removeEffect, this, [this, finalEffect](){ this->_model->removeEffect(finalEffect); });
+
+    if((finalEffect) && (Spellbook::Instance()) && (Spellbook::Instance()->exists(finalEffect->objectName())))
+    {
+        Spell* spell = Spellbook::Instance()->getSpell(finalEffect->objectName());
+        if(spell)
+        {
+            dlg->setConditions(spell->getEffectConditions());
+        }
+    }
 
     dlg->resize(width() * 3 / 4, height() * 3 / 4);
     dlg->fireAndForget();

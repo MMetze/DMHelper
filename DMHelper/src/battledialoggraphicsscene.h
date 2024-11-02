@@ -75,7 +75,6 @@ signals:
     void castSpell();
 
     void effectChanged(QGraphicsItem* effect);
-    void effectRemoved(QGraphicsItem* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);

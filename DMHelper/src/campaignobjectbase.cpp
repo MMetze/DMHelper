@@ -451,11 +451,11 @@ void CampaignObjectBase::handleInternalDirty()
 
 void CampaignObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute("expanded", getExpanded());
-    element.setAttribute("row", getRow());
-    element.setAttribute("name", getName());
+    element.setAttribute("expanded", _expanded);
+    element.setAttribute("row", _row);
+    element.setAttribute("name", objectName());
     if(!_iconFile.isEmpty())
-        element.setAttribute("base-icon", getIconFile());
+        element.setAttribute("base-icon", _iconFile);
 
     DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

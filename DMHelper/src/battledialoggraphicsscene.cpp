@@ -875,7 +875,6 @@ void BattleDialogGraphicsScene::deleteItem()
             _mouseDown = false;
             _mouseDownItem = nullptr;
         }
-        emit effectRemoved(_contextMenuItem);
         _model->removeEffect(deleteEffect);
     }
 }

@@ -146,6 +146,16 @@ void PublishGLFrame::initializeGL()
         f->glEnable(GL_TEXTURE_2D); // Enable texturing
         f->glEnable(GL_BLEND);// you enable blending function
         f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Output basic OpenGL data
+        qDebug() << "[PublishGLFrame] OpenGL publish frame initialized. OpenGL Data:";
+        qDebug() << "[PublishGLFrame]     OpenGL Version:" << reinterpret_cast<const char*>(f->glGetString(GL_VERSION));
+        qDebug() << "[PublishGLFrame]     GLSL Version Supported:" << reinterpret_cast<const char*>(f->glGetString(GL_SHADING_LANGUAGE_VERSION));
+        qDebug() << "[PublishGLFrame]     Vendor:" << reinterpret_cast<const char*>(f->glGetString(GL_VENDOR));
+        qDebug() << "[PublishGLFrame]     Renderer:" << reinterpret_cast<const char*>(f->glGetString(GL_RENDERER));
+        GLint maxTextureSize;
+        f->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+        qDebug() << "[PublishGLFrame]     Max Texture Size:" << maxTextureSize;
     }
 
     QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
