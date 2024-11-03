@@ -5,6 +5,8 @@ Generic Conditions
 Update DiceRollDialogCombatants and other places that conditions/effects are relevant
 Expand spells and DiceRollDialogCombatants to automatically place the right damage amounts and saving throw type
 
+Multiple publish targets?
+
 Main 3.3.1 Todos:
 DONE - to be tested 1) any time the backup file is bigger than the current file or twice as small, rename it rather than replacing it, might lead to a bit of bloat, but generally the files grow and hence they extra backups would be useful
 DONE - to be tested 2) add a date/timestamp to the backup names that are kept

@@ -22,7 +22,7 @@ DONE Combat - New Map button doesn’t do anything.
 DONE When initiative list is not sorted it will trigger a new round each time it hits a player with higher initiative also messing with lair actions. I understand it is probably coded this way for simplicity. Maybe either always auto sort or have a new round trigger only when it jumps back to the top of the list.
 DONE (SLIGHTLY IMPROVED, BIGGER IMPROVEMENT NEEDS MORE EFFORT) - When adding an object to a combat encounter, the height/width/rotation fields are offset from the labels.
 DONE When adding a monster to a combat map, clicking on … to get info of selected drop down monster, details window pops up behind add window and is non-intractable.
-Apply Effects doesn’t apply condition effects from spells
+DONE Apply Effects doesn’t apply condition effects from spells
 Spells aren't showing their images, just the colors
 Effects highlight players even when not active if you move players. Moving effect clears it but then reactivates on player movement. Sucks when I have a trap or status effect I don't want players to know about but gives away that something is up when their token suddenly lights up.
 Map Markers
@@ -40,6 +40,8 @@ DONE Space bar to move a map around, A-key to toggle the pointer.
 NOT GOING TO DO IT Apply Effects would be nice if it roll damage and knew what kind of save/roll it was.
 Dedicated effect settings dialogs for each setting type
 DONE Autosave timer
+DONE Improved apply effects dialog, including auto-delete of the effect
+DONE For measuring distance if I include the height distance after measured I have to re measure. Would be nice if it auto recalculated when typed using the current measured line.
 
 NOT REPRODUCIBLE, HOW IS THIS DONE --> R Click remove mobs from initiative list crashes program.
 NOT REPRODUCIBLE, HOW IS THIS DONE --> If I select no FoW at the beginning, it won’t let me add it later.
@@ -49,98 +51,6 @@ USER MANUAL BUG, USE [[text here]] TO CREATE A LINK --> Auto and manual hyperlin
 
 
 
-Feature Improvements
-Integrate Timer into current player window. Currently it shows up as a separate window which if maximized goes to another screen. Then moving it around causes issues. Should just overlay the current screen.
-Still behaves the same way
-
-For measuring distance if I include the height distance after measured I have to re measure. Would be nice if it auto recalculated when typed using the current measured line.
-Still behaves the same way
-
-There is no file check when importing media. If its not the right type it will either crash or display nothing.
-Still behaves the same way
-
-Character/Player initiative modifier not auto calculated from Dex modifier.
-Still behaves the same way
-
-For map grid adjustment. Would be nice to have an OBR (Owl Bear Rodeo) style grid adjuster (allow decimals and correct for distortion) as well as instead of just changing number, have the ability to drag both x and y independently bars that will live preview move the grid while overlayed on the map. (I can probably show what I mean better than explain) Secondly ability to calibrate distance to large (continent style) map distance markers.
-Same
-
-Have ability to reset Combat Statistics (also it seems to reset on its own randomly and not sure what the criteria is)
-Same
-
-Add ability to drop text/overlay on maps (Both Combat and regular Maps) for DM View only for quick notes, room numbering, etc…
-Same
-
-Add the ability to have Map Markers for Encounters or the ability to show the Map Markers already in the maps section be shown in Encounters.
-Same
-
-Add ability to show Player life total on Player Screen
-Same
-
-Add Hit Dice info on Player Sheets. (As I type this I realize multi classing might make this a bit more complicated than initially thought)
-Same
-
-
-There is no undo feature (even with Ctrl-Z/Cmd-Z for Mac) on text editor. I could REALLY use this… lol
-Same
-
-Give ability to change token size on the fly. (Enlarge/Shrink/etc…) After already on the map.
-I noticed the change log said this was a new feature but I cant seem to find it. Maybe should move this to questions section
-
-Would be nice to have snap to grid option as needed for tokens.
-Same
-
-Better text editor. Many settings paste that I later cannot change such as line spacing. Also if I want black text and one letter is black in the whole thing, it won’t change to black.
-Same
-
-Program forces you to do encounter based maps. I cannot have on large map with all of the mobs already pre populated and let everyone roam. If I do all of the mobs are on the initiative list by default. If I do encounter based, when players run from room to room mid combat (mine do this all the damn time the idiots…) I can’t just pull in the previously damaged person/monster into the fight by just moving them across the map or have those traps already pre set up. I would have to move them map to map and re populate mobs from other rooms on the fly. Would be nice to have a “add to/remove from initiative” option to allow for one map and bring pre-populated people in and out of fights as PCs go along. (Making a mob “known” kinda does this but still makes the list on the R crowded AF)
-Same
-
-Allow to swap icon for individual tokens. (Either to update, or if they change form, etc…)
-Didn't see this in the change log but noticed you added this for Mobs!!!! Thanks! Can we do the same for players now?
-
-Allow for distance unit edits (ft vs yards vs miles) for larger area maps.
-Same
-
-Allow for Mac pinch and zoom on touch pad.
-Same
-
-Add (or incorporate OS built in) spell check for the text would help catch mistakes.
-Same
-
-Enable Ctrl-F/Cmd-F (find/search function) would be really nice on text.
-Same
-
-Support mac keyboard shortcuts like Cmd-W to close a window.
-Same
-
-Allow manual scaling of objects. Right now it’s whole number input based. (use drag and scale instead)
-Same (this might be addressed by item 12. above)
-
-Allow for Actions for NPCs and maybe players for pop up on mouse hover over initiative list. Also be able to track NPC abilities the same way as Mobs.
-DONE!!! THANKS!!!!
-
-Allow for shapeshifting (Maybe in PC window have a drop down that will swap stats and picture and then refreshes map to show new info?
-Same
-
-Allow for companions as Beasts under PCs (I guess I could add them as additional PCs but would be nice if you bring in a player it also brings in all selected companions (selected as in the check marks next to their name) automatically with them. Also perks of calling them Beasts/Monsters is that you have actions on hover as well as hides unnecessary info such as proficiencies when looking at details. Maybe have it how NPC becomes a PC the moment they are put in a Party folder, have a beast become a companion when put in the party folder under a PC?
-Same
-
-Allow to select multiple and right click make all visible/known. Having a room full of monsters to make visible one by one is a bit of a pain.
-Same
-
-Allow reorganizing of special abilities/actions etc… in bestiary (like drag and drop)
-Same
-
-Questions
-Not sure if this is a bug or a question on how am I doing this wrong. “Edit file” in the Map menu of a Map does not swap out/update the map. It seems like it sometimes does if I then restart the program afterwards but not consistently. No idea why it sometimes works and sometimes doesn’t.
-Same
-
-What does Encounter option of Map Marker do?
-Same
-
-In the Player/NPC/Party character sheet under Hit Points, what is the lower number? If it’s Max HP it stays 0 when using bestiary info. Also doesn’t limit max HP when healing. Is it Temp HP? Either way should probably display and be editable (if Temp HP) in the initiative list while in a combat map.
-Same
 
 
 3.2 Specific Feedback
@@ -150,3 +60,27 @@ I noticed the program has been crashing a bit and randomly. This will suck if it
 Things I missed above
 Spell book - can't select any created spells to modify them.
 Spell book - arrows on the right don't work to cycle through spells.
+
+
+Feature Improvements
+
+S Would be nice to have snap to grid option as needed for tokens.
+S Allow manual scaling of objects. Right now it’s whole number input based. (use drag and scale instead)
+S Allow to select multiple and right click make all visible/known. Having a room full of monsters to make visible one by one is a bit of a pain.
+S Allow for Mac pinch and zoom on touch pad.
+    S Support mac keyboard shortcuts like Cmd-W to close a window.
+M Integrate Timer into current player window. Currently it shows up as a separate window which if maximized goes to another screen. Then moving it around causes issues. Should just overlay the current screen.
+M Have ability to reset Combat Statistics (also it seems to reset on its own randomly and not sure what the criteria is)
+M Add ability to drop text/overlay on maps (Both Combat and regular Maps) for DM View only for quick notes, room numbering, etc…
+M Add the ability to have Map Markers for Encounters or the ability to show the Map Markers already in the maps section be shown in Encounters.
+M Add ability to show Player life total on Player Screen
+    FOLLOW-UP: Where would you want to see it and how?
+M There is no undo feature (even with Ctrl-Z/Cmd-Z for Mac) on text editor. I could REALLY use this… lol
+M Give ability to change token size on the fly. (Enlarge/Shrink/etc…) After already on the map. I noticed the change log said this was a new feature but I cant seem to find it. Maybe should move this to questions section
+M Allow to swap icon for individual character tokens. (Either to update, or if they change form, etc…)
+M Allow for distance unit edits (ft vs yards vs miles) for larger area maps.
+L Better text editor. Many settings paste that I later cannot change such as line spacing. Also if I want black text and one letter is black in the whole thing, it won’t change to black.
+L Add (or incorporate OS built in) spell check for the text would help catch mistakes.
+L Allow reorganizing of special abilities/actions etc… in bestiary (like drag and drop)
+    FOLLOW-UP: Interesting, but pretty tricky to do, tbh
+

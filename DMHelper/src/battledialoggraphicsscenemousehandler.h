@@ -48,8 +48,11 @@ public:
     virtual void setDistanceLineType(int lineType);
     virtual void setDistanceLineWidth(int lineWidth);
 
+    virtual QString createDistanceString(qreal lineDistance) const;
+
     virtual QGraphicsItem* getDistanceLine() const = 0;
     virtual QGraphicsSimpleTextItem* getDistanceText() const = 0;
+    virtual void updateDistance() = 0;
 
 signals:
     void distanceChanged(const QString& distance);
@@ -81,6 +84,7 @@ public:
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual QGraphicsItem* getDistanceLine() const override;
     virtual QGraphicsSimpleTextItem* getDistanceText() const override;
+    virtual void updateDistance() override;
 
 protected:
     QGraphicsLineItem* _distanceLine;
@@ -106,6 +110,7 @@ public:
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual QGraphicsItem* getDistanceLine() const override;
     virtual QGraphicsSimpleTextItem* getDistanceText() const override;
+    virtual void updateDistance() override;
 
 protected:
     QPointF _mouseDownPos;
