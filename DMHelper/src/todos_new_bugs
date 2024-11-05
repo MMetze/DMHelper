@@ -23,7 +23,6 @@ DONE When initiative list is not sorted it will trigger a new round each time it
 DONE (SLIGHTLY IMPROVED, BIGGER IMPROVEMENT NEEDS MORE EFFORT) - When adding an object to a combat encounter, the height/width/rotation fields are offset from the labels.
 DONE When adding a monster to a combat map, clicking on … to get info of selected drop down monster, details window pops up behind add window and is non-intractable.
 DONE Apply Effects doesn’t apply condition effects from spells
-Spells aren't showing their images, just the colors
 Effects highlight players even when not active if you move players. Moving effect clears it but then reactivates on player movement. Sucks when I have a trap or status effect I don't want players to know about but gives away that something is up when their token suddenly lights up.
 Map Markers
     Map Markers only 1/4 of it visible to players
