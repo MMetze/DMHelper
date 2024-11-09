@@ -100,6 +100,18 @@ private slots:
     void editCharacterUIFile();
     void setCharacterUIFile(const QString& characterUIFile);
 
+    void browseBestiaryFile();
+    void editBestiaryFile();
+    void setBestiaryFile(const QString& bestiaryFile);
+
+    void browseMonsterDataFile();
+    void editMonsterDataFile();
+    void setMonsterDataFile(const QString& monsterDataFile);
+
+    void browseMonsterUIFile();
+    void editMonsterUIFile();
+    void setMonsterUIFile(const QString& monsterUIFile);
+
 private:
     Ui::OptionsDialog *ui;
 

@@ -22,6 +22,9 @@ public:
     QString getRuleInitiativeType();
     QString getCharacterDataFile() const;
     QString getCharacterUIFile() const;
+    QString getBestiaryFile() const;
+    QString getMonsterDataFile() const;
+    QString getMonsterUIFile() const;
     bool getCombatantDoneCheckbox() const;
 
     void setDefaultValues();
@@ -30,11 +33,17 @@ signals:
     void initiativeRuleChanged();
     void characterDataFileChanged(const QString& characterDataFile);
     void characterUIFileChanged(const QString& characterUIFile);
+    void bestiaryFileChanged(const QString& bestiaryFile);
+    void monsterDataFileChanged(const QString& monsterDataFile);
+    void monsterUIFileChanged(const QString& monsterUIFile);
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
     void setCharacterDataFile(const QString& characterDataFile);
     void setCharacterUIFile(const QString& characterUIFile);
+    void setBestiaryFile(const QString& bestiaryFile);
+    void setMonsterDataFile(const QString& monsterDataFile);
+    void setMonsterUIFile(const QString& monsterUIFile);
     void setCombatantDoneCheckbox(bool checked);
 
 protected slots:
@@ -47,6 +56,9 @@ protected:
     RuleInitiative* _ruleInitiative;
     QString _characterDataFile;
     QString _characterUIFile;
+    QString _bestiaryFile;
+    QString _monsterDataFile;
+    QString _monsterUIFile;
     bool _combatantDoneCheckbox;
 };
 

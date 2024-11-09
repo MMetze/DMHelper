@@ -674,3 +674,57 @@ void OptionsDialog::setCharacterUIFile(const QString& characterUIFile)
 {
     ui->edtCharacterUI->setText(characterUIFile);
 }
+
+
+void OptionsDialog::browseBestiaryFile()
+{
+    setBestiaryFile(QFileDialog::getOpenFileName(this, QString("Select the bestiary file"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editBestiaryFile()
+{
+    setBestiaryFile(ui->edtBestiary->text());
+}
+
+void OptionsDialog::setBestiaryFile(const QString& bestiaryFile)
+{
+    ui->edtBestiary->setText(bestiaryFile);
+}
+
+void OptionsDialog::browseMonsterDataFile()
+{
+    setMonsterDataFile(QFileDialog::getOpenFileName(this, QString("Select the monster data file"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editMonsterDataFile()
+{
+    setMonsterDataFile(ui->edtMonsterData->text());
+}
+
+void OptionsDialog::setMonsterDataFile(const QString& monsterDataFile)
+{
+    QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                               QString("Confirm Monster Data Format Change"),
+                                                               QString("You are about to chnage the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QMessageBox::Yes | QMessageBox::No);
+
+    if(result != QMessageBox::Yes)
+        return;
+
+    ui->edtMonsterData->setText(monsterDataFile);
+}
+
+void OptionsDialog::browseMonsterUIFile()
+{
+    setMonsterUIFile(QFileDialog::getOpenFileName(this, QString("Select the monster UI file"), QString(), QString("UI files (*.ui)")));
+}
+
+void OptionsDialog::editMonsterUIFile()
+{
+    setMonsterUIFile(ui->edtMonsterUI->text());
+}
+
+void OptionsDialog::setMonsterUIFile(const QString& monsterUIFile)
+{
+    ui->edtMonsterUI->setText(monsterUIFile);
+}
