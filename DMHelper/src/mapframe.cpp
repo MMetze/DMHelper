@@ -524,9 +524,7 @@ void MapFrame::editMapFile()
     if(!filename.isEmpty())
     {
         uninitializeMap();
-#if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
         _mapSource->uninitialize();
-#endif
         _mapSource->setFileName(filename);
         initializeMap();
     }
