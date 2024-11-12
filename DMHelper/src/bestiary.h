@@ -82,6 +82,7 @@ public slots:
 
 private:
     void showMonsterClassWarning(const QString& monsterClass);
+    void loadAndConvertBestiary(const QDomElement& bestiaryElement);
     void loadBestiary(const QDomElement& bestiaryElement);
     void importBestiary(const QDomElement& bestiaryElement, const QString& importFile);
     void importMonsterImage(const QDomElement& monsterElement, const QString& importFile);

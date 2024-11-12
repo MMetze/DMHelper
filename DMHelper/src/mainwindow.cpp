@@ -789,6 +789,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        set ruleset if exists, then configure monster factory
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));

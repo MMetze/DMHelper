@@ -20,12 +20,16 @@ public:
     QString getInitiativeDescription() const;
     QString getCharacterDataFile() const;
     QString getCharacterUIFile() const;
+    QString getMonsterDataFile() const;
+    QString getMonsterUIFile() const;
     bool isCombatantDone() const;
 
 private slots:
     void handleRulesetSelected();
     void handleCharacterDataBrowse();
     void handleCharacterUIBrowse();
+    void handleMonsterDataBrowse();
+    void handleMonsterUIBrowse();
 
 private:
     Ui::NewCampaignDialog *ui;

@@ -13,8 +13,8 @@ RuleFactory* RuleFactory::_instance = nullptr;
 
 RuleFactory::RuleFactory(const QString& rulesetFile, QObject *parent) :
     QObject{parent},
-    _rulesetTemplates(),
-    _rulesetDir()
+    _rulesetDir(),
+    _rulesetTemplates()
 {
     readRuleset(rulesetFile);
 }
@@ -139,6 +139,8 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         newRuleset._initiative = rulesetElement.attribute(QString("initiative"));
         newRuleset._characterData = rulesetElement.attribute(QString("characterdata"));
         newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
+        newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
+        newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
 
         _rulesetTemplates.insert(newRuleset._name, newRuleset);
 

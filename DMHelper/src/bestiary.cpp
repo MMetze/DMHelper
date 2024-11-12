@@ -234,13 +234,27 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         return;
     }
 
-    if (!isVersionIdentical())
-        qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion();
-
-    if(importFile.isEmpty())
-        loadBestiary(bestiaryElement);
+    if(!isVersionIdentical())
+    {
+        qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion() << ", trying to convert to the new format.";
+        if(importFile.isEmpty())
+        {
+            loadAndConvertBestiary(bestiaryElement);
+        }
+        else
+        {
+            qDebug() << "[Bestiary]    ERROR: Importing an old bestiary version is not supported. Please convert the file to the new format before importing.";
+            QMessageBox::critical(nullptr, QString("Importing old version"), QString("Importing an old bestiary version is not supported. Please convert the file to the new format before importing."));
+            return;
+        }
+    }
     else
-        importBestiary(bestiaryElement, importFile);
+    {
+        if(importFile.isEmpty())
+            loadBestiary(bestiaryElement);
+        else
+            importBestiary(bestiaryElement, importFile);
+    }
 
     emit changed();
 }

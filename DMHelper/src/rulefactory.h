@@ -34,8 +34,8 @@ public slots:
 
 private:
     static RuleFactory* _instance;
-    QDir _rulesetDir;
 
+    QDir _rulesetDir;
     QHash<QString, RulesetTemplate> _rulesetTemplates;
 
 
@@ -48,13 +48,17 @@ public:
             _name(),
             _initiative(),
             _characterData(),
-            _characterUI()
+            _characterUI(),
+            _monsterData(),
+            _monsterUI()
         {}
 
         QString _name;
         QString _initiative;
         QString _characterData;
         QString _characterUI;
+        QString _monsterData;
+        QString _monsterUI;
 
     };
 
