@@ -225,6 +225,30 @@ void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVe
     _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 4));
 }
 
+CampaignObjectBase* CombatantFactory::setDefaultValues(CampaignObjectBase* object)
+{
+    if((!object) || (object->getObjectType() != DMHelper::CampaignType_Combatant))
+        return object;
+
+    Characterv2* character = dynamic_cast<Characterv2*>(object);
+    if(!character)
+        return object;
+
+    QHash<QString, DMHAttribute> attributes = getAttributes();
+    for(auto it = attributes.begin(); it != attributes.end(); ++it)
+    {
+        character->setValue(it.key(), it->_default);
+    }
+
+    QHash<QString, DMHAttribute> elements = getElements();
+    for(auto it = elements.begin(); it != elements.end(); ++it)
+    {
+        character->setValue(it.key(), it->_default);
+    }
+
+    return character;
+}
+
 void CombatantFactory::loadCharacterTemplate(const QString& characterTemplateFile)
 {
     if(!RuleFactory::Instance())
@@ -380,28 +404,4 @@ void CombatantFactory::loadCharacterTemplate(const QString& characterTemplateFil
     // Validate that each entry has a name attribute
     if(!hasAttribute(QString("name")))
         qDebug() << "[CombatantFactory] ERROR: Combatant template has no 'name' attribute";
-}
-
-CampaignObjectBase* CombatantFactory::setDefaultValues(CampaignObjectBase* object)
-{
-    if((!object) || (object->getObjectType() != DMHelper::CampaignType_Combatant))
-        return object;
-
-    Characterv2* character = dynamic_cast<Characterv2*>(object);
-    if(!character)
-        return object;
-
-    QHash<QString, DMHAttribute> attributes = getAttributes();
-    for(auto it = attributes.begin(); it != attributes.end(); ++it)
-    {
-        character->setValue(it.key(), it->_default);
-    }
-
-    QHash<QString, DMHAttribute> elements = getElements();
-    for(auto it = elements.begin(); it != elements.end(); ++it)
-    {
-        character->setValue(it.key(), it->_default);
-    }
-
-    return character;
 }
