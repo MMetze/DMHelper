@@ -26,7 +26,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
@@ -921,6 +921,17 @@
            </layout>
           </item>
           <item>
+           <widget class="QCheckBox" name="chkCombatantDone">
+            <property name="text">
+             <string>Show a checkbox for whether a combatant has been active this round</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_19">
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -971,15 +982,71 @@
            </layout>
           </item>
           <item>
-           <widget class="QCheckBox" name="chkCombatantDone">
-            <property name="text">
-             <string>Show a checkbox for whether a combatant has been active this round</string>
-            </property>
-            <property name="icon">
-             <iconset resource="resources.qrc">
-              <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_16">
+              <item>
+               <widget class="QLabel" name="lblBestiaryFile">
+                <property name="text">
+                 <string>Bestiary File:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblMonsterData">
+                <property name="text">
+                 <string>Monster Data Template:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblMonsterUI">
+                <property name="text">
+                 <string>Monster UI Template:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QLineEdit" name="edtBestiaryFile"/>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="edtMonsterData"/>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="edtMonsterUI"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_18">
+              <item>
+               <widget class="QPushButton" name="btnBestiaryFile">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMonsterData">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMonsterUI">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

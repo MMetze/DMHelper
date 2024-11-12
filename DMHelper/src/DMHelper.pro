@@ -132,6 +132,7 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    monsterfactory.cpp \
     newcampaigndialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
@@ -201,6 +202,7 @@ SOURCES += main.cpp\
     spellbookdialog.cpp \
     spellslotlevelbutton.cpp \
     spellslotradiobutton.cpp \
+    templatefactory.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     tokeneditdialog.cpp \
@@ -420,6 +422,7 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    monsterfactory.h \
     newcampaigndialog.h \
     objectfactory.h \
     objectimportdialog.h \
@@ -489,6 +492,7 @@ HEADERS  += mainwindow.h \
     spellbookdialog.h \
     spellslotlevelbutton.h \
     spellslotradiobutton.h \
+    templatefactory.h \
     textbrowsermargins.h \
     texteditmargins.h \
     tokeneditdialog.h \
