@@ -8,6 +8,7 @@
 #include "party.h"
 #include "characterv2.h"
 #include "characterimporter.h"
+#include "characterv2converter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
 #include "characterframe.h"
@@ -933,7 +934,7 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
+    Characterv2* character = nullptr;
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -963,10 +964,16 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            // HACK
-            //character->copyMonsterValues(*monsterClass);
+            Characterv2Converter* convertCharacter = new Characterv2Converter();
+            CombatantFactory::Instance()->setDefaultValues(convertCharacter);
+            convertCharacter->readFromMonsterClass(*monsterClass);
+            convertCharacter->setName(characterName);
+            character = convertCharacter;
         }
     }
+
+    if(!character)
+        character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     addNewObject(character);
 }

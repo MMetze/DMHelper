@@ -2,25 +2,38 @@
 #include "character.h"
 #include <QDomElement>
 
-Characterv2Converter::Characterv2Converter() :
-    Characterv2{}
+Characterv2Converter::Characterv2Converter(const QString& name, QObject *parent) :
+    Characterv2{name, parent}
 {}
 
 void Characterv2Converter::inputXML(const QDomElement &element, bool isImport)
 {
-    Character* convertCharacter = new Character();
-    convertCharacter->inputXML(element, isImport);
+    Character* oldCharacter = new Character();
+    oldCharacter->inputXML(element, isImport);
 
     beginBatchChanges();
 
     setDndBeyondID(element.attribute(QString("dndBeyondID"), QString::number(-1)).toInt());
-    convertValues(convertCharacter);
+    convertValues(oldCharacter);
 
     Combatant::inputXML(element, isImport);
 
     endBatchChanges();
 
-    delete convertCharacter;
+    delete oldCharacter;
+}
+
+void Characterv2Converter::readFromMonsterClass(MonsterClass& monster)
+{
+    Character* oldCharacter = new Character();
+    oldCharacter->copyMonsterValues(monster);
+
+    beginBatchChanges();
+    convertValues(oldCharacter);
+    setIcon(oldCharacter->getIconFile());
+    endBatchChanges();
+
+    delete oldCharacter;
 }
 
 void Characterv2Converter::convertValues(Character* convertCharacter)
