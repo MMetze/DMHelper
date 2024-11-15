@@ -76,6 +76,9 @@ public:
     virtual int getWidth() const;
     virtual void setWidth(int width);
 
+    virtual bool hasEffectTransform() const;
+    virtual void updateTransform(QGraphicsItem* graphicsItem) const;
+
     virtual QColor getColor() const;
     virtual void setColor(const QColor& color);
 

@@ -2,6 +2,7 @@
 #define BATTLEDIALOGMODELEFFECTOBJECT_H
 
 #include "battledialogmodeleffect.h"
+#include <QSizeF>
 
 class BattleDialogModelEffectObject : public BattleDialogModelEffect
 {
@@ -30,6 +31,9 @@ public:
     virtual int getWidth() const override;
     virtual void setWidth(int width) override;
 
+    virtual bool hasEffectTransform() const override;
+    virtual void updateTransform(QGraphicsItem* graphicsItem) const override;
+
     virtual int getImageRotation() const override;
     virtual void setImageRotation(int imageRotation) override;
 
@@ -46,7 +50,8 @@ protected:
 
     int _width;
     int _imageRotation;
-    qreal _imageScaleFactor;
+    qreal _gridScale;
+    QSizeF _imageScaleFactors;
     QString _imageFile;
 
 };

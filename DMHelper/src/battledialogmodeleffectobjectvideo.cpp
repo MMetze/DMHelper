@@ -97,6 +97,11 @@ BattleDialogEffectSettingsBase* BattleDialogModelEffectObjectVideo::getEffectEdi
     return result;
 }
 
+bool BattleDialogModelEffectObjectVideo::hasEffectTransform() const
+{
+    return false;
+}
+
 QGraphicsItem* BattleDialogModelEffectObjectVideo::createEffectShape(qreal gridScale)
 {
     if(!_screenshot)
