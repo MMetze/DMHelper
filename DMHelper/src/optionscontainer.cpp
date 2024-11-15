@@ -844,15 +844,16 @@ void OptionsContainer::backupFile(const QString& filename)
                 return;
             }
 
+            QString backupRetainer = backupDir.filePath(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
             if(backupFileInfo.size() > fileInfo.size())
             {
-                qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup!";
-                previousBackup.rename(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+                qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup as: " << backupRetainer;
+                previousBackup.rename(backupRetainer);
             }
-            else if(backupFileInfo.size() < fileInfo.size() * 2)
+            else if(fileInfo.size() > backupFileInfo.size() * 120 / 100)
             {
-                qDebug() << "[OptionsContainer] WARNING: Recent save file is over twice as large as the previous backup, keeping previous backup!";
-                previousBackup.rename(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+                qDebug() << "[OptionsContainer] WARNING: Recent save file is over 20% larger than the previous backup, keeping previous backup as: " << backupRetainer;
+                previousBackup.rename(backupRetainer);
             }
             else
             {
