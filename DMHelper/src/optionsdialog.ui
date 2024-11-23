@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>668</width>
-    <height>617</height>
+    <height>651</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,16 +73,10 @@
             <item>
              <widget class="QSpinBox" name="spinBoxFontSize">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>22</height>
-               </size>
               </property>
               <property name="suffix">
                <string/>
@@ -126,16 +120,10 @@
             <item>
              <widget class="QSpinBox" name="spinBoxMRUCount">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>22</height>
-               </size>
               </property>
               <property name="suffix">
                <string/>

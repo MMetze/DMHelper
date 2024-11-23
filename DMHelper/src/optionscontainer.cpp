@@ -16,6 +16,7 @@
 
 OptionsContainer::OptionsContainer(QMainWindow *parent) :
     QObject(parent),
+    _loading(false),
     _bestiaryFileName(),
     _spellbookFileName(),
     _lastMonster(),
@@ -76,6 +77,11 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
 
 OptionsContainer::~OptionsContainer()
 {
+}
+
+bool OptionsContainer::isLoading() const
+{
+    return _loading;
 }
 
 QString OptionsContainer::getBestiaryFileName() const
@@ -367,6 +373,8 @@ void OptionsContainer::setMRUHandler(MRUHandler* mruHandler)
 void OptionsContainer::editSettings(Campaign* currentCampaign)
 {
     OptionsContainer* editCopyContainer = new OptionsContainer(getMainWindow());
+    MRUHandler* editCopyMRUHandler = new MRUHandler(nullptr, 0);
+    editCopyContainer->setMRUHandler(editCopyMRUHandler);
     editCopyContainer->copy(this);
 
     _fontChanged = false;
@@ -396,6 +404,8 @@ void OptionsContainer::editSettings(Campaign* currentCampaign)
 void OptionsContainer::readSettings()
 {
     OptionsAccessor settings;
+
+    setLoading(settings.value("loading", false).toBool());
 
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
@@ -588,6 +598,16 @@ void OptionsContainer::writeSettings()
     }
 
     cleanupLegacy(settings);
+}
+
+void OptionsContainer::setLoading(bool loading)
+{
+    if(_loading == loading)
+        return;
+
+    OptionsAccessor settings;
+    _loading = loading;
+    settings.setValue("loading", _loading);
 }
 
 void OptionsContainer::setBestiaryFileName(const QString& filename)
@@ -1343,6 +1363,12 @@ void OptionsContainer::copy(OptionsContainer* other)
         setSessionID(other->_sessionID);
         setInviteID(other->_inviteID);
 #endif
+
+        if((_mruHandler) && (other->_mruHandler))
+        {
+            _mruHandler->setMRUCount(other->_mruHandler->getMRUCount());
+            _mruHandler->setMRUList(other->_mruHandler->getMRUList());
+        }
     }
 }
 

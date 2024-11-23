@@ -259,6 +259,7 @@ private:
     QAction* _undoAction;
     QAction* _redoAction;
 
+    bool _recoveryMode;
     bool _initialized;
     bool _dirty;
     int _animationFrameCount;

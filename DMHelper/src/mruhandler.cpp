@@ -20,22 +20,33 @@ void MRUHandler::addMRUFile(const QString &mruFile)
     emit mruListChanged();
 }
 
+int MRUHandler::getMRUCount() const
+{
+    return _mruCount;
+}
+
 void MRUHandler::setMRUCount(int mruCount)
 {
+    if(_mruCount == mruCount)
+        return;
+
     internalSetMRUCount(mruCount);
 
     updateMRUActions();
     emit mruListChanged();
 }
 
-int MRUHandler::getMRUCount() const
-{
-    return _mruCount;
-}
-
 QStringList MRUHandler::getMRUList() const
 {
     return _mruFiles;
+}
+
+void MRUHandler::setMRUList(const QStringList& mruList)
+{
+    if(_mruFiles == mruList)
+        return;
+
+    _mruFiles = mruList;
 }
 
 QMenu* MRUHandler::getActionsMenu() const
@@ -142,12 +153,19 @@ void MRUHandler::updateMRUActions()
 
 void MRUHandler::internalSetMRUCount(int mruCount)
 {
-    _mruCount = mruCount < MRU_HANDLER_MAX_FILES ? mruCount : MRU_HANDLER_MAX_FILES;
+    _mruCount = qMin(qMax(0, mruCount), MRU_HANDLER_MAX_FILES);
 
-    // Cull any extra files in the list
-    while(_mruFiles.count() >= _mruCount)
+    if(_mruCount == 0)
     {
-        _mruFiles.pop_back();
+        _mruFiles.clear();
+    }
+    else
+    {
+        // Cull any extra files in the list
+        while(_mruFiles.count() >= _mruCount)
+        {
+            _mruFiles.pop_back();
+        }
     }
 
     _mruFiles.reserve(_mruCount);
