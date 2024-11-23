@@ -12,7 +12,7 @@
 
 DMHLogger* DMHLogger::_instance = nullptr;
 
-const int MAX_NUMBER_OF_LOGFILES = 5;
+const int MAX_NUMBER_OF_LOGFILES = 25;
 
 void logOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {

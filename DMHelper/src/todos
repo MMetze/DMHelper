@@ -8,6 +8,8 @@ Expand spells and DiceRollDialogCombatants to automatically place the right dama
 Multiple publish targets?
 
 Main 3.3.1 Todos:
+Add What's New to the About dialog
+Need a better Help icon, looks stupid. Maybe integrate with a dragon symbol
 DONE - to be tested 1) any time the backup file is bigger than the current file or twice as small, rename it rather than replacing it, might lead to a bit of bloat, but generally the files grow and hence they extra backups would be useful
 DONE - to be tested 2) add a date/timestamp to the backup names that are kept
 DONE - 3) add a "open the backup folder" button

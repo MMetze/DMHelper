@@ -42,6 +42,8 @@ Dedicated effect settings dialogs for each setting type
 DONE Autosave timer
 DONE Improved apply effects dialog, including auto-delete of the effect
 DONE For measuring distance if I include the height distance after measured I have to re measure. Would be nice if it auto recalculated when typed using the current measured line.
+DONE Increased default MRU, made MRU editable in options
+DONE Increased # of log files
 
 NOT REPRODUCIBLE, HOW IS THIS DONE --> R Click remove mobs from initiative list crashes program.
 NOT REPRODUCIBLE, HOW IS THIS DONE --> If I select no FoW at the beginning, it won’t let me add it later.

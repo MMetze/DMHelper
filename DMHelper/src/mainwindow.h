@@ -64,7 +64,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static const int DEFAULT_MRU_FILE_COUNT = 4;
+    static const int DEFAULT_MRU_FILE_COUNT = 10;
 
 public slots:
     void newCampaign();

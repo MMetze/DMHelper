@@ -24,22 +24,28 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 
 <h3>New v3.4 Features:</h3>
 <ul>
-<li><b>TBD:</b> TBD
+<li><b>Autosaving is here!</b> The default is ON, but it can be turned off in Settings (General tab)
+<li><b>Enhanced backup files:</b> an extra backup file is made any time a saved campaign file or resource file (e.g. Bestiary or Spellbook) grows by more than 20% or shrinks
+<li><b>Help Dialog:</b> Links to the Discord, Getting Started and User's Guides, but also direct link buttons to open the Logs or Backup directories, which might be useful...
+<li><b>Improved effects dialog</b> Slight overhaul, you can auto-delete an effect after applying damage and the application of spell effect conditions is automatic
+<li><b>Distance Measurement:</b> If you add a height after the fact, the distance is automatically recalculated
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li><b>TBD:</b> TBD
-Space bar to move a map around, A-key to toggle the pointer.
+<li><b>Consistent key usage:</b> "A" key to toggle the pointer and Space bar to move a map around
+<li><b>Initiative list:</b> Doesn't get confused about rounds when it isn't sorted
+<li>Creating a character from a monster works again
 </ul>
 
 <p>
 
 <h3>Other Improvements:</h3>
 <ul>
-<li><b>TBD:</b> TBD
+<li>Increased the default # of files in the recent files list, the number is editable in options</li>
+<li>Increased the number of log files retained</li>
 </ul>
 
 <p>
