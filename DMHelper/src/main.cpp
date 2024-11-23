@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "dmhlogger.h"
+#include "optionsaccessor.h"
 #include <QApplication>
 #include <QSurfaceFormat>
 #include <QDebug>
@@ -21,13 +22,20 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
 
     int result = 0;
-
     try {
         DMHLogger logger;
 
         qInfo() << "[Main] #########################################################################################";
         qInfo() << "[Main]                                  DMHELPER STARTED";
         qInfo() << "[Main] #########################################################################################";
+
+        QStringList arguments = QCoreApplication::arguments();
+        if(arguments.contains("-clear-settings"))
+        {
+            qInfo() << "[Main] WARNING: CLEARING ALL REGISTRY SETTINGS";
+            OptionsAccessor settings;
+            settings.remove("");
+        }
 
         MainWindow* w = new MainWindow;
         w->show();
