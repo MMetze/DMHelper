@@ -143,11 +143,24 @@ void WelcomeFrame::setMRUTexts()
     }
 
     // Add the MRU list
-    for(int i = 0; i < _mruHandler->getMRUList().count(); i++)
+    if(_mruHandler->getMRUList().isEmpty())
     {
         QLabel* newMRU = new QLabel();
-        setMRUText(newMRU, i);
+        newMRU->setText(QString("--- No recent campaigns ---"));
+        QFont font = newMRU->font();
+        font.setItalic(true);
+        font.setPointSize(9);
+        newMRU->setFont(font);
         ui->groupMRUList->layout()->addWidget(newMRU);
+    }
+    else
+    {
+        for(int i = 0; i < _mruHandler->getMRUList().count(); i++)
+        {
+            QLabel* newMRU = new QLabel();
+            setMRUText(newMRU, i);
+            ui->groupMRUList->layout()->addWidget(newMRU);
+        }
     }
 }
 

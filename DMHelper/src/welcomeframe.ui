@@ -208,9 +208,9 @@
         </spacer>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0">
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,1,0,0,1,0,0,1">
          <property name="spacing">
-          <number>0</number>
+          <number>6</number>
          </property>
          <item>
           <spacer name="verticalSpacer_5">
@@ -281,19 +281,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_6">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_7">
+          <spacer name="verticalSpacer_9">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -307,6 +295,19 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>Recent Campaigns:</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QGroupBox" name="groupMRUList">
@@ -323,7 +324,7 @@
             </font>
            </property>
            <property name="title">
-            <string>Recent Campaigns:</string>
+            <string/>
            </property>
            <property name="flat">
             <bool>false</bool>
@@ -421,13 +422,6 @@
              </widget>
             </item>
            </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string/>
-           </property>
           </widget>
          </item>
          <item>
