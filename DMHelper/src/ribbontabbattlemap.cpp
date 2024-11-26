@@ -17,10 +17,8 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)), this, SIGNAL(reloadMapClicked()));
 
-//    connect(ui->btnGrid, SIGNAL(toggled(bool)), this, SIGNAL(gridClicked(bool)));
     ui->btnGrid->setMenu(_menu);
 
     RibbonTabBattleMap_GridAction* gridAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Square, QString(":/img/data/icon_grid.png"), QString("Square Grid"));
@@ -88,13 +86,6 @@ void RibbonTabBattleMap::setGridConfig(const GridConfig& config)
     setGridWidth(config.getGridPen().width());
     setGridColor(config.getGridPen().color());
 }
-
-/*
-void RibbonTabBattleMap::setGridOn(bool checked)
-{
-    ui->btnGrid->setChecked(checked);
-}
-*/
 
 void RibbonTabBattleMap::setGridType(int gridType)
 {
@@ -177,7 +168,6 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
 
     int frameHeight = height();
 
-    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);
     setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap, frameHeight);
     setLineHeight(*ui->line_6, frameHeight);
 

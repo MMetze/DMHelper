@@ -75,7 +75,6 @@ signals:
     void castSpell();
 
     void effectChanged(QGraphicsItem* effect);
-    void effectRemoved(QGraphicsItem* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
@@ -86,6 +85,7 @@ signals:
     void battleMouseMove(const QPointF& pos);
     void battleMouseRelease(const QPointF& pos);
 
+    void mapMoveToggled();
     void mapMousePress(const QPointF& pos);
     void mapMouseMove(const QPointF& pos);
     void mapMouseRelease(const QPointF& pos);

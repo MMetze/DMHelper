@@ -329,6 +329,11 @@ BattleDialogModelCombatant* BattleDialogModel::getCombatantById(QUuid combatantI
     return nullptr;
 }
 
+int BattleDialogModel::getCombatantIndex(BattleDialogModelCombatant* combatant) const
+{
+    return combatant ? _combatants.indexOf(combatant) : -1;
+}
+
 void BattleDialogModel::moveCombatant(int fromIndex, int toIndex)
 {
     if((fromIndex < 0) || (fromIndex >= _combatants.size()) || (toIndex < 0) || (toIndex >= _combatants.size()))
@@ -619,11 +624,6 @@ const BattleDialogLogger& BattleDialogModel::getLogger() const
 BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const
 {
     return _activeCombatant;
-}
-
-int BattleDialogModel::getActiveCombatantIndex() const
-{
-    return _activeCombatant ? _combatants.indexOf(_activeCombatant) : -1;
 }
 
 QImage BattleDialogModel::getBackgroundImage() const

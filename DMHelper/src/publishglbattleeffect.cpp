@@ -90,7 +90,7 @@ void PublishGLBattleEffect::prepareObjectsGL()
         effectSize *= 2; // Convert radius to diameter
 
     QImage effectImage;
-    if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
+    if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line) || (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object))
         effectImage = QImage(QSize(effectWidth, effectSize), QImage::Format_RGBA8888);
     else
         effectImage = QImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
@@ -242,16 +242,25 @@ void PublishGLBattleEffect::effectMoved()
     if((!_effect) || (!_effect->getLayer()))
         return;
 
-    QPointF effectPos = effect->getPosition();
-    qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
-    if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
-        sizeFactor *= 2.0; // Convert radius to diameter
-    qreal scaleFactor = (static_cast<qreal>(_effect->getLayer()->getScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+    qreal scaleFactorX, scaleFactorY;
+    if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object)
+    {
+        scaleFactorX = static_cast<qreal>(_effect->getLayer()->getScale()-2) * (static_cast<qreal>(effect->getWidth()) / 5.0) / _textureSize.width();
+        scaleFactorY = static_cast<qreal>(_effect->getLayer()->getScale()-2) * (static_cast<qreal>(effect->getSize()) / 5.0) / _textureSize.height();
+    }
+    else
+    {
+        qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
+        if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+            sizeFactor *= 2.0; // Convert radius to diameter
+        scaleFactorX = static_cast<qreal>(_effect->getLayer()->getScale()-2) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+        scaleFactorY = scaleFactorX;
+    }
 
     _modelMatrix.setToIdentity();
-    _modelMatrix.translate(QVector3D(sceneToWorld(effectPos)));
+    _modelMatrix.translate(QVector3D(sceneToWorld(effect->getPosition())));
     _modelMatrix.rotate(effect->getRotation(), 0.f, 0.f, -1.f);
-    _modelMatrix.scale(scaleFactor, scaleFactor);
+    _modelMatrix.scale(scaleFactorX, scaleFactorY);
 
     emit changed();
 }

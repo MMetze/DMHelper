@@ -12,7 +12,7 @@
 
 DMHLogger* DMHLogger::_instance = nullptr;
 
-const int MAX_NUMBER_OF_LOGFILES = 5;
+const int MAX_NUMBER_OF_LOGFILES = 25;
 
 void logOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -51,13 +51,17 @@ DMHLogger* DMHLogger::instance()
     return _instance;
 }
 
+QString DMHLogger::getLogDirPath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QString("/log");
+}
+
 void DMHLogger::initialize()
 {
     if(_instance)
         return;
 
-    QString logDirBasePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString logDirPath = logDirBasePath + QString("/log");
+    QString logDirPath = getLogDirPath();
     QDir logDir(logDirPath);
     if(!logDir.exists())
     {

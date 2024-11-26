@@ -69,9 +69,10 @@ public slots:
 
     virtual void configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion) override;
 
+    CampaignObjectBase* setDefaultValues(CampaignObjectBase* object);
+
 private:    
     void loadCharacterTemplate(const QString& characterTemplateFile);
-    CampaignObjectBase* setDefaultValues(CampaignObjectBase* object);
 
     static CombatantFactory* _instance;
 

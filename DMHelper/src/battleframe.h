@@ -10,6 +10,7 @@
 
 class BattleDialogModelCombatant;
 class CombatantWidget;
+class CombatantDialog;
 class QVBoxLayout;
 class EncounterBattle;
 class BattleDialogModel;
@@ -161,7 +162,7 @@ public slots:
     void setHeight(qreal height);
 
     void setFoWEdit(bool enabled);
-    void setFoWSelect(bool enabled);
+    void setFoWSelect(bool enabled);   
 
     void setPointerOn(bool enabled);
     void showStatistics();
@@ -197,6 +198,8 @@ signals:
     void freeDistanceToggled(bool enabled);
     void distanceChanged(const QString&);
 
+    void mapMoveToggled();
+
     void foWEditToggled(bool enabled);
     void foWSelectToggled(bool enabled);
     void mapCreated();
@@ -221,7 +224,6 @@ private slots:
     void updateRounds();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleEffectChanged(QGraphicsItem* effectItem);
-    void handleEffectRemoved(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelObject* object);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
@@ -266,6 +268,7 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
+    void addMonsterFinished(CombatantDialog* combatantDlg, int result);
     void copyMonsters();
     void clearCopy();
     void pasteMonsters();

@@ -1,0 +1,88 @@
+User Guide
+It appears no changes were made to the User Guide so I will say all items here still apply
+pg. 9 Scroll Text no longer exists.
+pg. 10 Show Text is not a tool option anymore (I understand I can publish from the text entry instead just needs updating)
+pg. 10 Translate no longer under Tools ribbon, now under Entry ribbon.
+pg. 11 Zoom 1 button does not exist.
+pg. 14 Spell Effects - Last line (See more pg x). Seems you forgot to put in the page number which I believe is 27.
+pg. 16 Text Background button does not exist.
+pg. 17 Publish Options (such as Publish visible and Publish Zoom) are now under Player Camera View section no longer on the right with publish buttons.
+pg. 17 Publish Preview does not exist.
+pg. 29 Player Window Icons for initiative tracker is currently on the Left not Right as indicated.
+pg. 32 Paragraph 2. Typing error “In Party View you can party can be given a token image”
+pg. 34 Paragraph 1. Has a “1” randomly middle of a sentence. …”and import 1 the character icon as well.”
+
+Bugs
+Typing in an entry is very slow...
+Publishing text doesn't scale, animate or publish correctly
+DONE Combat - Spacebar to use pointer doesn’t work. Cycles though initiative list.
+DONE Map - Spacebar to use pointer doesn’t work.
+DONE Pointer still doesn’t come up with spacebar and not perfectly lined up with DM screen (shows slightly up left on Player view than on DM view)
+DONE Combat - New Map button doesn’t do anything.
+DONE When initiative list is not sorted it will trigger a new round each time it hits a player with higher initiative also messing with lair actions. I understand it is probably coded this way for simplicity. Maybe either always auto sort or have a new round trigger only when it jumps back to the top of the list.
+DONE (SLIGHTLY IMPROVED, BIGGER IMPROVEMENT NEEDS MORE EFFORT) - When adding an object to a combat encounter, the height/width/rotation fields are offset from the labels.
+DONE When adding a monster to a combat map, clicking on … to get info of selected drop down monster, details window pops up behind add window and is non-intractable.
+DONE Apply Effects doesn’t apply condition effects from spells
+DONE Character converter can read monsters into a new character
+Effects highlight players even when not active if you move players. Moving effect clears it but then reactivates on player movement. Sucks when I have a trap or status effect I don't want players to know about but gives away that something is up when their token suddenly lights up.
+Map Markers
+    Map Markers only 1/4 of it visible to players
+    Map Marker Right click Edit and Delete doesn’t work.
+    Not sure if this is a bug or should be a feature request, Map Markers cannot get small enough and gets highly pixelated Additionally text is unreadable when shrunk to appropriate size for map.
+If I have several pictures for a monster (e.g. Bandit), how can I edit more than one token? If I click "edit current token", it still only opens the first picture in the list...
+
+Mac Only
+Unable to play videos.
+Add Media under campaign tree and selecting a video (mp4) says not able to read image file. Seems to only support images not videos.
+
+ENHANCEMENTS
+DONE Space bar to move a map around, A-key to toggle the pointer.
+NOT GOING TO DO IT Apply Effects would be nice if it roll damage and knew what kind of save/roll it was.
+Dedicated effect settings dialogs for each setting type
+DONE Autosave timer
+DONE Improved apply effects dialog, including auto-delete of the effect
+DONE For measuring distance if I include the height distance after measured I have to re measure. Would be nice if it auto recalculated when typed using the current measured line.
+DONE Increased default MRU, made MRU editable in options
+DONE Increased # of log files
+
+NOT REPRODUCIBLE, HOW IS THIS DONE --> R Click remove mobs from initiative list crashes program.
+NOT REPRODUCIBLE, HOW IS THIS DONE --> If I select no FoW at the beginning, it won’t let me add it later.
+AS DESIGNED --> If a mob is visible but not known it doesn’t show up in Player view (seems like known overrides visibility if off). So when I go “and you see..” I have to click two check boxes per mob. Also I might want to have something visible but not them be aware its a mob, like an animated table for example.
+NOT REPRODUCIBLE, HOW IS THIS DONE --> Grid does not display on Player Window.
+USER MANUAL BUG, USE [[text here]] TO CREATE A LINK --> Auto and manual hyperlinks not working. Pg 21 of user manual.
+
+
+
+
+
+3.2 Specific Feedback
+Dropping an image comes out distorted on Player View but fine in DM view.
+I noticed the program has been crashing a bit and randomly. This will suck if it happened mid game and haven't saved recently. Might be worth adding an auto save feature? I know mac has the ability to reopen programs at last known state regardless how it closed. Not sure what goes on in the code in the background but its something that I have always liked about macs vs windows apps so I assume there is a APK or something you can use to make this happen?
+
+Things I missed above
+Spell book - can't select any created spells to modify them.
+Spell book - arrows on the right don't work to cycle through spells.
+
+
+Feature Improvements
+
+S Would be nice to have snap to grid option as needed for tokens.
+S Allow manual scaling of objects. Right now it’s whole number input based. (use drag and scale instead)
+S Allow to select multiple and right click make all visible/known. Having a room full of monsters to make visible one by one is a bit of a pain.
+S Allow for Mac pinch and zoom on touch pad.
+    S Support mac keyboard shortcuts like Cmd-W to close a window.
+M Integrate Timer into current player window. Currently it shows up as a separate window which if maximized goes to another screen. Then moving it around causes issues. Should just overlay the current screen.
+M Have ability to reset Combat Statistics (also it seems to reset on its own randomly and not sure what the criteria is)
+M Add ability to drop text/overlay on maps (Both Combat and regular Maps) for DM View only for quick notes, room numbering, etc…
+M Add the ability to have Map Markers for Encounters or the ability to show the Map Markers already in the maps section be shown in Encounters.
+M Add ability to show Player life total on Player Screen
+    FOLLOW-UP: Where would you want to see it and how?
+M There is no undo feature (even with Ctrl-Z/Cmd-Z for Mac) on text editor. I could REALLY use this… lol
+M Give ability to change token size on the fly. (Enlarge/Shrink/etc…) After already on the map. I noticed the change log said this was a new feature but I cant seem to find it. Maybe should move this to questions section
+M Allow to swap icon for individual character tokens. (Either to update, or if they change form, etc…)
+M Allow for distance unit edits (ft vs yards vs miles) for larger area maps.
+L Better text editor. Many settings paste that I later cannot change such as line spacing. Also if I want black text and one letter is black in the whole thing, it won’t change to black.
+L Add (or incorporate OS built in) spell check for the text would help catch mistakes.
+L Allow reorganizing of special abilities/actions etc… in bestiary (like drag and drop)
+    FOLLOW-UP: Interesting, but pretty tricky to do, tbh
+

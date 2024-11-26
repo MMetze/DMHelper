@@ -43,6 +43,7 @@
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
+#include "spellbook.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -191,7 +192,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
-    connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, &BattleDialogGraphicsScene::itemChangeLayer, this, &BattleFrame::handleItemChangeLayer);
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
@@ -552,11 +552,11 @@ void BattleFrame::next()
         return;
     }
 
-    int activeInitiative = activeCombatant->getInitiative();
-    int nextInitiative = nextCombatant->getInitiative();
-
     if(_model->getShowLairActions())
     {
+        int activeInitiative = activeCombatant->getInitiative();
+        int nextInitiative = nextCombatant->getInitiative();
+
         if((activeInitiative >= 20) && (nextInitiative < 20))
         {
             qDebug() << "[Battle Frame] Triggering Lair Action request.";
@@ -564,20 +564,8 @@ void BattleFrame::next()
         }
     }
 
-    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-    RuleInitiative* ruleInitiative = nullptr;
-    if((campaign) && (ruleInitiative = campaign->getRuleset().getRuleInitiative()))
-    {
-        if(ruleInitiative->compareCombatants(nextCombatant, activeCombatant))
-        {
-            newRound();
-            nextCombatant = getFirstLivingCombatant();
-        }
-    }
-    else
-    {
-        qDebug() << "[Battle Frame] WARNING: Unable to find campaign or ruleset!";
-    }
+    if(_model->getCombatantIndex(nextCombatant) <= _model->getCombatantIndex(activeCombatant))
+        newRound();
 
     setActiveCombatant(nextCombatant);
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
@@ -932,7 +920,6 @@ void BattleFrame::createActiveIcon()
 
     _activePixmap = _scene->addPixmap(activePmp);
     _activePixmap->setTransformationMode(Qt::SmoothTransformation);
-//    _activePixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _activeScale / ACTIVE_PIXMAP_SIZE);
     _activePixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _activePixmap->hide();
 }
@@ -1093,66 +1080,15 @@ void BattleFrame::reloadMap()
 
 void BattleFrame::addMonsters()
 {
-    if((!_battle) || (!_model))
-        return;
-
-    QPointF combatantPos = viewportCenter();
-
     if(!validateTokenLayerExists())
         return;
 
     qDebug() << "[Battle Frame] Adding monsters ...";
 
-    CombatantDialog combatantDlg(_model->getLayerScene(), QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(&combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
-
-    int result = combatantDlg.exec();
-    if(result == QDialog::Accepted)
-    {
-        MonsterClass* monsterClass = combatantDlg.getMonsterClass();
-        if(monsterClass == nullptr)
-        {
-            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
-            return;
-        }
-
-        QString baseName = combatantDlg.getName();
-        int monsterCount = combatantDlg.getCount();
-        int localInitiative = combatantDlg.getInitiative().toInt();
-
-        qreal sizeFactor = 0.0;
-        bool conversionResult = false;
-        sizeFactor = combatantDlg.getSizeFactor().toDouble(&conversionResult);
-        if(!conversionResult)
-            sizeFactor = 0.0;
-
-        qreal multipleShift = _model->getLayerScene().getScale() / 10.0;
-        QPointF multiplePos(multipleShift, multipleShift);
-        qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
-
-        for(int i = 0; i < monsterCount; ++i)
-        {
-            BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
-            monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
-            monster->setHitPoints(combatantDlg.getCombatantHitPoints());
-            monster->setInitiative(combatantDlg.isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
-            monster->setKnown(combatantDlg.isKnown());
-            monster->setShown(combatantDlg.isShown());
-            monster->setSizeFactor(sizeFactor);
-            monster->setPosition(combatantPos + (multiplePos * i));
-            monster->setIconIndex(combatantDlg.getIconIndex());
-            addCombatant(monster, combatantDlg.getLayer());
-        }
-
-        recreateCombatantWidgets();
-
-        if(combatantDlg.isSortInitiative())
-            _model->sortCombatants();
-    }
-    else
-    {
-        qDebug() << "[Battle Dialog Manager] ... add monsters dialog cancelled";
-    }
+    CombatantDialog* combatantDlg = new CombatantDialog(_model->getLayerScene(), QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
+    connect(combatantDlg, &CombatantDialog::finished, this, [this, combatantDlg](int result) {this->addMonsterFinished(combatantDlg, result);});
+    combatantDlg->open();
 }
 
 void BattleFrame::addCharacter()
@@ -1657,14 +1593,14 @@ void BattleFrame::setPointerOn(bool enabled)
 
 void BattleFrame::keyPressEvent(QKeyEvent * e)
 {
-    if(e->key() == Qt::Key_Space)
-    {
-        next();
-        return;
-    }
-    else if(e->key() == Qt::Key_Escape)
+    if(e->key() == Qt::Key_Escape)
     {
         cancelSelect();
+        return;
+    }
+    else if(e->key() == Qt::Key_A)
+    {
+        _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
         return;
     }
     else if((e->key() == Qt::Key_C) && (e->modifiers() == Qt::ControlModifier))
@@ -2224,20 +2160,6 @@ void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
     */
 }
 
-void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
-{
-    Q_UNUSED(effectItem);
-
-    /*
-    for(QGraphicsPixmapItem* item : _combatantIcons.values())
-    {
-        // TODO: Optimize to only remove effects if not still relevant
-        if(item)
-            removeEffectsFromItem(item);
-    }
-    */
-}
-
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
     Q_UNUSED(object);
@@ -2429,6 +2351,9 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    if((!effect) || (!_model))
+        return;
+
     QList<BattleDialogModelCombatant*> affectedCombatantList;
 
     QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
@@ -2453,11 +2378,23 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
         return;
     }
 
+    BattleDialogModelEffect* finalEffect = BattleDialogModelEffect::getFinalEffect(BattleDialogModelEffect::getEffectFromItem(effect));
+
     DiceRollDialogCombatants* dlg = new DiceRollDialogCombatants(Dice(1, 20, 0), affectedCombatantList, 15, this);
     connect(dlg, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SLOT(setSelectedCombatant(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantWidget(BattleDialogModelCombatant*)));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
     connect(dlg, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
+    connect(dlg, &DiceRollDialogCombatants::removeEffect, this, [this, finalEffect](){ this->_model->removeEffect(finalEffect); });
+
+    if((finalEffect) && (Spellbook::Instance()) && (Spellbook::Instance()->exists(finalEffect->objectName())))
+    {
+        Spell* spell = Spellbook::Instance()->getSpell(finalEffect->objectName());
+        if(spell)
+        {
+            dlg->setConditions(spell->getEffectConditions());
+        }
+    }
 
     dlg->resize(width() * 3 / 4, height() * 3 / 4);
     dlg->fireAndForget();
@@ -2675,6 +2612,7 @@ void BattleFrame::handleMapMousePress(const QPointF& pos)
 {
     _mouseDown = true;
     _mouseDownPos = ui->graphicsView->mapFromScene(pos);
+    emit mapMoveToggled();
 }
 
 void BattleFrame::handleMapMouseMove(const QPointF& pos)
@@ -2699,6 +2637,7 @@ void BattleFrame::handleMapMouseRelease(const QPointF& pos)
 {
     Q_UNUSED(pos);
     _mouseDown = false;
+    emit mapMoveToggled();
 }
 
 void BattleFrame::handleSceneChanged(const QList<QRectF> &region)
@@ -2905,6 +2844,56 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
 
     if(_logger)
         _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
+}
+
+void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
+{
+    if((_battle) && (_model) && (result == QDialog::Accepted))
+    {
+        MonsterClass* monsterClass = combatantDlg->getMonsterClass();
+        if(monsterClass == nullptr)
+        {
+            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
+        }
+        else
+        {
+            QString baseName = combatantDlg->getName();
+            int monsterCount = combatantDlg->getCount();
+            int localInitiative = combatantDlg->getInitiative().toInt();
+
+            qreal sizeFactor = 0.0;
+            bool conversionResult = false;
+            sizeFactor = combatantDlg->getSizeFactor().toDouble(&conversionResult);
+            if(!conversionResult)
+                sizeFactor = 0.0;
+
+            qreal multipleShift = _model->getLayerScene().getScale() / 10.0;
+            QPointF multiplePos(multipleShift, multipleShift);
+            qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
+            QPointF combatantPos = viewportCenter();
+
+            for(int i = 0; i < monsterCount; ++i)
+            {
+                BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
+                monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
+                monster->setHitPoints(combatantDlg->getCombatantHitPoints());
+                monster->setInitiative(combatantDlg->isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
+                monster->setKnown(combatantDlg->isKnown());
+                monster->setShown(combatantDlg->isShown());
+                monster->setSizeFactor(sizeFactor);
+                monster->setPosition(combatantPos + (multiplePos * i));
+                monster->setIconIndex(combatantDlg->getIconIndex());
+                addCombatant(monster, combatantDlg->getLayer());
+            }
+
+            recreateCombatantWidgets();
+
+            if(combatantDlg->isSortInitiative())
+                _model->sortCombatants();
+        }
+    }
+
+    combatantDlg->deleteLater();
 }
 
 void BattleFrame::copyMonsters()
@@ -3927,20 +3916,20 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     if(!combatant)
         return nullptr;
 
-    int nextHighlight = _model->getCombatantList().indexOf(combatant);
+    int nextCombatant = _model->getCombatantList().indexOf(combatant);
 
     if(_combatantLayout->count() <= 1)
         return nullptr;
 
     do
     {
-        if(++nextHighlight >= _model->getCombatantCount())
-            nextHighlight = 0;
-    } while(((_model->getCombatant(nextHighlight)->getHitPoints() <= 0) ||
-             (!_model->getCombatant(nextHighlight)->getKnown())) &&
-            (_model->getCombatant(nextHighlight) != _model->getActiveCombatant()));
+        if(++nextCombatant >= _model->getCombatantCount())
+            nextCombatant = 0;
+    } while(((_model->getCombatant(nextCombatant)->getHitPoints() <= 0) ||
+             (!_model->getCombatant(nextCombatant)->getKnown())) &&
+            (_model->getCombatant(nextCombatant) != _model->getActiveCombatant()));
 
-    return _model->getCombatant(nextHighlight);
+    return _model->getCombatant(nextCombatant);
 }
 
 void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
@@ -4158,14 +4147,6 @@ void BattleFrame::createSceneContents()
     }
     _cameraRect->setRatioLocked(_isGridLocked);
     updateCameraRect();
-
-    // Add icons for existing combatants
-    /*
-    for(int i = 0; i < _model->getCombatantCount(); ++i)
-    {
-        createCombatantIcon(_model->getCombatant(i));
-    }
-    */
 
     updateHighlights();
 }
@@ -4594,6 +4575,13 @@ instead move the player view
     connect(_mapDrawer, SIGNAL(cursorChanged(const QCursor&)), fowEditState, SLOT(setCursor(const QCursor&)));
     connect(fowEditState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
     _stateMachine.addState(fowEditState);
+
+    BattleFrameState* mapMoveState = new BattleFrameState(DMHelper::BattleFrameState_MapMove, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 32, 32);
+    mapMoveState->setCursor(QCursor(Qt::OpenHandCursor));
+    connect(_scene, &BattleDialogGraphicsScene::mapMoveToggled, this, [=]() {_stateMachine.toggleState(DMHelper::BattleFrameState_MapMove);});
+    connect(this, &BattleFrame::mapMoveToggled, this, [this, mapMoveState]() {mapMoveState->setCursor(this->_mouseDown ? QCursor(Qt::ClosedHandCursor) : QCursor(Qt::OpenHandCursor));});
+    connect(mapMoveState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
+    _stateMachine.addState(mapMoveState);
 
     _stateMachine.reset();
 }

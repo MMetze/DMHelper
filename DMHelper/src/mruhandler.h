@@ -16,9 +16,11 @@ public:
 
     void addMRUFile(const QString &mruFile);
 
-    void setMRUCount(int mruCount);
     int getMRUCount() const;
+    void setMRUCount(int mruCount);
+
     QStringList getMRUList() const;
+    void setMRUList(const QStringList& mruList);
 
     QMenu* getActionsMenu() const;
     void setActionsMenu(QMenu* actionsMenu);

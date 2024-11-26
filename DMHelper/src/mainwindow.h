@@ -64,7 +64,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static const int DEFAULT_MRU_FILE_COUNT = 4;
+    static const int DEFAULT_MRU_FILE_COUNT = 10;
 
 public slots:
     void newCampaign();
@@ -126,6 +126,9 @@ signals:
     void characterChanged(QUuid id);
     void audioTrackAdded(AudioTrack* track);
 
+    void openGettingStarted();
+    void openUsersGuide();
+
 protected:
     virtual void showEvent(QShowEvent * event);
     virtual void closeEvent(QCloseEvent * event);
@@ -183,6 +186,8 @@ protected slots:
     void handleOpenCountdown();
     void handleOpenGlobalSearch();
 
+    void handleAutoSaveExpired();
+    void handleAutoSaveChanged();
     void handleAnimationStarted();
 
     bool selectItemFromStack(const QUuid& itemId);
@@ -197,6 +202,9 @@ protected slots:
     void importSpellbook();
 
     void openAboutDialog();
+    void openHelpDialog();
+    void openBackupDirectory();
+    void openLogsDirectory();
     void openRandomMarkets();
     void configureGridLock();
 
@@ -230,6 +238,7 @@ private:
     QVBoxLayout* _characterLayout;
     Campaign* _campaign;
     QString _campaignFileName;
+    QTimer* _autoSaveTimer;
 
     OptionsContainer* _options;
 
@@ -250,6 +259,7 @@ private:
     QAction* _undoAction;
     QAction* _redoAction;
 
+    bool _recoveryMode;
     bool _initialized;
     bool _dirty;
     int _animationFrameCount;

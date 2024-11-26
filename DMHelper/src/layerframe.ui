@@ -306,7 +306,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Lock the aspect ratio</string>
+        <string>Turn on/off audio for this layer</string>
        </property>
        <property name="text">
         <string/>
@@ -383,7 +383,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Lock the aspect ratio</string>
+        <string>Edit detailed layer settings</string>
        </property>
        <property name="text">
         <string/>

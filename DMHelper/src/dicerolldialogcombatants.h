@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QVBoxLayout>
 #include "dice.h"
+#include "combatant.h"
 
 namespace Ui {
 class DiceRollDialogCombatants;
@@ -23,14 +24,21 @@ public:
 
     void fireAndForget();
 
+    void setSaveDC(int saveDC);
+    void setSaveType(const QString& saveType);
+    void setConditions(int conditions);
+    void setDamage(int damage);
+    void setDamageDice(const Dice& damageDice);
+
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
     void combatantChanged(BattleDialogModelCombatant* combatant);
     void hitPointsChanged(BattleDialogModelCombatant* combatant, int change);
+    void removeEffect();
 
 public slots:
     void rollDice();
-    void applyDamage();
+    void rollDamageDice();
     void rerollWidget(BattleCombatantWidget* widget);
     void setWidgetVisibility();
 
@@ -41,10 +49,15 @@ private slots:
     void diceTypeChanged();
     void modifierTypeChanged();
     void editConditions();
+    void applyEffect();
+    void applyEffectandClose();
+    void applyEffectandDelete();
 
 private:
     void init();
     void createCombatantWidgets();
+    void updateConditionLayout();
+    void addCondition(Combatant::Condition condition);
 
     int rollOnce(const Dice& dice, int modifier, QString& resultStr);
     void rollForWidget(BattleCombatantWidget* widget, const Dice& dice, int modifier);
@@ -57,6 +70,7 @@ private:
     QList<int> _modifiers;
     bool _fireAndForget;
     int _conditions;
+    QGridLayout* _conditionGrid;
 
     bool _mouseDown;
     QPoint _mouseDownPos;

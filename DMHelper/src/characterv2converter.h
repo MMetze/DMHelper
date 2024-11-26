@@ -4,14 +4,16 @@
 #include "characterv2.h"
 
 class Character;
+class MonsterClass;
 
 class Characterv2Converter : public Characterv2
 {
     Q_OBJECT
 public:
-    explicit Characterv2Converter();
+    explicit Characterv2Converter(const QString& name = QString(), QObject *parent = nullptr);
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void readFromMonsterClass(MonsterClass& monster);
 
 protected:
     virtual void convertValues(Character* convertCharacter);
