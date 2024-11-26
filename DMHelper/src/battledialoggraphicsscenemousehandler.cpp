@@ -65,6 +65,7 @@ BattleDialogGraphicsSceneMouseHandlerDistanceBase::~BattleDialogGraphicsSceneMou
 void BattleDialogGraphicsSceneMouseHandlerDistanceBase::setHeightDelta(qreal heightDelta)
 {
     _heightDelta = heightDelta;
+    updateDistance();
 }
 
 void BattleDialogGraphicsSceneMouseHandlerDistanceBase::setDistanceScale(int scale)
@@ -85,6 +86,15 @@ void BattleDialogGraphicsSceneMouseHandlerDistanceBase::setDistanceLineType(int 
 void BattleDialogGraphicsSceneMouseHandlerDistanceBase::setDistanceLineWidth(int lineWidth)
 {
     _lineWidth = lineWidth;
+}
+
+QString BattleDialogGraphicsSceneMouseHandlerDistanceBase::createDistanceString(qreal lineDistance) const
+{
+    if(_heightDelta == 0.0)
+        return QString::number(lineDistance, 'f', 1);
+
+    qreal diagonal = qSqrt((lineDistance*lineDistance) + (_heightDelta*_heightDelta));
+    return QString::number(diagonal, 'f', 1) + QChar::LineFeed + QString("(") + QString::number(lineDistance, 'f', 1) + QString (")");
 }
 
 
@@ -117,20 +127,8 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseMoveEvent(QGraphicsScen
     QLineF line = _distanceLine->line();
     line.setP2(mouseEvent->scenePos());
     _distanceLine->setLine(line);
-    qreal lineDistance = 5.0 * line.length() / _scale;
-    QString distanceText;
-    if(_heightDelta == 0.0)
-    {
-        distanceText = QString::number(lineDistance, 'f', 1);
-    }
-    else
-    {
-        qreal diagonal = qSqrt((lineDistance*lineDistance) + (_heightDelta*_heightDelta));
-        distanceText = QString::number(diagonal, 'f', 1) + QChar::LineFeed + QString("(") + QString::number(lineDistance, 'f', 1) + QString (")");
-    }
-    _distanceText->setText(distanceText);
-    _distanceText->setPos(line.center());
-    emit distanceChanged(distanceText);
+
+    updateDistance();
 
     mouseEvent->accept();
     return false;
@@ -172,6 +170,21 @@ QGraphicsItem* BattleDialogGraphicsSceneMouseHandlerDistance::getDistanceLine() 
 QGraphicsSimpleTextItem* BattleDialogGraphicsSceneMouseHandlerDistance::getDistanceText() const
 {
     return _distanceText;
+}
+
+void BattleDialogGraphicsSceneMouseHandlerDistance::updateDistance()
+{
+    if((!_distanceLine) || (!_distanceText) || (_scale <= 0.0))
+        return;
+
+    QLineF line = _distanceLine->line();
+    qreal lineDistance = 5.0 * line.length() / _scale;
+
+    QString distanceText = createDistanceString(lineDistance);
+
+    _distanceText->setText(distanceText);
+    _distanceText->setPos(line.center());
+    emit distanceChanged(distanceText);
 }
 
 
@@ -219,21 +232,10 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mouseMoveEvent(QGraphics
         _distancePath->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
         emit distanceItemChanged(_distancePath, _distanceText);
     }
-    qreal lineDistance = 5.0 * _distancePath->path().length() / _scale;//_distancePath->path().length() * _scale / 1000.0;
-    QString distanceText;
-    if(_heightDelta == 0.0)
-    {
-        distanceText = QString::number(lineDistance, 'f', 1);
-    }
-    else
-    {
-        qreal diagonal = qSqrt((lineDistance*lineDistance) + (_heightDelta*_heightDelta));
-        distanceText = QString::number(diagonal, 'f', 1) + QChar::LineFeed + QString("(") + QString::number(lineDistance, 'f', 1) + QString (")");
-    }
-    _distanceText->setText(distanceText);
     _distanceText->setPos(scenePos + QPointF(5.0, 5.0));
 
-    emit distanceChanged(distanceText);
+    updateDistance();
+
     mouseEvent->accept();
     return false;
 }
@@ -270,6 +272,18 @@ QGraphicsItem* BattleDialogGraphicsSceneMouseHandlerFreeDistance::getDistanceLin
 QGraphicsSimpleTextItem* BattleDialogGraphicsSceneMouseHandlerFreeDistance::getDistanceText() const
 {
     return _distanceText;
+}
+
+void BattleDialogGraphicsSceneMouseHandlerFreeDistance::updateDistance()
+{
+    if((!_distancePath) || (!_distanceText) || (_scale <= 0.0))
+        return;
+
+    qreal lineDistance = 5.0 * _distancePath->path().length() / _scale;
+    QString distanceText = createDistanceString(lineDistance);
+    _distanceText->setText(distanceText);
+
+    emit distanceChanged(distanceText);
 }
 
 

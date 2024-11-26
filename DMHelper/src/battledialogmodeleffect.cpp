@@ -187,6 +187,16 @@ void BattleDialogModelEffect::setWidth(int width)
     Q_UNUSED(width);
 }
 
+bool BattleDialogModelEffect::hasEffectTransform() const
+{
+    return false;
+}
+
+void BattleDialogModelEffect::updateTransform(QGraphicsItem* graphicsItem) const
+{
+    Q_UNUSED(graphicsItem);
+}
+
 QColor BattleDialogModelEffect::getColor() const
 {
     return _color;

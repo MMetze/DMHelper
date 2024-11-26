@@ -63,10 +63,20 @@ void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
 
 void CampaignTree::keyPressEvent(QKeyEvent *event)
 {
-    if((event) && (event->modifiers() == Qt::AltModifier))
+    if(event)
     {
-        event->ignore();
-        return;
+        if(event->modifiers() == Qt::AltModifier)
+        {
+            event->ignore();
+            return;
+        }
+        else if(event->key() == Qt::Key_F2)
+        {
+            QModelIndex index = currentIndex();
+            if(index.isValid())
+                edit(index);
+            return;
+        }
     }
 
     QTreeView::keyPressEvent(event);

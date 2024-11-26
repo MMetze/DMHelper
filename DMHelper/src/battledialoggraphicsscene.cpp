@@ -318,10 +318,14 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 
                 if((abstractShape) && (!effectId.isNull()))
                 {
-                    _mouseDownItem->setRotation(_previousRotation + angle);
                     BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
                     if(effect)
                         effect->setRotation(_previousRotation + angle);
+
+                    if((effect) && (effect->hasEffectTransform()))
+                        effect->updateTransform(_mouseDownItem);
+                    else
+                        _mouseDownItem->setRotation(_previousRotation + angle);
 
                     emit effectChanged(abstractShape);
                 }
@@ -875,7 +879,6 @@ void BattleDialogGraphicsScene::deleteItem()
             _mouseDown = false;
             _mouseDownItem = nullptr;
         }
-        emit effectRemoved(_contextMenuItem);
         _model->removeEffect(deleteEffect);
     }
 }
@@ -1069,16 +1072,22 @@ void BattleDialogGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
 
 void BattleDialogGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 {
-    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+    if((!_spaceDown) && (keyEvent) && (!keyEvent->isAutoRepeat()) && (keyEvent->key() == Qt::Key_Space))
+    {
         _spaceDown = true;
+        emit mapMoveToggled();
+    }
 
     QGraphicsScene::keyPressEvent(keyEvent);
 }
 
 void BattleDialogGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 {
-    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+    if((_spaceDown) && (keyEvent) && (!keyEvent->isAutoRepeat()) && (keyEvent->key() == Qt::Key_Space))
+    {
         _spaceDown = false;
+        emit mapMoveToggled();
+    }
 
     QGraphicsScene::keyReleaseEvent(keyEvent);
 }
@@ -1228,7 +1237,7 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
 {
     BattleDialogGraphicsSceneMouseHandlerBase* result = nullptr;
 
-    if((mouseEvent) && ((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton))
+    if((mouseEvent) && (((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton) || (_spaceDown)))
     {
         result = &_mapsMouseHandler;
     }

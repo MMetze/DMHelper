@@ -8,6 +8,7 @@
 #include "party.h"
 #include "characterv2.h"
 #include "characterimporter.h"
+#include "characterv2converter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
 #include "characterframe.h"
@@ -52,6 +53,8 @@
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
+#include "helpdialog.h"
+#include "dmhlogger.h"
 #include "newcampaigndialog.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
@@ -112,9 +115,12 @@
 #include <QShortcut>
 #include <QFontDatabase>
 #include <QSurfaceFormat>
+#include <QTimer>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
+
+const int AUTOSAVE_TIMER_INTERVAL = 60000; // 1 minute
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -136,6 +142,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _characterLayout(nullptr),
     _campaign(nullptr),
     _campaignFileName(),
+    _autoSaveTimer(nullptr),
     _options(nullptr),
     _bestiaryDlg(),
     _spellDlg(),
@@ -148,6 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _mouseDownPos(),
     _undoAction(nullptr),
     _redoAction(nullptr),
+    _recoveryMode(true),
     _initialized(false),
     _dirty(false),
     _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES),
@@ -229,6 +237,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mruHandler, SIGNAL(triggerMRU(QString)), this, SLOT(openCampaign(QString)));
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
+    _recoveryMode = _options->isLoading();
+    qDebug() << "[MainWindow] Recovery Mode: " << _recoveryMode;
+    _options->setLoading(true);
+
     connect(_options, SIGNAL(bestiaryFileNameChanged()), this, SLOT(readBestiary()));
     connect(_options, SIGNAL(spellbookFileNameChanged()), this, SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
@@ -239,6 +251,9 @@ MainWindow::MainWindow(QWidget *parent) :
     f.setPointSize(_options->getFontSize());
     qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
     qApp->setFont(f);
+
+    connect(_options, &OptionsContainer::autoSaveChanged, this, &MainWindow::handleAutoSaveChanged);
+    connect(this, &MainWindow::campaignLoaded, this, &MainWindow::handleAutoSaveChanged);
 
     DMH_DEBUG_OPENGL_Singleton::Initialize();
 
@@ -348,6 +363,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Help Menu
     connect(_ribbonTabFile, SIGNAL(checkForUpdatesClicked()), this, SLOT(checkForUpdates()));
     connect(_ribbonTabFile, SIGNAL(aboutClicked()), this, SLOT(openAboutDialog()));
+    connect(_ribbonTabFile, SIGNAL(helpClicked()), this, SLOT(openHelpDialog()));
     connect(ui->treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView, SIGNAL(collapsed(QModelIndex)), this, SLOT(handleTreeItemCollapsed(QModelIndex)));
 
@@ -531,10 +547,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
     connect(nextShortcut, SIGNAL(activated()), _battleFrame, SLOT(next()));
 
-    // TODO: Layers - do we still do this?
-    //connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), _battleFrame, SLOT(selectBattleMap()));
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
-    //connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
     connect(_battleFrame, &BattleFrame::gridConfigChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridConfig);
@@ -654,7 +667,12 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
     connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openCampaign(QString)));
+    connect(_ribbonTabFile, &RibbonTabFile::userGuideClicked, this, &MainWindow::openUsersGuide);
+    connect(this, &MainWindow::openUsersGuide, welcomeFrame, &WelcomeFrame::openUsersGuide);
+    connect(_ribbonTabFile, &RibbonTabFile::gettingStartedClicked, this, &MainWindow::openGettingStarted);
+    connect(this, &MainWindow::openGettingStarted, welcomeFrame, &WelcomeFrame::openGettingStarted);
     connect(_ribbonTabFile, SIGNAL(userGuideClicked()), welcomeFrame, SLOT(openUsersGuide()));
+    connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_WelcomeScreen, welcomeFrame);
     qDebug() << "[MainWindow]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
@@ -920,7 +938,7 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
+    Characterv2* character = nullptr;
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -950,10 +968,16 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            // HACK
-            //character->copyMonsterValues(*monsterClass);
+            Characterv2Converter* convertCharacter = new Characterv2Converter();
+            CombatantFactory::Instance()->setDefaultValues(convertCharacter);
+            convertCharacter->readFromMonsterClass(*monsterClass);
+            convertCharacter->setName(characterName);
+            character = convertCharacter;
         }
     }
+
+    if(!character)
+        character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     addNewObject(character);
 }
@@ -1651,7 +1675,7 @@ void MainWindow::showEvent(QShowEvent * event)
     qDebug() << "[MainWindow] Main window Show event.";
     if(!_initialized)
     {
-        if(_options)
+        if((_options) && (!_recoveryMode))
         {
             // Implement any one-time initialization here
             bool firstStart = !_options->doDataSettingsExist();
@@ -1687,6 +1711,8 @@ void MainWindow::showEvent(QShowEvent * event)
         }
 
         _initialized = true;
+        if(_options)
+            _options->setLoading(false);
     }
 
     int ribbonHeight = RibbonFrame::getRibbonHeight();
@@ -2806,6 +2832,38 @@ void MainWindow::handleOpenGlobalSearch()
     _globalSearchDlg->exec();
 }
 
+void MainWindow::handleAutoSaveExpired()
+{
+    if((_campaign) && (_dirty) && (_options->getAutoSave()))
+        saveCampaign();
+
+    handleAutoSaveChanged();
+}
+
+void MainWindow::handleAutoSaveChanged()
+{
+    if(!_campaign)
+        return;
+
+    if(_options->getAutoSave())
+    {
+        if(!_autoSaveTimer)
+        {
+            _autoSaveTimer = new QTimer(this);
+            _autoSaveTimer->setSingleShot(true);
+            connect(_autoSaveTimer, &QTimer::timeout, this, &MainWindow::handleAutoSaveExpired);
+        }
+
+        _autoSaveTimer->start(AUTOSAVE_TIMER_INTERVAL);
+
+    }
+    else
+    {
+        if(_autoSaveTimer)
+            _autoSaveTimer->stop();
+    }
+}
+
 void MainWindow::handleAnimationStarted()
 {
     if(_pubWindow)
@@ -2942,6 +3000,32 @@ void MainWindow::openAboutDialog()
     AboutDialog dlg;
     dlg.resize(qMax(dlg.width(), width() * 3 / 4), qMax(dlg.height(), height() * 3 / 4));
     dlg.exec();
+}
+
+void MainWindow::openHelpDialog()
+{
+    qDebug() << "[MainWindow] Opening Help Dialog";
+
+    HelpDialog dlg;
+    connect(&dlg, &HelpDialog::openGettingStarted, this, &MainWindow::openGettingStarted);
+    connect(&dlg, &HelpDialog::openUsersGuide, this, &MainWindow::openUsersGuide);
+    connect(&dlg, &HelpDialog::openBackupDirectory, this, &MainWindow::openBackupDirectory);
+    connect(&dlg, &HelpDialog::openLogsDirectory, this, &MainWindow::openLogsDirectory);
+    dlg.exec();
+}
+
+void MainWindow::openBackupDirectory()
+{
+    QString backupPath = _options->getStandardDirectory("backup");
+    if(!backupPath.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(backupPath));
+}
+
+void MainWindow::openLogsDirectory()
+{
+    QString logsPath = DMHLogger::getLogDirPath();
+    if(!logsPath.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(logsPath));
 }
 
 void MainWindow::openRandomMarkets()

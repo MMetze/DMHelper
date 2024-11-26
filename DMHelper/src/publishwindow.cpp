@@ -15,12 +15,8 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     setWindowTitle(title);
     // Not this: setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
 
-    //setAutoFillBackground(true);
-    //setStyleSheet("background-color: rgba(0, 0, 0, 255);");
-
     _publishFrame = new PublishGLFrame();
     setCentralWidget(_publishFrame);
-    //_publishFrame->setAutoFillBackground(true);
 
     setBackgroundColor();
 
@@ -45,7 +41,6 @@ void PublishWindow::setImage(QImage img)
 {
     PublishGLImageRenderer* newRenderer = new PublishGLImageRenderer(nullptr, img, _globalColor);
     _publishFrame->setRenderer(newRenderer);
-    //_publishFrame->setImage(img, _globalColor);
 }
 
 void PublishWindow::setImage(QImage img, const QColor& color)
@@ -55,17 +50,8 @@ void PublishWindow::setImage(QImage img, const QColor& color)
     PublishGLImageRenderer* newRenderer = new PublishGLImageRenderer(nullptr, img, color);
     _publishFrame->setRenderer(newRenderer);
 
-//    _publishFrame->setImage(img, color);
     _globalColorSet = false;
 }
-
-/*
-void PublishWindow::setImageNoScale(QImage img)
-{
-    setBackgroundColor();
-    _publishFrame->setImageNoScale(img, _globalColor);
-}
-*/
 
 void PublishWindow::setBackgroundColor()
 {
@@ -96,12 +82,6 @@ void PublishWindow::setRenderer(PublishGLRenderer* renderer)
 
 void PublishWindow::keyPressEvent(QKeyEvent * event)
 {
-    /*
-    if(event->key() == Qt::Key_Escape)
-    {
-        hide();
-    }
-    */
     if(event->key() == Qt::Key_Escape)
     {
         setWindowState(windowState() & ~Qt::WindowFullScreen);

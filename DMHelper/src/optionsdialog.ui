@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>752</width>
-    <height>863</height>
+    <width>668</width>
+    <height>651</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,16 +73,10 @@
             <item>
              <widget class="QSpinBox" name="spinBoxFontSize">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>22</height>
-               </size>
               </property>
               <property name="suffix">
                <string/>
@@ -94,6 +88,53 @@
             </item>
             <item>
              <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkAutosave">
+            <property name="text">
+             <string>Autosave open campaign</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>Recent Save Files:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBoxMRUCount">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="suffix">
+               <string/>
+              </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -440,12 +481,12 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::MinimumExpanding</enum>
+          <enum>QSizePolicy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>5</width>
-           <height>274</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -983,12 +1024,12 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>5</height>
           </size>
          </property>
         </spacer>

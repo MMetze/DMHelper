@@ -16,6 +16,7 @@
 
 OptionsContainer::OptionsContainer(QMainWindow *parent) :
     QObject(parent),
+    _loading(false),
     _bestiaryFileName(),
     _spellbookFileName(),
     _lastMonster(),
@@ -27,6 +28,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _tablesDirectory(),
     _rulesetFileName(),
     _showAnimations(false),
+    _autoSave(true),
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
     _logicalDPI(0.0),
@@ -75,6 +77,11 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
 
 OptionsContainer::~OptionsContainer()
 {
+}
+
+bool OptionsContainer::isLoading() const
+{
+    return _loading;
 }
 
 QString OptionsContainer::getBestiaryFileName() const
@@ -130,6 +137,11 @@ QString OptionsContainer::getLastSpell() const
 bool OptionsContainer::getShowAnimations() const
 {
     return _showAnimations;
+}
+
+bool OptionsContainer::getAutoSave() const
+{
+    return _autoSave;
 }
 
 QString OptionsContainer::getFontFamily() const
@@ -361,6 +373,8 @@ void OptionsContainer::setMRUHandler(MRUHandler* mruHandler)
 void OptionsContainer::editSettings(Campaign* currentCampaign)
 {
     OptionsContainer* editCopyContainer = new OptionsContainer(getMainWindow());
+    MRUHandler* editCopyMRUHandler = new MRUHandler(nullptr, 0);
+    editCopyContainer->setMRUHandler(editCopyMRUHandler);
     editCopyContainer->copy(this);
 
     _fontChanged = false;
@@ -390,6 +404,8 @@ void OptionsContainer::editSettings(Campaign* currentCampaign)
 void OptionsContainer::readSettings()
 {
     OptionsAccessor settings;
+
+    setLoading(settings.value("loading", false).toBool());
 
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
@@ -426,6 +442,7 @@ void OptionsContainer::readSettings()
 //        getDataDirectory(QString("ui"), true);
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
+    setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
     setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
 
     //12*96/72 = 16 Pixels
@@ -512,6 +529,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("tables", getTablesDirectory());
     settings.setValue("ruleset", getRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
+    settings.setValue("autoSave", getAutoSave());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
     settings.setValue("pasteRich", getPasteRich());
@@ -580,6 +598,16 @@ void OptionsContainer::writeSettings()
     }
 
     cleanupLegacy(settings);
+}
+
+void OptionsContainer::setLoading(bool loading)
+{
+    if(_loading == loading)
+        return;
+
+    OptionsAccessor settings;
+    _loading = loading;
+    settings.setValue("loading", _loading);
 }
 
 void OptionsContainer::setBestiaryFileName(const QString& filename)
@@ -827,18 +855,36 @@ void OptionsContainer::backupFile(const QString& filename)
         QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
         QFileInfo backupFileInfo(previousBackup);
         qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
-        if((!backupFileInfo.exists()) || (backupFileInfo.size() != fileInfo.size()))
+
+        if(backupFileInfo.exists())
         {
-            if(backupFileInfo.exists())
+            if(backupFileInfo.size() == fileInfo.size())
+            {
+                qDebug() << "[OptionsContainer] Backup file and current file are the same size, no further action needed.";
+                return;
+            }
+
+            QString backupRetainer = backupDir.filePath(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+            if(backupFileInfo.size() > fileInfo.size())
+            {
+                qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup as: " << backupRetainer;
+                previousBackup.rename(backupRetainer);
+            }
+            else if(fileInfo.size() > backupFileInfo.size() * 120 / 100)
+            {
+                qDebug() << "[OptionsContainer] WARNING: Recent save file is over 20% larger than the previous backup, keeping previous backup as: " << backupRetainer;
+                previousBackup.rename(backupRetainer);
+            }
+            else
             {
                 qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
                 previousBackup.remove();
             }
-
-            qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
-            QFile file(filename);
-            file.copy(backupDir.filePath(fileInfo.fileName()));
         }
+
+        qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
+        QFile file(filename);
+        file.copy(backupDir.filePath(fileInfo.fileName()));
     }
 }
 
@@ -878,6 +924,15 @@ void OptionsContainer::setShowAnimations(bool showAnimations)
     {
         _showAnimations = showAnimations;
         emit showAnimationsChanged(_showAnimations);
+    }
+}
+
+void OptionsContainer::setAutoSave(bool autoSave)
+{
+    if(_autoSave != autoSave)
+    {
+        _autoSave = autoSave;
+        emit autoSaveChanged(_autoSave);
     }
 }
 
@@ -1274,6 +1329,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setLastMonster(other->_lastMonster);
         setLastSpell(other->_lastSpell);
         setShowAnimations(other->_showAnimations);
+        setAutoSave(other->_autoSave);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);
@@ -1307,6 +1363,12 @@ void OptionsContainer::copy(OptionsContainer* other)
         setSessionID(other->_sessionID);
         setInviteID(other->_inviteID);
 #endif
+
+        if((_mruHandler) && (other->_mruHandler))
+        {
+            _mruHandler->setMRUCount(other->_mruHandler->getMRUCount());
+            _mruHandler->setMRUList(other->_mruHandler->getMRUList());
+        }
     }
 }
 

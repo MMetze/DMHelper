@@ -524,9 +524,7 @@ void MapFrame::editMapFile()
     if(!filename.isEmpty())
     {
         uninitializeMap();
-#if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
         _mapSource->uninitialize();
-#endif
         _mapSource->setFileName(filename);
         initializeMap();
     }
@@ -1081,6 +1079,12 @@ void MapFrame::keyReleaseEvent(QKeyEvent *event)
         {
             _spaceDown = false;
             setMapCursor();
+            event->accept();
+            return;
+        }
+        else if(event->key() == Qt::Key_A)
+        {
+            editModeToggled(_editMode == DMHelper::EditMode_Pointer ? DMHelper::EditMode_Move : DMHelper::EditMode_Pointer);
             event->accept();
             return;
         }

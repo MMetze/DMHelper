@@ -13,7 +13,8 @@ RuleFactory* RuleFactory::_instance = nullptr;
 
 RuleFactory::RuleFactory(const QString& rulesetFile, QObject *parent) :
     QObject{parent},
-    _rulesetTemplates()
+    _rulesetTemplates(),
+    _rulesetDir()
 {
     readRuleset(rulesetFile);
 }
@@ -87,6 +88,11 @@ RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rule
     return _rulesetTemplates.value(rulesetName);
 }
 
+QDir RuleFactory::getRulesetDir() const
+{
+    return _rulesetDir;
+}
+
 void RuleFactory::readRuleset(const QString& rulesetFile)
 {
     qDebug() << "[RuleFactory] Reading ruleset...";
@@ -138,6 +144,8 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
 
         rulesetElement = rulesetElement.nextSiblingElement(QString("ruleset"));
     }
+
+    _rulesetDir = QFileInfo(rulesetFile).absolutePath();
 
     qDebug() << "[RuleFActory] Completed reading ruleset.";
 }

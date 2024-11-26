@@ -2,11 +2,14 @@
 #include "ui_dicerolldialogcombatants.h"
 #include "battlecombatantwidget.h"
 #include "battledialogmodelcombatant.h"
+#include "quickref.h"
 #include "characterv2.h"
 #include "character.h" // HACK - needed for "AbilityScorePair"
 #include "conditionseditdialog.h"
 #include <QtGlobal>
 #include <QMouseEvent>
+
+const int CONDITION_FRAME_SPACING = 8;
 
 DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC, QWidget *parent) :
     QDialog(parent),
@@ -16,6 +19,7 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
     _modifiers(),
     _fireAndForget(false),
     _conditions(0),
+    _conditionGrid(nullptr),
     _mouseDown(false),
     _mouseDownPos()
 {
@@ -28,9 +32,9 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
 
     ui->edtDamage->setValidator(new QIntValidator(0, INT_MAX, this));
 
-    ui->editDiceCount->setText(QString::number(dice.getCount()));
-    ui->editDiceType->setText(QString::number(dice.getType()));
-    ui->editBonus->setText(QString::number(dice.getBonus()));
+    ui->edtDiceCount->setText(QString::number(dice.getCount()));
+    ui->edtDiceType->setText(QString::number(dice.getType()));
+    ui->edtBonus->setText(QString::number(dice.getBonus()));
     ui->edtTarget->setText(QString::number(rollDC));
 
     createCombatantWidgets();
@@ -41,7 +45,8 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
 DiceRollDialogCombatants::~DiceRollDialogCombatants()
 {
     QLayoutItem *child;
-    while ((child = _combatantLayout->takeAt(0)) != nullptr) {
+    while ((child = _combatantLayout->takeAt(0)) != nullptr)
+    {
         delete child;
     }
 
@@ -52,6 +57,39 @@ void DiceRollDialogCombatants::fireAndForget()
 {
     show();
     _fireAndForget = true;
+}
+
+void DiceRollDialogCombatants::setSaveDC(int saveDC)
+{
+    ui->edtTarget->setText(QString::number(saveDC));
+}
+
+void DiceRollDialogCombatants::setSaveType(const QString& saveType)
+{
+    int index = ui->cmbType->findText(saveType + QString(" Save"));
+    if(index >= 0)
+        ui->cmbType->setCurrentIndex(index);
+}
+
+void DiceRollDialogCombatants::setConditions(int conditions)
+{
+    if(_conditions == conditions)
+        return;
+
+    _conditions = conditions;
+    updateConditionLayout();
+}
+
+void DiceRollDialogCombatants::setDamage(int damage)
+{
+    ui->edtDamage->setText(QString::number(damage));
+}
+
+void DiceRollDialogCombatants::setDamageDice(const Dice& damageDice)
+{
+    ui->edtDamageDiceCount->setText(QString::number(damageDice.getCount()));
+    ui->edtDamageDiceType->setText(QString::number(damageDice.getType()));
+    ui->edtDamageBonus->setText(QString::number(damageDice.getBonus()));
 }
 
 void DiceRollDialogCombatants::rollDice()
@@ -66,14 +104,90 @@ void DiceRollDialogCombatants::rollDice()
         {
             BattleCombatantWidget* combatant = qobject_cast<BattleCombatantWidget*>(layoutItem->widget());
             if((combatant) && (combatant->isActive()))
-            {
                 rollForWidget(combatant, readDice(), (_modifiers.count() > 0) ? (_modifiers.at(rc)) : 0);
-            }
         }
     }
 }
 
-void DiceRollDialogCombatants::applyDamage()
+void DiceRollDialogCombatants::rollDamageDice()
+{
+    Dice damageDice(ui->edtDamageDiceCount->text().toInt(), ui->edtDamageDiceType->text().toInt(), ui->edtDamageBonus->text().toInt());
+    ui->edtDamage->setText(QString::number(damageDice.roll()));
+}
+
+void DiceRollDialogCombatants::rerollWidget(BattleCombatantWidget* widget)
+{
+    if(!widget)
+        return;
+
+    int modifier = 0;
+    if(_modifiers.count() > 0)
+    {
+        int index = _combatantLayout->indexOf(widget);
+        if((index >= 0) && index < _modifiers.count())
+            modifier = _modifiers.at(index);
+    }
+
+    rollForWidget(widget, readDice(), modifier);
+}
+
+void DiceRollDialogCombatants::setWidgetVisibility()
+{
+    if(_combatants.count() != _combatantLayout->count())
+        return;
+
+    for(int rc = 0; rc < _combatants.count(); ++rc)
+    {
+        BattleDialogModelCombatant* combatant = _combatants.at(rc);
+        QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
+        if(combatant && layoutItem && (layoutItem->widget()))
+            layoutItem->widget()->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
+    }
+}
+
+void DiceRollDialogCombatants::hideEvent(QHideEvent * event)
+{
+    Q_UNUSED(event);
+
+    if(_fireAndForget)
+        deleteLater();
+}
+
+void DiceRollDialogCombatants::diceTypeChanged()
+{
+    ui->cmbType->setEnabled(ui->edtDiceType->text().toInt() == 20);
+}
+
+void DiceRollDialogCombatants::modifierTypeChanged()
+{
+    _modifiers.clear();
+
+    AbilitySkillPair abilitySkillPair(-1, -1);
+    QVariant currentDataValue = ui->cmbType->currentData();
+    if(currentDataValue.isValid())
+        abilitySkillPair = currentDataValue.value<AbilitySkillPair>();
+
+    for(BattleDialogModelCombatant* combatant : _combatants)
+    {
+        int modifier = 0;
+        if(abilitySkillPair.second == -1)
+            modifier = Combatant::getAbilityMod(combatant->getAbilityValue(static_cast<Combatant::Ability>(abilitySkillPair.first)));
+        else
+            modifier = combatant->getSkillModifier(static_cast<Combatant::Skills>(abilitySkillPair.second));
+        _modifiers.append(modifier);
+    }
+}
+
+void DiceRollDialogCombatants::editConditions()
+{
+    ConditionsEditDialog dlg;
+    dlg.setConditions(_conditions);
+    int result = dlg.exec();    
+    if(result == QDialog::Accepted)
+        setConditions(dlg.getConditions());
+}
+
+void DiceRollDialogCombatants::applyEffect()
 {
     if(_combatants.count() != _combatantLayout->count())
         return;
@@ -105,100 +219,37 @@ void DiceRollDialogCombatants::applyDamage()
     }
 }
 
-void DiceRollDialogCombatants::rerollWidget(BattleCombatantWidget* widget)
+void DiceRollDialogCombatants::applyEffectandClose()
 {
-    if(!widget)
-        return;
-
-    int modifier = 0;
-    if(_modifiers.count() > 0)
-    {
-        int index = _combatantLayout->indexOf(widget);
-        if((index >= 0) && index < _modifiers.count())
-            modifier = _modifiers.at(index);
-    }
-
-    rollForWidget(widget, readDice(), modifier);
+    applyEffect();
+    hide();
 }
 
-void DiceRollDialogCombatants::setWidgetVisibility()
+void DiceRollDialogCombatants::applyEffectandDelete()
 {
-    if(_combatants.count() != _combatantLayout->count())
-        return;
-
-    for(int rc = 0; rc < _combatants.count(); ++rc)
-    {
-        BattleDialogModelCombatant* combatant = _combatants.at(rc);
-        QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
-        if(combatant && layoutItem && (layoutItem->widget()))
-        {
-            layoutItem->widget()->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
-        }
-    }
-}
-
-void DiceRollDialogCombatants::hideEvent(QHideEvent * event)
-{
-    Q_UNUSED(event);
-
-    if(_fireAndForget)
-    {
-        deleteLater();
-    }
-}
-
-void DiceRollDialogCombatants::diceTypeChanged()
-{
-    ui->cmbType->setEnabled(ui->editDiceType->text().toInt() == 20);
-}
-
-void DiceRollDialogCombatants::modifierTypeChanged()
-{
-    _modifiers.clear();
-
-    AbilitySkillPair abilitySkillPair(-1, -1);
-    QVariant currentDataValue = ui->cmbType->currentData();
-    if(currentDataValue.isValid())
-        abilitySkillPair = currentDataValue.value<AbilitySkillPair>();
-
-    for(BattleDialogModelCombatant* combatant : _combatants)
-    {
-        int modifier = 0;
-        if(abilitySkillPair.second == -1)
-            modifier = Combatant::getAbilityMod(combatant->getAbilityValue(static_cast<Combatant::Ability>(abilitySkillPair.first)));
-        else
-            modifier = combatant->getSkillModifier(static_cast<Combatant::Skills>(abilitySkillPair.second));
-        _modifiers.append(modifier);
-    }
-}
-
-void DiceRollDialogCombatants::editConditions()
-{
-    ConditionsEditDialog dlg;
-    dlg.setConditions(_conditions);
-    int result = dlg.exec();
-    if(result == QDialog::Accepted)
-    {
-        _conditions = dlg.getConditions();
-    }
+    applyEffect();
+    emit removeEffect();
+    hide();
 }
 
 void DiceRollDialogCombatants::init()
 {
     QValidator *valDiceCount = new QIntValidator(1, 100, this);
-    ui->editDiceCount->setValidator(valDiceCount);
+    ui->edtDiceCount->setValidator(valDiceCount);
     QValidator *valDiceType = new QIntValidator(1, 100, this);
-    ui->editDiceType->setValidator(valDiceType);
+    ui->edtDiceType->setValidator(valDiceType);
     QValidator *valBonus = new QIntValidator(0, 100, this);
-    ui->editBonus->setValidator(valBonus);
+    ui->edtBonus->setValidator(valBonus);
     QValidator *valTarget = new QIntValidator(0, 100, this);
     ui->edtTarget->setValidator(valTarget);
 
     connect(ui->btnRoll, SIGNAL(clicked()), this, SLOT(rollDice()));
-    connect(ui->editDiceType, SIGNAL(textChanged(QString)), this, SLOT(diceTypeChanged()));
+    connect(ui->edtDiceType, SIGNAL(textChanged(QString)), this, SLOT(diceTypeChanged()));
     connect(ui->cmbType, SIGNAL(currentIndexChanged(int)), this, SLOT(modifierTypeChanged()));
-    connect(ui->btnDamage, SIGNAL(clicked()), this, SLOT(applyDamage()));
+    connect(ui->btnApplyEffect, SIGNAL(clicked()), this, SLOT(applyEffectandClose()));
+    connect(ui->btnApplyEffectandDelete, SIGNAL(clicked()), this, SLOT(applyEffectandDelete()));
     connect(ui->btnApplyConditions, SIGNAL(clicked()), this, SLOT(editConditions()));
+    connect(ui->btnRollDamage, SIGNAL(clicked()), this, SLOT(rollDamageDice()));
 
     ui->cmbType->addItem(QString("None"), QVariant());
     ui->cmbType->addItem(QString("Strength Check"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Strength, -1)));
@@ -238,7 +289,7 @@ void DiceRollDialogCombatants::init()
     ui->cmbType->addItem(QString("   Intimidation"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Charisma, Combatant::Skills_intimidation)));
 
     ui->cmbType->setCurrentIndex(0);
-    ui->cmbType->setEnabled(ui->editDiceType->text().toInt() == 20);
+    ui->cmbType->setEnabled(ui->edtDiceType->text().toInt() == 20);
 
 }
 
@@ -253,10 +304,76 @@ void DiceRollDialogCombatants::createCombatantWidgets()
         _combatantLayout->addWidget(newWidget);
         connect(newWidget, SIGNAL(selectCombatant(BattleDialogModelCombatant*)), this, SIGNAL(selectCombatant(BattleDialogModelCombatant*)));
         connect(newWidget, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SIGNAL(combatantChanged(BattleDialogModelCombatant*)));
-        connect(newWidget, SIGNAL(rerollNeeded(WidgetBattleCombatant*)), this, SLOT(rerollWidget(WidgetBattleCombatant*)));
+        connect(newWidget, SIGNAL(rerollNeeded(BattleCombatantWidget*)), this, SLOT(rerollWidget(BattleCombatantWidget*)));
         connect(newWidget, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)));
         newWidget->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
     }
+}
+
+void DiceRollDialogCombatants::updateConditionLayout()
+{
+    if(_conditionGrid)
+    {
+        // Delete the grid entries
+        QLayoutItem *child = nullptr;
+        while((child = _conditionGrid->takeAt(0)) != nullptr)
+        {
+            delete child->widget();
+            delete child;
+        }
+
+        delete _conditionGrid;
+        _conditionGrid = nullptr;
+    }
+
+    _conditionGrid = new QGridLayout;
+    _conditionGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    _conditionGrid->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
+    _conditionGrid->setSpacing(CONDITION_FRAME_SPACING);
+    ui->conditionScrollAreaWidgetContents->setLayout(_conditionGrid);
+
+    for(int i = 0; i < Combatant::getConditionCount(); ++i)
+    {
+        Combatant::Condition condition = Combatant::getConditionByIndex(i);
+        if(_conditions & condition)
+            addCondition(condition);
+    }
+
+    int spacingColumn = _conditionGrid->columnCount();
+
+    _conditionGrid->addItem(new QSpacerItem(20, 40, QSizePolicy::Expanding), 0, spacingColumn);
+
+    for(int i = 0; i < spacingColumn; ++i)
+        _conditionGrid->setColumnStretch(i, 1);
+
+    _conditionGrid->setColumnStretch(spacingColumn, 10);
+
+    ui->conditionScrollAreaWidgetContents->update();
+}
+
+void DiceRollDialogCombatants::addCondition(Combatant::Condition condition)
+{
+    if(!_conditionGrid)
+        return;
+
+    QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
+    QLabel* conditionLabel = new QLabel(this);
+    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
+
+    QString conditionText = QString("<b>") + Combatant::getConditionDescription(condition) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+    conditionLabel->setToolTip(conditionText);
+
+    int columnCount = (ui->scrollAreaWidgetContents->width() - CONDITION_FRAME_SPACING) / (40 + CONDITION_FRAME_SPACING);
+    int row = _conditionGrid->count() / columnCount;
+    int column = _conditionGrid->count() % columnCount;
+
+    _conditionGrid->addWidget(conditionLabel, row, column);
 }
 
 int DiceRollDialogCombatants::rollOnce(const Dice& dice, int modifier, QString& resultStr)
@@ -269,9 +386,8 @@ int DiceRollDialogCombatants::rollOnce(const Dice& dice, int modifier, QString& 
         //int roll = 1 + (qrand() * dice.getType())/RAND_MAX;
         int roll = Dice::dX(dice.getType()); //1 + (qrand() * dice.getType())/RAND_MAX;
         if(dc > 0)
-        {
             resultStr.append(QString(" + "));
-        }
+
         resultStr.append(QString::number(roll));
         result += roll;
     }
@@ -291,9 +407,7 @@ int DiceRollDialogCombatants::rollOnce(const Dice& dice, int modifier, QString& 
 
     // If there was somehow more than one number shown, then we should bother showing the overall sum
     if((dice.getCount() > 1) || (dice.getBonus() > 0) || (modifier != 0))
-    {
         resultStr.append(QString(" = ") + QString::number(result));
-    }
 
     return result;
 }
@@ -340,7 +454,7 @@ void DiceRollDialogCombatants::rollForWidget(BattleCombatantWidget* widget, cons
 
 Dice DiceRollDialogCombatants::readDice()
 {
-    return Dice(ui->editDiceCount->text().toInt(),
-                ui->editDiceType->text().toInt(),
-                ui->editBonus->text().toInt());
+    return Dice(ui->edtDiceCount->text().toInt(),
+                ui->edtDiceType->text().toInt(),
+                ui->edtBonus->text().toInt());
 }

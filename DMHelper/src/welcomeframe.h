@@ -31,8 +31,6 @@ signals:
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
-    virtual void resizeEvent(QResizeEvent *event) override;
-
 
 private slots:
     void openCampaign(const QString& campaignText);

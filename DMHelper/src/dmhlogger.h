@@ -13,6 +13,7 @@ public:
     ~DMHLogger();
 
     static DMHLogger* instance();
+    static QString getLogDirPath();
 
     void initialize();
     void shutdown();

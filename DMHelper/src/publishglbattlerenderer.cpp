@@ -779,7 +779,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
         _initiativeBackground->paintGL(functions, nullptr);
     }
 
-    int activeCombatant = _model->getActiveCombatantIndex();
+    int activeCombatant = _model->getCombatantIndex(_model->getActiveCombatant());
     int currentCombatant = activeCombatant;
     do
     {
