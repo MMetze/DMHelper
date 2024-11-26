@@ -35,17 +35,19 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 
 <h3>Fixes:</h3>
 <ul>
+<li><b>Object scaling:</b> This actually works now, in both width and height for both the DM and Player's views
 <li><b>Consistent key usage:</b> "A" key to toggle the pointer and Space bar to move a map around
 <li><b>Initiative list:</b> Doesn't get confused about rounds when it isn't sorted
 <li>Creating a character from a monster works again
+<li>Newly created Fog of War layers default to black again, not blue (insert facepalm here)
 </ul>
 
 <p>
 
 <h3>Other Improvements:</h3>
 <ul>
-<li>Increased the default # of files in the recent files list, the number is editable in options</li>
-<li>Increased the number of log files retained</li>
+<li>Increased the default # of files in the recent files list, the number is editable in options
+<li>Increased the number of log files retained
 </ul>
 
 <p>
