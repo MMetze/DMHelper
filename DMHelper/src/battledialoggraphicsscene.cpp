@@ -318,10 +318,14 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 
                 if((abstractShape) && (!effectId.isNull()))
                 {
-                    _mouseDownItem->setRotation(_previousRotation + angle);
                     BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
                     if(effect)
                         effect->setRotation(_previousRotation + angle);
+
+                    if((effect) && (effect->hasEffectTransform()))
+                        effect->updateTransform(_mouseDownItem);
+                    else
+                        _mouseDownItem->setRotation(_previousRotation + angle);
 
                     emit effectChanged(abstractShape);
                 }

@@ -155,6 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _mouseDownPos(),
     _undoAction(nullptr),
     _redoAction(nullptr),
+    _recoveryMode(true),
     _initialized(false),
     _dirty(false),
     _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES),
@@ -236,6 +237,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mruHandler, SIGNAL(triggerMRU(QString)), this, SLOT(openCampaign(QString)));
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
+    _recoveryMode = _options->isLoading();
+    qDebug() << "[MainWindow] Recovery Mode: " << _recoveryMode;
+    _options->setLoading(true);
+
     connect(_options, SIGNAL(bestiaryFileNameChanged()), this, SLOT(readBestiary()));
     connect(_options, SIGNAL(spellbookFileNameChanged()), this, SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
@@ -1671,7 +1676,7 @@ void MainWindow::showEvent(QShowEvent * event)
     qDebug() << "[MainWindow] Main window Show event.";
     if(!_initialized)
     {
-        if(_options)
+        if((_options) && (!_recoveryMode))
         {
             // Implement any one-time initialization here
             bool firstStart = !_options->doDataSettingsExist();
@@ -1707,6 +1712,8 @@ void MainWindow::showEvent(QShowEvent * event)
         }
 
         _initialized = true;
+        if(_options)
+            _options->setLoading(false);
     }
 
     int ribbonHeight = RibbonFrame::getRibbonHeight();

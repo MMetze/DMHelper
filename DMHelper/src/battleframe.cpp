@@ -920,7 +920,6 @@ void BattleFrame::createActiveIcon()
 
     _activePixmap = _scene->addPixmap(activePmp);
     _activePixmap->setTransformationMode(Qt::SmoothTransformation);
-//    _activePixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _activeScale / ACTIVE_PIXMAP_SIZE);
     _activePixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _activePixmap->hide();
 }
@@ -4148,14 +4147,6 @@ void BattleFrame::createSceneContents()
     }
     _cameraRect->setRatioLocked(_isGridLocked);
     updateCameraRect();
-
-    // Add icons for existing combatants
-    /*
-    for(int i = 0; i < _model->getCombatantCount(); ++i)
-    {
-        createCombatantIcon(_model->getCombatant(i));
-    }
-    */
 
     updateHighlights();
 }

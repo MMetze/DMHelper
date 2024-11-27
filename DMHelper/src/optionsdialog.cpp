@@ -56,6 +56,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         font.setFamily(_options->getFontFamily());
         ui->fontComboBox->setCurrentFont(font);
         ui->spinBoxFontSize->setValue(_options->getFontSize());
+        if(_options->getMRUHandler())
+            ui->spinBoxMRUCount->setValue(_options->getMRUHandler()->getMRUCount());
         ui->chkAutosave->setChecked(_options->getAutoSave());
         ui->cmbInitiativeType->setCurrentIndex(_options->getInitiativeType());
         ui->edtInitiativeScale->setText(QString::number(_options->getInitiativeScale()));
@@ -130,6 +132,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
         connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
         connect(ui->chkAutosave, SIGNAL(clicked(bool)), _options, SLOT(setAutoSave(bool)));
+        if(_options->getMRUHandler())
+            connect(ui->spinBoxMRUCount, &QSpinBox::valueChanged, _options->getMRUHandler(), &MRUHandler::setMRUCount);
         connect(ui->cmbInitiativeType, SIGNAL(currentIndexChanged(int)), _options, SLOT(setInitiativeType(int)));
         connect(ui->sliderInitiativeScale, &QAbstractSlider::valueChanged,
                 this, [=](int newValue) { this->handleInitiativeScaleChanged(static_cast<qreal>(newValue) / 100.0); });

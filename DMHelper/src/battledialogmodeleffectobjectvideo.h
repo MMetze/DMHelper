@@ -26,6 +26,8 @@ public:
     virtual int getEffectType() const override;
     virtual BattleDialogEffectSettingsBase* getEffectEditor() const override;
 
+    virtual bool hasEffectTransform() const override;
+
     virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
 
     // Local Layer Interface

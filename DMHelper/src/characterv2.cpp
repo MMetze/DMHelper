@@ -239,9 +239,6 @@ QList<QVariant> Characterv2::getListValue(const QString& key) const
 
 void Characterv2::setValue(const QString& key, const QVariant& value)
 {
-    if(!_allValues.contains(key))
-        qDebug() << "[Characterv2] WARNING: Request to set unknown " << key << " to " << value;
-
     if(_allValues.value(key) == value)
         return;
 

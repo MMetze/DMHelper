@@ -17,6 +17,8 @@ public:
     explicit OptionsContainer(QMainWindow *parent = nullptr);
     ~OptionsContainer();
 
+    bool isLoading() const;
+
     // General settings
     QString getBestiaryFileName() const;
     QString getSpellbookFileName() const;
@@ -159,6 +161,8 @@ public slots:
     void readSettings();
     void writeSettings();
 
+    void setLoading(bool loading);
+
     // General settings
     void setBestiaryFileName(const QString& filename);
     void setSpellbookFileName(const QString& filename);
@@ -244,6 +248,8 @@ private:
     void copy(OptionsContainer* other);
     QMainWindow* getMainWindow();
     void cleanupLegacy(OptionsAccessor& settings);
+
+    bool _loading;
 
     // General settings
     QString _bestiaryFileName;

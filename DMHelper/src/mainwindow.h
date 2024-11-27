@@ -64,7 +64,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static const int DEFAULT_MRU_FILE_COUNT = 4;
+    static const int DEFAULT_MRU_FILE_COUNT = 10;
 
 public slots:
     void newCampaign();
@@ -259,6 +259,7 @@ private:
     QAction* _undoAction;
     QAction* _redoAction;
 
+    bool _recoveryMode;
     bool _initialized;
     bool _dirty;
     int _animationFrameCount;
