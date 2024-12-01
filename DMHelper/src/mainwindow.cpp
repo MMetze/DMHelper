@@ -22,6 +22,7 @@
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
 #include "encounterfactory.h"
+#include "monsterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encountertextlinked.h"
@@ -795,8 +796,8 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
-        set ruleset if exists, then configure monster factory
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -2422,6 +2423,11 @@ void MainWindow::openCampaign(const QString& filename)
     QFileInfo fileInfo(_campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
     _campaign = new Campaign();
+
+    _campaign->preloadRulesetXML(campaignElement, false);
+    MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                 campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                 campaignElement.attribute("minorVersion", QString::number(0)).toInt());
 
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);

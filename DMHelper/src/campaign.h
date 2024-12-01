@@ -30,6 +30,7 @@ public:
     virtual int getObjectType() const override;
 
     // Local Interface
+    virtual void preloadRulesetXML(const QDomElement &element, bool isImport);
     virtual void beginBatchChanges();
     virtual void endBatchChanges();
 

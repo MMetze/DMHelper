@@ -49,6 +49,13 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         connect(ui->edtCharacterData, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterDataFile);
         connect(ui->btnCharacterUI, &QAbstractButton::clicked, this, &OptionsDialog::browseCharacterUIFile);
         connect(ui->edtCharacterUI, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterUIFile);
+        connect(ui->btnBestiaryFile, &QAbstractButton::clicked, this, &OptionsDialog::browseBestiaryFile);
+        connect(ui->edtBestiaryFile, &QLineEdit::editingFinished, this, &OptionsDialog::editBestiaryFile);
+        connect(ui->btnMonsterData, &QAbstractButton::clicked, this, &OptionsDialog::browseMonsterDataFile);
+        connect(ui->edtMonsterData, &QLineEdit::editingFinished, this, &OptionsDialog::editMonsterDataFile);
+        connect(ui->btnMonsterUI, &QAbstractButton::clicked, this, &OptionsDialog::browseMonsterUIFile);
+        connect(ui->edtMonsterUI, &QLineEdit::editingFinished, this, &OptionsDialog::editMonsterUIFile);
+
 
         connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
 
@@ -95,9 +102,12 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
                 }
             }
 
+            ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
             ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
             ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
-            ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->edtBestiaryFile->setText(_campaign->getRuleset().getBestiaryFile());
+            ui->edtMonsterData->setText(_campaign->getRuleset().getMonsterDataFile());
+            ui->edtMonsterUI->setText(_campaign->getRuleset().getMonsterUIFile());
         }
         else
         {
@@ -206,9 +216,12 @@ void OptionsDialog::applyCampaignChanges()
 
     _campaign->setName(ui->edtCampaignName->text());
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
+    _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
     _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
     _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());
-    _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
+    _campaign->getRuleset().setBestiaryFile(ui->edtBestiaryFile->text());
+    _campaign->getRuleset().setMonsterDataFile(ui->edtMonsterData->text());
+    _campaign->getRuleset().setMonsterUIFile(ui->edtMonsterUI->text());
 }
 
 void OptionsDialog::browseBestiary()
@@ -679,7 +692,6 @@ void OptionsDialog::setCharacterUIFile(const QString& characterUIFile)
     ui->edtCharacterUI->setText(characterUIFile);
 }
 
-
 void OptionsDialog::browseBestiaryFile()
 {
     setBestiaryFile(QFileDialog::getOpenFileName(this, QString("Select the bestiary file"), QString(), QString("XML files (*.xml)")));
@@ -687,12 +699,12 @@ void OptionsDialog::browseBestiaryFile()
 
 void OptionsDialog::editBestiaryFile()
 {
-    setBestiaryFile(ui->edtBestiary->text());
+    setBestiaryFile(ui->edtBestiaryFile->text());
 }
 
 void OptionsDialog::setBestiaryFile(const QString& bestiaryFile)
 {
-    ui->edtBestiary->setText(bestiaryFile);
+    ui->edtBestiaryFile->setText(bestiaryFile);
 }
 
 void OptionsDialog::browseMonsterDataFile()

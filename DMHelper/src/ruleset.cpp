@@ -53,6 +53,11 @@ bool Ruleset::isTreeVisible() const
     return false;
 }
 
+bool Ruleset::isInitialized() const
+{
+    return _ruleInitiative != nullptr;
+}
+
 RuleInitiative* Ruleset::getRuleInitiative()
 {
     if(!_ruleInitiative)

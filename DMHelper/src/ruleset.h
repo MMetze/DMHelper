@@ -18,6 +18,7 @@ public:
     virtual bool isTreeVisible() const override;
 
     // Local accessors
+    bool isInitialized() const;
     RuleInitiative* getRuleInitiative();
     QString getRuleInitiativeType();
     QString getCharacterDataFile() const;
