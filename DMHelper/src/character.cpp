@@ -672,7 +672,14 @@ void Character::copyMonsterValues(MonsterClass& monster)
 {
     beginBatchChanges();
 
-    setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getName(), monster.getIcon())));
+    if(Bestiary::Instance())
+    {
+        QString monsterImageFile = Bestiary::Instance()->findMonsterImage(monster.getName(), monster.getIcon());
+        QDir bestiaryDir = Bestiary::Instance()->getDirectory();
+        if((!monsterImageFile.isEmpty()) && (bestiaryDir.exists(monsterImageFile)))
+            setIcon(bestiaryDir.filePath(monsterImageFile));
+    }
+
     setStringValue(StringValue_race, monster.getName());
     setStringValue(StringValue_size, monster.getMonsterSize());
     setIntValue(IntValue_speed, monster.getSpeedValue());
