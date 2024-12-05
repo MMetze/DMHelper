@@ -233,6 +233,8 @@ BattleFrame::~BattleFrame()
     QLayoutItem *child;
     while ((child = _combatantLayout->takeAt(0)) != nullptr)
     {
+        if(child->widget())
+            child->widget()->deleteLater();
         delete child;
     }
     
@@ -334,7 +336,7 @@ void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant, LayerToken
     }
 
     _model->appendCombatant(combatant, targetLayer);
-    createCombatantWidget(combatant);
+    //createCombatantWidget(combatant);
     //createCombatantIcon(combatant);
 }
 
@@ -1694,6 +1696,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
+                BattleDialogModelCombatant* widgetCombatant = widget->getCombatant();
                 if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
                 {
                     if(_hoverFrame)
@@ -2886,10 +2889,10 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
                 addCombatant(monster, combatantDlg->getLayer());
             }
 
-            recreateCombatantWidgets();
-
             if(combatantDlg->isSortInitiative())
                 _model->sortCombatants();
+
+            recreateCombatantWidgets();
         }
     }
 
