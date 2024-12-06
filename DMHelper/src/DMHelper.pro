@@ -132,6 +132,7 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    monsterclassv2.cpp \
     monsterfactory.cpp \
     newcampaigndialog.cpp \
     objectfactory.cpp \
@@ -203,6 +204,7 @@ SOURCES += main.cpp\
     spellslotlevelbutton.cpp \
     spellslotradiobutton.cpp \
     templatefactory.cpp \
+    templateobject.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     tokeneditdialog.cpp \
@@ -422,6 +424,7 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    monsterclassv2.h \
     monsterfactory.h \
     newcampaigndialog.h \
     objectfactory.h \
@@ -493,6 +496,7 @@ HEADERS  += mainwindow.h \
     spellslotlevelbutton.h \
     spellslotradiobutton.h \
     templatefactory.h \
+    templateobject.h \
     textbrowsermargins.h \
     texteditmargins.h \
     tokeneditdialog.h \
@@ -734,6 +738,8 @@ DISTFILES += \
     resources/character5e-2024.xml \
     resources/character5e.xml \
     resources/equipment.xml \
+    resources/monster2e.xml \
+    resources/monster5e.xml \
     resources/quickref_data.xml \
     resources/ruleset.xml \
     resources/shops.xml \

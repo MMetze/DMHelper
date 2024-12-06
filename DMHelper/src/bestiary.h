@@ -8,11 +8,12 @@
 #include <QStringList>
 
 class MonsterClass;
+class MonsterClassv2;
 class Monster;
 class QDomDocument;
 class QDomElement;
 
-typedef QMap<QString, MonsterClass*> BestiaryMap;
+typedef QMap<QString, MonsterClassv2*> BestiaryMap;
 
 class Bestiary : public QObject, public GlobalSearch_Interface
 {
@@ -49,15 +50,15 @@ public:
 
     bool isDirty();
 
-    MonsterClass* getMonsterClass(const QString& name);
-    MonsterClass* getFirstMonsterClass() const;
-    MonsterClass* getLastMonsterClass() const;
-    MonsterClass* getNextMonsterClass(MonsterClass* monsterClass) const;
-    MonsterClass* getPreviousMonsterClass(MonsterClass* monsterClass) const;
+    MonsterClassv2* getMonsterClass(const QString& name);
+    MonsterClassv2* getFirstMonsterClass() const;
+    MonsterClassv2* getLastMonsterClass() const;
+    MonsterClassv2* getNextMonsterClass(MonsterClassv2* monsterClass) const;
+    MonsterClassv2* getPreviousMonsterClass(MonsterClassv2* monsterClass) const;
 
-    bool insertMonsterClass(MonsterClass* monsterClass);
-    void removeMonsterClass(MonsterClass* monsterClass);
-    void renameMonster(MonsterClass* monsterClass, const QString& newName);
+    bool insertMonsterClass(MonsterClassv2* monsterClass);
+    void removeMonsterClass(MonsterClassv2* monsterClass);
+    void renameMonster(MonsterClassv2* monsterClass, const QString& newName);
 
     void setDirectory(const QDir& directory);
     const QDir& getDirectory() const;
@@ -86,12 +87,13 @@ private:
     void loadBestiary(const QDomElement& bestiaryElement);
     void importBestiary(const QDomElement& bestiaryElement, const QString& importFile);
     void importMonsterImage(const QDomElement& monsterElement, const QString& importFile);
-    QString searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const;
+    QString searchMonsterClass(const MonsterClassv2* monsterClass, const QString& searchString) const;
 
     static Bestiary* _instance;
 
     BestiaryMap _bestiaryMap;
     QDir _bestiaryDirectory;
+    QString _bestiaryFile;
     int _majorVersion;
     int _minorVersion;
     QStringList _licenseText;

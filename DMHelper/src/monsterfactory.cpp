@@ -51,6 +51,4 @@ void MonsterFactory::configureFactory(const Ruleset& ruleset, int inputMajorVers
     connect(&ruleset, &Ruleset::monsterDataFileChanged, this, &MonsterFactory::loadTemplate);
 
     _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 2));
-
-    should this now load the bestiary?
 }

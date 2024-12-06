@@ -89,6 +89,7 @@ bool ObjectImportWorker::doWork()
     MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
     Bestiary::Instance()->startBatchProcessing();
     _importCampaign->inputXML(campaignElement, true);
