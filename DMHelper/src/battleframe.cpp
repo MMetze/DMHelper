@@ -233,6 +233,8 @@ BattleFrame::~BattleFrame()
     QLayoutItem *child;
     while ((child = _combatantLayout->takeAt(0)) != nullptr)
     {
+        if(child->widget())
+            child->widget()->deleteLater();
         delete child;
     }
     
@@ -334,7 +336,7 @@ void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant, LayerToken
     }
 
     _model->appendCombatant(combatant, targetLayer);
-    createCombatantWidget(combatant);
+    //createCombatantWidget(combatant);
     //createCombatantIcon(combatant);
 }
 
@@ -2886,10 +2888,10 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
                 addCombatant(monster, combatantDlg->getLayer());
             }
 
-            recreateCombatantWidgets();
-
             if(combatantDlg->isSortInitiative())
                 _model->sortCombatants();
+
+            recreateCombatantWidgets();
         }
     }
 

@@ -53,13 +53,17 @@ bool ScaledPixmap::setBasePixmap(const QString& basePixmap)
     invalidate();
     _basePixmap = basePixmap;
     return true;
-    //return _pixmaps[DMHelper::PixmapSize_Full].load(basePixmap);
 }
 
-bool ScaledPixmap::isValid() const
+bool ScaledPixmap::isValid()
 {
-    return !_basePixmap.isEmpty();
-    //return _pixmaps.at(DMHelper::PixmapSize_Full).isNull() == false;
+    if(!_pixmaps.at(DMHelper::PixmapSize_Full).isNull())
+        return true;
+
+    if(_basePixmap.isEmpty())
+        return false;
+
+    return _pixmaps[DMHelper::PixmapSize_Full].load(_basePixmap);
 }
 
 void ScaledPixmap::invalidate()
@@ -70,14 +74,8 @@ void ScaledPixmap::invalidate()
 
 QPixmap ScaledPixmap::getPixmap(DMHelper::PixmapSize pixmapSize)
 {
-    if(_pixmaps.at(DMHelper::PixmapSize_Full).isNull())
-    {
-        if(!_basePixmap.isEmpty())
-            _pixmaps[DMHelper::PixmapSize_Full].load(_basePixmap);
-
-        if(_pixmaps.at(DMHelper::PixmapSize_Full).isNull())
-            return QPixmap();
-    }
+    if(!isValid())
+        return QPixmap();
 
     if(_pixmaps.at(pixmapSize).isNull())
     {

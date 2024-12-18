@@ -569,6 +569,12 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     if((getLayerScene()) && (getLayerScene()->getDMScene()))
     {
         QGraphicsPixmapItem* combatantItem = createCombatantIcon(getLayerScene()->getDMScene(), combatant);
+        if(!combatantItem)
+        {
+            qDebug() << "[LayerTokens] ERROR: Failed to create combatant icon for combatant: " << combatant->getName();
+            return;
+        }
+
         combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, getOrder()));
         combatantItem->setVisible(getLayerVisibleDM());
         combatantItem->setOpacity(_opacityReference);
@@ -1117,28 +1123,28 @@ QGraphicsItem* LayerTokens::addSpellEffect(QGraphicsScene* scene, BattleDialogMo
     QList<CampaignObjectBase*> childEffects = effect->getChildObjects();
     if(childEffects.count() != 1)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it does not have exactly one child object!";
+        qDebug() << "[LayerTokens] ERROR: cannot add spell effect because it does not have exactly one child object!";
         return nullptr;
     }
 
     BattleDialogModelEffectObject* tokenEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
     if(!tokenEffect)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it's child is not an effect!";
+        qDebug() << "[LayerTokens] ERROR: cannot add spell effect because it's child is not an effect!";
         return nullptr;
     }
 
     QGraphicsPixmapItem* tokenItem = dynamic_cast<QGraphicsPixmapItem*>(addEffectShape(scene, tokenEffect));
     if(!tokenItem)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to add the spell effect's token object to the scene!";
+        qDebug() << "[LayerTokens] ERROR: unable to add the spell effect's token object to the scene!";
         return nullptr;
     }
 
     QGraphicsItem* effectItem = effect->createEffectShape(1.0);
     if(!effectItem)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create the spell effect's basic shape!";
+        qDebug() << "[LayerTokens] ERROR: unable to create the spell effect's basic shape!";
         return nullptr;
     }
 

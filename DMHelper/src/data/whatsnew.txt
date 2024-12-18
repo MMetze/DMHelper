@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.4</h2>
+<h2>What's New: Version 3.5</h2>
 
 <h3>IMPORTANT: PLEASE READ</h3>
 <p>
@@ -22,32 +22,26 @@ If you are using the automatic D&D Beyond importer, it has been updated to refle
 Just to be 100% safe, we recommend backing up your campaign XML files before opening them.
 <p>
 
-<h3>New v3.4 Features:</h3>
+<h3>New v3.5 Features:</h3>
 <ul>
-<li><b>Autosaving is here!</b> The default is ON, but it can be turned off in Settings (General tab)
-<li><b>Enhanced backup files:</b> an extra backup file is made any time a saved campaign file or resource file (e.g. Bestiary or Spellbook) grows by more than 20% or shrinks
-<li><b>Help Dialog:</b> Links to the Discord, Getting Started and User's Guides, but also direct link buttons to open the Logs or Backup directories, which might be useful...
-<li><b>Improved effects dialog</b> Slight overhaul, you can auto-delete an effect after applying damage and the application of spell effect conditions is automatic
-<li><b>Distance Measurement:</b> If you add a height after the fact, the distance is automatically recalculated
+<li><b>TBD</b> TBD
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li><b>Object scaling:</b> This actually works now, in both width and height for both the DM and Player's views
-<li><b>Consistent key usage:</b> "A" key to toggle the pointer and Space bar to move a map around
-<li><b>Initiative list:</b> Doesn't get confused about rounds when it isn't sorted
-<li>Creating a character from a monster works again
-<li>Newly created Fog of War layers default to black again, not blue (insert facepalm here)
+<li>Crash-bug: add multiple monsters, then remove one
+<li>Bug: Add multiple monsters, one sits on top of a PC
+<li>Crash-bug: add a PC without an image to a combat
+<li>Bug: Add a PC based on a monster, gets an invalid image path
 </ul>
 
 <p>
 
 <h3>Other Improvements:</h3>
 <ul>
-<li>Increased the default # of files in the recent files list, the number is editable in options
-<li>Increased the number of log files retained
+<li>TBD
 </ul>
 
 <p>
