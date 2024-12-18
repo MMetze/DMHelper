@@ -1696,7 +1696,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
-                BattleDialogModelCombatant* widgetCombatant = widget->getCombatant();
                 if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
                 {
                     if(_hoverFrame)
