@@ -1,6 +1,6 @@
 #include "battledialogmodelcharacter.h"
 #include "characterv2.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 #include <QDebug>
 

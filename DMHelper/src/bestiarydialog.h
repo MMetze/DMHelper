@@ -4,7 +4,7 @@
 #include <QDialog>
 #include "bestiaryfindtokendialog.h"
 
-class MonsterClass;
+class MonsterClassv2;
 class MonsterAction;
 class Bestiary;
 class TokenEditor;
@@ -23,7 +23,7 @@ public:
     explicit BestiaryDialog(QWidget *parent = nullptr);
     ~BestiaryDialog();
 
-    MonsterClass* getMonster() const;
+    MonsterClassv2* getMonster() const;
 
     void setOptions(OptionsContainer* options);
 
@@ -33,7 +33,7 @@ signals:
     void dialogClosed();
 
 public slots:
-    void setMonster(MonsterClass* monster, bool edit = true);
+    void setMonster(MonsterClassv2* monster, bool edit = true);
     void setMonster(const QString& monsterName, bool edit = true);
     void createNewMonster();
     void deleteCurrentMonster();
@@ -99,7 +99,7 @@ private:
     QWidget* _reactionsWidget;
 
     OptionsContainer* _options;
-    MonsterClass* _monster;
+    MonsterClassv2* _monster;
     int _currentToken;
     bool _edit;
     bool _mouseDown;

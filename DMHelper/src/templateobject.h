@@ -19,6 +19,7 @@ public:
     TemplateFactory* getFactory() const;
     void setFactory(TemplateFactory* factory);
 
+    virtual bool hasValue(const QString& key) const;
     virtual QString getValueAsString(const QString& key) const;
     virtual QString getStringValue(const QString& key) const;
     virtual int getIntValue(const QString& key) const;

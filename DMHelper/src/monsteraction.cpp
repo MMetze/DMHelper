@@ -1,5 +1,5 @@
 #include "monsteraction.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomDocument>
 #include <QDomElement>
 

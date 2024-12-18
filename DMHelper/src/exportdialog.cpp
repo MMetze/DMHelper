@@ -12,7 +12,7 @@
 #include "dmhwaitingdialog.h"
 #include "exportworker.h"
 #include "bestiary.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "spellbook.h"
 #include "spell.h"
 #include "selectstringdialog.h"
@@ -459,7 +459,7 @@ void ExportDialog::addCharacter(Characterv2* character)
     _characters.append(character);
 }
 
-void ExportDialog::addMonster(MonsterClass* monsterClass)
+void ExportDialog::addMonster(MonsterClassv2* monsterClass)
 {
     if((!monsterClass) || (_monsters.contains(monsterClass->getName())))
         return;

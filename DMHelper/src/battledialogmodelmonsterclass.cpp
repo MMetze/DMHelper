@@ -1,5 +1,5 @@
 #include "battledialogmodelmonsterclass.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -13,7 +13,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const QString& name
 {
 }
 
-BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monsterClass) :
+BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* monsterClass) :
     BattleDialogModelMonsterBase(),
     _monsterClass(monsterClass),
     _monsterName(),
@@ -25,7 +25,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monst
         _monsterHP = _monsterClass->getHitDice().roll();
 }
 
-BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monsterClass, const QString& monsterName, int initiative, const QPointF& position) :
+BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* monsterClass, const QString& monsterName, int initiative, const QPointF& position) :
     BattleDialogModelMonsterBase(nullptr, initiative, position),
     _monsterClass(monsterClass),
     _monsterName(monsterName),
@@ -240,7 +240,7 @@ int BattleDialogModelMonsterClass::getMonsterType() const
     return BattleMonsterType_Class;
 }
 
-MonsterClass* BattleDialogModelMonsterClass::getMonsterClass() const
+MonsterClassv2* BattleDialogModelMonsterClass::getMonsterClass() const
 {
     return _monsterClass;
 }

@@ -1,12 +1,12 @@
 #include "monster.h"
 #include "dmconstants.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 #include <QDir>
 #include <QIcon>
 #include <QDebug>
 
-Monster::Monster(MonsterClass* monsterClass, const QString& name, QObject *parent) :
+Monster::Monster(MonsterClassv2* monsterClass, const QString& name, QObject *parent) :
     Combatant(name, parent),
     _monsterClass(monsterClass),
     _passivePerception(10),
@@ -104,7 +104,7 @@ Dice Monster::getHitDice() const
     return _monsterClass ? _monsterClass->getHitDice() : Combatant::getHitDice();
 }
 
-MonsterClass* Monster::getMonsterClass() const
+MonsterClassv2* Monster::getMonsterClass() const
 {
     return _monsterClass;
 }
@@ -196,7 +196,7 @@ QString Monster::getNotes() const
     return _notes;
 }
 
-void Monster::setMonsterClass(MonsterClass* newMonsterClass)
+void Monster::setMonsterClass(MonsterClassv2* newMonsterClass)
 {
     if(!newMonsterClass || (newMonsterClass == _monsterClass))
         return;

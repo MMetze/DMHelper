@@ -3,7 +3,7 @@
 #include "optionscontainer.h"
 #include "tokeneditor.h"
 #include "bestiary.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "dmhwaitingdialog.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -99,7 +99,7 @@ void BestiaryPopulateTokensDialog::populateTokens()
     QStringList fullMonsterList = Bestiary::Instance()->getMonsterList();
     for(const QString& monsterName : fullMonsterList)
     {
-        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+        MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
         if((monsterClass) && (monsterClass->getIconCount() == 0))
             _monsterList.append(monsterName);
     }
@@ -246,7 +246,7 @@ void BestiaryPopulateTokensDialog::imageRequestFinished(QNetworkReply *reply)
                     finalImage.save(tokenPath);
                     if(Bestiary::Instance())
                     {
-                        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(_currentMonster);
+                        MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(_currentMonster);
                         if(monsterClass)
                             monsterClass->addIcon(tokenPath);
                         _totalPopulated++;

@@ -9,7 +9,7 @@ class QUuid;
 class QTreeWidgetItem;
 class ExportWorker;
 class DMHWaitingDialog;
-class MonsterClass;
+class MonsterClassv2;
 class Spell;
 class Characterv2;
 class QThread;
@@ -53,7 +53,7 @@ private:
     QTreeWidgetItem* findItem(QTreeWidgetItem *item, QUuid id);
 
     void addCharacter(Characterv2* character);
-    void addMonster(MonsterClass* monsterClass);
+    void addMonster(MonsterClassv2* monsterClass);
     void addSpell(Spell* spell);
 
     Ui::ExportDialog *ui;

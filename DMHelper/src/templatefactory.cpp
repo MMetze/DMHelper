@@ -1,4 +1,5 @@
 #include "templatefactory.h"
+#include "templateobject.h"
 #include "dice.h"
 #include "combatant.h"
 #include "rulefactory.h"
@@ -144,6 +145,26 @@ QHash<QString, QHash<QString, DMHAttribute>> TemplateFactory::getElementLists() 
 bool TemplateFactory::hasEntry(const QString& name) const
 {
     return hasAttribute(name) || hasElement(name) || hasElementList(name);
+}
+
+TemplateObject* TemplateFactory::setDefaultValues(TemplateObject* object)
+{
+    if(!object)
+        return nullptr;
+
+    QHash<QString, DMHAttribute> attributes = getAttributes();
+    for(auto it = attributes.begin(); it != attributes.end(); ++it)
+    {
+        object->setValue(it.key(), it->_default);
+    }
+
+    QHash<QString, DMHAttribute> elements = getElements();
+    for(auto it = elements.begin(); it != elements.end(); ++it)
+    {
+        object->setValue(it.key(), it->_default);
+    }
+
+    return object;
 }
 
 void TemplateFactory::loadTemplate(const QString& templateFile)

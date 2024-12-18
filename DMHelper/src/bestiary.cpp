@@ -588,7 +588,7 @@ void Bestiary::showMonsterClassWarning(const QString& monsterClass)
     else
     {
         QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + monsterClass + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
-    }4
+    }
 }
 
 void Bestiary::loadAndConvertBestiary(const QDomElement& bestiaryElement)
@@ -598,7 +598,7 @@ void Bestiary::loadAndConvertBestiary(const QDomElement& bestiaryElement)
     QDomElement monsterElement = bestiaryElement.firstChildElement(QString("element"));
     while(!monsterElement.isNull())
     {
-        MonsterClass* monster = new MonsterClass(monsterElement, false);
+        MonsterClassv2* monster = new MonsterClassv2Converter(monsterElement, false);
         insertMonsterClass(monster);
         monsterElement = monsterElement.nextSiblingElement(QString("element"));
     }

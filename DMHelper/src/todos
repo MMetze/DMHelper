@@ -8,6 +8,8 @@ Generic Bestiary
         skills as a single string
         actions, legendary actions, reactions: combine damage_dice and damage_bonus to damage
     Add optional campaign-specific bestiary, what is a "private" entry in the bestiary? --> Nothing???
+Test:
+** Copy from Monster to Character - does it generally work, check default values (e.g. size)
 ** Check does import/export work, for bestiary and for CHARACTERS
 Generic Spellbook
 Generic Conditions

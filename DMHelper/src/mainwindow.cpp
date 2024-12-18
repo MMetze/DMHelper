@@ -33,7 +33,7 @@
 #include "battleframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "bestiary.h"
 #include "spell.h"
 #include "spellbook.h"
@@ -941,7 +941,7 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Characterv2* character = nullptr;
+    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -964,23 +964,16 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+            MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
             if(!monsterClass)
             {
                 qDebug() << "[MainWindow] New character not created because not able to find selected monster: " << monsterName;
                 return;
             }
 
-            Characterv2Converter* convertCharacter = new Characterv2Converter();
-            CombatantFactory::Instance()->setDefaultValues(convertCharacter);
-            convertCharacter->readFromMonsterClass(*monsterClass);
-            convertCharacter->setName(characterName);
-            character = convertCharacter;
+            character->copyMonsterValues(*monsterClass);
         }
     }
-
-    if(!character)
-        character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     addNewObject(character);
 }

@@ -5,6 +5,7 @@
 #include <QHash>
 
 class DMHAttribute;
+class TemplateObject;
 
 class TemplateFactory : public ObjectFactory
 {
@@ -56,6 +57,8 @@ public:
     QHash<QString, QHash<QString, DMHAttribute>> getElementLists() const;
 
     bool hasEntry(const QString& name) const;
+
+    TemplateObject* setDefaultValues(TemplateObject* object);
 
 protected:
     void loadTemplate(const QString& templateFile);

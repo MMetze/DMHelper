@@ -1,6 +1,6 @@
 #include "combatantdialog.h"
 #include "monster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "bestiary.h"
 #include "dmconstants.h"
 #include "dice.h"
@@ -82,7 +82,7 @@ LayerTokens* CombatantDialog::getLayer() const
 
 int CombatantDialog::getCombatantHitPoints() const
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return 0;
 
@@ -129,9 +129,9 @@ QString CombatantDialog::getSizeFactor() const
     return ui->edtSize->text();
 }
 
-MonsterClass* CombatantDialog::getMonsterClass() const
+MonsterClassv2* CombatantDialog::getMonsterClass() const
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
     if(!monsterClass)
         qDebug() << "[Combatant Dialog] Unable to find monster class: " << ui->cmbMonsterClass->currentText();
 
@@ -142,7 +142,7 @@ int CombatantDialog::getIconIndex() const
 {
     if(ui->chkRandomTokens->isChecked())
     {
-        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+        MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
         if(monsterClass)
             return Dice::dX(monsterClass->getIconCount()) - 1;
     }
@@ -159,7 +159,7 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
     if(!monster)
         return;
 
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(monsterClass == nullptr)
         return;
 
@@ -188,7 +188,7 @@ void CombatantDialog::resizeEvent(QResizeEvent *event)
 
 void CombatantDialog::monsterClassChanged(const QString &text)
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(text);
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(text);
     if(!monsterClass)
     {
         qDebug() << "[Combatant Dialog] invalid monster class change detected, monster class not found: " << text;
@@ -212,7 +212,7 @@ void CombatantDialog::monsterClassChanged(const QString &text)
 
 void CombatantDialog::setIconIndex(int index)
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
@@ -231,7 +231,7 @@ void CombatantDialog::updateIcon()
     if(!ui->lblIcon->size().isValid())
         return;
 
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
@@ -258,7 +258,7 @@ void CombatantDialog::nextIcon()
 
 void CombatantDialog::setHitPointAverageChanged()
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 

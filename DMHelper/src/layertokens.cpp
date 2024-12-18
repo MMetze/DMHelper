@@ -10,7 +10,7 @@
 #include "characterv2.h"
 #include "bestiary.h"
 #include "monster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodelmonstercombatant.h"
@@ -91,7 +91,7 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
                 else if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Class)
                 {
                     QString monsterClassName = combatantElement.attribute("monsterClass");
-                    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
+                    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
                     if(monsterClass)
                         combatant = new BattleDialogModelMonsterClass(monsterClass);
                     else

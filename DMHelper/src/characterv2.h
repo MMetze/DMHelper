@@ -7,6 +7,7 @@
 #include <QVariant>
 
 class DMHAttribute;
+class MonsterClassv2;
 
 class Characterv2 : public Combatant, public TemplateObject
 {
@@ -45,6 +46,8 @@ public:
     virtual int getIntelligence() const override;
     virtual int getWisdom() const override;
     virtual int getCharisma() const override;
+
+    virtual void copyMonsterValues(MonsterClassv2& monster);
 
 signals:
     void iconChanged(CampaignObjectBase* character);

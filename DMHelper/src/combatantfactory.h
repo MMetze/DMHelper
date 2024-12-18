@@ -22,8 +22,6 @@ public slots:
 
     virtual void configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion) override;
 
-    CampaignObjectBase* setDefaultValues(CampaignObjectBase* object);
-
 protected:
 
     static CombatantFactory* _instance;

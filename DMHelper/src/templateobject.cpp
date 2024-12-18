@@ -21,6 +21,17 @@ void TemplateObject::setFactory(TemplateFactory* factory)
     _factory = factory;
 }
 
+bool TemplateObject::hasValue(const QString& key) const
+{
+    if(isAttributeSpecial(key))
+        return true;
+
+    if(valueHash()->contains(key))
+        return true;
+
+    return _factory->hasEntry(key);
+}
+
 QString TemplateObject::getValueAsString(const QString& key) const
 {
     if(isAttributeSpecial(key))

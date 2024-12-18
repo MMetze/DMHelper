@@ -1,5 +1,5 @@
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, QObject *parent) :
@@ -60,7 +60,7 @@ int BattleDialogModelMonsterBase::getCombatantType() const
 
 int BattleDialogModelMonsterBase::getSkillModifier(Combatant::Skills skill) const
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(monsterClass)
         return monsterClass->getSkillValue(skill);
     else

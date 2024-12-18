@@ -1,6 +1,6 @@
 #include "bestiarydialog.h"
 #include "bestiary.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "combatant.h"
 #include "monsteraction.h"
 #include "monsteractionframe.h"
@@ -109,7 +109,7 @@ BestiaryDialog::~BestiaryDialog()
     delete ui;
 }
 
-MonsterClass* BestiaryDialog::getMonster() const
+MonsterClassv2* BestiaryDialog::getMonster() const
 {
     return _monster;
 }
@@ -122,7 +122,7 @@ void BestiaryDialog::setOptions(OptionsContainer* options)
     _options = options;
 }
 
-void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
+void BestiaryDialog::setMonster(MonsterClassv2* monster, bool edit)
 {
     if((!monster) || (_monster == monster))
         return;
@@ -283,7 +283,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
     if(monsterClass)
         setMonster(monsterClass, edit);
 }
@@ -300,7 +300,7 @@ void BestiaryDialog::createNewMonster()
         return;
     }
 
-    MonsterClass* monsterClass;
+    MonsterClassv2* monsterClass;
     if(Bestiary::Instance()->exists(monsterName))
     {
         monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
@@ -308,7 +308,7 @@ void BestiaryDialog::createNewMonster()
     }
     else
     {
-        monsterClass = new MonsterClass(monsterName);
+        monsterClass = new MonsterClassv2(monsterName);
 
         if(Bestiary::Instance()->count() > 0)
         {
@@ -332,7 +332,7 @@ void BestiaryDialog::createNewMonster()
                     return;
                 }
 
-                MonsterClass* templateClass = Bestiary::Instance()->getMonsterClass(templateName);
+                MonsterClassv2* templateClass = Bestiary::Instance()->getMonsterClass(templateName);
                 if(!templateClass)
                 {
                     qDebug() << "[Bestiary Dialog] New monster not created because not able to find selected template monster: " << templateName;
@@ -780,14 +780,14 @@ void BestiaryDialog::focusOutEvent(QFocusEvent * event)
 
 void BestiaryDialog::previousMonster()
 {
-    MonsterClass* previousClass = Bestiary::Instance()->getPreviousMonsterClass(_monster);
+    MonsterClassv2* previousClass = Bestiary::Instance()->getPreviousMonsterClass(_monster);
     if(previousClass)
         setMonster(previousClass);
 }
 
 void BestiaryDialog::nextMonster()
 {
-    MonsterClass* nextClass = Bestiary::Instance()->getNextMonsterClass(_monster);
+    MonsterClassv2* nextClass = Bestiary::Instance()->getNextMonsterClass(_monster);
     if(nextClass)
         setMonster(nextClass);
 }

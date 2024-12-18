@@ -4,7 +4,6 @@
 #include "bestiary.h"
 #include "spellbook.h"
 #include "quickref.h"
-#include "monsterclass.h"
 #include "scaledpixmap.h"
 
 const int GlobalSearchType_None = QTreeWidgetItem::UserType;

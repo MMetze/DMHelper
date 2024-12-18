@@ -10,7 +10,7 @@ class BattleDialogModelEffect;
 class CampaignObjectBase;
 class QTreeWidgetItem;
 class Spell;
-class MonsterClass;
+class MonsterClassv2;
 class QDomDocument;
 class QDomElement;
 
@@ -35,7 +35,7 @@ protected slots:
     void exportObjectAssets(const CampaignObjectBase* object, QDir& directory, QDomDocument &doc, QDomElement &element);
     void exportBattle(const EncounterBattle* battle, QDir& directory, QDomElement &battleElement);
     void exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, const QString& monsterName, QDir& directory);
-    void exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, MonsterClass* monster, QDir& directory);
+    void exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, MonsterClassv2* monster, QDir& directory);
     void exportSpell(QDomDocument &doc, QDomElement& spellbookElement, const QString& spellName, QDir& directory);
     QString exportFile(const QString& filename, const QDir& directory, QDomElement& element, const QString& fileAttribute, bool hashfileNaming);
 
@@ -56,7 +56,7 @@ protected:
     QStringList _spellList;
     QStringList _monsterList;
     QList<Spell*> _exportedSpells;
-    QList<MonsterClass*> _exportedMonsters;
+    QList<MonsterClassv2*> _exportedMonsters;
     QHash<QString, QString> _exportedFiles;
 
     QDir _directory;

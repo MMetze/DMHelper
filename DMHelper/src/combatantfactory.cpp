@@ -47,7 +47,11 @@ CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, 
     switch(subType)
     {
         case DMHelper::CombatantType_Character:
-            return setDefaultValues(new Characterv2(objectName));
+        {
+            Characterv2* newCharacter = new Characterv2(objectName);
+            setDefaultValues(newCharacter);
+            return newCharacter;
+        }
         case DMHelper::CombatantType_Reference:
             return new CombatantReference();
         case DMHelper::CombatantType_Base:
@@ -73,10 +77,9 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
         return nullptr;
     }
 
-    if(_compatibilityMode)
-        return setDefaultValues(new Characterv2Converter());
-    else
-        return setDefaultValues(new Characterv2());
+    Characterv2* newCharacter = _compatibilityMode ? new Characterv2Converter() : new Characterv2();
+    setDefaultValues(newCharacter);
+    return newCharacter;
 }
 
 
@@ -86,28 +89,4 @@ void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVe
     connect(&ruleset, &Ruleset::characterDataFileChanged, this, &CombatantFactory::loadTemplate);
 
     _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 4));
-}
-
-CampaignObjectBase* CombatantFactory::setDefaultValues(CampaignObjectBase* object)
-{
-    if((!object) || (object->getObjectType() != DMHelper::CampaignType_Combatant))
-        return object;
-
-    Characterv2* character = dynamic_cast<Characterv2*>(object);
-    if(!character)
-        return object;
-
-    QHash<QString, DMHAttribute> attributes = getAttributes();
-    for(auto it = attributes.begin(); it != attributes.end(); ++it)
-    {
-        character->setValue(it.key(), it->_default);
-    }
-
-    QHash<QString, DMHAttribute> elements = getElements();
-    for(auto it = elements.begin(); it != elements.end(); ++it)
-    {
-        character->setValue(it.key(), it->_default);
-    }
-
-    return character;
 }
