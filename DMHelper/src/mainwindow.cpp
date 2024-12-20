@@ -2790,6 +2790,9 @@ void MainWindow::handleOpenSoundboard()
         connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
         // TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
         _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+
+        if(_campaign)
+            soundboard->setCampaign(_campaign);
     }
 
     _soundDlg->exec();
@@ -3053,10 +3056,17 @@ QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)
     if(!dlgSize.isNull())
         resultDlg->resize(dlgSize);
 
-    QVBoxLayout *dlgLayout = new QVBoxLayout;
-    dlgLayout->addWidget(contents);
-    dlgLayout->setSpacing(3);
-    resultDlg->setLayout(dlgLayout);
+    if(contents)
+    {
+        QVBoxLayout *dlgLayout = new QVBoxLayout;
+        dlgLayout->addWidget(contents);
+        dlgLayout->setSpacing(3);
+        resultDlg->setLayout(dlgLayout);
+    }
+    else
+    {
+        qDebug() << "[MainWindow] ERROR: createDialog - contents is null.";
+    }
 
     return resultDlg;
 }
