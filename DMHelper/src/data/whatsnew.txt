@@ -24,7 +24,7 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 
 <h3>New v3.5 Features:</h3>
 <ul>
-<li><b>TBD</b> TBD
+<li><b>Nope!</b> This one is a straight-up bug-fix release!
 </ul>
 
 <p>
@@ -32,17 +32,20 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 <h3>Fixes:</h3>
 <ul>
 <li>Crash-bug: add multiple monsters, then remove one
-<li>Bug: Add multiple monsters, one sits on top of a PC
 <li>Crash-bug: add a PC without an image to a combat
+<li>Crash-bug: removing a combatant without sorting the initiative list
+<li>Bug: Add multiple monsters, one sits on top of a PC
 <li>Bug: Add a PC based on a monster, gets an invalid image path
+<li>Bug: Re-enabled the soundboard
 </ul>
 
+<!-- Commenting out this section for now
 <p>
-
 <h3>Other Improvements:</h3>
 <ul>
 <li>TBD
 </ul>
+-->
 
 <p>
 <h3>And don't forget</h3>
