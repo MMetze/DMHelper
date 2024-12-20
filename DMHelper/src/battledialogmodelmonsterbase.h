@@ -5,7 +5,7 @@
 #include "combatant.h"
 #include <QString>
 
-class MonsterClass;
+class MonsterClassv2;
 
 class BattleDialogModelMonsterBase : public BattleDialogModelCombatant
 {
@@ -30,7 +30,7 @@ public:
 
     virtual int getCombatantType() const override;
     virtual int getMonsterType() const = 0;
-    virtual MonsterClass* getMonsterClass() const = 0;
+    virtual MonsterClassv2* getMonsterClass() const = 0;
 
     virtual int getSkillModifier(Combatant::Skills skill) const override;
     virtual int getConditions() const override;

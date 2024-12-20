@@ -5,7 +5,7 @@
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "encountertext.h"
 #include "map.h"
 #include "bestiary.h"
@@ -205,7 +205,7 @@ void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement
     exportMonster(doc, bestiaryElement, Bestiary::Instance()->getMonsterClass(monsterName), directory);
 }
 
-void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, MonsterClass* monster, QDir& directory)
+void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, MonsterClassv2* monster, QDir& directory)
 {
     if((!Bestiary::Instance()) || (!monster) || (_exportedMonsters.contains(monster)))
         return;

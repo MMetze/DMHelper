@@ -23,19 +23,6 @@ void Characterv2Converter::inputXML(const QDomElement &element, bool isImport)
     delete oldCharacter;
 }
 
-void Characterv2Converter::readFromMonsterClass(MonsterClass& monster)
-{
-    Character* oldCharacter = new Character();
-    oldCharacter->copyMonsterValues(monster);
-
-    beginBatchChanges();
-    convertValues(oldCharacter);
-    setIcon(oldCharacter->getIconFile());
-    endBatchChanges();
-
-    delete oldCharacter;
-}
-
 void Characterv2Converter::convertValues(Character* convertCharacter)
 {
     // Walk through the Character object and convert the values to the Characterv2 object

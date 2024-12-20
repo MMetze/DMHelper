@@ -22,6 +22,7 @@
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
 #include "encounterfactory.h"
+#include "monsterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encountertextlinked.h"
@@ -32,7 +33,7 @@
 #include "battleframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "bestiary.h"
 #include "spell.h"
 #include "spellbook.h"
@@ -796,6 +797,8 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -938,7 +941,7 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Characterv2* character = nullptr;
+    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -961,23 +964,16 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+            MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
             if(!monsterClass)
             {
                 qDebug() << "[MainWindow] New character not created because not able to find selected monster: " << monsterName;
                 return;
             }
 
-            Characterv2Converter* convertCharacter = new Characterv2Converter();
-            CombatantFactory::Instance()->setDefaultValues(convertCharacter);
-            convertCharacter->readFromMonsterClass(*monsterClass);
-            convertCharacter->setName(characterName);
-            character = convertCharacter;
+            character->copyMonsterValues(*monsterClass);
         }
     }
-
-    if(!character)
-        character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     addNewObject(character);
 }
@@ -2421,6 +2417,12 @@ void MainWindow::openCampaign(const QString& filename)
     QFileInfo fileInfo(_campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
     _campaign = new Campaign();
+
+    _campaign->preloadRulesetXML(campaignElement, false);
+    MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                 campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                 campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);

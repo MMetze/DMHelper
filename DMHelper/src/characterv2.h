@@ -2,13 +2,14 @@
 #define CHARACTERV2_H
 
 #include "combatant.h"
+#include "templateobject.h"
 #include <QHash>
 #include <QVariant>
 
-class MonsterAction;
 class DMHAttribute;
+class MonsterClassv2;
 
-class Characterv2 : public Combatant
+class Characterv2 : public Combatant, public TemplateObject
 {
     Q_OBJECT
 public:
@@ -46,47 +47,30 @@ public:
     virtual int getWisdom() const override;
     virtual int getCharisma() const override;
 
-    QString getValueAsString(const QString& key) const;
-    QString getStringValue(const QString& key) const;
-    int getIntValue(const QString& key) const;
-    bool getBoolValue(const QString& key) const;
-    Dice getDiceValue(const QString& key) const;
-    ResourcePair getResourceValue(const QString& key) const;
-    QList<QVariant> getListValue(const QString& key) const;
+    virtual void copyMonsterValues(MonsterClassv2& monster);
 
 signals:
     void iconChanged(CampaignObjectBase* character);
 
 public slots:
     virtual void setIcon(const QString &newIcon) override;
-    void setValue(const QString& key, const QVariant& value);
-    void setValue(const QString& key, const QString& value);
-    void setStringValue(const QString& key, const QString& value);
-    void setIntValue(const QString& key, int value);
-    void setBoolValue(const QString& key, bool value);
-    void setDiceValue(const QString& key, const Dice& value);
-    void setResourceValue(const QString& key, const ResourcePair& value);
-    void setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue);
-    QHash<QString, QVariant> createListEntry(const QString& key, int index);
-    void insertListEntry(const QString& key, int index, QHash<QString, QVariant> listEntryValues);
-    void removeListEntry(const QString& key, int index);
 
 protected:
     // From Combatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
 
+    // From TemplateObject
+    virtual QHash<QString, QVariant>* valueHash() override;
+    virtual const QHash<QString, QVariant>* valueHash() const override;
+    virtual void declareDirty() override;
+    virtual void handleOldXMLs(const QDomElement& element) override;
+    virtual bool isAttributeSpecial(const QString& attribute) const override;
+    virtual QVariant getAttributeSpecial(const QString& attribute) const override;
+    virtual QString getAttributeSpecialAsString(const QString& attribute) const override;
+    virtual void setAttributeSpecial(const QString& key, const QString& value) override;
+
 private:
-    void readXMLValues(const QDomElement& element, bool isImport);
-    void handleOldXMLs(const QDomElement& element);
-    bool isAttributeSpecial(const QString& attribute) const;
-    QVariant getAttributeSpecial(const QString& attribute) const;
-    QString getAttributeSpecialAsString(const QString& attribute) const;
-    void setAttributeSpecial(const QString& key, const QString& value);
-    QVariant readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name);
-    void writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value);
-    void writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value);
-    void writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value);
 
     int _dndBeyondID;
     bool _iconChanged;

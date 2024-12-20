@@ -5,7 +5,7 @@
 #include <QDialogButtonBox>
 #include "combatant.h"
 
-class MonsterClass;
+class MonsterClassv2;
 class LayerScene;
 class LayerTokens;
 
@@ -32,7 +32,7 @@ public:
     bool isShown() const;
     bool isCustomSize() const;
     QString getSizeFactor() const;
-    MonsterClass* getMonsterClass() const;
+    MonsterClassv2* getMonsterClass() const;
     int getIconIndex() const;
 
     void writeCombatant(Combatant* combatant);

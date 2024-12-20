@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>431</width>
-    <height>308</height>
+    <height>339</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -82,71 +82,105 @@
      <property name="title">
       <string>Rules</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Initiative</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbInitiative">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Character Data:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Initiative</string>
-          </property>
-         </widget>
+         <widget class="QLineEdit" name="edtCharacterData"/>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QPushButton" name="btnBrowseCharacterData">
           <property name="text">
-           <string>Character Data:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Character UI</string>
+           <string>Browse...</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Character UI</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QComboBox" name="cmbInitiative">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QLineEdit" name="edtCharacterUI"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnBrowseCharacterUI">
+          <property name="text">
+           <string>Browse...</string>
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Monster Data:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLineEdit" name="edtCharacterData"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnBrowseCharacterData">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLineEdit" name="edtMonsterData"/>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QLineEdit" name="edtCharacterUI"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnBrowseCharacterUI">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QPushButton" name="btnBrowseMonsterData">
+          <property name="text">
+           <string>Browse...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Monster UI</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QLineEdit" name="edtMonsterUI"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnBrowseMonsterUI">
+          <property name="text">
+           <string>Browse...</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

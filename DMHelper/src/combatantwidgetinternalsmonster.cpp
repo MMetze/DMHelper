@@ -1,7 +1,7 @@
 #include "combatantwidgetinternalsmonster.h"
 #include "battledialogmodelmonsterbase.h"
 #include "combatantwidgetmonster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QLabel>

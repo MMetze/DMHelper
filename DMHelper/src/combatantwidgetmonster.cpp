@@ -3,7 +3,7 @@
 #include "combatantwidgetinternalsmonster.h"
 #include "dmconstants.h"
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "campaign.h"
 #include <QIntValidator>
 #include <QDebug>

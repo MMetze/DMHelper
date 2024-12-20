@@ -1,19 +1,15 @@
-#ifndef COMBATANTFACTORY_H
-#define COMBATANTFACTORY_H
+#ifndef MONSTERFACTORY_H
+#define MONSTERFACTORY_H
 
 #include "templatefactory.h"
 
-class QDomElement;
-class QString;
-
-class CombatantFactory : public TemplateFactory
+class MonsterFactory : public TemplateFactory
 {
     Q_OBJECT
 public:
+    explicit MonsterFactory(QObject *parent = nullptr);
 
-    explicit CombatantFactory(QObject *parent = nullptr);
-
-    static CombatantFactory* Instance();
+    static MonsterFactory* Instance();
     static void Shutdown();
 
 public slots:
@@ -24,9 +20,9 @@ public slots:
 
 protected:
 
-    static CombatantFactory* _instance;
+    static MonsterFactory* _instance;
 
     bool _compatibilityMode;
 };
 
-#endif // COMBATANTFACTORY_H
+#endif // MONSTERFACTORY_H

@@ -1,5 +1,6 @@
 #include "bestiary.h"
 #include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "monster.h"
 #include "dmversion.h"
 #include <QDomDocument>
@@ -18,6 +19,7 @@ Bestiary::Bestiary(QObject *parent) :
     QObject(parent),
     _bestiaryMap(),
     _bestiaryDirectory(),
+    _bestiaryFile(),
     _majorVersion(0),
     _minorVersion(0),
     _licenseText(),
@@ -68,7 +70,7 @@ QStringList Bestiary::search(const QString& searchString)
         }
         else
         {
-            MonsterClass* monsterClass = it.value();
+            MonsterClassv2* monsterClass = it.value();
             QString matchString = searchMonsterClass(monsterClass, searchString);
             if(!matchString.isEmpty())
                 results << key << matchString;
@@ -167,8 +169,17 @@ bool Bestiary::readBestiary(const QString& targetFilename)
         return false;
     }
 
+    // Remove the existing bestiary before resetting the directory and filename
+    if(_bestiaryMap.count() > 0)
+    {
+        qDebug() << "[Bestiary]    Unloading previous bestiary";
+        qDeleteAll(_bestiaryMap);
+        _bestiaryMap.clear();
+    }
+
     QFileInfo fileInfo(targetFilename);
     setDirectory(fileInfo.absoluteDir());
+    _bestiaryFile = targetFilename;
     inputXML(root);
 
     return true;
@@ -187,10 +198,10 @@ int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDire
     BestiaryMap::const_iterator i = _bestiaryMap.constBegin();
     while(i != _bestiaryMap.constEnd())
     {
-        MonsterClass* monsterClass = i.value();
+        MonsterClassv2* monsterClass = i.value();
         if(monsterClass)
         {
-            QDomElement monsterElement = doc.createElement("element");
+            QDomElement monsterElement = doc.createElement("monster");
             monsterClass->outputXML(doc, monsterElement, targetDirectory, isExport);
             bestiaryElement.appendChild(monsterElement);
         }
@@ -221,7 +232,8 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     QDomElement bestiaryElement = element.firstChildElement(QString("bestiary"));
     if(bestiaryElement.isNull())
     {
-        qDebug() << "[Bestiary]    ERROR: invalid bestiary file, unable to find base element";
+        qDebug() << "[Bestiary]    ERROR: invalid bestiary file, unable to find base bestiary element";
+        QMessageBox::critical(nullptr, QString("Invalid Bestiary File"), QString("The new bestiary file is invalid - it is missing a base bestiary element and can't be loaded."));
         return;
     }
 
@@ -231,16 +243,31 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     if(!isVersionCompatible())
     {
         qDebug() << "[Bestiary]    ERROR: Bestiary version is not compatible with expected version: " << getExpectedVersion();
+        QMessageBox::critical(nullptr, QString("Incompatible Bestiary File"), QString("The new bestiary file is incompatible with this version of DMHelper and can't be loaded."));
         return;
     }
 
-    if (!isVersionIdentical())
-        qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion();
-
-    if(importFile.isEmpty())
-        loadBestiary(bestiaryElement);
+    if(!isVersionIdentical())
+    {
+        qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion() << ", trying to convert to the new format.";
+        if(importFile.isEmpty())
+        {
+            loadAndConvertBestiary(bestiaryElement);
+        }
+        else
+        {
+            qDebug() << "[Bestiary]    ERROR: Importing an old bestiary version is not supported. Please convert the file to the new format before importing.";
+            QMessageBox::critical(nullptr, QString("Importing old version"), QString("Importing an old bestiary version is not supported. Please convert the file to the new format before importing. You can do this by setting the file to import as the primary bestiary file in DMHelper and then saving it again."));
+            return;
+        }
+    }
     else
-        importBestiary(bestiaryElement, importFile);
+    {
+        if(importFile.isEmpty())
+            loadBestiary(bestiaryElement);
+        else
+            importBestiary(bestiaryElement, importFile);
+    }
 
     emit changed();
 }
@@ -300,7 +327,7 @@ bool Bestiary::isDirty()
     return _dirty;
 }
 
-MonsterClass* Bestiary::getMonsterClass(const QString& name)
+MonsterClassv2* Bestiary::getMonsterClass(const QString& name)
 {
     if(name.isEmpty())
         return nullptr;
@@ -311,7 +338,7 @@ MonsterClass* Bestiary::getMonsterClass(const QString& name)
     return _bestiaryMap.value(name, nullptr);
 }
 
-MonsterClass* Bestiary::getFirstMonsterClass() const
+MonsterClassv2* Bestiary::getFirstMonsterClass() const
 {
     if(_bestiaryMap.count() == 0)
         return nullptr;
@@ -319,7 +346,7 @@ MonsterClass* Bestiary::getFirstMonsterClass() const
     return _bestiaryMap.first();
 }
 
-MonsterClass* Bestiary::getLastMonsterClass() const
+MonsterClassv2* Bestiary::getLastMonsterClass() const
 {
     if(_bestiaryMap.count() == 0)
         return nullptr;
@@ -327,7 +354,7 @@ MonsterClass* Bestiary::getLastMonsterClass() const
     return _bestiaryMap.last();
 }
 
-MonsterClass* Bestiary::getNextMonsterClass(MonsterClass* monsterClass) const
+MonsterClassv2* Bestiary::getNextMonsterClass(MonsterClassv2* monsterClass) const
 {
     if(!monsterClass)
         return nullptr;
@@ -344,7 +371,7 @@ MonsterClass* Bestiary::getNextMonsterClass(MonsterClass* monsterClass) const
     return i.value();
 }
 
-MonsterClass* Bestiary::getPreviousMonsterClass(MonsterClass* monsterClass) const
+MonsterClassv2* Bestiary::getPreviousMonsterClass(MonsterClassv2* monsterClass) const
 {
     if(!monsterClass)
         return nullptr;
@@ -357,7 +384,7 @@ MonsterClass* Bestiary::getPreviousMonsterClass(MonsterClass* monsterClass) cons
     return i.value();
 }
 
-bool Bestiary::insertMonsterClass(MonsterClass* monsterClass)
+bool Bestiary::insertMonsterClass(MonsterClassv2* monsterClass)
 {
     if(!monsterClass)
         return false;
@@ -366,13 +393,13 @@ bool Bestiary::insertMonsterClass(MonsterClass* monsterClass)
         return false;
 
     _bestiaryMap.insert(monsterClass->getName(), monsterClass);
-    connect(monsterClass, &MonsterClass::dirty, this, &Bestiary::registerDirty);
+    connect(monsterClass, &MonsterClassv2::dirty, this, &Bestiary::registerDirty);
     emit changed();
     setDirty();
     return true;
 }
 
-void Bestiary::removeMonsterClass(MonsterClass* monsterClass)
+void Bestiary::removeMonsterClass(MonsterClassv2* monsterClass)
 {
     if(!monsterClass)
         return;
@@ -380,14 +407,14 @@ void Bestiary::removeMonsterClass(MonsterClass* monsterClass)
     if(!_bestiaryMap.contains(monsterClass->getName()))
         return;
 
-    disconnect(monsterClass, &MonsterClass::dirty, this, &Bestiary::registerDirty);
+    disconnect(monsterClass, &MonsterClassv2::dirty, this, &Bestiary::registerDirty);
     _bestiaryMap.remove(monsterClass->getName());
     delete monsterClass;
     setDirty();
     emit changed();
 }
 
-void Bestiary::renameMonster(MonsterClass* monsterClass, const QString& newName)
+void Bestiary::renameMonster(MonsterClassv2* monsterClass, const QString& newName)
 {
     if(!monsterClass)
         return;
@@ -564,21 +591,14 @@ void Bestiary::showMonsterClassWarning(const QString& monsterClass)
     }
 }
 
-void Bestiary::loadBestiary(const QDomElement& bestiaryElement)
+void Bestiary::loadAndConvertBestiary(const QDomElement& bestiaryElement)
 {
     qDebug() << "[Bestiary] Loading bestiary...";
-
-    if(_bestiaryMap.count() > 0)
-    {        
-        qDebug() << "[Bestiary]    Unloading previous bestiary";
-        qDeleteAll(_bestiaryMap);
-        _bestiaryMap.clear();
-    }
 
     QDomElement monsterElement = bestiaryElement.firstChildElement(QString("element"));
     while(!monsterElement.isNull())
     {
-        MonsterClass* monster = new MonsterClass(monsterElement, false);
+        MonsterClassv2* monster = new MonsterClassv2Converter(monsterElement, false);
         insertMonsterClass(monster);
         monsterElement = monsterElement.nextSiblingElement(QString("element"));
     }
@@ -596,6 +616,38 @@ void Bestiary::loadBestiary(const QDomElement& bestiaryElement)
 
     qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
 
+    // TODO: actually convert the bestiary
+
+    setDirty(false);
+}
+
+void Bestiary::loadBestiary(const QDomElement& bestiaryElement)
+{
+    qDebug() << "[Bestiary] Loading bestiary...";
+
+    QDomElement monsterElement = bestiaryElement.firstChildElement(QString("monster"));
+    while(!monsterElement.isNull())
+    {
+        MonsterClassv2* monster = new MonsterClassv2(monsterElement, false);
+        insertMonsterClass(monster);
+        monsterElement = monsterElement.nextSiblingElement(QString("monster"));
+    }
+
+    QDomElement licenseElement = bestiaryElement.firstChildElement(QString("license"));
+    if(licenseElement.isNull())
+        qDebug() << "[Bestiary] ERROR: not able to find the license text in the bestiary!";
+
+    QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
+    while(!licenseText.isNull())
+    {
+        _licenseText.append(licenseText.text());
+        licenseText = licenseText.nextSiblingElement(QString("element"));
+    }
+
+    qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
+
+    // TODO: actually convert the bestiary
+
     setDirty(false);
 }
 
@@ -605,7 +657,7 @@ void Bestiary::importBestiary(const QDomElement& bestiaryElement, const QString&
 
     int importCount = 0;
     QMessageBox::StandardButton challengeResult = QMessageBox::NoButton;
-    QDomElement monsterElement = bestiaryElement.firstChildElement(QString("element"));
+    QDomElement monsterElement = bestiaryElement.firstChildElement(QString("monster"));
     while(!monsterElement.isNull())
     {
         bool importOK = true;
@@ -631,7 +683,7 @@ void Bestiary::importBestiary(const QDomElement& bestiaryElement, const QString&
         if(importOK)
         {
             importMonsterImage(monsterElement, importFile);
-            MonsterClass* monster = new MonsterClass(monsterElement, true);
+            MonsterClassv2* monster = new MonsterClassv2(monsterElement, true);
             if(insertMonsterClass(monster))
             {
                 ++importCount;
@@ -699,7 +751,7 @@ void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QStri
     }
 }
 
-QString Bestiary::searchMonsterClass(const MonsterClass* monsterClass, const QString& searchString) const
+QString Bestiary::searchMonsterClass(const MonsterClassv2* monsterClass, const QString& searchString) const
 {
     QString result;
 

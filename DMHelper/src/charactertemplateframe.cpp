@@ -775,14 +775,14 @@ void CharacterTemplateFrame::populateWidget(QWidget* widget, Characterv2* charac
         if(hash)
         {
             layout = new CharacterTemplateResourceLayout(listKey, listIndex, keyString, valuePair);
-            connect(layout, &CharacterTemplateResourceLayout::resourceListValueChanged, _character, &Characterv2::setListValue);
+            connect(layout, &CharacterTemplateResourceLayout::resourceListValueChanged, _character, [=](const QString& key, int listIndex, const QString& listKey, const QVariant& value){ _character->setListValue(key, listIndex, listKey, value); });
             connect(layout, &CharacterTemplateResourceLayout::addResource, this, [this, widget](){ this->handleAddResource(widget); });
             connect(layout, &CharacterTemplateResourceLayout::removeResource, this, [this, widget](){ this->handleRemoveResource(widget); });
         }
         else // character or nulls
         {
             layout = new CharacterTemplateResourceLayout(keyString, valuePair);
-            connect(layout, &CharacterTemplateResourceLayout::resourceValueChanged, _character, &Characterv2::setResourceValue);
+            connect(layout, &CharacterTemplateResourceLayout::resourceValueChanged, _character, [=](const QString& key, const ResourcePair& value){ _character->setResourceValue(key, value); });
         }
         frame->installEventFilter(layout);
         frame->setLayout(layout);

@@ -3,7 +3,7 @@
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterbase.h"
 #include "characterv2.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "monsteraction.h"
 #include "combatantwidget.h"
 #include "ui_combatantrolloverframe.h"
@@ -186,7 +186,7 @@ void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)
     if(!monster)
         return;
 
-    MonsterClass* monsterClass = monster->getMonsterClass();
+    MonsterClassv2* monsterClass = monster->getMonsterClass();
     if(!monsterClass)
         return;
 

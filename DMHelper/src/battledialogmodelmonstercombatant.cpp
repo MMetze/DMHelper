@@ -1,6 +1,6 @@
 #include "battledialogmodelmonstercombatant.h"
 #include "monster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -81,7 +81,7 @@ int BattleDialogModelMonsterCombatant::getSizeCategory() const
     if(_monsterSize > DMHelper::CombatantSize_Unknown)
         return _monsterSize;
 
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return DMHelper::CombatantSize_Unknown;
 
@@ -237,7 +237,7 @@ int BattleDialogModelMonsterCombatant::getMonsterType() const
     return BattleMonsterType_Combatant;
 }
 
-MonsterClass* BattleDialogModelMonsterCombatant::getMonsterClass() const
+MonsterClassv2* BattleDialogModelMonsterCombatant::getMonsterClass() const
 {
     Monster* monster = getMonster();
     if(monster)

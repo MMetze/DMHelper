@@ -24,6 +24,8 @@ NewCampaignDialog::NewCampaignDialog(QWidget *parent)
     connect(ui->cmbRulesets, &QComboBox::currentIndexChanged, this, &NewCampaignDialog::handleRulesetSelected);
     connect(ui->btnBrowseCharacterData, &QPushButton::clicked, this, &NewCampaignDialog::handleCharacterDataBrowse);
     connect(ui->btnBrowseCharacterUI, &QPushButton::clicked, this, &NewCampaignDialog::handleCharacterUIBrowse);
+    connect(ui->btnBrowseMonsterData, &QPushButton::clicked, this, &NewCampaignDialog::handleMonsterDataBrowse);
+    connect(ui->btnBrowseMonsterUI, &QPushButton::clicked, this, &NewCampaignDialog::handleMonsterUIBrowse);
 
     handleRulesetSelected();
 }
@@ -58,6 +60,16 @@ QString NewCampaignDialog::getCharacterUIFile() const
     return ui->edtCharacterUI->text();
 }
 
+QString NewCampaignDialog::getMonsterDataFile() const
+{
+    return ui->edtMonsterData->text();
+}
+
+QString NewCampaignDialog::getMonsterUIFile() const
+{
+    return ui->edtMonsterUI->text();
+}
+
 bool NewCampaignDialog::isCombatantDone() const
 {
     return ui->chkCombatantDone->isChecked();
@@ -65,6 +77,9 @@ bool NewCampaignDialog::isCombatantDone() const
 
 void NewCampaignDialog::handleRulesetSelected()
 {
+    if(!RuleFactory::Instance())
+        return;
+
     QString rulesetName = ui->cmbRulesets->currentText();
     RuleFactory::RulesetTemplate ruleset = RuleFactory::Instance()->getRulesetTemplate(rulesetName);
 
@@ -79,6 +94,8 @@ void NewCampaignDialog::handleRulesetSelected()
         ui->cmbInitiative->setCurrentIndex(initiativeIndex);
     ui->edtCharacterData->setText(ruleset._characterData);
     ui->edtCharacterUI->setText(ruleset._characterUI);
+    ui->edtMonsterData->setText(ruleset._monsterData);
+    ui->edtMonsterUI->setText(ruleset._monsterUI);
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()
@@ -93,4 +110,18 @@ void NewCampaignDialog::handleCharacterUIBrowse()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Select Character UI File"), QString(), tr("UI Files (*.ui)"));
     if(!fileName.isEmpty())
         ui->edtCharacterUI->setText(fileName);
+}
+
+void NewCampaignDialog::handleMonsterDataBrowse()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select Monster Data File"), QString(), tr("XML Files (*.xml)"));
+    if(!fileName.isEmpty())
+        ui->edtMonsterData->setText(fileName);
+}
+
+void NewCampaignDialog::handleMonsterUIBrowse()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select Monster UI File"), QString(), tr("UI Files (*.ui)"));
+    if(!fileName.isEmpty())
+        ui->edtMonsterUI->setText(fileName);
 }
