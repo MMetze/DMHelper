@@ -1,5 +1,6 @@
 #include "templateobject.h"
 #include "templatefactory.h"
+#include "globalsearch.h"
 #include <QDomElement>
 
 TemplateObject::TemplateObject(TemplateFactory* factory) :
@@ -21,6 +22,47 @@ void TemplateObject::setFactory(TemplateFactory* factory)
     _factory = factory;
 }
 
+bool TemplateObject::matchSearchString(const QString& searchString, QString& result) const
+{
+    if(!_factory)
+        return false;
+
+    QHash<QString, DMHAttribute> elementAttributes = _factory->getElements();
+    QString searchResult;
+    for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
+    {
+        DMHAttribute attribute = elementAttributes.value(*keyIt);
+        if((attribute._type == TemplateFactory::TemplateType_html) || (attribute._type == TemplateFactory::TemplateType_string))
+        {
+            QString value = getStringValue(*keyIt);
+            if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
+            {
+                result = *keyIt + ": " + searchResult;
+                return true;
+            }
+        }
+        else if(attribute._type == TemplateFactory::TemplateType_list)
+        {
+            QList<QVariant> listValues = getListValue(*keyIt);
+            for(const auto &value : std::as_const(listValues))
+            {
+                QHash<QString, QVariant> valueHash = value.toHash();
+                for(auto valueKeyIt = valueHash.keyBegin(), valueEnd = valueHash.keyEnd(); valueKeyIt != valueEnd; ++valueKeyIt)
+                {
+                    QString value = valueHash.value(*valueKeyIt).toString();
+                    if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
+                    {
+                        result = *keyIt + ": " + *valueKeyIt + ": " + searchResult;
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 bool TemplateObject::hasValue(const QString& key) const
 {
     if(isAttributeSpecial(key))
@@ -37,8 +79,11 @@ QString TemplateObject::getValueAsString(const QString& key) const
     if(isAttributeSpecial(key))
         return getAttributeSpecialAsString(key);
 
-    if((!valueHash()->contains(key)) || (!_factory->hasEntry(key)))
-        qDebug() << "[Characterv2] WARNING: Attempting to read the value for the unknown key " << key;
+    if((!_factory) || (!_factory->hasEntry(key)))
+    {
+        qDebug() << "[Characterv2] WARNING: Attempting to read the value for the unknown key " << key << " from factory " << _factory;
+        return QString();
+    }
 
     DMHAttribute attribute = _factory->getAttribute(key);
     switch(attribute._type)
@@ -66,38 +111,78 @@ QString TemplateObject::getValueAsString(const QString& key) const
 QString TemplateObject::getStringValue(const QString& key) const
 {
     if(isAttributeSpecial(key))
+    {
         return getAttributeSpecialAsString(key);
+    }
     else
-        return valueHash()->value(key, QString()).toString();
+    {
+        const QHash<QString, QVariant>* hash = valueHash();
+        return hash->contains(key) ? hash->value(key, QString()).toString() : _factory->getAttribute(key)._default;
+    }
 }
 
 int TemplateObject::getIntValue(const QString& key) const
 {
     if(isAttributeSpecial(key))
+    {
         return getAttributeSpecial(key).toInt();
+    }
     else
-        return valueHash()->value(key, 0).toInt();
+    {
+        const QHash<QString, QVariant>* hash = valueHash();
+        return hash->contains(key) ? hash->value(key, 0).toInt() : _factory->getAttribute(key)._default.toInt();
+    }
 }
 
 bool TemplateObject::getBoolValue(const QString& key) const
 {
     if(isAttributeSpecial(key))
+    {
         return getAttributeSpecial(key).toBool();
+    }
     else
-        return valueHash()->value(key, false).toBool();
+    {
+        const QHash<QString, QVariant>* hash = valueHash();
+        return hash->contains(key) ? hash->value(key, false).toBool() : static_cast<bool>(_factory->getAttribute(key)._default.toInt());
+    }
 }
 
 Dice TemplateObject::getDiceValue(const QString& key) const
 {
     if(isAttributeSpecial(key))
+    {
         return getAttributeSpecial(key).value<Dice>();
+    }
     else
-        return valueHash()->value(key, QVariant()).value<Dice>();
+    {
+        const QHash<QString, QVariant>* hash = valueHash();
+        return hash->contains(key) ? hash->value(key, QVariant()).value<Dice>() : Dice(_factory->getAttribute(key)._default);
+    }
 }
 
 ResourcePair TemplateObject::getResourceValue(const QString& key) const
 {
-    return valueHash()->value(key, QVariant()).value<ResourcePair>();
+    if(isAttributeSpecial(key))
+    {
+        return getAttributeSpecial(key).value<ResourcePair>();
+    }
+    else
+    {
+        const QHash<QString, QVariant>* hash = valueHash();
+        if(hash->contains(key))
+        {
+            return hash->value(key, QVariant()).value<ResourcePair>();
+        }
+        else
+        {
+            QString value = _factory->getAttribute(key)._default;
+            QStringList resourceString = value.split(QString(","));
+            if(resourceString.size() == 2)
+                return ResourcePair(resourceString.at(0).toInt(), resourceString.at(1).toInt());
+            else
+                return ResourcePair();
+        }
+    }
 }
 
 QList<QVariant> TemplateObject::getListValue(const QString& key) const
@@ -349,7 +434,7 @@ void TemplateObject::readXMLValues(const QDomElement& element, bool isImport)
     handleOldXMLs(element);
 }
 
-void TemplateObject::writeXMLValues(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+void TemplateObject::writeXMLValues(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
@@ -403,7 +488,7 @@ QVariant TemplateObject::readAttributeValue(const DMHAttribute& attribute, const
     return TemplateFactory::convertStringToVariant(element.attribute(name, attribute._default), attribute._type);
 }
 
-void TemplateObject::writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value)
+void TemplateObject::writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value) const
 {
     if((key.isEmpty()) || (value.isNull()))
     {
@@ -414,7 +499,7 @@ void TemplateObject::writeAttributeValue(const DMHAttribute& attribute, QDomElem
     element.setAttribute(key, TemplateFactory::convertVariantToString(value, attribute._type));
 }
 
-void TemplateObject::writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
+void TemplateObject::writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value) const
 {
     if((key.isEmpty()) || (value.isNull()))
     {
@@ -435,7 +520,7 @@ void TemplateObject::writeElementValue(QDomDocument &doc, QDomElement& element, 
     element.appendChild(childElement);
 }
 
-void TemplateObject::writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
+void TemplateObject::writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value) const
 {
     if((key.isEmpty()) || (value.isNull()))
     {

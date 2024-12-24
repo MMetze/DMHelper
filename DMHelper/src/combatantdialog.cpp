@@ -277,20 +277,20 @@ void CombatantDialog::sizeSelected(int index)
 
     ui->edtSize->setEnabled(sizeCategory == DMHelper::CombatantSize_Unknown);
     if(sizeCategory != DMHelper::CombatantSize_Unknown)
-        ui->edtSize->setText(QString::number(MonsterClass::convertSizeCategoryToScaleFactor(sizeCategory)));
+        ui->edtSize->setText(QString::number(MonsterClassv2::convertSizeCategoryToScaleFactor(sizeCategory)));
 }
 
 void CombatantDialog::fillSizeCombo()
 {
     ui->cmbSize->clear();
 
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
     ui->cmbSize->insertSeparator(999); // Insert at the end of the list
     ui->cmbSize->addItem(QString("Custom..."), DMHelper::CombatantSize_Unknown);
 

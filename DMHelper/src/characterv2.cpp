@@ -36,6 +36,10 @@ void Characterv2::copyValues(const CampaignObjectBase* other)
         return;
 
     _dndBeyondID = otherCharacter->_dndBeyondID;
+    foreach(const QString& key, _allValues.keys())
+    {
+        _allValues.insert(key, otherCharacter->_allValues.value(key));
+    }
 
     Combatant::copyValues(other);
 }
@@ -53,23 +57,7 @@ bool Characterv2::matchSearch(const QString& searchString, QString& result) cons
     if(Combatant::matchSearch(searchString, result))
         return true;
 
-    QHash<QString, DMHAttribute> elementAttributes = CombatantFactory::Instance()->getElements();
-    QString searchResult;
-    for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
-    {
-        DMHAttribute attribute = elementAttributes.value(*keyIt);
-        if(attribute._type == CombatantFactory::TemplateType_html)
-        {
-            QString value = getStringValue(*keyIt);
-            if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
-            {
-                result = *keyIt + ": " + searchResult;
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return matchSearchString(searchString, result);
 }
 
 void Characterv2::beginBatchChanges()
@@ -171,7 +159,7 @@ void Characterv2::copyMonsterValues(MonsterClassv2& monster)
 {
     beginBatchChanges();
 
-    setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getName(), monster.getIcon())));
+    setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getStringValue("name"), monster.getIcon())));
 
     QHash<QString, DMHAttribute> elementAttributes = CombatantFactory::Instance()->getElements();
     for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)

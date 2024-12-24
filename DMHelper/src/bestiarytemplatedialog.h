@@ -1,10 +1,10 @@
-#ifndef BESTIARYDIALOG_H
-#define BESTIARYDIALOG_H
+#ifndef BESTIARYTEMPLATEDIALOG_H
+#define BESTIARYTEMPLATEDIALOG_H
 
 #include <QDialog>
 #include "bestiaryfindtokendialog.h"
 
-class MonsterClass;
+class MonsterClassv2;
 class MonsterAction;
 class Bestiary;
 class TokenEditor;
@@ -12,18 +12,20 @@ class OptionsContainer;
 class QVBoxLayout;
 
 namespace Ui {
-class BestiaryDialog;
+class BestiaryTemplateDialog;
 }
 
-class BestiaryDialog : public QDialog
+class BestiaryTemplateDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit BestiaryDialog(QWidget *parent = nullptr);
-    ~BestiaryDialog();
+    explicit BestiaryTemplateDialog(QWidget *parent = nullptr);
+    ~BestiaryTemplateDialog();
 
-    MonsterClass* getMonster() const;
+    void loadMonsterUITemplate(const QString& templateFile);
+
+    MonsterClassv2* getMonster() const;
 
     void setOptions(OptionsContainer* options);
 
@@ -33,7 +35,7 @@ signals:
     void dialogClosed();
 
 public slots:
-    void setMonster(MonsterClass* monster, bool edit = true);
+    void setMonster(MonsterClassv2* monster, bool edit = true);
     void setMonster(const QString& monsterName, bool edit = true);
     void createNewMonster();
     void deleteCurrentMonster();
@@ -57,15 +59,6 @@ protected slots:
     void handleReloadImage();
     void handleClearImage();
     void handleNextToken();
-
-    void addAction();
-    void deleteAction(const MonsterAction& action);
-    void addLegendaryAction();
-    void deleteLegendaryAction(const MonsterAction& action);
-    void addSpecialAbility();
-    void deleteSpecialAbility(const MonsterAction& action);
-    void addReaction();
-    void deleteReaction(const MonsterAction& action);
 
     void handleChallengeEdited();
     void handleEditedData();
@@ -92,20 +85,22 @@ private:
 
     void interpretChallengeRating(const QString& inputCR);
 
-    Ui::BestiaryDialog *ui;
+    Ui::BestiaryTemplateDialog *ui;
+
     QWidget* _actionsWidget;
     QWidget* _legendaryActionsWidget;
     QWidget* _specialAbilitiesWidget;
     QWidget* _reactionsWidget;
 
     OptionsContainer* _options;
-    MonsterClass* _monster;
+    MonsterClassv2* _monster;
     int _currentToken;
     bool _edit;
     bool _mouseDown;
 
     // Token search data
     QString _searchString;
+
 };
 
-#endif // BESTIARYDIALOG_H
+#endif // BESTIARYTEMPLATEDIALOG_H

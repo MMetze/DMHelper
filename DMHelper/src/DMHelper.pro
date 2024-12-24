@@ -58,6 +58,7 @@ SOURCES += main.cpp\
     battleframestatemachine.cpp \
     bestiaryexportdialog.cpp \
     bestiarypopulatetokensdialog.cpp \
+    bestiarytemplatedialog.cpp \
     camerarect.cpp \
     camerascene.cpp \
     campaignexporter.cpp \
@@ -349,6 +350,7 @@ HEADERS  += mainwindow.h \
     battleframestatemachine.h \
     bestiaryexportdialog.h \
     bestiarypopulatetokensdialog.h \
+    bestiarytemplatedialog.h \
     camerarect.h \
     camerascene.h \
     campaignexporter.h \
@@ -611,6 +613,7 @@ FORMS    += mainwindow.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     bestiarypopulatetokensdialog.ui \
+    bestiarytemplatedialog.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
@@ -652,6 +655,9 @@ FORMS    += mainwindow.ui \
     resources/ui/character2e.ui \
     resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \
+    resources/ui/monster2e.ui \
+    resources/ui/monster5e-2024.ui \
+    resources/ui/monster5e.ui \
     resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \

@@ -46,7 +46,7 @@ qreal BattleDialogModelCharacter::getSizeFactor() const
     if(!character)
         return 1;
 
-    return MonsterClass::convertSizeToScaleFactor(character->getStringValue(QString("size")));
+    return MonsterClassv2::convertSizeToScaleFactor(character->getStringValue("size"));
 }
 
 int BattleDialogModelCharacter::getSizeCategory() const

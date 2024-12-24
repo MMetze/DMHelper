@@ -40,12 +40,12 @@ MonsterAction::~MonsterAction()
 
 QDomElement MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const
 {
-    MonsterClass::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
-    MonsterClass::outputValue(doc, element, isExport, QString("desc"), getDescription());
-    MonsterClass::outputValue(doc, element, isExport, QString("name"), getName());
-    MonsterClass::outputValue(doc, element, isExport, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
+    MonsterClassv2::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
+    MonsterClassv2::outputValue(doc, element, isExport, QString("desc"), getDescription());
+    MonsterClassv2::outputValue(doc, element, isExport, QString("name"), getName());
+    MonsterClassv2::outputValue(doc, element, isExport, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
     Dice outputDice = Dice(getDamageDice().getCount(), getDamageDice().getType(), 0);
-    MonsterClass::outputValue(doc, element, isExport, QString("damage_dice"), outputDice.toString());
+    MonsterClassv2::outputValue(doc, element, isExport, QString("damage_dice"), outputDice.toString());
 
     return element;
 }

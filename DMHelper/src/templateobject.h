@@ -19,6 +19,9 @@ public:
     TemplateFactory* getFactory() const;
     void setFactory(TemplateFactory* factory);
 
+    // For support of GlobalSearch_Interface
+    bool matchSearchString(const QString& searchString, QString& result) const;
+
     virtual bool hasValue(const QString& key) const;
     virtual QString getValueAsString(const QString& key) const;
     virtual QString getStringValue(const QString& key) const;
@@ -46,7 +49,7 @@ protected:
     virtual void declareDirty() = 0;
 
     virtual void readXMLValues(const QDomElement& element, bool isImport);
-    virtual void writeXMLValues(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void writeXMLValues(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
 
     virtual void handleOldXMLs(const QDomElement& element);
     virtual bool isAttributeSpecial(const QString& attribute) const;
@@ -55,9 +58,9 @@ protected:
     virtual void setAttributeSpecial(const QString& key, const QString& value);
 
     virtual QVariant readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name);
-    virtual void writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value);
-    virtual void writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value);
-    virtual void writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value);
+    virtual void writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value) const;
+    virtual void writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value) const;
+    virtual void writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value) const;
 
     TemplateFactory* _factory;
 };

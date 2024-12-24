@@ -50,6 +50,10 @@ signals:
     void dirty();
 
 protected:
+    virtual QHash<QString, QVariant>* valueHash() override;
+    virtual const QHash<QString, QVariant>* valueHash() const override;
+    virtual void declareDirty() override;
+
     void registerChange();
     void readIcons(const QDomElement& element, bool isImport);
     void writeIcons(QDomDocument &doc, QDomElement& element, QDir& targetDirectory, bool isExport) const;

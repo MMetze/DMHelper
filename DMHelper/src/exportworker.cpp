@@ -218,11 +218,11 @@ void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement
         monster->outputXML(doc, monsterElement, directory, true);
     }
 
-    QString monsterIconFile = Bestiary::Instance()->findMonsterImage(monster->getName(), monster->getIcon());
+    QString monsterIconFile = Bestiary::Instance()->findMonsterImage(monster->getStringValue("name"), monster->getIcon());
     if(!monsterIconFile.isEmpty())
     {
         QString fullMonsterFile = Bestiary::Instance()->getDirectory().filePath(monsterIconFile);
-        qDebug() << "[ExportWorker] Exporting monster: " << monster->getName() << ", icon: " << fullMonsterFile;
+        qDebug() << "[ExportWorker] Exporting monster: " << monster->getStringValue("name") << ", icon: " << fullMonsterFile;
         exportFile(fullMonsterFile, directory, monsterElement, QString("icon"), false);
     }
 

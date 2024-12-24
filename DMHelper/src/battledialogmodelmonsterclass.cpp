@@ -22,7 +22,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
     _iconIndex(0)
 {
     if(_monsterClass)
-        _monsterHP = _monsterClass->getHitDice().roll();
+        _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
 }
 
 BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* monsterClass, const QString& monsterName, int initiative, const QPointF& position) :
@@ -34,7 +34,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
     _iconIndex(0)
 {
     if(_monsterClass)
-        _monsterHP = _monsterClass->getHitDice().roll();
+        _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
 }
 
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
@@ -215,7 +215,7 @@ QString BattleDialogModelMonsterClass::getName() const
         return QString();
     }
 
-    return _monsterClass->getName();
+    return _monsterClass->getStringValue("name");
 }
 
 QPixmap BattleDialogModelMonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize) const
@@ -274,7 +274,7 @@ void BattleDialogModelMonsterClass::setIconIndex(int index)
 
 void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute("monsterClass", _monsterClass->getName());
+    element.setAttribute("monsterClass", _monsterClass->getStringValue("name"));
     element.setAttribute("monsterName", _monsterName);
     element.setAttribute("monsterHP", _monsterHP);
     if(_monsterSize > 0.0)

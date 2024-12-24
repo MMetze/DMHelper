@@ -109,7 +109,7 @@ void CombatantWidgetInternalsMonster::setHitPoints(int hp)
 void CombatantWidgetInternalsMonster::executeDoubleClick()
 {
     if((_monster) && (_monster->getMonsterClass()))
-        emit clicked(_monster->getMonsterClass()->getName());
+        emit clicked(_monster->getMonsterClass()->getStringValue("name"));
     else
         qDebug() << "[Widget Monster Internal] no valid monster class found!";
 }

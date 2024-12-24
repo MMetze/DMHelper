@@ -461,12 +461,12 @@ void ExportDialog::addCharacter(Characterv2* character)
 
 void ExportDialog::addMonster(MonsterClassv2* monsterClass)
 {
-    if((!monsterClass) || (_monsters.contains(monsterClass->getName())))
+    if((!monsterClass) || (_monsters.contains(monsterClass->getStringValue("name"))))
         return;
 
-    QListWidgetItem* listItem = new QListWidgetItem(QIcon(monsterClass->getIconPixmap(DMHelper::PixmapSize_Full)), monsterClass->getName());
+    QListWidgetItem* listItem = new QListWidgetItem(QIcon(monsterClass->getIconPixmap(DMHelper::PixmapSize_Full)), monsterClass->getStringValue("name"));
     ui->listMonsters->addItem(listItem);
-    _monsters.append(monsterClass->getName());
+    _monsters.append(monsterClass->getStringValue("name"));
 }
 
 void ExportDialog::addSpell(Spell* spell)

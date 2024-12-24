@@ -1,6 +1,6 @@
 #include "bestiarydialog.h"
 #include "bestiary.h"
-#include "monsterclassv2.h"
+#include "monsterclass.h"
 #include "combatant.h"
 #include "monsteraction.h"
 #include "monsteractionframe.h"
@@ -127,7 +127,7 @@ void BestiaryDialog::setMonster(MonsterClassv2* monster, bool edit)
     if((!monster) || (_monster == monster))
         return;
 
-    qDebug() << "[Bestiary Dialog] Set Monster to " << monster->getName();
+    qDebug() << "[Bestiary Dialog] Set Monster to " << monster->getStringValue("name");
 
     if(_monster && _edit)
         storeMonsterData();
@@ -135,8 +135,8 @@ void BestiaryDialog::setMonster(MonsterClassv2* monster, bool edit)
     _monster = monster;
     _edit = edit;
 
-    if(ui->cmbSearch->currentText() != _monster->getName())
-        ui->cmbSearch->setCurrentText(_monster->getName());
+    if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
+        ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));
 
     if(_monster->getIconCount() == 0)
         _monster->searchForIcons();

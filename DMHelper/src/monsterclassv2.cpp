@@ -1,5 +1,7 @@
 #include "monsterclassv2.h"
 #include "monsterfactory.h"
+#include "bestiary.h"
+#include <QDomElement>
 
 MonsterClassv2::MonsterClassv2(const QString& name, QObject *parent) :
     QObject{parent},
@@ -11,12 +13,14 @@ MonsterClassv2::MonsterClassv2(const QString& name, QObject *parent) :
     _iconChanged(false),
     _scaledPixmaps()
 {
+    setStringValue("name", name);
 }
 
 MonsterClassv2::MonsterClassv2(const QDomElement &element, bool isImport, QObject *parent) :
     QObject{parent},
     TemplateObject{MonsterFactory::Instance()}
 {
+    inputXML(element, isImport);
 }
 
 void MonsterClassv2::inputXML(const QDomElement &element, bool isImport)
@@ -28,7 +32,6 @@ void MonsterClassv2::inputXML(const QDomElement &element, bool isImport)
     readIcons(element, isImport);
 
     endBatchChanges();
-
 }
 
 QDomElement MonsterClassv2::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
@@ -96,7 +99,19 @@ QPixmap MonsterClassv2::getIconPixmap(DMHelper::PixmapSize iconSize, int index)
         return _scaledPixmaps[index].getPixmap(iconSize);
 }
 
-void MonsterClassv2::cloneMonster(MonsterClassv2& other);
+void MonsterClassv2::cloneMonster(MonsterClassv2& other)
+{
+    beginBatchChanges();
+
+    _private = other._private;
+    foreach(const QString& key, _allValues.keys())
+    {
+        _allValues.insert(key, other._allValues.value(key));
+    }
+
+    endBatchChanges();
+
+}
 
 int MonsterClassv2::convertSizeToCategory(const QString& monsterSize)
 {
@@ -209,7 +224,7 @@ void MonsterClassv2::setIcon(int index, const QString& iconFile)
     if((index < 0) || (index >= _icons.count()))
         return;
 
-    QString searchResult = Bestiary::Instance()->findMonsterImage(getName(), iconFile);
+    QString searchResult = Bestiary::Instance()->findMonsterImage(getStringValue("name"), iconFile);
     if(searchResult.isEmpty())
         return;
 
@@ -241,7 +256,7 @@ void MonsterClassv2::removeIcon(const QString& iconFile)
 
 void MonsterClassv2::searchForIcons()
 {
-    QStringList searchResult = Bestiary::Instance()->findMonsterImages(getName());
+    QStringList searchResult = Bestiary::Instance()->findMonsterImages(getStringValue("name"));
     for(int i = 0; i < searchResult.count(); ++i)
         addIcon(searchResult.at(i));
 }
@@ -274,6 +289,21 @@ void MonsterClassv2::clearIcon()
         _iconChanged = true;
     else
         emit iconChanged(this);
+}
+
+QHash<QString, QVariant>* MonsterClassv2::valueHash()
+{
+    return &_allValues;
+}
+
+const QHash<QString, QVariant>* MonsterClassv2::valueHash() const
+{
+    return &_allValues;
+}
+
+void MonsterClassv2::declareDirty()
+{
+    registerChange();
 }
 
 void MonsterClassv2::registerChange()
