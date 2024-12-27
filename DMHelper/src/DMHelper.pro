@@ -73,7 +73,6 @@ SOURCES += main.cpp\
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
     charactertemplateframe.cpp \
-    charactertemplateresourcelayout.cpp \
     characterv2.cpp \
     characterv2converter.cpp \
     colorpushbutton.cpp \
@@ -205,7 +204,9 @@ SOURCES += main.cpp\
     spellslotlevelbutton.cpp \
     spellslotradiobutton.cpp \
     templatefactory.cpp \
+    templateframe.cpp \
     templateobject.cpp \
+    templateresourcelayout.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     tokeneditdialog.cpp \
@@ -365,7 +366,6 @@ HEADERS  += mainwindow.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
     charactertemplateframe.h \
-    charactertemplateresourcelayout.h \
     characterv2.h \
     characterv2converter.h \
     colorpushbutton.h \
@@ -498,7 +498,9 @@ HEADERS  += mainwindow.h \
     spellslotlevelbutton.h \
     spellslotradiobutton.h \
     templatefactory.h \
+    templateframe.h \
     templateobject.h \
+    templateresourcelayout.h \
     textbrowsermargins.h \
     texteditmargins.h \
     tokeneditdialog.h \

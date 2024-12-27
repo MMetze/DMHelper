@@ -6,6 +6,7 @@
 
 class DMHAttribute;
 class TemplateObject;
+class TemplateFrame;
 
 class TemplateFactory : public ObjectFactory
 {
@@ -41,6 +42,12 @@ public:
     static QVariant convertStringToVariant(const QString& value, TemplateType type);
     static QString convertVariantToString(const QVariant& value, TemplateType type);
 
+    // UI generation functionality
+    static QWidget* loadUITemplate(const QString& templateFile);
+    void readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame);
+    void populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
+    QWidget* createResourceWidget(const QString& keyString, const QString& widgetString);
+
     // Public members
     bool isEmpty() const;
 
@@ -57,11 +64,14 @@ public:
     QHash<QString, QHash<QString, DMHAttribute>> getElementLists() const;
 
     bool hasEntry(const QString& name) const;
+    QString getDefaultValue(const QString& keyString);
 
     TemplateObject* setDefaultValues(TemplateObject* object);
 
 protected:
     void loadTemplate(const QString& templateFile);
+    QWidget* createResourceWidgetFile(const QString& widgetFilename);
+    QWidget* createResourceWidgetInternal(const QString& keyString);
 
     QHash<QString, DMHAttribute> _attributes;
     QHash<QString, DMHAttribute> _elements;

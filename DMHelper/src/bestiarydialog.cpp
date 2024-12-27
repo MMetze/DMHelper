@@ -109,7 +109,7 @@ BestiaryDialog::~BestiaryDialog()
     delete ui;
 }
 
-MonsterClassv2* BestiaryDialog::getMonster() const
+MonsterClass* BestiaryDialog::getMonster() const
 {
     return _monster;
 }
@@ -122,12 +122,12 @@ void BestiaryDialog::setOptions(OptionsContainer* options)
     _options = options;
 }
 
-void BestiaryDialog::setMonster(MonsterClassv2* monster, bool edit)
+void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 {
     if((!monster) || (_monster == monster))
         return;
 
-    qDebug() << "[Bestiary Dialog] Set Monster to " << monster->getStringValue("name");
+    qDebug() << "[Bestiary Dialog] Set Monster to " << monster->getName();
 
     if(_monster && _edit)
         storeMonsterData();
@@ -135,8 +135,8 @@ void BestiaryDialog::setMonster(MonsterClassv2* monster, bool edit)
     _monster = monster;
     _edit = edit;
 
-    if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
-        ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));
+    if(ui->cmbSearch->currentText() != _monster->getName())
+        ui->cmbSearch->setCurrentText(_monster->getName());
 
     if(_monster->getIconCount() == 0)
         _monster->searchForIcons();
@@ -253,8 +253,8 @@ void BestiaryDialog::setMonster(MonsterClassv2* monster, bool edit)
         }
     }
 
-    ui->btnLeft->setEnabled(_monster != Bestiary::Instance()->getFirstMonsterClass());
-    ui->btnRight->setEnabled(_monster != Bestiary::Instance()->getLastMonsterClass());
+    //ui->btnLeft->setEnabled(_monster != Bestiary::Instance()->getFirstMonsterClass());
+    //ui->btnRight->setEnabled(_monster != Bestiary::Instance()->getLastMonsterClass());
 
     ui->edtName->setReadOnly(!_edit);
     ui->edtMonsterSize->setReadOnly(!_edit);

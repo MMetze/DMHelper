@@ -2,6 +2,7 @@
 #define BESTIARYTEMPLATEDIALOG_H
 
 #include <QDialog>
+#include "templateframe.h"
 #include "bestiaryfindtokendialog.h"
 
 class MonsterClassv2;
@@ -15,7 +16,7 @@ namespace Ui {
 class BestiaryTemplateDialog;
 }
 
-class BestiaryTemplateDialog : public QDialog
+class BestiaryTemplateDialog : public QDialog, public TemplateFrame
 {
     Q_OBJECT
 
@@ -65,12 +66,16 @@ protected slots:
 
 protected:
     // From QWidget
-    virtual void closeEvent(QCloseEvent * event);
-    virtual void mousePressEvent(QMouseEvent * event);
-    virtual void mouseReleaseEvent(QMouseEvent * event);
-    virtual void showEvent(QShowEvent * event);
-    virtual void hideEvent(QHideEvent * event);
-    virtual void focusOutEvent(QFocusEvent * event);
+    virtual bool eventFilter(QObject *object, QEvent *event) override;
+    virtual void closeEvent(QCloseEvent * event) override;
+    virtual void mousePressEvent(QMouseEvent * event) override;
+    virtual void mouseReleaseEvent(QMouseEvent * event) override;
+    virtual void showEvent(QShowEvent * event) override;
+    virtual void hideEvent(QHideEvent * event) override;
+    virtual void focusOutEvent(QFocusEvent * event) override;
+
+    // From TemplateFrame
+    virtual QObject* getFrameObject() override;
 
     void createTokenFiles(BestiaryFindTokenDialog* dialog);
 
@@ -85,12 +90,15 @@ private:
 
     void interpretChallengeRating(const QString& inputCR);
 
-    Ui::BestiaryTemplateDialog *ui;
 
-    QWidget* _actionsWidget;
-    QWidget* _legendaryActionsWidget;
-    QWidget* _specialAbilitiesWidget;
-    QWidget* _reactionsWidget;
+
+
+
+
+
+    Ui::BestiaryTemplateDialog *ui;
+    QWidget *_uiWidget;
+
 
     OptionsContainer* _options;
     MonsterClassv2* _monster;
