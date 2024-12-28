@@ -87,9 +87,9 @@ int CombatantDialog::getCombatantHitPoints() const
         return 0;
 
     if(ui->chkUseAverage->isChecked())
-        return monsterClass->getHitDice().average();
+        return monsterClass->getDiceValue("hit_dice").average();
     else if(ui->edtHitPointsLocal->text().isEmpty())
-        return monsterClass->getHitDice().roll();
+        return monsterClass->getDiceValue("hit_dice").roll();
     else
         return ui->edtHitPointsLocal->text().toInt();
 }
@@ -202,12 +202,12 @@ void CombatantDialog::monsterClassChanged(const QString &text)
     ui->chkRandomTokens->setEnabled(monsterClass->getIconCount() > 1);
 
     ui->edtName->setText(text);
-    ui->edtHitDice->setText(monsterClass->getHitDice().toString());
+    ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
 
     setHitPointAverageChanged();
 
     if(ui->cmbSize->currentData().toInt() != DMHelper::CombatantSize_Unknown)
-        ui->cmbSize->setCurrentIndex(monsterClass->getMonsterSizeCategory() - 1);
+        ui->cmbSize->setCurrentIndex(monsterClass->MonsterClassv2::convertSizeToCategory(monsterClass->getStringValue("size")) - 1);
 }
 
 void CombatantDialog::setIconIndex(int index)
@@ -262,7 +262,7 @@ void CombatantDialog::setHitPointAverageChanged()
     if(!monsterClass)
         return;
 
-    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getHitDice().average()) + QString(")"));
+    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getDiceValue("hit_dice").average()) + QString(")"));
 }
 
 void CombatantDialog::openMonsterClicked()

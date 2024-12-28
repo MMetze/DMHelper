@@ -88,7 +88,7 @@ qreal BattleDialogModelMonsterClass::getSizeFactor() const
         return 1.0;
     }
 
-    return _monsterClass->getMonsterSizeFactor();
+    return MonsterClassv2::convertSizeToScaleFactor(_monsterClass->getStringValue("size"));
 }
 
 int BattleDialogModelMonsterClass::getSizeCategory() const
@@ -99,7 +99,7 @@ int BattleDialogModelMonsterClass::getSizeCategory() const
         return DMHelper::CombatantSize_Medium;
     }
 
-    return _monsterClass->getMonsterSizeCategory();
+    return MonsterClassv2::convertSizeToCategory(_monsterClass->getStringValue("size"));
 }
 
 int BattleDialogModelMonsterClass::getStrength() const
@@ -110,7 +110,7 @@ int BattleDialogModelMonsterClass::getStrength() const
         return 0;
     }
 
-    return _monsterClass->getStrength();
+    return _monsterClass->getIntValue("strength");
 }
 
 int BattleDialogModelMonsterClass::getDexterity() const
@@ -121,7 +121,7 @@ int BattleDialogModelMonsterClass::getDexterity() const
         return 0;
     }
 
-    return _monsterClass->getDexterity();
+    return _monsterClass->getIntValue("dexterity");
 }
 
 int BattleDialogModelMonsterClass::getConstitution() const
@@ -132,7 +132,7 @@ int BattleDialogModelMonsterClass::getConstitution() const
         return 0;
     }
 
-    return _monsterClass->getConstitution();
+    return _monsterClass->getIntValue("constitution");
 }
 
 int BattleDialogModelMonsterClass::getIntelligence() const
@@ -143,7 +143,7 @@ int BattleDialogModelMonsterClass::getIntelligence() const
         return 0;
     }
 
-    return _monsterClass->getIntelligence();
+    return _monsterClass->getIntValue("intelligence");
 }
 
 int BattleDialogModelMonsterClass::getWisdom() const
@@ -154,7 +154,7 @@ int BattleDialogModelMonsterClass::getWisdom() const
         return 0;
     }
 
-    return _monsterClass->getWisdom();
+    return _monsterClass->getIntValue("wisdom");
 }
 
 int BattleDialogModelMonsterClass::getCharisma() const
@@ -165,7 +165,7 @@ int BattleDialogModelMonsterClass::getCharisma() const
         return 0;
     }
 
-    return _monsterClass->getCharisma();
+    return _monsterClass->getIntValue("charisma");
 }
 
 int BattleDialogModelMonsterClass::getSpeed() const
@@ -176,7 +176,7 @@ int BattleDialogModelMonsterClass::getSpeed() const
         return 30;
     }
 
-    return _monsterClass->getSpeedValue();
+    return _monsterClass->getIntValue("speed");
 }
 
 int BattleDialogModelMonsterClass::getArmorClass() const
@@ -187,7 +187,7 @@ int BattleDialogModelMonsterClass::getArmorClass() const
         return 10;
     }
 
-    return _monsterClass->getArmorClass();
+    return _monsterClass->getIntValue("armor_class");
 }
 
 int BattleDialogModelMonsterClass::getHitPoints() const
@@ -247,7 +247,7 @@ MonsterClassv2* BattleDialogModelMonsterClass::getMonsterClass() const
 
 void BattleDialogModelMonsterClass::setSizeFactor(qreal sizeFactor)
 {
-    if((_monsterClass) && (_monsterClass->getMonsterSizeFactor() == sizeFactor))
+    if((_monsterClass) && (MonsterClassv2::convertSizeToScaleFactor(_monsterClass->getStringValue("size")) == sizeFactor))
         return;
 
     _monsterSize = sizeFactor;

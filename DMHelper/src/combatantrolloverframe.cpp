@@ -5,6 +5,7 @@
 #include "characterv2.h"
 #include "monsterclassv2.h"
 #include "monsteraction.h"
+#include "monsterfactory.h"
 #include "combatantwidget.h"
 #include "ui_combatantrolloverframe.h"
 #include <QStringList>
@@ -190,13 +191,38 @@ void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)
     if(!monsterClass)
         return;
 
-    addActionList(monsterClass->getActions(), QString("Actions"));
-    addSeparator();
-    addActionList(monsterClass->getLegendaryActions(), QString("Legendary Actions"));
-    addSeparator();
-    addActionList(monsterClass->getSpecialAbilities(), QString("Special Actions"));
-    addSeparator();
-    addActionList(monsterClass->getReactions(), QString("Reactions"));
+    QList<QString> elementNames = MonsterFactory::Instance()->getElementLists().keys();
+    for(const QString& elementName : elementNames)
+    {
+        if(!monsterClass->hasValue(elementName))
+            continue;
+
+        QList<QVariant> listValue = monsterClass->getListValue(elementName);
+        if(listValue.isEmpty())
+            continue;
+
+        if(ui->listActions->count() > 0)
+            addSeparator();
+
+        addSectionTitle(elementName);
+
+        for(const auto &listEntry : std::as_const(listValue))
+        {
+            QHash<QString, QVariant> hashEntry = listEntry.toHash();
+            if((hashEntry.isEmpty()) || (!hashEntry.contains("name")))
+                continue;
+
+            QString summaryString = MonsterAction::createSummaryString(hashEntry);
+            QListWidgetItem *item = new QListWidgetItem(summaryString);
+            item->setData(ROLLOVER_LISTITEM_TITLE, summaryString);
+            if(!hashEntry.value("desc").isNull())
+                item->setData(ROLLOVER_LISTITEM_DESCRIPTION, hashEntry.value("desc").toString());
+            else
+                item->setFlags(Qt::NoItemFlags);
+
+            ui->listActions->addItem(item);
+        }
+    }
 }
 
 void CombatantRolloverFrame::addActionList(const QList<MonsterAction>& actionList, const QString& listTitle)

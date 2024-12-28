@@ -144,7 +144,7 @@ int BattleDialogModelCharacter::getSkillModifier(Combatant::Skills skill) const
     if(!character)
         return 0;
 
-    // HACK
+    // TODO: HACK
     switch(skill)
     {
         case Combatant::Skills_strengthSave:

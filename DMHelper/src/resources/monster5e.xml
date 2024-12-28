@@ -20,6 +20,7 @@
     <dmh:attribute type="dmh:string" name="skills"/>
     <dmh:attribute type="dmh:integer" name="challenge_rating" default="1"/>
     <dmh:attribute type="dmh:integer" name="experience" default="100"/>
+    <dmh:attribute type="dmh:integer" name="legendary"/>
 
     <dmh:attribute type="dmh:integer" name="strength" default="10"/>
     <dmh:attribute type="dmh:integer" name="strengthMod"/>

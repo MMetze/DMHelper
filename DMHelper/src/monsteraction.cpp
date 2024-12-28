@@ -13,9 +13,9 @@ MonsterAction::MonsterAction(int attackBonus, const QString& description, const 
 
 MonsterAction::MonsterAction(const QDomElement &element, bool isImport) :
     _attackBonus(0),
-    _description(QString()),
-    _name(QString()),
-    _damageDice(Dice())
+    _description(),
+    _name(),
+    _damageDice()
 {
     Q_UNUSED(isImport);
 
@@ -24,6 +24,14 @@ MonsterAction::MonsterAction(const QDomElement &element, bool isImport) :
     _name = element.firstChildElement(QString("name")).text();
     Dice inputDice = Dice(element.firstChildElement(QString("damage_dice")).text());
     _damageDice = Dice(inputDice.getCount(), inputDice.getType(), element.firstChildElement(QString("damage_bonus")).text().toInt());
+}
+
+MonsterAction::MonsterAction(const QHash<QString, QVariant>& valueHash) :
+    _attackBonus(valueHash.value("attack_bonus").toInt()),
+    _description(valueHash.value("desc").toString()),
+    _name(valueHash.value("name").toString()),
+    _damageDice(valueHash.value("damage").value<Dice>())
+{
 }
 
 MonsterAction::MonsterAction(const MonsterAction& other) :
@@ -137,4 +145,10 @@ bool MonsterAction::operator==(const MonsterAction &other) const
 bool MonsterAction::operator!=(const MonsterAction &other) const
 {
     return !(*this == other);
+}
+
+QString MonsterAction::createSummaryString(const QHash<QString, QVariant>& valueHash)
+{
+    MonsterAction action(valueHash);
+    return action.summaryString();
 }

@@ -25,6 +25,14 @@ Redo documentation and demos
 Many feature and intro videos
 Map Library
 
+Template things to do:
+* Add Combatant dialog
+* Initiative list entries
+    Combatant roll-over frame
+* Conditions
+* "Events" in initiative, such as lair actions
+* Handling legendary actions or other resettable per round enemy resources
+
 Main 3.3.1 Todos:
 Add What's New to the About dialog
 Need a better Help icon, looks stupid. Maybe integrate with a dragon symbol

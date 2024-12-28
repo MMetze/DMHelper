@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "campaignobjectbase.h"
-#include "bestiarydialog.h"
+#include "bestiarytemplatedialog.h"
 #include "spellbookdialog.h"
 #include "dmconstants.h"
 #include "optionscontainer.h"
@@ -242,7 +242,7 @@ private:
 
     OptionsContainer* _options;
 
-    BestiaryDialog _bestiaryDlg;
+    BestiaryTemplateDialog _bestiaryDlg;
     SpellbookDialog _spellDlg;
 
     BattleDialogManager* _battleDlgMgr;

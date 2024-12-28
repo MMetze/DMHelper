@@ -12,6 +12,7 @@ class MonsterAction
 public:
     explicit MonsterAction(int attackBonus, const QString& description, const QString& name, Dice damageDice);
     explicit MonsterAction(const QDomElement &element, bool isImport);
+    explicit MonsterAction(const QHash<QString, QVariant>& valueHash);
     MonsterAction(const MonsterAction& other);
     virtual ~MonsterAction();
 
@@ -34,6 +35,8 @@ public:
     MonsterAction &operator=(const MonsterAction &other);
     bool operator==(const MonsterAction &other) const;
     bool operator!=(const MonsterAction &other) const;
+
+    static QString createSummaryString(const QHash<QString, QVariant>& valueHash);
 
 private:
     int _attackBonus;

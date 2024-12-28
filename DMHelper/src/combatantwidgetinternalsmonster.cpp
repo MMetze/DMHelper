@@ -9,11 +9,12 @@
 #include <QTimer>
 #include <QDebug>
 
+const int CombatantWidgetInternalsMonster_LEGENDARY_MAXIMUM = 3;
+
 CombatantWidgetInternalsMonster::CombatantWidgetInternalsMonster(BattleDialogModelMonsterBase* monster, CombatantWidgetMonster* parent) :
     CombatantWidgetInternals(parent),
     _widgetParent(parent),
-    _monster(monster),
-    _legendaryMaximum(3)
+    _monster(monster)
 {
     if(_widgetParent)
         _widgetParent->setInternals(this);
@@ -58,17 +59,6 @@ bool CombatantWidgetInternalsMonster::isKnown()
         return _monster->getKnown();
     else
         return true;
-}
-
-void CombatantWidgetInternalsMonster::setLegendaryMaximum(int legendaryMaximum)
-{
-    _legendaryMaximum = legendaryMaximum;
-    resetLegendary();
-}
-
-int CombatantWidgetInternalsMonster::getLegendaryMaximum() const
-{
-    return _legendaryMaximum;
 }
 
 void CombatantWidgetInternalsMonster::updateImage()
@@ -127,5 +117,9 @@ void CombatantWidgetInternalsMonster::decrementLegendary()
 
 void CombatantWidgetInternalsMonster::resetLegendary()
 {
-    _monster->setLegendaryCount(_legendaryMaximum);
+    if(!_monster)
+        return;
+
+    MonsterClassv2* monsterClass = _monster->getMonsterClass();
+    _monster->setLegendaryCount(monsterClass ? monsterClass->getIntValue("legendary") : CombatantWidgetInternalsMonster_LEGENDARY_MAXIMUM);
 }
