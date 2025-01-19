@@ -332,6 +332,16 @@ void TemplateObject::insertListEntry(const QString& key, int index, QHash<QStrin
     setValue(key, QVariant(list));
 }
 
+void TemplateObject::prependListEntry(const QString& key, QHash<QString, QVariant> listEntryValues)
+{
+    insertListEntry(key, 0, listEntryValues);
+}
+
+void TemplateObject::appendListEntry(const QString& key, QHash<QString, QVariant> listEntryValues)
+{
+    insertListEntry(key, getListValue(key).size(), listEntryValues);
+}
+
 void TemplateObject::removeListEntry(const QString& key, int index)
 {
     QList<QVariant> list = getListValue(key);

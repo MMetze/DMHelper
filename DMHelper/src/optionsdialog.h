@@ -22,9 +22,9 @@ public:
     void applyCampaignChanges();
 
 private slots:
-    void browseBestiary();
-    void editBestiary();
-    void setBestiary(const QString& bestiaryFile);
+    void browseDefaultBestiary();
+    void editDefaultBestiary();
+    void setDefaultBestiary(const QString& bestiaryFile);
 
     void browseSpellbook();
     void editSpellbook();

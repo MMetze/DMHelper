@@ -520,7 +520,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="lblBestiary">
            <property name="text">
-            <string>Bestiary File</string>
+            <string>Default Bestiary File</string>
            </property>
           </widget>
          </item>
@@ -569,7 +569,11 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLineEdit" name="edtBestiary"/>
+          <widget class="QLineEdit" name="edtBestiary">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="lblSpellbook">
@@ -583,6 +587,9 @@
          </item>
          <item row="0" column="3">
           <widget class="QPushButton" name="btnBestiary">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Browse...</string>
            </property>
@@ -955,17 +962,6 @@
            </layout>
           </item>
           <item>
-           <widget class="QCheckBox" name="chkCombatantDone">
-            <property name="text">
-             <string>Show a checkbox for whether a combatant has been active this round</string>
-            </property>
-            <property name="icon">
-             <iconset resource="resources.qrc">
-              <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_19">
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -1081,6 +1077,17 @@
              </layout>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkCombatantDone">
+            <property name="text">
+             <string>Show a checkbox for whether a combatant has been active this round</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

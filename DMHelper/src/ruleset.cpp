@@ -22,6 +22,29 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
     _monsterUIFile(DEFAULT_MONSTER_UI),
     _combatantDoneCheckbox(DEFAULT_CHARACTER_DONE_CHECKBOX)
 {
+    if((RuleFactory::Instance()) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
+        _bestiaryFile = RuleFactory::Instance()->getDefaultBestiary();
+}
+
+Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *parent) :
+    CampaignObjectBase(rulesetTemplate._name, parent),
+    _ruleInitiative(nullptr),
+    _characterDataFile(rulesetTemplate._characterData),
+    _characterUIFile(rulesetTemplate._characterUI),
+    _bestiaryFile(rulesetTemplate._bestiary),
+    _monsterDataFile(rulesetTemplate._monsterData),
+    _monsterUIFile(rulesetTemplate._monsterUI),
+    _combatantDoneCheckbox(DEFAULT_CHARACTER_DONE_CHECKBOX)
+{
+    _ruleInitiative = RuleFactory::createRuleInitiative(rulesetTemplate._initiative, this);
+
+    if(_bestiaryFile.isEmpty())
+    {
+        if((RuleFactory::Instance()) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
+            _bestiaryFile = RuleFactory::Instance()->getDefaultBestiary();
+        else
+            _bestiaryFile = DEFAULT_BESTIARY;
+    }
 }
 
 Ruleset::~Ruleset()
@@ -35,10 +58,18 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
 
     _characterDataFile = element.attribute("characterData", DEFAULT_CHARACTER_DATA);
     _characterUIFile = element.attribute("characterUI", DEFAULT_CHARACTER_UI);
-    _bestiaryFile = element.attribute("bestiary", DEFAULT_BESTIARY);
     _characterDataFile = element.attribute("monsterData", DEFAULT_MONSTER_DATA);
     _characterUIFile = element.attribute("monsterUI", DEFAULT_MONSTER_UI);
     _combatantDoneCheckbox = static_cast<bool>(element.attribute("done", QString::number(DEFAULT_CHARACTER_DONE_CHECKBOX)).toInt());
+
+    _bestiaryFile = element.attribute("bestiary");
+    if(_bestiaryFile.isEmpty())
+    {
+        if((RuleFactory::Instance()) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
+            _bestiaryFile = RuleFactory::Instance()->getDefaultBestiary();
+        else
+            _bestiaryFile = DEFAULT_BESTIARY;
+    }
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -109,10 +140,14 @@ void Ruleset::setDefaultValues()
     _ruleInitiative = RuleFactory::createRuleInitiative(RuleFactory::getRuleInitiativeDefault(), this);
     _characterDataFile = DEFAULT_CHARACTER_DATA;
     _characterUIFile = DEFAULT_CHARACTER_UI;
-    _bestiaryFile = DEFAULT_BESTIARY;
     _monsterDataFile = DEFAULT_MONSTER_DATA;
     _monsterUIFile = DEFAULT_MONSTER_UI;
     _combatantDoneCheckbox = DEFAULT_CHARACTER_DONE_CHECKBOX;
+
+    if((RuleFactory::Instance()) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
+        _bestiaryFile = RuleFactory::Instance()->getDefaultBestiary();
+    else
+        _bestiaryFile = DEFAULT_BESTIARY;
 }
 
 void Ruleset::setRuleInitiative(const QString& initiativeType)

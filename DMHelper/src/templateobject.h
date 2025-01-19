@@ -41,6 +41,8 @@ public:
     virtual void setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue);
     virtual QHash<QString, QVariant> createListEntry(const QString& key, int index);
     virtual void insertListEntry(const QString& key, int index, QHash<QString, QVariant> listEntryValues);
+    virtual void prependListEntry(const QString& key, QHash<QString, QVariant> listEntryValues);
+    virtual void appendListEntry(const QString& key, QHash<QString, QVariant> listEntryValues);
     virtual void removeListEntry(const QString& key, int index);
 
 protected:

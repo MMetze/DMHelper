@@ -114,9 +114,7 @@ void Combatant::endBatchChanges()
     {
         _batchChanges = false;
         if(_changesMade)
-        {
             emit dirty();
-        }
     }
 }
 

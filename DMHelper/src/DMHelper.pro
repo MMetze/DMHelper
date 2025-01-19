@@ -133,6 +133,7 @@ SOURCES += main.cpp\
     mapfactory.cpp \
     mapframescene.cpp \
     monsterclassv2.cpp \
+    monsterclassv2converter.cpp \
     monsterfactory.cpp \
     newcampaigndialog.cpp \
     objectfactory.cpp \
@@ -427,6 +428,7 @@ HEADERS  += mainwindow.h \
     mapframescene.h \
     mapmarker.h \
     monsterclassv2.h \
+    monsterclassv2converter.h \
     monsterfactory.h \
     newcampaigndialog.h \
     objectfactory.h \

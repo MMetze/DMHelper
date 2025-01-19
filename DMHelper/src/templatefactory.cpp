@@ -105,6 +105,12 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
 {
     QWidget* result = nullptr;
 
+    if(templateFile.isEmpty())
+    {
+        qDebug() << "[RuleFactory::loadUITemplate] ERROR: No template file name provided, cannot load any UI template files";
+        return result;
+    }
+
     if(!RuleFactory::Instance())
     {
         qDebug() << "[RuleFactory::loadUITemplate] ERROR: No rule factory exists, cannot load any UI template files: " << templateFile;
@@ -155,6 +161,8 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
         qDebug() << "[RuleFactory::loadUITemplate] ERROR: UI Template File " << appFile << " could not be loaded: " << loader.errorString();
         return result;
     }
+
+    qDebug() << "[RuleFactory::loadUITemplate] UI Template File " << appFile << " loaded.";
 
     // Activate hyperlinks for any included text edits
     QList<QTextEdit*> textEdits = result->findChildren<QTextEdit*>();

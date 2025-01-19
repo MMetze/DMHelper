@@ -283,7 +283,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
 {
-    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+    MonsterClass* monsterClass = nullptr;//Bestiary::Instance()->getMonsterClass(monsterName);
     if(monsterClass)
         setMonster(monsterClass, edit);
 }
@@ -300,15 +300,15 @@ void BestiaryDialog::createNewMonster()
         return;
     }
 
-    MonsterClassv2* monsterClass;
+    MonsterClass* monsterClass;
     if(Bestiary::Instance()->exists(monsterName))
     {
-        monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+        monsterClass = nullptr;//Bestiary::Instance()->getMonsterClass(monsterName);
         qDebug() << "[Bestiary Dialog] New Monster already exists, selecting new monster: " << monsterClass;
     }
     else
     {
-        monsterClass = new MonsterClassv2(monsterName);
+        monsterClass = new MonsterClass(monsterName);
 
         if(Bestiary::Instance()->count() > 0)
         {
@@ -332,7 +332,7 @@ void BestiaryDialog::createNewMonster()
                     return;
                 }
 
-                MonsterClassv2* templateClass = Bestiary::Instance()->getMonsterClass(templateName);
+                MonsterClass* templateClass = nullptr;//Bestiary::Instance()->getMonsterClass(templateName);
                 if(!templateClass)
                 {
                     qDebug() << "[Bestiary Dialog] New monster not created because not able to find selected template monster: " << templateName;
@@ -344,7 +344,7 @@ void BestiaryDialog::createNewMonster()
             }
         }
 
-        Bestiary::Instance()->insertMonsterClass(monsterClass);
+        //Bestiary::Instance()->insertMonsterClass(monsterClass);
         qDebug() << "[Bestiary Dialog] New Monster created: " << monsterClass;
     }
 
@@ -370,10 +370,10 @@ void BestiaryDialog::deleteCurrentMonster()
         return;
     }
 
-    Bestiary::Instance()->removeMonsterClass(_monster);
+    //Bestiary::Instance()->removeMonsterClass(_monster);
     if(Bestiary::Instance()->count() > 0)
     {
-        setMonster(Bestiary::Instance()->getFirstMonsterClass());
+        //setMonster(Bestiary::Instance()->getFirstMonsterClass());
     }
     else
     {
@@ -428,7 +428,7 @@ void BestiaryDialog::monsterRenamed()
     if((!_monster) || (ui->edtName->text() == _monster->getName()))
         return;
 
-    Bestiary::Instance()->renameMonster(_monster, ui->edtName->text());
+    //Bestiary::Instance()->renameMonster(_monster, ui->edtName->text());
 }
 
 void BestiaryDialog::handlePublishButton()
@@ -780,14 +780,14 @@ void BestiaryDialog::focusOutEvent(QFocusEvent * event)
 
 void BestiaryDialog::previousMonster()
 {
-    MonsterClassv2* previousClass = Bestiary::Instance()->getPreviousMonsterClass(_monster);
+    MonsterClass* previousClass = nullptr;//Bestiary::Instance()->getPreviousMonsterClass(_monster);
     if(previousClass)
         setMonster(previousClass);
 }
 
 void BestiaryDialog::nextMonster()
 {
-    MonsterClassv2* nextClass = Bestiary::Instance()->getNextMonsterClass(_monster);
+    MonsterClass* nextClass = nullptr;//Bestiary::Instance()->getNextMonsterClass(_monster);
     if(nextClass)
         setMonster(nextClass);
 }

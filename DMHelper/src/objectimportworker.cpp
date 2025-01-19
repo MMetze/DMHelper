@@ -90,6 +90,7 @@ bool ObjectImportWorker::doWork()
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
     Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+    connect(&_campaign->getRuleset(), &Ruleset::bestiaryFileChanged, Bestiary::Instance(), &Bestiary::readBestiary);
 
     Bestiary::Instance()->startBatchProcessing();
     _importCampaign->inputXML(campaignElement, true);

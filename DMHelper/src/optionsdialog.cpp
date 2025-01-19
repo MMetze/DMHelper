@@ -29,8 +29,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
     {
         updateFileLocations();
 
-        connect(ui->btnBestiary, &QAbstractButton::clicked, this, &OptionsDialog::browseBestiary);
-        connect(ui->edtBestiary, &QLineEdit::editingFinished, this, &OptionsDialog::editBestiary);
+        connect(ui->btnBestiary, &QAbstractButton::clicked, this, &OptionsDialog::browseDefaultBestiary);
+        connect(ui->edtBestiary, &QLineEdit::editingFinished, this, &OptionsDialog::editDefaultBestiary);
         connect(ui->btnSpellbook, &QAbstractButton::clicked, this, &OptionsDialog::browseSpellbook);
         connect(ui->edtSpellbook, &QLineEdit::editingFinished, this, &OptionsDialog::editSpellbook);
         connect(ui->btnQuickReference, &QAbstractButton::clicked, this, &OptionsDialog::browseQuickReference);
@@ -224,25 +224,25 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->getRuleset().setMonsterUIFile(ui->edtMonsterUI->text());
 }
 
-void OptionsDialog::browseBestiary()
+void OptionsDialog::browseDefaultBestiary()
 {
-    setBestiary(QFileDialog::getOpenFileName(this, QString("Select Bestiary File"), QString(), QString("XML files (*.xml)")));
+    setDefaultBestiary(QFileDialog::getOpenFileName(this, QString("Select Default Bestiary File"), QString(), QString("XML files (*.xml)")));
 }
 
-void OptionsDialog::editBestiary()
+void OptionsDialog::editDefaultBestiary()
 {
-    setBestiary(ui->edtBestiary->text());
+    setDefaultBestiary(ui->edtBestiary->text());
 }
 
-void OptionsDialog::setBestiary(const QString& bestiaryFile)
+void OptionsDialog::setDefaultBestiary(const QString& bestiaryFile)
 {
     if(bestiaryFile.isEmpty())
         return;
 
     if(!QFile::exists(bestiaryFile))
     {
-        QMessageBox::critical(this, QString("Bestiary file not found"), QString("The selected bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
-        qDebug() << "[OptionsDialog] ERROR: The selected bestiary file could not be found: " << bestiaryFile;
+        QMessageBox::critical(this, QString("Default bestiary file not found"), QString("The selected default bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected default bestiary file could not be found: " << bestiaryFile;
         return;
     }
 

@@ -2,6 +2,7 @@
 #define RULESET_H
 
 #include "campaignobjectbase.h"
+#include "rulefactory.h"
 
 class RuleInitiative;
 
@@ -10,6 +11,7 @@ class Ruleset : public CampaignObjectBase
     Q_OBJECT
 public:
     explicit Ruleset(const QString& name = QString(), QObject *parent = nullptr);
+    explicit Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *parent = nullptr);
     virtual ~Ruleset() override;
 
     // From CampaignObjectBase

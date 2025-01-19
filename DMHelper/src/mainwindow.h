@@ -111,8 +111,6 @@ public slots:
 
     void linkActivated(const QUrl & link);
 
-    // Bestiary
-    void readBestiary();
     void readSpellbook();
     void readQuickRef();
 
@@ -156,8 +154,6 @@ protected:
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
 
-    // Bestiary
-    void writeBestiary();
     void writeSpellbook();
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
@@ -196,7 +192,10 @@ protected slots:
     void openBestiary();
     void exportBestiary();
     void importBestiary();
+    void writeBestiary();
+    void handleBestiaryRead(const QString& bestiaryFileName);
 
+    // Spellbook
     void openSpellbook();
     void exportSpellbook();
     void importSpellbook();

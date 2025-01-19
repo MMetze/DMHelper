@@ -30,6 +30,7 @@ public:
     QString getRulesetFileName() const;
     QString getLastMonster() const;
     QString getLastSpell() const;
+    QString getLastRuleset() const;
     bool getShowAnimations() const;
     bool getAutoSave() const;
 
@@ -182,6 +183,7 @@ public slots:
 
     void setLastMonster(const QString& lastMonster);
     void setLastSpell(const QString& lastSpell);
+    void setLastRuleset(const QString& lastRuleset);
     void setShowAnimations(bool showAnimations);
     void setAutoSave(bool autoSave);
 
@@ -256,6 +258,7 @@ private:
     QString _spellbookFileName;
     QString _lastMonster;
     QString _lastSpell;
+    QString _lastRuleset;
     QString _quickReferenceFileName;
     QString _calendarFileName;
     QString _equipmentFileName;

@@ -10,6 +10,7 @@ class MonsterAction;
 class Bestiary;
 class TokenEditor;
 class OptionsContainer;
+class QLineEdit;
 class QVBoxLayout;
 
 namespace Ui {
@@ -47,9 +48,6 @@ public slots:
     void dataChanged();
 
 protected slots:
-    void hitDiceChanged();
-    void abilityChanged();
-    void updateAbilityMods();
     void monsterRenamed();
     void handlePublishButton();
 
@@ -61,18 +59,14 @@ protected slots:
     void handleClearImage();
     void handleNextToken();
 
-    void handleChallengeEdited();
-    void handleEditedData();
-
 protected:
     // From QWidget
-    virtual bool eventFilter(QObject *object, QEvent *event) override;
-    virtual void closeEvent(QCloseEvent * event) override;
-    virtual void mousePressEvent(QMouseEvent * event) override;
-    virtual void mouseReleaseEvent(QMouseEvent * event) override;
-    virtual void showEvent(QShowEvent * event) override;
-    virtual void hideEvent(QHideEvent * event) override;
-    virtual void focusOutEvent(QFocusEvent * event) override;
+    virtual bool eventFilter(QObject* object, QEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void showEvent(QShowEvent* event) override;
+    virtual void hideEvent(QHideEvent* event) override;
+    virtual void focusOutEvent(QFocusEvent* event) override;
 
     // From TemplateFrame
     virtual QObject* getFrameObject() override;
@@ -83,18 +77,9 @@ private:
     QString selectToken();
     void setTokenIndex(int index);
     void loadMonsterImage();
-    void storeMonsterData();
 
-    void clearActionWidgets();
-    void clearWidget(QWidget* widget);
-
-    void interpretChallengeRating(const QString& inputCR);
-
-
-
-
-
-
+    void connectSpecialSignals();
+    QLineEdit* getValueEdit(const QString& key);
 
     Ui::BestiaryTemplateDialog *ui;
     QWidget *_uiWidget;

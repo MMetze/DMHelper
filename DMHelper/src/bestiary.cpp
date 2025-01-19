@@ -1,6 +1,7 @@
 #include "bestiary.h"
 #include "monsterclass.h"
 #include "monsterclassv2.h"
+#include "monsterclassv2converter.h"
 #include "monster.h"
 #include "dmversion.h"
 #include <QDomDocument>
@@ -8,6 +9,7 @@
 #include <QDir>
 #include <QPixmap>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
@@ -25,7 +27,9 @@ Bestiary::Bestiary(QObject *parent) :
     _licenseText(),
     _dirty(false),
     _batchProcessing(false),
-    _batchAcknowledge(false)
+    _batchAcknowledge(false),
+    _batchChanges(false),
+    _changesMade(false)
 {
 }
 
@@ -91,6 +95,12 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
         return false;
     }
 
+    if(count() <= 0)
+    {
+        qDebug() << "[Bestiary] Bestiary is empty, no file will be written";
+        return false;
+    }
+
     qDebug() << "[Bestiary] Writing Bestiary to " << targetFilename;
 
     QDomDocument doc("DMHelperBestiaryXML");
@@ -124,66 +134,7 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
     file.close();
     setDirty(false);
 
-    return true;
-}
-
-bool Bestiary::readBestiary(const QString& targetFilename)
-{
-    if(targetFilename.isEmpty())
-    {
-        qDebug() << "[Bestiary] ERROR! No known bestiary found, unable to load bestiary";
-        QMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file is invalid: ") + targetFilename);
-        return false;
-    }
-
-    qDebug() << "[Bestiary] Reading bestiary: " << targetFilename;
-
-    QDomDocument doc("DMHelperBestiaryXML");
-    QFile file(targetFilename);
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "[Bestiary] Reading bestiary file open failed.";
-        QMessageBox::critical(nullptr, QString("Bestiary file open failed"), QString("Unable to open the bestiary file: ") + targetFilename);
-        return false;
-    }
-
-    QTextStream in(&file);
-    in.setEncoding(QStringConverter::Utf8);
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
-
-    file.close();
-
-    if(contentResult == false)
-    {
-        qDebug() << "[Bestiary] Error reading bestiary XML content. The XML is probably not valid.";
-        qDebug() << errMsg << errRow << errColumn;
-        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + targetFilename + QString(", the XML is invalid"));
-        return false;
-    }
-
-    QDomElement root = doc.documentElement();
-    if((root.isNull()) || (root.tagName() != "root"))
-    {
-        qDebug() << "[Bestiary] Bestiary file missing root item";
-        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + targetFilename + QString(", the XML does not have the expected root item."));
-        return false;
-    }
-
-    // Remove the existing bestiary before resetting the directory and filename
-    if(_bestiaryMap.count() > 0)
-    {
-        qDebug() << "[Bestiary]    Unloading previous bestiary";
-        qDeleteAll(_bestiaryMap);
-        _bestiaryMap.clear();
-    }
-
-    QFileInfo fileInfo(targetFilename);
-    setDirectory(fileInfo.absoluteDir());
-    _bestiaryFile = targetFilename;
-    inputXML(root);
+    qDebug() << "[MainWindow] Bestiary file writing complete: " << targetFilename;
 
     return true;
 }
@@ -250,6 +201,13 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         return;
     }
 
+    /*
+    QString stringData;
+    QTextStream textStream(&stringData);
+    bestiaryElement.save(textStream, 4);
+    qDebug() << "DEBUG BESTIARY: " << stringData;
+*/
+
     if(!isVersionIdentical())
     {
         qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion() << ", trying to convert to the new format.";
@@ -272,7 +230,7 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
             importBestiary(bestiaryElement, importFile);
     }
 
-    emit changed();
+    registerChange();
 }
 
 QString Bestiary::getVersion() const
@@ -397,7 +355,7 @@ bool Bestiary::insertMonsterClass(MonsterClassv2* monsterClass)
 
     _bestiaryMap.insert(monsterClass->getStringValue("name"), monsterClass);
     connect(monsterClass, &MonsterClassv2::dirty, this, &Bestiary::registerDirty);
-    emit changed();
+    registerChange();
     setDirty();
     return true;
 }
@@ -414,7 +372,7 @@ void Bestiary::removeMonsterClass(MonsterClassv2* monsterClass)
     _bestiaryMap.remove(monsterClass->getStringValue("name"));
     delete monsterClass;
     setDirty();
-    emit changed();
+    registerChange();
 }
 
 void Bestiary::renameMonster(MonsterClassv2* monsterClass, const QString& newName)
@@ -544,6 +502,103 @@ QStringList Bestiary::findSpecificImages(const QDir& sourceDir, const QStringLis
     return result;
 }
 
+bool Bestiary::readBestiary(const QString& targetFilename)
+{
+    if(targetFilename.isEmpty())
+    {
+        qDebug() << "[Bestiary] ERROR! No known bestiary found, unable to load bestiary: " << targetFilename;
+        QMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file is invalid: ") + targetFilename);
+        return false;
+    }
+
+    if(targetFilename == _bestiaryFile)
+    {
+        qDebug() << "[Bestiary] Requested to reload bestiary file, no action taken: " << targetFilename;
+        return false;
+    }
+
+    if(isDirty())
+    {
+        qDebug() << "[Bestiary] Existing bestiary is unsaved!";
+        QMessageBox::StandardButton result = QMessageBox::critical(nullptr,
+                                                                   QString("Unsaved Bestiary"),
+                                                                   QString("The current bestiary has not been saved. Would you like to save it before loading a new bestiary? If you don't. you may lose monster data!"),
+                                                                   QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::Yes)
+        {
+            QString bestiarySaveFileName = QFileDialog::getSaveFileName(nullptr, QString("Save Bestiary"), QString(), QString("XML files (*.xml)"));
+            if(!bestiarySaveFileName.isEmpty())
+            {
+                if(writeBestiary(bestiarySaveFileName))
+                    qDebug() << "[Bestiary] Bestiary file writing complete: " << bestiarySaveFileName;
+                else
+                    qDebug() << "[Bestiary] ERROR: Bestiary file writing failed: " << bestiarySaveFileName;
+            }
+        }
+    }
+
+    qDebug() << "[Bestiary] Reading bestiary: " << targetFilename;
+#ifdef QT_DEBUG
+    QFileInfo bestiaryInfo(targetFilename);
+    qDebug() << "[Bestiary] Debug full path:" << bestiaryInfo.absoluteFilePath() << ", exists: " << bestiaryInfo.exists() << ", is file: " << bestiaryInfo.isFile();;
+#endif
+
+    QDomDocument doc("DMHelperBestiaryXML");
+    QFile file(targetFilename);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[Bestiary] Reading bestiary file open failed.";
+        QMessageBox::critical(nullptr, QString("Bestiary file open failed"), QString("Unable to open the bestiary file: ") + targetFilename);
+        return false;
+    }
+
+    QTextStream in(&file);
+    in.setEncoding(QStringConverter::Utf8);
+    QString errMsg;
+    int errRow;
+    int errColumn;
+    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+
+    file.close();
+
+    if(contentResult == false)
+    {
+        qDebug() << "[Bestiary] Error reading bestiary XML content. The XML is probably not valid.";
+        qDebug() << errMsg << errRow << errColumn;
+        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + targetFilename + QString(", the XML is invalid"));
+        return false;
+    }
+
+    QDomElement root = doc.documentElement();
+    if((root.isNull()) || (root.tagName() != "root"))
+    {
+        qDebug() << "[Bestiary] Bestiary file missing root item";
+        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + targetFilename + QString(", the XML does not have the expected root item."));
+        return false;
+    }
+
+    startBatchChanges();
+
+    // Remove the existing bestiary before resetting the directory and filename
+    if(_bestiaryMap.count() > 0)
+    {
+        qDebug() << "[Bestiary]    Unloading previous bestiary";
+        qDeleteAll(_bestiaryMap);
+        _bestiaryMap.clear();
+    }
+
+    QFileInfo fileInfo(targetFilename);
+    setDirectory(fileInfo.absoluteDir());
+    _bestiaryFile = targetFilename;
+    inputXML(root);
+
+    finishBatchChanges();
+
+    emit bestiaryLoaded(_bestiaryFile);
+
+    return true;
+}
+
 void Bestiary::startBatchProcessing()
 {
     _batchProcessing = true;
@@ -566,6 +621,30 @@ void Bestiary::setDirty(bool dirty)
     _dirty = dirty;
 }
 
+void Bestiary::startBatchChanges()
+{
+    _batchChanges = true;
+    _changesMade = false;
+}
+
+void Bestiary::finishBatchChanges()
+{
+    if(_batchChanges)
+    {
+        _batchChanges = false;
+        if(_changesMade)
+            emit changed();
+    }
+}
+
+void Bestiary::registerChange()
+{
+    if(_batchChanges)
+        _changesMade = true;
+    else
+        emit changed();
+}
+
 void Bestiary::showMonsterClassWarning(const QString& monsterClass)
 {
     qDebug() << "[Bestiary] ERROR: Requested monster class not found: " << monsterClass;
@@ -583,9 +662,7 @@ void Bestiary::showMonsterClassWarning(const QString& monsterClass)
             msgBox.setEscapeButton(pButtonOK);
             msgBox.exec();
             if (msgBox.clickedButton()==pButtonOKAll)
-            {
                 _batchAcknowledge = true;
-            }
         }
     }
     else
@@ -601,7 +678,7 @@ void Bestiary::loadAndConvertBestiary(const QDomElement& bestiaryElement)
     QDomElement monsterElement = bestiaryElement.firstChildElement(QString("element"));
     while(!monsterElement.isNull())
     {
-        MonsterClassv2* monster = new MonsterClassv2Converter(monsterElement, false);
+        MonsterClassv2* monster = new MonsterClassv2Converter(monsterElement);
         insertMonsterClass(monster);
         monsterElement = monsterElement.nextSiblingElement(QString("element"));
     }

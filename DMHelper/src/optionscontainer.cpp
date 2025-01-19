@@ -21,6 +21,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _spellbookFileName(),
     _lastMonster(),
     _lastSpell(),
+    _lastRuleset(),
     _quickReferenceFileName(),
     _calendarFileName(),
     _equipmentFileName(),
@@ -132,6 +133,11 @@ QString OptionsContainer::getLastMonster() const
 QString OptionsContainer::getLastSpell() const
 {
     return _lastSpell;
+}
+
+QString OptionsContainer::getLastRuleset() const
+{
+    return _lastRuleset;
 }
 
 bool OptionsContainer::getShowAnimations() const
@@ -428,6 +434,8 @@ void OptionsContainer::readSettings()
         getDataDirectory(QString("Images"), true);
     setLastSpell(settings.value("lastSpell", "").toString());
 
+    setLastRuleset(settings.value("lastRuleset", "").toString());
+
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
     setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
     setEquipmentFileName(getSettingsFile(settings, QString("equipment"), QString("equipment.xml")));
@@ -522,6 +530,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("lastMonster", getLastMonster());
     settings.setValue("spellbook", getSpellbookFileName());
     settings.setValue("lastSpell", getLastSpell());
+    settings.setValue("lastRuleset", getLastRuleset());
     settings.setValue("quickReference", getQuickReferenceFileName());
     settings.setValue("calendar", getCalendarFileName());
     settings.setValue("equipment", getEquipmentFileName());
@@ -915,6 +924,14 @@ void OptionsContainer::setLastSpell(const QString& lastSpell)
     if(_lastSpell!= lastSpell)
     {
         _lastSpell = lastSpell;
+    }
+}
+
+void OptionsContainer::setLastRuleset(const QString& lastRuleset)
+{
+    if(_lastRuleset!= lastRuleset)
+    {
+        _lastRuleset = lastRuleset;
     }
 }
 
@@ -1328,6 +1345,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setRulesetFileName(other->_rulesetFileName);
         setLastMonster(other->_lastMonster);
         setLastSpell(other->_lastSpell);
+        setLastRuleset(other->_lastRuleset);
         setShowAnimations(other->_showAnimations);
         setAutoSave(other->_autoSave);
         setFontFamily(other->_fontFamily);

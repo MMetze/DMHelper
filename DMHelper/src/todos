@@ -1,3 +1,7 @@
+Real bugs:
+Fog of War clear area doesn't work!
+Copy character doesn't set Hit Points or AC, REactions not copied (Noble), Monster Type goes to Race instead of Class, Speed?
+
 3.4 todos:
 Why does my bestiary have a whole bunch of License entries and the spellbook has none?
 Generic Bestiary
@@ -9,6 +13,13 @@ Generic Bestiary
         actions, legendary actions, reactions: combine damage_dice and damage_bonus to damage
     Add optional campaign-specific bestiary, what is a "private" entry in the bestiary? --> Nothing???
 Test:
+** Monsters
+    Add monster
+    Remove monster, first, middle and end of list
+    Edit monster then change monster - does it store and save?
+    Edit monster then close dialog - does it store and save?
+    Ruleset default, new campaign, loaded campaign
+** Default ruleset persists
 ** Copy from Monster to Character - does it generally work, check default values (e.g. size)
 ** Check does import/export work, for bestiary and for CHARACTERS
 Generic Spellbook

@@ -9,11 +9,14 @@
 #include <QFileInfo>
 #include <QDebug>
 
+const char* RuleFactory::DEFAULT_RULESET_NAME = "DnD 5e 2014";
+
 RuleFactory* RuleFactory::_instance = nullptr;
 
 RuleFactory::RuleFactory(const QString& rulesetFile, QObject *parent) :
     QObject{parent},
     _rulesetDir(),
+    _defaultBestiary(),
     _rulesetTemplates()
 {
     readRuleset(rulesetFile);
@@ -83,6 +86,11 @@ QList<RuleFactory::RulesetTemplate> RuleFactory::getRulesetTemplates() const
     return _rulesetTemplates.values();
 }
 
+bool RuleFactory::rulesetExists(const QString& rulesetName) const
+{
+    return ((!rulesetName.isEmpty()) && (_rulesetTemplates.contains(rulesetName)));
+}
+
 RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rulesetName) const
 {
     return _rulesetTemplates.value(rulesetName);
@@ -91,6 +99,16 @@ RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rule
 QDir RuleFactory::getRulesetDir() const
 {
     return _rulesetDir;
+}
+
+void RuleFactory::setDefaultBestiary(const QString& bestiaryFile)
+{
+    _defaultBestiary = bestiaryFile;
+}
+
+QString RuleFactory::getDefaultBestiary() const
+{
+    return _defaultBestiary;
 }
 
 void RuleFactory::readRuleset(const QString& rulesetFile)
@@ -141,6 +159,7 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
         newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
         newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
+        newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
 
         _rulesetTemplates.insert(newRuleset._name, newRuleset);
 
