@@ -159,7 +159,7 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
         return;
 
     // Walk through the loaded UI Widget and allocate the appropriate values to the UI elements
-    populateWidget(widget, source, frame, nullptr);
+    populateWidget(widget, source, frame);
 
     QList<QScrollArea*> scrollAreas = widget->findChildren<QScrollArea*>();
     for(auto scrollArea : scrollAreas)
@@ -211,9 +211,10 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
                     }
 
                     QHash<QString, QVariant> hashValue = listEntry.toHash();
+                    QHash<QString, DMHAttribute> hashAttributes = getElementList(keyString);
 
                     // Walk through the loaded UI Widget and allocate the appropriate object values to the UI elements
-                    populateWidget(newWidget, nullptr, frame, &hashValue, i, keyString);
+                    populateWidget(newWidget, nullptr, frame, &hashValue, &hashAttributes, i, keyString);
 
                     newWidget->installEventFilter(this);
                     scrollLayout->addWidget(newWidget);
@@ -224,7 +225,7 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
     }
 }
 
-void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* templateFrame, QHash<QString, QVariant>* hash, int listIndex, const QString& listKey)
+void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* templateFrame, QHash<QString, QVariant>* hash, QHash<QString, DMHAttribute>* hashAttributes, int listIndex, const QString& listKey)
 {
     if((!widget) || (!templateFrame))
         return;
@@ -240,9 +241,16 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         {
             QString valueString;
             if(source)
+            {
                 valueString = source->getValueAsString(keyString);
+            }
             else if(hash)
-                valueString = hash->value(keyString).toString();
+            {
+                if(hashAttributes)
+                    valueString = convertVariantToString(hash->value(keyString), hashAttributes->value(keyString)._type);
+                else
+                    valueString = hash->value(keyString).toString();
+            }
 
             lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
             lineEdit->setCursorPosition(0);
@@ -261,9 +269,16 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         {
             QString valueString;
             if(source)
+            {
                 valueString = source->getValueAsString(keyString);
+            }
             else if(hash)
-                valueString = hash->value(keyString).toString();
+            {
+                if(hashAttributes)
+                    valueString = convertVariantToString(hash->value(keyString), hashAttributes->value(keyString)._type);
+                else
+                    valueString = hash->value(keyString).toString();
+            }
 
             textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
             textEdit->moveCursor(QTextCursor::Start);

@@ -45,7 +45,7 @@ public:
     // UI generation functionality
     static QWidget* loadUITemplate(const QString& templateFile);
     void readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame);
-    void populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
+    void populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QHash<QString, QVariant>* hash = nullptr, QHash<QString, DMHAttribute>* hashAttributes = nullptr, int listIndex = 0, const QString& listKey = QString());
     QWidget* createResourceWidget(const QString& keyString, const QString& widgetString, const QString& templateFile);
 
     // Public members

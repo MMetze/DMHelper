@@ -94,9 +94,10 @@ void TemplateFrame::handleAddResource(QWidget* widget, TemplateObject* templateO
     }
 
     QHash<QString, QVariant> newHash = templateObject->createListEntry(keyString, widgetIndex);
+    QHash<QString, DMHAttribute> hashAttributes = templateObject->getFactory()->getElementList(keyString);
 
     // Walk through the loaded UI Widget and allocate the appropriate values to the UI elements
-    templateObject->getFactory()->populateWidget(newWidget, nullptr, this, &newHash, widgetIndex, keyString);
+    templateObject->getFactory()->populateWidget(newWidget, nullptr, this, &newHash, &hashAttributes, widgetIndex, keyString);
 
     newWidget->installEventFilter(getFrameObject());
     scrollLayout->insertWidget(widgetIndex, newWidget);
