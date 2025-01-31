@@ -6,30 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>435</width>
-    <height>478</height>
+    <width>672</width>
+    <height>742</height>
    </rect>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);
 color: rgb(50, 50, 50);</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_13" stretch="0,0,0,0,1,0,3,3">
-   <property name="spacing">
-    <number>3</number>
-   </property>
-   <property name="leftMargin">
-    <number>3</number>
-   </property>
-   <property name="topMargin">
-    <number>3</number>
-   </property>
-   <property name="rightMargin">
-    <number>3</number>
-   </property>
-   <property name="bottomMargin">
-    <number>3</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_9" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,10">
    <item>
     <widget class="QLineEdit" name="name">
      <property name="sizePolicy">
@@ -54,51 +39,9 @@ color: rgb(50, 50, 50);</string>
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_30">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Race</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="race">
-       <property name="font">
-        <font>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="text">
-        <string>race</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>race</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="label_31">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Class</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QLineEdit" name="class_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_21">
+     <item>
+      <widget class="QLineEdit" name="edtMonsterType">
        <property name="font">
         <font>
          <italic>true</italic>
@@ -108,129 +51,27 @@ color: rgb(50, 50, 50);</string>
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>class</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>class</string>
+        <string>Monster Type</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="label_32">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Level</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QLineEdit" name="level">
+     <item>
+      <widget class="QLineEdit" name="edtMonsterSubType">
        <property name="font">
         <font>
          <italic>true</italic>
         </font>
        </property>
        <property name="text">
-        <string>level</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>level</string>
+        <string>Monster Subtype</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Speed</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="speed">
+     <item>
+      <widget class="QLineEdit" name="edtAlignment">
        <property name="maximumSize">
         <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>speed</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>speed</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QLabel" name="label_13">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Size</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QLineEdit" name="size">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>size</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>size</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
-      <widget class="QLabel" name="label_29">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Alignment</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="5">
-      <widget class="QLineEdit" name="alignment">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
+         <width>150</width>
          <height>16777215</height>
         </size>
        </property>
@@ -245,29 +86,140 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>alignment</string>
        </property>
-       <property name="dmhValue" stdset="0">
-        <string>alignment</string>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="chkLegendary">
+       <property name="text">
+        <string>Legendary</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="chkPrivate">
+       <property name="text">
+        <string>Private</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <widget class="Line" name="line">
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>-1</number>
+     </property>
+     <property name="midLineWidth">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_22">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Speed</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtSpeed">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="font">
         <font>
-         <bold>true</bold>
+         <italic>false</italic>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Speed</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_15">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_13">
+       <property name="text">
+        <string>Size</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtSize">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Size</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_14">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_20">
+     <item>
+      <widget class="QLabel" name="label">
        <property name="text">
         <string>Armor Class</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="armorClass">
+      <widget class="QLineEdit" name="edtArmorClass">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -283,10 +235,7 @@ color: rgb(50, 50, 50);</string>
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>armorClass</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>armorClass</string>
+        <string>Armor Class</string>
        </property>
       </widget>
      </item>
@@ -305,58 +254,15 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <widget class="QLabel" name="label_2">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
        <property name="text">
         <string>Hit Points</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="hitPoints">
+      <widget class="QLineEdit" name="edtAverageHitPoints">
        <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>HP</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>hitPoints</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_10">
-       <property name="text">
-        <string>/</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="maximumHp">
-       <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="maximumSize">
         <size>
@@ -373,13 +279,10 @@ color: rgb(50, 50, 50);</string>
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>Max HP</string>
+        <string>Average Hit Points</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>maximumHp</string>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -399,19 +302,7 @@ color: rgb(50, 50, 50);</string>
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>5</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>5</height>
-      </size>
-     </property>
+    <widget class="Line" name="line_2">
      <property name="styleSheet">
       <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
@@ -440,7 +331,7 @@ color: rgb(50, 50, 50);</string>
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="label_19">
          <property name="font">
           <font>
            <bold>true</bold>
@@ -481,7 +372,7 @@ color: rgb(50, 50, 50);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_11">
+          <widget class="QLabel" name="label_20">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -496,7 +387,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_18">
+          <widget class="QLabel" name="label_21">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -564,7 +455,7 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
-      <widget class="Line" name="line_2">
+      <widget class="Line" name="line_6">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -576,7 +467,7 @@ color: rgb(50, 50, 50);</string>
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="label_22">
          <property name="font">
           <font>
            <bold>true</bold>
@@ -618,7 +509,7 @@ color: rgb(50, 50, 50);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_19">
+          <widget class="QLabel" name="label_23">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -633,7 +524,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_20">
+          <widget class="QLabel" name="label_24">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -701,7 +592,7 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
-      <widget class="Line" name="line_4">
+      <widget class="Line" name="line_7">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -713,7 +604,7 @@ color: rgb(50, 50, 50);</string>
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="label_25">
          <property name="font">
           <font>
            <bold>true</bold>
@@ -755,7 +646,7 @@ color: rgb(50, 50, 50);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_21">
+          <widget class="QLabel" name="label_26">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -770,7 +661,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_22">
+          <widget class="QLabel" name="label_27">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -838,7 +729,7 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
-      <widget class="Line" name="line_5">
+      <widget class="Line" name="line_8">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -850,7 +741,7 @@ color: rgb(50, 50, 50);</string>
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="label_28">
          <property name="font">
           <font>
            <bold>true</bold>
@@ -892,7 +783,7 @@ color: rgb(50, 50, 50);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_23">
+          <widget class="QLabel" name="label_29">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -907,7 +798,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_28">
+          <widget class="QLabel" name="label_30">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -975,7 +866,7 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
-      <widget class="Line" name="line_6">
+      <widget class="Line" name="line_9">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -987,7 +878,7 @@ color: rgb(50, 50, 50);</string>
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="label_31">
          <property name="font">
           <font>
            <bold>true</bold>
@@ -1029,7 +920,7 @@ color: rgb(50, 50, 50);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_25">
+          <widget class="QLabel" name="label_32">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -1044,7 +935,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_24">
+          <widget class="QLabel" name="label_33">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -1112,7 +1003,7 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
-      <widget class="Line" name="line_7">
+      <widget class="Line" name="line_10">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -1124,7 +1015,7 @@ color: rgb(50, 50, 50);</string>
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_34">
          <property name="font">
           <font>
            <bold>true</bold>
@@ -1166,7 +1057,7 @@ color: rgb(50, 50, 50);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_26">
+          <widget class="QLabel" name="label_35">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -1181,7 +1072,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_27">
+          <widget class="QLabel" name="label_36">
            <property name="font">
             <font>
              <bold>true</bold>
@@ -1252,18 +1143,6 @@ color: rgb(50, 50, 50);</string>
    </item>
    <item>
     <widget class="Line" name="line_3">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>5</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>5</height>
-      </size>
-     </property>
      <property name="styleSheet">
       <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
@@ -1282,731 +1161,257 @@ color: rgb(50, 50, 50);</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_19">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_9">
-       <item>
-        <widget class="QLabel" name="label_15">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Spells</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="txtSpellData">
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
-         <property name="dmhValue" stdset="0">
-          <string>spell-data</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="lblSkills">
+       <property name="text">
+        <string>Skills/Saves</string>
+       </property>
+      </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
-       <item>
-        <widget class="QLabel" name="label_16">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Proficiencies</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="txtProficiencies">
-         <property name="dmhValue" stdset="0">
-          <string>proficiencies</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_12">
-       <item>
-        <widget class="QLabel" name="label_33">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Skills</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QScrollArea" name="scrollArea">
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOn</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents_2">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>120</width>
-            <height>455</height>
-           </rect>
-          </property>
-          <layout class="QFormLayout" name="formLayout">
-           <property name="horizontalSpacing">
-            <number>1</number>
-           </property>
-           <property name="verticalSpacing">
-            <number>1</number>
-           </property>
-           <property name="leftMargin">
-            <number>3</number>
-           </property>
-           <property name="topMargin">
-            <number>3</number>
-           </property>
-           <property name="rightMargin">
-            <number>3</number>
-           </property>
-           <property name="bottomMargin">
-            <number>3</number>
-           </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_34">
-             <property name="text">
-              <string>Acrobatics</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="acrobatics">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>acrobatics</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>acrobatics</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_35">
-             <property name="text">
-              <string>Animal Handling</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="animalHandling">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>animalHandling</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>animalHandling</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_36">
-             <property name="text">
-              <string>Arcana</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="arcana">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>arcana</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>arcana</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_37">
-             <property name="text">
-              <string>Athletics</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLineEdit" name="athletics">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>athletics</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>athletics</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_38">
-             <property name="text">
-              <string>Deception</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QLineEdit" name="deception">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>deception</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>deception</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_39">
-             <property name="text">
-              <string>History</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QLineEdit" name="history">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>history</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>history</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_40">
-             <property name="text">
-              <string>Insight</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QLineEdit" name="insight">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>insight</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>insight</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_46">
-             <property name="text">
-              <string>Intimidation</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QLineEdit" name="intimidation">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>intimidation</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>intimidation</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0">
-            <widget class="QLabel" name="label_47">
-             <property name="text">
-              <string>Investigation</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="1">
-            <widget class="QLineEdit" name="investigation">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>investigation</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>investigation</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QLabel" name="label_43">
-             <property name="text">
-              <string>Medicine</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QLineEdit" name="medicine">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>medicine</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>medicine</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0">
-            <widget class="QLabel" name="label_45">
-             <property name="text">
-              <string>Nature</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="1">
-            <widget class="QLineEdit" name="nature">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>nature</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>nature</string>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="0">
-            <widget class="QLabel" name="label_41">
-             <property name="text">
-              <string>Perception</string>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="1">
-            <widget class="QLineEdit" name="perception">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>perception</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>perception</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="0">
-            <widget class="QLabel" name="label_44">
-             <property name="text">
-              <string>Performance</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="1">
-            <widget class="QLineEdit" name="performance">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>performance</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>performance</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="0">
-            <widget class="QLabel" name="label_42">
-             <property name="text">
-              <string>Persuasion</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="1">
-            <widget class="QLineEdit" name="persuasion">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>persuasion</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>persuasion</string>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="0">
-            <widget class="QLabel" name="label_48">
-             <property name="text">
-              <string>Religion</string>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="1">
-            <widget class="QLineEdit" name="religion">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>religion</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>religion</string>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="0">
-            <widget class="QLabel" name="label_51">
-             <property name="text">
-              <string>Sleight of Hand</string>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="1">
-            <widget class="QLineEdit" name="sleightOfHand">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>sleightOfHand</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>sleightOfHand</string>
-             </property>
-            </widget>
-           </item>
-           <item row="16" column="0">
-            <widget class="QLabel" name="label_49">
-             <property name="text">
-              <string>Stealth</string>
-             </property>
-            </widget>
-           </item>
-           <item row="16" column="1">
-            <widget class="QLineEdit" name="stealth">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>stealth</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>stealth</string>
-             </property>
-            </widget>
-           </item>
-           <item row="17" column="0">
-            <widget class="QLabel" name="label_50">
-             <property name="text">
-              <string>Survival</string>
-             </property>
-            </widget>
-           </item>
-           <item row="17" column="1">
-            <widget class="QLineEdit" name="survival">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <italic>true</italic>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>survival</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="dmhValue" stdset="0">
-              <string>survival</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLineEdit" name="edtSkills">
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Skills</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QLabel" name="lblResistances">
+       <property name="text">
+        <string>Condition Immunities</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtConditionImmunities">
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Condition Immunities</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Damage Immunities</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtDamageImmunities">
+       <property name="text">
+        <string>Damage Immunities</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>Damage Resistances</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtDamageResistances">
+       <property name="text">
+        <string>Damage Resistances</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>Damage Vulnerabilities</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtDamageVulnerabilities">
+       <property name="text">
+        <string>Damage Vulnerabilities</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="lblSenses">
+       <property name="text">
+        <string>Senses</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtSenses">
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Senses</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblLanguages">
+       <property name="text">
+        <string>Languages</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtLanguages">
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Languages</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Challenge</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtChallenge">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Challenge</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtXP">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>XP</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>XP</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_4">
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>-1</number>
+     </property>
+     <property name="midLineWidth">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -2017,7 +1422,7 @@ color: rgb(50, 50, 50);</string>
           </font>
          </property>
          <property name="text">
-          <string>Spell Slots</string>
+          <string>Actions</string>
          </property>
         </widget>
        </item>
@@ -2027,18 +1432,18 @@ color: rgb(50, 50, 50);</string>
           <bool>true</bool>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>spellSlots</string>
+          <string>actions</string>
          </property>
          <property name="dmhWidget" stdset="0">
-          <string>spellSlot.ui</string>
+          <string>action.ui</string>
          </property>
          <widget class="QWidget" name="scrollAreaWidgetContents">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>134</width>
-            <height>84</height>
+            <width>319</width>
+            <height>111</height>
            </rect>
           </property>
          </widget>
@@ -2056,38 +1461,113 @@ color: rgb(50, 50, 50);</string>
           </font>
          </property>
          <property name="text">
-          <string>Equipment</string>
+          <string>Reactions</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="txtEquipment">
-         <property name="dmhValue" stdset="0">
-          <string>equipment</string>
+        <widget class="QScrollArea" name="scrollSpellSlots_3">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
+         <property name="dmhValue" stdset="0">
+          <string>reactions</string>
+         </property>
+         <property name="dmhWidget" stdset="0">
+          <string>action.ui</string>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_3">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>319</width>
+            <height>111</height>
+           </rect>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>
      </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_23" stretch="1,1">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_8">
+      <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="label_37">
          <property name="font">
           <font>
            <bold>true</bold>
           </font>
          </property>
          <property name="text">
-          <string>Notes</string>
+          <string>Special Abilities</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="txtNotes">
-         <property name="dmhValue" stdset="0">
-          <string>notes</string>
+        <widget class="QScrollArea" name="scrollSpellSlots_5">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
+         <property name="dmhValue" stdset="0">
+          <string>special_abilities</string>
+         </property>
+         <property name="dmhWidget" stdset="0">
+          <string>action.ui</string>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_5">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>319</width>
+            <height>111</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_12">
+       <item>
+        <widget class="QLabel" name="label_38">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Legendary Actions</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QScrollArea" name="scrollSpellSlots_4">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>legendary_actions</string>
+         </property>
+         <property name="dmhWidget" stdset="0">
+          <string>action.ui</string>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>319</width>
+            <height>111</height>
+           </rect>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -2098,38 +1578,7 @@ color: rgb(50, 50, 50);</string>
  </widget>
  <tabstops>
   <tabstop>name</tabstop>
-  <tabstop>race</tabstop>
-  <tabstop>class_2</tabstop>
-  <tabstop>level</tabstop>
-  <tabstop>alignment</tabstop>
-  <tabstop>speed</tabstop>
-  <tabstop>size</tabstop>
-  <tabstop>armorClass</tabstop>
-  <tabstop>hitPoints</tabstop>
-  <tabstop>maximumHp</tabstop>
-  <tabstop>strength</tabstop>
-  <tabstop>strengthMod</tabstop>
-  <tabstop>strengthSave</tabstop>
-  <tabstop>dexterity</tabstop>
-  <tabstop>dexterityMod</tabstop>
-  <tabstop>dexteritySave</tabstop>
-  <tabstop>constitution</tabstop>
-  <tabstop>constitutionMod</tabstop>
-  <tabstop>constitutionSave</tabstop>
-  <tabstop>intelligence</tabstop>
-  <tabstop>intelligenceMod</tabstop>
-  <tabstop>intelligenceSave</tabstop>
-  <tabstop>wisdom</tabstop>
-  <tabstop>wisdomMod</tabstop>
-  <tabstop>wisdomSave</tabstop>
-  <tabstop>charisma</tabstop>
-  <tabstop>charismaMod</tabstop>
-  <tabstop>charismaSave</tabstop>
-  <tabstop>txtSpellData</tabstop>
-  <tabstop>txtProficiencies</tabstop>
-  <tabstop>txtEquipment</tabstop>
   <tabstop>scrollSpellSlots</tabstop>
-  <tabstop>txtNotes</tabstop>
  </tabstops>
  <resources/>
  <connections/>

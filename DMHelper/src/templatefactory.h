@@ -46,7 +46,7 @@ public:
     static QWidget* loadUITemplate(const QString& templateFile);
     void readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame);
     void populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
-    QWidget* createResourceWidget(const QString& keyString, const QString& widgetString);
+    QWidget* createResourceWidget(const QString& keyString, const QString& widgetString, const QString& templateFile);
 
     // Public members
     bool isEmpty() const;
@@ -67,6 +67,7 @@ public:
     QString getDefaultValue(const QString& keyString);
 
     TemplateObject* setDefaultValues(TemplateObject* object);
+    static QString getAbsoluteTemplateFile(const QString& templateFile);
 
 protected:
     void loadTemplate(const QString& templateFile);

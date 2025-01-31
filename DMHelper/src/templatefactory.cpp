@@ -117,52 +117,25 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
         return result;
     }
 
-    // Try our best to load the given character template file
-    QString appFile;
-    if(QFileInfo(templateFile).isRelative())
+    if(!QFileInfo::exists(templateFile))
     {
-        QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
-        appFile = relativeDir.absoluteFilePath(templateFile);
-        if(!QFileInfo::exists(appFile))
-        {
-#ifdef Q_OS_MAC
-            QDir fileDirPath(QCoreApplication::applicationDirPath());
-            fileDirPath.cdUp();
-            appFile = fileDirPath.path() + QString("/Resources/") + templateFile;
-#else
-            QDir fileDirPath(QCoreApplication::applicationDirPath());
-            appFile = fileDirPath.path() + QString("/resources/") + templateFile;
-#endif
-            if(!QFileInfo::exists(appFile))
-            {
-                qDebug() << "[RuleFactory::loadUITemplate] ERROR: Relative UI Template File not found: " << templateFile;
-                return result;
-            }
-        }
-    }
-    else
-    {
-        appFile = templateFile;
-        if(!QFileInfo::exists(appFile))
-        {
-            qDebug() << "[RuleFactory::loadUITemplate] ERROR: Absolute Character UI Template File not found: " << templateFile;
-            return result;
-        }
+        qDebug() << "[RuleFactory::loadUITemplate] ERROR: Relative UI Template File not found: " << templateFile;
+        return result;
     }
 
     QUiLoader loader;
-    QFile file(appFile);
+    QFile file(templateFile);
     file.open(QFile::ReadOnly);
     result = loader.load(&file);
     file.close();
 
     if(!result)
     {
-        qDebug() << "[RuleFactory::loadUITemplate] ERROR: UI Template File " << appFile << " could not be loaded: " << loader.errorString();
+        qDebug() << "[RuleFactory::loadUITemplate] ERROR: UI Template File " << templateFile << " could not be loaded: " << loader.errorString();
         return result;
     }
 
-    qDebug() << "[RuleFactory::loadUITemplate] UI Template File " << appFile << " loaded.";
+    qDebug() << "[RuleFactory::loadUITemplate] UI Template File " << templateFile << " loaded.";
 
     // Activate hyperlinks for any included text edits
     QList<QTextEdit*> textEdits = result->findChildren<QTextEdit*>();
@@ -230,7 +203,7 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
                     if(listEntry.isNull())
                         continue;
 
-                    QWidget* newWidget = createResourceWidget(keyString, widgetString);
+                    QWidget* newWidget = createResourceWidget(keyString, widgetString, frame->getUIFilename());
                     if(!newWidget)
                     {
                         qDebug() << "[TemplateFactory] ERROR: Unable to create the object widget: " << widgetString << ", for scroll area: " << keyString;
@@ -272,6 +245,7 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 valueString = hash->value(keyString).toString();
 
             lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
+            lineEdit->setCursorPosition(0);
             connect(lineEdit, &QLineEdit::editingFinished, [templateFrame, source, lineEdit](){templateFrame->handleEditBoxChange(lineEdit, source, lineEdit->text());});
         }
     }
@@ -292,7 +266,7 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 valueString = hash->value(keyString).toString();
 
             textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
-            //if(!valueString.isEmpty())
+            textEdit->moveCursor(QTextCursor::Start);
             connect(textEdit, &QTextEdit::textChanged, [templateFrame, source, textEdit](){templateFrame->handleEditBoxChange(textEdit, source, textEdit->toHtml());});
         }
     }
@@ -337,11 +311,12 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
     }
 }
 
-QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const QString& widgetString)
+QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const QString& widgetString, const QString& templateFile)
 {
     if(widgetString.isEmpty())
         return createResourceWidgetInternal(keyString);
 
+/*
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
@@ -350,6 +325,14 @@ QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const Q
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     QString appFile = fileDirPath.path() + QString("/resources/ui/") + widgetString;
 #endif
+*/
+    QString appFile;
+    if(!templateFile.isEmpty())
+    {
+        QFileInfo fileInfo(templateFile);
+        appFile = fileInfo.absolutePath();
+        appFile += QString("/") + widgetString;
+    }
 
     if(QFileInfo::exists(appFile))
     {
@@ -447,16 +430,11 @@ TemplateObject* TemplateFactory::setDefaultValues(TemplateObject* object)
     return object;
 }
 
-void TemplateFactory::loadTemplate(const QString& templateFile)
+QString TemplateFactory::getAbsoluteTemplateFile(const QString& templateFile)
 {
-    if(!RuleFactory::Instance())
-    {
-        qDebug() << "[TemplateFactory] ERROR: No rule factory exists, cannot load the template file: " << templateFile;
-        return;
-    }
-
     // Try our best to load the given template file
     QString appFile;
+
     if(QFileInfo(templateFile).isRelative())
     {
         QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
@@ -471,29 +449,43 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
             QDir fileDirPath(QCoreApplication::applicationDirPath());
             appFile = fileDirPath.path() + QString("/resources/") + templateFile;
 #endif
-            if(!QFileInfo::exists(appFile))
-            {
-                qDebug() << "[TemplateFactory] ERROR: Relative Template File not found: " << templateFile;
-                return;
-            }
         }
     }
     else
     {
         appFile = templateFile;
-        if(!QFileInfo::exists(appFile))
-        {
-            qDebug() << "[TemplateFactory] ERROR: Absolute Template File not found: " << templateFile;
-            return;
-        }
+    }
+
+    if(!QFileInfo::exists(appFile))
+    {
+        qDebug() << "[TemplateFactory] ERROR: Template File not found: " << templateFile;
+        return QString();
+    }
+
+    return appFile;
+}
+
+void TemplateFactory::loadTemplate(const QString& templateFile)
+{
+    if(!RuleFactory::Instance())
+    {
+        qDebug() << "[TemplateFactory] ERROR: No rule factory exists, cannot load the template file: " << templateFile;
+        return;
+    }
+
+    QString absoluteTemplateFile = getAbsoluteTemplateFile(templateFile);
+    if(absoluteTemplateFile.isEmpty())
+    {
+        qDebug() << "[TemplateFactory] ERROR: Unable to load the template file: " << templateFile;
+        return;
     }
 
     QDomDocument doc;
-    QFile file(appFile);
+    QFile file(absoluteTemplateFile);
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[TemplateFactory] Template file open failed: " << appFile;
-        QMessageBox::critical(nullptr, QString("Template file open failed"), QString("Unable to open the template file: ") + appFile);
+        qDebug() << "[TemplateFactory] Template file open failed: " << absoluteTemplateFile;
+        QMessageBox::critical(nullptr, QString("Template file open failed"), QString("Unable to open the template file: ") + absoluteTemplateFile);
         return;
     }
 
@@ -508,9 +500,9 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[TemplateFactory] Error reading template XML content. The XML is probably not valid: " << appFile;
+        qDebug() << "[TemplateFactory] Error reading template XML content. The XML is probably not valid: " << absoluteTemplateFile;
         qDebug() << errMsg << errRow << errColumn;
-        QMessageBox::critical(nullptr, QString("Template invalid"), QString("Unable to read the template: ") + appFile + QString(", the XML is invalid"));
+        QMessageBox::critical(nullptr, QString("Template invalid"), QString("Unable to read the template: ") + absoluteTemplateFile + QString(", the XML is invalid"));
         return;
     }
 
@@ -521,8 +513,8 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != TEMPLATEVALUES[TemplateType_template]))
     {
-        qDebug() << "[TemplateFactory] Ttemplate missing root item: " << appFile;
-        QMessageBox::critical(nullptr, QString("Template file invalid"), QString("Unable to read the template: ") + appFile + QString(", the XML does not have the expected root item."));
+        qDebug() << "[TemplateFactory] Ttemplate missing root item: " << absoluteTemplateFile;
+        QMessageBox::critical(nullptr, QString("Template file invalid"), QString("Unable to read the template: ") + absoluteTemplateFile + QString(", the XML does not have the expected root item."));
         return;
     }
 

@@ -51,7 +51,14 @@ BestiaryTemplateDialog::~BestiaryTemplateDialog()
 
 void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
 {
-    QWidget* newWidget = TemplateFactory::loadUITemplate(templateFile);
+    QString absoluteTemplateFile = TemplateFactory::getAbsoluteTemplateFile(templateFile);
+    if(absoluteTemplateFile.isEmpty())
+    {
+        qDebug() << "[BestiaryTemplateDialog] ERROR: UI Template File " << templateFile << " could not be found!";
+        return;
+    }
+
+    QWidget* newWidget = TemplateFactory::loadUITemplate(absoluteTemplateFile);
     if(!newWidget)
     {
         qDebug() << "[BestiaryTemplateDialog] ERROR: UI Template File " << templateFile << " could not be loaded!";
@@ -63,6 +70,7 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
         delete ui->scrollAreaWidgetContents->layout();
 
     _uiWidget = newWidget;
+    _uiFilename = absoluteTemplateFile;
 
     connectSpecialSignals();
 

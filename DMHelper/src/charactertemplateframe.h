@@ -57,8 +57,6 @@ private slots:
     void importHeroForge();
     void updateCharacterName();
 
-//    void handleResourceChanged(QFrame* resourceFrame);
-
 private:
     void loadCharacterImage();
     void enableDndBeyondSync(bool enabled);

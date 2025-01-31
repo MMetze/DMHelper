@@ -91,7 +91,14 @@ void CharacterTemplateFrame::setHeroForgeToken(const QString& token)
 
 void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile)
 {
-    QWidget* newWidget = TemplateFactory::loadUITemplate(templateFile);
+    QString absoluteTemplateFile = TemplateFactory::getAbsoluteTemplateFile(templateFile);
+    if(absoluteTemplateFile.isEmpty())
+    {
+        qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File " << templateFile << " could not be found!";
+        return;
+    }
+
+    QWidget* newWidget = TemplateFactory::loadUITemplate(absoluteTemplateFile);
     if(!newWidget)
     {
         qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File " << templateFile << " could not be loaded!";
@@ -106,6 +113,7 @@ void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile
         delete ui->scrollAreaWidgetContents->layout();
 
     _uiWidget = newWidget;
+    _uiFilename = absoluteTemplateFile;
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);

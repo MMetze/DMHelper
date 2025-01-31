@@ -656,6 +656,7 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/action.ui \
     resources/ui/character2e.ui \
     resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \

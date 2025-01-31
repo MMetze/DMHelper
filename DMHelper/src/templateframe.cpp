@@ -6,7 +6,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
-TemplateFrame::TemplateFrame()
+TemplateFrame::TemplateFrame() :
+    _uiFilename()
 {
 }
 
@@ -85,7 +86,7 @@ void TemplateFrame::handleAddResource(QWidget* widget, TemplateObject* templateO
     QString keyString = scrollArea->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
     QString widgetString = scrollArea->property(TemplateFactory::TEMPLATE_WIDGET).toString();
 
-    QWidget* newWidget = templateObject->getFactory()->createResourceWidget(keyString, widgetString);
+    QWidget* newWidget = templateObject->getFactory()->createResourceWidget(keyString, widgetString, getUIFilename());
     if(!newWidget)
     {
         qDebug() << "[TemplateFrame] ERROR: Unable to create the widget: " << widgetString << ", for scroll area: " << keyString;
@@ -136,3 +137,7 @@ void TemplateFrame::handleRemoveResource(QWidget* widget, TemplateObject* templa
     widget->deleteLater();
 }
 
+QString TemplateFrame::getUIFilename() const
+{
+    return _uiFilename;
+}

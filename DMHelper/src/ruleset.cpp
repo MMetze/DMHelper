@@ -58,8 +58,8 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
 
     _characterDataFile = element.attribute("characterData", DEFAULT_CHARACTER_DATA);
     _characterUIFile = element.attribute("characterUI", DEFAULT_CHARACTER_UI);
-    _characterDataFile = element.attribute("monsterData", DEFAULT_MONSTER_DATA);
-    _characterUIFile = element.attribute("monsterUI", DEFAULT_MONSTER_UI);
+    _monsterDataFile = element.attribute("monsterData", DEFAULT_MONSTER_DATA);
+    _monsterUIFile = element.attribute("monsterUI", DEFAULT_MONSTER_UI);
     _combatantDoneCheckbox = static_cast<bool>(element.attribute("done", QString::number(DEFAULT_CHARACTER_DONE_CHECKBOX)).toInt());
 
     _bestiaryFile = element.attribute("bestiary");
