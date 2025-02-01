@@ -47,11 +47,11 @@ color: rgb(50, 50, 50);</string>
          <italic>true</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
        <property name="text">
         <string>Monster Type</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>type</string>
        </property>
       </widget>
      </item>
@@ -65,25 +65,22 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>Monster Subtype</string>
        </property>
+       <property name="dmhValue" stdset="0">
+        <string>subtype</string>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="edtAlignment">
-       <property name="maximumSize">
-        <size>
-         <width>150</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="font">
         <font>
          <italic>true</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
        <property name="text">
+        <string>alignment</string>
+       </property>
+       <property name="dmhValue" stdset="0">
         <string>alignment</string>
        </property>
       </widget>
@@ -93,12 +90,18 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>Legendary</string>
        </property>
+       <property name="dmhValue" stdset="0">
+        <string>legendary</string>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="chkPrivate">
        <property name="text">
         <string>Private</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>private</string>
        </property>
       </widget>
      </item>
@@ -134,22 +137,16 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <widget class="QLineEdit" name="edtSpeed">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="font">
         <font>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Speed</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>speed</string>
        </property>
       </widget>
      </item>
@@ -157,6 +154,9 @@ color: rgb(50, 50, 50);</string>
       <spacer name="horizontalSpacer_15">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -175,22 +175,16 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <widget class="QLineEdit" name="edtSize">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="font">
         <font>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Size</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>size</string>
        </property>
       </widget>
      </item>
@@ -198,6 +192,9 @@ color: rgb(50, 50, 50);</string>
       <spacer name="horizontalSpacer_14">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -210,7 +207,7 @@ color: rgb(50, 50, 50);</string>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_20">
+    <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="0,1,0,0,1,0,0,1,0">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -220,22 +217,19 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <widget class="QLineEdit" name="edtArmorClass">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="font">
         <font>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Armor Class</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>armor_class</string>
        </property>
       </widget>
      </item>
@@ -243,6 +237,53 @@ color: rgb(50, 50, 50);</string>
       <spacer name="horizontalSpacer_13">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Hit Dice</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edtHitDice">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="font">
+        <font>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>Hit Dice</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>hit_dice</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_9">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -255,7 +296,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Hit Points</string>
+        <string>Avg Hit Points</string>
        </property>
       </widget>
      </item>
@@ -264,25 +305,19 @@ color: rgb(50, 50, 50);</string>
        <property name="enabled">
         <bool>false</bool>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="font">
         <font>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Average Hit Points</string>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>hit_points</string>
        </property>
       </widget>
      </item>
@@ -290,6 +325,9 @@ color: rgb(50, 50, 50);</string>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -352,9 +390,6 @@ color: rgb(50, 50, 50);</string>
            <pointsize>12</pointsize>
           </font>
          </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
          <property name="text">
           <string>+0</string>
          </property>
@@ -415,9 +450,6 @@ color: rgb(50, 50, 50);</string>
              <italic>false</italic>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
             <string>strength</string>
            </property>
@@ -435,9 +467,6 @@ color: rgb(50, 50, 50);</string>
             <font>
              <italic>false</italic>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
            </property>
            <property name="text">
             <string>strength</string>
@@ -488,9 +517,6 @@ color: rgb(50, 50, 50);</string>
            <pointsize>12</pointsize>
            <italic>false</italic>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="text">
           <string>+0</string>
@@ -552,9 +578,6 @@ color: rgb(50, 50, 50);</string>
              <italic>false</italic>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
             <string>dexterity</string>
            </property>
@@ -572,9 +595,6 @@ color: rgb(50, 50, 50);</string>
             <font>
              <italic>false</italic>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
            </property>
            <property name="text">
             <string>dexterity</string>
@@ -625,9 +645,6 @@ color: rgb(50, 50, 50);</string>
            <pointsize>12</pointsize>
            <italic>false</italic>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="text">
           <string>+0</string>
@@ -689,9 +706,6 @@ color: rgb(50, 50, 50);</string>
              <italic>false</italic>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
             <string>constitution</string>
            </property>
@@ -709,9 +723,6 @@ color: rgb(50, 50, 50);</string>
             <font>
              <italic>false</italic>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
            </property>
            <property name="text">
             <string>constitution</string>
@@ -762,9 +773,6 @@ color: rgb(50, 50, 50);</string>
            <pointsize>12</pointsize>
            <italic>false</italic>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="text">
           <string>+0</string>
@@ -826,9 +834,6 @@ color: rgb(50, 50, 50);</string>
              <italic>false</italic>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
             <string>intelligence</string>
            </property>
@@ -846,9 +851,6 @@ color: rgb(50, 50, 50);</string>
             <font>
              <italic>false</italic>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
            </property>
            <property name="text">
             <string>intelligence</string>
@@ -899,9 +901,6 @@ color: rgb(50, 50, 50);</string>
            <pointsize>12</pointsize>
            <italic>false</italic>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="text">
           <string>+0</string>
@@ -963,9 +962,6 @@ color: rgb(50, 50, 50);</string>
              <italic>false</italic>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
             <string>wisdom</string>
            </property>
@@ -983,9 +979,6 @@ color: rgb(50, 50, 50);</string>
             <font>
              <italic>false</italic>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
            </property>
            <property name="text">
             <string>wisdom</string>
@@ -1036,9 +1029,6 @@ color: rgb(50, 50, 50);</string>
            <pointsize>12</pointsize>
            <italic>false</italic>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="text">
           <string>+0</string>
@@ -1100,9 +1090,6 @@ color: rgb(50, 50, 50);</string>
              <italic>false</italic>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
             <string>charisma</string>
            </property>
@@ -1120,9 +1107,6 @@ color: rgb(50, 50, 50);</string>
             <font>
              <italic>false</italic>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
            </property>
            <property name="text">
             <string>charisma</string>
@@ -1176,14 +1160,11 @@ color: rgb(50, 50, 50);</string>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Skills</string>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="dmhValue" stdset="0">
+        <string>skills</string>
        </property>
       </widget>
      </item>
@@ -1205,11 +1186,11 @@ color: rgb(50, 50, 50);</string>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Condition Immunities</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>condition_immunities</string>
        </property>
       </widget>
      </item>
@@ -1224,6 +1205,9 @@ color: rgb(50, 50, 50);</string>
       <widget class="QLineEdit" name="edtDamageImmunities">
        <property name="text">
         <string>Damage Immunities</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>damage_immunities</string>
        </property>
       </widget>
      </item>
@@ -1243,6 +1227,9 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>Damage Resistances</string>
        </property>
+       <property name="dmhValue" stdset="0">
+        <string>damage_resistances</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -1256,6 +1243,9 @@ color: rgb(50, 50, 50);</string>
       <widget class="QLineEdit" name="edtDamageVulnerabilities">
        <property name="text">
         <string>Damage Vulnerabilities</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>damage_vulnerabilities</string>
        </property>
       </widget>
      </item>
@@ -1277,11 +1267,11 @@ color: rgb(50, 50, 50);</string>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Senses</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>senses</string>
        </property>
       </widget>
      </item>
@@ -1299,11 +1289,11 @@ color: rgb(50, 50, 50);</string>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Languages</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>languages</string>
        </property>
       </widget>
      </item>
@@ -1314,7 +1304,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="QLabel" name="label_16">
        <property name="text">
-        <string>Challenge</string>
+        <string>Challenge Rating:</string>
        </property>
       </widget>
      </item>
@@ -1331,19 +1321,19 @@ color: rgb(50, 50, 50);</string>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Challenge</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>challenge_rating</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="edtXP">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
        <property name="maximumSize">
         <size>
          <width>100</width>
@@ -1355,17 +1345,14 @@ color: rgb(50, 50, 50);</string>
          <italic>false</italic>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>XP</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignCenter</set>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="dmhValue" stdset="0">
+        <string>experience</string>
        </property>
       </widget>
      </item>

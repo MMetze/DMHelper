@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>335</width>
-    <height>111</height>
+    <height>96</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -16,22 +16,25 @@ color: rgb(50, 50, 50);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>3</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,0,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="6,0,1,2">
+     <property name="spacing">
+      <number>3</number>
+     </property>
      <item>
       <widget class="QLineEdit" name="name">
        <property name="sizePolicy">
@@ -76,6 +79,9 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>atk</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
        <property name="dmhValue" stdset="0">
         <string>attack_bonus</string>
        </property>
@@ -96,6 +102,9 @@ color: rgb(50, 50, 50);</string>
        </property>
        <property name="text">
         <string>damage</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
        <property name="dmhValue" stdset="0">
         <string>damage</string>

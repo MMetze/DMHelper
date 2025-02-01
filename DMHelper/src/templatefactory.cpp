@@ -316,7 +316,7 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
             connect(layout, &TemplateResourceLayout::addResource, [templateFrame, source, widget](){ templateFrame->handleAddResource(widget, source); });
             connect(layout, &TemplateResourceLayout::removeResource, [templateFrame, source, widget](){ templateFrame->handleRemoveResource(widget, source); });
         }
-        else // character or nulls
+        else
         {
             layout = new TemplateResourceLayout(keyString, valuePair);
             connect(layout, &TemplateResourceLayout::resourceValueChanged, [source](const QString& key, const ResourcePair& value){ source->setResourceValue(key, value); });
