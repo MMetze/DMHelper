@@ -168,5 +168,5 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
 
     _rulesetDir = QFileInfo(rulesetFile).absolutePath();
 
-    qDebug() << "[RuleFActory] Completed reading ruleset.";
+    qDebug() << "[RuleFactory] Completed reading ruleset. Read " << _rulesetTemplates.size() << " rulesets.";
 }

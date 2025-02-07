@@ -1,3 +1,8 @@
+1) There are two ruleset files, the app's one and the user's one (optional)
+2) The user can decide the location for both of them in settings
+3) The app will check at startup and overwrite it's one if the default file with the installation is newer than the app's file
+Should be enough already, compatible with what is already there, and I can fix the current problem you have first, then add the user ruleset file
+
 Real bugs:
 Fog of War clear area doesn't work!
 Copy character doesn't set Hit Points or AC, REactions not copied (Noble), Monster Type goes to Race instead of Class, Speed?
