@@ -44,9 +44,10 @@ public:
 
     // UI generation functionality
     static QWidget* loadUITemplate(const QString& templateFile);
-    void readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame);
+    void readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QObject* filterObject);
     void populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QHash<QString, QVariant>* hash = nullptr, QHash<QString, DMHAttribute>* hashAttributes = nullptr, int listIndex = 0, const QString& listKey = QString());
     QWidget* createResourceWidget(const QString& keyString, const QString& widgetString, const QString& templateFile);
+    void disconnectWidget(QWidget* widget);
 
     // Public members
     bool isEmpty() const;

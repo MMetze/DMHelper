@@ -153,7 +153,7 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
     return result;
 }
 
-void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame)
+void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, TemplateFrame* frame, QObject* filterObject)
 {
     if((!widget) || (!frame))
         return;
@@ -191,6 +191,7 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
             QFrame* scrollWidget = new QFrame;
             QVBoxLayout* scrollLayout = new QVBoxLayout;
             scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+            scrollLayout->setContentsMargins(0, 0, 0, 0);
             scrollWidget->setLayout(scrollLayout);
             scrollArea->setWidget(scrollWidget);
 
@@ -214,20 +215,20 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
                     QHash<QString, DMHAttribute> hashAttributes = getElementList(keyString);
 
                     // Walk through the loaded UI Widget and allocate the appropriate object values to the UI elements
-                    populateWidget(newWidget, nullptr, frame, &hashValue, &hashAttributes, i, keyString);
+                    populateWidget(newWidget, source, frame, &hashValue, &hashAttributes, i, keyString);
 
-                    newWidget->installEventFilter(this);
+                    newWidget->installEventFilter(filterObject);
                     scrollLayout->addWidget(newWidget);
                 }
             }
-            scrollArea->installEventFilter(this);
+            scrollArea->installEventFilter(filterObject);
         }
     }
 }
 
 void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, TemplateFrame* templateFrame, QHash<QString, QVariant>* hash, QHash<QString, DMHAttribute>* hashAttributes, int listIndex, const QString& listKey)
 {
-    if((!widget) || (!templateFrame))
+    if((!widget) || (!templateFrame) || (!source))
         return;
 
     QList<QLineEdit*> lineEdits = widget->findChildren<QLineEdit*>();
@@ -240,16 +241,16 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         if(!keyString.isEmpty())
         {
             QString valueString;
-            if(source)
-            {
-                valueString = source->getValueAsString(keyString);
-            }
-            else if(hash)
+            if(hash)
             {
                 if(hashAttributes)
                     valueString = convertVariantToString(hash->value(keyString), hashAttributes->value(keyString)._type);
                 else
                     valueString = hash->value(keyString).toString();
+            }
+            else
+            {
+                valueString = source->getValueAsString(keyString);
             }
 
             lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
@@ -268,16 +269,16 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         if(!keyString.isEmpty())
         {
             QString valueString;
-            if(source)
-            {
-                valueString = source->getValueAsString(keyString);
-            }
-            else if(hash)
+            if(hash)
             {
                 if(hashAttributes)
                     valueString = convertVariantToString(hash->value(keyString), hashAttributes->value(keyString)._type);
                 else
                     valueString = hash->value(keyString).toString();
+            }
+            else
+            {
+                valueString = source->getValueAsString(keyString);
             }
 
             textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
@@ -303,10 +304,10 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
             continue;
 
         ResourcePair valuePair;
-        if(source)
-            valuePair = source->getResourceValue(keyString);
-        else if(hash)
+        if(hash)
             valuePair = hash->value(keyString).value<ResourcePair>();
+        else
+            valuePair = source->getResourceValue(keyString);
 
         TemplateResourceLayout* layout = nullptr;
         if(hash)
@@ -357,6 +358,27 @@ QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const Q
     {
         qDebug() << "[TemplateFactory] ERROR: UI Widget Template File not found: " << appFile << ", for the widget name: " << widgetString;
         return createResourceWidgetInternal(keyString);
+    }
+}
+
+void TemplateFactory::disconnectWidget(QWidget* widget)
+{
+    if(!widget)
+        return;
+
+    // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
+    QList<QLineEdit*> lineEdits = widget->findChildren<QLineEdit*>();
+    for(auto lineEdit : lineEdits)
+    {
+        if(lineEdit)
+            disconnect(lineEdit, &QLineEdit::editingFinished, nullptr, nullptr);
+    }
+
+    QList<QTextEdit*> textEdits = widget->findChildren<QTextEdit*>();
+    for(auto textEdit : textEdits)
+    {
+        if(textEdit)
+            disconnect(textEdit, &QTextEdit::textChanged, nullptr, nullptr);
     }
 }
 

@@ -1414,7 +1414,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
-        <widget class="QScrollArea" name="scrollSpellSlots">
+        <widget class="QScrollArea" name="scrollActions">
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -1453,7 +1453,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
-        <widget class="QScrollArea" name="scrollSpellSlots_3">
+        <widget class="QScrollArea" name="scrollReactions">
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -1496,7 +1496,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
-        <widget class="QScrollArea" name="scrollSpellSlots_5">
+        <widget class="QScrollArea" name="scrollSpecialAbilities">
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -1535,7 +1535,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
-        <widget class="QScrollArea" name="scrollSpellSlots_4">
+        <widget class="QScrollArea" name="scrollLegendaryActions">
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -1565,7 +1565,7 @@ color: rgb(50, 50, 50);</string>
  </widget>
  <tabstops>
   <tabstop>name</tabstop>
-  <tabstop>scrollSpellSlots</tabstop>
+  <tabstop>scrollActions</tabstop>
  </tabstops>
  <resources/>
  <connections/>

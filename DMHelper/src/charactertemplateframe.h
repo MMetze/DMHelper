@@ -49,7 +49,6 @@ protected:
     virtual QObject* getFrameObject() override;
 
 private slots:
-    void disconnectTemplate();
     void readCharacterData();
     void handlePublishClicked();
     void editCharacterIcon();

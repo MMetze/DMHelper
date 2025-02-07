@@ -80,7 +80,7 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
     ui->scrollAreaWidgetContents->setLayout(layout);
 
     if(_monster)
-        MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this);
+        MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this, this);
 }
 
 MonsterClassv2* BestiaryTemplateDialog::getMonster() const
@@ -98,15 +98,18 @@ void BestiaryTemplateDialog::setOptions(OptionsContainer* options)
 
 void BestiaryTemplateDialog::setMonster(MonsterClassv2* monster, bool edit)
 {
-    if((!monster) || (_monster == monster))
+    if((!monster) || (_monster == monster) || (!MonsterFactory::Instance()))
         return;
 
     qDebug() << "[BestiaryTemplateDialog] Set Monster to " << monster->getStringValue("name");
 
+    if(_monster)
+        MonsterFactory::Instance()->disconnectWidget(_uiWidget);
+
     _monster = monster;
     _edit = edit;
 
-    MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this);
+    MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this, this);
 
     if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
         ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));

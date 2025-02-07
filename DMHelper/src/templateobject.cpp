@@ -291,6 +291,13 @@ void TemplateObject::setListValue(const QString& key, int index, const QString& 
     setValue(key, QVariant(list));
 }
 
+void TemplateObject::setListValue(const QString& key, int index, const QString& listEntryKey, const QString& listEntryValue)
+{
+    QHash<QString, DMHAttribute> listAttributes = _factory->getElementList(key);
+    DMHAttribute attribute = listAttributes.value(listEntryKey);
+    setListValue(key, index, listEntryKey, TemplateFactory::convertStringToVariant(listEntryValue, attribute._type));
+}
+
 QHash<QString, QVariant> TemplateObject::createListEntry(const QString& key, int index)
 {
     if(!_factory->hasElementList(key))

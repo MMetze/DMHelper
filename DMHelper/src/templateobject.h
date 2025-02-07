@@ -39,6 +39,7 @@ public:
     virtual void setDiceValue(const QString& key, const Dice& value);
     virtual void setResourceValue(const QString& key, const ResourcePair& value);
     virtual void setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue);
+    virtual void setListValue(const QString& key, int index, const QString& listEntryKey, const QString& listEntryValue);
     virtual QHash<QString, QVariant> createListEntry(const QString& key, int index);
     virtual void insertListEntry(const QString& key, int index, QHash<QString, QVariant> listEntryValues);
     virtual void prependListEntry(const QString& key, QHash<QString, QVariant> listEntryValues);

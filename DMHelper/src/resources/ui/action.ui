@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CharacterFrameWidget</class>
- <widget class="QFrame" name="CharacterFrameWidget">
+ <class>ActionFrameWidget</class>
+ <widget class="QFrame" name="ActionFrameWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>335</width>
-    <height>96</height>
+    <height>98</height>
    </rect>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);
 color: rgb(50, 50, 50);</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::Box</enum>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

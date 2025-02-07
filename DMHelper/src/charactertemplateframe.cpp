@@ -73,11 +73,11 @@ void CharacterTemplateFrame::deactivateObject()
 
 void CharacterTemplateFrame::setCharacter(Characterv2* character)
 {
-    if(_character == character)
+    if((_character == character) || (!CombatantFactory::Instance()))
         return;
 
     if(_character)
-        disconnectTemplate();
+        CombatantFactory::Instance()->disconnectWidget(_uiWidget);
 
     _character = character;
     readCharacterData();
@@ -91,6 +91,9 @@ void CharacterTemplateFrame::setHeroForgeToken(const QString& token)
 
 void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile)
 {
+    if(!CombatantFactory::Instance())
+        return;
+
     QString absoluteTemplateFile = TemplateFactory::getAbsoluteTemplateFile(templateFile);
     if(absoluteTemplateFile.isEmpty())
     {
@@ -105,8 +108,8 @@ void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile
         return;
     }
 
-    if(_character)
-        disconnectTemplate();
+    //if(_character)
+    //    CombatantFactory::Instance()->disconnectWidget(_uiWidget);
 
     delete _uiWidget;
     if(ui->scrollAreaWidgetContents->layout())
@@ -200,27 +203,6 @@ QObject* CharacterTemplateFrame::getFrameObject()
     return this;
 }
 
-void CharacterTemplateFrame::disconnectTemplate()
-{
-    if(!_uiWidget)
-        return;
-
-    // Walk through the loaded UI Widget and allocate the appropriate character values to the UI elements
-    QList<QLineEdit*> lineEdits = _uiWidget->findChildren<QLineEdit*>();
-    for(auto lineEdit : lineEdits)
-    {
-        if(lineEdit)
-            disconnect(lineEdit, &QLineEdit::editingFinished, nullptr, nullptr);
-    }
-
-    QList<QTextEdit*> textEdits = _uiWidget->findChildren<QTextEdit*>();
-    for(auto textEdit : textEdits)
-    {
-        if(textEdit)
-            disconnect(textEdit, &QTextEdit::textChanged, nullptr, nullptr);
-    }
-}
-
 void CharacterTemplateFrame::readCharacterData()
 {
     if((!_character) || (!_uiWidget) || (!CombatantFactory::Instance()))
@@ -228,7 +210,7 @@ void CharacterTemplateFrame::readCharacterData()
 
     _reading = true;
 
-    CombatantFactory::Instance()->readObjectData(_uiWidget, _character, this);
+    CombatantFactory::Instance()->readObjectData(_uiWidget, _character, this, this);
 
     loadCharacterImage();
     enableDndBeyondSync(_character->getDndBeyondID() != -1);
