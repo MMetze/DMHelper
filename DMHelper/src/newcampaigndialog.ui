@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>431</width>
-    <height>308</height>
+    <width>511</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -41,6 +41,9 @@
     <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -82,9 +85,9 @@
      <property name="title">
       <string>Rules</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_8">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,1">
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -92,24 +95,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Character Data:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Character UI</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QComboBox" name="cmbInitiative">
           <property name="sizePolicy">
@@ -121,23 +106,58 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QLineEdit" name="edtCharacterData"/>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Character Data Template:</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnBrowseCharacterData">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Browse...</string>
+             <string>Character UI Template:</string>
             </property>
            </widget>
           </item>
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLineEdit" name="edtCharacterData"/>
+          </item>
           <item>
            <widget class="QLineEdit" name="edtCharacterUI"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QPushButton" name="btnBrowseCharacterData">
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnBrowseCharacterUI">
@@ -150,24 +170,94 @@
         </item>
        </layout>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Bestiary File:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Monster Data Template:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Monster UI Template:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLineEdit" name="edtBestiaryFile"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="edtMonsterData"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="edtMonsterUI"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QPushButton" name="btnBrowseBestiaryFile">
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnBrowseMonsterData">
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnBrowseMonsterUI">
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkCombatantDone">
+        <property name="text">
+         <string>Show a checkbox for whether a combatant has been active this round</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="chkCombatantDone">
-     <property name="text">
-      <string>Show a checkbox for whether a combatant has been active this round</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
-     </property>
     </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -197,7 +287,6 @@
   <tabstop>btnBrowseCharacterData</tabstop>
   <tabstop>edtCharacterUI</tabstop>
   <tabstop>btnBrowseCharacterUI</tabstop>
-  <tabstop>chkCombatantDone</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

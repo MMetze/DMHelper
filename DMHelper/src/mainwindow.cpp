@@ -22,6 +22,7 @@
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
 #include "encounterfactory.h"
+#include "monsterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encountertextlinked.h"
@@ -32,7 +33,7 @@
 #include "battleframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "bestiary.h"
 #include "spell.h"
 #include "spellbook.h"
@@ -241,7 +242,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Recovery Mode: " << _recoveryMode;
     _options->setLoading(true);
 
-    connect(_options, SIGNAL(bestiaryFileNameChanged()), this, SLOT(readBestiary()));
+    //connect(_options, SIGNAL(bestiaryFileNameChanged()), this, SLOT(readBestiary())); --> moved this to the campaign ruleset
     connect(_options, SIGNAL(spellbookFileNameChanged()), this, SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
 
@@ -290,14 +291,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qDebug() << "[MainWindow] Initializing BasicDateServer";
     BasicDateServer::Initialize(_options->getCalendarFileName());
-    BasicDateServer* dateServer = BasicDateServer::Instance();
-    connect(_options, &OptionsContainer::calendarFileNameChanged, dateServer, &BasicDateServer::readDateInformation);
+    connect(_options, &OptionsContainer::calendarFileNameChanged, BasicDateServer::Instance(), &BasicDateServer::readDateInformation);
     qDebug() << "[MainWindow] BasicDateServer Initialized";
 
     qDebug() << "[MainWindow] Initializing Rule Factory";
     RuleFactory::Initialize(_options->getRulesetFileName());
-    RuleFactory* ruleFactory = RuleFactory::Instance();
-    connect(_options, &OptionsContainer::rulesetFileNameChanged, ruleFactory, &RuleFactory::readRuleset);
+    RuleFactory::Instance()->setDefaultBestiary(_options->getBestiaryFileName());
+    connect(_options, &OptionsContainer::rulesetFileNameChanged, RuleFactory::Instance(), &RuleFactory::readRuleset);
+    // Set the default ruleset
+    if(!RuleFactory::Instance()->rulesetExists(_options->getLastRuleset()))
+        _options->setLastRuleset(RuleFactory::DEFAULT_RULESET_NAME);
     qDebug() << "[MainWindow] Rule Factory Initialized";
 
     qDebug() << "[MainWindow] Initializing EquipmentServer";
@@ -410,14 +413,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_treeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
 
-    qDebug() << "[MainWindow] Loading Bestiary";
+    qDebug() << "[MainWindow] Loading Default Bestiary";
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Initializing Bestiary...\n"), Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing Default Bestiary...\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
-    readBestiary();
+
+    // Open the default UI template and prepare the bestiary dialog
     _bestiaryDlg.setOptions(_options);
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
+    qDebug() << "[MainWindow] Loading default Bestiary UI frame: " << defaultRuleset._monsterUI;
+    MonsterFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+    //_bestiaryDlg.loadMonsterUITemplate(defaultRuleset._monsterUI);
+    connect(Bestiary::Instance(), &Bestiary::changed, &_bestiaryDlg, &BestiaryTemplateDialog::dataChanged);
+    connect(Bestiary::Instance(), &Bestiary::bestiaryLoaded, this, &MainWindow::handleBestiaryRead);
+    qDebug() << "[MainWindow] Default Bestiary UI Frame Loaded";
+
+    //Bestiary::Instance()->readBestiary(_options->getBestiaryFileName());
+
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
@@ -425,9 +439,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
 
-    connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
-    connect(&_bestiaryDlg, SIGNAL(publishMonsterImage(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
-    connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
+    connect(&_bestiaryDlg, &BestiaryTemplateDialog::publishMonsterImage, _ribbon->getPublishRibbon(), &PublishButtonProxy::cancelPublish);
+    connect(&_bestiaryDlg, &BestiaryTemplateDialog::publishMonsterImage, this, QOverload<QImage, const QColor&>::of(&MainWindow::dispatchPublishImage));
+    connect(&_bestiaryDlg, &BestiaryTemplateDialog::dialogClosed, this, &MainWindow::writeBestiary);
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -781,10 +795,12 @@ void MainWindow::newCampaign()
     if(!closeCampaign())
         return;
 
-    NewCampaignDialog* newCampaignDialog = new NewCampaignDialog(this);
+    NewCampaignDialog* newCampaignDialog = new NewCampaignDialog(_options->getLastRuleset(), this);
     int result = newCampaignDialog->exec();
     if(result == QDialog::Accepted)
     {
+        _options->setLastRuleset(newCampaignDialog->getRuleset());
+
         QString campaignName = newCampaignDialog->getCampaignName();
         if(campaignName.isEmpty())
             campaignName = QString("Campaign");
@@ -938,7 +954,7 @@ void MainWindow::newCharacter()
         return;
     }
 
-    Characterv2* character = nullptr;
+    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -961,23 +977,16 @@ void MainWindow::newCharacter()
                 return;
             }
 
-            MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+            MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
             if(!monsterClass)
             {
                 qDebug() << "[MainWindow] New character not created because not able to find selected monster: " << monsterName;
                 return;
             }
 
-            Characterv2Converter* convertCharacter = new Characterv2Converter();
-            CombatantFactory::Instance()->setDefaultValues(convertCharacter);
-            convertCharacter->readFromMonsterClass(*monsterClass);
-            convertCharacter->setName(characterName);
-            character = convertCharacter;
+            character->copyMonsterValues(*monsterClass);
         }
     }
-
-    if(!character)
-        character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
 
     addNewObject(character);
 }
@@ -1552,59 +1561,6 @@ void MainWindow::linkActivated(const QUrl & link)
     }
 }
 
-void MainWindow::readBestiary()
-{
-    qDebug() << "[MainWindow] Requested to read Bestiary.";
-
-    if(!Bestiary::Instance())
-    {
-        qDebug() << "[MainWindow] Bestiary instance not found, reading stopped";
-        return;
-    }
-
-    if(Bestiary::Instance()->isDirty())
-    {
-        qDebug() << "[MainWindow] Existing bestiary is unsaved!";
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
-                                                                   QString("Unsaved Bestiary"),
-                                                                   QString("The current bestiary has not been saved. Would you like to save it before loading a new bestiary? If you don't. you may lose monster data!"),
-                                                                   QMessageBox::Yes | QMessageBox::No);
-        if(result == QMessageBox::Yes)
-        {
-            QString bestiaryFileName = QFileDialog::getSaveFileName(this, QString("Save Bestiary"), QString(), QString("XML files (*.xml)"));
-            if(!bestiaryFileName.isEmpty())
-            {
-                if(Bestiary::Instance()->writeBestiary(bestiaryFileName))
-                    qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
-                else
-                    qDebug() << "[MainWindow] ERROR: Bestiary file writing failed: " << bestiaryFileName;
-            }
-        }
-    }
-
-    disconnect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
-
-    QString bestiaryFileName = _options->getBestiaryFileName();
-    if(!Bestiary::Instance()->readBestiary(bestiaryFileName))
-    {
-        qDebug() << "[MainWindow] ERROR: Bestiary reading failed: " << bestiaryFileName;
-        return;
-    }
-
-    // Bestiary file seems ok, make a backup
-    _options->backupFile(bestiaryFileName);
-
-    _bestiaryDlg.dataChanged();
-    if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
-        _bestiaryDlg.setMonster(_options->getLastMonster());
-    else
-        _bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
-
-    connect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
-
-    qDebug() << "[MainWindow] Bestiary reading complete.";
-}
-
 void MainWindow::readSpellbook()
 {
     qDebug() << "[MainWindow] Requested to read Spellbook";
@@ -1737,18 +1693,19 @@ void MainWindow::closeEvent(QCloseEvent * event)
 
     qDebug() << "[MainWindow] Close event received.";
 
+    // Save the Bestiary
+    writeBestiary();
+
     if(!closeCampaign())
     {
         event->ignore();
         return;
     }
 
-    if((Bestiary::Instance()) && (Bestiary::Instance()->isDirty()))
-        writeBestiary();
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
         writeSpellbook();
 
-    _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getName() : "");
+    _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getStringValue("name") : "");
     _options->setLastSpell(_spellDlg.getSpell() ? _spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
 
@@ -2116,16 +2073,10 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(_campaignFileName);
 
-    // Optionally save Bestiary and Spellbook here
-    if((Bestiary::Instance()) && (Bestiary::Instance()->isDirty()))
-    {
-        if(QMessageBox::critical(this,
-                                 QString("Save Bestiary"),
-                                 QString("The Bestiary has been changed. Would you like to save it as well?"),
-                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-            writeBestiary();
-    }
+    // Save the Bestiary
+    writeBestiary();
 
+    // Optionally save the Spellbook
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
     {
         if(QMessageBox::critical(this,
@@ -2200,44 +2151,6 @@ bool MainWindow::selectItem(int itemType, QUuid itemId, QUuid adventureId)
     Q_UNUSED(adventureId);
 
     return selectItem(itemId);
-}
-
-void MainWindow::writeBestiary()
-{
-    qDebug() << "[MainWindow] Writing Bestiary...";
-
-    if(!Bestiary::Instance())
-    {
-        qDebug() << "[MainWindow] Bestiary instance not found, no file written.";
-        return;
-    }
-
-    if(Bestiary::Instance()->count() <= 0)
-    {
-        qDebug() << "[MainWindow] Bestiary is empty, no file will be written";
-        return;
-    }
-
-    if(!Bestiary::Instance()->isDirty())
-    {
-        qDebug() << "[MainWindow] Bestiary has not been changed, no file will be written";
-        return;
-    }
-
-    QString bestiaryFileName = _options->getBestiaryFileName();
-    if(bestiaryFileName.isEmpty())
-    {
-        bestiaryFileName = QFileDialog::getSaveFileName(this, QString("Save Bestiary"), QString(), QString("XML files (*.xml)"));
-        if(bestiaryFileName.isEmpty())
-            return;
-
-        _options->setBestiaryFileName(bestiaryFileName);
-    }
-
-    if(Bestiary::Instance()->writeBestiary(bestiaryFileName))
-        qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
-    else
-        qDebug() << "[MainWindow] ERROR: Bestiary file writing failed: " << bestiaryFileName;
 }
 
 void MainWindow::writeSpellbook()
@@ -2422,6 +2335,12 @@ void MainWindow::openCampaign(const QString& filename)
     QDir::setCurrent(fileInfo.absolutePath());
     _campaign = new Campaign();
 
+    _campaign->preloadRulesetXML(campaignElement, false);
+    MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                 campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                 campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
     _campaign->postProcessXML(campaignElement, false);
@@ -2486,6 +2405,11 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
         connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
         connect(&campaign->getRuleset(), &Ruleset::characterUIFileChanged, _characterFrame, &CharacterTemplateFrame::loadCharacterUITemplate);
+        connect(&campaign->getRuleset(), &Ruleset::monsterUIFileChanged, &_bestiaryDlg, &BestiaryTemplateDialog::loadMonsterUITemplate);
+
+        MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        Bestiary::Instance()->readBestiary(campaign->getRuleset().getBestiaryFile());
+        _bestiaryDlg.loadMonsterUITemplate(campaign->getRuleset().getMonsterUIFile());
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
@@ -2501,11 +2425,17 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         ui->stackedWidgetEncounter->setEnabled(true);
         // Deactivate the currently selected object
         deactivateObject();
-        activateWidget(DMHelper::CampaignType_WelcomeScreen);// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
+        activateWidget(DMHelper::CampaignType_WelcomeScreen);
         setRibbonToType(DMHelper::CampaignType_WelcomeScreen);
         _ribbon->setCurrentIndex(0); // Shift to the File tab
         _ribbonTabCampaign->setAddPCButton(false);
         _ribbonTabWorldMap->clearPartyIcons();
+
+        // Reset the monster UI to the default
+        //RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
+        //_bestiaryDlg.loadMonsterUITemplate(defaultRuleset._monsterUI);
+
+        //too many calls to loadUITemplate, and to setMonster - let's minimize this...
     }
 
     enableCampaignMenu();
@@ -2890,10 +2820,10 @@ bool MainWindow::selectItemFromStack(const QUuid& itemId)
 
 void MainWindow::openBestiary()
 {
-    qDebug() << "[MainWindow] Opening Bestiary";
-    if(!Bestiary::Instance())
+    if((!_campaign) || (!Bestiary::Instance()))
         return;
 
+    qDebug() << "[MainWindow] Opening Bestiary";
     if(Bestiary::Instance()->count() == 0)
     {
         qDebug() << "[MainWindow]    ...Bestiary is empty, creating a first monster";
@@ -2965,6 +2895,45 @@ void MainWindow::importBestiary()
 
         qDebug() << "[MainWindow] Bestiary import complete.";
     }
+}
+
+void MainWindow::writeBestiary()
+{
+    qDebug() << "[MainWindow] Writing Bestiary...";
+
+    if(!Bestiary::Instance())
+    {
+        qDebug() << "[MainWindow] Bestiary instance not found, no file written.";
+        return;
+    }
+
+    if(!Bestiary::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Bestiary has not been changed, no file will be written";
+        return;
+    }
+
+    if(!_campaign)
+    {
+        qDebug() << "[MainWindow] No campaign loaded, no reason to write the Bestiary";
+        return;
+    }
+
+    Bestiary::Instance()->writeBestiary(_campaign->getRuleset().getBestiaryFile());
+}
+
+void MainWindow::handleBestiaryRead(const QString& bestiaryFileName)
+{
+    qDebug() << "[MainWindow] Bestiary reading completed";
+
+    // Bestiary file seems ok, make a backup
+    _options->backupFile(bestiaryFileName);
+
+    // Try to reset the monster to the previously selected one
+    if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
+        _bestiaryDlg.setMonster(_options->getLastMonster());
+    else
+        _bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
 }
 
 void MainWindow::openSpellbook()

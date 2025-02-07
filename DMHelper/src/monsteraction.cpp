@@ -1,5 +1,5 @@
 #include "monsteraction.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomDocument>
 #include <QDomElement>
 
@@ -13,9 +13,9 @@ MonsterAction::MonsterAction(int attackBonus, const QString& description, const 
 
 MonsterAction::MonsterAction(const QDomElement &element, bool isImport) :
     _attackBonus(0),
-    _description(QString()),
-    _name(QString()),
-    _damageDice(Dice())
+    _description(),
+    _name(),
+    _damageDice()
 {
     Q_UNUSED(isImport);
 
@@ -24,6 +24,14 @@ MonsterAction::MonsterAction(const QDomElement &element, bool isImport) :
     _name = element.firstChildElement(QString("name")).text();
     Dice inputDice = Dice(element.firstChildElement(QString("damage_dice")).text());
     _damageDice = Dice(inputDice.getCount(), inputDice.getType(), element.firstChildElement(QString("damage_bonus")).text().toInt());
+}
+
+MonsterAction::MonsterAction(const QHash<QString, QVariant>& valueHash) :
+    _attackBonus(valueHash.value("attack_bonus").toInt()),
+    _description(valueHash.value("desc").toString()),
+    _name(valueHash.value("name").toString()),
+    _damageDice(valueHash.value("damage").value<Dice>())
+{
 }
 
 MonsterAction::MonsterAction(const MonsterAction& other) :
@@ -40,12 +48,12 @@ MonsterAction::~MonsterAction()
 
 QDomElement MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const
 {
-    MonsterClass::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
-    MonsterClass::outputValue(doc, element, isExport, QString("desc"), getDescription());
-    MonsterClass::outputValue(doc, element, isExport, QString("name"), getName());
-    MonsterClass::outputValue(doc, element, isExport, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
+    MonsterClassv2::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
+    MonsterClassv2::outputValue(doc, element, isExport, QString("desc"), getDescription());
+    MonsterClassv2::outputValue(doc, element, isExport, QString("name"), getName());
+    MonsterClassv2::outputValue(doc, element, isExport, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
     Dice outputDice = Dice(getDamageDice().getCount(), getDamageDice().getType(), 0);
-    MonsterClass::outputValue(doc, element, isExport, QString("damage_dice"), outputDice.toString());
+    MonsterClassv2::outputValue(doc, element, isExport, QString("damage_dice"), outputDice.toString());
 
     return element;
 }
@@ -137,4 +145,10 @@ bool MonsterAction::operator==(const MonsterAction &other) const
 bool MonsterAction::operator!=(const MonsterAction &other) const
 {
     return !(*this == other);
+}
+
+QString MonsterAction::createSummaryString(const QHash<QString, QVariant>& valueHash)
+{
+    MonsterAction action(valueHash);
+    return action.summaryString();
 }

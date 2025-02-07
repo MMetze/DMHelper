@@ -1,6 +1,6 @@
 #include "battledialogmodelcharacter.h"
 #include "characterv2.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -46,7 +46,7 @@ qreal BattleDialogModelCharacter::getSizeFactor() const
     if(!character)
         return 1;
 
-    return MonsterClass::convertSizeToScaleFactor(character->getStringValue(QString("size")));
+    return MonsterClassv2::convertSizeToScaleFactor(character->getStringValue("size"));
 }
 
 int BattleDialogModelCharacter::getSizeCategory() const
@@ -144,7 +144,7 @@ int BattleDialogModelCharacter::getSkillModifier(Combatant::Skills skill) const
     if(!character)
         return 0;
 
-    // HACK
+    // TODO: HACK
     switch(skill)
     {
         case Combatant::Skills_strengthSave:

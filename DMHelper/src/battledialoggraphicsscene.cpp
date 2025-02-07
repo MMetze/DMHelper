@@ -4,7 +4,7 @@
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodelmonsterclass.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "unselectedpixmap.h"
 #include "layertokens.h"
 #include "layergrid.h"
@@ -603,7 +603,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(object);
                 if(monster)
                 {
-                    MonsterClass* monsterClass = monster->getMonsterClass();
+                    MonsterClassv2* monsterClass = monster->getMonsterClass();
                     if(monsterClass)
                     {
                         QStringList iconList = monsterClass->getIconList();

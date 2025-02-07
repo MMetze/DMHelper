@@ -1,5 +1,5 @@
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, QObject *parent) :
@@ -60,11 +60,64 @@ int BattleDialogModelMonsterBase::getCombatantType() const
 
 int BattleDialogModelMonsterBase::getSkillModifier(Combatant::Skills skill) const
 {
-    MonsterClass* monsterClass = getMonsterClass();
-    if(monsterClass)
-        return monsterClass->getSkillValue(skill);
-    else
+    MonsterClassv2* monsterClass = getMonsterClass();
+    if(!monsterClass)
         return 0;
+
+    // TODO: HACK
+    switch(skill)
+    {
+        case Combatant::Skills_strengthSave:
+            return monsterClass->getIntValue(QString("strengthSave"));
+        case Combatant::Skills_athletics:
+            return monsterClass->getIntValue(QString("athletics"));
+        case Combatant::Skills_dexteritySave:
+            return monsterClass->getIntValue(QString("dexteritySave"));
+        case Combatant::Skills_stealth:
+            return monsterClass->getIntValue(QString("stealth"));
+        case Combatant::Skills_acrobatics:
+            return monsterClass->getIntValue(QString("acrobatics"));
+        case Combatant::Skills_sleightOfHand:
+            return monsterClass->getIntValue(QString("sleightOfHand"));
+        case Combatant::Skills_constitutionSave:
+            return monsterClass->getIntValue(QString("constitutionSave"));
+        case Combatant::Skills_intelligenceSave:
+            return monsterClass->getIntValue(QString("intelligenceSave"));
+        case Combatant::Skills_investigation:
+            return monsterClass->getIntValue(QString("investigation"));
+        case Combatant::Skills_arcana:
+            return monsterClass->getIntValue(QString("arcana"));
+        case Combatant::Skills_nature:
+            return monsterClass->getIntValue(QString("nature"));
+        case Combatant::Skills_history:
+            return monsterClass->getIntValue(QString("history"));
+        case Combatant::Skills_religion:
+            return monsterClass->getIntValue(QString("religion"));
+        case Combatant::Skills_wisdomSave:
+            return monsterClass->getIntValue(QString("wisdomSave"));
+        case Combatant::Skills_medicine:
+            return monsterClass->getIntValue(QString("medicine"));
+        case Combatant::Skills_animalHandling:
+            return monsterClass->getIntValue(QString("animalHandling"));
+        case Combatant::Skills_perception:
+            return monsterClass->getIntValue(QString("perception"));
+        case Combatant::Skills_insight:
+            return monsterClass->getIntValue(QString("insight"));
+        case Combatant::Skills_survival:
+            return monsterClass->getIntValue(QString("survival"));
+        case Combatant::Skills_charismaSave:
+            return monsterClass->getIntValue(QString("charismaSave"));
+        case Combatant::Skills_performance:
+            return monsterClass->getIntValue(QString("performance"));
+        case Combatant::Skills_deception:
+            return monsterClass->getIntValue(QString("deception"));
+        case Combatant::Skills_persuasion:
+            return monsterClass->getIntValue(QString("persuasion"));
+        case Combatant::Skills_intimidation:
+            return monsterClass->getIntValue(QString("intimidation"));
+        default:
+            return 0;
+    }
 }
 
 int BattleDialogModelMonsterBase::getConditions() const

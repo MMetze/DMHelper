@@ -1,6 +1,6 @@
 #include "combatantdialog.h"
 #include "monster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "bestiary.h"
 #include "dmconstants.h"
 #include "dice.h"
@@ -82,14 +82,14 @@ LayerTokens* CombatantDialog::getLayer() const
 
 int CombatantDialog::getCombatantHitPoints() const
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return 0;
 
     if(ui->chkUseAverage->isChecked())
-        return monsterClass->getHitDice().average();
+        return monsterClass->getDiceValue("hit_dice").average();
     else if(ui->edtHitPointsLocal->text().isEmpty())
-        return monsterClass->getHitDice().roll();
+        return monsterClass->getDiceValue("hit_dice").roll();
     else
         return ui->edtHitPointsLocal->text().toInt();
 }
@@ -129,9 +129,9 @@ QString CombatantDialog::getSizeFactor() const
     return ui->edtSize->text();
 }
 
-MonsterClass* CombatantDialog::getMonsterClass() const
+MonsterClassv2* CombatantDialog::getMonsterClass() const
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
     if(!monsterClass)
         qDebug() << "[Combatant Dialog] Unable to find monster class: " << ui->cmbMonsterClass->currentText();
 
@@ -142,7 +142,7 @@ int CombatantDialog::getIconIndex() const
 {
     if(ui->chkRandomTokens->isChecked())
     {
-        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+        MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
         if(monsterClass)
             return Dice::dX(monsterClass->getIconCount()) - 1;
     }
@@ -159,7 +159,7 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
     if(!monster)
         return;
 
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(monsterClass == nullptr)
         return;
 
@@ -188,7 +188,7 @@ void CombatantDialog::resizeEvent(QResizeEvent *event)
 
 void CombatantDialog::monsterClassChanged(const QString &text)
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(text);
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(text);
     if(!monsterClass)
     {
         qDebug() << "[Combatant Dialog] invalid monster class change detected, monster class not found: " << text;
@@ -202,17 +202,17 @@ void CombatantDialog::monsterClassChanged(const QString &text)
     ui->chkRandomTokens->setEnabled(monsterClass->getIconCount() > 1);
 
     ui->edtName->setText(text);
-    ui->edtHitDice->setText(monsterClass->getHitDice().toString());
+    ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
 
     setHitPointAverageChanged();
 
     if(ui->cmbSize->currentData().toInt() != DMHelper::CombatantSize_Unknown)
-        ui->cmbSize->setCurrentIndex(monsterClass->getMonsterSizeCategory() - 1);
+        ui->cmbSize->setCurrentIndex(monsterClass->MonsterClassv2::convertSizeToCategory(monsterClass->getStringValue("size")) - 1);
 }
 
 void CombatantDialog::setIconIndex(int index)
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
@@ -231,7 +231,7 @@ void CombatantDialog::updateIcon()
     if(!ui->lblIcon->size().isValid())
         return;
 
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
@@ -258,11 +258,11 @@ void CombatantDialog::nextIcon()
 
 void CombatantDialog::setHitPointAverageChanged()
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
-    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getHitDice().average()) + QString(")"));
+    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getDiceValue("hit_dice").average()) + QString(")"));
 }
 
 void CombatantDialog::openMonsterClicked()
@@ -277,20 +277,20 @@ void CombatantDialog::sizeSelected(int index)
 
     ui->edtSize->setEnabled(sizeCategory == DMHelper::CombatantSize_Unknown);
     if(sizeCategory != DMHelper::CombatantSize_Unknown)
-        ui->edtSize->setText(QString::number(MonsterClass::convertSizeCategoryToScaleFactor(sizeCategory)));
+        ui->edtSize->setText(QString::number(MonsterClassv2::convertSizeCategoryToScaleFactor(sizeCategory)));
 }
 
 void CombatantDialog::fillSizeCombo()
 {
     ui->cmbSize->clear();
 
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
     ui->cmbSize->insertSeparator(999); // Insert at the end of the list
     ui->cmbSize->addItem(QString("Custom..."), DMHelper::CombatantSize_Unknown);
 

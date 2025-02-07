@@ -1,7 +1,7 @@
 #include "combatantwidgetinternalsmonster.h"
 #include "battledialogmodelmonsterbase.h"
 #include "combatantwidgetmonster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QLabel>
@@ -9,11 +9,12 @@
 #include <QTimer>
 #include <QDebug>
 
+const int CombatantWidgetInternalsMonster_LEGENDARY_MAXIMUM = 3;
+
 CombatantWidgetInternalsMonster::CombatantWidgetInternalsMonster(BattleDialogModelMonsterBase* monster, CombatantWidgetMonster* parent) :
     CombatantWidgetInternals(parent),
     _widgetParent(parent),
-    _monster(monster),
-    _legendaryMaximum(3)
+    _monster(monster)
 {
     if(_widgetParent)
         _widgetParent->setInternals(this);
@@ -60,17 +61,6 @@ bool CombatantWidgetInternalsMonster::isKnown()
         return true;
 }
 
-void CombatantWidgetInternalsMonster::setLegendaryMaximum(int legendaryMaximum)
-{
-    _legendaryMaximum = legendaryMaximum;
-    resetLegendary();
-}
-
-int CombatantWidgetInternalsMonster::getLegendaryMaximum() const
-{
-    return _legendaryMaximum;
-}
-
 void CombatantWidgetInternalsMonster::updateImage()
 {
     if(_widgetParent)
@@ -109,7 +99,7 @@ void CombatantWidgetInternalsMonster::setHitPoints(int hp)
 void CombatantWidgetInternalsMonster::executeDoubleClick()
 {
     if((_monster) && (_monster->getMonsterClass()))
-        emit clicked(_monster->getMonsterClass()->getName());
+        emit clicked(_monster->getMonsterClass()->getStringValue("name"));
     else
         qDebug() << "[Widget Monster Internal] no valid monster class found!";
 }
@@ -127,5 +117,9 @@ void CombatantWidgetInternalsMonster::decrementLegendary()
 
 void CombatantWidgetInternalsMonster::resetLegendary()
 {
-    _monster->setLegendaryCount(_legendaryMaximum);
+    if(!_monster)
+        return;
+
+    MonsterClassv2* monsterClass = _monster->getMonsterClass();
+    _monster->setLegendaryCount(monsterClass ? monsterClass->getIntValue("legendary") : CombatantWidgetInternalsMonster_LEGENDARY_MAXIMUM);
 }

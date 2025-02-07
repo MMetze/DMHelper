@@ -4,7 +4,7 @@
 #include "combatantwidgetinternalsmonster.h"
 #include "combatantwidgetcharacter.h"
 #include "combatantwidgetinternalscharacter.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "dmconstants.h"
 #include "spellbook.h"
 #include "spell.h"
@@ -2341,7 +2341,7 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
     }
     else
     {
-        MonsterClass* selectedClass = monster->getMonsterClass();
+        MonsterClassv2* selectedClass = monster->getMonsterClass();
         foreach(QGraphicsItem* graphicsItem, selected)
         {
             BattleDialogModelMonsterClass* itemMonster = dynamic_cast<BattleDialogModelMonsterClass*>(getCombatantFromItem(graphicsItem));
@@ -2852,7 +2852,7 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
 {
     if((_battle) && (_model) && (result == QDialog::Accepted))
     {
-        MonsterClass* monsterClass = combatantDlg->getMonsterClass();
+        MonsterClassv2* monsterClass = combatantDlg->getMonsterClass();
         if(monsterClass == nullptr)
         {
             qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
@@ -2879,7 +2879,7 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
                 BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
                 monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
                 monster->setHitPoints(combatantDlg->getCombatantHitPoints());
-                monster->setInitiative(combatantDlg->isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
+                monster->setInitiative(combatantDlg->isRandomInitiative() ? Dice::d20() + monsterClass->getIntValue("dexterityMod") : localInitiative);
                 monster->setKnown(combatantDlg->isKnown());
                 monster->setShown(combatantDlg->isShown());
                 monster->setSizeFactor(sizeFactor);

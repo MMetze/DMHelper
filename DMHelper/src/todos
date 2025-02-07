@@ -1,11 +1,48 @@
+Real bugs:
+Fog of War clear area doesn't work!
+Copy character doesn't set Hit Points or AC, REactions not copied (Noble), Monster Type goes to Race instead of Class, Speed?
+
 3.4 todos:
+Why does my bestiary have a whole bunch of License entries and the spellbook has none?
 Generic Bestiary
+    Add a repeatable string-based "element" (e.g. multiple icons)
+    Transition from current to new bestiary, item by item
+        "icon" as an element attribute to a sub-element, or "icon filename --> special case sub-elements, add this to characters...
+        stat modifiers as separate items
+        skills as a single string
+        actions, legendary actions, reactions: combine damage_dice and damage_bonus to damage
+    Add optional campaign-specific bestiary, what is a "private" entry in the bestiary? --> Nothing???
+Test:
+** Monsters
+    Add monster
+    Remove monster, first, middle and end of list
+    Edit monster then change monster - does it store and save?
+    Edit monster then close dialog - does it store and save?
+    Ruleset default, new campaign, loaded campaign
+** Default ruleset persists
+** Copy from Monster to Character - does it generally work, check default values (e.g. size)
+** Check does import/export work, for bestiary and for CHARACTERS
 Generic Spellbook
 Generic Conditions
 Update DiceRollDialogCombatants and other places that conditions/effects are relevant
 Expand spells and DiceRollDialogCombatants to automatically place the right damage amounts and saving throw type
 
+Big Rocks
+Templates
+Set scale for table-top screens
+Enhanced Soundboard
 Multiple publish targets?
+Redo documentation and demos
+Many feature and intro videos
+Map Library
+
+Template things to do:
+* Add Combatant dialog
+* Initiative list entries
+    Combatant roll-over frame
+* Conditions
+* "Events" in initiative, such as lair actions
+* Handling legendary actions or other resettable per round enemy resources
 
 Main 3.3.1 Todos:
 Add What's New to the About dialog

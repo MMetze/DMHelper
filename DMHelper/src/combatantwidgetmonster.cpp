@@ -3,7 +3,7 @@
 #include "combatantwidgetinternalsmonster.h"
 #include "dmconstants.h"
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "campaign.h"
 #include <QIntValidator>
 #include <QDebug>
@@ -70,7 +70,7 @@ void CombatantWidgetMonster::setInternals(CombatantWidgetInternalsMonster* inter
         else
             qDebug() << "[Monster Widget] neither valid combatant nor monster class found!";
 
-        if((monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getLegendary()))
+        if((monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getIntValue("legendary") > 0))
         {
             _internals->resetLegendary();
             connect(ui->btnLegendary, SIGNAL(clicked(bool)), _internals, SLOT(decrementLegendary()));
@@ -206,7 +206,7 @@ void CombatantWidgetMonster::readInternals()
     ui->chkDone->setChecked(_internals->getCombatant()->getDone());
 
     BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
-    if((monsterCombatant) && (monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getLegendary()))
+    if((monsterCombatant) && (monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getIntValue("legendary") > 0))
         ui->btnLegendary->setText(QString("L: ") + QString::number(monsterCombatant->getLegendaryCount()));
 }
 

@@ -58,6 +58,7 @@ SOURCES += main.cpp\
     battleframestatemachine.cpp \
     bestiaryexportdialog.cpp \
     bestiarypopulatetokensdialog.cpp \
+    bestiarytemplatedialog.cpp \
     camerarect.cpp \
     camerascene.cpp \
     campaignexporter.cpp \
@@ -72,7 +73,6 @@ SOURCES += main.cpp\
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
     charactertemplateframe.cpp \
-    charactertemplateresourcelayout.cpp \
     characterv2.cpp \
     characterv2converter.cpp \
     colorpushbutton.cpp \
@@ -132,6 +132,9 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    monsterclassv2.cpp \
+    monsterclassv2converter.cpp \
+    monsterfactory.cpp \
     newcampaigndialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
@@ -201,6 +204,10 @@ SOURCES += main.cpp\
     spellbookdialog.cpp \
     spellslotlevelbutton.cpp \
     spellslotradiobutton.cpp \
+    templatefactory.cpp \
+    templateframe.cpp \
+    templateobject.cpp \
+    templateresourcelayout.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     tokeneditdialog.cpp \
@@ -345,6 +352,7 @@ HEADERS  += mainwindow.h \
     battleframestatemachine.h \
     bestiaryexportdialog.h \
     bestiarypopulatetokensdialog.h \
+    bestiarytemplatedialog.h \
     camerarect.h \
     camerascene.h \
     campaignexporter.h \
@@ -359,7 +367,6 @@ HEADERS  += mainwindow.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
     charactertemplateframe.h \
-    charactertemplateresourcelayout.h \
     characterv2.h \
     characterv2converter.h \
     colorpushbutton.h \
@@ -420,6 +427,9 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    monsterclassv2.h \
+    monsterclassv2converter.h \
+    monsterfactory.h \
     newcampaigndialog.h \
     objectfactory.h \
     objectimportdialog.h \
@@ -489,6 +499,10 @@ HEADERS  += mainwindow.h \
     spellbookdialog.h \
     spellslotlevelbutton.h \
     spellslotradiobutton.h \
+    templatefactory.h \
+    templateframe.h \
+    templateobject.h \
+    templateresourcelayout.h \
     textbrowsermargins.h \
     texteditmargins.h \
     tokeneditdialog.h \
@@ -603,6 +617,7 @@ FORMS    += mainwindow.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     bestiarypopulatetokensdialog.ui \
+    bestiarytemplatedialog.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
@@ -641,9 +656,13 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/action.ui \
     resources/ui/character2e.ui \
     resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \
+    resources/ui/monster2e.ui \
+    resources/ui/monster5e-2024.ui \
+    resources/ui/monster5e.ui \
     resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \
@@ -730,6 +749,8 @@ DISTFILES += \
     resources/character5e-2024.xml \
     resources/character5e.xml \
     resources/equipment.xml \
+    resources/monster2e.xml \
+    resources/monster5e.xml \
     resources/quickref_data.xml \
     resources/ruleset.xml \
     resources/shops.xml \

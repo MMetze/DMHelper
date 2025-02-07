@@ -21,11 +21,17 @@ public:
     static QString getRuleInitiativeDefault();
     static QStringList getRuleInitiativeNames();
 
+    static const char* DEFAULT_RULESET_NAME;
+
     class RulesetTemplate;
     QList<QString> getRulesetNames() const;
     QList<RulesetTemplate> getRulesetTemplates() const;
+    bool rulesetExists(const QString& rulesetName) const;
     RulesetTemplate getRulesetTemplate(const QString& rulesetName) const;
     QDir getRulesetDir() const;
+
+    void setDefaultBestiary(const QString& bestiaryFile);
+    QString getDefaultBestiary() const;
 
 signals:
 
@@ -34,8 +40,9 @@ public slots:
 
 private:
     static RuleFactory* _instance;
-    QDir _rulesetDir;
 
+    QDir _rulesetDir;
+    QString _defaultBestiary;
     QHash<QString, RulesetTemplate> _rulesetTemplates;
 
 
@@ -48,13 +55,19 @@ public:
             _name(),
             _initiative(),
             _characterData(),
-            _characterUI()
+            _characterUI(),
+            _monsterData(),
+            _monsterUI(),
+            _bestiary()
         {}
 
         QString _name;
         QString _initiative;
         QString _characterData;
         QString _characterUI;
+        QString _monsterData;
+        QString _monsterUI;
+        QString _bestiary;
 
     };
 

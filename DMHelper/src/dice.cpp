@@ -72,6 +72,9 @@ void Dice::setBonus(int bonus)
 
 QString Dice::toString() const
 {
+    if(((_dieCount == 0) || (_dieType == 0)) && (_dieBonus == 0))
+        return QString("---");
+
     QString result;
 
     result = QString::number(getCount());
@@ -186,5 +189,7 @@ void Dice::readString(const QString& diceString)
         int diceInt = diceString.toInt(&ok);
         if(ok)
             _dieBonus = diceInt;
+        else
+            _dieCount = _dieType = _dieBonus = 0;
     }
 }

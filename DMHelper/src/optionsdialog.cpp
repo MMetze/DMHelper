@@ -29,8 +29,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
     {
         updateFileLocations();
 
-        connect(ui->btnBestiary, &QAbstractButton::clicked, this, &OptionsDialog::browseBestiary);
-        connect(ui->edtBestiary, &QLineEdit::editingFinished, this, &OptionsDialog::editBestiary);
+        connect(ui->btnBestiary, &QAbstractButton::clicked, this, &OptionsDialog::browseDefaultBestiary);
+        connect(ui->edtBestiary, &QLineEdit::editingFinished, this, &OptionsDialog::editDefaultBestiary);
         connect(ui->btnSpellbook, &QAbstractButton::clicked, this, &OptionsDialog::browseSpellbook);
         connect(ui->edtSpellbook, &QLineEdit::editingFinished, this, &OptionsDialog::editSpellbook);
         connect(ui->btnQuickReference, &QAbstractButton::clicked, this, &OptionsDialog::browseQuickReference);
@@ -49,6 +49,13 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         connect(ui->edtCharacterData, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterDataFile);
         connect(ui->btnCharacterUI, &QAbstractButton::clicked, this, &OptionsDialog::browseCharacterUIFile);
         connect(ui->edtCharacterUI, &QLineEdit::editingFinished, this, &OptionsDialog::editCharacterUIFile);
+        connect(ui->btnBestiaryFile, &QAbstractButton::clicked, this, &OptionsDialog::browseBestiaryFile);
+        connect(ui->edtBestiaryFile, &QLineEdit::editingFinished, this, &OptionsDialog::editBestiaryFile);
+        connect(ui->btnMonsterData, &QAbstractButton::clicked, this, &OptionsDialog::browseMonsterDataFile);
+        connect(ui->edtMonsterData, &QLineEdit::editingFinished, this, &OptionsDialog::editMonsterDataFile);
+        connect(ui->btnMonsterUI, &QAbstractButton::clicked, this, &OptionsDialog::browseMonsterUIFile);
+        connect(ui->edtMonsterUI, &QLineEdit::editingFinished, this, &OptionsDialog::editMonsterUIFile);
+
 
         connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
 
@@ -95,9 +102,12 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
                 }
             }
 
+            ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
             ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
             ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
-            ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->edtBestiaryFile->setText(_campaign->getRuleset().getBestiaryFile());
+            ui->edtMonsterData->setText(_campaign->getRuleset().getMonsterDataFile());
+            ui->edtMonsterUI->setText(_campaign->getRuleset().getMonsterUIFile());
         }
         else
         {
@@ -206,30 +216,33 @@ void OptionsDialog::applyCampaignChanges()
 
     _campaign->setName(ui->edtCampaignName->text());
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
+    _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
     _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
     _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());
-    _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
+    _campaign->getRuleset().setBestiaryFile(ui->edtBestiaryFile->text());
+    _campaign->getRuleset().setMonsterDataFile(ui->edtMonsterData->text());
+    _campaign->getRuleset().setMonsterUIFile(ui->edtMonsterUI->text());
 }
 
-void OptionsDialog::browseBestiary()
+void OptionsDialog::browseDefaultBestiary()
 {
-    setBestiary(QFileDialog::getOpenFileName(this, QString("Select Bestiary File"), QString(), QString("XML files (*.xml)")));
+    setDefaultBestiary(QFileDialog::getOpenFileName(this, QString("Select Default Bestiary File"), QString(), QString("XML files (*.xml)")));
 }
 
-void OptionsDialog::editBestiary()
+void OptionsDialog::editDefaultBestiary()
 {
-    setBestiary(ui->edtBestiary->text());
+    setDefaultBestiary(ui->edtBestiary->text());
 }
 
-void OptionsDialog::setBestiary(const QString& bestiaryFile)
+void OptionsDialog::setDefaultBestiary(const QString& bestiaryFile)
 {
     if(bestiaryFile.isEmpty())
         return;
 
     if(!QFile::exists(bestiaryFile))
     {
-        QMessageBox::critical(this, QString("Bestiary file not found"), QString("The selected bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
-        qDebug() << "[OptionsDialog] ERROR: The selected bestiary file could not be found: " << bestiaryFile;
+        QMessageBox::critical(this, QString("Default bestiary file not found"), QString("The selected default bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
+        qDebug() << "[OptionsDialog] ERROR: The selected default bestiary file could not be found: " << bestiaryFile;
         return;
     }
 
@@ -677,4 +690,57 @@ void OptionsDialog::editCharacterUIFile()
 void OptionsDialog::setCharacterUIFile(const QString& characterUIFile)
 {
     ui->edtCharacterUI->setText(characterUIFile);
+}
+
+void OptionsDialog::browseBestiaryFile()
+{
+    setBestiaryFile(QFileDialog::getOpenFileName(this, QString("Select the bestiary file"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editBestiaryFile()
+{
+    setBestiaryFile(ui->edtBestiaryFile->text());
+}
+
+void OptionsDialog::setBestiaryFile(const QString& bestiaryFile)
+{
+    ui->edtBestiaryFile->setText(bestiaryFile);
+}
+
+void OptionsDialog::browseMonsterDataFile()
+{
+    setMonsterDataFile(QFileDialog::getOpenFileName(this, QString("Select the monster data file"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editMonsterDataFile()
+{
+    setMonsterDataFile(ui->edtMonsterData->text());
+}
+
+void OptionsDialog::setMonsterDataFile(const QString& monsterDataFile)
+{
+    QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                               QString("Confirm Monster Data Format Change"),
+                                                               QString("You are about to chnage the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QMessageBox::Yes | QMessageBox::No);
+
+    if(result != QMessageBox::Yes)
+        return;
+
+    ui->edtMonsterData->setText(monsterDataFile);
+}
+
+void OptionsDialog::browseMonsterUIFile()
+{
+    setMonsterUIFile(QFileDialog::getOpenFileName(this, QString("Select the monster UI file"), QString(), QString("UI files (*.ui)")));
+}
+
+void OptionsDialog::editMonsterUIFile()
+{
+    setMonsterUIFile(ui->edtMonsterUI->text());
+}
+
+void OptionsDialog::setMonsterUIFile(const QString& monsterUIFile)
+{
+    ui->edtMonsterUI->setText(monsterUIFile);
 }

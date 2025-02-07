@@ -4,7 +4,7 @@
 #include "characterv2.h"
 
 class Character;
-class MonsterClass;
+class MonsterClassv2;
 
 class Characterv2Converter : public Characterv2
 {
@@ -13,7 +13,6 @@ public:
     explicit Characterv2Converter(const QString& name = QString(), QObject *parent = nullptr);
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void readFromMonsterClass(MonsterClass& monster);
 
 protected:
     virtual void convertValues(Character* convertCharacter);

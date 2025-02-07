@@ -2,6 +2,7 @@
 #define CHARACTERTEMPLATEFRAME_H
 
 #include "campaignobjectframe.h"
+#include "templateframe.h"
 #include "characterv2.h"
 
 namespace Ui {
@@ -12,7 +13,7 @@ class OptionsContainer;
 class QLineEdit;
 class QTextEdit;
 
-class CharacterTemplateFrame : public CampaignObjectFrame
+class CharacterTemplateFrame : public CampaignObjectFrame, public TemplateFrame
 {
     Q_OBJECT
 
@@ -20,6 +21,7 @@ public:
     explicit CharacterTemplateFrame(OptionsContainer* options, QWidget *parent = nullptr);
     ~CharacterTemplateFrame();
 
+    // Public interface from CampaignObjectFrame
     virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
@@ -38,36 +40,25 @@ public slots:
     virtual void setRotation(int rotation) override;
 
 protected:
+    // From CampaignObjectFrame
     virtual bool eventFilter(QObject *object, QEvent *event) override;
     virtual void mousePressEvent(QMouseEvent * event) override;
     virtual void mouseReleaseEvent(QMouseEvent * event) override;
 
+    // From TemplateFrame
+    virtual QObject* getFrameObject() override;
+
 private slots:
-    void disconnectTemplate();
     void readCharacterData();
-    void writeCharacterData();
     void handlePublishClicked();
     void editCharacterIcon();
     void syncDndBeyond();
     void importHeroForge();
     void updateCharacterName();
 
-    void handleLineEditFinished(QLineEdit* lineEdit);
-    void handleTextEditChanged(QTextEdit* textEdit);
-    void handleResourceChanged(QFrame* resourceFrame);
-
-    void handleAddResource(QWidget* widget);
-    void handleRemoveResource(QWidget* widget);
-
 private:
     void loadCharacterImage();
     void enableDndBeyondSync(bool enabled);
-    QWidget* createResourceWidget(const QString& keyString, const QString& widgetString);
-    QWidget* createResourceWidgetFile(const QString& widgetFilename);
-    QWidget* createResourceWidgetInternal(const QString& keyString);
-    void populateWidget(QWidget* widget, Characterv2* character, QHash<QString, QVariant>* hash, int listIndex = 0, const QString& listKey = QString());
-    QString getDefaultValue(const QString& keyString);
-    void handleEditBoxChange(QWidget* editWidget, const QString& value);
 
     Ui::CharacterTemplateFrame *ui;
     QWidget *_uiWidget;
