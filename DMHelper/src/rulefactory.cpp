@@ -120,7 +120,7 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
     qDebug() << "[RuleFactory] Ruleset file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[RuleFactory] Unable to read ruleset file: " << rulesetFile;
+        qDebug() << "[RuleFactory] ERROR: Unable to read ruleset file: " << rulesetFile;
         return;
     }
 
@@ -135,15 +135,14 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[RuleFactory] Unable to parse the ruleset file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[RuleFactory] ERROR: Unable to parse the ruleset file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[RuleFactory] Unable to find the root element in the ruleset file.";
+        qDebug() << "[RuleFactory] ERROR: Unable to find the root element in the ruleset file.";
         return;
     }
 

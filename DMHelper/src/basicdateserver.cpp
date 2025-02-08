@@ -261,7 +261,7 @@ void BasicDateServer::readDateInformation(const QString& calendarFile)
     qDebug() << "[BasicDateServer] Calendar file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[BasicDateServer] Unable to read calendar file: " << calendarFile;
+        qDebug() << "[BasicDateServer] ERROR: Unable to read calendar file: " << calendarFile;
         return;
     }
 
@@ -276,22 +276,21 @@ void BasicDateServer::readDateInformation(const QString& calendarFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[BasicDateServer] Unable to parse the calendar data file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[BasicDateServer] ERROR: Unable to parse the calendar data file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[BasicDateServer] Unable to find the root element in the calendar data file.";
+        qDebug() << "[BasicDateServer] ERROR: Unable to find the root element in the calendar data file.";
         return;
     }
 
     QDomElement calendarElement = root.firstChildElement("calendar");
     if(calendarElement.isNull())
     {
-        qDebug() << "[BasicDateServer] Unable to find any calendar information elements in the calendar data file.";
+        qDebug() << "[BasicDateServer] ERROR: Unable to find any calendar information elements in the calendar data file.";
         return;
     }
 
