@@ -50,6 +50,7 @@ CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, 
         {
             Characterv2* newCharacter = new Characterv2(objectName);
             setDefaultValues(newCharacter);
+            newCharacter->setName(objectName);
             return newCharacter;
         }
         case DMHelper::CombatantType_Reference:
