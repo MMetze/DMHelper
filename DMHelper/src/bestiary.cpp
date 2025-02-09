@@ -690,13 +690,12 @@ void Bestiary::loadAndConvertBestiary(const QDomElement& bestiaryElement)
     QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
     while(!licenseText.isNull())
     {
-        _licenseText.append(licenseText.text());
+        if(!_licenseText.contains(licenseText.text()))
+            _licenseText.append(licenseText.text());
         licenseText = licenseText.nextSiblingElement(QString("element"));
     }
 
     qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
-
-    // TODO: actually convert the bestiary
 
     setDirty(false);
 }
@@ -725,8 +724,6 @@ void Bestiary::loadBestiary(const QDomElement& bestiaryElement)
     }
 
     qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
-
-    // TODO: actually convert the bestiary
 
     setDirty(false);
 }
