@@ -5,6 +5,7 @@
 #include "bestiary.h"
 #include "tokeneditdialog.h"
 #include "optionscontainer.h"
+#include "bestiarypopulatetokensdialog.h"
 #include <QMouseEvent>
 #include <QTextEdit>
 #include <QMenu>
@@ -40,6 +41,8 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     connect(ui->btnReload, &QPushButton::clicked, this, &BestiaryTemplateDialog::handleReloadImage);
     connect(ui->btnClear, &QPushButton::clicked, this, &BestiaryTemplateDialog::handleClearImage);
     connect(ui->btnNextToken, &QPushButton::clicked, this, &BestiaryTemplateDialog::handleNextToken);
+
+    connect(ui->btnPopulateTokens, &QPushButton::clicked, this, &BestiaryTemplateDialog::handlePopulateTokens);
 
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 }
@@ -399,6 +402,16 @@ void BestiaryTemplateDialog::handleClearImage()
 void BestiaryTemplateDialog::handleNextToken()
 {
     setTokenIndex(_currentToken + 1);
+}
+
+void BestiaryTemplateDialog::handlePopulateTokens()
+{
+    if(!_options)
+        return;
+
+    BestiaryPopulateTokensDialog* dlg = new BestiaryPopulateTokensDialog(*_options);
+    dlg->exec();
+    dlg->deleteLater();
 }
 
 bool BestiaryTemplateDialog::eventFilter(QObject* object, QEvent* event)

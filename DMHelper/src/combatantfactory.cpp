@@ -83,7 +83,6 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
     return newCharacter;
 }
 
-
 void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     loadTemplate(ruleset.getCharacterDataFile());

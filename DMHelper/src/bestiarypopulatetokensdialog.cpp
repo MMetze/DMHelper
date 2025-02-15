@@ -4,6 +4,7 @@
 #include "tokeneditor.h"
 #include "bestiary.h"
 #include "monsterclassv2.h"
+#include "monsterfactory.h"
 #include "dmhwaitingdialog.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -46,8 +47,6 @@ BestiaryPopulateTokensDialog::BestiaryPopulateTokensDialog(const OptionsContaine
     ui->chkFrame->setChecked(options.getTokenFrameApplied());
     ui->edtFrameImage->setText(options.getTokenFrameFile());
 
-    ui->frameToken->installEventFilter(this);
-
     _editor = new TokenEditor;
     _editor->applyOptionsToEditor(options);
     _editor->setSourceImage(QImage(":/img/data/icon_bestiary.png"));
@@ -65,20 +64,12 @@ BestiaryPopulateTokensDialog::BestiaryPopulateTokensDialog(const OptionsContaine
     connect(ui->edtFrameImage, &QLineEdit::textChanged, _editor, &TokenEditor::setFrameFile);
     connect(ui->btnBrowseFrameImage, &QAbstractButton::clicked, this, &BestiaryPopulateTokensDialog::browseFrame);
 
-    /*
-    connect(ui->chkFill, &QAbstractButton::toggled, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->btnFillColor, &ColorPushButton::colorChanged, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->chkTransparent, &QAbstractButton::toggled, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->btnTransparentColor, &ColorPushButton::colorChanged, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->sliderFuzzy, &QAbstractSlider::valueChanged, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->chkMask, &QAbstractButton::toggled, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->edtMaskImage, &QLineEdit::textChanged, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->chkFrame, &QAbstractButton::toggled, this, &BestiaryPopulateTokensDialog::updateImage);
-    connect(ui->edtFrameImage, &QLineEdit::textChanged, this, &BestiaryPopulateTokensDialog::updateImage);
-*/
     connect(_editor, &TokenEditor::imageDirty, this, &BestiaryPopulateTokensDialog::updateImage);
 
     connect(ui->btnPopulate, &QAbstractButton::clicked, this, &BestiaryPopulateTokensDialog::populateTokens);
+
+    if((_searchString.isEmpty()) && (MonsterFactory::Instance() != nullptr))
+        _searchString = MonsterFactory::Instance()->getRulesetName();
 }
 
 BestiaryPopulateTokensDialog::~BestiaryPopulateTokensDialog()
@@ -285,26 +276,6 @@ void BestiaryPopulateTokensDialog::updateImage()
 {
     QImage image = _editor->getFinalImage();
     ui->lblToken->setPixmap(QPixmap::fromImage(image));
-}
-
-
-bool BestiaryPopulateTokensDialog::eventFilter(QObject *o, QEvent *e)
-{
-    /*
-    if(o == ui->frameToken)
-    {
-        if(e->type() == QEvent::Resize)
-        {
-            QSize size = ui->frameToken->size();
-            QMargins margins = ui->frameToken->contentsMargins();
-            int sideLength = qMin(size.width() - margins.left() - margins.right() - (ui->lblToken->lineWidth() * 2) - 10,
-                                  size.height() - margins.top() - margins.bottom() - (ui->lblToken->lineWidth() * 2) - 10);
-            ui->lblToken->setFixedSize(sideLength, sideLength);
-        }
-    }
-*/
-
-    return QDialog::eventFilter(o, e);
 }
 
 void BestiaryPopulateTokensDialog::checkNextMonster()

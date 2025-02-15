@@ -59,6 +59,8 @@ protected slots:
     void handleClearImage();
     void handleNextToken();
 
+    void handlePopulateTokens();
+
 protected:
     // From QWidget
     virtual bool eventFilter(QObject* object, QEvent* event) override;
