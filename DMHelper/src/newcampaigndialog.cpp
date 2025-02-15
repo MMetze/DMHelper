@@ -116,11 +116,13 @@ void NewCampaignDialog::handleRulesetSelected()
     int initiativeIndex = ui->cmbInitiative->findData(ruleset._initiative);
     if(initiativeIndex != -1)
         ui->cmbInitiative->setCurrentIndex(initiativeIndex);
-    ui->edtCharacterData->setText(ruleset._characterData);
-    ui->edtCharacterUI->setText(ruleset._characterUI);
-    ui->edtMonsterData->setText(ruleset._monsterData);
-    ui->edtMonsterUI->setText(ruleset._monsterUI);
-    ui->edtBestiaryFile->setText(ruleset._bestiary);
+
+    QDir rulesetDir = RuleFactory::Instance()->getRulesetDir();
+    ui->edtCharacterData->setText(rulesetDir.absoluteFilePath(ruleset._characterData).removerelativestucff);
+    ui->edtCharacterUI->setText(rulesetDir.absoluteFilePath(ruleset._characterUI));
+    ui->edtMonsterData->setText(rulesetDir.absoluteFilePath(ruleset._monsterData));
+    ui->edtMonsterUI->setText(rulesetDir.absoluteFilePath(ruleset._monsterUI));
+    ui->edtBestiaryFile->setText(rulesetDir.absoluteFilePath(ruleset._bestiary));
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()
