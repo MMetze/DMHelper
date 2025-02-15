@@ -118,11 +118,11 @@ void NewCampaignDialog::handleRulesetSelected()
         ui->cmbInitiative->setCurrentIndex(initiativeIndex);
 
     QDir rulesetDir = RuleFactory::Instance()->getRulesetDir();
-    ui->edtCharacterData->setText(rulesetDir.absoluteFilePath(ruleset._characterData).removerelativestucff);
-    ui->edtCharacterUI->setText(rulesetDir.absoluteFilePath(ruleset._characterUI));
-    ui->edtMonsterData->setText(rulesetDir.absoluteFilePath(ruleset._monsterData));
-    ui->edtMonsterUI->setText(rulesetDir.absoluteFilePath(ruleset._monsterUI));
-    ui->edtBestiaryFile->setText(rulesetDir.absoluteFilePath(ruleset._bestiary));
+    ui->edtCharacterData->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._characterData)));
+    ui->edtCharacterUI->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._characterUI)));
+    ui->edtMonsterData->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._monsterData)));
+    ui->edtMonsterUI->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._monsterUI)));
+    ui->edtBestiaryFile->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._bestiary)));
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()
