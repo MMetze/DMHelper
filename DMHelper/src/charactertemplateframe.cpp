@@ -101,6 +101,12 @@ void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile
         return;
     }
 
+    if(absoluteTemplateFile == _uiFilename)
+    {
+        qDebug() << "[CharacterTemplateFrame] UI Template File " << absoluteTemplateFile << " already loaded, no further action required";
+        return;
+    }
+
     QWidget* newWidget = TemplateFactory::loadUITemplate(absoluteTemplateFile);
     if(!newWidget)
     {

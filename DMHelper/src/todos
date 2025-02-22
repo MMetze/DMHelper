@@ -1,3 +1,6 @@
+* Move some options around
+* Add search string to ruleset/campaign specifics
+* Populated icon doesn't show up until changing monsters
 1) There are two ruleset files, the app's one and the user's one (optional)
 2) The user can decide the location for both of them in settings
 3) The app will check at startup and overwrite it's one if the default file with the installation is newer than the app's file

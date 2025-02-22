@@ -111,6 +111,8 @@ void BestiaryPopulateTokensDialog::populateTokens()
 
     _tokenDir.setPath(tokenPath);
 
+    qDebug() << "[BestiaryPopulateTokensDialog] Polulating Bestiary tokens with string " << _searchString << " to directory " << _tokenDir.absolutePath();
+
     _waitingDlg = new DMHWaitingDialog(QString("Populating Bestiary tokens..."), this);
     _waitingDlg->setModal(true);
     _waitingDlg->show();

@@ -61,6 +61,12 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
         return;
     }
 
+    if(absoluteTemplateFile == _uiFilename)
+    {
+        qDebug() << "[BestiaryTemplateDialog] UI Template File " << absoluteTemplateFile << " already loaded, no further action required";
+        return;
+    }
+
     QWidget* newWidget = TemplateFactory::loadUITemplate(absoluteTemplateFile);
     if(!newWidget)
     {
@@ -412,6 +418,13 @@ void BestiaryTemplateDialog::handlePopulateTokens()
     BestiaryPopulateTokensDialog* dlg = new BestiaryPopulateTokensDialog(*_options);
     dlg->exec();
     dlg->deleteLater();
+
+    loadMonsterImage();
+}
+
+void BestiaryTemplateDialog::loadMonsterImage()
+{
+    ui->lblIcon->setPixmap(_monster->getIconPixmap(DMHelper::PixmapSize_Showcase, _currentToken));
 }
 
 bool BestiaryTemplateDialog::eventFilter(QObject* object, QEvent* event)
@@ -600,11 +613,6 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
     ui->btnClear->setEnabled(_monster->getIconCount() > 0);
     ui->btnPreviousToken->setVisible(_monster->getIconCount() > 1);
     ui->btnNextToken->setVisible(_monster->getIconCount() > 1);
-}
-
-void BestiaryTemplateDialog::loadMonsterImage()
-{
-    ui->lblIcon->setPixmap(_monster->getIconPixmap(DMHelper::PixmapSize_Showcase, _currentToken));
 }
 
 void BestiaryTemplateDialog::connectSpecialSignals()

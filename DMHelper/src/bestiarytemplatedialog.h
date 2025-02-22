@@ -60,6 +60,7 @@ protected slots:
     void handleNextToken();
 
     void handlePopulateTokens();
+    void loadMonsterImage();
 
 protected:
     // From QWidget
@@ -78,7 +79,6 @@ protected:
 private:
     QString selectToken();
     void setTokenIndex(int index);
-    void loadMonsterImage();
 
     void connectSpecialSignals();
     QLineEdit* getValueEdit(const QString& key);

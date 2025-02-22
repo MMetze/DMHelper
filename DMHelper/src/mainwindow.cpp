@@ -810,6 +810,9 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setRuleInitiative(newCampaignDialog->getInitiativeType());
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
+        _campaign->getRuleset().setBestiaryFile(newCampaignDialog->getBestiaryFile());
+        _campaign->getRuleset().setMonsterDataFile(newCampaignDialog->getMonsterDataFile());
+        _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
@@ -2339,6 +2342,7 @@ void MainWindow::openCampaign(const QString& filename)
     MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
     Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
     Bestiary::Instance()->startBatchProcessing();
@@ -2408,8 +2412,8 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(&campaign->getRuleset(), &Ruleset::monsterUIFileChanged, &_bestiaryDlg, &BestiaryTemplateDialog::loadMonsterUITemplate);
 
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
-        Bestiary::Instance()->readBestiary(campaign->getRuleset().getBestiaryFile());
         _bestiaryDlg.loadMonsterUITemplate(campaign->getRuleset().getMonsterUIFile());
+        Bestiary::Instance()->readBestiary(campaign->getRuleset().getBestiaryFile());
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
