@@ -86,7 +86,6 @@ private:
     Ui::BestiaryTemplateDialog *ui;
     QWidget *_uiWidget;
 
-
     OptionsContainer* _options;
     MonsterClassv2* _monster;
     int _currentToken;

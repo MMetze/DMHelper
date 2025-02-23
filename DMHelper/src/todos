@@ -7,7 +7,6 @@
 Should be enough already, compatible with what is already there, and I can fix the current problem you have first, then add the user ruleset file
 
 Real bugs:
-Fog of War clear area doesn't work!
 Copy character doesn't set Hit Points or AC, REactions not copied (Noble), Monster Type goes to Race instead of Class, Speed?
 
 3.4 todos:

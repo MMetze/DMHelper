@@ -988,6 +988,7 @@ void MainWindow::newCharacter()
             }
 
             character->copyMonsterValues(*monsterClass);
+            character->setName(characterName);
         }
     }
 
@@ -2342,6 +2343,7 @@ void MainWindow::openCampaign(const QString& filename)
     MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    _bestiaryDlg.setMonster(nullptr);
     _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
     Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
@@ -2412,6 +2414,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(&campaign->getRuleset(), &Ruleset::monsterUIFileChanged, &_bestiaryDlg, &BestiaryTemplateDialog::loadMonsterUITemplate);
 
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        _bestiaryDlg.setMonster(nullptr);
         _bestiaryDlg.loadMonsterUITemplate(campaign->getRuleset().getMonsterUIFile());
         Bestiary::Instance()->readBestiary(campaign->getRuleset().getBestiaryFile());
 
@@ -2438,6 +2441,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         // Reset the monster UI to the default
         //RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
         //_bestiaryDlg.loadMonsterUITemplate(defaultRuleset._monsterUI);
+
 
         //too many calls to loadUITemplate, and to setMonster - let's minimize this...
     }

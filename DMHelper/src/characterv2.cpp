@@ -161,12 +161,38 @@ void Characterv2::copyMonsterValues(MonsterClassv2& monster)
 
     setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getStringValue("name"), monster.getIcon())));
 
-    QHash<QString, DMHAttribute> elementAttributes = CombatantFactory::Instance()->getElements();
-    for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
+    QHash<QString, DMHAttribute> attributeHash = CombatantFactory::Instance()->getAttributes();
+    for(auto keyIt = attributeHash.keyBegin(), end = attributeHash.keyEnd(); keyIt != end; ++keyIt)
     {
         if(monster.hasValue(*keyIt))
             setValue(*keyIt, monster.getValueAsString(*keyIt));
     }
+
+    QHash<QString, DMHAttribute> elementHash = CombatantFactory::Instance()->getElements();
+    for(auto keyIt = elementHash.keyBegin(), end = elementHash.keyEnd(); keyIt != end; ++keyIt)
+    {
+        if(monster.hasValue(*keyIt))
+            setValue(*keyIt, monster.getValueAsString(*keyIt));
+    }
+
+    // Special case for 5e
+    if((attributeHash.contains("armorClass")) && (monster.hasValue("armor_class")))
+        setValue("armorClass", monster.getValueAsString("armor_class"));
+
+    if((attributeHash.contains("hitPoints")) && (monster.hasValue("hit_points")))
+        setValue("hitPoints", monster.getValueAsString("hit_points"));
+
+    if((attributeHash.contains("hitPoints")) && (monster.hasValue("hit_points")))
+        setValue("maximumHp", monster.getValueAsString("hit_points"));
+
+    if((attributeHash.contains("race")) && (monster.hasValue("name")))
+        setValue("race", monster.getValueAsString("name"));
+
+    if((attributeHash.contains("speed")) && (monster.hasValue("speed")))
+        setValue("speed", monster.getValueAsString("speed").left(monster.getValueAsString("speed").indexOf(" ")).toInt());
+
+    if((attributeHash.contains("movement")) && (monster.hasValue("speed")))
+        setValue("movement", monster.getValueAsString("speed"));
 
     /*
     remove the rest?

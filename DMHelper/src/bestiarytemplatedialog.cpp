@@ -107,10 +107,10 @@ void BestiaryTemplateDialog::setOptions(OptionsContainer* options)
 
 void BestiaryTemplateDialog::setMonster(MonsterClassv2* monster, bool edit)
 {
-    if((!monster) || (_monster == monster) || (!MonsterFactory::Instance()))
+    if((_monster == monster) || (!MonsterFactory::Instance()))
         return;
 
-    qDebug() << "[BestiaryTemplateDialog] Set Monster to " << monster->getStringValue("name");
+    qDebug() << "[BestiaryTemplateDialog] Set Monster to " << (monster ? monster->getStringValue("name") : QString("nullptr"));
 
     if(_monster)
         MonsterFactory::Instance()->disconnectWidget(_uiWidget);
@@ -118,14 +118,17 @@ void BestiaryTemplateDialog::setMonster(MonsterClassv2* monster, bool edit)
     _monster = monster;
     _edit = edit;
 
-    MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this, this);
+    if(_monster)
+    {
+        MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this, this);
 
-    if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
-        ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));
+        if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
+            ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));
 
-    if(_monster->getIconCount() == 0)
-        _monster->searchForIcons();
-    setTokenIndex(0);
+        if(_monster->getIconCount() == 0)
+            _monster->searchForIcons();
+        setTokenIndex(0);
+    }
 
     emit monsterChanged();
 }
