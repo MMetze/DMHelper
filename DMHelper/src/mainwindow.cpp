@@ -148,7 +148,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _bestiaryDlg(),
     _spellDlg(),
     _battleDlgMgr(nullptr),
-    _audioPlayer(nullptr),
+    //_audioPlayer(nullptr),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController(nullptr),
 #endif
@@ -750,8 +750,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
     connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
-    _audioPlayer = new AudioPlayer(this);
-    _audioPlayer->setVolume(_options->getAudioVolume());
+    //_audioPlayer = new AudioPlayer(this);
+    //_audioPlayer->setVolume(_options->getAudioVolume());
     //connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -760,7 +760,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
     _networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
-    connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
+    //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString, QString, QString, QString, QString)), _networkController, SLOT(setNetworkLogin(QString, QString, QString, QString, QString)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);
@@ -2726,7 +2726,7 @@ void MainWindow::handleOpenSoundboard()
         connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
         connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
         connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
-        // TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
+        connect(soundboard, &SoundboardFrame::dirty, this, &MainWindow::setDirty);
         _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
         if(_campaign)

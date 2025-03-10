@@ -246,7 +246,7 @@ private:
 
     BattleDialogManager* _battleDlgMgr;
 
-    AudioPlayer* _audioPlayer;
+    //AudioPlayer* _audioPlayer;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;
