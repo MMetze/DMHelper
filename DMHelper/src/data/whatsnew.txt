@@ -22,21 +22,16 @@ If you are using the automatic D&D Beyond importer, it has been updated to refle
 Just to be 100% safe, we recommend backing up your campaign XML files before opening them.
 <p>
 
-<h3>New v3.5 Features:</h3>
+<h3>New v3.6 Features:</h3>
 <ul>
-<li><b>Nope!</b> This one is a straight-up bug-fix release!
+<li><b>Dynamic Monsters</b>
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Crash-bug: add multiple monsters, then remove one
-<li>Crash-bug: add a PC without an image to a combat
-<li>Crash-bug: removing a combatant without sorting the initiative list
-<li>Bug: Add multiple monsters, one sits on top of a PC
-<li>Bug: Add a PC based on a monster, gets an invalid image path
-<li>Bug: Re-enabled the soundboard
+<li>Bug: Remove FoW by area works again
 </ul>
 
 <!-- Commenting out this section for now

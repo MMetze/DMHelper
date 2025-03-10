@@ -25,8 +25,8 @@ public:
 
 public slots:
     void updateTrackLayout();
-    void addTrack(AudioTrack* track);
-    void removeTrack(AudioTrack* track);
+    void addTrack(SoundboardTrack* track);
+    void removeTrack(SoundboardTrack* track);
     void setMute(bool mute);
     void trackMuteChanged(bool mute);
     void handleRemove();
@@ -49,7 +49,7 @@ protected slots:
     virtual void toggleMute();
 
 private:
-    void addTrackToLayout(AudioTrack* track);
+    void addTrackToLayout(SoundboardTrack* track);
 
     Ui::SoundBoardGroupFrame *ui;
 

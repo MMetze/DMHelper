@@ -145,10 +145,12 @@ void AudioTrackYoutube::setMute(bool mute)
 
 void AudioTrackYoutube::setVolume(float volume)
 {
-    if(volume == _volume)
+    float newVolume = static_cast<int>(volume * 100.f);
+
+    if(newVolume == _volume)
         return;
 
-    _volume = static_cast<int>(volume * 100.f);
+    _volume = newVolume;
 
     if(isPlaying())
         libvlc_audio_set_volume(_vlcPlayer, _volume);

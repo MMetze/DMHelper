@@ -2,11 +2,13 @@
 #include "ui_soundboardgroupframe.h"
 #include "soundboardtrackframe.h"
 #include "soundboardgroup.h"
+#include "soundboardtrack.h"
 #include "campaign.h"
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>
 #include <QUuid>
+#include <QDebug>
 
 SoundBoardGroupFrame::SoundBoardGroupFrame(SoundboardGroup* group, Campaign* campaign, QWidget *parent) :
     QFrame(parent),
@@ -20,23 +22,30 @@ SoundBoardGroupFrame::SoundBoardGroupFrame(SoundboardGroup* group, Campaign* cam
 
     setAcceptDrops(true);
 
-    ui->edtName->setText(group->getGroupName());
+    if(!_group)
+    {
+        qDebug() << "[SoundBoardGroupFrame] Frame created with empty group!";
+        return;
+    }
+
+    ui->edtName->setText(_group->getGroupName());
     ui->btnExpand->setIcon(QIcon(QPixmap(":/img/data/icon_downarrow.png").transformed(QTransform().rotate(180))));
+    ui->sliderVolume->setValue(_group->getVolume());
+    setMute(_group->getMute());
 
     connect(ui->btnExpand, &QPushButton::clicked, this, &SoundBoardGroupFrame::toggleContents);
-    connect(ui->btnVolume, &QPushButton::clicked, this, &SoundBoardGroupFrame::toggleMute);
+    connect(ui->btnMute, &QPushButton::clicked, this, &SoundBoardGroupFrame::toggleMute);
     connect(ui->btnRemove, &QPushButton::clicked, this, &SoundBoardGroupFrame::handleRemove);
+    connect(ui->sliderVolume, &QSlider::valueChanged, this, &SoundBoardGroupFrame::volumeChanged);
+    connect(this, &SoundBoardGroupFrame::volumeChanged, _group, &SoundboardGroup::setVolume);
 
-    if(_group)
+    for(SoundboardTrack* track : _group->getTracks())
     {
-        for(AudioTrack* track : _group->getTracks())
-        {
-            if(track)
-                addTrackToLayout(track);
-        }
-
-        connect(_group, &SoundboardGroup::destroyed, this, &SoundBoardGroupFrame::handleRemove);
+        if(track)
+            addTrackToLayout(track);
     }
+
+    connect(_group, &SoundboardGroup::destroyed, this, &SoundBoardGroupFrame::handleRemove);
 }
 
 SoundBoardGroupFrame::~SoundBoardGroupFrame()
@@ -110,7 +119,7 @@ void SoundBoardGroupFrame::updateTrackLayout()
     update();
 }
 
-void SoundBoardGroupFrame::addTrack(AudioTrack* track)
+void SoundBoardGroupFrame::addTrack(SoundboardTrack* track)
 {
     if((!_group) || (!track))
         return;
@@ -120,7 +129,7 @@ void SoundBoardGroupFrame::addTrack(AudioTrack* track)
     emit dirty();
 }
 
-void SoundBoardGroupFrame::removeTrack(AudioTrack* track)
+void SoundBoardGroupFrame::removeTrack(SoundboardTrack* track)
 {
     if((!_group) || (!track))
         return;
@@ -142,9 +151,9 @@ void SoundBoardGroupFrame::removeTrack(AudioTrack* track)
 
 void SoundBoardGroupFrame::setMute(bool mute)
 {
-    ui->btnVolume->setIcon(mute ? QIcon(QPixmap(":/img/data/icon_volumeoff.png")) : QIcon(QPixmap(":/img/data/icon_volumeon.png")));
+    ui->btnMute->setIcon(mute ? QIcon(QPixmap(":/img/data/icon_volumeoff.png")) : QIcon(QPixmap(":/img/data/icon_volumeon.png")));
     ui->sliderVolume->setEnabled(!mute);
-    ui->btnVolume->setChecked(mute);
+    ui->btnMute->setChecked(mute);
 }
 
 void SoundBoardGroupFrame::trackMuteChanged(bool mute)
@@ -209,7 +218,7 @@ void SoundBoardGroupFrame::dropEvent(QDropEvent *event)
             QUuid trackId(roleDataMap.value(Qt::UserRole).toString());
             AudioTrack* track = _campaign->getTrackById(trackId);
             if(track)
-                addTrack(track);
+                addTrack(new SoundboardTrack(track, 100, false, _group));
         }
     }
 
@@ -230,14 +239,16 @@ void SoundBoardGroupFrame::toggleContents()
 
 void SoundBoardGroupFrame::toggleMute()
 {
-    bool newMute = ui->btnVolume->isChecked();
+    bool newMute = ui->btnMute->isChecked();
     setMute(newMute);
     _localMute = newMute;
+    if(_group)
+        _group->setMute(newMute);
     emit muteChanged(newMute);
     emit dirty();
 }
 
-void SoundBoardGroupFrame::addTrackToLayout(AudioTrack* track)
+void SoundBoardGroupFrame::addTrackToLayout(SoundboardTrack* track)
 {
     SoundboardTrackFrame* trackFrame = new SoundboardTrackFrame(track);
     connect(this, &SoundBoardGroupFrame::muteChanged, trackFrame, &SoundboardTrackFrame::parentMuteChanged);

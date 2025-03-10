@@ -445,9 +445,16 @@ void OptionsContainer::readSettings()
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
     bool rulesetExists = true;
-    setRulesetFileName(getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists));
+    QString appRulesetFile = getAppFile(QString("ruleset.xml"));
+    QString settingsRulesetFile = getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists);
+    if((QFile::exists(appRulesetFile)) && (QFile::exists(settingsRulesetFile)) && (QFileInfo(appRulesetFile).lastModified() > QFileInfo(settingsRulesetFile).lastModified()))
+    {
+        QFile::remove(settingsRulesetFile);
+        QFile::copy(appRulesetFile, settingsRulesetFile);
+    }
+    setRulesetFileName(settingsRulesetFile);
 //    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
-//        getDataDirectory(QString("ui"), true);
+    getDataDirectory(QString("ui"), true);
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
@@ -726,15 +733,7 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename, bool* 
         return standardFile;
     }
 
-    QString appFile;
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    appFile = fileDirPath.path() + QString("/Resources/") + defaultFilename;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    appFile = fileDirPath.path() + QString("/resources/") + defaultFilename;
-#endif
+    QString appFile = getAppFile(defaultFilename);
 
     QDir().mkpath(standardPath);
     QDir().mkpath(standardPath + QString("/ui"));
@@ -1398,4 +1397,16 @@ QMainWindow* OptionsContainer::getMainWindow()
 void OptionsContainer::cleanupLegacy(OptionsAccessor& settings)
 {
     settings.remove("showOnDeck");
+}
+
+QString OptionsContainer::getAppFile(const QString& filename)
+{
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    return fileDirPath.path() + QString("/Resources/") + filename;
+#else
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    return fileDirPath.path() + QString("/resources/") + filename;
+#endif
 }

@@ -3,15 +3,17 @@
 
     <dmh:attribute type="dmh:boolean" name="private"/>
     <dmh:attribute type="dmh:string" name="name"/>
-    <dmh:attribute type="dmh:string" name="type" default="Beast"/>
-    <dmh:attribute type="dmh:string" name="subtype"/>
     <dmh:attribute type="dmh:string" name="size" default="medium"/>
     <dmh:attribute type="dmh:string" name="speed" default="30 ft"/>
-    <dmh:attribute type="dmh:string" name="alignment" default="neutral"/>
-    <dmh:attribute type="dmh:string" name="languages" default="---"/>
     <dmh:attribute type="dmh:integer" name="armor_class" default="10"/>
     <dmh:attribute type="dmh:dice" name="hit_dice" default="1d8"/>
     <dmh:attribute type="dmh:integer" name="hit_points" default="4"/>
+    <dmh:element type="dmh:string" name="icon"/>
+
+    <dmh:attribute type="dmh:string" name="type" default="Beast"/>
+    <dmh:attribute type="dmh:string" name="subtype"/>
+    <dmh:attribute type="dmh:string" name="alignment" default="neutral"/>
+    <dmh:attribute type="dmh:string" name="languages" default="---"/>
     <dmh:attribute type="dmh:string" name="condition_immunities"/>
     <dmh:attribute type="dmh:string" name="damage_immunities"/>
     <dmh:attribute type="dmh:string" name="damage_resistances"/>
@@ -41,8 +43,8 @@
     <dmh:attribute type="dmh:integer" name="charismaMod"/>
     <dmh:attribute type="dmh:integer" name="charismaSave"/>
 
-    <dmh:element type="dmh:string" name="icon"/>
-    
+    <dmh:element type="dmh:html" name="lore"/>
+
     <dmh:element type="dmh:list" name="actions">
         <dmh:element type="dmh:string" name="name"/>
         <dmh:element type="dmh:string" name="desc"/>

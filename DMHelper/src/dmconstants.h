@@ -151,6 +151,7 @@ namespace DMHelper
 
     enum AudioType
     {
+        AudioType_Unknown = -1,
         AudioType_File = 0,
         AudioType_Syrinscape,
         AudioType_Youtube,

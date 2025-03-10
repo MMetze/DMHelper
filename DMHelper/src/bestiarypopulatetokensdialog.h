@@ -33,8 +33,6 @@ protected slots:
     void updateImage();
 
 protected:
-    virtual bool eventFilter(QObject *o, QEvent *e) override;
-
     void checkNextMonster();
     void postRequest();
     void cancelRequests();

@@ -59,6 +59,9 @@ protected slots:
     void handleClearImage();
     void handleNextToken();
 
+    void handlePopulateTokens();
+    void loadMonsterImage();
+
 protected:
     // From QWidget
     virtual bool eventFilter(QObject* object, QEvent* event) override;
@@ -76,14 +79,12 @@ protected:
 private:
     QString selectToken();
     void setTokenIndex(int index);
-    void loadMonsterImage();
 
     void connectSpecialSignals();
     QLineEdit* getValueEdit(const QString& key);
 
     Ui::BestiaryTemplateDialog *ui;
     QWidget *_uiWidget;
-
 
     OptionsContainer* _options;
     MonsterClassv2* _monster;

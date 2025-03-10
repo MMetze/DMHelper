@@ -342,7 +342,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
 
     if(mapEditShape.erase())
     {
-        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         if(mapEditShape.smooth())
         {
             qreal rectWidth = rect.width() / 80;
@@ -383,7 +383,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     else
     {
         p.setBrush(_fowColor);
-        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         p.drawRect(rect);
     }
 

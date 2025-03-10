@@ -50,6 +50,7 @@ CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, 
         {
             Characterv2* newCharacter = new Characterv2(objectName);
             setDefaultValues(newCharacter);
+            newCharacter->setName(objectName);
             return newCharacter;
         }
         case DMHelper::CombatantType_Reference:
@@ -81,7 +82,6 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
     setDefaultValues(newCharacter);
     return newCharacter;
 }
-
 
 void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {

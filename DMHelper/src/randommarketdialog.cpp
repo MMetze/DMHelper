@@ -52,7 +52,7 @@ void RandomMarketDialog::loadMarkets(const QString& shopFile)
     qDebug() << "[RandomMarketDialog] Market file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[RandomMarketDialog] Unable to read market file: " << shopFile;
+        qDebug() << "[RandomMarketDialog] ERROR: Unable to read market file: " << shopFile;
         return;
     }
 
@@ -67,22 +67,21 @@ void RandomMarketDialog::loadMarkets(const QString& shopFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[RandomMarketDialog] Unable to parse the market data file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[RandomMarketDialog] ERROR: Unable to parse the market data file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[RandomMarketDialog] Unable to find the root element in the market data file.";
+        qDebug() << "[RandomMarketDialog] ERROR: Unable to find the root element in the market data file.";
         return;
     }
 
     QDomElement locationSection = root.firstChildElement(QString("locations"));
     if(locationSection.isNull())
     {
-        qDebug() << "[RandomMarketDialog] Unable to find the locations element in the market data file.";
+        qDebug() << "[RandomMarketDialog] ERROR: Unable to find the locations element in the market data file.";
     }
     else
     {

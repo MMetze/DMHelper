@@ -250,6 +250,7 @@ private:
     void copy(OptionsContainer* other);
     QMainWindow* getMainWindow();
     void cleanupLegacy(OptionsAccessor& settings);
+    QString getAppFile(const QString& filename);
 
     bool _loading;
 

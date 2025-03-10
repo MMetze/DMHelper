@@ -3,8 +3,7 @@
 
 #include <QFrame>
 
-class AudioTrack;
-class AudioPlayer;
+class SoundboardTrack;
 
 namespace Ui {
 class SoundboardTrackFrame;
@@ -15,11 +14,11 @@ class SoundboardTrackFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit SoundboardTrackFrame(AudioTrack* track, QWidget *parent = nullptr);
+    explicit SoundboardTrackFrame(SoundboardTrack* track, QWidget *parent = nullptr);
     ~SoundboardTrackFrame();
 
-    void setTrack(AudioTrack* track);
-    AudioTrack* getTrack() const;
+    SoundboardTrack* getTrack() const;
+    int getAudioType() const;
 
 public slots:
     void setMute(bool mute);
@@ -29,12 +28,11 @@ public slots:
     void setRepeat(bool repeat);
 
 signals:
-    void play(AudioPlayer* player);
+    void play();
     void stop();
     void muteChanged(bool mute);
-    void volumeChanged(int volume);
     void repeatChanged(bool repeat);
-    void removeTrack(AudioTrack* track);
+    void removeTrack(SoundboardTrack* track);
 
 protected slots:
     void togglePlay(bool checked);
@@ -44,9 +42,11 @@ protected slots:
     void handleRemove();
 
 private:
+    void setTrack(SoundboardTrack* track);
+
     Ui::SoundboardTrackFrame *ui;
 
-    AudioTrack* _track;
+    SoundboardTrack* _track;
     bool _localMute;
     bool _currentMute;
     QString _trackLength;

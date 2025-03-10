@@ -12,6 +12,8 @@ public:
     static MonsterFactory* Instance();
     static void Shutdown();
 
+    QString getRulesetName() const;
+
 public slots:
     virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) override;
     virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) override;
@@ -23,6 +25,7 @@ protected:
     static MonsterFactory* _instance;
 
     bool _compatibilityMode;
+    QString _rulesetName;
 };
 
 #endif // MONSTERFACTORY_H

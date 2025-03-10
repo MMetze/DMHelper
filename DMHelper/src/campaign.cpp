@@ -489,13 +489,7 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
         if(group)
         {
             QDomElement groupElement = doc.createElement("soundboardgroup");
-            groupElement.setAttribute("groupname", group->getGroupName());
-            for(AudioTrack* track : group->getTracks())
-            {
-                QDomElement trackElement = doc.createElement("soundboardtrack");
-                trackElement.setAttribute("trackID", track->getID().toString());
-                groupElement.appendChild(trackElement);
-            }
+            group->outputXML(doc, groupElement, targetDirectory, isExport);
             soundboardElement.appendChild(groupElement);
         }
     }
@@ -516,52 +510,13 @@ void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    /*
-    // Compatibility mode for global expansion flags
-    if(element.hasAttribute("partyExpanded"))
-    {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Party", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("partyExpanded", QString::number(0)).toInt()));
-    }
-    if(element.hasAttribute("adventuresExpanded"))
-    {
-        CampaignObjectBase* adventuresChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
-        if(adventuresChild)
-            adventuresChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded", QString::number(0)).toInt()));
-    }
-    if(element.hasAttribute("worldSettingsExpanded"))
-    {
-        CampaignObjectBase* worldChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
-        if(worldChild)
-            worldChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded", QString::number(0)).toInt()));
-    }
-    if(element.hasAttribute("worldNPCsExpanded"))
-    {
-        CampaignObjectBase* npcChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
-        if(npcChild)
-            npcChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded", QString::number(0)).toInt()));
-    }
-    */
-
     QDomElement soundboardElement = element.firstChildElement("soundboard");
     if(!soundboardElement.isNull())
     {
         QDomElement groupElement = soundboardElement.firstChildElement("soundboardgroup");
         while(!groupElement.isNull())
         {
-            SoundboardGroup* group = new SoundboardGroup(groupElement.attribute("groupname"));
-            QDomElement trackElement = groupElement.firstChildElement("soundboardtrack");
-            while(!trackElement.isNull())
-            {
-                int trackIdInt = DMH_GLOBAL_INVALID_ID;
-                QUuid trackId = parseIdString(trackElement.attribute("trackID"), &trackIdInt);
-                AudioTrack* track = dynamic_cast<AudioTrack*>(getObjectById(trackId));
-                if(track)
-                    group->addTrack(track);
-
-                trackElement = trackElement.nextSiblingElement("soundboardtrack");
-            }
+            SoundboardGroup* group = new SoundboardGroup(*this, groupElement, isImport);
             addSoundboardGroup(group);
             groupElement = groupElement.nextSiblingElement("soundboardgroup");
         }

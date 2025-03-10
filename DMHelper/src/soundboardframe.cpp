@@ -80,9 +80,7 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     for(SoundboardGroup* group : campaign->getSoundboardGroups())
     {
         if(group)
-        {
             addGroupToLayout(group);
-        }
     }
 
     QList<CampaignObjectBase*> tracks = campaign->getChildObjectsByType(DMHelper::CampaignType_AudioTrack);
@@ -267,7 +265,7 @@ void SoundboardFrame::addTrack(const QUrl& url)
 
 void SoundboardFrame::addGroupToLayout(SoundboardGroup* group)
 {
-    if((!_campaign) || (!_layout))
+    if((!_campaign) || (!_layout) || (!group))
         return;
 
     SoundBoardGroupFrame* newGroupBox = new SoundBoardGroupFrame(group, _campaign);

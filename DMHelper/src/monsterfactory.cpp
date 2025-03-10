@@ -6,7 +6,8 @@ MonsterFactory* MonsterFactory::_instance = nullptr;
 
 MonsterFactory::MonsterFactory(QObject *parent) :
     TemplateFactory{parent},
-    _compatibilityMode(false)
+    _compatibilityMode(false),
+    _rulesetName{}
 {
 }
 
@@ -25,6 +26,11 @@ void MonsterFactory::Shutdown()
 {
     delete _instance;
     _instance = nullptr;
+}
+
+QString MonsterFactory::getRulesetName() const
+{
+    return _rulesetName;
 }
 
 CampaignObjectBase* MonsterFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
@@ -51,4 +57,5 @@ void MonsterFactory::configureFactory(const Ruleset& ruleset, int inputMajorVers
     connect(&ruleset, &Ruleset::monsterDataFileChanged, this, &MonsterFactory::loadTemplate);
 
     _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 2));
+    _rulesetName = ruleset.getName();
 }

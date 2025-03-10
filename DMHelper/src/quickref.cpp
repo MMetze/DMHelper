@@ -145,7 +145,7 @@ void QuickRef::readQuickRef(const QString& quickRefFile)
     qDebug() << "[QuickRef] Quickref data file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFile;
+        qDebug() << "[QuickRef] ERROR: Unable to read quickref file: " << quickRefFile;
         return;
     }
 
@@ -163,15 +163,14 @@ void QuickRef::readQuickRef(const QString& quickRefFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[QuickRef] Unable to parse the quickref data file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[QuickRef] ERROR: Unable to parse the quickref data file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[QuickRef] Unable to find the root element in the quickref data file.";
+        qDebug() << "[QuickRef] ERROR: Unable to find the root element in the quickref data file.";
         return;
     }
 

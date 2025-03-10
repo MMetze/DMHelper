@@ -5,6 +5,7 @@
 #include "bestiary.h"
 #include "tokeneditdialog.h"
 #include "optionscontainer.h"
+#include "bestiarypopulatetokensdialog.h"
 #include <QMouseEvent>
 #include <QTextEdit>
 #include <QMenu>
@@ -41,6 +42,8 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     connect(ui->btnClear, &QPushButton::clicked, this, &BestiaryTemplateDialog::handleClearImage);
     connect(ui->btnNextToken, &QPushButton::clicked, this, &BestiaryTemplateDialog::handleNextToken);
 
+    connect(ui->btnPopulateTokens, &QPushButton::clicked, this, &BestiaryTemplateDialog::handlePopulateTokens);
+
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 }
 
@@ -55,6 +58,12 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
     if(absoluteTemplateFile.isEmpty())
     {
         qDebug() << "[BestiaryTemplateDialog] ERROR: UI Template File " << templateFile << " could not be found!";
+        return;
+    }
+
+    if(absoluteTemplateFile == _uiFilename)
+    {
+        qDebug() << "[BestiaryTemplateDialog] UI Template File " << absoluteTemplateFile << " already loaded, no further action required";
         return;
     }
 
@@ -98,10 +107,10 @@ void BestiaryTemplateDialog::setOptions(OptionsContainer* options)
 
 void BestiaryTemplateDialog::setMonster(MonsterClassv2* monster, bool edit)
 {
-    if((!monster) || (_monster == monster) || (!MonsterFactory::Instance()))
+    if((_monster == monster) || (!MonsterFactory::Instance()))
         return;
 
-    qDebug() << "[BestiaryTemplateDialog] Set Monster to " << monster->getStringValue("name");
+    qDebug() << "[BestiaryTemplateDialog] Set Monster to " << (monster ? monster->getStringValue("name") : QString("nullptr"));
 
     if(_monster)
         MonsterFactory::Instance()->disconnectWidget(_uiWidget);
@@ -109,14 +118,17 @@ void BestiaryTemplateDialog::setMonster(MonsterClassv2* monster, bool edit)
     _monster = monster;
     _edit = edit;
 
-    MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this, this);
+    if(_monster)
+    {
+        MonsterFactory::Instance()->readObjectData(_uiWidget, _monster, this, this);
 
-    if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
-        ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));
+        if(ui->cmbSearch->currentText() != _monster->getStringValue("name"))
+            ui->cmbSearch->setCurrentText(_monster->getStringValue("name"));
 
-    if(_monster->getIconCount() == 0)
-        _monster->searchForIcons();
-    setTokenIndex(0);
+        if(_monster->getIconCount() == 0)
+            _monster->searchForIcons();
+        setTokenIndex(0);
+    }
 
     emit monsterChanged();
 }
@@ -401,6 +413,23 @@ void BestiaryTemplateDialog::handleNextToken()
     setTokenIndex(_currentToken + 1);
 }
 
+void BestiaryTemplateDialog::handlePopulateTokens()
+{
+    if(!_options)
+        return;
+
+    BestiaryPopulateTokensDialog* dlg = new BestiaryPopulateTokensDialog(*_options);
+    dlg->exec();
+    dlg->deleteLater();
+
+    loadMonsterImage();
+}
+
+void BestiaryTemplateDialog::loadMonsterImage()
+{
+    ui->lblIcon->setPixmap(_monster->getIconPixmap(DMHelper::PixmapSize_Showcase, _currentToken));
+}
+
 bool BestiaryTemplateDialog::eventFilter(QObject* object, QEvent* event)
 {
     if((event) && (event->type() == QEvent::MouseButtonPress))
@@ -587,11 +616,6 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
     ui->btnClear->setEnabled(_monster->getIconCount() > 0);
     ui->btnPreviousToken->setVisible(_monster->getIconCount() > 1);
     ui->btnNextToken->setVisible(_monster->getIconCount() > 1);
-}
-
-void BestiaryTemplateDialog::loadMonsterImage()
-{
-    ui->lblIcon->setPixmap(_monster->getIconPixmap(DMHelper::PixmapSize_Showcase, _currentToken));
 }
 
 void BestiaryTemplateDialog::connectSpecialSignals()

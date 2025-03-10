@@ -176,7 +176,7 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
                 if(QLayout* oldLayout = oldWidget->layout())
                 {
                     QLayoutItem *child;
-                    while((child = scrollArea->layout()->takeAt(0)) != nullptr)
+                    while((child = oldLayout->takeAt(0)) != nullptr)
                     {
                         if(child->widget())
                             child->widget()->deleteLater();
@@ -293,15 +293,15 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         if((!frame) || (dynamic_cast<QTextEdit*>(frame)) || (dynamic_cast<QScrollArea*>(frame)) || (dynamic_cast<QScrollArea*>(frame->parentWidget())))
             continue;
 
+        QString keyString = frame->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
         if(QLayout* oldLayout = frame->layout())
         {
             frame->removeEventFilter(oldLayout);
             delete oldLayout;
         }
-
-        QString keyString = frame->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
-        if(keyString.isEmpty())
-            continue;
 
         ResourcePair valuePair;
         if(hash)
