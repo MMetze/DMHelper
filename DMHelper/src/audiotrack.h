@@ -39,6 +39,7 @@ public slots:
     virtual void setRepeat(bool repeat) = 0;
 
 signals:
+    void playingChanged(bool playing);
     void trackLengthChanged(int length);
     void trackPositionChanged(int length);
 

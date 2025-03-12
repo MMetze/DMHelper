@@ -195,6 +195,7 @@ SOURCES += main.cpp\
     selectcombatantdialog.cpp \
     selectitemdialog.cpp \
     selectstringdialog.cpp \
+    soundboardbutton.cpp \
     soundboardframe.cpp \
     soundboardgroup.cpp \
     soundboardgroupframe.cpp \
@@ -491,6 +492,7 @@ HEADERS  += mainwindow.h \
     selectcombatantdialog.h \
     selectitemdialog.h \
     selectstringdialog.h \
+    soundboardbutton.h \
     soundboardframe.h \
     soundboardgroup.h \
     soundboardgroupframe.h \

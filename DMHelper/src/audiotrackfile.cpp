@@ -100,6 +100,7 @@ void AudioTrackFile::play()
     connect(_player, &QMediaPlayer::durationChanged, this, &AudioTrackFile::handleDurationChanged);
     connect(_player, &QMediaPlayer::positionChanged, this, &AudioTrackFile::handlePositionChanged);
     connect(_player, &QMediaPlayer::errorOccurred, this, &AudioTrackFile::handleErrorOccurred);
+    connect(_player, &QMediaPlayer::playingChanged, this, &AudioTrackFile::handlePlayingChanged);
 
     if(_mute)
         _player->audioOutput()->setMuted(_mute);
@@ -162,6 +163,17 @@ void AudioTrackFile::handleDurationChanged(qint64 position)
 void AudioTrackFile::handlePositionChanged(qint64 position)
 {
     emit trackPositionChanged(position / 1000);
+}
+
+void AudioTrackFile::handlePlayingChanged(bool playing)
+{
+    if((_player) && (!playing))
+    {
+        _player->deleteLater();
+        _player = nullptr;
+    }
+
+    emit playingChanged(playing);
 }
 
 void AudioTrackFile::handleErrorOccurred(QMediaPlayer::Error error, const QString &errorString)

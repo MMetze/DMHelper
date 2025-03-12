@@ -4,6 +4,7 @@
 #include "soundboardgroup.h"
 #include "soundboardtrack.h"
 #include "campaign.h"
+#include "audiotrack.h"
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>

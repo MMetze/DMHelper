@@ -31,6 +31,7 @@ public slots:
 protected slots:
     void handleDurationChanged(qint64 position);
     void handlePositionChanged(qint64 position);
+    void handlePlayingChanged(bool playing);
     void handleErrorOccurred(QMediaPlayer::Error error, const QString &errorString);
 
 protected:

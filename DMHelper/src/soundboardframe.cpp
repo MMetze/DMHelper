@@ -4,6 +4,7 @@
 #include "dmconstants.h"
 #include "soundboardgroup.h"
 #include "soundboardgroupframe.h"
+#include "soundboardbutton.h"
 #include "audiotrack.h"
 #include "audiofactory.h"
 #include "ribbonframe.h"
@@ -90,6 +91,23 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     }
 
     updateTrackLayout();
+
+    if(tracks.count() > 0)
+    {
+        QGridLayout* grid = dynamic_cast<QGridLayout*>(ui->frameButtons->layout());
+        if(grid)
+        {
+            grid->addWidget(new SoundboardButton(_campaign, QString(":/img/data/img/aura.png"), dynamic_cast<AudioTrack*>(tracks.at(0))), 0, 0);
+            grid->addWidget(new SoundboardButton(_campaign, QString(":/img/data/img/aura.png"), dynamic_cast<AudioTrack*>(tracks.at(0))), 1, 0);
+            grid->addWidget(new SoundboardButton(_campaign, QString(":/img/data/img/aura.png"), dynamic_cast<AudioTrack*>(tracks.at(0))), 2, 0);
+            grid->addWidget(new SoundboardButton(_campaign, QString(":/img/data/img/aura.png"), dynamic_cast<AudioTrack*>(tracks.at(0))), 0, 1);
+            grid->addWidget(new SoundboardButton(_campaign, QString(":/img/data/img/aura.png"), dynamic_cast<AudioTrack*>(tracks.at(0))), 1, 1);
+            grid->addWidget(new SoundboardButton(_campaign, QString(":/img/data/img/aura.png"), dynamic_cast<AudioTrack*>(tracks.at(0))), 2, 1);
+            grid->addWidget(new SoundboardButton(_campaign, QString(""), nullptr), 0, 2);
+            grid->addWidget(new SoundboardButton(_campaign, QString(""), nullptr), 1, 2);
+            grid->addWidget(new SoundboardButton(_campaign, QString(""), nullptr), 2, 2);
+        }
+    }
 
     ui->treeWidget->setMinimumWidth(ui->treeWidget->sizeHint().width());
 }

@@ -79,6 +79,7 @@ void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
     {
         libvlc_time_t length_full = libvlc_media_player_get_length(_vlcPlayer);
         emit trackLengthChanged(length_full / 1000);
+        emit playingChanged(true);
     }
 }
 
@@ -376,6 +377,8 @@ void AudioTrackYoutube::internalStopCheck(int status)
 
     if(_stopStatus != AUDIOTRACKYOUTUBE_STOPCOMPLETE)
         return;
+
+    emit playingChanged(false);
 
     libvlc_media_player_release(_vlcPlayer);
     _vlcPlayer = nullptr;
