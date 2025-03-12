@@ -283,6 +283,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
 {
+    Q_UNUSED(monsterName);
     MonsterClass* monsterClass = nullptr;//Bestiary::Instance()->getMonsterClass(monsterName);
     if(monsterClass)
         setMonster(monsterClass, edit);
