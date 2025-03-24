@@ -112,8 +112,12 @@ protected slots:
 
     void refreshImage();
 
+    void triggerEncounterChanged();
+    void triggerUpdateAnchor();
+
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
     void scaleBackgroundImage();
     void prepareImages();
@@ -123,6 +127,8 @@ protected:
 
     void setPublishCheckable();
     QSize getRotatedTargetSize();
+
+    void cancelTimers();
 
     Ui::EncounterTextEdit *ui;
 
@@ -144,6 +150,9 @@ protected:
     int _rotation;
 
     QPointF _textPos;
+
+    int _encounterChangedTimer;
+    int _updateAnchorTimer;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H
