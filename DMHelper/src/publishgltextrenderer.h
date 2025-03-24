@@ -35,6 +35,8 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
+    void setTextImage(QImage textImage);
+
 public slots:
     // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
