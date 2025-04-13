@@ -26,6 +26,8 @@ public:
 
     virtual void setShowDone(bool showDone) = 0;
 
+    virtual void disconnectInternals() = 0;
+
 signals:
 
     void contextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);

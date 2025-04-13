@@ -466,7 +466,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(_encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_encounterTextEdit, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
-    connect(_pubWindow, SIGNAL(frameResized(QSize)), _encounterTextEdit, SLOT(targetResized(QSize)));
     connect(_ribbonTabText, SIGNAL(animationClicked(bool)), _encounterTextEdit, SLOT(setAnimated(bool)));
     connect(_ribbonTabText, SIGNAL(speedChanged(int)), _encounterTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabText, SIGNAL(widthChanged(int)), _encounterTextEdit, SLOT(setTextWidth(int)));
@@ -879,6 +878,7 @@ bool MainWindow::closeCampaign()
             qDebug() << "[MainWindow] User decided not to save Campaign: " << _campaignFileName;
     }
 
+    writeBestiary();
     deleteCampaign();
     clearDirty();
 
@@ -2915,16 +2915,23 @@ void MainWindow::writeBestiary()
         return;
     }
 
-    if(!Bestiary::Instance()->isDirty())
-    {
-        qDebug() << "[MainWindow] Bestiary has not been changed, no file will be written";
-        return;
-    }
-
     if(!_campaign)
     {
         qDebug() << "[MainWindow] No campaign loaded, no reason to write the Bestiary";
         return;
+    }
+
+    if(!Bestiary::Instance()->isDirty())
+    {
+        if(Bestiary::Instance()->isVersionIdentical())
+        {
+            qDebug() << "[MainWindow] Bestiary has not been changed, no file will be written";
+            return;
+        }
+        else
+        {
+            qDebug() << "[MainWindow] Bestiary has not been changed, but it is an older version so it will be written anyways...";
+        }
     }
 
     Bestiary::Instance()->writeBestiary(_campaign->getRuleset().getBestiaryFile());

@@ -415,6 +415,9 @@ void BattleDialogModel::removeCombatantFromList(BattleDialogModelCombatant* comb
     if(!_combatants.removeOne(combatant))
         return;
 
+    if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
+        disconnect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
+
     if(combatant->getCombatantType() == DMHelper::CombatantType_Monster)
     {
         BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);

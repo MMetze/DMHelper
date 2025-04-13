@@ -81,7 +81,7 @@ QString TemplateObject::getValueAsString(const QString& key) const
 
     if((!_factory) || (!_factory->hasEntry(key)))
     {
-        qDebug() << "[Characterv2] WARNING: Attempting to read the value for the unknown key " << key << " from factory " << _factory;
+        qDebug() << "[TemplateObject] WARNING: Attempting to read the value for the unknown key " << key << " from factory " << _factory;
         return QString();
     }
 
@@ -326,8 +326,6 @@ void TemplateObject::insertListEntry(const QString& key, int index, QHash<QStrin
         return;
 
     QList<QVariant> list = getListValue(key);
-    if(list.isEmpty())
-        qDebug() << "[Characterv2] WARNING: Request to insert item into unknown list, will create a new entry: " << key;
 
     if((index < 0) || (index > list.size()))
     {
@@ -442,7 +440,7 @@ void TemplateObject::readXMLValues(const QDomElement& element, bool isImport)
         }
         else
         {
-            qDebug() << "[Characterv2] WARNING: Unknown value type: " << tagName;
+            qDebug() << "[TemplateObject] WARNING: Unknown value type: " << tagName;
         }
 
         childElement = childElement.nextSiblingElement();

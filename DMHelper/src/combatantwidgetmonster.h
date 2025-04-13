@@ -27,6 +27,8 @@ public:
 
     virtual void setShowDone(bool showDone) override;
 
+    virtual void disconnectInternals() override;
+
 public slots:
     void clearImage();
     virtual void updateData() override;

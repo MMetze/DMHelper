@@ -123,12 +123,16 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     {
         //if(!belongsToObject(childElement))
         {
-            QString elTagName = childElement.tagName();
-            QString elName = childElement.attribute(QString("name"));
+//            QString elTagName = childElement.tagName();
+//            QString elName = childElement.attribute(QString("name"));
 
-            CampaignObjectBase* childObject = searchChildrenById(QUuid(childElement.attribute(QString("_baseID"))));
-            if(childObject)
-                childObject->internalPostProcessXML(childElement, isImport);
+            QUuid baseIDValue= QUuid(childElement.attribute(QString("_baseID")));
+            if(!baseIDValue.isNull())
+            {
+                CampaignObjectBase* childObject = searchChildrenById(baseIDValue);
+                if(childObject)
+                    childObject->internalPostProcessXML(childElement, isImport);
+            }
 
             CampaignObjectBase::postProcessXML(childElement, isImport);
         }

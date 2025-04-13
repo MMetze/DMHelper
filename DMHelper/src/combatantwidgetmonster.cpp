@@ -64,9 +64,9 @@ void CombatantWidgetMonster::setInternals(CombatantWidgetInternalsMonster* inter
         connect(monsterCombatant, &BattleDialogModelMonsterBase::combatantDoneChanged, this, &CombatantWidgetMonster::updateData);
 
         if(monsterCombatant->getCombatant())
-            connect(monsterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
+            connect(monsterCombatant->getCombatant(), &Combatant::dirty, this, &CombatantWidgetMonster::updateData);
         else if (monsterCombatant->getMonsterClass())
-            connect(monsterCombatant->getMonsterClass(), SIGNAL(dirty()), this, SLOT(updateData()));
+            connect(monsterCombatant->getMonsterClass(), &MonsterClassv2::dirty, this, &CombatantWidgetMonster::updateData);
         else
             qDebug() << "[Monster Widget] neither valid combatant nor monster class found!";
 
@@ -99,6 +99,22 @@ void CombatantWidgetMonster::setShowDone(bool showDone)
 {
     ui->lblDone->setVisible(showDone);
     ui->chkDone->setVisible(showDone);
+}
+
+void CombatantWidgetMonster::disconnectInternals()
+{
+    if(!_internals)
+        return;
+
+    BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
+    if(!monsterCombatant)
+        return;
+
+    disconnect(monsterCombatant, &BattleDialogModelMonsterBase::combatantDoneChanged, this, &CombatantWidgetMonster::updateData);
+    if(monsterCombatant->getCombatant())
+        disconnect(monsterCombatant->getCombatant(), &Combatant::dirty, this, &CombatantWidgetMonster::updateData);
+    else if (monsterCombatant->getMonsterClass())
+        disconnect(monsterCombatant->getMonsterClass(), &MonsterClassv2::dirty, this, &CombatantWidgetMonster::updateData);
 }
 
 void CombatantWidgetMonster::clearImage()

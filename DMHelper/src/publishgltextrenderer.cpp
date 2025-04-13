@@ -9,10 +9,9 @@
 #include <QTextDocument>
 #include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, const QSize& frameSize, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
-    _frameSize(frameSize),
     _targetSize(),
     _color(),
     _textImage(textImage),
@@ -104,10 +103,7 @@ void PublishGLTextRenderer::initializeGL()
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    if(_encounter->getLayerScene().sceneSize().isEmpty())
-        _scene.deriveSceneRectFromSize(_frameSize);
-    else
-        _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
+    updateSceneRect();
 
     // Create the objects
     _encounter->getLayerScene().playerGLInitialize(this, &_scene);
@@ -184,8 +180,10 @@ void PublishGLTextRenderer::resizeGL(int w, int h)
     qDebug() << "[PublishGLTextRenderer] Resize w: " << w << ", h: " << h;
 
     _scene.setTargetSize(_targetSize);
-    if(_encounter)
-        _encounter->getLayerScene().playerGLResize(w, h);
+    updateSceneRect();
+    updateProjectionMatrix();
+//    if(_encounter)
+//        _encounter->getLayerScene().playerGLResize(w, h);
 
     // This happens now when the text image is changed...
     //recreateContent();
@@ -255,9 +253,9 @@ void PublishGLTextRenderer::setTextImage(QImage textImage)
 
     _textImage = textImage;
     _recreateContent = true;
+    updateSceneRect();
 
     emit updateWidget();
-
 }
 
 void PublishGLTextRenderer::updateProjectionMatrix()
@@ -269,27 +267,39 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     if(!f)
         return;
 
-    QSizeF transformedTarget = _targetSize;
-    if((_rotation == 90) || (_rotation == 270))
-        transformedTarget.transpose();
+//    Fix the scissor for text with background, then fix 90/270 rotations
+
+    QSizeF transformedTarget;
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+        transformedTarget = getRotatedSize().toSizeF();
+    else
+        transformedTarget = _targetSize.scaled(getRotatedSize(), Qt::KeepAspectRatioByExpanding).toSizeF();
+
+//    if((_encounter) && (!_encounter->getLayerScene().sceneSize().isEmpty()))
+//        transformedTarget = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+//    if(_scene.getSceneRect().isValid())
+//        transformedTarget = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
 
     // Update projection matrix and other size related settings:
-    QSizeF rectSize = transformedTarget;//.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
-    if(rectSize.isEmpty())
-        qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR - publish scene size empty!";
+    //QSizeF rectSize = transformedTarget;//.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    //if(rectSize.isEmpty())
+    //    qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR - publish scene size empty!";
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-    _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    _projectionMatrix.ortho(-transformedTarget.width() / 2, transformedTarget.width() / 2, -transformedTarget.height() / 2, transformedTarget.height() / 2, 0.1f, 1000.f);
     //_projectionMatrix.ortho(0.0, 0.0, -rectSize.height(), rectSize.height(), 0.1f, 1000.f);
     //_projectionMatrix.ortho(0.0, rectSize.width(), -rectSize.height(), 0.0, 0.1f, 1000.f);
 
+    /*
     QSizeF transformedBackgroundSize = _scene.getSceneRect().size(); //_encounter->getLayerScene().sceneSize();
     if(transformedBackgroundSize.isEmpty())
         qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR - background size empty!";
 
     if((_rotation == 90) || (_rotation == 270))
         transformedBackgroundSize.transpose();
+    */
+    QSizeF transformedBackgroundSize = transformedTarget;
 
     //QSizeF scissorSize = transformedBackgroundSize.scaled(_targetSize, Qt::KeepAspectRatio);
     //QSizeF scaledSize = originalSize.scaled(targetSize.width(), originalSize.height(), Qt::KeepAspectRatio);
@@ -298,12 +308,14 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     if(transformedBackgroundSize.width() <= 0.1)
         return;
 
-    QSizeF targetSizeF = _targetSize.toSizeF();
-    qreal scaleFactor = targetSizeF.width() / transformedBackgroundSize.width();
-    QSizeF scissorSize(_targetSize.width(), static_cast<int>(transformedBackgroundSize.height() * scaleFactor));
+    QSizeF sceneSizeF = _scene.getSceneRect().size();
+    //qreal targetWidth = static_cast<qreal>(getRotatedWidth());
+    //QSizeF targetSizeF = _targetSize.toSizeF();
+    qreal scaleFactor = sceneSizeF.width() / transformedBackgroundSize.width();
+    QSizeF scissorSize(sceneSizeF.width(), static_cast<int>(transformedBackgroundSize.height() * scaleFactor));
 
-    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
-    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
+    _scissorRect.setX((sceneSizeF.width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((sceneSizeF.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
     _scissorRect.setHeight(scissorSize.height());
 }
@@ -312,6 +324,8 @@ void PublishGLTextRenderer::setRotation(int rotation)
 {
     if((rotation != _rotation) && (_textObject) && (_encounter) && (!_encounter->getAnimated()))
         _textObject->setY((getRotatedHeight(rotation) / 2) - _textObject->getImageSize().height());
+
+    updateSceneRect();
 
     PublishGLRenderer::setRotation(rotation);
 }
@@ -328,8 +342,8 @@ void PublishGLTextRenderer::rewind()
     }
     else
     {
-        //_textObject->setY((getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
         _textObject->setY((getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+        //_textObject->setY(- _textObject->getImageSize().height());//(getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
     }
 
     emit updateWidget();
@@ -402,8 +416,29 @@ void PublishGLTextRenderer::updateBackground()
 }
 */
 
+QSize PublishGLTextRenderer::getRotatedSize()
+{
+    return (_rotation % 180 == 0) ? _scene.getSceneRect().size().toSize() : _scene.getSceneRect().size().toSize().transposed();
+}
+
+QSize PublishGLTextRenderer::getRotatedTargetSize()
+{
+    return (_rotation % 180 == 0) ? _targetSize : _targetSize.transposed();
+}
+
+int PublishGLTextRenderer::getRotatedWidth()
+{
+//    return (_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height();
+    return _targetSize.width();
+}
+
 int PublishGLTextRenderer::getRotatedHeight(int rotation)
 {
+    return (rotation % 180 == 0) ? _scene.getSceneRect().height() : _scene.getSceneRect().width();
+//    return (rotation % 180 == 0) ? _targetSize.height() : _targetSize.width();
+//    return _targetSize.height();
+
+/*
     if(!_encounter)
         return 0;
 
@@ -411,7 +446,7 @@ int PublishGLTextRenderer::getRotatedHeight(int rotation)
         return _targetSize.width();
     else
         return _targetSize.height();
-
+*/
 //    QSizeQRectF totalBoundingRect = _encounter->getLayerScene().boundingRect();
     /*
     if((rotation == 90) || (rotation == 270))
@@ -427,12 +462,39 @@ void PublishGLTextRenderer::recreateContent()
         return;
 
     delete _textObject;
+
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
-    _textObject->setX(-_targetSize.width() / 2); //-_scene.getSceneRect().width() / 2);
+
+    //_textObject->setX(-_targetSize.width() / 2); //-_scene.getSceneRect().width() / 2);
+    //_textObject->setX(-((_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height()) / 2); //why not _textImage
+    _textObject->setX(-((_rotation % 180 == 0) ? _scene.getSceneRect().width() : _scene.getSceneRect().height()) / 2); //why not _textImage
+
+    /*
+    QSizeF transformedTarget = getRotatedSize().toSizeF();
+    if(_scene.getSceneRect().isValid())
+        transformedTarget = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    _textObject->setX(-transformedTarget.width() / 2);
+*/
 
     rewind();
 
     _recreateContent = false;
+}
+
+void PublishGLTextRenderer::updateSceneRect()
+{
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+    {
+        _scene.deriveSceneRectFromSize(_targetSize.toSizeF());
+        qDebug() << "[PublishGLTextRenderer] scene rect updated from target size to " << _scene.getSceneRect();
+        emit sceneSizeChanged(_targetSize);
+    }
+    else
+    {
+        _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
+        qDebug() << "[PublishGLTextRenderer] scene rect updated from layer scene to " << _scene.getSceneRect();
+        emit sceneSizeChanged(_encounter->getLayerScene().sceneSize().toSize());
+    }
 }
 
 void PublishGLTextRenderer::createShaders()

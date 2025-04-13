@@ -62,7 +62,6 @@ public slots:
     void setTranslated(bool translated);
     void setCodeView(bool active);
 
-    void targetResized(const QSize& newSize);
     void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
@@ -115,6 +114,8 @@ protected slots:
     void triggerEncounterChanged();
     void triggerUpdateAnchor();
 
+    void sceneRectUpdated(const QSize& size);
+
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;
@@ -122,11 +123,12 @@ protected:
     void scaleBackgroundImage();
     void prepareImages();
     void prepareTextImage();
-    QImage getDocumentTextImage();
+    QImage getDocumentTextImage(int renderWidth);
     void drawTextImage(QPaintDevice* target);
 
     void setPublishCheckable();
     QSize getRotatedTargetSize();
+    int getRotatedTargetWidth();
 
     void cancelTimers();
 

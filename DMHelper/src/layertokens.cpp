@@ -1052,7 +1052,7 @@ QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, Bat
     pixmapItem->setScale(scaleFactor);
     applyCombatantTooltip(pixmapItem, combatant);
 
-    qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
+    // qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
 
     qreal gridSize = (static_cast<qreal>(_scale)) / scaleFactor;
     qreal gridOffset = gridSize * static_cast<qreal>(sizeFactor) / 2.0;
@@ -1062,7 +1062,7 @@ QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, Bat
     //rect->setData(BattleDialogItemChild_Index, BattleDialogItemChild_Area);
     rect->setParentItem(pixmapItem);
     rect->setVisible(false);
-    qDebug() << "[LayerTokens] created " << pixmapItem << " with area child " << rect;
+    //qDebug() << "[LayerTokens] created " << pixmapItem << " with area child " << rect;
 
     // TODO: Layers
     // applyPersonalEffectToItem(pixmapItem);

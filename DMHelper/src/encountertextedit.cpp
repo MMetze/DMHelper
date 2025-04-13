@@ -474,20 +474,6 @@ void EncounterTextEdit::setCodeView(bool active)
     emit codeViewChanged(active);
 }
 
-void EncounterTextEdit::targetResized(const QSize& newSize)
-{
-    if(newSize == _targetSize)
-        return;
-
-    _targetSize = newSize;
-
-    if((_isPublishing) && (_renderer))
-    {
-        prepareImages();
-        _renderer->setTextImage(_textImage);
-    }
-}
-
 void EncounterTextEdit::layerSelected(int selected)
 {
     if(_encounter)
@@ -517,10 +503,11 @@ void EncounterTextEdit::publishClicked(bool checked)
 //                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
 //            else
 //                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
-            _renderer = new PublishGLTextRenderer(_encounter, _textImage, size());
+            _renderer = new PublishGLTextRenderer(_encounter, _textImage);
 
             _renderer->setRotation(_rotation);
             connect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
+            connect(_renderer, &PublishGLTextRenderer::sceneSizeChanged, this, &EncounterTextEdit::sceneRectUpdated);
             emit registerRenderer(_renderer);
         }
     }
@@ -530,6 +517,7 @@ void EncounterTextEdit::publishClicked(bool checked)
 //            _renderer->stop();
         _renderer = nullptr;
         disconnect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
+        disconnect(_renderer, &PublishGLTextRenderer::sceneSizeChanged, this, &EncounterTextEdit::sceneRectUpdated);
         emit registerRenderer(nullptr);
     }
 }
@@ -542,6 +530,16 @@ void EncounterTextEdit::setRotation(int rotation)
     _rotation = rotation;
     if(_renderer)
         _renderer->setRotation(_rotation);
+
+    QTextDocument* doc = ui->textBrowser->document();
+    if(doc)
+        doc->setTextWidth(getRotatedTargetWidth());
+
+    if((_isPublishing) && (_renderer))
+    {
+        prepareImages();
+        _renderer->setTextImage(_textImage);
+    }
 }
 
 void EncounterTextEdit::editLayers()
@@ -745,6 +743,23 @@ void EncounterTextEdit::triggerUpdateAnchor()
     _updateAnchorTimer = startTimer(ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL);
 }
 
+void EncounterTextEdit::sceneRectUpdated(const QSize& size)
+{
+    if(size == _targetSize)
+        return;
+
+    _targetSize = size;
+    QTextDocument* doc = ui->textBrowser->document();
+    if(doc)
+        doc->setTextWidth(getRotatedTargetWidth());
+
+    if((_isPublishing) && (_renderer))
+    {
+        prepareImages();
+        _renderer->setTextImage(_textImage);
+    }
+}
+
 void EncounterTextEdit::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
@@ -779,12 +794,12 @@ void EncounterTextEdit::scaleBackgroundImage()
 
 void EncounterTextEdit::prepareImages()
 {
-    if(!_encounter)
+    if((!_encounter) || (_targetSize.isEmpty()))
         return;
 
     if(_backgroundImage.isNull())
     {
-        _prescaledImage = QImage(_targetSize, QImage::Format_ARGB32_Premultiplied);
+        _prescaledImage = QImage(getRotatedTargetSize(), QImage::Format_ARGB32_Premultiplied);
         _prescaledImage.fill(QColor(0, 0, 0, 0));
     }
     else
@@ -801,29 +816,33 @@ void EncounterTextEdit::prepareTextImage()
     if((!_encounter) || (_prescaledImage.isNull()))
         return;
 
-    _textImage = getDocumentTextImage();
-    _textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
+    _textImage = getDocumentTextImage(_prescaledImage.width());
+    //_textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
 }
 
-QImage EncounterTextEdit::getDocumentTextImage()
+QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
 {
     QImage result;
+
+    if(renderWidth <= 0)
+        return result;
 
     QTextDocument* doc = ui->textBrowser->document();
     if(doc)
     {
         int oldTextWidth = doc->textWidth();
         int textPercentage = _encounter ? _encounter->getTextWidth() : 100;
-        int absoluteWidth = oldTextWidth * textPercentage / 100;
-        int targetMargin = (oldTextWidth - absoluteWidth) / 2;
+        //int absoluteWidth = oldTextWidth * textPercentage / 100;
+        int absoluteWidth = renderWidth * textPercentage / 100;
+        //int targetMargin = (oldTextWidth - absoluteWidth) / 2;
 
         doc->setTextWidth(absoluteWidth);
 
-        result = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        result = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
         result.fill(Qt::transparent);
         QPainter painter;
         painter.begin(&result);
-            painter.translate(targetMargin, 0);
+            //painter.translate(targetMargin, 0);
             doc->drawContents(&painter);
         painter.end();
 
@@ -860,10 +879,12 @@ void EncounterTextEdit::setPublishCheckable()
 
 QSize EncounterTextEdit::getRotatedTargetSize()
 {
-    if(_rotation % 180 == 0)
-        return _targetSize;
-    else
-        return _targetSize.transposed();
+    return (_rotation % 180 == 0) ? _targetSize : _targetSize.transposed();
+}
+
+int EncounterTextEdit::getRotatedTargetWidth()
+{
+    return (_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height();
 }
 
 void EncounterTextEdit::cancelTimers()

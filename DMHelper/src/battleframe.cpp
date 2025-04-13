@@ -3498,7 +3498,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             BattleDialogModelCharacter* character = dynamic_cast<BattleDialogModelCharacter*>(combatant);
             if(character)
             {
-                qDebug() << "[Battle Frame] creating character widget for " << character->getName();
+                //qDebug() << "[Battle Frame] creating character widget for " << character->getName();
                 newWidget = new CombatantWidgetCharacter(((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox())), ui->scrollAreaWidgetContents);
                 CombatantWidgetInternalsCharacter* widgetInternals = new CombatantWidgetInternalsCharacter(character, dynamic_cast<CombatantWidgetCharacter*>(newWidget));
                 connect(widgetInternals, SIGNAL(clicked(QUuid)), this, SIGNAL(characterSelected(QUuid)));
@@ -3518,7 +3518,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
             if(monster)
             {
-                qDebug() << "[Battle Frame] creating monster widget for " << monster->getName();
+                //qDebug() << "[Battle Frame] creating monster widget for " << monster->getName();
                 newWidget = new CombatantWidgetMonster(((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox())), ui->scrollAreaWidgetContents);
                 CombatantWidgetInternalsMonster* widgetInternals = new CombatantWidgetInternalsMonster(monster, dynamic_cast<CombatantWidgetMonster*>(newWidget));
                 connect(widgetInternals, SIGNAL(clicked(const QString&)), this, SIGNAL(monsterSelected(const QString&)));
@@ -3542,7 +3542,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
     {
         newWidget->installEventFilter(this);
         _combatantWidgets.insert(combatant, newWidget);
-        qDebug() << "[Battle Frame] new widget inserted and event filter established: " << reinterpret_cast<quint64>(newWidget);
+        //qDebug() << "[Battle Frame] new widget inserted and event filter established: " << reinterpret_cast<quint64>(newWidget);
     }
 
     return newWidget;
@@ -4039,7 +4039,12 @@ void BattleFrame::clearBattleFrame()
     while(i.hasNext())
     {
         i.next();
-        i.value()->deleteLater();
+        CombatantWidget* widget = i.value();
+        if(widget)
+        {
+            widget->disconnectInternals();
+            widget->deleteLater();
+        }
     }
     _combatantWidgets.clear();
 
