@@ -25,6 +25,7 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 <h3>New v3.6 Features:</h3>
 <ul>
 <li><b>Dynamic Monsters</b>
+<li><b>Upgraded Text rendering</b>
 </ul>
 
 <p>
@@ -32,6 +33,7 @@ Just to be 100% safe, we recommend backing up your campaign XML files before ope
 <h3>Fixes:</h3>
 <ul>
 <li>Bug: Remove FoW by area works again
+<li>Bug: Grid rendering on the Mac version works again
 </ul>
 
 <!-- Commenting out this section for now
