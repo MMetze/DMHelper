@@ -407,7 +407,7 @@ void PublishGLTextRenderer::recreateContent()
 
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
 
-    _textObject->setX(-getRotatedWidth() / 2.0);
+    _textObject->setX(-(getRotatedWidth() * _encounter->getTextWidth() / 100) / 2.0);
 
     if(_encounter->getAnimated())
         _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos);
