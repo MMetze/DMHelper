@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = DMHelper
 TEMPLATE = app
 
+message("Building DMHelper")
+
 #install_it.path = $$PWD/../bin
 #win32:install_it.files = $$PWD/bin-win32/*
 #win64:install_it.files = $$PWD/bin-win64/*
@@ -769,6 +771,35 @@ DISTFILES += \
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
+
+# Compiler settings
+win32:CONFIG(debug, debug|release) {
+    message("Windows Debug build detected")
+    QMAKE_CXXFLAGS += $$QMAKE_CFLAGS_DEBUG                      # Use debug flags
+    QMAKE_CXXFLAGS += /FS                                       # enable multi-threaded file access
+    QMAKE_LFLAGS += /DEBUG                                      # ensures debug info is linked in
+    QMAKE_LFLAGS -= /INCREMENTAL                                # Optional, improves debugger stability
+#    QMAKE_PRE_LINK += cmd /C del /Q /S \"$$OUT_PWD\\*.pdb\"     # delete old PDB files
+}
+
+win32:CONFIG(release, debug|release) {
+    message("Windows Release build detected")
+    QMAKE_CXXFLAGS += /O2   # use optimized flags
+    QMAKE_CXXFLAGS -= /Zi   # ensure to turn off generating full debug info
+    QMAKE_LFLAGS -= /DEBUG  # ensure to turn off linking debug info
+    DEFINES += NDEBUG       # ensure to turn off assert
+}
+
+macx:CONFIG(debug, debug|release) {
+    message("MacOS Debug build detected")
+    QMAKE_CXXFLAGS += -g    # Use debug flags
+}
+
+macx:CONFIG(release, debug|release) {
+    message("MacOS Release build detected")
+    QMAKE_CXXFLAGS += -O2   # use optimized flags
+    DEFINES += NDEBUG       # ensure to turn off assert
+}
 
 # link to libvlc
 win32 {
