@@ -405,6 +405,12 @@ void EncounterTextEdit::setAnimated(bool animated)
 
     _encounter->setAnimated(animated);
     setPublishCheckable();
+
+    if(_renderer)
+    {
+        _renderer->stop();
+        _renderer->rewind();
+    }
 }
 
 void EncounterTextEdit::setScrollSpeed(int scrollSpeed)
