@@ -60,20 +60,10 @@ protected:
     // QObject overrides
     virtual void timerEvent(QTimerEvent *event) override;
 
-    // Background overrides
-    /*
-    virtual void initializeBackground() = 0;
-    virtual bool isBackgroundReady() = 0;
-    virtual void resizeBackground(int w, int h) = 0;
-    virtual void paintBackground(QOpenGLFunctions* functions) = 0;
-    virtual QSizeF getBackgroundSize() = 0;
-    virtual void updateBackground();
-    */
-
     QSizeF getRotatedSizeF();
     QSizeF getRotatedTargetSizeF();
     int getRotatedWidth();
-    int getRotatedHeight(int rotation);
+    int getRotatedHeight();
     void recreateContent();
     void updateSceneRect();
 
@@ -97,14 +87,11 @@ protected:
     int _shaderModelMatrixRGBColor;
     int _shaderProjectionMatrixRGBColor;
     int _shaderRGBColor;
-    // unsigned int _shaderProgram;
-    // int _shaderModelMatrix;
-    // int _shaderProjectionMatrix;
     QMatrix4x4 _projectionMatrix;
     QRect _scissorRect;
     PublishGLImage* _textObject;
 
-    QPointF _textPos;
+    qreal _textPos;
     QElapsedTimer _elapsed;
     int _timerId;
 

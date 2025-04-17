@@ -150,15 +150,8 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     _encounter = encounter;
 
     _encounter->initialize();
-//    if(_encounter->isInitialized())
-//    {
-//        qDebug() << "[EncounterTextEdit] Initializing encounter background image";
-//        _encounter->getLayerScene().dmInitialize(nullptr);
-//    }
 
     readEncounter();
-//    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
-//    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
     connect(_encounter, SIGNAL(textWidthChanged(int)), this, SIGNAL(textWidthChanged(int)));
     connect(_encounter, &EncounterText::textWidthChanged, ui->textBrowser, &TextBrowserMargins::setTextWidth);
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
@@ -490,19 +483,10 @@ void EncounterTextEdit::publishClicked(bool checked)
     if(_isPublishing)
     {
         if(!_renderer)
-//        if(_renderer)
-//        {
-//            _renderer->play();
-//        }
-//        else
         {
             emit showPublishWindow();
             prepareImages();
 
-//            if(isVideo())
-//                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
-//            else
-//                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
             _renderer = new PublishGLTextRenderer(_encounter, _textImage);
 
             _renderer->setRotation(_rotation);
@@ -513,8 +497,6 @@ void EncounterTextEdit::publishClicked(bool checked)
     }
     else
     {
-//        if(_renderer)
-//            _renderer->stop();
         _renderer = nullptr;
         disconnect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
         disconnect(_renderer, &PublishGLTextRenderer::sceneSizeChanged, this, &EncounterTextEdit::sceneRectUpdated);
@@ -635,7 +617,6 @@ void EncounterTextEdit::readEncounter()
 
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
 
-//    emit imageFileChanged(_encounter->getImageFile());
     emit textWidthChanged(_encounter->getTextWidth());
     emit animatedChanged(_encounter->getAnimated());
     emit scrollSpeedChanged(_encounter->getScrollSpeed());
@@ -702,16 +683,6 @@ void EncounterTextEdit::loadImage()
     scaleBackgroundImage();
     setPublishCheckable();
 }
-
-/*
-void EncounterTextEdit::handleScreenshotReady(const QImage& image)
-{
-    _backgroundImage = image;
-    _backgroundImageScaled = QImage();
-    scaleBackgroundImage();
-    update();
-}
-*/
 
 void EncounterTextEdit::handleLayersChanged()
 {
@@ -817,7 +788,6 @@ void EncounterTextEdit::prepareTextImage()
         return;
 
     _textImage = getDocumentTextImage(_prescaledImage.width());
-    //_textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
 }
 
 QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
@@ -832,9 +802,7 @@ QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
     {
         int oldTextWidth = doc->textWidth();
         int textPercentage = _encounter ? _encounter->getTextWidth() : 100;
-        //int absoluteWidth = oldTextWidth * textPercentage / 100;
         int absoluteWidth = renderWidth * textPercentage / 100;
-        //int targetMargin = (oldTextWidth - absoluteWidth) / 2;
 
         doc->setTextWidth(absoluteWidth);
 
@@ -842,7 +810,6 @@ QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
         result.fill(Qt::transparent);
         QPainter painter;
         painter.begin(&result);
-            //painter.translate(targetMargin, 0);
             doc->drawContents(&painter);
         painter.end();
 
@@ -901,6 +868,3 @@ void EncounterTextEdit::cancelTimers()
         _updateAnchorTimer = 0;
     }
 }
-
-
-
