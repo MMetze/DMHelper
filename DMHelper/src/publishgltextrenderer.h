@@ -70,8 +70,8 @@ protected:
     virtual void updateBackground();
     */
 
-    QSize getRotatedSize();
-    QSize getRotatedTargetSize();
+    QSizeF getRotatedSizeF();
+    QSizeF getRotatedTargetSizeF();
     int getRotatedWidth();
     int getRotatedHeight(int rotation);
     void recreateContent();
