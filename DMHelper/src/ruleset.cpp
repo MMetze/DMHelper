@@ -237,19 +237,19 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
         element.setAttribute("initiative", _ruleInitiative->getInitiativeType());
 
     if(_characterDataFile != DEFAULT_CHARACTER_DATA)
-        element.setAttribute("characterData", _characterDataFile);
+        element.setAttribute("characterData", targetDirectory.relativeFilePath(_characterDataFile));
 
     if(_characterUIFile != DEFAULT_CHARACTER_UI)
-        element.setAttribute("characterUI", _characterUIFile);
+        element.setAttribute("characterUI", targetDirectory.relativeFilePath(_characterUIFile));
 
     if(_bestiaryFile != DEFAULT_BESTIARY)
-        element.setAttribute("bestiary", _bestiaryFile);
+        element.setAttribute("bestiary", targetDirectory.relativeFilePath(_bestiaryFile));
 
     if(_monsterDataFile != DEFAULT_MONSTER_DATA)
-        element.setAttribute("monsterData", _monsterDataFile);
+        element.setAttribute("monsterData", targetDirectory.relativeFilePath(_monsterDataFile));
 
     if(_monsterUIFile != DEFAULT_MONSTER_UI)
-        element.setAttribute("monsterUI", _monsterUIFile);
+        element.setAttribute("monsterUI", targetDirectory.relativeFilePath(_monsterUIFile));
 
     if(!_combatantDoneCheckbox)
         element.setAttribute("done", _combatantDoneCheckbox);

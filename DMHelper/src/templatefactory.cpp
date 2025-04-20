@@ -125,7 +125,12 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
 
     QUiLoader loader;
     QFile file(templateFile);
-    file.open(QFile::ReadOnly);
+    if(!file.open(QFile::ReadOnly))
+    {
+        qDebug() << "[RuleFactory::loadUITemplate] ERROR: Unable to read UI Template file: " << templateFile << ", error: " << file.error() << ", " << file.errorString();
+        return result;
+    }
+
     result = loader.load(&file);
     file.close();
 
@@ -513,16 +518,18 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
     QString absoluteTemplateFile = getAbsoluteTemplateFile(templateFile);
     if(absoluteTemplateFile.isEmpty())
     {
-        qDebug() << "[TemplateFactory] ERROR: Unable to load the template file: " << templateFile;
+        qDebug() << "[TemplateFactory] ERROR: Unable to find the template file: " << templateFile;
         return;
     }
+
+    qDebug() << "[TemplateFactory] Reading Template File " << absoluteTemplateFile;
 
     QDomDocument doc;
     QFile file(absoluteTemplateFile);
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[TemplateFactory] Template file open failed: " << absoluteTemplateFile;
-        QMessageBox::critical(nullptr, QString("Template file open failed"), QString("Unable to open the template file: ") + absoluteTemplateFile);
+        qDebug() << "[TemplateFactory] Template file open failed: " << absoluteTemplateFile << ", error: " << file.error() << ", " << file.errorString();
+        QMessageBox::critical(nullptr, QString("Template file open failed"), QString("Unable to open the template file: ") + " - " + file.errorString());
         return;
     }
 

@@ -2937,12 +2937,12 @@ void MainWindow::writeBestiary()
     Bestiary::Instance()->writeBestiary(_campaign->getRuleset().getBestiaryFile());
 }
 
-void MainWindow::handleBestiaryRead(const QString& bestiaryFileName)
+void MainWindow::handleBestiaryRead(const QString& bestiaryFileName, bool converted)
 {
     qDebug() << "[MainWindow] Bestiary reading completed";
 
     // Bestiary file seems ok, make a backup
-    _options->backupFile(bestiaryFileName);
+    _options->backupFile(bestiaryFileName, converted ? QString("_converted_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss")) : QString());
 
     // Try to reset the monster to the previously selected one
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))

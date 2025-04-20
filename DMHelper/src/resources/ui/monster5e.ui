@@ -39,7 +39,7 @@ color: rgb(50, 50, 50);</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_21">
+    <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="2,2,2,0,0">
      <item>
       <widget class="QLineEdit" name="edtMonsterType">
        <property name="font">
@@ -86,22 +86,24 @@ color: rgb(50, 50, 50);</string>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="chkLegendary">
+      <widget class="QLabel" name="label_14">
        <property name="text">
-        <string>Legendary</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>legendary</string>
+        <string>Legendary Saves</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="chkPrivate">
+      <widget class="QLineEdit" name="edtLegendarySaves">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
        <property name="text">
-        <string>Private</string>
+        <string>legendary</string>
        </property>
        <property name="dmhValue" stdset="0">
-        <string>private</string>
+        <string>legendary</string>
        </property>
       </widget>
      </item>

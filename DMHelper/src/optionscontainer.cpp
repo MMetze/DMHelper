@@ -852,48 +852,56 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir, bool* 
     return result;
 }
 
-void OptionsContainer::backupFile(const QString& filename)
+void OptionsContainer::backupFile(const QString& filename, const QString& overrideFilename)
 {
-    QFileInfo fileInfo(filename);
-
     QString backupPath = getStandardDirectory("backup");
-    if(!backupPath.isEmpty())
+    if(backupPath.isEmpty())
     {
-        QDir backupDir(backupPath);
-        QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
-        QFileInfo backupFileInfo(previousBackup);
-        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+        qDebug() << "[OptionsContainer] ERROR: Unable to find standard BACKUP path. File not backed up: " << filename;
+        return;
+    }
 
-        if(backupFileInfo.exists())
+    QFileInfo fileInfo(filename);
+    if(!overrideFilename.isEmpty())
+    {
+        fileInfo.setFile(fileInfo.baseName() + QString("_") + overrideFilename + QString(".") + fileInfo.completeSuffix());
+        qDebug() << "[OptionsContainer] Backup file prepared with override for filename: " << fileInfo.fileName();
+    }
+
+    QDir backupDir(backupPath);
+    QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
+    QFileInfo backupFileInfo(previousBackup);
+    qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+
+    if(backupFileInfo.exists())
+    {
+        if(backupFileInfo.size() == fileInfo.size())
         {
-            if(backupFileInfo.size() == fileInfo.size())
-            {
-                qDebug() << "[OptionsContainer] Backup file and current file are the same size, no further action needed.";
-                return;
-            }
-
-            QString backupRetainer = backupDir.filePath(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
-            if(backupFileInfo.size() > fileInfo.size())
-            {
-                qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup as: " << backupRetainer;
-                previousBackup.rename(backupRetainer);
-            }
-            else if(fileInfo.size() > backupFileInfo.size() * 120 / 100)
-            {
-                qDebug() << "[OptionsContainer] WARNING: Recent save file is over 20% larger than the previous backup, keeping previous backup as: " << backupRetainer;
-                previousBackup.rename(backupRetainer);
-            }
-            else
-            {
-                qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
-                previousBackup.remove();
-            }
+            qDebug() << "[OptionsContainer] Backup file and current file are the same size, no further action needed.";
+            return;
         }
 
-        qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
-        QFile file(filename);
-        file.copy(backupDir.filePath(fileInfo.fileName()));
+        QString backupRetainer = backupDir.filePath(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+        if(backupFileInfo.size() > fileInfo.size())
+        {
+            qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup as: " << backupRetainer;
+            previousBackup.rename(backupRetainer);
+        }
+        else if(fileInfo.size() > backupFileInfo.size() * 120 / 100)
+        {
+            qDebug() << "[OptionsContainer] WARNING: Recent save file is over 20% larger than the previous backup, keeping previous backup as: " << backupRetainer;
+            previousBackup.rename(backupRetainer);
+        }
+        else
+        {
+            qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
+            previousBackup.remove();
+        }
     }
+
+    qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
+    QFile file(filename);
+    file.copy(backupDir.filePath(fileInfo.fileName()));
 }
 
 void OptionsContainer::resetFileSettings()

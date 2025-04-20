@@ -80,10 +80,7 @@ QString TemplateObject::getValueAsString(const QString& key) const
         return getAttributeSpecialAsString(key);
 
     if((!_factory) || (!_factory->hasEntry(key)))
-    {
-        qDebug() << "[TemplateObject] WARNING: Attempting to read the value for the unknown key " << key << " from factory " << _factory;
         return QString();
-    }
 
     DMHAttribute attribute = _factory->getAttribute(key);
     switch(attribute._type)
@@ -438,10 +435,12 @@ void TemplateObject::readXMLValues(const QDomElement& element, bool isImport)
             // Add the list entry to the main list
             valueHash()->insert(tagName, listValues);
         }
+#ifdef QT_DEBUG
         else
         {
             qDebug() << "[TemplateObject] WARNING: Unknown value type: " << tagName;
         }
+#endif
 
         childElement = childElement.nextSiblingElement();
     }
@@ -529,8 +528,18 @@ void TemplateObject::writeElementValue(QDomDocument &doc, QDomElement& element, 
         return;
     }
 
+    if(!value.canConvert<QString>())
+    {
+        qDebug() << "[Characterv2] WARNING: Trying to write an invalid element value: " << key << " with type " << attribute._type;
+        return;
+    }
+
+    QString stringValue = value.toString();
+    if(stringValue.isEmpty())
+        return; // Nothing to write
+
     QDomElement childElement = doc.createElement(key);
-    QDomCDATASection childData = doc.createCDATASection(value.toString());
+    QDomCDATASection childData = doc.createCDATASection(stringValue);
     childElement.appendChild(childData);
     element.appendChild(childElement);
 }

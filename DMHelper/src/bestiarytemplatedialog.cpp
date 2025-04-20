@@ -61,6 +61,8 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
         return;
     }
 
+    qDebug() << "[BestiaryTemplateDialog] Reading Monster UI Template File " << absoluteTemplateFile;
+
     if(absoluteTemplateFile == _uiFilename)
     {
         qDebug() << "[BestiaryTemplateDialog] UI Template File " << absoluteTemplateFile << " already loaded, no further action required";

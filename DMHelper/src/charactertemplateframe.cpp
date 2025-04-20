@@ -101,6 +101,8 @@ void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile
         return;
     }
 
+    qDebug() << "[CharacterTemplateFrame] Reading Character UI Template File " << absoluteTemplateFile;
+
     if(absoluteTemplateFile == _uiFilename)
     {
         qDebug() << "[CharacterTemplateFrame] UI Template File " << absoluteTemplateFile << " already loaded, no further action required";
@@ -113,9 +115,6 @@ void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile
         qDebug() << "[CharacterTemplateFrame] ERROR: UI Template File " << templateFile << " could not be loaded!";
         return;
     }
-
-    //if(_character)
-    //    CombatantFactory::Instance()->disconnectWidget(_uiWidget);
 
     delete _uiWidget;
     if(ui->scrollAreaWidgetContents->layout())

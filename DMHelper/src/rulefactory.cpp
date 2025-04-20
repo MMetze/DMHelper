@@ -113,14 +113,14 @@ QString RuleFactory::getDefaultBestiary() const
 
 void RuleFactory::readRuleset(const QString& rulesetFile)
 {
-    qDebug() << "[RuleFactory] Reading ruleset...";
+    qDebug() << "[RuleFactory] Reading ruleset from " << rulesetFile;
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(rulesetFile);
     qDebug() << "[RuleFactory] Ruleset file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[RuleFactory] ERROR: Unable to read ruleset file: " << rulesetFile;
+        qDebug() << "[RuleFactory] ERROR: Unable to read ruleset file: " << rulesetFile << ", error: " << file.error() << ", " << file.errorString();
         return;
     }
 

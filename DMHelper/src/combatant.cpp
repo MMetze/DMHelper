@@ -610,15 +610,18 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
         element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
     }
 
-    QDomElement attacksElement = doc.createElement("attacks");
-    for(int i = 0; i < getAttacks().count(); ++i)
+    if(getAttacks().count() > 0)
     {
-        QDomElement attackElement = doc.createElement("attack");
-        attackElement.setAttribute("name", getAttacks().at(i).getName());
-        attackElement.setAttribute("dice", getAttacks().at(i).getDice().toString());
-        attacksElement.appendChild(attackElement);
+        QDomElement attacksElement = doc.createElement("attacks");
+        for(int i = 0; i < getAttacks().count(); ++i)
+        {
+            QDomElement attackElement = doc.createElement("attack");
+            attackElement.setAttribute("name", getAttacks().at(i).getName());
+            attackElement.setAttribute("dice", getAttacks().at(i).getDice().toString());
+            attacksElement.appendChild(attackElement);
+        }
+        element.appendChild(attacksElement);
     }
-    element.appendChild(attacksElement);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

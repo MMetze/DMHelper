@@ -193,7 +193,7 @@ protected slots:
     void exportBestiary();
     void importBestiary();
     void writeBestiary();
-    void handleBestiaryRead(const QString& bestiaryFileName);
+    void handleBestiaryRead(const QString& bestiaryFileName, bool converted);
 
     // Spellbook
     void openSpellbook();

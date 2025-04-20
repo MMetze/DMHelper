@@ -207,9 +207,15 @@ void MonsterClassv2::addIcon(const QString &newIcon)
     if((newIcon.isEmpty()) || (_icons.contains(newIcon)))
         return;
 
-    _icons.append(newIcon);
     ScaledPixmap newPixmap;
-    newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(newIcon));
+    QString basePixmap = Bestiary::Instance()->getDirectory().filePath(newIcon);
+    if(!newPixmap.setBasePixmap(basePixmap))
+    {
+        qDebug() << "[MonsterClassv2] ERROR: Unable to set icon pixmap for monster: " << getStringValue("name") << " - " << basePixmap;
+        return;
+    }
+
+    _icons.append(newIcon);
     _scaledPixmaps.append(newPixmap);
     registerChange();
 
@@ -228,9 +234,15 @@ void MonsterClassv2::setIcon(int index, const QString& iconFile)
     if(searchResult.isEmpty())
         return;
 
-    _icons[index] = searchResult;
     ScaledPixmap newPixmap;
-    newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(searchResult));
+    QString basePixmap = Bestiary::Instance()->getDirectory().filePath(searchResult);
+    if(!newPixmap.setBasePixmap(basePixmap))
+    {
+        qDebug() << "[MonsterClassv2] ERROR: Unable to set icon pixmap for monster: " << getStringValue("name") << " - " << basePixmap;
+        return;
+    }
+
+    _icons[index] = searchResult;
     _scaledPixmaps[index] = newPixmap;
     registerChange();
 
@@ -267,8 +279,8 @@ void MonsterClassv2::refreshIconPixmaps()
     for(int i = 0; i < _icons.count(); ++i)
     {
         ScaledPixmap newPixmap;
-        newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(_icons.at(i)));
-        _scaledPixmaps.append(newPixmap);
+        if(newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(_icons.at(i))))
+            _scaledPixmaps.append(newPixmap);
     }
 
     registerChange();

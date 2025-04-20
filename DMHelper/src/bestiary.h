@@ -72,7 +72,7 @@ public:
 
 signals:
     void changed();
-    void bestiaryLoaded(const QString& bestiaryFile);
+    void bestiaryLoaded(const QString& bestiaryFile, bool converted);
 
 public slots:
     bool readBestiary(const QString& targetFilename);

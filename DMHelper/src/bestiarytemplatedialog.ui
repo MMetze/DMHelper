@@ -406,7 +406,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Reload Token</string>
+          <string>Reload Tokens</string>
          </property>
          <property name="text">
           <string/>

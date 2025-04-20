@@ -178,7 +178,7 @@ public slots:
     QString getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir);
     QString getDataDirectory(const QString& defaultDir, bool overwrite = false);
     QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
-    void backupFile(const QString& filename);
+    void backupFile(const QString& filename, const QString& overrideFilename = QString());
     void resetFileSettings();
 
     void setLastMonster(const QString& lastMonster);

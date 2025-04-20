@@ -3,6 +3,7 @@
 #include "monsterclassv2.h"
 #include "monsterclassv2converter.h"
 #include "monster.h"
+#include "templatefactory.h"
 #include "dmversion.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -200,13 +201,6 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         QMessageBox::critical(nullptr, QString("Incompatible Bestiary File"), QString("The new bestiary file is incompatible with this version of DMHelper and can't be loaded."));
         return;
     }
-
-    /*
-    QString stringData;
-    QTextStream textStream(&stringData);
-    bestiaryElement.save(textStream, 4);
-    qDebug() << "DEBUG BESTIARY: " << stringData;
-*/
 
     if(!isVersionIdentical())
     {
@@ -511,7 +505,15 @@ bool Bestiary::readBestiary(const QString& targetFilename)
         return false;
     }
 
-    if(targetFilename == _bestiaryFile)
+    QString absoluteTargetFilename = TemplateFactory::getAbsoluteTemplateFile(targetFilename);
+    if(absoluteTargetFilename.isEmpty())
+    {
+        qDebug() << "[Bestiary] ERROR! Bestiary not found based on relative file path: " << targetFilename;
+        QMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file could not be found: ") + targetFilename);
+        return false;
+    }
+
+    if(absoluteTargetFilename == _bestiaryFile)
     {
         qDebug() << "[Bestiary] Requested to reload bestiary file, no action taken: " << targetFilename;
         return false;
@@ -537,18 +539,18 @@ bool Bestiary::readBestiary(const QString& targetFilename)
         }
     }
 
-    qDebug() << "[Bestiary] Reading bestiary: " << targetFilename;
+    qDebug() << "[Bestiary] Reading bestiary: " << absoluteTargetFilename;
 #ifdef QT_DEBUG
-    QFileInfo bestiaryInfo(targetFilename);
-    qDebug() << "[Bestiary] Debug full path:" << bestiaryInfo.absoluteFilePath() << ", exists: " << bestiaryInfo.exists() << ", is file: " << bestiaryInfo.isFile();;
+    QFileInfo bestiaryInfo(absoluteTargetFilename);
+    qDebug() << "[Bestiary] Debug full path:" << bestiaryInfo.absoluteFilePath() << ", exists: " << bestiaryInfo.exists() << ", is file: " << bestiaryInfo.isFile();
 #endif
 
     QDomDocument doc("DMHelperBestiaryXML");
-    QFile file(targetFilename);
+    QFile file(absoluteTargetFilename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[Bestiary] Reading bestiary file open failed.";
-        QMessageBox::critical(nullptr, QString("Bestiary file open failed"), QString("Unable to open the bestiary file: ") + targetFilename);
+        qDebug() << "[Bestiary] Reading bestiary file open failed: " << file.error() << ", " << file.errorString();
+        QMessageBox::critical(nullptr, QString("Bestiary file open failed"), QString("Unable to open the bestiary file: ") + absoluteTargetFilename + QString(": ") + file.errorString());
         return false;
     }
 
@@ -565,7 +567,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     {
         qDebug() << "[Bestiary] Error reading bestiary XML content. The XML is probably not valid.";
         qDebug() << errMsg << errRow << errColumn;
-        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + targetFilename + QString(", the XML is invalid"));
+        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + absoluteTargetFilename + QString(", the XML is invalid"));
         return false;
     }
 
@@ -573,7 +575,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if((root.isNull()) || (root.tagName() != "root"))
     {
         qDebug() << "[Bestiary] Bestiary file missing root item";
-        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + targetFilename + QString(", the XML does not have the expected root item."));
+        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + absoluteTargetFilename + QString(", the XML does not have the expected root item."));
         return false;
     }
 
@@ -587,14 +589,15 @@ bool Bestiary::readBestiary(const QString& targetFilename)
         _bestiaryMap.clear();
     }
 
-    QFileInfo fileInfo(targetFilename);
+    QFileInfo fileInfo(absoluteTargetFilename);
     setDirectory(fileInfo.absoluteDir());
-    _bestiaryFile = targetFilename;
+    _bestiaryFile = absoluteTargetFilename;
     inputXML(root);
 
     finishBatchChanges();
 
-    emit bestiaryLoaded(_bestiaryFile);
+    if(isVersionCompatible())
+        emit bestiaryLoaded(_bestiaryFile, !isVersionIdentical());
 
     return true;
 }
