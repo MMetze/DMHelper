@@ -233,23 +233,29 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
+    if(!RuleFactory::Instance())
+    {
+        qDebug() << "[Ruleset] ERROR: RuleFactory not initialized, so cannot save ruleset!";
+        return;
+    }
+
     if((_ruleInitiative) && (_ruleInitiative->getInitiativeType() != RuleFactory::getRuleInitiativeDefault()))
         element.setAttribute("initiative", _ruleInitiative->getInitiativeType());
 
     if(_characterDataFile != DEFAULT_CHARACTER_DATA)
-        element.setAttribute("characterData", targetDirectory.relativeFilePath(_characterDataFile));
+        element.setAttribute("characterData", RuleFactory::Instance()->getRulesetDir().relativeFilePath(_characterDataFile));
 
     if(_characterUIFile != DEFAULT_CHARACTER_UI)
-        element.setAttribute("characterUI", targetDirectory.relativeFilePath(_characterUIFile));
+        element.setAttribute("characterUI", RuleFactory::Instance()->getRulesetDir().relativeFilePath(_characterUIFile));
 
     if(_bestiaryFile != DEFAULT_BESTIARY)
-        element.setAttribute("bestiary", targetDirectory.relativeFilePath(_bestiaryFile));
+        element.setAttribute("bestiary", RuleFactory::Instance()->getRulesetDir().relativeFilePath(_bestiaryFile));
 
     if(_monsterDataFile != DEFAULT_MONSTER_DATA)
-        element.setAttribute("monsterData", targetDirectory.relativeFilePath(_monsterDataFile));
+        element.setAttribute("monsterData", RuleFactory::Instance()->getRulesetDir().relativeFilePath(_monsterDataFile));
 
     if(_monsterUIFile != DEFAULT_MONSTER_UI)
-        element.setAttribute("monsterUI", targetDirectory.relativeFilePath(_monsterUIFile));
+        element.setAttribute("monsterUI", RuleFactory::Instance()->getRulesetDir().relativeFilePath(_monsterUIFile));
 
     if(!_combatantDoneCheckbox)
         element.setAttribute("done", _combatantDoneCheckbox);

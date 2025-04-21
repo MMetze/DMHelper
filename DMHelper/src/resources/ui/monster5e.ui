@@ -261,7 +261,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="QLineEdit" name="edtHitDice">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="font">
         <font>
@@ -305,7 +305,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="QLineEdit" name="edtAverageHitPoints">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="font">
         <font>

@@ -177,6 +177,7 @@ public slots:
     void setRulesetFileName(const QString& filename);
     QString getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir);
     QString getDataDirectory(const QString& defaultDir, bool overwrite = false);
+    void copyCoreData(const QString& fileRoot, bool overwrite = false);
     QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
     void backupFile(const QString& filename, const QString& overrideFilename = QString());
     void resetFileSettings();

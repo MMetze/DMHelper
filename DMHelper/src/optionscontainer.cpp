@@ -426,7 +426,7 @@ void OptionsContainer::readSettings()
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml"), &bestiaryExists));
     if((!settings.contains(QString("bestiary"))) || (!bestiaryExists))
         getDataDirectory(QString("Images"), true);
-    setLastMonster(settings.value("lastMonster", "").toString());
+    setLastMonster(settings.value("lastMonster", "Hydra").toString());
 
     bool spellbookExists = true;
     setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml"), &spellbookExists));
@@ -455,6 +455,9 @@ void OptionsContainer::readSettings()
     setRulesetFileName(settingsRulesetFile);
 //    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
     getDataDirectory(QString("ui"), true);
+    copyCoreData(QString("DMHelperBestiary"));
+    copyCoreData(QString("monster"));
+    copyCoreData(QString("character"));
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
@@ -793,7 +796,7 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overw
         return QString();
     }
 
-    if((!created)&&(!overwrite))
+    if((!created) && (!overwrite))
     {
         qDebug() << "[OptionsContainer] Data Directory found: " << standardPath;
         return standardPath;
@@ -820,6 +823,52 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overw
 
     qDebug() << "[OptionsContainer] Data default files copied to directory: " << standardPath;
     return standardPath;
+}
+
+void OptionsContainer::copyCoreData(const QString& fileRoot, bool overwrite)
+{
+    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir standardDir(standardPath);
+    if(!standardDir.exists())
+    {
+        qDebug() << "[OptionsContainer] Creating standard directory: " << standardPath;
+        QDir().mkpath(standardPath);
+
+        if(!standardDir.exists())
+        {
+            qDebug() << "[OptionsContainer] ERROR: Standard directory creation failed! " << standardPath;
+            return;
+        }
+
+        qDebug() << "[OptionsContainer] Standard directory created.";
+    }
+
+    QString applicationPath = QCoreApplication::applicationDirPath();
+    QDir fileDirPath(applicationPath);
+#ifdef Q_OS_MAC
+    fileDirPath.cdUp();
+    if(!fileDirPath.cd(QString("Resources/")))
+    {
+        qDebug() << "[OptionsContainer] ERROR: Resources directory NOT FOUND: " << fileDirPath.absolutePath();
+        return;
+    }
+#else
+    if(!fileDirPath.cd(QString("resources/")))
+    {
+        qDebug() << "[OptionsContainer] ERROR: Resources directory NOT FOUND: " << fileDirPath.absolutePath();
+        return;
+    }
+#endif
+
+    QStringList filters;
+    filters << (fileRoot + QString("*.xml"));
+    QStringList fileEntries = fileDirPath.entryList(filters);
+    for(int i = 0; i < fileEntries.size(); ++i)
+    {
+        if(overwrite)
+            QFile::remove(standardDir.filePath(fileEntries.at(i)));
+        QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
+    }
 }
 
 QString OptionsContainer::getStandardDirectory(const QString& defaultDir, bool* created)
@@ -916,6 +965,9 @@ void OptionsContainer::resetFileSettings()
     getDataDirectory(QString("ui"), true);
     setRulesetFileName(getStandardFile(QString("ruleset.xml")));
     getDataDirectory(QString("Images"), true);
+    copyCoreData(QString("DMHelperBestiary"), true);
+    copyCoreData(QString("monster"), true);
+    copyCoreData(QString("character"), true);
 }
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
