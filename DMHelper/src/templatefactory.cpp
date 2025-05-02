@@ -479,8 +479,9 @@ QString TemplateFactory::getAbsoluteTemplateFile(const QString& templateFile)
 
     if(QFileInfo(templateFile).isRelative())
     {
-        QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
-        appFile = relativeDir.absoluteFilePath(templateFile);
+        //QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
+        //appFile = relativeDir.absoluteFilePath(templateFile);
+        appFile = QDir::current().absoluteFilePath(templateFile);
         if(!QFileInfo::exists(appFile))
         {
 #ifdef Q_OS_MAC

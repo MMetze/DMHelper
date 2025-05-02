@@ -19,6 +19,9 @@ public:
     virtual int getObjectType() const override;
     virtual bool isTreeVisible() const override;
 
+    // Local interface
+    void setValues(const RuleFactory::RulesetTemplate& rulesetTemplate);
+
     // Local accessors
     bool isInitialized() const;
     RuleInitiative* getRuleInitiative();
@@ -29,8 +32,6 @@ public:
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool getCombatantDoneCheckbox() const;
-
-    void setDefaultValues();
 
 signals:
     void initiativeRuleChanged();
@@ -55,6 +56,8 @@ protected:
     // From CampaignObjectBase
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+
+    bool areSameFile(const QString& file1, const QString& file2) const;
 
     RuleInitiative* _ruleInitiative;
     QString _characterDataFile;

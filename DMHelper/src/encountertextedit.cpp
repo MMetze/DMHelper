@@ -38,7 +38,8 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _targetSize(),
     _rotation(0),
     _textPos(),
-    _encounterChangedTimer(0)
+    _encounterChangedTimer(0),
+    _updateAnchorTimer(0)
 {
     ui->setupUi(this);
 

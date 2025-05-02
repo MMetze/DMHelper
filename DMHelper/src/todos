@@ -1,3 +1,10 @@
+Change of pace: just thinking about what else is needed before I release that Bestiary version
+Need to create a new Bestiary file and make sure it's clean for clean releases.
+Test the Dickens out of replacing other bestiaries, and maybe make sure it creates a backup specifically when it tries an upgrade
+Update the warning message to mention the bestiary
+Prepare a messaging online to the same effect
+
+
 * Move some options around
 * Add search string to ruleset/campaign specifics
 * Populated icon doesn't show up until changing monsters

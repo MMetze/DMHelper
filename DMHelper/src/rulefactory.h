@@ -58,7 +58,20 @@ public:
             _characterUI(),
             _monsterData(),
             _monsterUI(),
-            _bestiary()
+            _bestiary(),
+            _combatantDone(false)
+        {}
+
+        RulesetTemplate(const QString& name, const QString& initiative, const QString& characterData, const QString& characterUI,
+                        const QString& monsterData, const QString& monsterUI, const QString& bestiary, bool combatantDone = false) :
+            _name(name),
+            _initiative(initiative),
+            _characterData(characterData),
+            _characterUI(characterUI),
+            _monsterData(monsterData),
+            _monsterUI(monsterUI),
+            _bestiary(bestiary),
+            _combatantDone(combatantDone)
         {}
 
         QString _name;
@@ -68,6 +81,7 @@ public:
         QString _monsterData;
         QString _monsterUI;
         QString _bestiary;
+        bool _combatantDone;
 
     };
 

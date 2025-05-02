@@ -10,6 +10,11 @@
 #include <QDebug>
 
 const char* RuleFactory::DEFAULT_RULESET_NAME = "DnD 5e 2014";
+const char* DEFAULT_CHARACTER_DATA = "character5e.xml";
+const char* DEFAULT_CHARACTER_UI = "./ui/character5e.ui";
+const char* DEFAULT_MONSTER_DATA = "monster5e.xml";
+const char* DEFAULT_MONSTER_UI = "./ui/monster5e.ui";
+bool DEFAULT_CHARACTER_DONE = true;
 
 RuleFactory* RuleFactory::_instance = nullptr;
 
@@ -93,7 +98,22 @@ bool RuleFactory::rulesetExists(const QString& rulesetName) const
 
 RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rulesetName) const
 {
-    return _rulesetTemplates.value(rulesetName);
+    if(rulesetExists(rulesetName))
+    {
+        return _rulesetTemplates.value(rulesetName);
+    }
+    else
+    {
+        qDebug() << "[RuleFactory] WARNING: Requested ruleset " << rulesetName << " does not exist, returning a default ruleset template.";
+        return RulesetTemplate(RuleFactory::DEFAULT_RULESET_NAME,
+                               RuleInitiative5e::InitiativeType,
+                               DEFAULT_CHARACTER_DATA,
+                               DEFAULT_CHARACTER_UI,
+                               DEFAULT_MONSTER_DATA,
+                               DEFAULT_MONSTER_UI,
+                               getDefaultBestiary(),
+                               DEFAULT_CHARACTER_DONE);
+    }
 }
 
 QDir RuleFactory::getRulesetDir() const
@@ -159,6 +179,7 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
         newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
         newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
+        newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
 
         _rulesetTemplates.insert(newRuleset._name, newRuleset);
 

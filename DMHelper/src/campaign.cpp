@@ -188,7 +188,7 @@ void Campaign::preloadRulesetXML(const QDomElement &element, bool isImport)
     if(!rulesetElement.isNull())
         _ruleset.inputXML(rulesetElement, isImport);
     else
-        _ruleset.setDefaultValues();
+        _ruleset.setValues(RuleFactory::Instance()->getRulesetTemplate(RuleFactory::DEFAULT_RULESET_NAME));
 }
 
 void Campaign::beginBatchChanges()

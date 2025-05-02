@@ -32,8 +32,6 @@ NewCampaignDialog::NewCampaignDialog(const QString& rulesetName, QWidget *parent
     connect(ui->btnBrowseMonsterUI, &QPushButton::clicked, this, &NewCampaignDialog::handleMonsterUIBrowse);
 
     handleRulesetSelected();
-    if((RuleFactory::Instance()) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
-        ui->edtBestiaryFile->setText(RuleFactory::Instance()->getDefaultBestiary());
 }
 
 NewCampaignDialog::~NewCampaignDialog()
@@ -122,7 +120,13 @@ void NewCampaignDialog::handleRulesetSelected()
     ui->edtCharacterUI->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._characterUI)));
     ui->edtMonsterData->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._monsterData)));
     ui->edtMonsterUI->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._monsterUI)));
-    ui->edtBestiaryFile->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._bestiary)));
+
+    if((RuleFactory::Instance()) && (rulesetName == RuleFactory::DEFAULT_RULESET_NAME) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
+        ui->edtBestiaryFile->setText(RuleFactory::Instance()->getDefaultBestiary());
+    else
+        ui->edtBestiaryFile->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._bestiary)));
+
+    ui->chkCombatantDone->setChecked(ruleset._combatantDone);
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()
