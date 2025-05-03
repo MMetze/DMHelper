@@ -14,6 +14,7 @@ const char* DEFAULT_CHARACTER_DATA = "character5e.xml";
 const char* DEFAULT_CHARACTER_UI = "./ui/character5e.ui";
 const char* DEFAULT_MONSTER_DATA = "monster5e.xml";
 const char* DEFAULT_MONSTER_UI = "./ui/monster5e.ui";
+const char* DEFAULT_BESTIARY = "DMHelperBestiary.xml";
 bool DEFAULT_CHARACTER_DONE = true;
 
 RuleFactory* RuleFactory::_instance = nullptr;
@@ -123,7 +124,19 @@ QDir RuleFactory::getRulesetDir() const
 
 void RuleFactory::setDefaultBestiary(const QString& bestiaryFile)
 {
+    if(_defaultBestiary == bestiaryFile)
+        return;
+
     _defaultBestiary = bestiaryFile;
+
+    if(_rulesetTemplates.contains(DEFAULT_RULESET_NAME))
+    {
+        RulesetTemplate defaultTemplate = _rulesetTemplates.value(DEFAULT_RULESET_NAME);
+        if((defaultTemplate._bestiary == DEFAULT_BESTIARY) && (!_defaultBestiary.isEmpty()))
+            defaultTemplate._bestiary = _defaultBestiary;
+
+        _rulesetTemplates.insert(DEFAULT_RULESET_NAME, defaultTemplate);
+    }
 }
 
 QString RuleFactory::getDefaultBestiary() const
@@ -180,6 +193,9 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
         newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
         newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
+
+        if((newRuleset._name == DEFAULT_RULESET_NAME) && (newRuleset._bestiary == DEFAULT_BESTIARY) && (!getDefaultBestiary().isEmpty()))
+            newRuleset._bestiary = getDefaultBestiary();
 
         _rulesetTemplates.insert(newRuleset._name, newRuleset);
 
