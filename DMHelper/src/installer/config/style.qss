@@ -1,4 +1,4 @@
 QWidget
 {
-    background-image: url(parchment.jpg);
+    background-image: url(:/parchment.jpg);
 }
