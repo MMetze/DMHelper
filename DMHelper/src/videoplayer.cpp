@@ -1,4 +1,5 @@
 #include "videoplayer.h"
+#include <QFile>
 #include <QDebug>
 
 //#define VIDEO_DEBUG_MESSAGES
@@ -496,6 +497,12 @@ bool VideoPlayer::startPlayer()
     if(_videoFile.isEmpty())
     {
         qDebug() << "[VideoPlayer] Playback file empty - not able to start player!";
+        return false;
+    }
+
+    if(!QFile::exists(_videoFile))
+    {
+        qDebug() << "[VideoPlayer] Playback file does not exist - not able to start player!";
         return false;
     }
 

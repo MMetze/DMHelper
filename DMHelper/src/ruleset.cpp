@@ -94,16 +94,25 @@ bool Ruleset::isTreeVisible() const
 
 void Ruleset::setValues(const RuleFactory::RulesetTemplate& rulesetTemplate)
 {
+    if(!RuleFactory::Instance())
+    {
+        qDebug() << "[Ruleset] ERROR: RuleFactory not initialized, not able to set the ruleset values!";
+        return;
+    }
+
     setObjectName(rulesetTemplate._name);
 
     delete _ruleInitiative;
     _ruleInitiative = RuleFactory::createRuleInitiative(rulesetTemplate._initiative, this);
 
-    _characterDataFile = rulesetTemplate._characterData;
-    _characterUIFile = rulesetTemplate._characterUI;
-    _bestiaryFile = rulesetTemplate._bestiary;
-    _monsterDataFile = rulesetTemplate._monsterData;
-    _monsterUIFile = rulesetTemplate._monsterUI;
+    QDir rulesetDir = RuleFactory::Instance()->getRulesetDir();
+
+    _characterDataFile = rulesetDir.absoluteFilePath(rulesetTemplate._characterData);
+    _characterUIFile = rulesetDir.absoluteFilePath(rulesetTemplate._characterUI);
+    _bestiaryFile = rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
+    _monsterDataFile = rulesetDir.absoluteFilePath(rulesetTemplate._monsterData);
+    _monsterUIFile = rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI);
+
     _combatantDoneCheckbox = rulesetTemplate._combatantDone;
 
     qDebug() << "[Ruleset] Values for the ruleset set to the default values for the template: " << rulesetTemplate._name;
