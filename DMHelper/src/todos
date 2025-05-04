@@ -1,3 +1,11 @@
+FIXED - Zoom to FOW doesn't work (setCameraVisible)
+Background color isn't saved
+Monsters missing movement circle
+Next with hidden combatant in another layer does not skip hidden combatantSize view to FOW doesn't work
+When adding a new video, it doesn't zoom out upon loading
+Error message for importing PC should suggest making it public
+Skinning a monster with a unique token for a battle
+
 Change of pace: just thinking about what else is needed before I release that Bestiary version
 Need to create a new Bestiary file and make sure it's clean for clean releases.
 Test the Dickens out of replacing other bestiaries, and maybe make sure it creates a backup specifically when it tries an upgrade
