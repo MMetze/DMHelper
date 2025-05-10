@@ -32,6 +32,7 @@ DM Helper will try to update your Bestiary automatically, but we do encourage yo
 <ul>
 <li>Bug: Remove FoW by area works again
 <li>Bug: Grid rendering on the Mac version works again
+<li>Bug: Combatants in hidden layers are skipped properly in the initiative order
 </ul>
 
 <!-- Commenting out this section for now
