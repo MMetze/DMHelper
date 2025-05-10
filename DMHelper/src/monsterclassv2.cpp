@@ -11,7 +11,8 @@ MonsterClassv2::MonsterClassv2(const QString& name, QObject *parent) :
     _batchChanges(false),
     _changesMade(false),
     _iconChanged(false),
-    _scaledPixmaps()
+    _scaledPixmaps(),
+    _backgroundColor(Qt::black)
 {
     setStringValue("name", name);
 }
@@ -31,6 +32,8 @@ void MonsterClassv2::inputXML(const QDomElement &element, bool isImport)
     readXMLValues(element, isImport);
     readIcons(element, isImport);
 
+    _backgroundColor = QColor(element.attribute("backgroundColor", "#000000"));
+
     endBatchChanges();
 }
 
@@ -39,6 +42,9 @@ QDomElement MonsterClassv2::outputXML(QDomDocument &doc, QDomElement &element, Q
     element.setAttribute("private", static_cast<int>(getPrivate()));
     writeIcons(doc, element, targetDirectory, isExport);
     writeXMLValues(doc, element, targetDirectory, isExport);
+
+    if((_backgroundColor.isValid()) && (_backgroundColor != Qt::black))
+        element.setAttribute("backgroundColor", _backgroundColor.name());
 
     return element;
 }
@@ -97,6 +103,11 @@ QPixmap MonsterClassv2::getIconPixmap(DMHelper::PixmapSize iconSize, int index)
         return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
     else
         return _scaledPixmaps[index].getPixmap(iconSize);
+}
+
+QColor MonsterClassv2::getBackgroundColor()
+{
+    return _backgroundColor;
 }
 
 void MonsterClassv2::cloneMonster(MonsterClassv2& other)
@@ -301,6 +312,15 @@ void MonsterClassv2::clearIcon()
         _iconChanged = true;
     else
         emit iconChanged(this);
+}
+
+void MonsterClassv2::setBackgroundColor(const QColor& color)
+{
+    if(color == _backgroundColor)
+        return;
+
+    _backgroundColor = color;
+    registerChange();
 }
 
 QHash<QString, QVariant>* MonsterClassv2::valueHash()

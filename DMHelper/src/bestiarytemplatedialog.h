@@ -50,6 +50,7 @@ public slots:
 protected slots:
     void monsterRenamed();
     void handlePublishButton();
+    void handleBackgroundColorChanged(const QColor& color);
 
     void handlePreviousToken();
     void handleAddToken();

@@ -61,6 +61,8 @@ public:
     int getDistanceLineWidth() const;
     int getMapScale() const;
 
+    QColor getBackgroundColor() const;
+
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
@@ -137,6 +139,8 @@ public slots:
     void setDistanceLineType(int lineType);
     void setDistanceLineWidth(int lineWidth);
 
+    void setBackgroundColor(const QColor& color);
+
     void setShowMarkers(bool showMarkers);
 
     void setApplyFilter(bool applyFilter);
@@ -175,6 +179,7 @@ protected:
     int _lineType;
     QColor _lineColor;
     int _lineWidth;
+    QColor _backgroundColor;
 
     // For a generic map
     QColor _mapColor;

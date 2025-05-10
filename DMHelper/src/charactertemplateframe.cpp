@@ -147,6 +147,12 @@ void CharacterTemplateFrame::setRotation(int rotation)
     }
 }
 
+void CharacterTemplateFrame::setBackgroundColor(const QColor& color)
+{
+    if(_character)
+        _character->setBackgroundColor(color);
+}
+
 bool CharacterTemplateFrame::eventFilter(QObject *object, QEvent *event)
 {
     if((event) && (event->type() == QEvent::MouseButtonPress))
@@ -217,6 +223,7 @@ void CharacterTemplateFrame::readCharacterData()
 
     CombatantFactory::Instance()->readObjectData(_uiWidget, _character, this, this);
 
+    emit backgroundColorChanged(_character->getBackgroundColor());
     loadCharacterImage();
     enableDndBeyondSync(_character->getDndBeyondID() != -1);
 

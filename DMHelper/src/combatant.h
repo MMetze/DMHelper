@@ -136,6 +136,7 @@ public:
     virtual QString getIconFile() const override;
     virtual QString getIconFileLocal() const;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
+    virtual QColor getBackgroundColor() const;
 
     virtual int getStrength() const = 0;
     virtual int getDexterity() const = 0;
@@ -180,6 +181,7 @@ public slots:
     virtual void removeCondition(Condition condition);
     virtual void clearConditions();
     virtual void setIcon(const QString &newIcon);
+    virtual void setBackgroundColor(const QColor &color);
 
 protected:
 
@@ -197,6 +199,7 @@ protected:
     int _conditions;
     QString _icon;
     ScaledPixmap _iconPixmap;
+    QColor _backgroundColor;
 
     bool _batchChanges;
     bool _changesMade;

@@ -38,6 +38,7 @@ public slots:
     virtual void loadCharacterUITemplate(const QString& templateFile);
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void setBackgroundColor(const QColor& color) override;
 
 protected:
     // From CampaignObjectFrame

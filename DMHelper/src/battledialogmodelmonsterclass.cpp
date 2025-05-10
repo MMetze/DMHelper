@@ -1,6 +1,8 @@
 #include "battledialogmodelmonsterclass.h"
 #include "monsterclassv2.h"
 #include <QDomElement>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QDebug>
 
 BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const QString& name, QObject *parent) :
@@ -176,7 +178,10 @@ int BattleDialogModelMonsterClass::getSpeed() const
         return 30;
     }
 
-    return _monsterClass->getIntValue("speed");
+    QRegularExpressionMatch match = QRegularExpression(R"(^\s*(\d+))").match(_monsterClass->getStringValue("speed"));
+    return match.hasMatch() ? match.captured(1).toInt() : 0;
+
+    //return _monsterClass->getStringValue("speed").toInt();
 }
 
 int BattleDialogModelMonsterClass::getArmorClass() const

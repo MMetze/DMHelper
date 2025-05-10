@@ -26,6 +26,7 @@ public:
     QStringList getIconList() const;
     QString getIcon(int index = 0) const;
     QPixmap getIconPixmap(DMHelper::PixmapSize iconSize, int index = 0);
+    QColor getBackgroundColor();
 
     void cloneMonster(MonsterClassv2& other);
 
@@ -44,6 +45,7 @@ public slots:
     void searchForIcons();
     void refreshIconPixmaps();
     void clearIcon();
+    void setBackgroundColor(const QColor& color);
 
 signals:
     void iconChanged(MonsterClassv2* monsterClass);
@@ -68,6 +70,7 @@ protected:
     bool _iconChanged;
 
     QList<ScaledPixmap> _scaledPixmaps;
+    QColor _backgroundColor;
 };
 
 #endif // MONSTERCLASSV2_H

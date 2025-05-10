@@ -531,6 +531,12 @@ void EncounterTextEdit::setRotation(int rotation)
     }
 }
 
+void EncounterTextEdit::setBackgroundColor(const QColor& color)
+{
+    if(_encounter)
+        _encounter->setBackgroundColor(color);
+}
+
 void EncounterTextEdit::editLayers()
 {
     if(!_encounter)
@@ -628,6 +634,7 @@ void EncounterTextEdit::readEncounter()
     emit animatedChanged(_encounter->getAnimated());
     emit scrollSpeedChanged(_encounter->getScrollSpeed());
     emit translatedChanged(_encounter->getTranslated());
+    emit backgroundColorChanged(_encounter->getBackgroundColor());
 
     bool showCodeView = false;
     _isCodeView = false;

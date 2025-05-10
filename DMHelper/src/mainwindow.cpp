@@ -3136,7 +3136,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layersClicked, objectFrame, &CampaignObjectFrame::editLayers);
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
-        connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
+        connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::colorChanged, objectFrame, &CampaignObjectFrame::setBackgroundColor);
         connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
 
         connect(objectFrame, SIGNAL(setPublishEnabled(bool, bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool, bool)));

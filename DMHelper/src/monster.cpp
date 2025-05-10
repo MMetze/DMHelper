@@ -89,7 +89,7 @@ int Monster::getCombatantType() const
 int Monster::getSpeed() const
 {
     if(_monsterClass)
-        return _monsterClass->getIntValue("speed");
+        return _monsterClass->getStringValue("speed").toInt();
     else
         return 0;
 }

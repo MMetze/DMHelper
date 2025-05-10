@@ -30,6 +30,7 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     connect(ui->btnDeleteMonster, &QPushButton::clicked, this, &BestiaryTemplateDialog::deleteCurrentMonster);
     connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setMonster(newValue);});
     connect(ui->framePublish, &PublishButtonFrame::clicked, this, &BestiaryTemplateDialog::handlePublishButton);
+    connect(ui->framePublish, &PublishButtonFrame::colorChanged, this, &BestiaryTemplateDialog::handleBackgroundColorChanged);
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
     connect(publishShortcut, &QShortcut::activated, ui->framePublish, &PublishButtonFrame::clickPublish);
 
@@ -130,6 +131,8 @@ void BestiaryTemplateDialog::setMonster(MonsterClassv2* monster, bool edit)
         if(_monster->getIconCount() == 0)
             _monster->searchForIcons();
         setTokenIndex(0);
+
+        ui->framePublish->setColor(_monster->getBackgroundColor());
     }
 
     emit monsterChanged();
@@ -290,6 +293,12 @@ void BestiaryTemplateDialog::handlePublishButton()
 
         emit publishMonsterImage(iconImg, ui->framePublish->getColor());
     }
+}
+
+void BestiaryTemplateDialog::handleBackgroundColorChanged(const QColor& color)
+{
+    if(_monster)
+        _monster->setBackgroundColor(color);
 }
 
 void BestiaryTemplateDialog::handlePreviousToken()

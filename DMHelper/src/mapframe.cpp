@@ -107,6 +107,7 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
 
     emit checkableChanged(_isVideo);
     emit setPublishEnabled(true, true);
+    emit backgroundColorChanged(_mapSource->getBackgroundColor());
     emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
 
@@ -155,6 +156,8 @@ void MapFrame::setMap(Map* map)
 
     initializeMap();
     setMapCursor();
+
+    emit
 }
 
 void MapFrame::mapMarkerMoved(UndoMarker* marker)
@@ -788,6 +791,12 @@ void MapFrame::setRotation(int rotation)
     _rotation = rotation;
     if(_renderer)
         _renderer->setRotation(_rotation);
+}
+
+void MapFrame::setBackgroundColor(const QColor& color)
+{
+    if(_mapSource)
+        _mapSource->setBackgroundColor(color);
 }
 
 void MapFrame::editLayers()

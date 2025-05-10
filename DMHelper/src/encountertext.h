@@ -4,6 +4,7 @@
 #include "campaignobjectbase.h"
 #include "layerscene.h"
 #include <QDomElement>
+#include <QColor>
 
 class QDomDocument;
 
@@ -37,6 +38,8 @@ public:
     virtual bool getTranslated() const;
     virtual QString getTranslatedText() const;
 
+    virtual QColor getBackgroundColor() const;
+
     bool isInitialized() const;
     LayerScene& getLayerScene();
     const LayerScene& getLayerScene() const;
@@ -57,6 +60,8 @@ public slots:
     // Translation
     virtual void setTranslated(bool translated);
     virtual void setTranslatedText(const QString& translatedText);
+
+    virtual void setBackgroundColor(const QColor& color);
 
 signals:
     // Text
@@ -89,6 +94,7 @@ protected:
     QString _imageFile; // For compatibility only
     int _textWidth;
     bool _initialized;
+    QColor _backgroundColor;
 
     // Animation
     bool _animated;

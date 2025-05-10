@@ -67,6 +67,7 @@ public slots:
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void setBackgroundColor(const QColor& color) override;
     virtual void editLayers() override;
 
 signals:

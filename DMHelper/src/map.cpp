@@ -44,6 +44,7 @@ Map::Map(const QString& mapName, QObject *parent) :
     _lineType(Qt::SolidLine),
     _lineColor(Qt::yellow),
     _lineWidth(1),
+    _backgroundColor(Qt::black),
     _mapColor(Qt::white),
     _mapSize(),
     _markerList()
@@ -84,6 +85,8 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                            element.attribute("partyPosY", QString::number(-1)).toInt());
     _mapScale = element.attribute("mapScale").toInt();
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
+
+    setBackgroundColor(QColor(element.attribute("backgroundColor", "#000000")));
 
     // Load the markers
     QDomElement markersElement = element.firstChildElement(QString("markers"));
@@ -397,6 +400,11 @@ int Map::getDistanceLineWidth() const
 int Map::getMapScale() const
 {
     return _mapScale;
+}
+
+QColor Map::getBackgroundColor() const
+{
+    return _backgroundColor;
 }
 
 const QRect& Map::getMapRect() const
@@ -775,6 +783,15 @@ void Map::setDistanceLineWidth(int lineWidth)
     }
 }
 
+void Map::setBackgroundColor(const QColor& color)
+{
+    if(_backgroundColor != color)
+    {
+        _backgroundColor = color;
+        emit dirty();
+    }
+}
+
 void Map::setShowMarkers(bool showMarkers)
 {
     if(_showMarkers != showMarkers)
@@ -861,6 +878,9 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("cameraRectY", _cameraRect.y());
     element.setAttribute("cameraRectWidth", _cameraRect.width());
     element.setAttribute("cameraRectHeight", _cameraRect.height());
+
+    if((_backgroundColor.isValid()) && (_backgroundColor != Qt::black))
+        element.setAttribute("backgroundColor", _backgroundColor.name());
 
     if(_markerList.count() > 0)
     {

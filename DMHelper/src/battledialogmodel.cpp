@@ -21,7 +21,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _previousMap(nullptr),
     _previousMapRect(),
     _cameraRect(),
-    _background(Qt::black),
+    _backgroundColor(Qt::black),
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
@@ -48,7 +48,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _background = QColor(element.attribute("backgroundColorR", QString::number(0)).toInt(),
+    _backgroundColor = QColor(element.attribute("backgroundColorR", QString::number(0)).toInt(),
                          element.attribute("backgroundColorG", QString::number(0)).toInt(),
                          element.attribute("backgroundColorB", QString::number(0)).toInt());
     _cameraRect = QRectF(element.attribute("cameraRectX", QString::number(0.0)).toDouble(),
@@ -199,7 +199,7 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
     if(!otherModel)
         return;
 
-    _background = otherModel->_background;
+    _backgroundColor = otherModel->_backgroundColor;
     _cameraRect = otherModel->_cameraRect;
     _showAlive = otherModel->_showAlive;
     _showDead = otherModel->_showDead;
@@ -591,7 +591,7 @@ QRectF BattleDialogModel::getCameraRect() const
 
 QColor BattleDialogModel::getBackgroundColor() const
 {
-    return _background;
+    return _backgroundColor;
 }
 
 bool BattleDialogModel::getShowAlive() const
@@ -700,9 +700,9 @@ void BattleDialogModel::setCameraRect(const QRectF& rect)
 
 void BattleDialogModel::setBackgroundColor(const QColor& color)
 {
-    if(_background != color)
+    if(_backgroundColor != color)
     {
-        _background = color;
+        _backgroundColor = color;
         emit backgroundColorChanged(color);
         emit dirty();
     }
@@ -871,9 +871,9 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("cameraRectY", _cameraRect.y());
     element.setAttribute("cameraRectWidth", _cameraRect.width());
     element.setAttribute("cameraRectHeight", _cameraRect.height());
-    element.setAttribute("backgroundColorR", _background.red());
-    element.setAttribute("backgroundColorG", _background.green());
-    element.setAttribute("backgroundColorB", _background.blue());
+    element.setAttribute("backgroundColorR", _backgroundColor.red());
+    element.setAttribute("backgroundColorG", _backgroundColor.green());
+    element.setAttribute("backgroundColorB", _backgroundColor.blue());
     element.setAttribute("background", _mapRect.height());
     element.setAttribute("showAlive", _showAlive);
     element.setAttribute("showDead", _showDead);
