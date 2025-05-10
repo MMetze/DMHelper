@@ -6,7 +6,8 @@ FIXED Background color isn't saved
     TESTED Text Edit
     TESTED Map
 FIXED Monsters missing movement circle
-Next with hidden combatant in another layer does not skip hidden combatantSize view to FOW doesn't work
+FIXED Next with hidden combatant in another layer does not skip hidden combatant
+FIXED Size view to FOW doesn't work
 When adding a new video, it doesn't zoom out upon loading
 Error message for importing PC should suggest making it public
 Skinning a monster with a unique token for a battle

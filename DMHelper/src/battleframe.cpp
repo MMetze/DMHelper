@@ -3918,20 +3918,25 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     if(!combatant)
         return nullptr;
 
-    int nextCombatant = _model->getCombatantList().indexOf(combatant);
+    int nextCombatantIndex = _model->getCombatantList().indexOf(combatant);
 
     if(_combatantLayout->count() <= 1)
         return nullptr;
 
+    BattleDialogModelCombatant* nextCombatant = nullptr;
     do
     {
-        if(++nextCombatant >= _model->getCombatantCount())
-            nextCombatant = 0;
-    } while(((_model->getCombatant(nextCombatant)->getHitPoints() <= 0) ||
-             (!_model->getCombatant(nextCombatant)->getKnown())) &&
-            (_model->getCombatant(nextCombatant) != _model->getActiveCombatant()));
+        if(++nextCombatantIndex >= _model->getCombatantCount())
+            nextCombatantIndex = 0;
 
-    return _model->getCombatant(nextCombatant);
+        nextCombatant = _model->getCombatant(nextCombatantIndex);
+        if((!nextCombatant) || (nextCombatant == _model->getActiveCombatant()))
+            return nextCombatant;
+    } while((nextCombatant->getHitPoints() <= 0) || // skip dead combatants
+            (!nextCombatant->getKnown()) ||         // skip unknown combatants
+             ((nextCombatant->getLayer()) && (!nextCombatant->getLayer()->getLayerVisibleDM()))); // skip hidden combatants
+
+    return nextCombatant;
 }
 
 void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
