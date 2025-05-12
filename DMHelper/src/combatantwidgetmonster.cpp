@@ -15,6 +15,7 @@ CombatantWidgetMonster::CombatantWidgetMonster(bool showDone, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(edtNameChanged()));
     connect(ui->edtInit, SIGNAL(editingFinished()), this, SLOT(edtInitiativeChanged()));
     connect(ui->edtMove, SIGNAL(editingFinished()), this, SLOT(edtMoveChanged()));
     connect(ui->edtHP, SIGNAL(editingFinished()), this, SLOT(edtHPChanged()));
@@ -183,6 +184,12 @@ void CombatantWidgetMonster::mouseDoubleClickEvent(QMouseEvent *event)
         _internals->mouseDoubleClickEvent(event);
     
     CombatantWidget::mouseDoubleClickEvent(event);
+}
+
+void CombatantWidgetMonster::edtNameChanged()
+{
+    if(_internals)
+        _internals->setMonsterName(ui->edtName->text());
 }
 
 void CombatantWidgetMonster::edtInitiativeChanged()

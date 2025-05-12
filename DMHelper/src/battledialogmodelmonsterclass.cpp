@@ -262,15 +262,6 @@ MonsterClassv2* BattleDialogModelMonsterClass::getMonsterClass() const
     return _monsterClass;
 }
 
-void BattleDialogModelMonsterClass::setSizeFactor(qreal sizeFactor)
-{
-    if((_monsterClass) && (MonsterClassv2::convertSizeToScaleFactor(_monsterClass->getStringValue("size")) == sizeFactor))
-        return;
-
-    _monsterSize = sizeFactor;
-    emit dataChanged(this);
-}
-
 void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
 {
     if(_monsterName != monsterName)
@@ -278,6 +269,15 @@ void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
         _monsterName = monsterName;
         emit dataChanged(this);
     }
+}
+
+void BattleDialogModelMonsterClass::setSizeFactor(qreal sizeFactor)
+{
+    if((_monsterClass) && (MonsterClassv2::convertSizeToScaleFactor(_monsterClass->getStringValue("size")) == sizeFactor))
+        return;
+
+    _monsterSize = sizeFactor;
+    emit dataChanged(this);
 }
 
 void BattleDialogModelMonsterClass::setIconIndex(int index)

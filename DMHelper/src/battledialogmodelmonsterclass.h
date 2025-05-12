@@ -44,8 +44,9 @@ public:
     virtual int getMonsterType() const override;
     virtual MonsterClassv2* getMonsterClass() const override;
 
+    virtual void setMonsterName(const QString& monsterName) override;
+
     void setSizeFactor(qreal sizeFactor);
-    void setMonsterName(const QString& monsterName);
     void setIconIndex(int index);
     void setIconFile(const QString& iconFile);
 

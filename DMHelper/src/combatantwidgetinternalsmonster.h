@@ -33,6 +33,8 @@ public slots:
     void decrementLegendary();
     void resetLegendary();
 
+    void setMonsterName(const QString& monsterName);
+
 protected:
 
     // Data

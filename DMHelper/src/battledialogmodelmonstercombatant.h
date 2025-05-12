@@ -47,7 +47,7 @@ public:
     virtual int getMonsterType() const override;
     virtual MonsterClassv2* getMonsterClass() const override;
 
-    void setMonsterName(const QString& monsterName);
+    virtual void setMonsterName(const QString& monsterName) override;
 
     Monster* getMonster() const;
     void setMonster(Monster* monster);

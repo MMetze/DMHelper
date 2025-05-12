@@ -32,6 +32,8 @@ public:
     virtual int getMonsterType() const = 0;
     virtual MonsterClassv2* getMonsterClass() const = 0;
 
+    virtual void setMonsterName(const QString& monsterName) = 0;
+
     virtual int getSkillModifier(Combatant::Skills skill) const override;
     virtual int getConditions() const override;
     virtual bool hasCondition(Combatant::Condition condition) const override;

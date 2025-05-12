@@ -46,6 +46,7 @@ protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private slots:
+    void edtNameChanged();
     void edtInitiativeChanged();
     void edtMoveChanged();
     void edtHPChanged();

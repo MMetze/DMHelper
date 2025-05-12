@@ -123,3 +123,9 @@ void CombatantWidgetInternalsMonster::resetLegendary()
     MonsterClassv2* monsterClass = _monster->getMonsterClass();
     _monster->setLegendaryCount(monsterClass ? monsterClass->getIntValue("legendary") : CombatantWidgetInternalsMonster_LEGENDARY_MAXIMUM);
 }
+
+void CombatantWidgetInternalsMonster::setMonsterName(const QString& monsterName)
+{
+    if(_monster)
+        _monster->setMonsterName(monsterName);
+}
