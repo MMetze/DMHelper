@@ -1,6 +1,5 @@
 #include "scaledpixmap.h"
 #include "dmconstants.h"
-
 #include <QFile>
 #include <QDebug>
 

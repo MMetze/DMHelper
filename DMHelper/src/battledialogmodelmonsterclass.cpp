@@ -1,6 +1,7 @@
 #include "battledialogmodelmonsterclass.h"
 #include "monsterclassv2.h"
 #include <QDomElement>
+#include <QDir>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QDebug>
@@ -11,7 +12,9 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const QString& name
     _monsterName(),
     _monsterHP(-1),
     _monsterSize(0.0),
-    _iconIndex(0)
+    _iconIndex(0),
+    _iconFile(),
+    _iconPixmap(nullptr)
 {
 }
 
@@ -21,7 +24,9 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
     _monsterName(),
     _monsterHP(-1),
     _monsterSize(0.0),
-    _iconIndex(0)
+    _iconIndex(0),
+    _iconFile(),
+    _iconPixmap(nullptr)
 {
     if(_monsterClass)
         _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
@@ -33,7 +38,9 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
     _monsterName(monsterName),
     _monsterHP(-1),
     _monsterSize(0.0),
-    _iconIndex(0)
+    _iconIndex(0),
+    _iconFile(),
+    _iconPixmap(nullptr)
 {
     if(_monsterClass)
         _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
@@ -41,6 +48,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
 
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 {
+    delete _iconPixmap;
+    _iconPixmap = nullptr;
 }
 
 void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool isImport)
@@ -51,6 +60,8 @@ void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool is
     _iconIndex = element.attribute("iconIndex", QString::number(0)).toInt();
     if((_iconIndex < 0) || ((_iconIndex > 0) && (_monsterClass) && (_iconIndex >= _monsterClass->getIconCount())))
         _iconIndex = 0;
+
+    setIconFile(element.attribute("iconFile"));
 
     BattleDialogModelMonsterBase::inputXML(element, isImport);
 }
@@ -225,6 +236,9 @@ QString BattleDialogModelMonsterClass::getName() const
 
 QPixmap BattleDialogModelMonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize) const
 {
+    if((_iconPixmap) && (_iconPixmap->isValid()))
+        return _iconPixmap->getPixmap(iconSize);
+
     if(_monsterClass)
     {
         QPixmap result = _monsterClass->getIconPixmap(iconSize, _iconIndex);
@@ -233,11 +247,9 @@ QPixmap BattleDialogModelMonsterClass::getIconPixmap(DMHelper::PixmapSize iconSi
         else
             return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
     }
-    else
-    {
-        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getIconPixmap!";
-        return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
-    }
+
+    qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getIconPixmap!";
+    return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
 }
 
 int BattleDialogModelMonsterClass::getMonsterType() const
@@ -277,6 +289,25 @@ void BattleDialogModelMonsterClass::setIconIndex(int index)
     emit imageChanged(this);
 }
 
+void BattleDialogModelMonsterClass::setIconFile(const QString& iconFile)
+{
+    if((iconFile.isEmpty()) || (_iconFile == iconFile))
+        return;
+
+    _iconFile = iconFile;
+    delete _iconPixmap;
+    _iconPixmap = new ScaledPixmap();
+    if(!_iconPixmap->setBasePixmap(iconFile))
+    {
+        qDebug() << "[BattleDialogModelMonsterClass] Unable to set icon file for monster " << _monsterName << " to " << iconFile << " from directory " << QDir::currentPath();
+        delete _iconPixmap;
+        _iconPixmap = nullptr;
+        return;
+    }
+
+    emit imageChanged(this);
+}
+
 void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("monsterClass", _monsterClass->getStringValue("name"));
@@ -286,6 +317,9 @@ void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomEle
         element.setAttribute("monsterSize", _monsterSize);
     if(_iconIndex != 0)
         element.setAttribute("iconIndex", _iconIndex);
+
+    if((!_iconFile.isEmpty()) && (_iconPixmap))
+        element.setAttribute("iconFile", targetDirectory.relativeFilePath(_iconFile));
 
     BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

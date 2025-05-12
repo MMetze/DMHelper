@@ -9,9 +9,10 @@ FIXED Monsters missing movement circle
 FIXED Next with hidden combatant in another layer does not skip hidden combatant
 FIXED Size view to FOW doesn't work
 When adding a new video, it doesn't zoom out upon loading
-Error message for importing PC should suggest making it public
+Error message for importing PC should suggest making it public: bool CharacterImporter::interpretReply(QNetworkReply* reply)
 Skinning a monster with a unique token for a battle
 Lots of commented code in map and mapframe
+Remove BattleDialogModelMonsterCombatant?
 
 Change of pace: just thinking about what else is needed before I release that Bestiary version
 Need to create a new Bestiary file and make sure it's clean for clean releases.

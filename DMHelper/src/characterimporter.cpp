@@ -9,7 +9,6 @@
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QMessageBox>
 #include <QSslSocket>
 #include <QFileDialog>
 #include <QApplication>

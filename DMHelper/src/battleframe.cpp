@@ -200,7 +200,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
-    connect(_scene, SIGNAL(monsterChangeToken(BattleDialogModelMonsterClass*, int)), this, SLOT(handleChangeMonsterToken(BattleDialogModelMonsterClass*, int)));
+    connect(_scene, &BattleDialogGraphicsScene::monsterChangeToken, this, &BattleFrame::handleChangeMonsterToken);
+    connect(_scene, &BattleDialogGraphicsScene::monsterChangeTokenCustom, this, &BattleFrame::handleChangeMonsterTokenCustom);
     connect(_scene, SIGNAL(itemLink(BattleDialogModelObject*)), this, SLOT(handleItemLink(BattleDialogModelObject*)));
     connect(_scene, SIGNAL(itemUnlink(BattleDialogModelObject*)), this, SLOT(handleItemUnlink(BattleDialogModelObject*)));
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
@@ -2347,6 +2348,40 @@ void BattleFrame::handleChangeMonsterToken(BattleDialogModelMonsterClass* monste
             BattleDialogModelMonsterClass* itemMonster = dynamic_cast<BattleDialogModelMonsterClass*>(getCombatantFromItem(graphicsItem));
             if((itemMonster) && (itemMonster->getMonsterClass() == selectedClass))
                 itemMonster->setIconIndex(iconIndex);
+        }
+    }
+}
+
+void BattleFrame::handleChangeMonsterTokenCustom(BattleDialogModelMonsterClass* monster)
+{
+    if(!monster)
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select monster token..."));
+    if(filename.isEmpty())
+        return;
+
+    if(!QImageReader(filename).canRead())
+    {
+        qDebug() << "[BattleFrame] handleChangeMonsterTokenCustom: " << filename << " is not a valid image file.";
+        return;
+    }
+
+    // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(monster);
+    if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
+    {
+        monster->setIconFile(filename);
+    }
+    else
+    {
+        MonsterClassv2* selectedClass = monster->getMonsterClass();
+        foreach(QGraphicsItem* graphicsItem, selected)
+        {
+            BattleDialogModelMonsterClass* itemMonster = dynamic_cast<BattleDialogModelMonsterClass*>(getCombatantFromItem(graphicsItem));
+            if((itemMonster) && (itemMonster->getMonsterClass() == selectedClass))
+                itemMonster->setIconFile(filename);
         }
     }
 }

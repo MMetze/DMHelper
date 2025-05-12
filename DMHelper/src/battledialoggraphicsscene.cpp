@@ -616,6 +616,11 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                                 connect(tokenAction, &QAction::triggered, [this, i, monster](){this->changeMonsterToken(monster, i);});
                                 tokenMenu->addAction(tokenAction);
                             }
+
+                            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+                            connect(customAction, &QAction::triggered, [this, monster](){this->changeMonsterTokenCustom(monster);});
+                            tokenMenu->addAction(customAction);
+
                             menu.addMenu(tokenMenu);
                             menu.addSeparator();
                         }
@@ -966,6 +971,12 @@ void BattleDialogGraphicsScene::changeMonsterToken(BattleDialogModelMonsterClass
 {
     if(monster)
         emit monsterChangeToken(monster, iconIndex);
+}
+
+void BattleDialogGraphicsScene::changeMonsterTokenCustom(BattleDialogModelMonsterClass* monster)
+{
+    if(monster)
+        emit monsterChangeTokenCustom(monster);
 }
 
 void BattleDialogGraphicsScene::changeEffectLayer()
