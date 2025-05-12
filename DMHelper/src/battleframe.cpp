@@ -2919,7 +2919,12 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
                 monster->setShown(combatantDlg->isShown());
                 monster->setSizeFactor(sizeFactor);
                 monster->setPosition(combatantPos + (multiplePos * i));
-                monster->setIconIndex(combatantDlg->getIconIndex());
+
+                if(!combatantDlg->getIconFile().isEmpty())
+                    monster->setIconFile(combatantDlg->getIconFile());
+                else
+                    monster->setIconIndex(combatantDlg->getIconIndex());
+
                 addCombatant(monster, combatantDlg->getLayer());
             }
 

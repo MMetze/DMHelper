@@ -9,13 +9,16 @@
 #include "layerscene.h"
 #include "ui_combatantdialog.h"
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QImageReader>
 #include <QLineEdit>
 #include <QDebug>
 
 CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
-    _iconIndex(0)
+    _iconIndex(0),
+    _iconFile()
 {
     ui->setupUi(this);
 
@@ -24,6 +27,7 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     ui->buttonBox->setStandardButtons(buttons);
 
     connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CombatantDialog::previousIcon);
+    connect(ui->btnCustomToken, &QAbstractButton::clicked, this, &CombatantDialog::selectCustomToken);
     connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CombatantDialog::nextIcon);
 
     connect(ui->cmbMonsterClass,  &QComboBox::currentTextChanged, this, &CombatantDialog::monsterClassChanged);
@@ -150,6 +154,11 @@ int CombatantDialog::getIconIndex() const
     return _iconIndex;
 }
 
+QString CombatantDialog::getIconFile() const
+{
+    return _iconFile;
+}
+
 void CombatantDialog::writeCombatant(Combatant* combatant)
 {
     if((!combatant) || (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
@@ -231,16 +240,26 @@ void CombatantDialog::updateIcon()
     if(!ui->lblIcon->size().isValid())
         return;
 
-    MonsterClassv2* monsterClass = getMonsterClass();
-    if(!monsterClass)
-        return;
+    QPixmap pmp;
 
-    QPixmap pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full, _iconIndex);
-    if(pmp.isNull())
+    if(!_iconFile.isEmpty())
     {
-        pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Full);
-        if(pmp.isNull())
+        if(!pmp.load(_iconFile))
             return;
+    }
+    else
+    {
+        MonsterClassv2* monsterClass = getMonsterClass();
+        if(!monsterClass)
+            return;
+
+        pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full, _iconIndex);
+        if(pmp.isNull())
+        {
+            pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Full);
+            if(pmp.isNull())
+                return;
+        }
     }
 
     ui->lblIcon->setPixmap(pmp.scaled(ui->lblIcon->size(), Qt::KeepAspectRatio));
@@ -248,11 +267,35 @@ void CombatantDialog::updateIcon()
 
 void CombatantDialog::previousIcon()
 {
+    _iconFile.clear();
     setIconIndex(_iconIndex - 1);
+}
+
+void CombatantDialog::selectCustomToken()
+{
+    _iconFile.clear();
+
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select monster token..."));
+    if(filename.isEmpty())
+        return;
+
+    if(!QImageReader(filename).canRead())
+    {
+        qDebug() << "[CombatantDialog] selectCustomToken: " << filename << " is not a valid image file.";
+        return;
+    }
+
+    _iconIndex = -1;
+    _iconFile = filename;
+    updateIcon();
+
+    ui->btnNextToken->setVisible(true);
+    ui->btnPreviousToken->setEnabled(false);
 }
 
 void CombatantDialog::nextIcon()
 {
+    _iconFile.clear();
     setIconIndex(_iconIndex + 1);
 }
 

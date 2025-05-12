@@ -34,6 +34,7 @@ public:
     QString getSizeFactor() const;
     MonsterClassv2* getMonsterClass() const;
     int getIconIndex() const;
+    QString getIconFile() const;
 
     void writeCombatant(Combatant* combatant);
 
@@ -53,6 +54,7 @@ private slots:
     void setIconIndex(int index);
     void updateIcon();
     void previousIcon();
+    void selectCustomToken();
     void nextIcon();
     void setHitPointAverageChanged();
     void openMonsterClicked();
@@ -63,6 +65,7 @@ private:
 
     Ui::CombatantDialog *ui;
     int _iconIndex;
+    QString _iconFile;
 
 };
 
