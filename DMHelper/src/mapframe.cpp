@@ -8,6 +8,7 @@
 #include "undofowshape.h"
 #include "undomarker.h"
 #include "layerscene.h"
+#include "layervideo.h"
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
 #include "layerseditdialog.h"
@@ -846,6 +847,7 @@ void MapFrame::initializeMap()
             return;
 
         qDebug() << "[MapFrame] Initializing map frame image";
+
         //setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
         _mapSource->getLayerScene().dmInitialize(_scene);
         _mapSource->initializeMarkers(_scene);
@@ -863,6 +865,16 @@ void MapFrame::initializeMap()
             _cameraRect->setCameraRect(_mapSource->getCameraRect());
         else
             _cameraRect = new CameraRect(_mapSource->getCameraRect(), *_scene, ui->graphicsView->viewport());
+
+        if(_cameraRect->getCameraRect().isValid())
+        {
+            QList<Layer*> videoLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Video);
+            foreach(Layer* layer, videoLayers)
+            {
+                LayerVideo* videoLayer = dynamic_cast<LayerVideo*>(layer->getFinalLayer());
+                connect(videoLayer, &LayerVideo::screenshotAvailable, this, &MapFrame::zoomFit);
+            }
+        }
 
         emit cameraRectChanged(_mapSource->getCameraRect());
         emit fowChanged(_bwFoWImage);

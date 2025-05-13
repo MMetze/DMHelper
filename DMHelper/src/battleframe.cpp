@@ -38,6 +38,7 @@
 #include "layergrid.h"
 #include "layerfow.h"
 #include "layerimage.h"
+#include "layervideo.h"
 #include "layerreference.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
@@ -4199,6 +4200,16 @@ void BattleFrame::createSceneContents()
     }
     _cameraRect->setRatioLocked(_isGridLocked);
     updateCameraRect();
+
+    if(_cameraRect->getCameraRect().isValid())
+    {
+        QList<Layer*> videoLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Video);
+        foreach(Layer* layer, videoLayers)
+        {
+            LayerVideo* videoLayer = dynamic_cast<LayerVideo*>(layer->getFinalLayer());
+            connect(videoLayer, &LayerVideo::screenshotAvailable, this, &BattleFrame::zoomFit);
+        }
+    }
 
     updateHighlights();
 }
