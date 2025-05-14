@@ -40,6 +40,13 @@ Dice& Dice::operator=(const Dice& other)
     return *this;
 }
 
+bool Dice::isValid() const
+{
+    // Valid is defined as any die that can return a non-zero result
+    return(((_dieType > 0) && (_dieCount > 0)) ||
+           (_dieBonus > 0));
+}
+
 int Dice::getCount() const
 {
     return _dieCount;

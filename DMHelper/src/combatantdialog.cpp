@@ -3,7 +3,6 @@
 #include "monsterclassv2.h"
 #include "bestiary.h"
 #include "dmconstants.h"
-#include "dice.h"
 #include "layer.h"
 #include "layertokens.h"
 #include "layerscene.h"
@@ -33,6 +32,8 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     connect(ui->cmbMonsterClass,  &QComboBox::currentTextChanged, this, &CombatantDialog::monsterClassChanged);
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
     connect(ui->btnOpenMonster, SIGNAL(clicked(bool)), this, SLOT(openMonsterClicked()));
+
+    connect(ui->edtHitDice, &QLineEdit::editingFinished, this, &CombatantDialog::setHitPointAverageChanged);
 
     connect(ui->chkRandomInitiative, &QAbstractButton::clicked, ui->edtInitiative, &QWidget::setDisabled);
     ui->edtInitiative->setValidator(new QIntValidator(-100, 1000, this));
@@ -91,11 +92,11 @@ int CombatantDialog::getCombatantHitPoints() const
         return 0;
 
     if(ui->chkUseAverage->isChecked())
-        return monsterClass->getDiceValue("hit_dice").average();
-    else if(ui->edtHitPointsLocal->text().isEmpty())
-        return monsterClass->getDiceValue("hit_dice").roll();
-    else
+        return getMonsterHitDice(*monsterClass).average();
+    else if(!ui->edtHitPointsLocal->text().isEmpty())
         return ui->edtHitPointsLocal->text().toInt();
+    else
+        return getMonsterHitDice(*monsterClass).roll();
 }
 
 bool CombatantDialog::isRandomInitiative() const
@@ -305,7 +306,7 @@ void CombatantDialog::setHitPointAverageChanged()
     if(!monsterClass)
         return;
 
-    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getDiceValue("hit_dice").average()) + QString(")"));
+    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(getMonsterHitDice(*monsterClass).average()) + QString(")"));
 }
 
 void CombatantDialog::openMonsterClicked()
@@ -338,4 +339,14 @@ void CombatantDialog::fillSizeCombo()
     ui->cmbSize->addItem(QString("Custom..."), DMHelper::CombatantSize_Unknown);
 
     ui->cmbSize->setCurrentIndex(2); // Default to Medium
+}
+
+Dice CombatantDialog::getMonsterHitDice(const MonsterClassv2& monsterClass) const
+{
+    Dice dialogHitDice(ui->edtHitDice->text());
+
+    if(dialogHitDice.isValid())
+        return dialogHitDice;
+    else
+        return monsterClass.getDiceValue("hit_dice");
 }

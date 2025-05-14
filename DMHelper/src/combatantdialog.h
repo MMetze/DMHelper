@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include "combatant.h"
+#include "dice.h"
 
 class MonsterClassv2;
 class LayerScene;
@@ -62,6 +63,7 @@ private slots:
 
 private:
     void fillSizeCombo();
+    Dice getMonsterHitDice(const MonsterClassv2& monsterClass) const;
 
     Ui::CombatantDialog *ui;
     int _iconIndex;
