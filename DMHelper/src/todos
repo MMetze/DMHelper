@@ -12,7 +12,7 @@ FIXED When adding a new video, it doesn't zoom out upon loading
 DONE Error message for importing PC should suggest making it public: bool CharacterImporter::interpretReply(QNetworkReply* reply)
 DONE Skinning a monster with a unique token for a battle
 DONE Override hit dice doesn't work
-Lots of commented code in map and mapframe
+DONE Lots of commented code in map and mapframe
 Remove BattleDialogModelMonsterCombatant?
 
 Change of pace: just thinking about what else is needed before I release that Bestiary version
