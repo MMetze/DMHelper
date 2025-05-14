@@ -510,10 +510,12 @@ const LayerScene& Map::getLayerScene() const
     return _layerScene;
 }
 
+/*
 void Map::setExternalFoWImage(QImage externalImage)
 {
     // TODO: Layers
 }
+*/
 
 QImage Map::getUnfilteredBackgroundImage()
 {
@@ -549,50 +551,27 @@ QImage Map::getFoWImage()
     return layer ? layer->getImage() : QImage();
 }
 
+/*
 bool Map::isCleared()
 {
-    // TODO: Layers
-    /*
-    if((_undoStack) && (_undoStack->count() > 0))
-    {
-        const QUndoCommand* latestCommand = _undoStack->command(_undoStack->index());
-        if(latestCommand)
-        {
-            const UndoFowFill* fillObj = dynamic_cast<const UndoFowFill*>(latestCommand);
-            if((fillObj) && (fillObj->mapEditFill().color().alpha() == 0))
-            {
-                return true;
-            }
-        }
-    }
-    */
-
     return false;
 }
+*/
 
+/*
 QImage Map::getGrayImage()
 {
-    QImage result(getPreviewImage());
-
-    // TODO: Layers
-    /*
-    QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
-    applyPaintTo(&grayFoWImage, QColor(0, 0, 0, 128), _undoStack->index(), true);
-
-    QPainter p;
-    p.begin(&result);
-        p.drawImage(0, 0, grayFoWImage);
-    p.end();
-    */
-
-    return result;
+    return getPreviewImage();
 }
+*/
 
+/*
 bool Map::isFilterApplied() const
 {
     LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
     return layer ? layer->isFilterApplied() : false;
 }
+*/
 
 MapColorizeFilter Map::getFilter() const
 {
@@ -602,24 +581,7 @@ MapColorizeFilter Map::getFilter() const
 
 QImage Map::getPreviewImage()
 {
-    QImage previewImage = getBackgroundImage();
-    if(!previewImage.isNull())
-        return previewImage;
-
-    // TODO: build a preview image
-    /*
-    if((_filename.isNull()) || (_filename.isEmpty()))
-        return QImage();
-
-    if(!previewImage.load(_filename))
-    {
-        // Last attempt, check the cache for a video version
-        QString cacheFilePath = DMHCache().getCacheFilePath(_filename, QString("png"));
-        previewImage.load(cacheFilePath);
-    }
-    */
-
-    return isFilterApplied() ? getFilter().apply(previewImage) : previewImage;
+    return getBackgroundImage();
 }
 
 void Map::addMarker(UndoMarker* marker)
@@ -685,10 +647,12 @@ void Map::undoPaint()
     //emit executeUndo();
 }
 
+/*
 void Map::updateFoW()
 {
     //emit requestFoWUpdate();
 }
+*/
 
 void Map::setParty(Party* party)
 {

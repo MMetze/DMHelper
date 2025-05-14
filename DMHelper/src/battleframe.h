@@ -223,8 +223,6 @@ private slots:
     void updateMap();
     void updateRounds();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
-    void handleEffectChanged(QGraphicsItem* effectItem);
-    void handleCombatantMoved(BattleDialogModelObject* object);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
@@ -292,7 +290,6 @@ private slots:
     void selectAddCharacter(QList<Characterv2*> characters, const QString& title, const QString& label);
 
     void setEditMode();
-    void updateFowImage(const QPixmap& fow);
     void setItemsInert(bool inert);
 
     void removeRollover();
@@ -311,7 +308,6 @@ private:
     void buildCombatantWidgets();
     void reorderCombatantWidgets();
     void setActiveCombatant(BattleDialogModelCombatant* active);
-    void createCombatantIcon(BattleDialogModelCombatant* combatant);
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
     void newRound();

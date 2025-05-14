@@ -83,16 +83,16 @@ public:
     bool isValid();
     LayerScene& getLayerScene();
     const LayerScene& getLayerScene() const;
-    // TODO - remove
-    void setExternalFoWImage(QImage externalImage);
+// TODO - remove
+//    void setExternalFoWImage(QImage externalImage);
     QImage getUnfilteredBackgroundImage();
     QImage getBackgroundImage();
     QImage getFoWImage();
-    bool isCleared();
+//    bool isCleared();
 
-    QImage getGrayImage();
+//    QImage getGrayImage();
 
-    bool isFilterApplied() const;
+//    bool isFilterApplied() const;
     MapColorizeFilter getFilter() const;
 
     QImage getPreviewImage();
@@ -126,7 +126,7 @@ public slots:
     void uninitialize();
 
     void undoPaint();
-    void updateFoW();
+//    void updateFoW();
 
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
