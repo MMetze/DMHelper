@@ -78,6 +78,9 @@ protected:
     QHash<QString, DMHAttribute> _attributes;
     QHash<QString, DMHAttribute> _elements;
     QHash<QString, QHash<QString, DMHAttribute>> _elementLists;
+
+    QHash<QWidget*, QMetaObject::Connection> _lineConnections;
+    QHash<QWidget*, QMetaObject::Connection> _textConnections;
 };
 
 class DMHAttribute

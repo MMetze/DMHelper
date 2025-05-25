@@ -39,7 +39,9 @@ TemplateFactory::TemplateFactory(QObject *parent) :
     ObjectFactory{parent},
     _attributes(),
     _elements(),
-    _elementLists()
+    _elementLists(),
+    _lineConnections(),
+    _textConnections()
 {
 }
 
@@ -163,10 +165,35 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
     if((!widget) || (!frame))
         return;
 
+    QList<QScrollArea*> scrollAreas = widget->findChildren<QScrollArea*>();
+
+    // Clean up any existing scroll area children
+    for(auto scrollArea : scrollAreas)
+    {
+        if(!scrollArea)
+            continue;
+
+        if(QWidget* oldWidget = scrollArea->takeWidget())
+        {
+            if(QLayout* oldLayout = oldWidget->layout())
+            {
+                QLayoutItem *child;
+                while((child = oldLayout->takeAt(0)) != nullptr)
+                {
+                    if(child->widget())
+                        child->widget()->deleteLater();
+                    delete child;
+                }
+                delete oldLayout;
+            }
+            oldWidget->deleteLater();
+        }
+    }
+
     // Walk through the loaded UI Widget and allocate the appropriate values to the UI elements
     populateWidget(widget, source, frame);
 
-    QList<QScrollArea*> scrollAreas = widget->findChildren<QScrollArea*>();
+    // Populate the scroll areas
     for(auto scrollArea : scrollAreas)
     {
         if(!scrollArea)
@@ -176,22 +203,6 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
         QString widgetString = scrollArea->property(TemplateFactory::TEMPLATE_WIDGET).toString();
         if((!keyString.isEmpty()) && (!widgetString.isEmpty()))
         {
-            if(QWidget* oldWidget = scrollArea->takeWidget())
-            {
-                if(QLayout* oldLayout = oldWidget->layout())
-                {
-                    QLayoutItem *child;
-                    while((child = oldLayout->takeAt(0)) != nullptr)
-                    {
-                        if(child->widget())
-                            child->widget()->deleteLater();
-                        delete child;
-                    }
-                    delete oldLayout;
-                }
-                oldWidget->deleteLater();
-            }
-
             scrollArea->setWidgetResizable(true);
             QFrame* scrollWidget = new QFrame;
             QVBoxLayout* scrollLayout = new QVBoxLayout;
@@ -260,7 +271,12 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
 
             lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
             lineEdit->setCursorPosition(0);
-            connect(lineEdit, &QLineEdit::editingFinished, [templateFrame, source, lineEdit](){templateFrame->handleEditBoxChange(lineEdit, source, lineEdit->text());});
+
+            if(_lineConnections.contains(lineEdit))
+                disconnect(_textConnections[lineEdit]);
+
+            auto connection = connect(lineEdit, &QLineEdit::editingFinished, lineEdit, [=]() { templateFrame->handleEditBoxChange(lineEdit, source, lineEdit->text()); });
+            _lineConnections[lineEdit] = connection;
         }
     }
 
@@ -288,7 +304,12 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
 
             textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
             textEdit->moveCursor(QTextCursor::Start);
-            connect(textEdit, &QTextEdit::textChanged, [templateFrame, source, textEdit](){templateFrame->handleEditBoxChange(textEdit, source, textEdit->toHtml());});
+
+            if(_textConnections.contains(textEdit))
+                disconnect(_textConnections[textEdit]);
+
+            auto connection = connect(textEdit, &QTextEdit::textChanged, textEdit, [=]() { templateFrame->handleEditBoxChange(textEdit, source, textEdit->toHtml()); });
+            _textConnections[textEdit] = connection;
         }
     }
 
@@ -337,16 +358,6 @@ QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const Q
     if(widgetString.isEmpty())
         return createResourceWidgetInternal(keyString);
 
-/*
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    QString appFile = fileDirPath.path() + QString("/Resources/ui/") + widgetString;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString appFile = fileDirPath.path() + QString("/resources/ui/") + widgetString;
-#endif
-*/
     QString appFile;
     if(!templateFile.isEmpty())
     {
@@ -375,15 +386,21 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
     QList<QLineEdit*> lineEdits = widget->findChildren<QLineEdit*>();
     for(auto lineEdit : lineEdits)
     {
-        if(lineEdit)
-            disconnect(lineEdit, &QLineEdit::editingFinished, nullptr, nullptr);
+        if((lineEdit) && (_lineConnections.contains(lineEdit)))
+        {
+            disconnect(_lineConnections[lineEdit]);
+            _lineConnections.remove(lineEdit);
+        }
     }
 
     QList<QTextEdit*> textEdits = widget->findChildren<QTextEdit*>();
     for(auto textEdit : textEdits)
     {
-        if(textEdit)
-            disconnect(textEdit, &QTextEdit::textChanged, nullptr, nullptr);
+        if((textEdit) && (_textConnections.contains(textEdit)))
+        {
+            disconnect(_textConnections[textEdit]);
+            _textConnections.remove(textEdit);
+        }
     }
 }
 
@@ -479,8 +496,6 @@ QString TemplateFactory::getAbsoluteTemplateFile(const QString& templateFile)
 
     if(QFileInfo(templateFile).isRelative())
     {
-        //QDir relativeDir = RuleFactory::Instance()->getRulesetDir();
-        //appFile = relativeDir.absoluteFilePath(templateFile);
         appFile = QDir::current().absoluteFilePath(templateFile);
         if(!QFileInfo::exists(appFile))
         {
