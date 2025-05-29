@@ -192,7 +192,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectObjectFile, this, &BattleFrame::addEffectObjectFile);
     connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
-    connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
+    //connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, &BattleDialogGraphicsScene::itemChangeLayer, this, &BattleFrame::handleItemChangeLayer);
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));

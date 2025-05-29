@@ -2415,9 +2415,6 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
-        //_bestiaryDlg.setMonster(nullptr);
-        //_bestiaryDlg.loadMonsterUITemplate(campaign->getRuleset().getMonsterUIFile());
-        //Bestiary::Instance()->readBestiary(campaign->getRuleset().getBestiaryFile());
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));

@@ -1,5 +1,4 @@
 Why isn't action.ui getting replaced in Roaming?
-[TemplateObject] WARNING: Unknown value type:  "icon"
 
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved

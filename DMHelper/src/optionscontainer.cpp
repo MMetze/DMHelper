@@ -454,7 +454,7 @@ void OptionsContainer::readSettings()
     }
     setRulesetFileName(settingsRulesetFile);
 //    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
-    getDataDirectory(QString("ui"), true);
+    getDataDirectory(QString("ui"));
     copyCoreData(QString("DMHelperBestiary"));
     copyCoreData(QString("monster"));
     copyCoreData(QString("character"));
@@ -787,19 +787,12 @@ QString OptionsContainer::getSettingsDirectory(OptionsAccessor& settings, const 
 
 QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overwrite)
 {
-    bool created = false;
-    QString standardPath = getStandardDirectory(defaultDir, &created);
+    QString standardPath = getStandardDirectory(defaultDir);
     QDir standardDir(standardPath);
     if(!standardDir.exists())
     {
         qDebug() << "[OptionsContainer] ERROR: Data directory NOT FOUND: " << standardPath;
         return QString();
-    }
-
-    if((!created) && (!overwrite))
-    {
-        qDebug() << "[OptionsContainer] Data Directory found: " << standardPath;
-        return standardPath;
     }
 
     QString applicationPath = QCoreApplication::applicationDirPath();
@@ -818,10 +811,24 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overw
     QStringList fileEntries = fileDirPath.entryList(filters);
     for(int i = 0; i < fileEntries.size(); ++i)
     {
-        QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
+        QString sourceFile = fileDirPath.filePath(fileEntries.at(i));
+        QString destinationFile = standardDir.filePath(fileEntries.at(i));
+
+        QFileInfo destinationInfo(destinationFile);
+        if(destinationInfo.exists())
+        {
+            QFileInfo sourceInfo(sourceFile);
+            if((overwrite) || (sourceInfo.lastModified() > destinationInfo.lastModified()))
+                QFile::remove(destinationFile);
+            else
+                continue;
+        }
+
+        if(QFile::copy(sourceFile, destinationFile))
+            qDebug() << "[OptionsContainer] Copied resource file from " << sourceFile << " to " << destinationFile;
     }
 
-    qDebug() << "[OptionsContainer] Data default files copied to directory: " << standardPath;
+    qDebug() << "[OptionsContainer] Data Directory identified: " << standardPath;
     return standardPath;
 }
 
