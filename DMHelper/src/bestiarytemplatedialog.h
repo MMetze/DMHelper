@@ -38,7 +38,8 @@ signals:
 
 public slots:
     void setMonster(MonsterClassv2* monster, bool edit = true);
-    void setMonster(const QString& monsterName, bool edit = true);
+    void setMonster(const QString& monsterName, bool edit);
+    void setMonster(const QString& monsterName);
     void createNewMonster();
     void deleteCurrentMonster();
 

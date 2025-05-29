@@ -28,7 +28,8 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     connect(ui->btnRight, &QPushButton::clicked, this, &BestiaryTemplateDialog::nextMonster);
     connect(ui->btnNewMonster, &QPushButton::clicked, this, &BestiaryTemplateDialog::createNewMonster);
     connect(ui->btnDeleteMonster, &QPushButton::clicked, this, &BestiaryTemplateDialog::deleteCurrentMonster);
-    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setMonster(newValue);});
+    //connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setMonster(newValue);});
+    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
     connect(ui->framePublish, &PublishButtonFrame::clicked, this, &BestiaryTemplateDialog::handlePublishButton);
     connect(ui->framePublish, &PublishButtonFrame::colorChanged, this, &BestiaryTemplateDialog::handleBackgroundColorChanged);
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
@@ -143,6 +144,11 @@ void BestiaryTemplateDialog::setMonster(const QString& monsterName, bool edit)
     setMonster(Bestiary::Instance()->getMonsterClass(monsterName), edit);
 }
 
+void BestiaryTemplateDialog::setMonster(const QString& monsterName)
+{
+    setMonster(Bestiary::Instance()->getMonsterClass(monsterName), true);
+}
+
 void BestiaryTemplateDialog::createNewMonster()
 {
     qDebug() << "[BestiaryTemplateDialog] Creating a new monster...";
@@ -225,6 +231,8 @@ void BestiaryTemplateDialog::deleteCurrentMonster()
         return;
     }
 
+    MonsterClassv2* removedMonster = _monster;
+
     MonsterClassv2* nextClass = Bestiary::Instance()->getNextMonsterClass(_monster);
     if(nextClass)
     {
@@ -239,7 +247,7 @@ void BestiaryTemplateDialog::deleteCurrentMonster()
             setMonster(Bestiary::Instance()->getFirstMonsterClass());
     }
 
-    Bestiary::Instance()->removeMonsterClass(_monster);
+    Bestiary::Instance()->removeMonsterClass(removedMonster);
 }
 
 void BestiaryTemplateDialog::previousMonster()
@@ -258,9 +266,27 @@ void BestiaryTemplateDialog::nextMonster()
 
 void BestiaryTemplateDialog::dataChanged()
 {
-    _monster = nullptr;
+    QString previousMonster = ui->cmbSearch->currentText();
+    setMonster(nullptr);
+
+    QList<QString> monsterList = Bestiary::Instance()->getMonsterList();
+
+//    _monster = nullptr;
+    disconnect(ui->cmbSearch, &QComboBox::currentTextChanged, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
     ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
+    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+
+    if(!previousMonster.isEmpty())
+    {
+        int index = ui->cmbSearch->findText(previousMonster);
+        if(index >= 0)
+            ui->cmbSearch->setCurrentIndex(index);
+    }
+    else
+    {
+        setMonster(ui->cmbSearch->currentText());
+    }
 }
 
 void BestiaryTemplateDialog::monsterRenamed()
