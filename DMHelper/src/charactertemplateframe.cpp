@@ -123,6 +123,8 @@ void CharacterTemplateFrame::loadCharacterUITemplate(const QString& templateFile
     _uiWidget = newWidget;
     _uiFilename = absoluteTemplateFile;
 
+    postLoadConfiguration(this, _uiWidget);
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     layout->addWidget(_uiWidget);
@@ -179,7 +181,10 @@ bool CharacterTemplateFrame::eventFilter(QObject *object, QEvent *event)
         }
     }
 
-    return CampaignObjectFrame::eventFilter(object, event);
+    if(localEventFilter(object, event))
+        return true;
+    else
+        return CampaignObjectFrame::eventFilter(object, event);
 }
 
 void CharacterTemplateFrame::mousePressEvent(QMouseEvent * event)
@@ -359,26 +364,6 @@ void CharacterTemplateFrame::updateCharacterName()
     // TODO: Implement me!
     //ui->edtName->setText(_character->getName());
 }
-
-/*
-void CharacterTemplateFrame::handleResourceChanged(QFrame* resourceFrame)
-{
-    if((!_character) || (!resourceFrame))
-        return;
-
-    int checkboxCount = 0;
-    int checkedCount = 0;
-    for(auto child : resourceFrame->findChildren<QCheckBox*>())
-    {
-        ++checkboxCount;
-        if(child->isChecked())
-            ++checkedCount;
-    }
-
-    QString keyString = resourceFrame->property(CombatantFactory::TEMPLATE_PROPERTY).toString();
-    _character->setResourceValue(keyString, ResourcePair(checkedCount, checkboxCount));
-}
-*/
 
 void CharacterTemplateFrame::loadCharacterImage()
 {

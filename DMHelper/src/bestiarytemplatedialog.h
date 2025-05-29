@@ -75,6 +75,7 @@ protected:
 
     // From TemplateFrame
     virtual QObject* getFrameObject() override;
+    virtual void postLoadConfiguration(QWidget* owner, QWidget* uiWidget) override;
 
     void createTokenFiles(BestiaryFindTokenDialog* dialog);
 
@@ -82,7 +83,6 @@ private:
     QString selectToken();
     void setTokenIndex(int index);
 
-    void connectSpecialSignals();
     QLineEdit* getValueEdit(const QString& key);
 
     Ui::BestiaryTemplateDialog *ui;

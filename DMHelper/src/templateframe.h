@@ -4,6 +4,7 @@
 #include <QString>
 
 class QObject;
+class QEvent;
 class QWidget;
 class TemplateObject;
 
@@ -21,6 +22,8 @@ public:
 
 protected:
     virtual QObject* getFrameObject() = 0;
+    virtual void postLoadConfiguration(QWidget* owner, QWidget* uiWidget);
+    virtual bool localEventFilter(QObject* object, QEvent* event);
 
     QString _uiFilename;
 };

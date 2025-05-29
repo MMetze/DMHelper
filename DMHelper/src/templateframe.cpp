@@ -4,6 +4,8 @@
 #include <QBoxLayout>
 #include <QScrollArea>
 #include <QMessageBox>
+#include <QTextEdit>
+#include <QKeyEvent>
 #include <QDebug>
 
 TemplateFrame::TemplateFrame() :
@@ -141,4 +143,60 @@ void TemplateFrame::handleRemoveResource(QWidget* widget, TemplateObject* templa
 QString TemplateFrame::getUIFilename() const
 {
     return _uiFilename;
+}
+
+void TemplateFrame::postLoadConfiguration(QWidget* owner, QWidget* uiWidget)
+{
+    if((!owner) || (!uiWidget))
+        return;
+
+    // Install this dialog as the event filter for each text edit to handle formatting
+    QList<QTextEdit*> textEdits = uiWidget->findChildren<QTextEdit*>();
+    for(QTextEdit* textEdit : textEdits)
+    {
+        if(textEdit)
+            textEdit->installEventFilter(owner);
+    }
+}
+
+bool TemplateFrame::localEventFilter(QObject* object, QEvent* event)
+{
+    if((!object) || (!event))
+        return false;
+
+    // Check if the object is a text edit and handle basic text formatting for it
+    if(event->type() != QEvent::KeyPress)
+        return false;
+
+    QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+    if(!keyEvent)
+        return false;
+
+    QTextEdit* watched = qobject_cast<QTextEdit*>(object);
+    if(!watched)
+        return false;
+
+    if((keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+    {
+        QTextCharFormat currentFormat = watched->currentCharFormat();
+        QTextCharFormat deltaFormat;
+
+        if(keyEvent->key() == Qt::Key_B)
+        {
+            deltaFormat.setFontWeight(currentFormat.fontWeight() == QFont::Normal ? QFont::Bold : QFont::Normal);
+            watched->mergeCurrentCharFormat(deltaFormat);
+        }
+        else if(keyEvent->key() == Qt::Key_I)
+        {
+            deltaFormat.setFontItalic(!currentFormat.fontItalic());
+            watched->mergeCurrentCharFormat(deltaFormat);
+        }
+        else if(keyEvent->key() == Qt::Key_U)
+        {
+            deltaFormat.setFontUnderline(!currentFormat.fontUnderline());
+            watched->mergeCurrentCharFormat(deltaFormat);
+        }
+    }
+
+    return false;
 }

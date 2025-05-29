@@ -85,7 +85,7 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
     _uiWidget = newWidget;
     _uiFilename = absoluteTemplateFile;
 
-    connectSpecialSignals();
+    postLoadConfiguration(this, _uiWidget);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -493,7 +493,10 @@ bool BestiaryTemplateDialog::eventFilter(QObject* object, QEvent* event)
         }
     }
 
-    return QDialog::eventFilter(object, event);
+    if(localEventFilter(object, event))
+        return true;
+    else
+        return QDialog::eventFilter(object, event);
 }
 
 void BestiaryTemplateDialog::mousePressEvent(QMouseEvent* event)
@@ -561,6 +564,26 @@ void BestiaryTemplateDialog::focusOutEvent(QFocusEvent* event)
 QObject* BestiaryTemplateDialog::getFrameObject()
 {
     return this;
+}
+
+void BestiaryTemplateDialog::postLoadConfiguration(QWidget* owner, QWidget* uiWidget)
+{
+    // Activate hyperlinks for any included text edits
+    if(_uiWidget)
+    {
+        QList<QLineEdit*> lineEdits = _uiWidget->findChildren<QLineEdit*>();
+        for(QLineEdit* lineEdit : lineEdits)
+        {
+            if(!lineEdit)
+                continue;
+
+            QString keyString = lineEdit->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+            if(keyString == QString("name"))
+                connect(lineEdit, &QLineEdit::editingFinished, this, &BestiaryTemplateDialog::monsterRenamed);
+        }
+    }
+
+    TemplateFrame::postLoadConfiguration(owner, uiWidget);
 }
 
 void BestiaryTemplateDialog::createTokenFiles(BestiaryFindTokenDialog* dialog)
@@ -653,24 +676,6 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
     ui->btnClear->setEnabled(_monster->getIconCount() > 0);
     ui->btnPreviousToken->setVisible(_monster->getIconCount() > 1);
     ui->btnNextToken->setVisible(_monster->getIconCount() > 1);
-}
-
-void BestiaryTemplateDialog::connectSpecialSignals()
-{
-    if(!_uiWidget)
-        return;
-
-    // Activate hyperlinks for any included text edits
-    QList<QLineEdit*> lineEdits = _uiWidget->findChildren<QLineEdit*>();
-    for(QLineEdit* lineEdit : lineEdits)
-    {
-        if(!lineEdit)
-            continue;
-
-        QString keyString = lineEdit->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
-        if(keyString == QString("name"))
-            connect(lineEdit, &QLineEdit::editingFinished, this, &BestiaryTemplateDialog::monsterRenamed);
-    }
 }
 
 QLineEdit* BestiaryTemplateDialog::getValueEdit(const QString& key)
