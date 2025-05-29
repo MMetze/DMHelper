@@ -115,7 +115,7 @@ void MonsterClassv2::cloneMonster(MonsterClassv2& other)
     beginBatchChanges();
 
     _private = other._private;
-    foreach(const QString& key, _allValues.keys())
+    foreach(const QString& key, other._allValues.keys())
     {
         _allValues.insert(key, other._allValues.value(key));
     }

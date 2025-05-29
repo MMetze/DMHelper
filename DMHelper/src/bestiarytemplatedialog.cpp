@@ -202,6 +202,7 @@ void BestiaryTemplateDialog::createNewMonster()
                 }
 
                 monsterClass->cloneMonster(*templateClass);
+                monsterClass->setStringValue("name", monsterName);
             }
         }
 

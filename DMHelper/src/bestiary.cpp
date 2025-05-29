@@ -345,7 +345,10 @@ bool Bestiary::insertMonsterClass(MonsterClassv2* monsterClass)
         return false;
 
     if(_bestiaryMap.contains(monsterClass->getStringValue("name")))
+    {
+        qDebug() << "[Bestiary] Attempted to insert a monster class that already exists in the bestiary: " << monsterClass->getStringValue("name");
         return false;
+    }
 
     _bestiaryMap.insert(monsterClass->getStringValue("name"), monsterClass);
     connect(monsterClass, &MonsterClassv2::dirty, this, &Bestiary::registerDirty);
