@@ -1,21 +1,23 @@
 #include "combatantdialog.h"
 #include "monster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "bestiary.h"
 #include "dmconstants.h"
-#include "dice.h"
 #include "layer.h"
 #include "layertokens.h"
 #include "layerscene.h"
 #include "ui_combatantdialog.h"
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QImageReader>
 #include <QLineEdit>
 #include <QDebug>
 
 CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
-    _iconIndex(0)
+    _iconIndex(0),
+    _iconFile()
 {
     ui->setupUi(this);
 
@@ -24,11 +26,14 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     ui->buttonBox->setStandardButtons(buttons);
 
     connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CombatantDialog::previousIcon);
+    connect(ui->btnCustomToken, &QAbstractButton::clicked, this, &CombatantDialog::selectCustomToken);
     connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CombatantDialog::nextIcon);
 
     connect(ui->cmbMonsterClass,  &QComboBox::currentTextChanged, this, &CombatantDialog::monsterClassChanged);
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
     connect(ui->btnOpenMonster, SIGNAL(clicked(bool)), this, SLOT(openMonsterClicked()));
+
+    connect(ui->edtHitDice, &QLineEdit::editingFinished, this, &CombatantDialog::setHitPointAverageChanged);
 
     connect(ui->chkRandomInitiative, &QAbstractButton::clicked, ui->edtInitiative, &QWidget::setDisabled);
     ui->edtInitiative->setValidator(new QIntValidator(-100, 1000, this));
@@ -82,16 +87,16 @@ LayerTokens* CombatantDialog::getLayer() const
 
 int CombatantDialog::getCombatantHitPoints() const
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return 0;
 
     if(ui->chkUseAverage->isChecked())
-        return monsterClass->getHitDice().average();
-    else if(ui->edtHitPointsLocal->text().isEmpty())
-        return monsterClass->getHitDice().roll();
-    else
+        return getMonsterHitDice(*monsterClass).average();
+    else if(!ui->edtHitPointsLocal->text().isEmpty())
         return ui->edtHitPointsLocal->text().toInt();
+    else
+        return getMonsterHitDice(*monsterClass).roll();
 }
 
 bool CombatantDialog::isRandomInitiative() const
@@ -129,9 +134,9 @@ QString CombatantDialog::getSizeFactor() const
     return ui->edtSize->text();
 }
 
-MonsterClass* CombatantDialog::getMonsterClass() const
+MonsterClassv2* CombatantDialog::getMonsterClass() const
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
     if(!monsterClass)
         qDebug() << "[Combatant Dialog] Unable to find monster class: " << ui->cmbMonsterClass->currentText();
 
@@ -142,12 +147,17 @@ int CombatantDialog::getIconIndex() const
 {
     if(ui->chkRandomTokens->isChecked())
     {
-        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+        MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
         if(monsterClass)
             return Dice::dX(monsterClass->getIconCount()) - 1;
     }
 
     return _iconIndex;
+}
+
+QString CombatantDialog::getIconFile() const
+{
+    return _iconFile;
 }
 
 void CombatantDialog::writeCombatant(Combatant* combatant)
@@ -159,7 +169,7 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
     if(!monster)
         return;
 
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(monsterClass == nullptr)
         return;
 
@@ -188,7 +198,7 @@ void CombatantDialog::resizeEvent(QResizeEvent *event)
 
 void CombatantDialog::monsterClassChanged(const QString &text)
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(text);
+    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(text);
     if(!monsterClass)
     {
         qDebug() << "[Combatant Dialog] invalid monster class change detected, monster class not found: " << text;
@@ -202,17 +212,17 @@ void CombatantDialog::monsterClassChanged(const QString &text)
     ui->chkRandomTokens->setEnabled(monsterClass->getIconCount() > 1);
 
     ui->edtName->setText(text);
-    ui->edtHitDice->setText(monsterClass->getHitDice().toString());
+    ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
 
     setHitPointAverageChanged();
 
     if(ui->cmbSize->currentData().toInt() != DMHelper::CombatantSize_Unknown)
-        ui->cmbSize->setCurrentIndex(monsterClass->getMonsterSizeCategory() - 1);
+        ui->cmbSize->setCurrentIndex(monsterClass->MonsterClassv2::convertSizeToCategory(monsterClass->getStringValue("size")) - 1);
 }
 
 void CombatantDialog::setIconIndex(int index)
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
@@ -231,16 +241,26 @@ void CombatantDialog::updateIcon()
     if(!ui->lblIcon->size().isValid())
         return;
 
-    MonsterClass* monsterClass = getMonsterClass();
-    if(!monsterClass)
-        return;
+    QPixmap pmp;
 
-    QPixmap pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full, _iconIndex);
-    if(pmp.isNull())
+    if(!_iconFile.isEmpty())
     {
-        pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Full);
-        if(pmp.isNull())
+        if(!pmp.load(_iconFile))
             return;
+    }
+    else
+    {
+        MonsterClassv2* monsterClass = getMonsterClass();
+        if(!monsterClass)
+            return;
+
+        pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full, _iconIndex);
+        if(pmp.isNull())
+        {
+            pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Full);
+            if(pmp.isNull())
+                return;
+        }
     }
 
     ui->lblIcon->setPixmap(pmp.scaled(ui->lblIcon->size(), Qt::KeepAspectRatio));
@@ -248,21 +268,45 @@ void CombatantDialog::updateIcon()
 
 void CombatantDialog::previousIcon()
 {
+    _iconFile.clear();
     setIconIndex(_iconIndex - 1);
+}
+
+void CombatantDialog::selectCustomToken()
+{
+    _iconFile.clear();
+
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select monster token..."));
+    if(filename.isEmpty())
+        return;
+
+    if(!QImageReader(filename).canRead())
+    {
+        qDebug() << "[CombatantDialog] selectCustomToken: " << filename << " is not a valid image file.";
+        return;
+    }
+
+    _iconIndex = -1;
+    _iconFile = filename;
+    updateIcon();
+
+    ui->btnNextToken->setVisible(true);
+    ui->btnPreviousToken->setEnabled(false);
 }
 
 void CombatantDialog::nextIcon()
 {
+    _iconFile.clear();
     setIconIndex(_iconIndex + 1);
 }
 
 void CombatantDialog::setHitPointAverageChanged()
 {
-    MonsterClass* monsterClass = getMonsterClass();
+    MonsterClassv2* monsterClass = getMonsterClass();
     if(!monsterClass)
         return;
 
-    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getHitDice().average()) + QString(")"));
+    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(getMonsterHitDice(*monsterClass).average()) + QString(")"));
 }
 
 void CombatantDialog::openMonsterClicked()
@@ -277,22 +321,32 @@ void CombatantDialog::sizeSelected(int index)
 
     ui->edtSize->setEnabled(sizeCategory == DMHelper::CombatantSize_Unknown);
     if(sizeCategory != DMHelper::CombatantSize_Unknown)
-        ui->edtSize->setText(QString::number(MonsterClass::convertSizeCategoryToScaleFactor(sizeCategory)));
+        ui->edtSize->setText(QString::number(MonsterClassv2::convertSizeCategoryToScaleFactor(sizeCategory)));
 }
 
 void CombatantDialog::fillSizeCombo()
 {
     ui->cmbSize->clear();
 
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
-    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
+    ui->cmbSize->addItem(MonsterClassv2::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
     ui->cmbSize->insertSeparator(999); // Insert at the end of the list
     ui->cmbSize->addItem(QString("Custom..."), DMHelper::CombatantSize_Unknown);
 
     ui->cmbSize->setCurrentIndex(2); // Default to Medium
+}
+
+Dice CombatantDialog::getMonsterHitDice(const MonsterClassv2& monsterClass) const
+{
+    Dice dialogHitDice(ui->edtHitDice->text());
+
+    if(dialogHitDice.isValid())
+        return dialogHitDice;
+    else
+        return monsterClass.getDiceValue("hit_dice");
 }

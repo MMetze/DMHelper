@@ -88,7 +88,7 @@ void EquipmentServer::readEquipment(const QString& equipmentFile)
     qDebug() << "[EquipmentServer] Equipment file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[EquipmentServer] Unable to read equipment file: " << equipmentFile;
+        qDebug() << "[EquipmentServer] ERROR: Unable to read equipment file: " << equipmentFile;
         return;
     }
 
@@ -103,22 +103,21 @@ void EquipmentServer::readEquipment(const QString& equipmentFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[EquipmentServer] Unable to parse the equipment data file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[EquipmentServer] ERROR: Unable to parse the equipment data file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[EquipmentServer] Unable to find the root element in the equipment data file.";
+        qDebug() << "[EquipmentServer] ERROR: Unable to find the root element in the equipment data file.";
         return;
     }
 
     QDomElement magicSection = root.firstChildElement(QString("magicitems"));
     if(magicSection.isNull())
     {
-        qDebug() << "[EquipmentServer] Unable to find the magic item information element in the equipment data file.";
+        qDebug() << "[EquipmentServer] ERROR: Unable to find the magic item information element in the equipment data file.";
     }
     else
     {

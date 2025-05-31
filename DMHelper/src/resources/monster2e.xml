@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="monster.xsd">
+
+    <dmh:attribute type="dmh:boolean" name="private"/>
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:string" name="speed" default="12"/>
+    <dmh:attribute type="dmh:integer" name="armor_class" default="10"/>
+    <dmh:attribute type="dmh:dice" name="hit_dice" default="1d8"/>
+    <dmh:attribute type="dmh:integer" name="hit_points" default="4"/>
+    <dmh:element type="dmh:string" name="icon"/>
+
+    <dmh:attribute type="dmh:string" name="climate" default="Any"/>
+    <dmh:attribute type="dmh:string" name="frequency" default="Common"/>
+    <dmh:attribute type="dmh:string" name="organization" default="Solitary"/>
+    <dmh:attribute type="dmh:string" name="activity" default="Day"/>
+    <dmh:attribute type="dmh:string" name="diet" default="Omnivore"/>
+    <dmh:attribute type="dmh:string" name="intelligence" default="Average (8-10)"/>
+    <dmh:attribute type="dmh:string" name="treasure" default="D"/>
+    <dmh:attribute type="dmh:string" name="alignment" default="neutral"/>
+    <dmh:attribute type="dmh:string" name="number_appearing" default="1"/>
+    <dmh:attribute type="dmh:integer" name="thac0" default="10"/>
+    <dmh:attribute type="dmh:string" name="number_attacks" default="1 or by weapon"/>
+    <dmh:attribute type="dmh:string" name="damage" default="1d3 or by weapon"/>
+    <dmh:attribute type="dmh:string" name="special_attacks" default="Nil"/>
+    <dmh:attribute type="dmh:string" name="special_defenses" default="Nil"/>
+    <dmh:attribute type="dmh:string" name="magic_resistance" default="Nil"/>
+    <dmh:attribute type="dmh:string" name="size_description" default="6' tall"/>
+    <dmh:attribute type="dmh:string" name="morale" default="Average (10)"/>
+    <dmh:attribute type="dmh:string" name="experience" default="100"/>
+
+    <dmh:element type="dmh:html" name="description"/>
+    <dmh:element type="dmh:html" name="combat"/>
+    <dmh:element type="dmh:html" name="habitat"/>
+    <dmh:element type="dmh:html" name="ecology"/>
+</dmh:template>

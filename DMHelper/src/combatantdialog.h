@@ -4,8 +4,9 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include "combatant.h"
+#include "dice.h"
 
-class MonsterClass;
+class MonsterClassv2;
 class LayerScene;
 class LayerTokens;
 
@@ -32,8 +33,9 @@ public:
     bool isShown() const;
     bool isCustomSize() const;
     QString getSizeFactor() const;
-    MonsterClass* getMonsterClass() const;
+    MonsterClassv2* getMonsterClass() const;
     int getIconIndex() const;
+    QString getIconFile() const;
 
     void writeCombatant(Combatant* combatant);
 
@@ -53,6 +55,7 @@ private slots:
     void setIconIndex(int index);
     void updateIcon();
     void previousIcon();
+    void selectCustomToken();
     void nextIcon();
     void setHitPointAverageChanged();
     void openMonsterClicked();
@@ -60,9 +63,11 @@ private slots:
 
 private:
     void fillSizeCombo();
+    Dice getMonsterHitDice(const MonsterClassv2& monsterClass) const;
 
     Ui::CombatantDialog *ui;
     int _iconIndex;
+    QString _iconFile;
 
 };
 

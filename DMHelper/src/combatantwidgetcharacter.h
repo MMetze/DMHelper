@@ -27,6 +27,8 @@ public:
 
     virtual void setShowDone(bool showDone) override;
 
+    virtual void disconnectInternals() override;
+
 public slots:
     virtual void updateData() override;
     virtual void updateMove() override;

@@ -346,7 +346,8 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
         QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
         while(!licenseText.isNull())
         {
-            _licenseText.append(licenseText.text());
+            if(!_licenseText.contains(licenseText.text()))
+                _licenseText.append(licenseText.text());
             licenseText = licenseText.nextSiblingElement(QString("element"));
         }
 

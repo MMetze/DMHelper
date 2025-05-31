@@ -11,5 +11,4 @@
     <StartMenuDir>DMHelper</StartMenuDir>
     <TargetDir>@ApplicationsDirX86@/DMHelper</TargetDir>
     <StyleSheet>style.qss</StyleSheet>
-    <RunProgram>@TargetDir@/DMHelper.exe</RunProgram>
 </Installer>

@@ -5,7 +5,7 @@
 #include "battledialogevent.h"
 #include "battledialogeventdamage.h"
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QList>
 
 BattleDialogLogView::BattleDialogLogView(const BattleDialogModel& model, const BattleDialogLogger& logger, QWidget *parent) :
@@ -73,7 +73,7 @@ BattleDialogLogView::BattleDialogLogView(const BattleDialogModel& model, const B
             totalEnemyDamage += dealt;
             BattleDialogModelMonsterBase* monsterBase = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
             if((monsterBase) && (monsterBase->getMonsterClass()))
-                totalExperience += monsterBase->getMonsterClass()->getXP();
+                totalExperience += monsterBase->getMonsterClass()->getIntValue("experience");
         }
     }
 

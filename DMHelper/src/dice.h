@@ -14,6 +14,8 @@ public:
 
     Dice& operator=(const Dice& other);
 
+    bool isValid() const;
+
     int getCount() const;
     void setCount(int count);
 

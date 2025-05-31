@@ -10,7 +10,7 @@
 #include "characterv2.h"
 #include "bestiary.h"
 #include "monster.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodelmonstercombatant.h"
@@ -91,7 +91,7 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
                 else if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Class)
                 {
                     QString monsterClassName = combatantElement.attribute("monsterClass");
-                    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
+                    MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
                     if(monsterClass)
                         combatant = new BattleDialogModelMonsterClass(monsterClass);
                     else
@@ -1052,7 +1052,7 @@ QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, Bat
     pixmapItem->setScale(scaleFactor);
     applyCombatantTooltip(pixmapItem, combatant);
 
-    qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
+    // qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
 
     qreal gridSize = (static_cast<qreal>(_scale)) / scaleFactor;
     qreal gridOffset = gridSize * static_cast<qreal>(sizeFactor) / 2.0;
@@ -1062,7 +1062,7 @@ QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, Bat
     //rect->setData(BattleDialogItemChild_Index, BattleDialogItemChild_Area);
     rect->setParentItem(pixmapItem);
     rect->setVisible(false);
-    qDebug() << "[LayerTokens] created " << pixmapItem << " with area child " << rect;
+    //qDebug() << "[LayerTokens] created " << pixmapItem << " with area child " << rect;
 
     // TODO: Layers
     // applyPersonalEffectToItem(pixmapItem);

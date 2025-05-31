@@ -177,7 +177,7 @@ void AudioTrackFile::internalOutputXML(QDomDocument &doc, QDomElement &element, 
     if(!_repeat)
         element.setAttribute("repeat", _repeat);
 
-    if(_volume != 1.0)
+    if(_volume < 1.0)
         element.setAttribute("volume", static_cast<int>(_volume * 100.f));
 
     AudioTrackUrl::internalOutputXML(doc, element, targetDirectory, isExport);

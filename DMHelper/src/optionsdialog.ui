@@ -109,7 +109,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_20">
+           <layout class="QHBoxLayout" name="horizontalLayout_201">
             <item>
              <widget class="QLabel" name="label_16">
               <property name="text">
@@ -520,7 +520,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="lblBestiary">
            <property name="text">
-            <string>Bestiary File</string>
+            <string>Default Bestiary File</string>
            </property>
           </widget>
          </item>
@@ -569,7 +569,11 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLineEdit" name="edtBestiary"/>
+          <widget class="QLineEdit" name="edtBestiary">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="lblSpellbook">
@@ -583,6 +587,9 @@
          </item>
          <item row="0" column="3">
           <widget class="QPushButton" name="btnBestiary">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Browse...</string>
            </property>
@@ -661,91 +668,6 @@
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>Bestiary Token Search</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_15">
-            <item>
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Default Search String:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="edtTokenSearchString"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblBestiary_2">
-              <property name="text">
-               <string>Frame Image:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="edtTokenFrame"/>
-            </item>
-            <item row="0" column="2">
-             <widget class="QPushButton" name="btnBrowseTokenFrame">
-              <property name="text">
-               <string>Browse...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="lblBestiary_3">
-              <property name="text">
-               <string>Mask Image:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="edtTokenMask"/>
-            </item>
-            <item row="1" column="2">
-             <widget class="QPushButton" name="btnBrowseTokenMask">
-              <property name="text">
-               <string>Browse...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_16">
-            <item>
-             <widget class="QPushButton" name="btnPopulateTokens">
-              <property name="text">
-               <string>Populate Bestiary Tokens...</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_7">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer_4">
@@ -891,7 +813,7 @@
       <attribute name="title">
        <string>Campaign</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_15" stretch="0,0,10">
+      <layout class="QVBoxLayout" name="verticalLayout_15">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_17">
          <item>
@@ -1005,6 +927,73 @@
            </layout>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_16">
+              <item>
+               <widget class="QLabel" name="lblBestiaryFile">
+                <property name="text">
+                 <string>Bestiary File:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblMonsterData">
+                <property name="text">
+                 <string>Monster Data Template:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblMonsterUI">
+                <property name="text">
+                 <string>Monster UI Template:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QLineEdit" name="edtBestiaryFile"/>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="edtMonsterData"/>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="edtMonsterUI"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_18">
+              <item>
+               <widget class="QPushButton" name="btnBestiaryFile">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMonsterData">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMonsterUI">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
            <widget class="QCheckBox" name="chkCombatantDone">
             <property name="text">
              <string>Show a checkbox for whether a combatant has been active this round</string>
@@ -1014,6 +1003,91 @@
               <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Bestiary Token Search</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Default Search String:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtTokenSearchString"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblBestiary_2">
+              <property name="text">
+               <string>Frame Image:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="edtTokenFrame"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="btnBrowseTokenFrame">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblBestiary_3">
+              <property name="text">
+               <string>Mask Image:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="edtTokenMask"/>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="btnBrowseTokenMask">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <widget class="QPushButton" name="btnPopulateTokens">
+              <property name="text">
+               <string>Populate Bestiary Tokens...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

@@ -1,6 +1,5 @@
 #include "publishgltextrenderer.h"
 #include "encountertext.h"
-#include "publishglbattlebackground.h"
 #include "publishglimage.h"
 #include "layer.h"
 #include "dmconstants.h"
@@ -10,10 +9,9 @@
 #include <QTextDocument>
 #include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, const QSize& frameSize, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
-    _frameSize(frameSize),
     _targetSize(),
     _color(),
     _textImage(textImage),
@@ -33,7 +31,7 @@ PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage te
     _projectionMatrix(),
     _scissorRect(),
     _textObject(nullptr),
-    _textPos(),
+    _textPos(0.0),
     _elapsed(),
     _timerId(0),
     _recreateContent(false)
@@ -105,10 +103,7 @@ void PublishGLTextRenderer::initializeGL()
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    if(_encounter->getLayerScene().sceneSize().isEmpty())
-        _scene.deriveSceneRectFromSize(_frameSize);
-    else
-        _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
+    updateSceneRect();
 
     // Create the objects
     _encounter->getLayerScene().playerGLInitialize(this, &_scene);
@@ -155,9 +150,6 @@ void PublishGLTextRenderer::initializeGL()
     updateProjectionMatrix();
 
     _initialized = true;
-
-    rewind();
-    play();
 }
 
 void PublishGLTextRenderer::cleanupGL()
@@ -187,7 +179,7 @@ void PublishGLTextRenderer::resizeGL(int w, int h)
     _scene.setTargetSize(_targetSize);
     if(_encounter)
         _encounter->getLayerScene().playerGLResize(w, h);
-
+    updateSceneRect();
     updateProjectionMatrix();
 
     emit updateWidget();
@@ -209,7 +201,10 @@ void PublishGLTextRenderer::paintGL()
     DMH_DEBUG_OPENGL_PAINTGL();
 
     if(_recreateContent)
+    {
         recreateContent();
+        updateProjectionMatrix();
+    }
 
     if(!_scissorRect.isEmpty())
     {
@@ -244,6 +239,18 @@ void PublishGLTextRenderer::paintGL()
         f->glDisable(GL_SCISSOR_TEST);
 }
 
+void PublishGLTextRenderer::setTextImage(QImage textImage)
+{
+    if(textImage.isNull())
+        return;
+
+    _textImage = textImage;
+    _recreateContent = true;
+    updateSceneRect();
+
+    emit updateWidget();
+}
+
 void PublishGLTextRenderer::updateProjectionMatrix()
 {
     if((_shaderProgramRGB == 0) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
@@ -253,29 +260,24 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     if(!f)
         return;
 
-    QSizeF transformedTarget = _targetSize;
-    if((_rotation == 90) || (_rotation == 270))
-        transformedTarget.transpose();
-
-    // Update projection matrix and other size related settings:
-    QSizeF rectSize = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
-    if(rectSize.isEmpty())
-        qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR -publish scene size empty!";
+    QSizeF transformedTarget;
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+        transformedTarget = getRotatedSizeF();
+    else
+        transformedTarget = getRotatedTargetSizeF().scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-    _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-    //_projectionMatrix.ortho(0.0, 0.0, -rectSize.height(), rectSize.height(), 0.1f, 1000.f);
-    //_projectionMatrix.ortho(0.0, rectSize.width(), -rectSize.height(), 0.0, 0.1f, 1000.f);
+    _projectionMatrix.ortho(-transformedTarget.width() / 2, transformedTarget.width() / 2, -transformedTarget.height() / 2, transformedTarget.height() / 2, 0.1f, 1000.f);
 
-    QSizeF transformedBackgroundSize = _scene.getSceneRect().size(); //_encounter->getLayerScene().sceneSize();
-    if(transformedBackgroundSize.isEmpty())
-        qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR - background size empty!";
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+    {
+        _scissorRect = QRect();
+        return;
+    }
 
-    if((_rotation == 90) || (_rotation == 270))
-        transformedBackgroundSize.transpose();
+    QSizeF scissorSize = getRotatedSizeF().scaled(_targetSize, Qt::KeepAspectRatio);
 
-    QSizeF scissorSize = transformedBackgroundSize.scaled(_targetSize, Qt::KeepAspectRatio);
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
@@ -284,8 +286,7 @@ void PublishGLTextRenderer::updateProjectionMatrix()
 
 void PublishGLTextRenderer::setRotation(int rotation)
 {
-    if((rotation != _rotation) && (_textObject) && (_encounter) && (!_encounter->getAnimated()))
-        _textObject->setY((getRotatedHeight(rotation) / 2) - _textObject->getImageSize().height());
+    updateSceneRect();
 
     PublishGLRenderer::setRotation(rotation);
 }
@@ -297,12 +298,13 @@ void PublishGLTextRenderer::rewind()
 
     if(_encounter->getAnimated())
     {
-        _textObject->setY((-getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+        _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height());
+        _textPos = 0.0;
         _elapsed.start();
     }
     else
     {
-        _textObject->setY((getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+        _textObject->setY((getRotatedHeight() / 2) - _textObject->getImageSize().height());
     }
 
     emit updateWidget();
@@ -364,37 +366,71 @@ void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
         return;
 
     qreal elapsedtime = _elapsed.restart();
-    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (getRotatedHeight(_rotation) / 250) * (elapsedtime / 1000.0));
+    _textPos += static_cast<qreal>(_encounter->getScrollSpeed() * (getRotatedHeight() / 250)) * (elapsedtime / 1000.0);
+    _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos);
 
     emit updateWidget();
 }
 
-/*
-void PublishGLTextRenderer::updateBackground()
+QSizeF PublishGLTextRenderer::getRotatedSizeF()
 {
+    return (_rotation % 180 == 0) ? _scene.getSceneRect().size() : _scene.getSceneRect().size().transposed();
 }
-*/
 
-int PublishGLTextRenderer::getRotatedHeight(int rotation)
+QSizeF PublishGLTextRenderer::getRotatedTargetSizeF()
 {
-    if((rotation == 90) || (rotation == 270))
-        return _encounter->getLayerScene().sceneSize().width();
+    return (_rotation % 180 == 0) ? _targetSize.toSizeF() : _targetSize.transposed().toSizeF();
+}
+
+int PublishGLTextRenderer::getRotatedWidth()
+{
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+        return (_rotation % 180 == 0) ? _scene.getSceneRect().width() : _scene.getSceneRect().height();
     else
-        return _encounter->getLayerScene().sceneSize().height();
+        return _scene.getSceneRect().width();
+}
+
+int PublishGLTextRenderer::getRotatedHeight()
+{
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+        return (_rotation % 180 == 0) ? _scene.getSceneRect().height() : _scene.getSceneRect().width();
+    else
+        return _scene.getSceneRect().height();
 }
 
 void PublishGLTextRenderer::recreateContent()
 {
-    if((!_encounter) || (!_encounter->getLayerScene().sceneSize().isValid()))
+    if(!_encounter)
         return;
 
     delete _textObject;
-    _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
-    _textObject->setX(-_scene.getSceneRect().width() / 2);
 
-    rewind();
+    _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
+
+    _textObject->setX(-(getRotatedWidth() * _encounter->getTextWidth() / 100) / 2.0);
+
+    if(_encounter->getAnimated())
+        _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos);
+    else
+        _textObject->setY((getRotatedHeight() / 2.0) - _textObject->getImageSize().height());
 
     _recreateContent = false;
+}
+
+void PublishGLTextRenderer::updateSceneRect()
+{
+    if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
+    {
+        _scene.deriveSceneRectFromSize(_targetSize.toSizeF());
+        qDebug() << "[PublishGLTextRenderer] scene rect updated from target size to " << _scene.getSceneRect();
+        emit sceneSizeChanged(_targetSize);
+    }
+    else
+    {
+        _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
+        qDebug() << "[PublishGLTextRenderer] scene rect updated from layer scene to " << _scene.getSceneRect();
+        emit sceneSizeChanged(_encounter->getLayerScene().sceneSize().toSize());
+    }
 }
 
 void PublishGLTextRenderer::createShaders()
@@ -446,9 +482,6 @@ void PublishGLTextRenderer::createShaders()
         "{\n"
         "    FragColor = texture(texture1, TexCoord);\n"
         "}\0";
-
-    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
-    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShaderRGB;
     fragmentShaderRGB = f->glCreateShader(GL_FRAGMENT_SHADER);
@@ -526,10 +559,6 @@ void PublishGLTextRenderer::createShaders()
         "{\n"
         "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
         "}\0";
-
-    //   "    FragColor = texture(texture1, TexCoord) * ourColor; // FragColor = vec4(ourColor, 1.0f);\n"
-    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
-    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShaderRGBA;
     fragmentShaderRGBA = f->glCreateShader(GL_FRAGMENT_SHADER);
@@ -609,7 +638,6 @@ void PublishGLTextRenderer::createShaders()
         "{\n"
         "    FragColor = ourColor;\n"
         "}\0";
-
 
     unsigned int fragmentShaderRGBColor;
     fragmentShaderRGBColor = f->glCreateShader(GL_FRAGMENT_SHADER);

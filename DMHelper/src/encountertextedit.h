@@ -62,12 +62,12 @@ public slots:
     void setTranslated(bool translated);
     void setCodeView(bool active);
 
-    void targetResized(const QSize& newSize);
     void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void setBackgroundColor(const QColor& color) override;
     virtual void editLayers() override;
 
 signals:
@@ -112,17 +112,26 @@ protected slots:
 
     void refreshImage();
 
+    void triggerEncounterChanged();
+    void triggerUpdateAnchor();
+
+    void sceneRectUpdated(const QSize& size);
+
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
     void scaleBackgroundImage();
     void prepareImages();
     void prepareTextImage();
-    QImage getDocumentTextImage();
+    QImage getDocumentTextImage(int renderWidth);
     void drawTextImage(QPaintDevice* target);
 
     void setPublishCheckable();
     QSize getRotatedTargetSize();
+    int getRotatedTargetWidth();
+
+    void cancelTimers();
 
     Ui::EncounterTextEdit *ui;
 
@@ -144,6 +153,9 @@ protected:
     int _rotation;
 
     QPointF _textPos;
+
+    int _encounterChangedTimer;
+    int _updateAnchorTimer;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

@@ -9,12 +9,21 @@
 #include <QFileInfo>
 #include <QDebug>
 
+const char* RuleFactory::DEFAULT_RULESET_NAME = "DnD 5e 2014";
+const char* DEFAULT_CHARACTER_DATA = "character5e.xml";
+const char* DEFAULT_CHARACTER_UI = "./ui/character5e.ui";
+const char* DEFAULT_MONSTER_DATA = "monster5e.xml";
+const char* DEFAULT_MONSTER_UI = "./ui/monster5e.ui";
+const char* DEFAULT_BESTIARY = "DMHelperBestiary.xml";
+bool DEFAULT_CHARACTER_DONE = true;
+
 RuleFactory* RuleFactory::_instance = nullptr;
 
 RuleFactory::RuleFactory(const QString& rulesetFile, QObject *parent) :
     QObject{parent},
-    _rulesetTemplates(),
-    _rulesetDir()
+    _rulesetDir(),
+    _defaultBestiary(),
+    _rulesetTemplates()
 {
     readRuleset(rulesetFile);
 }
@@ -83,9 +92,29 @@ QList<RuleFactory::RulesetTemplate> RuleFactory::getRulesetTemplates() const
     return _rulesetTemplates.values();
 }
 
+bool RuleFactory::rulesetExists(const QString& rulesetName) const
+{
+    return ((!rulesetName.isEmpty()) && (_rulesetTemplates.contains(rulesetName)));
+}
+
 RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rulesetName) const
 {
-    return _rulesetTemplates.value(rulesetName);
+    if(rulesetExists(rulesetName))
+    {
+        return _rulesetTemplates.value(rulesetName);
+    }
+    else
+    {
+        qDebug() << "[RuleFactory] WARNING: Requested ruleset " << rulesetName << " does not exist, returning a default ruleset template.";
+        return RulesetTemplate(RuleFactory::DEFAULT_RULESET_NAME,
+                               RuleInitiative5e::InitiativeType,
+                               DEFAULT_CHARACTER_DATA,
+                               DEFAULT_CHARACTER_UI,
+                               DEFAULT_MONSTER_DATA,
+                               DEFAULT_MONSTER_UI,
+                               getDefaultBestiary(),
+                               DEFAULT_CHARACTER_DONE);
+    }
 }
 
 QDir RuleFactory::getRulesetDir() const
@@ -93,16 +122,38 @@ QDir RuleFactory::getRulesetDir() const
     return _rulesetDir;
 }
 
+void RuleFactory::setDefaultBestiary(const QString& bestiaryFile)
+{
+    if(_defaultBestiary == bestiaryFile)
+        return;
+
+    _defaultBestiary = bestiaryFile;
+
+    if(_rulesetTemplates.contains(DEFAULT_RULESET_NAME))
+    {
+        RulesetTemplate defaultTemplate = _rulesetTemplates.value(DEFAULT_RULESET_NAME);
+        if((defaultTemplate._bestiary == DEFAULT_BESTIARY) && (!_defaultBestiary.isEmpty()))
+            defaultTemplate._bestiary = _defaultBestiary;
+
+        _rulesetTemplates.insert(DEFAULT_RULESET_NAME, defaultTemplate);
+    }
+}
+
+QString RuleFactory::getDefaultBestiary() const
+{
+    return _defaultBestiary;
+}
+
 void RuleFactory::readRuleset(const QString& rulesetFile)
 {
-    qDebug() << "[RuleFactory] Reading ruleset...";
+    qDebug() << "[RuleFactory] Reading ruleset from " << rulesetFile;
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(rulesetFile);
     qDebug() << "[RuleFactory] Ruleset file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[RuleFactory] Unable to read ruleset file: " << rulesetFile;
+        qDebug() << "[RuleFactory] ERROR: Unable to read ruleset file: " << rulesetFile << ", error: " << file.error() << ", " << file.errorString();
         return;
     }
 
@@ -117,15 +168,14 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[RuleFactory] Unable to parse the ruleset file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[RuleFactory] ERROR: Unable to parse the ruleset file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[RuleFactory] Unable to find the root element in the ruleset file.";
+        qDebug() << "[RuleFactory] ERROR: Unable to find the root element in the ruleset file.";
         return;
     }
 
@@ -139,6 +189,13 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         newRuleset._initiative = rulesetElement.attribute(QString("initiative"));
         newRuleset._characterData = rulesetElement.attribute(QString("characterdata"));
         newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
+        newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
+        newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
+        newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
+        newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
+
+        if((newRuleset._name == DEFAULT_RULESET_NAME) && (newRuleset._bestiary == DEFAULT_BESTIARY) && (!getDefaultBestiary().isEmpty()))
+            newRuleset._bestiary = getDefaultBestiary();
 
         _rulesetTemplates.insert(newRuleset._name, newRuleset);
 
@@ -147,5 +204,5 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
 
     _rulesetDir = QFileInfo(rulesetFile).absolutePath();
 
-    qDebug() << "[RuleFActory] Completed reading ruleset.";
+    qDebug() << "[RuleFactory] Completed reading ruleset. Read " << _rulesetTemplates.size() << " rulesets.";
 }

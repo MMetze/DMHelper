@@ -3,7 +3,7 @@
 #include "combatantwidgetinternalsmonster.h"
 #include "dmconstants.h"
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include "campaign.h"
 #include <QIntValidator>
 #include <QDebug>
@@ -15,6 +15,7 @@ CombatantWidgetMonster::CombatantWidgetMonster(bool showDone, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(edtNameChanged()));
     connect(ui->edtInit, SIGNAL(editingFinished()), this, SLOT(edtInitiativeChanged()));
     connect(ui->edtMove, SIGNAL(editingFinished()), this, SLOT(edtMoveChanged()));
     connect(ui->edtHP, SIGNAL(editingFinished()), this, SLOT(edtHPChanged()));
@@ -64,13 +65,13 @@ void CombatantWidgetMonster::setInternals(CombatantWidgetInternalsMonster* inter
         connect(monsterCombatant, &BattleDialogModelMonsterBase::combatantDoneChanged, this, &CombatantWidgetMonster::updateData);
 
         if(monsterCombatant->getCombatant())
-            connect(monsterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
+            connect(monsterCombatant->getCombatant(), &Combatant::dirty, this, &CombatantWidgetMonster::updateData);
         else if (monsterCombatant->getMonsterClass())
-            connect(monsterCombatant->getMonsterClass(), SIGNAL(dirty()), this, SLOT(updateData()));
+            connect(monsterCombatant->getMonsterClass(), &MonsterClassv2::dirty, this, &CombatantWidgetMonster::updateData);
         else
             qDebug() << "[Monster Widget] neither valid combatant nor monster class found!";
 
-        if((monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getLegendary()))
+        if((monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getIntValue("legendary") > 0))
         {
             _internals->resetLegendary();
             connect(ui->btnLegendary, SIGNAL(clicked(bool)), _internals, SLOT(decrementLegendary()));
@@ -99,6 +100,22 @@ void CombatantWidgetMonster::setShowDone(bool showDone)
 {
     ui->lblDone->setVisible(showDone);
     ui->chkDone->setVisible(showDone);
+}
+
+void CombatantWidgetMonster::disconnectInternals()
+{
+    if(!_internals)
+        return;
+
+    BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
+    if(!monsterCombatant)
+        return;
+
+    disconnect(monsterCombatant, &BattleDialogModelMonsterBase::combatantDoneChanged, this, &CombatantWidgetMonster::updateData);
+    if(monsterCombatant->getCombatant())
+        disconnect(monsterCombatant->getCombatant(), &Combatant::dirty, this, &CombatantWidgetMonster::updateData);
+    else if (monsterCombatant->getMonsterClass())
+        disconnect(monsterCombatant->getMonsterClass(), &MonsterClassv2::dirty, this, &CombatantWidgetMonster::updateData);
 }
 
 void CombatantWidgetMonster::clearImage()
@@ -169,6 +186,12 @@ void CombatantWidgetMonster::mouseDoubleClickEvent(QMouseEvent *event)
     CombatantWidget::mouseDoubleClickEvent(event);
 }
 
+void CombatantWidgetMonster::edtNameChanged()
+{
+    if(_internals)
+        _internals->setMonsterName(ui->edtName->text());
+}
+
 void CombatantWidgetMonster::edtInitiativeChanged()
 {
     if(_internals)
@@ -206,7 +229,7 @@ void CombatantWidgetMonster::readInternals()
     ui->chkDone->setChecked(_internals->getCombatant()->getDone());
 
     BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(_internals->getCombatant());
-    if((monsterCombatant) && (monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getLegendary()))
+    if((monsterCombatant) && (monsterCombatant->getMonsterClass()) && (monsterCombatant->getMonsterClass()->getIntValue("legendary") > 0))
         ui->btnLegendary->setText(QString("L: ") + QString::number(monsterCombatant->getLegendaryCount()));
 }
 

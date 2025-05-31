@@ -27,6 +27,8 @@ public:
 
     virtual void setShowDone(bool showDone) override;
 
+    virtual void disconnectInternals() override;
+
 public slots:
     void clearImage();
     virtual void updateData() override;
@@ -44,6 +46,7 @@ protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private slots:
+    void edtNameChanged();
     void edtInitiativeChanged();
     void edtMoveChanged();
     void edtHPChanged();

@@ -1,7 +1,7 @@
 #include "bestiaryexportdialog.h"
 #include "ui_bestiaryexportdialog.h"
 #include "bestiary.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QFileDialog>
 #include <QDomDocument>
 #include <QDebug>
@@ -98,7 +98,7 @@ void BestiaryExportDialog::exportSelected()
     {
         if((ui->listMonsters->item(i)) && (ui->listMonsters->item(i)->checkState() == Qt::Checked))
         {
-            MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->listMonsters->item(i)->text());
+            MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->listMonsters->item(i)->text());
             if(monsterClass)
             {
                 QDomElement monsterElement = doc.createElement("element");

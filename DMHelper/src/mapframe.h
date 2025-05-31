@@ -154,14 +154,13 @@ public slots:
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void setBackgroundColor(const QColor& color) override;
     virtual void editLayers() override;
 
 protected:
     void initializeMap();
     void uninitializeMap();
 
-//    void createMarkerItems();
-//    void cleanupMarkerItems();
     void cleanupSelectionItems();
 
     virtual void hideEvent(QHideEvent * event) override;
@@ -185,7 +184,6 @@ protected:
     bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
     bool execEventFilterPointer(QObject *obj, QEvent *event);
 
-//    void extractDMScreenshot();
     void cleanupBuffers();
 
 protected slots:
@@ -196,7 +194,6 @@ protected slots:
     void loadViewRect();
     void checkPartyUpdate();
 
-//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLMapRenderer* renderer);
     void rendererDeactivated();
 
@@ -212,7 +209,6 @@ protected slots:
 
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
-//    void setBackgroundPixmap(const QPixmap& pixmap);
     void setCameraToView();
     QGraphicsItem* findTopObject(const QPoint &pos);
     QPixmap getPointerPixmap();
@@ -220,9 +216,6 @@ private:
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
-    //QGraphicsPixmapItem* _backgroundImage;
-    //Layer* _backgroundLayer;
-    //QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;
 

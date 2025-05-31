@@ -22,9 +22,9 @@ public:
     void applyCampaignChanges();
 
 private slots:
-    void browseBestiary();
-    void editBestiary();
-    void setBestiary(const QString& bestiaryFile);
+    void browseDefaultBestiary();
+    void editDefaultBestiary();
+    void setDefaultBestiary(const QString& bestiaryFile);
 
     void browseSpellbook();
     void editSpellbook();
@@ -99,6 +99,18 @@ private slots:
     void browseCharacterUIFile();
     void editCharacterUIFile();
     void setCharacterUIFile(const QString& characterUIFile);
+
+    void browseBestiaryFile();
+    void editBestiaryFile();
+    void setBestiaryFile(const QString& bestiaryFile);
+
+    void browseMonsterDataFile();
+    void editMonsterDataFile();
+    void setMonsterDataFile(const QString& monsterDataFile);
+
+    void browseMonsterUIFile();
+    void editMonsterUIFile();
+    void setMonsterUIFile(const QString& monsterUIFile);
 
 private:
     Ui::OptionsDialog *ui;

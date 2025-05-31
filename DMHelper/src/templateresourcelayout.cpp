@@ -1,4 +1,4 @@
-#include "charactertemplateresourcelayout.h"
+#include "templateresourcelayout.h"
 #include <QWidget>
 #include <QCheckBox>
 #include <QMouseEvent>
@@ -6,7 +6,7 @@
 #include <QMenu>
 #include <QMessageBox>
 
-CharacterTemplateResourceLayout::CharacterTemplateResourceLayout(const QString& key, const ResourcePair& value) :
+TemplateResourceLayout::TemplateResourceLayout(const QString& key, const ResourcePair& value) :
     QHBoxLayout(),
     _key(key),
     _listIndex(-1),
@@ -19,7 +19,7 @@ CharacterTemplateResourceLayout::CharacterTemplateResourceLayout(const QString& 
     createCheckboxes();
 }
 
-CharacterTemplateResourceLayout::CharacterTemplateResourceLayout(const QString& key, int listIndex, const QString& listKey, const ResourcePair& value) :
+TemplateResourceLayout::TemplateResourceLayout(const QString& key, int listIndex, const QString& listKey, const ResourcePair& value) :
     QHBoxLayout(),
     _key(key),
     _listIndex(listIndex),
@@ -32,12 +32,12 @@ CharacterTemplateResourceLayout::CharacterTemplateResourceLayout(const QString& 
     createCheckboxes();
 }
 
-CharacterTemplateResourceLayout::~CharacterTemplateResourceLayout()
+TemplateResourceLayout::~TemplateResourceLayout()
 {
     cleanupLayout();
 }
 
-void CharacterTemplateResourceLayout::handleResourceChanged()
+void TemplateResourceLayout::handleResourceChanged()
 {
     _value.first = 0;
 
@@ -56,17 +56,17 @@ void CharacterTemplateResourceLayout::handleResourceChanged()
     emitChange();
 }
 
-void CharacterTemplateResourceLayout::handleAddResource()
+void TemplateResourceLayout::handleAddResource()
 {
     emit addResource();
 }
 
-void CharacterTemplateResourceLayout::handleRemoveResource()
+void TemplateResourceLayout::handleRemoveResource()
 {
     emit removeResource(this);
 }
 
-void CharacterTemplateResourceLayout::handleEditResource()
+void TemplateResourceLayout::handleEditResource()
 {
     bool ok;
     int newValue = QInputDialog::getInt(nullptr,
@@ -88,7 +88,7 @@ void CharacterTemplateResourceLayout::handleEditResource()
     }
 }
 
-bool CharacterTemplateResourceLayout::eventFilter(QObject *object, QEvent *event)
+bool TemplateResourceLayout::eventFilter(QObject *object, QEvent *event)
 {
     // Edit the number of checkboxes in the layout on right click
     if((event) && (event->type() == QEvent::MouseButtonPress))
@@ -99,7 +99,7 @@ bool CharacterTemplateResourceLayout::eventFilter(QObject *object, QEvent *event
             QMenu* popupMenu = new QMenu();
 
             QAction* editItem = new QAction(QString("Edit..."), popupMenu);
-            connect(editItem, &QAction::triggered, this, &CharacterTemplateResourceLayout::handleEditResource);
+            connect(editItem, &QAction::triggered, this, &TemplateResourceLayout::handleEditResource);
             popupMenu->addAction(editItem);
 
             if(_listIndex >= 0)
@@ -107,11 +107,11 @@ bool CharacterTemplateResourceLayout::eventFilter(QObject *object, QEvent *event
                 popupMenu->addSeparator();
 
                 QAction* addItem = new QAction(QString("Add..."), popupMenu);
-                connect(addItem, &QAction::triggered, this, &CharacterTemplateResourceLayout::handleAddResource);
+                connect(addItem, &QAction::triggered, this, &TemplateResourceLayout::handleAddResource);
                 popupMenu->addAction(addItem);
 
                 QAction* removeItem = new QAction(QString("Remove..."), popupMenu);
-                connect(removeItem, &QAction::triggered, this, &CharacterTemplateResourceLayout::handleRemoveResource);
+                connect(removeItem, &QAction::triggered, this, &TemplateResourceLayout::handleRemoveResource);
                 popupMenu->addAction(removeItem);
             }
 
@@ -124,7 +124,7 @@ bool CharacterTemplateResourceLayout::eventFilter(QObject *object, QEvent *event
     return QHBoxLayout::eventFilter(object, event);
 }
 
-void CharacterTemplateResourceLayout::cleanupLayout()
+void TemplateResourceLayout::cleanupLayout()
 {
     QLayoutItem *child;
     while((child = takeAt(0)) != nullptr)
@@ -135,18 +135,18 @@ void CharacterTemplateResourceLayout::cleanupLayout()
     }
 }
 
-void CharacterTemplateResourceLayout::createCheckboxes()
+void TemplateResourceLayout::createCheckboxes()
 {
     for(int i = 0; i < _value.second; ++i)
     {
         QCheckBox* checkBox = new QCheckBox();
         checkBox->setChecked(i < _value.first);
         addWidget(checkBox);
-        connect(checkBox, &QCheckBox::stateChanged, this, &CharacterTemplateResourceLayout::handleResourceChanged);
+        connect(checkBox, &QCheckBox::stateChanged, this, &TemplateResourceLayout::handleResourceChanged);
     }
 }
 
-void CharacterTemplateResourceLayout::emitChange()
+void TemplateResourceLayout::emitChange()
 {
     if(_listIndex >= 0)
     {

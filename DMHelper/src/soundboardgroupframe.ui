@@ -133,7 +133,7 @@
          <number>3</number>
         </property>
         <item>
-         <widget class="QPushButton" name="btnVolume">
+         <widget class="QPushButton" name="btnMute">
           <property name="minimumSize">
            <size>
             <width>40</width>

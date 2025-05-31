@@ -1,12 +1,12 @@
 #include "monster.h"
 #include "dmconstants.h"
-#include "monsterclass.h"
+#include "monsterclassv2.h"
 #include <QDomElement>
 #include <QDir>
 #include <QIcon>
 #include <QDebug>
 
-Monster::Monster(MonsterClass* monsterClass, const QString& name, QObject *parent) :
+Monster::Monster(MonsterClassv2* monsterClass, const QString& name, QObject *parent) :
     Combatant(name, parent),
     _monsterClass(monsterClass),
     _passivePerception(10),
@@ -89,29 +89,29 @@ int Monster::getCombatantType() const
 int Monster::getSpeed() const
 {
     if(_monsterClass)
-        return _monsterClass->getSpeedValue();
+        return _monsterClass->getStringValue("speed").toInt();
     else
         return 0;
 }
 
 int Monster::getArmorClass() const
 {
-    return _monsterClass ? _monsterClass->getArmorClass() : Combatant::getArmorClass();
+    return _monsterClass ? _monsterClass->getIntValue("armor") : Combatant::getArmorClass();
 }
 
 Dice Monster::getHitDice() const
 {
-    return _monsterClass ? _monsterClass->getHitDice() : Combatant::getHitDice();
+    return _monsterClass ? _monsterClass->getDiceValue("hit_dice") : Combatant::getHitDice();
 }
 
-MonsterClass* Monster::getMonsterClass() const
+MonsterClassv2* Monster::getMonsterClass() const
 {
     return _monsterClass;
 }
 
 QString Monster::getMonsterClassName() const
 {
-    return _monsterClass ? _monsterClass->getName() : QString("");
+    return _monsterClass ? _monsterClass->getStringValue("name") : QString("");
 }
 
 QString Monster::getIconFile() const
@@ -153,32 +153,32 @@ QPixmap Monster::getIconPixmap(DMHelper::PixmapSize iconSize)
 
 int Monster::getStrength() const
 {
-    return _monsterClass ? _monsterClass->getStrength() : 10;
+    return _monsterClass ? _monsterClass->getIntValue("strength") : 10;
 }
 
 int Monster::getDexterity() const
 {
-    return _monsterClass ? _monsterClass->getDexterity() : 10;
+    return _monsterClass ? _monsterClass->getIntValue("dexterity") : 10;
 }
 
 int Monster::getConstitution() const
 {
-    return _monsterClass ? _monsterClass->getConstitution() : 10;
+    return _monsterClass ? _monsterClass->getIntValue("constitution") : 10;
 }
 
 int Monster::getIntelligence() const
 {
-    return _monsterClass ? _monsterClass->getIntelligence() : 10;
+    return _monsterClass ? _monsterClass->getIntValue("intelligence") : 10;
 }
 
 int Monster::getWisdom() const
 {
-    return _monsterClass ? _monsterClass->getWisdom() : 10;
+    return _monsterClass ? _monsterClass->getIntValue("wisdom") : 10;
 }
 
 int Monster::getCharisma() const
 {
-    return _monsterClass ? _monsterClass->getCharisma() : 10;
+    return _monsterClass ? _monsterClass->getIntValue("charisma") : 10;
 }
 
 int Monster::getPassivePerception() const
@@ -196,7 +196,7 @@ QString Monster::getNotes() const
     return _notes;
 }
 
-void Monster::setMonsterClass(MonsterClass* newMonsterClass)
+void Monster::setMonsterClass(MonsterClassv2* newMonsterClass)
 {
     if(!newMonsterClass || (newMonsterClass == _monsterClass))
         return;
@@ -250,7 +250,7 @@ void Monster::setNotes(const QString& newNotes)
 
 void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute("monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getName() : QString(""));
+    element.setAttribute("monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getStringValue("name") : QString(""));
     element.setAttribute("passivePerception", getPassivePerception());
     element.setAttribute("active", static_cast<int>(getActive()));
     element.setAttribute("notes", getNotes());

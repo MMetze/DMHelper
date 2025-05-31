@@ -43,6 +43,7 @@ Combatant::Combatant(const QString& name, QObject *parent) :
     _conditions(Condition_None),
     _icon(""),
     _iconPixmap(),
+    _backgroundColor(Qt::black),
     _batchChanges(false),
     _changesMade(false)
 {
@@ -60,6 +61,7 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
     setConditions(element.attribute("conditions", QString("0")).toInt());
     setInitiative(element.attribute("initiative", QString("0")).toInt());
     setIcon(element.attribute("icon"));
+    setBackgroundColor(QColor(element.attribute("backgroundColor", QString("#000000"))));
 
     QDomElement attacksElement = element.firstChildElement(QString("attacks"));
     if(!attacksElement.isNull())
@@ -114,9 +116,7 @@ void Combatant::endBatchChanges()
     {
         _batchChanges = false;
         if(_changesMade)
-        {
             emit dirty();
-        }
     }
 }
 
@@ -166,6 +166,11 @@ QPixmap Combatant::getIconPixmap(DMHelper::PixmapSize iconSize)
         return _iconPixmap.getPixmap(iconSize);
     else
         return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
+}
+
+QColor Combatant::getBackgroundColor() const
+{
+    return _backgroundColor;
 }
 
 int Combatant::getAbilityValue(Ability ability) const
@@ -588,6 +593,15 @@ void Combatant::setIcon(const QString &newIcon)
     }
 }
 
+void Combatant::setBackgroundColor(const QColor &color)
+{
+    if(color != _backgroundColor)
+    {
+        _backgroundColor = color;
+        registerChange();
+    }
+}
+
 QDomElement Combatant::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("combatant");
@@ -602,6 +616,9 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     element.setAttribute("conditions", getConditions());
     element.setAttribute("initiative", getInitiative());
 
+    if((_backgroundColor.isValid()) && (_backgroundColor != Qt::black))
+        element.setAttribute("backgroundColor", _backgroundColor.name());
+
     QString iconPath = getIconFileLocal();
     if(iconPath.isEmpty())
     {
@@ -612,15 +629,18 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
         element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
     }
 
-    QDomElement attacksElement = doc.createElement("attacks");
-    for(int i = 0; i < getAttacks().count(); ++i)
+    if(getAttacks().count() > 0)
     {
-        QDomElement attackElement = doc.createElement("attack");
-        attackElement.setAttribute("name", getAttacks().at(i).getName());
-        attackElement.setAttribute("dice", getAttacks().at(i).getDice().toString());
-        attacksElement.appendChild(attackElement);
+        QDomElement attacksElement = doc.createElement("attacks");
+        for(int i = 0; i < getAttacks().count(); ++i)
+        {
+            QDomElement attackElement = doc.createElement("attack");
+            attackElement.setAttribute("name", getAttacks().at(i).getName());
+            attackElement.setAttribute("dice", getAttacks().at(i).getDice().toString());
+            attacksElement.appendChild(attackElement);
+        }
+        element.appendChild(attacksElement);
     }
-    element.appendChild(attacksElement);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

@@ -155,7 +155,7 @@ void PublishGLBattleGrid::createGridObjectsGL()
         "uniform mat4 model;\n"
         "uniform mat4 view;\n"
         "uniform mat4 projection;\n"
-        "uniform vec4 gridColor;\n;"
+        "uniform vec4 gridColor;\n"
         "out vec4 ourColor; // output a color to the fragment shader\n"
         "void main()\n"
         "{\n"

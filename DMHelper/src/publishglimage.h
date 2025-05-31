@@ -30,6 +30,7 @@ public:
 
     float getX() const;
     float getY() const;
+    QPointF getPosition() const;
     QSize getSize() const;
     QSize getImageSize() const;
     float getScale() const;

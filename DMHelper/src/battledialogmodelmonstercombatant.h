@@ -8,7 +8,7 @@
 #include <QPoint>
 
 class Monster;
-class MonsterClass;
+class MonsterClassv2;
 
 class BattleDialogModelMonsterCombatant : public BattleDialogModelMonsterBase
 {
@@ -45,9 +45,9 @@ public:
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const override;
 
     virtual int getMonsterType() const override;
-    virtual MonsterClass* getMonsterClass() const override;
+    virtual MonsterClassv2* getMonsterClass() const override;
 
-    void setMonsterName(const QString& monsterName);
+    virtual void setMonsterName(const QString& monsterName) override;
 
     Monster* getMonster() const;
     void setMonster(Monster* monster);

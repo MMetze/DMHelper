@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>style.qss</file>
+        <file>parchment.jpg</file>
+    </qresource>
+</RCC>
