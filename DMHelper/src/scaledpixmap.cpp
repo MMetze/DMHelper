@@ -1,6 +1,5 @@
 #include "scaledpixmap.h"
 #include "dmconstants.h"
-
 #include <QFile>
 #include <QDebug>
 
@@ -46,7 +45,7 @@ bool ScaledPixmap::setBasePixmap(const QString& basePixmap)
 
     if(!QFile::exists(basePixmap))
     {
-        qDebug() << "[ScaledPixmap] Invalid Base Pixmap set: " << basePixmap;
+        qDebug() << "[ScaledPixmap] ERROR: Base Pixmap file not found: " << basePixmap;
         return false;
     }
 

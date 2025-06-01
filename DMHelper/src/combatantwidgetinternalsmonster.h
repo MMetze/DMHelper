@@ -20,9 +20,6 @@ public:
     virtual bool isShown() override;
     virtual bool isKnown() override;
 
-    void setLegendaryMaximum(int legendaryMaximum);
-    int getLegendaryMaximum() const;
-
 signals:
     void clicked(const QString& monsterClass);
 
@@ -36,13 +33,13 @@ public slots:
     void decrementLegendary();
     void resetLegendary();
 
+    void setMonsterName(const QString& monsterName);
+
 protected:
 
     // Data
     CombatantWidgetMonster* _widgetParent;
     BattleDialogModelMonsterBase* _monster;
-
-    int _legendaryMaximum;
 };
 
 #endif // COMBATANTWIDGETINTERNALSMONSTER_H

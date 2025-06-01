@@ -30,6 +30,7 @@ public:
     QString getRulesetFileName() const;
     QString getLastMonster() const;
     QString getLastSpell() const;
+    QString getLastRuleset() const;
     bool getShowAnimations() const;
     bool getAutoSave() const;
 
@@ -176,12 +177,14 @@ public slots:
     void setRulesetFileName(const QString& filename);
     QString getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir);
     QString getDataDirectory(const QString& defaultDir, bool overwrite = false);
+    void copyCoreData(const QString& fileRoot, bool overwrite = false);
     QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
-    void backupFile(const QString& filename);
+    void backupFile(const QString& filename, const QString& overrideFilename = QString());
     void resetFileSettings();
 
     void setLastMonster(const QString& lastMonster);
     void setLastSpell(const QString& lastSpell);
+    void setLastRuleset(const QString& lastRuleset);
     void setShowAnimations(bool showAnimations);
     void setAutoSave(bool autoSave);
 
@@ -248,6 +251,7 @@ private:
     void copy(OptionsContainer* other);
     QMainWindow* getMainWindow();
     void cleanupLegacy(OptionsAccessor& settings);
+    QString getAppFile(const QString& filename);
 
     bool _loading;
 
@@ -256,6 +260,7 @@ private:
     QString _spellbookFileName;
     QString _lastMonster;
     QString _lastSpell;
+    QString _lastRuleset;
     QString _quickReferenceFileName;
     QString _calendarFileName;
     QString _equipmentFileName;

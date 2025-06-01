@@ -6,7 +6,7 @@
 #include <QString>
 #include <QPoint>
 
-class MonsterClass;
+class MonsterClassv2;
 
 class BattleDialogModelMonsterClass : public BattleDialogModelMonsterBase
 {
@@ -14,8 +14,8 @@ class BattleDialogModelMonsterClass : public BattleDialogModelMonsterBase
 
 public:
     BattleDialogModelMonsterClass(const QString& name = QString(), QObject *parent = nullptr);
-    explicit BattleDialogModelMonsterClass(MonsterClass* monsterClass);
-    explicit BattleDialogModelMonsterClass(MonsterClass* monsterClass, const QString& monsterName, int initiative, const QPointF& position);
+    explicit BattleDialogModelMonsterClass(MonsterClassv2* monsterClass);
+    explicit BattleDialogModelMonsterClass(MonsterClassv2* monsterClass, const QString& monsterName, int initiative, const QPointF& position);
     virtual ~BattleDialogModelMonsterClass() override;
 
     // From CampaignObjectBase
@@ -42,21 +42,25 @@ public:
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const override;
 
     virtual int getMonsterType() const override;
-    virtual MonsterClass* getMonsterClass() const override;
+    virtual MonsterClassv2* getMonsterClass() const override;
+
+    virtual void setMonsterName(const QString& monsterName) override;
 
     void setSizeFactor(qreal sizeFactor);
-    void setMonsterName(const QString& monsterName);
     void setIconIndex(int index);
+    void setIconFile(const QString& iconFile);
 
 protected:
     // From BattleDialogModelCombatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
-    MonsterClass* _monsterClass;
+    MonsterClassv2* _monsterClass;
     QString _monsterName;
     int _monsterHP;
     qreal _monsterSize;
     int _iconIndex;
+    QString _iconFile;
+    ScaledPixmap* _iconPixmap;
 };
 
 

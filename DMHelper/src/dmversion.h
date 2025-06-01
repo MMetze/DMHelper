@@ -6,14 +6,14 @@
 namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 3;
-    const int DMHELPER_MINOR_VERSION = 5;
+    const int DMHELPER_MINOR_VERSION = 6;
     const int DMHELPER_ENGINEERING_VERSION = 0;
 
     const int CAMPAIGN_MAJOR_VERSION = 2;
     const int CAMPAIGN_MINOR_VERSION = 4;
 
     const int BESTIARY_MAJOR_VERSION = 2;
-    const int BESTIARY_MINOR_VERSION = 1;
+    const int BESTIARY_MINOR_VERSION = 3;
 
     const int SPELLBOOK_MAJOR_VERSION = 1;
     const int SPELLBOOK_MINOR_VERSION = 0;

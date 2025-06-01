@@ -16,7 +16,7 @@ class PublishGLTextRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLTextRenderer(EncounterText* encounter, QImage textImage, const QSize& frameSize, QObject *parent = nullptr);
+    PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent = nullptr);
     virtual ~PublishGLTextRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
@@ -35,6 +35,8 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
+    void setTextImage(QImage textImage);
+
 public slots:
     // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
@@ -47,6 +49,7 @@ public slots:
 
 signals:
     void playPauseChanged(bool playing);
+    void sceneSizeChanged(const QSize& sceneSize);
 
 protected slots:
     void contentChanged();
@@ -57,24 +60,17 @@ protected:
     // QObject overrides
     virtual void timerEvent(QTimerEvent *event) override;
 
-    // Background overrides
-    /*
-    virtual void initializeBackground() = 0;
-    virtual bool isBackgroundReady() = 0;
-    virtual void resizeBackground(int w, int h) = 0;
-    virtual void paintBackground(QOpenGLFunctions* functions) = 0;
-    virtual QSizeF getBackgroundSize() = 0;
-    virtual void updateBackground();
-    */
-
-    int getRotatedHeight(int rotation);
+    QSizeF getRotatedSizeF();
+    QSizeF getRotatedTargetSizeF();
+    int getRotatedWidth();
+    int getRotatedHeight();
     void recreateContent();
+    void updateSceneRect();
 
     virtual void createShaders();
     void destroyShaders();
 
     EncounterText* _encounter;
-    QSize _frameSize;
     QSize _targetSize;
     QColor _color;
     QImage _textImage;
@@ -91,14 +87,11 @@ protected:
     int _shaderModelMatrixRGBColor;
     int _shaderProjectionMatrixRGBColor;
     int _shaderRGBColor;
-    // unsigned int _shaderProgram;
-    // int _shaderModelMatrix;
-    // int _shaderProjectionMatrix;
     QMatrix4x4 _projectionMatrix;
     QRect _scissorRect;
     PublishGLImage* _textObject;
 
-    QPointF _textPos;
+    qreal _textPos;
     QElapsedTimer _elapsed;
     int _timerId;
 

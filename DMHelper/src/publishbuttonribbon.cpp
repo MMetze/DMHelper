@@ -204,7 +204,8 @@ void PublishButtonRibbon::handleColorChanged(const QColor& color)
 {
     emit buttonColorChanged(color);
 
-    if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))
+//    if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))
+    if(ui->btnPublish->isCheckable())
         emit colorChanged(color);
 }
 

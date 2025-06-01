@@ -9,7 +9,6 @@
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QMessageBox>
 #include <QSslSocket>
 #include <QFileDialog>
 #include <QApplication>
@@ -660,7 +659,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 #ifndef IMPORTER_LOCAL_TEST
     if(reply->error() != QNetworkReply::NoError)
     {
-        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
+        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString() + QChar::LineFeed + QChar::LineFeed + QString("This is a common error if DMHelper cannot access the character. Please check if the character privacy for this character is set to is 'Public'"));
         qDebug() << "[CharacterImporter] ERROR: network reply not ok: " << reply->error();
         qDebug() << "[CharacterImporter] ERROR: " << reply->errorString();
         return false;

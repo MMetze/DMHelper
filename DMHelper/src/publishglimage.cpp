@@ -206,6 +206,11 @@ float PublishGLImage::getY() const
     return _y;
 }
 
+QPointF PublishGLImage::getPosition() const
+{
+    return QPointF(_x, _y);
+}
+
 QSize PublishGLImage::getSize() const
 {
     return _imageSize * _scaleFactor;

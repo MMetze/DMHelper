@@ -63,7 +63,7 @@ void CombatantWidgetCharacter::setInternals(CombatantWidgetInternalsCharacter* i
         connect(characterCombatant, &BattleDialogModelCharacter::combatantDoneChanged, this, &CombatantWidgetCharacter::updateData);
 
         if(characterCombatant->getCombatant())
-            connect(characterCombatant->getCombatant(), SIGNAL(dirty()), this, SLOT(updateData()));
+            connect(characterCombatant->getCombatant(), &Combatant::dirty, this, &CombatantWidgetCharacter::updateData);
         else
             qDebug() << "[Character Widget] a valid combatant could not be found!";
     }
@@ -85,6 +85,20 @@ void CombatantWidgetCharacter::setShowDone(bool showDone)
 {
     ui->lblDone->setVisible(showDone);
     ui->chkDone->setVisible(showDone);
+}
+
+void CombatantWidgetCharacter::disconnectInternals()
+{
+    if(!_internals)
+        return;
+
+    BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(_internals->getCombatant());
+    if(!characterCombatant)
+        return;
+
+    disconnect(characterCombatant, &BattleDialogModelCharacter::combatantDoneChanged, this, &CombatantWidgetCharacter::updateData);
+    if(characterCombatant->getCombatant())
+        disconnect(characterCombatant->getCombatant(), &Combatant::dirty, this, &CombatantWidgetCharacter::updateData);
 }
 
 void CombatantWidgetCharacter::updateData()

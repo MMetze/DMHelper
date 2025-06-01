@@ -4,6 +4,7 @@
 #include "audiotrack.h"
 #include "dmconstants.h"
 #include "encounterbattle.h"
+#include "monsterfactory.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
 #include "bestiary.h"
@@ -83,6 +84,13 @@ bool ObjectImportWorker::doWork()
     QFileInfo importFileInfo(_importFilename);
     QDir::setCurrent(importFileInfo.absolutePath());
     _importCampaign = new Campaign();
+
+    _campaign->preloadRulesetXML(campaignElement, true);
+    MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                 campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                 campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+    connect(&_campaign->getRuleset(), &Ruleset::bestiaryFileChanged, Bestiary::Instance(), &Bestiary::readBestiary);
 
     Bestiary::Instance()->startBatchProcessing();
     _importCampaign->inputXML(campaignElement, true);

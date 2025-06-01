@@ -5,13 +5,13 @@
 #include <QString>
 
 class QDomElement;
-class MonsterClass;
+class MonsterClassv2;
 
 class Monster : public Combatant
 {
     Q_OBJECT
 public:
-    explicit Monster(MonsterClass* monsterClass, const QString& name = QString(), QObject *parent = nullptr);
+    explicit Monster(MonsterClassv2* monsterClass, const QString& name = QString(), QObject *parent = nullptr);
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -29,7 +29,7 @@ public:
     virtual int getArmorClass() const override;
     virtual Dice getHitDice() const override;
 
-    MonsterClass* getMonsterClass() const;
+    MonsterClassv2* getMonsterClass() const;
     QString getMonsterClassName() const;
     virtual QString getIconFile() const override;
     virtual QString getIconFileLocal() const override;
@@ -47,7 +47,7 @@ public:
     QString getNotes() const;
 
 public slots:
-    virtual void setMonsterClass(MonsterClass* newMonsterClass);
+    virtual void setMonsterClass(MonsterClassv2* newMonsterClass);
     virtual void setIcon(const QString& newIcon) override;
     void setPassivePerception(int value);
     void setActive(bool value);
@@ -60,7 +60,7 @@ protected:
     // From Combatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
-    MonsterClass* _monsterClass;
+    MonsterClassv2* _monsterClass;
     int _passivePerception;
     bool _active;
     QString _notes;

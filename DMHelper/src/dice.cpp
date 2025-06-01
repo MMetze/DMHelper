@@ -40,6 +40,13 @@ Dice& Dice::operator=(const Dice& other)
     return *this;
 }
 
+bool Dice::isValid() const
+{
+    // Valid is defined as any die that can return a non-zero result
+    return(((_dieType > 0) && (_dieCount > 0)) ||
+           (_dieBonus > 0));
+}
+
 int Dice::getCount() const
 {
     return _dieCount;
@@ -72,6 +79,9 @@ void Dice::setBonus(int bonus)
 
 QString Dice::toString() const
 {
+    if(((_dieCount == 0) || (_dieType == 0)) && (_dieBonus == 0))
+        return QString("---");
+
     QString result;
 
     result = QString::number(getCount());
@@ -186,5 +196,7 @@ void Dice::readString(const QString& diceString)
         int diceInt = diceString.toInt(&ok);
         if(ok)
             _dieBonus = diceInt;
+        else
+            _dieCount = _dieType = _dieBonus = 0;
     }
 }

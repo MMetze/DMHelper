@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "campaignobjectbase.h"
-#include "bestiarydialog.h"
+#include "bestiarytemplatedialog.h"
 #include "spellbookdialog.h"
 #include "dmconstants.h"
 #include "optionscontainer.h"
@@ -111,8 +111,6 @@ public slots:
 
     void linkActivated(const QUrl & link);
 
-    // Bestiary
-    void readBestiary();
     void readSpellbook();
     void readQuickRef();
 
@@ -156,8 +154,6 @@ protected:
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
 
-    // Bestiary
-    void writeBestiary();
     void writeSpellbook();
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
@@ -196,7 +192,10 @@ protected slots:
     void openBestiary();
     void exportBestiary();
     void importBestiary();
+    void writeBestiary();
+    void handleBestiaryRead(const QString& bestiaryFileName, bool converted);
 
+    // Spellbook
     void openSpellbook();
     void exportSpellbook();
     void importSpellbook();
@@ -242,12 +241,12 @@ private:
 
     OptionsContainer* _options;
 
-    BestiaryDialog _bestiaryDlg;
+    BestiaryTemplateDialog _bestiaryDlg;
     SpellbookDialog _spellDlg;
 
     BattleDialogManager* _battleDlgMgr;
 
-    AudioPlayer* _audioPlayer;
+    //AudioPlayer* _audioPlayer;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;

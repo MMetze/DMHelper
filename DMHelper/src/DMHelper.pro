@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = DMHelper
 TEMPLATE = app
 
+message("Building DMHelper")
+
 #install_it.path = $$PWD/../bin
 #win32:install_it.files = $$PWD/bin-win32/*
 #win64:install_it.files = $$PWD/bin-win64/*
@@ -58,6 +60,7 @@ SOURCES += main.cpp\
     battleframestatemachine.cpp \
     bestiaryexportdialog.cpp \
     bestiarypopulatetokensdialog.cpp \
+    bestiarytemplatedialog.cpp \
     camerarect.cpp \
     camerascene.cpp \
     campaignexporter.cpp \
@@ -72,7 +75,6 @@ SOURCES += main.cpp\
     characterimportheroforgedata.cpp \
     characterimportheroforgedialog.cpp \
     charactertemplateframe.cpp \
-    charactertemplateresourcelayout.cpp \
     characterv2.cpp \
     characterv2converter.cpp \
     colorpushbutton.cpp \
@@ -132,6 +134,9 @@ SOURCES += main.cpp\
     mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
+    monsterclassv2.cpp \
+    monsterclassv2converter.cpp \
+    monsterfactory.cpp \
     newcampaigndialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
@@ -195,12 +200,17 @@ SOURCES += main.cpp\
     soundboardframe.cpp \
     soundboardgroup.cpp \
     soundboardgroupframe.cpp \
+    soundboardtrack.cpp \
     soundboardtrackframe.cpp \
     spell.cpp \
     spellbook.cpp \
     spellbookdialog.cpp \
     spellslotlevelbutton.cpp \
     spellslotradiobutton.cpp \
+    templatefactory.cpp \
+    templateframe.cpp \
+    templateobject.cpp \
+    templateresourcelayout.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     tokeneditdialog.cpp \
@@ -345,6 +355,7 @@ HEADERS  += mainwindow.h \
     battleframestatemachine.h \
     bestiaryexportdialog.h \
     bestiarypopulatetokensdialog.h \
+    bestiarytemplatedialog.h \
     camerarect.h \
     camerascene.h \
     campaignexporter.h \
@@ -359,7 +370,6 @@ HEADERS  += mainwindow.h \
     characterimportheroforgedata.h \
     characterimportheroforgedialog.h \
     charactertemplateframe.h \
-    charactertemplateresourcelayout.h \
     characterv2.h \
     characterv2converter.h \
     colorpushbutton.h \
@@ -420,6 +430,9 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
+    monsterclassv2.h \
+    monsterclassv2converter.h \
+    monsterfactory.h \
     newcampaigndialog.h \
     objectfactory.h \
     objectimportdialog.h \
@@ -483,12 +496,17 @@ HEADERS  += mainwindow.h \
     soundboardframe.h \
     soundboardgroup.h \
     soundboardgroupframe.h \
+    soundboardtrack.h \
     soundboardtrackframe.h \
     spell.h \
     spellbook.h \
     spellbookdialog.h \
     spellslotlevelbutton.h \
     spellslotradiobutton.h \
+    templatefactory.h \
+    templateframe.h \
+    templateobject.h \
+    templateresourcelayout.h \
     textbrowsermargins.h \
     texteditmargins.h \
     tokeneditdialog.h \
@@ -603,6 +621,7 @@ FORMS    += mainwindow.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     bestiarypopulatetokensdialog.ui \
+    bestiarytemplatedialog.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
     characterimportheroforgedialog.ui \
@@ -641,9 +660,13 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    resources/ui/action.ui \
     resources/ui/character2e.ui \
     resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \
+    resources/ui/monster2e.ui \
+    resources/ui/monster5e-2024.ui \
+    resources/ui/monster5e.ui \
     resources/ui/spellSlot.ui \
     ribbonframetext.ui \
     ribbontabaudio.ui \
@@ -730,6 +753,8 @@ DISTFILES += \
     resources/character5e-2024.xml \
     resources/character5e.xml \
     resources/equipment.xml \
+    resources/monster2e.xml \
+    resources/monster5e.xml \
     resources/quickref_data.xml \
     resources/ruleset.xml \
     resources/shops.xml \
@@ -746,6 +771,35 @@ DISTFILES += \
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
+
+# Compiler settings
+win32:CONFIG(debug, debug|release) {
+    message("Windows Debug build detected")
+    QMAKE_CXXFLAGS += $$QMAKE_CFLAGS_DEBUG                      # Use debug flags
+    QMAKE_CXXFLAGS += /FS                                       # enable multi-threaded file access
+    QMAKE_LFLAGS += /DEBUG                                      # ensures debug info is linked in
+    QMAKE_LFLAGS -= /INCREMENTAL                                # Optional, improves debugger stability
+#    QMAKE_PRE_LINK += cmd /C del /Q /S \"$$OUT_PWD\\*.pdb\"     # delete old PDB files
+}
+
+win32:CONFIG(release, debug|release) {
+    message("Windows Release build detected")
+    QMAKE_CXXFLAGS += /O2   # use optimized flags
+    QMAKE_CXXFLAGS -= /Zi   # ensure to turn off generating full debug info
+    QMAKE_LFLAGS -= /DEBUG  # ensure to turn off linking debug info
+    DEFINES += NDEBUG       # ensure to turn off assert
+}
+
+macx:CONFIG(debug, debug|release) {
+    message("MacOS Debug build detected")
+    QMAKE_CXXFLAGS += -g    # Use debug flags
+}
+
+macx:CONFIG(release, debug|release) {
+    message("MacOS Release build detected")
+    QMAKE_CXXFLAGS += -O2   # use optimized flags
+    DEFINES += NDEBUG       # ensure to turn off assert
+}
 
 # link to libvlc
 win32 {

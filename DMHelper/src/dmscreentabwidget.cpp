@@ -35,7 +35,7 @@ void DMScreenTabWidget::readEquipment(const QString& equipmentFile)
     qDebug() << "[DMScreen] Equipment file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[DMScreen] Unable to read equipment file: " << equipmentFile;
+        qDebug() << "[DMScreen] ERROR: Unable to read equipment file: " << equipmentFile;
         return;
     }
 
@@ -50,22 +50,21 @@ void DMScreenTabWidget::readEquipment(const QString& equipmentFile)
 
     if(contentResult == false)
     {
-        qDebug() << "[DMScreen] Unable to parse the equipment data file.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[DMScreen] ERROR: Unable to parse the equipment data file: " << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        qDebug() << "[DMScreen] Unable to find the root element in the equipment data file.";
+        qDebug() << "[DMScreen] ERROR: Unable to find the root element in the equipment data file.";
         return;
     }
 
     QDomElement weaponsElement = root.firstChildElement(QString("weapons"));
     if(weaponsElement.isNull())
     {
-        qDebug() << "[DMScreen] Unable to find the weapons information element in the equipment data file.";
+        qDebug() << "[DMScreen] ERROR: Unable to find the weapons information element in the equipment data file.";
     }
     else
     {

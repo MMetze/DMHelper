@@ -147,7 +147,7 @@ private:
 
     QRectF _cameraRect;
 
-    QColor _background;
+    QColor _backgroundColor;
 
     bool _showAlive;
     bool _showDead;

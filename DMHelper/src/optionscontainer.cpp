@@ -21,6 +21,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _spellbookFileName(),
     _lastMonster(),
     _lastSpell(),
+    _lastRuleset(),
     _quickReferenceFileName(),
     _calendarFileName(),
     _equipmentFileName(),
@@ -132,6 +133,11 @@ QString OptionsContainer::getLastMonster() const
 QString OptionsContainer::getLastSpell() const
 {
     return _lastSpell;
+}
+
+QString OptionsContainer::getLastRuleset() const
+{
+    return _lastRuleset;
 }
 
 bool OptionsContainer::getShowAnimations() const
@@ -420,13 +426,15 @@ void OptionsContainer::readSettings()
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml"), &bestiaryExists));
     if((!settings.contains(QString("bestiary"))) || (!bestiaryExists))
         getDataDirectory(QString("Images"), true);
-    setLastMonster(settings.value("lastMonster", "").toString());
+    setLastMonster(settings.value("lastMonster", "Hydra").toString());
 
     bool spellbookExists = true;
     setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml"), &spellbookExists));
     if((!settings.contains(QString("spellbook"))) || (!spellbookExists))
         getDataDirectory(QString("Images"), true);
     setLastSpell(settings.value("lastSpell", "").toString());
+
+    setLastRuleset(settings.value("lastRuleset", "").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
     setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
@@ -437,9 +445,19 @@ void OptionsContainer::readSettings()
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
     bool rulesetExists = true;
-    setRulesetFileName(getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists));
+    QString appRulesetFile = getAppFile(QString("ruleset.xml"));
+    QString settingsRulesetFile = getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists);
+    if((QFile::exists(appRulesetFile)) && (QFile::exists(settingsRulesetFile)) && (QFileInfo(appRulesetFile).lastModified() > QFileInfo(settingsRulesetFile).lastModified()))
+    {
+        QFile::remove(settingsRulesetFile);
+        QFile::copy(appRulesetFile, settingsRulesetFile);
+    }
+    setRulesetFileName(settingsRulesetFile);
 //    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
-//        getDataDirectory(QString("ui"), true);
+    getDataDirectory(QString("ui"));
+    copyCoreData(QString("DMHelperBestiary"));
+    copyCoreData(QString("monster"));
+    copyCoreData(QString("character"));
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
@@ -522,6 +540,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("lastMonster", getLastMonster());
     settings.setValue("spellbook", getSpellbookFileName());
     settings.setValue("lastSpell", getLastSpell());
+    settings.setValue("lastRuleset", getLastRuleset());
     settings.setValue("quickReference", getQuickReferenceFileName());
     settings.setValue("calendar", getCalendarFileName());
     settings.setValue("equipment", getEquipmentFileName());
@@ -717,15 +736,7 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename, bool* 
         return standardFile;
     }
 
-    QString appFile;
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    appFile = fileDirPath.path() + QString("/Resources/") + defaultFilename;
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    appFile = fileDirPath.path() + QString("/resources/") + defaultFilename;
-#endif
+    QString appFile = getAppFile(defaultFilename);
 
     QDir().mkpath(standardPath);
     QDir().mkpath(standardPath + QString("/ui"));
@@ -776,19 +787,12 @@ QString OptionsContainer::getSettingsDirectory(OptionsAccessor& settings, const 
 
 QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overwrite)
 {
-    bool created = false;
-    QString standardPath = getStandardDirectory(defaultDir, &created);
+    QString standardPath = getStandardDirectory(defaultDir);
     QDir standardDir(standardPath);
     if(!standardDir.exists())
     {
         qDebug() << "[OptionsContainer] ERROR: Data directory NOT FOUND: " << standardPath;
         return QString();
-    }
-
-    if((!created)&&(!overwrite))
-    {
-        qDebug() << "[OptionsContainer] Data Directory found: " << standardPath;
-        return standardPath;
     }
 
     QString applicationPath = QCoreApplication::applicationDirPath();
@@ -807,11 +811,71 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overw
     QStringList fileEntries = fileDirPath.entryList(filters);
     for(int i = 0; i < fileEntries.size(); ++i)
     {
-        QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
+        QString sourceFile = fileDirPath.filePath(fileEntries.at(i));
+        QString destinationFile = standardDir.filePath(fileEntries.at(i));
+
+        QFileInfo destinationInfo(destinationFile);
+        if(destinationInfo.exists())
+        {
+            QFileInfo sourceInfo(sourceFile);
+            if((overwrite) || (sourceInfo.lastModified() > destinationInfo.lastModified()))
+                QFile::remove(destinationFile);
+            else
+                continue;
+        }
+
+        if(QFile::copy(sourceFile, destinationFile))
+            qDebug() << "[OptionsContainer] Copied resource file from " << sourceFile << " to " << destinationFile;
     }
 
-    qDebug() << "[OptionsContainer] Data default files copied to directory: " << standardPath;
+    qDebug() << "[OptionsContainer] Data Directory identified: " << standardPath;
     return standardPath;
+}
+
+void OptionsContainer::copyCoreData(const QString& fileRoot, bool overwrite)
+{
+    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir standardDir(standardPath);
+    if(!standardDir.exists())
+    {
+        qDebug() << "[OptionsContainer] Creating standard directory: " << standardPath;
+        QDir().mkpath(standardPath);
+
+        if(!standardDir.exists())
+        {
+            qDebug() << "[OptionsContainer] ERROR: Standard directory creation failed! " << standardPath;
+            return;
+        }
+
+        qDebug() << "[OptionsContainer] Standard directory created.";
+    }
+
+    QString applicationPath = QCoreApplication::applicationDirPath();
+    QDir fileDirPath(applicationPath);
+#ifdef Q_OS_MAC
+    fileDirPath.cdUp();
+    if(!fileDirPath.cd(QString("Resources/")))
+    {
+        qDebug() << "[OptionsContainer] ERROR: Resources directory NOT FOUND: " << fileDirPath.absolutePath();
+        return;
+    }
+#else
+    if(!fileDirPath.cd(QString("resources/")))
+    {
+        qDebug() << "[OptionsContainer] ERROR: Resources directory NOT FOUND: " << fileDirPath.absolutePath();
+        return;
+    }
+#endif
+
+    QStringList filters;
+    filters << (fileRoot + QString("*.xml"));
+    QStringList fileEntries = fileDirPath.entryList(filters);
+    for(int i = 0; i < fileEntries.size(); ++i)
+    {
+        if(overwrite)
+            QFile::remove(standardDir.filePath(fileEntries.at(i)));
+        QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
+    }
 }
 
 QString OptionsContainer::getStandardDirectory(const QString& defaultDir, bool* created)
@@ -844,48 +908,56 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir, bool* 
     return result;
 }
 
-void OptionsContainer::backupFile(const QString& filename)
+void OptionsContainer::backupFile(const QString& filename, const QString& overrideFilename)
 {
-    QFileInfo fileInfo(filename);
-
     QString backupPath = getStandardDirectory("backup");
-    if(!backupPath.isEmpty())
+    if(backupPath.isEmpty())
     {
-        QDir backupDir(backupPath);
-        QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
-        QFileInfo backupFileInfo(previousBackup);
-        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+        qDebug() << "[OptionsContainer] ERROR: Unable to find standard BACKUP path. File not backed up: " << filename;
+        return;
+    }
 
-        if(backupFileInfo.exists())
+    QFileInfo fileInfo(filename);
+    if(!overrideFilename.isEmpty())
+    {
+        fileInfo.setFile(fileInfo.baseName() + QString("_") + overrideFilename + QString(".") + fileInfo.completeSuffix());
+        qDebug() << "[OptionsContainer] Backup file prepared with override for filename: " << fileInfo.fileName();
+    }
+
+    QDir backupDir(backupPath);
+    QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
+    QFileInfo backupFileInfo(previousBackup);
+    qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup.fileName() << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+
+    if(backupFileInfo.exists())
+    {
+        if(backupFileInfo.size() == fileInfo.size())
         {
-            if(backupFileInfo.size() == fileInfo.size())
-            {
-                qDebug() << "[OptionsContainer] Backup file and current file are the same size, no further action needed.";
-                return;
-            }
-
-            QString backupRetainer = backupDir.filePath(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
-            if(backupFileInfo.size() > fileInfo.size())
-            {
-                qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup as: " << backupRetainer;
-                previousBackup.rename(backupRetainer);
-            }
-            else if(fileInfo.size() > backupFileInfo.size() * 120 / 100)
-            {
-                qDebug() << "[OptionsContainer] WARNING: Recent save file is over 20% larger than the previous backup, keeping previous backup as: " << backupRetainer;
-                previousBackup.rename(backupRetainer);
-            }
-            else
-            {
-                qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
-                previousBackup.remove();
-            }
+            qDebug() << "[OptionsContainer] Backup file and current file are the same size, no further action needed.";
+            return;
         }
 
-        qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
-        QFile file(filename);
-        file.copy(backupDir.filePath(fileInfo.fileName()));
+        QString backupRetainer = backupDir.filePath(backupFileInfo.baseName() + QString("_") + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + QString(".") + backupFileInfo.completeSuffix());
+        if(backupFileInfo.size() > fileInfo.size())
+        {
+            qDebug() << "[OptionsContainer] WARNING: Previous backup is LARGER than recent save file, keeping previous backup as: " << backupRetainer;
+            previousBackup.rename(backupRetainer);
+        }
+        else if(fileInfo.size() > backupFileInfo.size() * 120 / 100)
+        {
+            qDebug() << "[OptionsContainer] WARNING: Recent save file is over 20% larger than the previous backup, keeping previous backup as: " << backupRetainer;
+            previousBackup.rename(backupRetainer);
+        }
+        else
+        {
+            qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
+            previousBackup.remove();
+        }
     }
+
+    qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
+    QFile file(filename);
+    file.copy(backupDir.filePath(fileInfo.fileName()));
 }
 
 void OptionsContainer::resetFileSettings()
@@ -900,6 +972,9 @@ void OptionsContainer::resetFileSettings()
     getDataDirectory(QString("ui"), true);
     setRulesetFileName(getStandardFile(QString("ruleset.xml")));
     getDataDirectory(QString("Images"), true);
+    copyCoreData(QString("DMHelperBestiary"), true);
+    copyCoreData(QString("monster"), true);
+    copyCoreData(QString("character"), true);
 }
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
@@ -915,6 +990,14 @@ void OptionsContainer::setLastSpell(const QString& lastSpell)
     if(_lastSpell!= lastSpell)
     {
         _lastSpell = lastSpell;
+    }
+}
+
+void OptionsContainer::setLastRuleset(const QString& lastRuleset)
+{
+    if(_lastRuleset!= lastRuleset)
+    {
+        _lastRuleset = lastRuleset;
     }
 }
 
@@ -1328,6 +1411,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setRulesetFileName(other->_rulesetFileName);
         setLastMonster(other->_lastMonster);
         setLastSpell(other->_lastSpell);
+        setLastRuleset(other->_lastRuleset);
         setShowAnimations(other->_showAnimations);
         setAutoSave(other->_autoSave);
         setFontFamily(other->_fontFamily);
@@ -1380,4 +1464,16 @@ QMainWindow* OptionsContainer::getMainWindow()
 void OptionsContainer::cleanupLegacy(OptionsAccessor& settings)
 {
     settings.remove("showOnDeck");
+}
+
+QString OptionsContainer::getAppFile(const QString& filename)
+{
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    return fileDirPath.path() + QString("/Resources/") + filename;
+#else
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    return fileDirPath.path() + QString("/resources/") + filename;
+#endif
 }

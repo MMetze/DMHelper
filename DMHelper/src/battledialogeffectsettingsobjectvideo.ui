@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>707</width>
-    <height>574</height>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -476,6 +476,26 @@
    <header>colorpushbutton.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>edtName</tabstop>
+  <tabstop>chkActive</tabstop>
+  <tabstop>chkVisible</tabstop>
+  <tabstop>chkPlayAudio</tabstop>
+  <tabstop>edtHeight</tabstop>
+  <tabstop>edtWidth</tabstop>
+  <tabstop>edtRotation</tabstop>
+  <tabstop>btnEffectColor</tabstop>
+  <tabstop>sliderOpacity</tabstop>
+  <tabstop>chkColorize</tabstop>
+  <tabstop>btnColorizeColor</tabstop>
+  <tabstop>btnNoTransparency</tabstop>
+  <tabstop>btnRed</tabstop>
+  <tabstop>btnGreen</tabstop>
+  <tabstop>btnBlue</tabstop>
+  <tabstop>btnTransparent</tabstop>
+  <tabstop>btnTransparentColor</tabstop>
+  <tabstop>slideTolerance</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

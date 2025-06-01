@@ -1,6 +1,8 @@
 #include "characterv2.h"
 #include "combatantfactory.h"
 #include "globalsearch.h"
+#include "bestiary.h"
+#include "monsterclassv2.h"
 #include <QIcon>
 #include <QDomElement>
 #include <QTextDocument>
@@ -8,6 +10,7 @@
 
 Characterv2::Characterv2(const QString& name, QObject *parent) :
     Combatant(name, parent),
+    TemplateObject(CombatantFactory::Instance()),
     _dndBeyondID(-1),
     _iconChanged(false),
     _allValues()
@@ -33,6 +36,10 @@ void Characterv2::copyValues(const CampaignObjectBase* other)
         return;
 
     _dndBeyondID = otherCharacter->_dndBeyondID;
+    foreach(const QString& key, _allValues.keys())
+    {
+        _allValues.insert(key, otherCharacter->_allValues.value(key));
+    }
 
     Combatant::copyValues(other);
 }
@@ -50,23 +57,7 @@ bool Characterv2::matchSearch(const QString& searchString, QString& result) cons
     if(Combatant::matchSearch(searchString, result))
         return true;
 
-    QHash<QString, DMHAttribute> elementAttributes = CombatantFactory::Instance()->getElements();
-    QString searchResult;
-    for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
-    {
-        DMHAttribute attribute = elementAttributes.value(*keyIt);
-        if(attribute._type == CombatantFactory::TemplateType_html)
-        {
-            QString value = getStringValue(*keyIt);
-            if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
-            {
-                result = *keyIt + ": " + searchResult;
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return matchSearchString(searchString, result);
 }
 
 void Characterv2::beginBatchChanges()
@@ -116,17 +107,17 @@ bool Characterv2::isInParty() const
 
 void Characterv2::setIcon(const QString &newIcon)
 {
-    if(newIcon != _icon)
-    {
-        _icon = newIcon;
-        _iconPixmap.setBasePixmap(_icon);
-        registerChange();
+    if(newIcon == _icon)
+        return;
 
-        if(_batchChanges)
-            _iconChanged = true;
-        else
-            emit iconChanged(this);
-    }
+    _icon = newIcon;
+    _iconPixmap.setBasePixmap(_icon);
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged(this);
 }
 
 int Characterv2::getSpeed() const
@@ -164,259 +155,55 @@ int Characterv2::getCharisma() const
     return getIntValue(QString("charisma"));
 }
 
-QString Characterv2::getValueAsString(const QString& key) const
+void Characterv2::copyMonsterValues(MonsterClassv2& monster)
 {
-    if(isAttributeSpecial(key))
-        return getAttributeSpecialAsString(key);
+    beginBatchChanges();
 
-    if((!_allValues.contains(key)) || (!CombatantFactory::Instance()->hasEntry(key)))
-        qDebug() << "[Characterv2] WARNING: Attempting to read the value for the unknown key " << key;
+    setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getStringValue("name"), monster.getIcon())));
 
-    DMHAttribute attribute = CombatantFactory::Instance()->getAttribute(key);
-    switch(attribute._type)
+    QHash<QString, DMHAttribute> attributeHash = CombatantFactory::Instance()->getAttributes();
+    for(auto keyIt = attributeHash.keyBegin(), end = attributeHash.keyEnd(); keyIt != end; ++keyIt)
     {
-        case CombatantFactory::TemplateType_string:
-        case CombatantFactory::TemplateType_html:
-            return getStringValue(key);
-        case CombatantFactory::TemplateType_integer:
-            return QString::number(getIntValue(key));
-        case CombatantFactory::TemplateType_boolean:
-            return getBoolValue(key) ? "true" : "false";
-        case CombatantFactory::TemplateType_dice:
-            return getDiceValue(key).toString();
-        case CombatantFactory::TemplateType_resource:
-        {
-            ResourcePair pair = getResourceValue(key);
-            return QString::number(pair.first) + QString(",") + QString::number(pair.second);
-        }
-        default:
-            qDebug() << "[Characterv2] WARNING: Trying to read value for unexpected key: " << key << " with type " << attribute._type;
-            return QString();
-    }
-}
-
-QString Characterv2::getStringValue(const QString& key) const
-{
-    if(isAttributeSpecial(key))
-        return getAttributeSpecialAsString(key);
-    else
-        return _allValues.value(key, QString()).toString();
-}
-
-int Characterv2::getIntValue(const QString& key) const
-{
-    if(isAttributeSpecial(key))
-        return getAttributeSpecial(key).toInt();
-    else
-        return _allValues.value(key, 0).toInt();
-}
-
-bool Characterv2::getBoolValue(const QString& key) const
-{
-    if(isAttributeSpecial(key))
-        return getAttributeSpecial(key).toBool();
-    else
-        return _allValues.value(key, false).toBool();
-}
-
-Dice Characterv2::getDiceValue(const QString& key) const
-{
-    if(isAttributeSpecial(key))
-        return getAttributeSpecial(key).value<Dice>();
-    else
-        return _allValues.value(key, QVariant()).value<Dice>();
-}
-
-ResourcePair Characterv2::getResourceValue(const QString& key) const
-{
-    return _allValues.value(key, QVariant()).value<ResourcePair>();
-}
-
-QList<QVariant> Characterv2::getListValue(const QString& key) const
-{
-    return _allValues.value(key).toList();
-}
-
-void Characterv2::setValue(const QString& key, const QVariant& value)
-{
-    if(_allValues.value(key) == value)
-        return;
-
-    _allValues.insert(key, value);
-    registerChange();
-}
-
-void Characterv2::setValue(const QString& key, const QString& value)
-{
-    if(isAttributeSpecial(key))
-        setAttributeSpecial(key, value);
-
-    if((!_allValues.contains(key)) && (!CombatantFactory::Instance()->hasEntry(key)))
-    {
-        qDebug() << "[Characterv2] Attempting to set the value \"" << value << "\" for the unknown key " << key;
-        return;
+        if(monster.hasValue(*keyIt))
+            setValue(*keyIt, monster.getValueAsString(*keyIt));
     }
 
-    DMHAttribute attribute = CombatantFactory::Instance()->getAttribute(key);
-    switch(attribute._type)
+    QHash<QString, DMHAttribute> elementHash = CombatantFactory::Instance()->getElements();
+    for(auto keyIt = elementHash.keyBegin(), end = elementHash.keyEnd(); keyIt != end; ++keyIt)
     {
-        case CombatantFactory::TemplateType_string:
-        case CombatantFactory::TemplateType_html:
-            setValue(key, QVariant(value));
-            break;
-        case CombatantFactory::TemplateType_integer:
-            setValue(key, QVariant(value.toInt()));
-            break;
-        case CombatantFactory::TemplateType_boolean:
-            setValue(key, QVariant(static_cast<bool>(value.toInt())));
-            break;
-        case CombatantFactory::TemplateType_dice:
-        {
-            QVariant newValue;
-            newValue.setValue(Dice(value));
-            setValue(key, newValue);
-            break;
-        }
-        case CombatantFactory::TemplateType_resource:
-        {
-            QStringList resourceString = value.split(QString(","));
-            if(resourceString.size() == 2)
-            {
-                QVariant newValue;
-                newValue.setValue(ResourcePair(resourceString.at(0).toInt(), resourceString.at(1).toInt()));
-                setValue(key, newValue);
-            }
-            else
-                qDebug() << "[Characterv2] WARNING: Resource attribute missing values: " << key << " with type " << attribute._type << ": " << value;
-            break;
-        }
-        default:
-            qDebug() << "[Characterv2] WARNING: Setting value for unexpected key: " << key << " with type " << attribute._type << " and value " << value;
-            break;
+        if(monster.hasValue(*keyIt))
+            setValue(*keyIt, monster.getValueAsString(*keyIt));
     }
-}
 
-void Characterv2::setStringValue(const QString& key, const QString& value)
-{
-    setValue(key, QVariant(value));
-}
+    // Special case for 5e
+    if((attributeHash.contains("armorClass")) && (monster.hasValue("armor_class")))
+        setValue("armorClass", monster.getValueAsString("armor_class"));
 
-void Characterv2::setIntValue(const QString& key, int value)
-{
-    setValue(key, QVariant(value));
-}
+    if((attributeHash.contains("hitPoints")) && (monster.hasValue("hit_points")))
+        setValue("hitPoints", monster.getValueAsString("hit_points"));
 
-void Characterv2::setBoolValue(const QString& key, bool value)
-{
-    setValue(key, QVariant(value));
-}
+    if((attributeHash.contains("hitPoints")) && (monster.hasValue("hit_points")))
+        setValue("maximumHp", monster.getValueAsString("hit_points"));
 
-void Characterv2::setDiceValue(const QString& key, const Dice& value)
-{
-    QVariant newValue;
-    newValue.setValue(value);
-    setValue(key, newValue);
-}
+    if((attributeHash.contains("race")) && (monster.hasValue("name")))
+        setValue("race", monster.getValueAsString("name"));
 
-void Characterv2::setResourceValue(const QString& key, const ResourcePair& value)
-{
-    QVariant newValue;
-    newValue.setValue(value);
-    setValue(key, newValue);
+    if((attributeHash.contains("speed")) && (monster.hasValue("speed")))
+        setValue("speed", monster.getValueAsString("speed").left(monster.getValueAsString("speed").indexOf(" ")).toInt());
+
+    if((attributeHash.contains("movement")) && (monster.hasValue("speed")))
+        setValue("movement", monster.getValueAsString("speed"));
+
+    endBatchChanges();
 }
 
 void Characterv2::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("dndBeyondID", getDndBeyondID());
 
-    if(CombatantFactory::Instance())
-    {
-        QList<QString> valueKeys = _allValues.keys();
-        for (const auto &key : std::as_const(valueKeys))
-        {
-            if(CombatantFactory::Instance()->hasAttribute(key))
-                writeAttributeValue(CombatantFactory::Instance()->getAttribute(key), element, key, _allValues.value(key));
-            else if(CombatantFactory::Instance()->hasElement(key))
-                writeElementValue(doc, element, key, _allValues.value(key));
-            else if(CombatantFactory::Instance()->hasElementList(key))
-                writeElementListValue(doc, element, key, _allValues.value(key));
-        }
-    }
+    writeXMLValues(doc, element, targetDirectory, isExport);
 
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
-}
-
-void Characterv2::setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue)
-{
-    QList<QVariant> list = getListValue(key);
-
-    if((index < 0) || (index >= list.size()))
-        return;
-
-    QHash<QString, QVariant> listEntryValues = list.at(index).toHash();
-    listEntryValues.insert(listEntryKey, listEntryValue);
-    list.replace(index, listEntryValues);
-    setValue(key, QVariant(list));
-}
-
-QHash<QString, QVariant> Characterv2::createListEntry(const QString& key, int index)
-{
-    if(!CombatantFactory::Instance()->hasElementList(key))
-    {
-        qDebug() << "[Characterv2] WARNING: Request to create list entry for an invalid list key: " << key;
-        return QHash<QString, QVariant>();
-    }
-
-    QHash<QString, QVariant> newEntryValues;
-
-    // Iterate through the list and create the individual attributes
-    QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(key);
-    for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
-    {
-        DMHAttribute attribute = listAttributes.value(*keyIt);
-        newEntryValues.insert(*keyIt, CombatantFactory::convertStringToVariant(attribute._default, attribute._type));
-    }
-
-    insertListEntry(key, index, newEntryValues);
-    return newEntryValues;
-}
-
-void Characterv2::insertListEntry(const QString& key, int index, QHash<QString, QVariant> listEntryValues)
-{
-    if(listEntryValues.isEmpty())
-        return;
-
-    QList<QVariant> list = getListValue(key);
-    if(list.isEmpty())
-        qDebug() << "[Characterv2] WARNING: Request to insert item into unknown list, will create a new entry: " << key;
-
-    if((index < 0) || (index > list.size()))
-    {
-        qDebug() << "[Characterv2] WARNING: Request to insert invalid index " << index << " into list " << key;
-        return;
-    }
-
-    list.insert(index, QVariant(listEntryValues));
-    setValue(key, QVariant(list));
-}
-
-void Characterv2::removeListEntry(const QString& key, int index)
-{
-    QList<QVariant> list = getListValue(key);
-    if(list.isEmpty())
-    {
-        qDebug() << "[Characterv2] WARNING: Request to remove item from unknown list " << key;
-        return;
-    }
-
-    if((index < 0) || (index >= list.size()))
-    {
-        qDebug() << "[Characterv2] WARNING: Request to move invalid index " << index << " from list " << key;
-        return;
-    }
-
-    list.removeAt(index);
-    setValue(key, QVariant(list));
 }
 
 bool Characterv2::belongsToObject(QDomElement& element)
@@ -429,86 +216,19 @@ bool Characterv2::belongsToObject(QDomElement& element)
         return Combatant::belongsToObject(element);
 }
 
-void Characterv2::readXMLValues(const QDomElement& element, bool isImport)
+QHash<QString, QVariant>* Characterv2::valueHash()
 {
-    Q_UNUSED(isImport);
+    return &_allValues;
+}
 
-    if((!CombatantFactory::Instance()) || (element.isNull()))
-        return;
+const QHash<QString, QVariant>* Characterv2::valueHash() const
+{
+    return &_allValues;
+}
 
-    // Iterate through expected attributes
-    QHash<QString, DMHAttribute> attributeHash = CombatantFactory::Instance()->getAttributes();
-    for(auto keyIt = attributeHash.keyBegin(), end = attributeHash.keyEnd(); keyIt != end; ++keyIt)
-    {
-        if(!isAttributeSpecial(*keyIt))
-        {
-            QVariant attributeValue = readAttributeValue(CombatantFactory::Instance()->getAttribute(*keyIt), element, *keyIt);
-            if(!attributeValue.isNull())
-                _allValues.insert(*keyIt, attributeValue);
-        }
-    }
-
-    // Child elements
-    QDomElement childElement = element.firstChildElement();
-    while(!childElement.isNull())
-    {
-        QString tagName = childElement.tagName();
-        if(CombatantFactory::Instance()->hasElement(tagName))
-        {
-            DMHAttribute attribute = CombatantFactory::Instance()->getElement(tagName);
-            if(attribute._type == CombatantFactory::TemplateType_html)
-            {
-                QDomNode dataChildNode = childElement.firstChild();
-                if((!dataChildNode.isNull()) && (dataChildNode.isCDATASection()))
-                {
-                    QDomCDATASection dataSection = dataChildNode.toCDATASection();
-                    _allValues.insert(tagName, dataSection.data());
-                }
-                else
-                {
-                    qDebug() << "[Characterv2] WARNING: HTML child element missing a data node: " << tagName << " with type " << attribute._type;
-                }
-            }
-            else
-            {
-                qDebug() << "[Characterv2] WARNING: Unexpected child element: " << tagName << " with type " << attribute._type;
-            }
-        }
-        else if(CombatantFactory::Instance()->hasElementList(tagName))
-        {
-            QList<QVariant> listValues;
-
-            // Iterate through the list and create the individual attributes
-            QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(tagName);
-            QDomElement listEntry = childElement.firstChildElement();
-            while(!listEntry.isNull())
-            {
-                QHash<QString, QVariant> listEntryValues;
-                for(auto keyIt = listAttributes.keyBegin(), end = listAttributes.keyEnd(); keyIt != end; ++keyIt)
-                {
-                    QVariant attributeValue = readAttributeValue(listAttributes.value(*keyIt), listEntry, *keyIt);
-                    if(!attributeValue.isNull())
-                        listEntryValues.insert(*keyIt, attributeValue);
-                }
-
-                // Add the list entry to the list
-                listValues.append(listEntryValues);
-
-                listEntry = listEntry.nextSiblingElement();
-            }
-
-            // Add the list entry to the main list
-            _allValues.insert(tagName, listValues);
-        }
-        else
-        {
-            qDebug() << "[Characterv2] WARNING: Unknown value type: " << tagName;
-        }
-
-        childElement = childElement.nextSiblingElement();
-    }
-
-    handleOldXMLs(element);
+void Characterv2::declareDirty()
+{
+    registerChange();
 }
 
 void Characterv2::handleOldXMLs(const QDomElement& element)
@@ -636,9 +356,9 @@ QString Characterv2::getAttributeSpecialAsString(const QString& attribute) const
 void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
 {
     if(key == QString("expanded"))
-        qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
+        return; //qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
     else if(key == QString("row"))
-        qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
+        return; //qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
     else if(key == QString("name"))
         setName(value);
     else if(key == QString("base-icon"))
@@ -657,80 +377,4 @@ void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
         setIcon(value);
     else
         qDebug() << "[Characterv2] ERROR: Attempt to set unknown special attribute " << key << " to " << value;
-}
-
-QVariant Characterv2::readAttributeValue(const DMHAttribute& attribute, const QDomElement& element, const QString& name)
-{
-    return CombatantFactory::convertStringToVariant(element.attribute(name, attribute._default), attribute._type);
-}
-
-void Characterv2::writeAttributeValue(const DMHAttribute& attribute, QDomElement& element, const QString& key, const QVariant& value)
-{
-    if((key.isEmpty()) || (value.isNull()))
-    {
-        qDebug() << "[Characterv2] WARNING: Trying to write an invalid/empty attribute. Key: " << key << ", value: " << value;
-        return;
-    }
-
-    element.setAttribute(key, CombatantFactory::convertVariantToString(value, attribute._type));
-}
-
-void Characterv2::writeElementValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
-{
-    if((key.isEmpty()) || (value.isNull()))
-    {
-        qDebug() << "[Characterv2] WARNING: Trying to write an invalid/empty element. Key: " << key << ", value: " << value;
-        return;
-    }
-
-    DMHAttribute attribute = CombatantFactory::Instance()->getElement(key);
-    if(attribute._type != CombatantFactory::TemplateType_html)
-    {
-        qDebug() << "[Characterv2] WARNING: Trying to write an unexpected element: " << key << " with type " << attribute._type;
-        return;
-    }
-
-    QDomElement childElement = doc.createElement(key);
-    QDomCDATASection childData = doc.createCDATASection(value.toString());
-    childElement.appendChild(childData);
-    element.appendChild(childElement);
-}
-
-void Characterv2::writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value)
-{
-    if((key.isEmpty()) || (value.isNull()))
-    {
-        qDebug() << "[Characterv2] WARNING: Trying to write an invalid/empty element list. Key: " << key << ", value: " << value;
-        return;
-    }
-
-    if(!CombatantFactory::Instance()->hasElementList(key))
-    {
-        qDebug() << "[Characterv2] WARNING: Trying to write an unexpected element list: " << key;
-        return;
-    }
-
-    QList<QVariant> listValues = value.toList();
-    if(listValues.isEmpty())
-    {
-        qDebug() << "[Characterv2] WARNING: Trying to write an empty element list: " << key;
-        return;
-    }
-
-    QHash<QString, DMHAttribute> listAttributes = CombatantFactory::Instance()->getElementList(key);
-    QDomElement listElement = doc.createElement(key);
-    for(const auto &value : std::as_const(listValues))
-    {
-        QDomElement childElement = doc.createElement(QString("entry"));
-
-        QHash<QString, QVariant> valueHash = value.toHash();
-        QList<QString> hashKeys = valueHash.keys();
-        for(const auto &hashKey : std::as_const(hashKeys))
-        {
-            writeAttributeValue(listAttributes.value(hashKey), childElement, hashKey, valueHash.value(hashKey));
-        }
-
-        listElement.appendChild(childElement);
-    }
-    element.appendChild(listElement);
 }

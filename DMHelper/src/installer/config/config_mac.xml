@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>DMHelper</Name>
-    <Version>3.5.0</Version>
+    <Version>3.6.0</Version>
     <Title>DMHelper</Title>
     <Publisher>DMHelper</Publisher>
     <WizardStyle>Modern</WizardStyle>
@@ -11,5 +11,4 @@
     <StartMenuDir>DMHelper</StartMenuDir>
     <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
     <StyleSheet>style.qss</StyleSheet>
-    <RunProgram>@TargetDir@/DMHelper.app/Contents/MacOS/DMHelper</RunProgram>
 </Installer>

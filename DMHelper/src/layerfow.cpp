@@ -342,7 +342,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
 
     if(mapEditShape.erase())
     {
-        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         if(mapEditShape.smooth())
         {
             qreal rectWidth = rect.width() / 80;
@@ -383,7 +383,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     else
     {
         p.setBrush(_fowColor);
-        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         p.drawRect(rect);
     }
 
@@ -404,6 +404,13 @@ void LayerFow::fillFoW(const QColor& color)
 
 QRect LayerFow::getFoWVisibleRect() const
 {
+    QColor testColorTL = _imageFow.pixelColor(0, 0);
+    QColor testColorTR = _imageFow.pixelColor(_imageFow.width(), 0);
+    QColor testColorBL = _imageFow.pixelColor(0, _imageFow.height());
+    QColor testColorBR = _imageFow.pixelColor(_imageFow.width(), _imageFow.height());
+    QColor testColorMid = _imageFow.pixelColor(_imageFow.width() / 2, _imageFow.height() / 2);
+    QColor testColor;
+
     int top, bottom, left, right;
     top = bottom = left = right = -1;
     int i, j;
@@ -411,7 +418,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(i = 0; (i < _imageFow.width()) && (top == -1); ++i)
         {
-            if(_imageFow.pixelColor(i, j).alpha() > 0)
+            testColor = _imageFow.pixelColor(i, j);
+            if(_imageFow.pixelColor(i, j).alpha() < 255)
                 top = j;
         }
     }
@@ -420,7 +428,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(i = 0; (i < _imageFow.width()) && (bottom == -1); ++i)
         {
-            if(_imageFow.pixelColor(i, j).alpha() > 0)
+            testColor = _imageFow.pixelColor(i, j);
+            if(_imageFow.pixelColor(i, j).alpha() < 255)
                 bottom = j;
         }
     }
@@ -429,7 +438,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(j = top; (j < bottom) && (left == -1); ++j)
         {
-            if(_imageFow.pixelColor(i, j).alpha() > 0)
+            testColor = _imageFow.pixelColor(i, j);
+            if(_imageFow.pixelColor(i, j).alpha() < 255)
                 left = i;
         }
     }
@@ -438,7 +448,8 @@ QRect LayerFow::getFoWVisibleRect() const
     {
         for(j = top; (j < bottom) && (right == -1); ++j)
         {
-            if(_imageFow.pixelColor(i, j).alpha() > 0)
+            testColor = _imageFow.pixelColor(i, j);
+            if(_imageFow.pixelColor(i, j).alpha() < 255)
                 right = i;
         }
     }

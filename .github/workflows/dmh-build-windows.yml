@@ -119,8 +119,7 @@ jobs:
       run: |
         cd DMHelper
         cd bin64
-        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
-        # binarycreator -c config\config_win64.xml -p packages DMHelper-64-bit-release-Installer
+        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages --resources config\resources.qrc DMHelper-64-bit-release-Installer
         cd ..
         move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
         

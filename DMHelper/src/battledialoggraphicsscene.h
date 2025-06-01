@@ -106,6 +106,7 @@ signals:
     void combatantDamage(BattleDialogModelCombatant* combatant);
     void combatantHeal(BattleDialogModelCombatant* combatant);
     void monsterChangeToken(BattleDialogModelMonsterClass* monster, int iconIndex);
+    void monsterChangeTokenCustom(BattleDialogModelMonsterClass* monster);
 
     void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 
@@ -123,6 +124,7 @@ protected slots:
     void damageCombatant();
     void healCombatant();
     void changeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex);
+    void changeMonsterTokenCustom(BattleDialogModelMonsterClass* monster);
 
     void changeEffectLayer();
     void handleSelectionChanged();

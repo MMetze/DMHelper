@@ -1,12 +1,12 @@
 #include "soundboardtrackframe.h"
 #include "ui_soundboardtrackframe.h"
+#include "soundboardtrack.h"
 #include "audiotrack.h"
-#include "audioplayer.h"
 #include "dmconstants.h"
 #include <QPainter>
 #include <QTimer>
 
-SoundboardTrackFrame::SoundboardTrackFrame(AudioTrack* track, QWidget *parent) :
+SoundboardTrackFrame::SoundboardTrackFrame(SoundboardTrack* track, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::SoundboardTrackFrame),
     _track(nullptr),
@@ -18,29 +18,10 @@ SoundboardTrackFrame::SoundboardTrackFrame(AudioTrack* track, QWidget *parent) :
     ui->setupUi(this);
     setTrack(track);
 
-    if(_track)
-    {
-        if(_track->getAudioType() == DMHelper::AudioType_Syrinscape)
-        {
-            ui->btnPlay->setIcon(QIcon(QString(":/img/data/icon_syrinscape.png")));
-            ui->btnRepeat->setEnabled(false);
-            ui->btnMute->setEnabled(false);
-            ui->slideVolume->setEnabled(false);
-            ui->lblProgress->setText(QString("--:-- / --:--"));
-            ui->lblProgress->setEnabled(false);
-        }
-        else if(_track->getAudioType() == DMHelper::AudioType_Youtube)
-        {
-            ui->btnPlay->setIcon(QIcon(QString(":/img/data/icon_playerswindow.png")));
-        }
-    }
-
     connect(ui->btnMute, &QAbstractButton::clicked, this, &SoundboardTrackFrame::toggleMute);
     connect(ui->btnPlay, &QAbstractButton::toggled, this, &SoundboardTrackFrame::togglePlay);
     connect(ui->btnRepeat, &QAbstractButton::toggled, this, &SoundboardTrackFrame::repeatChanged);
     connect(ui->btnRemove, &QAbstractButton::clicked, this, &SoundboardTrackFrame::handleRemove);
-    connect(track, &AudioTrack::trackLengthChanged, this, &SoundboardTrackFrame::setTrackLength);
-    connect(track, &AudioTrack::trackPositionChanged, this, &SoundboardTrackFrame::setTrackPosition);
 }
 
 SoundboardTrackFrame::~SoundboardTrackFrame()
@@ -48,33 +29,17 @@ SoundboardTrackFrame::~SoundboardTrackFrame()
     delete ui;
 }
 
-void SoundboardTrackFrame::setTrack(AudioTrack* track)
-{
-    if(_track)
-    {
-        disconnect(this, &SoundboardTrackFrame::play, _track, &AudioTrack::play);
-        disconnect(this, &SoundboardTrackFrame::stop, _track, &AudioTrack::stop);
-        disconnect(this, &SoundboardTrackFrame::muteChanged, _track, &AudioTrack::setMute);
-        disconnect(ui->slideVolume, &QAbstractSlider::valueChanged, _track, &AudioTrack::setVolume);
-        disconnect(_track, &AudioTrack::destroyed, this, &SoundboardTrackFrame::handleRemove);
-    }
-
-    if((track) && (_track != track))
-    {
-        _track = track;
-        ui->lblName->setText(_track->getName());
-        setToolTip(_track->getUrl().toDisplayString());
-        connect(this, &SoundboardTrackFrame::play, _track, &AudioTrack::play);
-        connect(this, &SoundboardTrackFrame::stop, _track, &AudioTrack::stop);
-        connect(this, &SoundboardTrackFrame::muteChanged, _track, &AudioTrack::setMute);
-        connect(ui->slideVolume, &QAbstractSlider::valueChanged, _track, &AudioTrack::setVolume);
-        connect(_track, &AudioTrack::destroyed, this, &SoundboardTrackFrame::handleRemove);
-    }
-}
-
-AudioTrack* SoundboardTrackFrame::getTrack() const
+SoundboardTrack* SoundboardTrackFrame::getTrack() const
 {
     return _track;
+}
+
+int SoundboardTrackFrame::getAudioType() const
+{
+    if(!_track)
+        return DMHelper::AudioType_Unknown;
+
+    return _track->getAudioType();
 }
 
 void SoundboardTrackFrame::setMute(bool mute)
@@ -114,9 +79,9 @@ void SoundboardTrackFrame::togglePlay(bool checked)
         if(_currentMute)
             ui->btnMute->click();
 
-        emit play(nullptr);
+        emit play();
 
-        if((_track) && (_track->getAudioType() == DMHelper::AudioType_Syrinscape))
+        if(getAudioType() == DMHelper::AudioType_Syrinscape)
             QTimer::singleShot(500, ui->btnPlay, &QAbstractButton::click);
     }
     else
@@ -140,9 +105,9 @@ void SoundboardTrackFrame::setCurrentMute(bool mute)
         emit muteChanged(mute);
         _currentMute = mute;
         ui->btnMute->setIcon(mute ? QIcon(QPixmap(":/img/data/icon_volumeoff.png")) : QIcon(QPixmap(":/img/data/icon_volumeon.png")));
-        if(_track->getAudioType() != DMHelper::AudioType_Syrinscape)
-            ui->slideVolume->setEnabled(!mute);
         ui->btnMute->setChecked(mute);
+        if(getAudioType() != DMHelper::AudioType_Syrinscape)
+            ui->slideVolume->setEnabled(!mute);
     }
 }
 
@@ -155,4 +120,42 @@ void SoundboardTrackFrame::handleRemove()
 {
     if(_track)
         emit removeTrack(_track);
+}
+
+void SoundboardTrackFrame::setTrack(SoundboardTrack* track)
+{
+    if((_track) || (!track) || (!track->getTrack()))
+        return;
+
+    _track = track;
+
+    switch(getAudioType())
+    {
+        case DMHelper::AudioType_Syrinscape:
+            ui->btnPlay->setIcon(QIcon(QString(":/img/data/icon_syrinscape.png")));
+            ui->btnRepeat->setEnabled(false);
+            ui->btnMute->setEnabled(false);
+            ui->slideVolume->setEnabled(false);
+            ui->lblProgress->setText(QString("--:-- / --:--"));
+            ui->lblProgress->setEnabled(false);
+            break;
+        case DMHelper::AudioType_Youtube:
+            ui->btnPlay->setIcon(QIcon(QString(":/img/data/icon_playerswindow.png")));
+            break;
+        default:
+            break;
+    }
+
+    ui->lblName->setText(_track->getTrackName());
+    setToolTip(_track->getTrackDetails());
+    ui->slideVolume->setValue(_track->getVolume());
+    setMute(_track->getMute());
+
+    connect(this, &SoundboardTrackFrame::play, _track, &SoundboardTrack::play);
+    connect(this, &SoundboardTrackFrame::stop, _track, &SoundboardTrack::stop);
+    connect(this, &SoundboardTrackFrame::muteChanged, _track, &SoundboardTrack::setMute);
+    connect(ui->slideVolume, &QAbstractSlider::valueChanged, _track, &SoundboardTrack::setVolume);
+    connect(_track, &SoundboardTrack::trackLengthChanged, this, &SoundboardTrackFrame::setTrackLength);
+    connect(_track, &SoundboardTrack::trackPositionChanged, this, &SoundboardTrackFrame::setTrackPosition);
+    connect(_track, &AudioTrack::destroyed, this, &SoundboardTrackFrame::handleRemove);
 }

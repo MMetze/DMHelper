@@ -6,7 +6,6 @@
 #include "dmconstants.h"
 #include "campaign.h"
 #include "texttranslatedialog.h"
-#include "videoplayerglscreenshot.h"
 #include "layerseditdialog.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
@@ -16,7 +15,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QRegularExpression>
+#include <QScrollBar>
 #include <QDebug>
+
+const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
+const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -34,14 +37,15 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _isCodeView(false),
     _targetSize(),
     _rotation(0),
-    _textPos()
+    _textPos(),
+    _encounterChangedTimer(0),
+    _updateAnchorTimer(0)
 {
     ui->setupUi(this);
 
     ui->textBrowser->viewport()->setCursor(Qt::IBeamCursor);
 
-    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
-    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(updateAnchors()));
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
     connect(ui->textBrowser, SIGNAL(anchorClicked(QUrl)), this, SIGNAL(anchorClicked(QUrl)));
 
     connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SIGNAL(fontFamilyChanged(const QString&)));
@@ -106,6 +110,8 @@ void EncounterTextEdit::deactivateObject()
         return;
     }
 
+    cancelTimers();
+
     _renderer = nullptr;
 
     storeEncounter();
@@ -145,15 +151,8 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     _encounter = encounter;
 
     _encounter->initialize();
-//    if(_encounter->isInitialized())
-//    {
-//        qDebug() << "[EncounterTextEdit] Initializing encounter background image";
-//        _encounter->getLayerScene().dmInitialize(nullptr);
-//    }
 
     readEncounter();
-//    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
-//    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
     connect(_encounter, SIGNAL(textWidthChanged(int)), this, SIGNAL(textWidthChanged(int)));
     connect(_encounter, &EncounterText::textWidthChanged, ui->textBrowser, &TextBrowserMargins::setTextWidth);
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
@@ -180,6 +179,8 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 {
     if(encounter != _encounter)
         qDebug() << "[EncounterTextEdit] WARNING: unsetting text with a DIFFERENT encounter than currently set! Current: " << QString(_encounter ? _encounter->getID().toString() : "nullptr") << ", Unset: " << QString(encounter ? encounter->getID().toString() : "nullptr");
+
+    cancelTimers();
 
     if(_encounter)
     {
@@ -245,7 +246,11 @@ bool EncounterTextEdit::eventFilter(QObject *watched, QEvent *event)
         if(!keyEvent)
             return false;
 
-        if((_formatter) && ((keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
+        if((keyEvent->key() == Qt::Key_BracketLeft) || (keyEvent->key() == Qt::Key_BracketRight))
+        {
+            triggerUpdateAnchor(); // Don't swallow the event, just trigger the update
+        }
+        else if((_formatter) && ((keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
         {
             if(keyEvent->key() == Qt::Key_B)
             {
@@ -401,6 +406,12 @@ void EncounterTextEdit::setAnimated(bool animated)
 
     _encounter->setAnimated(animated);
     setPublishCheckable();
+
+    if(_renderer)
+    {
+        _renderer->stop();
+        _renderer->rewind();
+    }
 }
 
 void EncounterTextEdit::setScrollSpeed(int scrollSpeed)
@@ -463,12 +474,6 @@ void EncounterTextEdit::setCodeView(bool active)
     emit codeViewChanged(active);
 }
 
-void EncounterTextEdit::targetResized(const QSize& newSize)
-{
-    if(newSize != _targetSize)
-        _targetSize = newSize;
-}
-
 void EncounterTextEdit::layerSelected(int selected)
 {
     if(_encounter)
@@ -485,32 +490,23 @@ void EncounterTextEdit::publishClicked(bool checked)
     if(_isPublishing)
     {
         if(!_renderer)
-//        if(_renderer)
-//        {
-//            _renderer->play();
-//        }
-//        else
         {
             emit showPublishWindow();
             prepareImages();
 
-//            if(isVideo())
-//                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
-//            else
-//                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
-            _renderer = new PublishGLTextRenderer(_encounter, _textImage, size());
+            _renderer = new PublishGLTextRenderer(_encounter, _textImage);
 
             _renderer->setRotation(_rotation);
             connect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
+            connect(_renderer, &PublishGLTextRenderer::sceneSizeChanged, this, &EncounterTextEdit::sceneRectUpdated);
             emit registerRenderer(_renderer);
         }
     }
     else
     {
-//        if(_renderer)
-//            _renderer->stop();
         _renderer = nullptr;
         disconnect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
+        disconnect(_renderer, &PublishGLTextRenderer::sceneSizeChanged, this, &EncounterTextEdit::sceneRectUpdated);
         emit registerRenderer(nullptr);
     }
 }
@@ -523,6 +519,22 @@ void EncounterTextEdit::setRotation(int rotation)
     _rotation = rotation;
     if(_renderer)
         _renderer->setRotation(_rotation);
+
+    QTextDocument* doc = ui->textBrowser->document();
+    if(doc)
+        doc->setTextWidth(getRotatedTargetWidth());
+
+    if((_isPublishing) && (_renderer))
+    {
+        prepareImages();
+        _renderer->setTextImage(_textImage);
+    }
+}
+
+void EncounterTextEdit::setBackgroundColor(const QColor& color)
+{
+    if(_encounter)
+        _encounter->setBackgroundColor(color);
 }
 
 void EncounterTextEdit::editLayers()
@@ -539,54 +551,58 @@ void EncounterTextEdit::editLayers()
 
 void EncounterTextEdit::updateAnchors()
 {
-    if(!_encounter)
+    if (!_encounter)
         return;
 
-    qDebug() << "[EncounterTextEdit] Checking anchors...";
-    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(updateAnchors()));
+    // Block signals to prevent unwanted textChanged() recursion
+    ui->textBrowser->blockSignals(true);
 
     QTextCursor originalCursor = ui->textBrowser->textCursor();
+    int originalScrollPos = ui->textBrowser->verticalScrollBar()->value();
 
-    QTextCursor startPosCursor = originalCursor;
-    startPosCursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
-    ui->textBrowser->setTextCursor(startPosCursor);
+    QTextCursor cursor = originalCursor;
+    QRegularExpression regex("\\[\\[([^\\[\\]]+)\\]\\]");
+    cursor.movePosition(QTextCursor::Start);  // Move only this temporary cursor
+    ui->textBrowser->setTextCursor(cursor);
 
-    QRegularExpression regex("\\[\\[(.*?)\\]\\]");
     while(ui->textBrowser->find(regex))
     {
-        QTextCursor cursor = ui->textBrowser->textCursor();
-        int startPos = cursor.selectionStart();
-        int endPos = cursor.selectionEnd();
-        cursor.setPosition(startPos + 2);
-        cursor.setPosition(endPos - 2, QTextCursor::KeepAnchor);
-        if(!cursor.selectedText().isEmpty())
+        QTextCursor selectionCursor = ui->textBrowser->textCursor();
+        int startPos = selectionCursor.selectionStart();
+        int endPos = selectionCursor.selectionEnd();
+        selectionCursor.setPosition(startPos + 2);
+        selectionCursor.setPosition(endPos - 2, QTextCursor::KeepAnchor);
+
+        if (!selectionCursor.selectedText().isEmpty())
         {
             Campaign* campaign = dynamic_cast<Campaign*>(_encounter->getParentByType(DMHelper::CampaignType_Campaign));
-            if(campaign)
+            if (campaign)
             {
-                QTextCharFormat format = cursor.charFormat();
-                if(campaign->searchDirectChildrenByName(cursor.selectedText()))
+                QTextCharFormat format = selectionCursor.charFormat();
+                if (campaign->searchDirectChildrenByName(selectionCursor.selectedText()))
                 {
-                    qDebug() << "[EncounterTextEdit] Setting cursor format for text: " << cursor.selectedText();
                     format.setAnchor(true);
-                    format.setAnchorHref(QString("DMHelper@") + cursor.selectedText());
+                    format.setAnchorHref(QString("DMHelper@") + selectionCursor.selectedText());
                     format.setFontItalic(true);
-                    cursor.mergeCharFormat(format);
+                    selectionCursor.mergeCharFormat(format);
                 }
-                else if(format.isAnchor())
+                else if (format.isAnchor())
                 {
-                    qDebug() << "[EncounterTextEdit] Removing cursor format for text: " << cursor.selectedText();
                     format.setAnchor(false);
-                    format.setAnchorHref(QString(""));
+                    format.setAnchorHref("");
                     format.setFontItalic(false);
-                    cursor.mergeCharFormat(format);
+                    selectionCursor.mergeCharFormat(format);
                 }
             }
         }
     }
 
+    // Restore cursor and scroll position
     ui->textBrowser->setTextCursor(originalCursor);
-    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(updateAnchors()));
+    ui->textBrowser->verticalScrollBar()->setValue(originalScrollPos);
+
+    // Re-enable signals
+    ui->textBrowser->blockSignals(false);
 }
 
 void EncounterTextEdit::storeEncounter()
@@ -612,13 +628,13 @@ void EncounterTextEdit::readEncounter()
     if(!_encounter)
         return;
 
-    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
 
-//    emit imageFileChanged(_encounter->getImageFile());
     emit textWidthChanged(_encounter->getTextWidth());
     emit animatedChanged(_encounter->getAnimated());
     emit scrollSpeedChanged(_encounter->getScrollSpeed());
     emit translatedChanged(_encounter->getTranslated());
+    emit backgroundColorChanged(_encounter->getBackgroundColor());
 
     bool showCodeView = false;
     _isCodeView = false;
@@ -640,7 +656,7 @@ void EncounterTextEdit::readEncounter()
     setTranslated(_encounter->getTranslated());
     setHtml();
 
-    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
 }
 
 void EncounterTextEdit::updateEncounter()
@@ -648,7 +664,7 @@ void EncounterTextEdit::updateEncounter()
     if(!_encounter)
         return;
 
-    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
         bool showCodeView = false;
         if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
         {
@@ -658,7 +674,7 @@ void EncounterTextEdit::updateEncounter()
         }
         emit codeViewVisible(showCodeView);
         setHtml();
-    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
 }
 
 void EncounterTextEdit::takeFocus()
@@ -682,16 +698,6 @@ void EncounterTextEdit::loadImage()
     setPublishCheckable();
 }
 
-/*
-void EncounterTextEdit::handleScreenshotReady(const QImage& image)
-{
-    _backgroundImage = image;
-    _backgroundImageScaled = QImage();
-    scaleBackgroundImage();
-    update();
-}
-*/
-
 void EncounterTextEdit::handleLayersChanged()
 {
     if(!_encounter)
@@ -706,10 +712,63 @@ void EncounterTextEdit::refreshImage()
     update();
 }
 
+void EncounterTextEdit::triggerEncounterChanged()
+{
+    if(_encounterChangedTimer)
+        killTimer(_encounterChangedTimer);
+
+    _encounterChangedTimer = startTimer(ENCOUNTERTEXTEDIT_STORE_INTERVAL);
+}
+
+void EncounterTextEdit::triggerUpdateAnchor()
+{
+    if(_updateAnchorTimer)
+        killTimer(_updateAnchorTimer);
+
+    _updateAnchorTimer = startTimer(ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL);
+}
+
+void EncounterTextEdit::sceneRectUpdated(const QSize& size)
+{
+    if(size == _targetSize)
+        return;
+
+    _targetSize = size;
+    QTextDocument* doc = ui->textBrowser->document();
+    if(doc)
+        doc->setTextWidth(getRotatedTargetWidth());
+
+    if((_isPublishing) && (_renderer))
+    {
+        prepareImages();
+        _renderer->setTextImage(_textImage);
+    }
+}
+
 void EncounterTextEdit::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
     scaleBackgroundImage();
+}
+
+void EncounterTextEdit::timerEvent(QTimerEvent *event)
+{
+    if((!event) || (event->timerId() == 0))
+        return;
+
+    if(event->timerId() == _encounterChangedTimer)
+    {
+        killTimer(_encounterChangedTimer);
+        _encounterChangedTimer = 0;
+        storeEncounter();
+    }
+
+    if(event->timerId() == _updateAnchorTimer)
+    {
+        killTimer(_updateAnchorTimer);
+        _updateAnchorTimer = 0;
+        updateAnchors();
+    }
 }
 
 void EncounterTextEdit::scaleBackgroundImage()
@@ -720,12 +779,12 @@ void EncounterTextEdit::scaleBackgroundImage()
 
 void EncounterTextEdit::prepareImages()
 {
-    if(!_encounter)
+    if((!_encounter) || (_targetSize.isEmpty()))
         return;
 
     if(_backgroundImage.isNull())
     {
-        _prescaledImage = QImage(_targetSize, QImage::Format_ARGB32_Premultiplied);
+        _prescaledImage = QImage(getRotatedTargetSize(), QImage::Format_ARGB32_Premultiplied);
         _prescaledImage.fill(QColor(0, 0, 0, 0));
     }
     else
@@ -742,28 +801,29 @@ void EncounterTextEdit::prepareTextImage()
     if((!_encounter) || (_prescaledImage.isNull()))
         return;
 
-    _textImage = getDocumentTextImage();
-    _textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
+    _textImage = getDocumentTextImage(_prescaledImage.width());
 }
 
-QImage EncounterTextEdit::getDocumentTextImage()
+QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
 {
     QImage result;
+
+    if(renderWidth <= 0)
+        return result;
 
     QTextDocument* doc = ui->textBrowser->document();
     if(doc)
     {
         int oldTextWidth = doc->textWidth();
-        int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
-        int targetMargin = (oldTextWidth - absoluteWidth) / 2;
+        int textPercentage = _encounter ? _encounter->getTextWidth() : 100;
+        int absoluteWidth = renderWidth * textPercentage / 100;
 
         doc->setTextWidth(absoluteWidth);
 
-        result = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        result = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
         result.fill(Qt::transparent);
         QPainter painter;
         painter.begin(&result);
-            painter.translate(targetMargin, 0);
             doc->drawContents(&painter);
         painter.end();
 
@@ -800,8 +860,25 @@ void EncounterTextEdit::setPublishCheckable()
 
 QSize EncounterTextEdit::getRotatedTargetSize()
 {
-    if(_rotation % 180 == 0)
-        return _targetSize;
-    else
-        return _targetSize.transposed();
+    return (_rotation % 180 == 0) ? _targetSize : _targetSize.transposed();
+}
+
+int EncounterTextEdit::getRotatedTargetWidth()
+{
+    return (_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height();
+}
+
+void EncounterTextEdit::cancelTimers()
+{
+    if(_encounterChangedTimer)
+    {
+        killTimer(_encounterChangedTimer);
+        _encounterChangedTimer = 0;
+    }
+
+    if(_updateAnchorTimer)
+    {
+        killTimer(_updateAnchorTimer);
+        _updateAnchorTimer = 0;
+    }
 }

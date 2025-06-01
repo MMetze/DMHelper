@@ -61,6 +61,8 @@ public:
     int getDistanceLineWidth() const;
     int getMapScale() const;
 
+    QColor getBackgroundColor() const;
+
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
@@ -81,16 +83,16 @@ public:
     bool isValid();
     LayerScene& getLayerScene();
     const LayerScene& getLayerScene() const;
-    // TODO - remove
-    void setExternalFoWImage(QImage externalImage);
+// TODO - remove
+//    void setExternalFoWImage(QImage externalImage);
     QImage getUnfilteredBackgroundImage();
     QImage getBackgroundImage();
     QImage getFoWImage();
-    bool isCleared();
+//    bool isCleared();
 
-    QImage getGrayImage();
+//    QImage getGrayImage();
 
-    bool isFilterApplied() const;
+//    bool isFilterApplied() const;
     MapColorizeFilter getFilter() const;
 
     QImage getPreviewImage();
@@ -124,7 +126,7 @@ public slots:
     void uninitialize();
 
     void undoPaint();
-    void updateFoW();
+//    void updateFoW();
 
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
@@ -136,6 +138,8 @@ public slots:
     void setDistanceLineColor(const QColor& color);
     void setDistanceLineType(int lineType);
     void setDistanceLineWidth(int lineWidth);
+
+    void setBackgroundColor(const QColor& color);
 
     void setShowMarkers(bool showMarkers);
 
@@ -175,6 +179,7 @@ protected:
     int _lineType;
     QColor _lineColor;
     int _lineWidth;
+    QColor _backgroundColor;
 
     // For a generic map
     QColor _mapColor;

@@ -9,48 +9,51 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.5</h2>
+<h2>What's New: Version 3.6</h2>
 
 <h3>IMPORTANT: PLEASE READ</h3>
 <p>
-Starting with version 3.3, DMHelper has a more flexible character data and UI template system to support different game systems. As a result, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.
+With version 3.6, DMHelper has added more flexible Bestiary data to the already flexible character data and UI template system added to support different game systems in v3.3. In a similar fashion to the changes with characters in v3.3, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.
 <p>
-DM Helper will try to update the math to transition to the new format, but we encourage you to double-check the PC and NPC stats.
+DM Helper will try to update your Bestiary automatically, but we do encourage you to double-check your monster entries and their stats.
 <p>
-If you are using the automatic D&D Beyond importer, it has been updated to reflect the new formats and has even gotten a few improvements along the way. We would recommend updating your D&D Beyond characters in the app.
-<p>
-Just to be 100% safe, we recommend backing up your campaign XML files before opening them.
+<b>To be 100% safe, we recommend backing up your Bestiary and Campaign XML files before opening them.</b>
 <p>
 
-<h3>New v3.5 Features:</h3>
+<h3>New v3.6 Features:</h3>
 <ul>
-<li><b>Nope!</b> This one is a straight-up bug-fix release!
+<li><b>Dynamic Monster definitions</b>: It's done! Play any TTRPG you want using DMHelper from now on! Just configure your character and bestiary data to fit the game you play - or use one of the pre-configured options!
+<li><b>Upgraded Text rendering</b>: More control and full layer support behind text publishing and animations... try it out!
+<li><b>Skinning Monsters</b>: Need a quick orc priest? Grab an acolyte and give it a new token. Reminder: you can also create an NPC derived from monster if you want that orc priest to appear again and again OR if you just want to give acolytes a permanent option to be orc priests, add the new token in the Bestiary, and enjoy it forever!
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Crash-bug: add multiple monsters, then remove one
-<li>Crash-bug: add a PC without an image to a combat
-<li>Crash-bug: removing a combatant without sorting the initiative list
-<li>Bug: Add multiple monsters, one sits on top of a PC
-<li>Bug: Add a PC based on a monster, gets an invalid image path
-<li>Bug: Re-enabled the soundboard
+<li>Bug: Background colors used to publish entries are saved properly
+<li>Bug: Remove FoW by area works again
+<li>Bug: Grid rendering on the Mac version works again
+<li>Bug: Combatants in hidden layers are skipped properly in the initiative order
+<li>Bug: Zoom to FOW works again
+<li>Bug: Clicking 'Next' with combatants in a hidden layer skips hidden combatants properly
+<li>Bug: When adding a new video, it now zooms out properly upon loading
+<li>Bug: Changing the hit dice when adding monsters to a combat works
 </ul>
 
-<!-- Commenting out this section for now
+<!-- Commenting this section back in for now
+-->
 <p>
 <h3>Other Improvements:</h3>
 <ul>
-<li>TBD
+<li> The error message when importing a PC fails suggests making it public
+<li> Long/formatted text in character or monster sheets can be formatted with Ctrl-B/I/U (bold/italic/underline)
 </ul>
--->
 
 <p>
 <h3>And don't forget</h3>
 <ul>
-<li><b>Press the magical "F" key on the Player's Window for Fullscreen mode</b>
+<li><b>Press the magical "F" key on the Player's Window for Fullscreen mode!!</b>
 <br>
 <li>If you like the app, consider supporting our Patreon here: <a href="www.patreon.com/dmhelper">www.patreon.com/dmhelper</a>
 </ul>

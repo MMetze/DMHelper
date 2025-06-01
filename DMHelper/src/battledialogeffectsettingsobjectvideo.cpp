@@ -38,7 +38,7 @@ BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(con
 
     _editor = new TokenEditor();
 
-    ui->btnColorizeColor->setChecked(effect.isColorize());
+    ui->chkColorize->setChecked(effect.isColorize());
     _editor->setColorize(effect.isColorize());
 
     ui->btnColorizeColor->setRotationVisible(false);

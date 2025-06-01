@@ -88,6 +88,8 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
         setAnimated(true);
     }
 
+    setBackgroundColor(QColor(element.attribute("backgroundColor", "#000000")));
+
     QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
     if(!layersElement.isNull())
     {
@@ -188,6 +190,11 @@ QString EncounterText::getTranslatedText() const
         return _text;
     else
         return _translatedText;
+}
+
+QColor EncounterText::getBackgroundColor() const
+{
+    return _backgroundColor;
 }
 
 bool EncounterText::isInitialized() const
@@ -325,6 +332,15 @@ void EncounterText::setTranslatedText(const QString& translatedText)
     }
 }
 
+void EncounterText::setBackgroundColor(const QColor& color)
+{
+    if(_backgroundColor == color)
+        return;
+
+    _backgroundColor = color;
+    emit dirty();
+}
+
 QDomElement EncounterText::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("entry-object");
@@ -341,6 +357,9 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     element.setAttribute("translated", getTranslated());
 
     createTextNode(doc, element, targetDirectory, isExport);
+
+    if((_backgroundColor.isValid()) && (_backgroundColor != Qt::black))
+        element.setAttribute("backgroundColor", _backgroundColor.name());
 
     // Check to only write really translated text, correcting also for a previous error that has created a lot of duplicate entries!
     if((!_translatedText.isEmpty()) && (_translatedText != _text))
