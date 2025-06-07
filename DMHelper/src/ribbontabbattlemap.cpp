@@ -32,6 +32,8 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     selectAction(gridAction);
     connect(_menu, &QMenu::triggered, this, &RibbonTabBattleMap::selectAction);
 
+    connect(ui->btnGridResize, SIGNAL(clicked(bool)), this, SIGNAL(gridResizeClicked()));
+
     connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->spinGridAngle, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->btnGridCount, &QAbstractButton::clicked, this, &RibbonTabBattleMap::gridScaleSetClicked);
@@ -172,6 +174,7 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_6, frameHeight);
 
     setStandardButtonSize(*ui->lblGrid, *ui->btnGrid, frameHeight);
+    setStandardButtonSize(*ui->lblGridResize, *ui->btnGridResize, frameHeight);
 
     setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit, frameHeight);
     setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase, frameHeight);

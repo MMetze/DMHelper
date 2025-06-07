@@ -45,6 +45,7 @@
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
 #include "spellbook.h"
+#include "gridsizer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -126,6 +127,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownFrame(),
     _targetSize(),
     _targetLabelSize(),
+    _gridSizer(nullptr),
     _isGridLocked(false),
     _gridLockScale(0.0),
     _mapDrawer(nullptr),
@@ -729,6 +731,25 @@ void BattleFrame::selectGridCount()
         if(newGridScale > 0)
             setGridScale(newGridScale);
     }
+}
+
+void BattleFrame::resizeGrid()
+{
+    if((!_scene) || (_gridSizer))
+        return;
+
+    // Add a resizeable grid setter with a 5x5 grid to the battle frame
+    Layer* currentLayer = _model ? _model->getLayerScene().getSelectedLayer() : nullptr;
+    qreal currentScale = static_cast<qreal>(active->getLayer() ? active->getLayer()->getScale() : DMHelper::STARTING_GRID_SCALE);
+
+    _gridSizer = new GridSizer(250);
+    _scene->addItem(gridItem);
+    gridItem->setPos(100, 100);
+
+    bool ok = false;
+    int newGridScale = QInputDialog::getInt(this, QString("Resize Grid"), QString("What should the new grid scale be?"), _model->getLayerScene().getScale(), 1, 100000, 1, &ok);
+    if((ok) && (newGridScale > 0))
+        setGridScale(newGridScale);
 }
 
 void BattleFrame::setGridAngle(int gridAngle)

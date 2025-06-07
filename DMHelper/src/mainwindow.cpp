@@ -563,6 +563,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridResizeClicked, _battleFrame, &BattleFrame::resizeGrid);
     connect(_battleFrame, &BattleFrame::gridConfigChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridConfig);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selectGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
@@ -1176,13 +1177,7 @@ void MainWindow::newBattleEncounter()
     battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
     battle->getBattleDialogModel()->setMapRect(battle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
 
-//    battleFrame->setBattle(battle);
-//    if(!battleFrame->createNewBattle())
-//        battleFrame->editLayers();
     addNewObject(encounter);
-
-//    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
-//    battleFrame->recenterCombatants();
 }
 
 void MainWindow::newMap(Layer* imageLayer)

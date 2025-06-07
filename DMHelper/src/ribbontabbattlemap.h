@@ -42,6 +42,7 @@ signals:
     void reloadMapClicked();
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);
+    void gridResizeClicked();
     void gridScaleSetClicked();
     void gridAngleChanged(int angle);
     void gridXOffsetChanged(int offset);

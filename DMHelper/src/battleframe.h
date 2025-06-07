@@ -17,6 +17,7 @@ class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
 class GridConfig;
+class GridSizer;
 class Characterv2;
 class Map;
 class QTimer;
@@ -90,6 +91,7 @@ public slots:
 
     void setGridScale(int gridScale);
     void selectGridCount();
+    void resizeGrid();
     void setGridAngle(int gridAngle);
     void setGridType(int gridType);
     void setXOffset(int xOffset);
@@ -406,6 +408,7 @@ private:
     QSize _targetSize;
     QSize _targetLabelSize;
 
+    GridSizer* _gridSizer;
     bool _isGridLocked;
     qreal _gridLockScale;
 

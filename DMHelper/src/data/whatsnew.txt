@@ -11,44 +11,34 @@
 <div class="myDiv">
 <h2>What's New: Version 3.6</h2>
 
-<h3>IMPORTANT: PLEASE READ</h3>
+<h3>⚠️ Important Update</h3>
 <p>
-With version 3.6, DMHelper has added more flexible Bestiary data to the already flexible character data and UI template system added to support different game systems in v3.3. In a similar fashion to the changes with characters in v3.3, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.
+DMHelper has become more flexible over recent versions, with updates to character data, UI templates (v3.3), and now the Bestiary system (v3.6). As part of this, some automatic 5E rules — like ability modifiers, saving throws, and proficiency bonuses — are no longer applied by default.
+</p>
 <p>
-DM Helper will try to update your Bestiary automatically, but we do encourage you to double-check your monster entries and their stats.
-<p>
-<b>To be 100% safe, we recommend backing up your Bestiary and Campaign XML files before opening them.</b>
-<p>
+If you are coming from an earlier version, DMHelper will try to update your Bestiary automatically, but please double-check your monster entries and their stats.
+<b>To be safe, we recommend backing up your Bestiary and Campaign XML files before opening them.</b>
+</p>
 
-<h3>New v3.6 Features:</h3>
+<h3>New v3.7 Features:</h3>
 <ul>
-<li><b>Dynamic Monster definitions</b>: It's done! Play any TTRPG you want using DMHelper from now on! Just configure your character and bestiary data to fit the game you play - or use one of the pre-configured options!
-<li><b>Upgraded Text rendering</b>: More control and full layer support behind text publishing and animations... try it out!
-<li><b>Skinning Monsters</b>: Need a quick orc priest? Grab an acolyte and give it a new token. Reminder: you can also create an NPC derived from monster if you want that orc priest to appear again and again OR if you just want to give acolytes a permanent option to be orc priests, add the new token in the Bestiary, and enjoy it forever!
+<li><b>TBD</b>: tbd
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Bug: Background colors used to publish entries are saved properly
-<li>Bug: Remove FoW by area works again
-<li>Bug: Grid rendering on the Mac version works again
-<li>Bug: Combatants in hidden layers are skipped properly in the initiative order
-<li>Bug: Zoom to FOW works again
-<li>Bug: Clicking 'Next' with combatants in a hidden layer skips hidden combatants properly
-<li>Bug: When adding a new video, it now zooms out properly upon loading
-<li>Bug: Changing the hit dice when adding monsters to a combat works
+<li>Bug: tbd
 </ul>
 
-<!-- Commenting this section back in for now
--->
+<!-- Commenting this section out for now
 <p>
 <h3>Other Improvements:</h3>
 <ul>
-<li> The error message when importing a PC fails suggests making it public
-<li> Long/formatted text in character or monster sheets can be formatted with Ctrl-B/I/U (bold/italic/underline)
+<li> tbd
 </ul>
+-->
 
 <p>
 <h3>And don't forget</h3>

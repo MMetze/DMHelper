@@ -108,6 +108,7 @@ SOURCES += main.cpp\
     globalsearch.cpp \
     globalsearchframe.cpp \
     gridconfig.cpp \
+    gridsizer.cpp \
     helpdialog.cpp \
     initiativelistcombatantwidget.cpp \
     initiativelistdialog.cpp \
@@ -404,6 +405,7 @@ HEADERS  += mainwindow.h \
     globalsearch.h \
     globalsearchframe.h \
     gridconfig.h \
+    gridsizer.h \
     helpdialog.h \
     initiativelistcombatantwidget.h \
     initiativelistdialog.h \
