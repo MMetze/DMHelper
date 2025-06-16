@@ -735,7 +735,7 @@ void BattleFrame::selectGridCount()
 
 void BattleFrame::resizeGrid()
 {
-    if((!_scene) || (_gridSizer))
+    if((!_scene) || (!_model) || (_gridSizer))
         return;
 
     // Add a resizeable grid setter with a 5x5 grid to the battle frame
@@ -1614,9 +1614,12 @@ void BattleFrame::setPointerOn(bool enabled)
     _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
 }
 
-void BattleFrame::keyPressEvent(QKeyEvent * e)
+void BattleFrame::keyPressEvent(QKeyEvent * event)
 {
-    if(e->key() == Qt::Key_Escape)
+    if(!event)
+        return;
+
+    if(event->key() == Qt::Key_Escape)
     {
         cancelSelect();
         return;
@@ -1630,21 +1633,21 @@ void BattleFrame::keyPressEvent(QKeyEvent * e)
         _gridSizer = nullptr;
     }
 
-    if(e->key() == Qt::Key_A)
+    if(event->key() == Qt::Key_A)
     {
         _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
         return;
     }
-    else if((e->key() == Qt::Key_C) && (e->modifiers() == Qt::ControlModifier))
+    else if((event->key() == Qt::Key_C) && (event->modifiers() == Qt::ControlModifier))
     {
         copyMonsters();
     }
-    else if((e->key() == Qt::Key_V) && (e->modifiers() == Qt::ControlModifier))
+    else if((event->key() == Qt::Key_V) && (event->modifiers() == Qt::ControlModifier))
     {
         pasteMonsters();
     }
 
-    QFrame::keyPressEvent(e);
+    QFrame::keyPressEvent(event);
 }
 
 bool BattleFrame::eventFilter(QObject *obj, QEvent *event)

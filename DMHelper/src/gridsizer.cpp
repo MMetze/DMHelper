@@ -1,4 +1,5 @@
 #include "gridsizer.h"
+#include "dmconstants.h"
 #include <QPainter>
 #include <QCursor>
 #include <QGraphicsSceneMouseEvent>
@@ -15,6 +16,7 @@ GridSizer::GridSizer(qreal size, QGraphicsItem *parent) :
 {
     setFlags(ItemIsSelectable | ItemIsMovable);
     setAcceptHoverEvents(true);
+    setZValue(DMHelper::BattleDialog_Z_Overlay);
 
     setSize(size);
 }

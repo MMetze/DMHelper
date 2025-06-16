@@ -638,6 +638,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, _mapFrame, &MapFrame::setPartyIcon);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, _mapFrame, &MapFrame::setShowParty);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::gridResizeClicked, _mapFrame, &MapFrame::resizeGrid);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _mapFrame, &MapFrame::layerSelected);

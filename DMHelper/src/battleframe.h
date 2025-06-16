@@ -215,7 +215,7 @@ signals:
     void navigateBackwards();
 
 protected:
-    virtual void keyPressEvent(QKeyEvent * e) override;
+    virtual void keyPressEvent(QKeyEvent * event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;

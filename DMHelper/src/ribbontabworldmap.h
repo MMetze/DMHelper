@@ -41,6 +41,7 @@ signals:
     void partySelected(Party* party);
     void partyIconSelected(const QString& partyIcon);
     void scaleChanged(int scale);
+    void gridResizeClicked();
 
     void showMarkersClicked(bool checked);
     void addMarkerClicked();
