@@ -739,17 +739,16 @@ void BattleFrame::resizeGrid()
         return;
 
     // Add a resizeable grid setter with a 5x5 grid to the battle frame
-    Layer* currentLayer = _model ? _model->getLayerScene().getSelectedLayer() : nullptr;
-    qreal currentScale = static_cast<qreal>(active->getLayer() ? active->getLayer()->getScale() : DMHelper::STARTING_GRID_SCALE);
+    qreal currentScale = DMHelper::STARTING_GRID_SCALE;
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(gridLayer)
+        currentScale = gridLayer->getConfig().getGridScale();
+    else
+        currentScale = _model->getLayerScene().getScale();
 
-    _gridSizer = new GridSizer(250);
-    _scene->addItem(gridItem);
-    gridItem->setPos(100, 100);
-
-    bool ok = false;
-    int newGridScale = QInputDialog::getInt(this, QString("Resize Grid"), QString("What should the new grid scale be?"), _model->getLayerScene().getScale(), 1, 100000, 1, &ok);
-    if((ok) && (newGridScale > 0))
-        setGridScale(newGridScale);
+    _gridSizer = new GridSizer(currentScale);
+    _scene->addItem(_gridSizer);
+    _gridSizer->setPos(currentScale, currentScale);
 }
 
 void BattleFrame::setGridAngle(int gridAngle)
@@ -1016,7 +1015,12 @@ void BattleFrame::zoomDelta(int delta)
 
 void BattleFrame::cancelSelect()
 {
-    qDebug() << "[BattleFrame] cancelSelect";
+    if(_gridSizer)
+    {
+        delete _gridSizer;
+        _gridSizer = nullptr;
+    }
+
     _stateMachine.deactivateState();
 }
 
@@ -1617,7 +1621,16 @@ void BattleFrame::keyPressEvent(QKeyEvent * e)
         cancelSelect();
         return;
     }
-    else if(e->key() == Qt::Key_A)
+
+    if(_gridSizer)
+    {
+        setGridScale(_gridSizer->getSize());
+
+        delete _gridSizer;
+        _gridSizer = nullptr;
+    }
+
+    if(e->key() == Qt::Key_A)
     {
         _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
         return;

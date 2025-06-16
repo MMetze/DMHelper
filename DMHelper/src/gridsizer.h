@@ -11,6 +11,12 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *) override;
 
+    qreal getSize() const;
+    qreal getHandleSize() const;
+
+public slots:
+    void setSize(qreal size);
+
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
@@ -20,10 +26,10 @@ private:
     bool isInResizeHandle(const QPointF &pos) const;
     void updateAspectRatioResize(const QPointF &mousePos);
 
-    QRectF rect;
-    QPointF dragStart;
-    bool resizing = false;
-    qreal handleSize = 10.0;
+    QRectF _gridSizerRect;
+    bool _resizing;
+    QPointF _mouseDownPos;
+    qreal _gridSize;
 };
 
 #endif // GRIDSIZER_H

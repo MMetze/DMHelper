@@ -12,7 +12,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QImageReader>
-#include <QtMinMax>
+#include <QtGlobal>
 
 //#define DEBUG_FINDTOKEN_IMPORT
 
