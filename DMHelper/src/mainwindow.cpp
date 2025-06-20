@@ -1179,6 +1179,8 @@ void MainWindow::newBattleEncounter()
     battle->getBattleDialogModel()->setMapRect(battle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
 
     addNewObject(encounter);
+
+    _battleFrame->resizeGrid();
 }
 
 void MainWindow::newMap(Layer* imageLayer)
@@ -1205,11 +1207,6 @@ void MainWindow::newMap(Layer* imageLayer)
 
     map->getLayerScene().appendLayer(mapLayer);
 
-    ok = false;
-    int gridCount = QInputDialog::getInt(this, QString("Map Scale"), QString("How many grid squares should the map have horizontally? This is used to set the size of tokens on the map, even if you don't use the map for combat or with a grid."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
-    if(ok)
-        map->setGridCount(gridCount);
-
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)
     {
@@ -1218,6 +1215,8 @@ void MainWindow::newMap(Layer* imageLayer)
     }
 
     addNewObject(map);
+
+    _mapFrame->resizeGrid();
 }
 
 void MainWindow::newMedia()
