@@ -85,16 +85,18 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
                 if((gridLayer) && (gridLayer->getConfig().isSnapToGrid()))
                 {
                     // Snap the current position to the grid
+                    QPointF offset = gridLayer->getConfig().getGridOffset() * gridLayer->getConfig().getGridScale() / 100.0;
+                    newPos -= offset;
                     int intGridSize = static_cast<int>(tokenLayer->getScale());
                     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(_object);
                     qreal sizeFactor = combatant ? combatant->getSizeFactor() : 1.0;
-                    if(sizeFactor < 1.0)
+                    if(sizeFactor <= 0.5)
                     {
                         // For smaller combatants, snap to a grid of half the normal size
                         newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / (intGridSize / 2)) * (tokenLayer->getScale() / 2.0)) + (tokenLayer->getScale() / 4.0));
                         newPos.setY((static_cast<qreal>(static_cast<int>(newPos.y()) / (intGridSize / 2)) * (tokenLayer->getScale() / 2.0)) + (tokenLayer->getScale() / 4.0));
                     }
-                    else if(static_cast<int>(sizeFactor) % 2 == 1)
+                    else if((sizeFactor <= 1.0) || (static_cast<int>(sizeFactor) % 2 == 1))
                     {
                         // For combatants that should be centered in the middle of a square
                         newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / intGridSize) * tokenLayer->getScale()) + (tokenLayer->getScale() / 2.0));
@@ -106,6 +108,7 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
                         newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / intGridSize) * tokenLayer->getScale()));
                         newPos.setY((static_cast<qreal>(static_cast<int>(newPos.y()) / intGridSize) * tokenLayer->getScale()));
                     }
+                    newPos += offset;
                     return mapToParent(mapFromScene(newPos));
                 }
             }

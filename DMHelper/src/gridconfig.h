@@ -23,6 +23,7 @@ public:
     int getGridAngle() const;
     int getGridOffsetX() const;
     int getGridOffsetY() const;
+    QPointF getGridOffset() const;
     const QPen& getGridPen() const;
     bool isSnapToGrid() const;
 

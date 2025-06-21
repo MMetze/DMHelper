@@ -94,6 +94,11 @@ int GridConfig::getGridOffsetY() const
     return _gridOffsetY;
 }
 
+QPointF GridConfig::getGridOffset() const
+{
+    return QPointF(_gridOffsetX, _gridOffsetY);
+}
+
 const QPen& GridConfig::getGridPen() const
 {
     return _gridPen;
