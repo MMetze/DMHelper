@@ -4,7 +4,6 @@
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
     BattleDialogModelObject(QPointF(), 0.0, name, parent),
     _combatant(nullptr),
-    _tokensLayer(nullptr),
     _initiative(0),
     _sortPosition(-1),
     _moved(0.0),
@@ -18,7 +17,6 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObj
 BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     BattleDialogModelObject(),
     _combatant(combatant),
-    _tokensLayer(nullptr),
     _initiative(0),
     _sortPosition(-1),
     _moved(0.0),
@@ -32,7 +30,6 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
 BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int initiative, const QPointF& position) :
     BattleDialogModelObject(position),
     _combatant(combatant),
-    _tokensLayer(nullptr),
     _initiative(initiative),
     _sortPosition(-1),
     _moved(0.0),
@@ -65,7 +62,6 @@ void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
         return;
 
     _combatant = otherCombatant->_combatant;
-    _tokensLayer = otherCombatant->_tokensLayer;
     _initiative = otherCombatant->_initiative;
     _moved = otherCombatant->_moved;
     _isShown = otherCombatant->_isShown;
@@ -79,16 +75,6 @@ void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
 int BattleDialogModelCombatant::getObjectType() const
 {
     return DMHelper::CampaignType_BattleContentCombatant;
-}
-
-void BattleDialogModelCombatant::setLayer(LayerTokens* tokensLayer)
-{
-    _tokensLayer = tokensLayer;
-}
-
-LayerTokens* BattleDialogModelCombatant::getLayer() const
-{
-    return _tokensLayer;
 }
 
 bool BattleDialogModelCombatant::getShown() const

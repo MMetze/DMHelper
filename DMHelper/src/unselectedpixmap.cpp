@@ -1,6 +1,9 @@
 #include "unselectedpixmap.h"
 #include "battledialogmodel.h"
+#include "battledialogmodelcombatant.h"
 #include "battleframe.h"
+#include "layertokens.h"
+#include "layergrid.h"
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
@@ -60,6 +63,7 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
     {
         scene()->update(mapRectToScene(boundingRect() | childrenBoundingRect()));
 
+        // Ensure the new position is within the scene rect
         QPointF newPos = mapToScene(mapFromParent(value.toPointF()));
         QRectF rect = scene()->sceneRect();
         bool posOutOfBounds = !rect.contains(newPos);
@@ -68,6 +72,43 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
             newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
             newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
             return mapToParent(mapFromScene(newPos));
+        }
+
+        // Check if snap to grid is activated for this layer
+        if((_object) && (_object->getLayer()))
+        {
+            LayerTokens* tokenLayer = _object->getLayer();
+            BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
+            if((battleScene) && (battleScene->getModel()))
+            {
+                LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(battleScene->getModel()->getLayerScene().getNearest(tokenLayer, DMHelper::LayerType_Grid));
+                if((gridLayer) && (gridLayer->getConfig().isSnapToGrid()))
+                {
+                    // Snap the current position to the grid
+                    int intGridSize = static_cast<int>(tokenLayer->getScale());
+                    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(_object);
+                    qreal sizeFactor = combatant ? combatant->getSizeFactor() : 1.0;
+                    if(sizeFactor < 1.0)
+                    {
+                        // For smaller combatants, snap to a grid of half the normal size
+                        newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / (intGridSize / 2)) * (tokenLayer->getScale() / 2.0)) + (tokenLayer->getScale() / 4.0));
+                        newPos.setY((static_cast<qreal>(static_cast<int>(newPos.y()) / (intGridSize / 2)) * (tokenLayer->getScale() / 2.0)) + (tokenLayer->getScale() / 4.0));
+                    }
+                    else if(static_cast<int>(sizeFactor) % 2 == 1)
+                    {
+                        // For combatants that should be centered in the middle of a square
+                        newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / intGridSize) * tokenLayer->getScale()) + (tokenLayer->getScale() / 2.0));
+                        newPos.setY((static_cast<qreal>(static_cast<int>(newPos.y()) / intGridSize) * tokenLayer->getScale()) + (tokenLayer->getScale() / 2.0));
+                    }
+                    else
+                    {
+                        // For combatants that should be centered on a grid crossing
+                        newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / intGridSize) * tokenLayer->getScale()));
+                        newPos.setY((static_cast<qreal>(static_cast<int>(newPos.y()) / intGridSize) * tokenLayer->getScale()));
+                    }
+                    return mapToParent(mapFromScene(newPos));
+                }
+            }
         }
     }
     else if(change == ItemScenePositionHasChanged)

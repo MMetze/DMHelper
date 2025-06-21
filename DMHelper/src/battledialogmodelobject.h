@@ -4,6 +4,7 @@
 #include "campaignobjectbase.h"
 #include <QPointF>
 
+class LayerTokens;
 class QGraphicsItem;
 
 class BattleDialogModelObject : public CampaignObjectBase
@@ -16,6 +17,10 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+
+    // Local
+    virtual void setLayer(LayerTokens* tokensLayer);
+    virtual LayerTokens* getLayer() const;
 
     virtual BattleDialogModelObject* getLinkedObject() const;
     QUuid getLinkedID() const;
@@ -45,6 +50,7 @@ protected:
     // From CampaignObjectBase
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    LayerTokens* _tokensLayer;
     BattleDialogModelObject* _linkedObject;
     QUuid _linkedId;
     QPointF _position;

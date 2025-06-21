@@ -571,6 +571,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridWidthChanged, _battleFrame, &BattleFrame::setGridWidth);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridColorChanged, _battleFrame, &BattleFrame::setGridColor);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::snapToGridClicked, _battleFrame, &BattleFrame::setSnapToGrid);
 
     connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
     connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
@@ -3074,18 +3075,6 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));
         if(gridLayer)
             _ribbonTabBattleMap->setGridConfig(gridLayer->getConfig());
-            /*
-        {
-            //_ribbonTabBattleMap->setGridOn(model->getGridOn());
-            _ribbonTabBattleMap->setGridType(layer->getConfig().getGridType());
-            _ribbonTabBattleMap->setGridScale(layer->getConfig().getGridScale());
-            _ribbonTabBattleMap->setGridAngle(layer->getConfig().getGridAngle());
-            _ribbonTabBattleMap->setGridXOffset(layer->getConfig().getGridOffsetX());
-            _ribbonTabBattleMap->setGridYOffset(layer->getConfig().getGridOffsetY());
-            _ribbonTabBattleMap->setGridWidth(layer->getConfig().getGridPen().width());
-            _ribbonTabBattleMap->setGridColor(layer->getConfig().getGridPen().color());
-        }
-        */
     }
 }
 

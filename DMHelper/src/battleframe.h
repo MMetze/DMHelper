@@ -100,6 +100,7 @@ public slots:
     void setGridColor(const QColor& gridColor);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
+    void setSnapToGrid(bool snapToGrid);
 
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);

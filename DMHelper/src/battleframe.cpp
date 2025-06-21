@@ -759,7 +759,7 @@ void BattleFrame::setGridAngle(int gridAngle)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -775,7 +775,7 @@ void BattleFrame::setGridType(int gridType)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -791,7 +791,7 @@ void BattleFrame::setXOffset(int xOffset)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -807,7 +807,7 @@ void BattleFrame::setYOffset(int yOffset)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -823,7 +823,7 @@ void BattleFrame::setGridWidth(int gridWidth)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -839,7 +839,7 @@ void BattleFrame::setGridColor(const QColor& gridColor)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -857,6 +857,22 @@ void BattleFrame::setGridLocked(bool gridLocked)
 void BattleFrame::setGridLockScale(qreal gridLockScale)
 {
     _gridLockScale = gridLockScale;
+}
+
+void BattleFrame::setSnapToGrid(bool snapToGrid)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid type, no battle model is set!";
+        return;
+    }
+
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(!layer)
+        return;
+
+    layer->getConfig().setSnapToGrid(snapToGrid);
+    ui->graphicsView->update();
 }
 
 void BattleFrame::setInitiativeType(int initiativeType)
