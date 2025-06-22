@@ -9,6 +9,7 @@
 #include "undomarker.h"
 #include "layerscene.h"
 #include "layervideo.h"
+#include "layergrid.h"
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
 #include "layerseditdialog.h"
@@ -17,6 +18,7 @@
 #include "unselectedpixmap.h"
 #include "camerarect.h"
 #include "publishglmaprenderer.h"
+#include "gridsizer.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -55,6 +57,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _publishMouseDownPos(),
     _rubberBand(nullptr),
     _scale(1.0),
+    _gridSizer(nullptr),
     _mapSource(nullptr),
     _renderer(nullptr),
     _targetSize(),
@@ -118,6 +121,7 @@ void MapFrame::deactivateObject()
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
     rendererDeactivated();
+    cancelSelect();
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
 
@@ -325,6 +329,24 @@ void MapFrame::setPartySelected(bool selected)
         _partyIcon->setSelected(selected);
 }
 
+void MapFrame::resizeGrid()
+{
+    if((!_scene) || (!_mapSource) || (_gridSizer))
+        return;
+
+    // Add a resizeable grid setter with a 5x5 grid to the battle frame
+    qreal currentScale = DMHelper::STARTING_GRID_SCALE;
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(gridLayer)
+        currentScale = gridLayer->getConfig().getGridScale();
+    else
+        currentScale = _mapSource->getLayerScene().getScale();
+
+    _gridSizer = new GridSizer(currentScale);
+    _scene->addItem(_gridSizer);
+    _gridSizer->setPos(currentScale, currentScale);
+}
+
 void MapFrame::setShowMarkers(bool show)
 {
     // TODO: Layers
@@ -484,6 +506,12 @@ void MapFrame::centerWindow(const QPointF& position)
 
 void MapFrame::cancelSelect()
 {
+    if(_gridSizer)
+    {
+        delete _gridSizer;
+        _gridSizer = nullptr;
+    }
+
     editModeToggled(DMHelper::EditMode_Move);
 }
 
@@ -927,15 +955,35 @@ void MapFrame::showEvent(QShowEvent *event)
 
 void MapFrame::keyPressEvent(QKeyEvent *event)
 {
-    if(event)
+    if(!event)
+        return;
+
+    if(event->key() == Qt::Key_Escape)
     {
-        if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
-        {
-            _spaceDown = true;
-            setMapCursor();
-            event->accept();
-            return;
-        }
+        cancelSelect();
+        return;
+    }
+
+    if(_gridSizer)
+    {
+        setPartyScale(_gridSizer->getSize());
+
+        delete _gridSizer;
+        _gridSizer = nullptr;
+    }
+
+    if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
+    {
+        _spaceDown = true;
+        setMapCursor();
+        event->accept();
+        return;
+    }
+    else if(event->key() == Qt::Key_A)
+    {
+        editModeToggled(_editMode == DMHelper::EditMode_Pointer ? DMHelper::EditMode_Move : DMHelper::EditMode_Pointer);
+        event->accept();
+        return;
     }
 
     CampaignObjectFrame::keyPressEvent(event);
@@ -949,18 +997,6 @@ void MapFrame::keyReleaseEvent(QKeyEvent *event)
         {
             _spaceDown = false;
             setMapCursor();
-            event->accept();
-            return;
-        }
-        else if(event->key() == Qt::Key_A)
-        {
-            editModeToggled(_editMode == DMHelper::EditMode_Pointer ? DMHelper::EditMode_Move : DMHelper::EditMode_Pointer);
-            event->accept();
-            return;
-        }
-        else if(event->key() == Qt::Key_Escape)
-        {
-            editModeToggled(DMHelper::EditMode_Move);
             event->accept();
             return;
         }

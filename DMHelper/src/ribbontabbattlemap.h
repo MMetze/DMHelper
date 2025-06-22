@@ -31,6 +31,7 @@ public slots:
     void setGridYOffset(int offset);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
+    void setSnapToGrid(bool checked);
 
     void setEditFoW(bool checked);
     void setDrawErase(bool checked);
@@ -42,12 +43,14 @@ signals:
     void reloadMapClicked();
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);
+    void gridResizeClicked();
     void gridScaleSetClicked();
     void gridAngleChanged(int angle);
     void gridXOffsetChanged(int offset);
     void gridYOffsetChanged(int offset);
     void gridWidthChanged(int gridWidth);
     void gridColorChanged(const QColor& gridColor);
+    void snapToGridClicked(bool checked);
 
     void editFoWClicked(bool checked);
     void drawEraseClicked(bool checked);

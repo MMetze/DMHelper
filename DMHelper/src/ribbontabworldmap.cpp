@@ -14,6 +14,8 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     connect(ui->btnShowParty, &QAbstractButton::toggled, this, &RibbonTabWorldMap::showPartyClicked);
     connect(ui->spinScale, SIGNAL(valueChanged(int)), this, SIGNAL(scaleChanged(int)));
 
+    connect(ui->btnGridResize, SIGNAL(clicked(bool)), this, SIGNAL(gridResizeClicked()));
+
     ui->btnShowParty->setMenu(_menu);
 
     RibbonTabWorldMap_PartyAction* defaultAction = new RibbonTabWorldMap_PartyAction(nullptr, RibbonTabWorldMap_PartyAction::PartyActionType_Default);
@@ -28,29 +30,6 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
 
     _menu->addSeparator();
     connect(_menu, &QMenu::triggered, this, &RibbonTabWorldMap::selectAction);
-
-    /*
-    connect(ui->btnDistance, &QAbstractButton::clicked, this, &RibbonTabWorldMap::distanceClicked);
-    connect(ui->btnFreeDistance, &QAbstractButton::clicked, this, &RibbonTabWorldMap::freeDistanceClicked);
-    connect(ui->edtScale, &QLineEdit::textChanged, this, &RibbonTabWorldMap::freeScaleEdited);
-    ui->edtScale->setValidator(new QIntValidator(this));
-
-    ui->btnLineColor->setRotationVisible(false);
-    ui->btnLineColor->setColor(Qt::yellow);
-
-    QMenu* lineTypeMenu = new QMenu(this);
-    RibbonTabWorldMap_LineTypeAction* solidAction = new RibbonTabWorldMap_LineTypeAction(QIcon(":/img/data/icon_pensolid.png"), QString("Solid Line"), Qt::SolidLine);
-    lineTypeMenu->addAction(solidAction);
-    ui->btnLineType->setIcon(solidAction->icon());
-    lineTypeMenu->addAction(new RibbonTabWorldMap_LineTypeAction(QIcon(":/img/data/icon_pendash.png"), QString("Dashed Line"), Qt::DashLine));
-    lineTypeMenu->addAction(new RibbonTabWorldMap_LineTypeAction(QIcon(":/img/data/icon_pendot.png"), QString("Dotted Line"), Qt::DotLine));
-    lineTypeMenu->addAction(new RibbonTabWorldMap_LineTypeAction(QIcon(":/img/data/icon_pendashdot.png"), QString("Dash Dot Line"), Qt::DashDotLine));
-    lineTypeMenu->addAction(new RibbonTabWorldMap_LineTypeAction(QIcon(":/img/data/icon_pendashdotdot.png"), QString("Dash Dot Dot Line"), Qt::DashDotDotLine));
-    ui->btnLineType->setMenu(lineTypeMenu);
-    connect(lineTypeMenu, &QMenu::triggered, this, &RibbonTabWorldMap::selectLineTypeAction);
-    connect(ui->btnLineColor, &ColorPushButton::colorChanged, this, &RibbonTabWorldMap::distanceLineColorChanged);
-    connect(ui->spinLineWidth, SIGNAL(valueChanged(int)), this, SIGNAL(distanceLineWidthChanged(int)));
-    */
 
     connect(ui->btnShowMarkers, &QAbstractButton::toggled, this, &RibbonTabWorldMap::showMarkersClicked);
     connect(ui->btnAddMarker, &QAbstractButton::clicked, this, &RibbonTabWorldMap::addMarkerClicked);
@@ -147,52 +126,6 @@ void RibbonTabWorldMap::clearPartyIcons()
         delete actionList.takeAt(3);
 }
 
-/*
-void RibbonTabWorldMap::setDistanceOn(bool checked)
-{
-    if(ui->btnDistance->isChecked() != checked)
-        ui->btnDistance->setChecked(checked);
-}
-
-void RibbonTabWorldMap::setFreeDistanceOn(bool checked)
-{
-    if(ui->btnFreeDistance->isChecked() != checked)
-        ui->btnFreeDistance->setChecked(checked);
-}
-
-void RibbonTabWorldMap::setDistance(const QString& distance)
-{
-    ui->edtDistance->setText(distance);
-}
-
-void RibbonTabWorldMap::setDistanceScale(int scale)
-{
-    ui->edtScale->setText(QString::number(scale));
-}
-
-void RibbonTabWorldMap::setDistanceLineType(int lineType)
-{
-    if(!ui->btnLineType->menu())
-        return;
-
-    int newLineType = lineType - 1;
-    if((newLineType < 0) || (newLineType >= ui->btnLineType->menu()->actions().count()))
-        newLineType = 0;
-
-    selectLineTypeAction(ui->btnLineType->menu()->actions().at(newLineType));
-}
-
-void RibbonTabWorldMap::setDistanceLineColor(const QColor& color)
-{
-    ui->btnLineColor->setColor(color);
-}
-
-void RibbonTabWorldMap::setDistanceLineWidth(int lineWidth)
-{
-    ui->spinLineWidth->setValue(lineWidth);
-}
-*/
-
 void RibbonTabWorldMap::setShowMarkers(bool checked)
 {
     if(ui->btnShowMarkers->isChecked() != checked)
@@ -207,37 +140,10 @@ void RibbonTabWorldMap::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblShowParty, *ui->btnShowParty, frameHeight);
     setWidgetSize(*ui->spinScale, ui->lblShowParty->width() * 9 / 10, ui->spinScale->height());
     setWidgetSize(*ui->lblScale, ui->lblShowParty->width(), ui->lblShowParty->height());
-
-    /*
-    setStandardButtonSize(*ui->lblDistance, *ui->btnDistance, frameHeight);
-    setStandardButtonSize(*ui->lblFreeDistance, *ui->btnFreeDistance, frameHeight);
-
-    QFontMetrics metrics = ui->lblDistance->fontMetrics();
-    int labelHeight = getLabelHeight(*ui->lblDistance, frameHeight);
-    int iconDim = height() - labelHeight;
-
-    setStandardButtonSize(*ui->lblLineColor, *ui->btnLineColor, frameHeight);
-    int squareButtonSize = qMin(ui->btnLineColor->width(), iconDim);
-    int colorButtonSize = squareButtonSize * 3 / 4;
-    setWidgetSize(*ui->btnLineColor, colorButtonSize, colorButtonSize);
-
-    setStandardButtonSize(*ui->lblLineType, *ui->btnLineType, frameHeight);
-    setWidgetSize(*ui->btnLineType, squareButtonSize, squareButtonSize);
-
-    setWidgetSize(*ui->lblDistanceScale, metrics.horizontalAdvance(ui->lblDistanceScale->text()), height() / 3);
-    setWidgetSize(*ui->lblMeasurement, iconDim / 2, iconDim / 2);
-
-    setWidgetSize(*ui->edtDistance, ui->lblShowParty->width(), ui->spinScale->height());
-    setWidgetSize(*ui->edtScale, ui->lblShowParty->width(), ui->spinScale->height());
-    */
+    setStandardButtonSize(*ui->lblGridResize, *ui->btnGridResize, frameHeight);
 
     setStandardButtonSize(*ui->lblShowMarkers, *ui->btnShowMarkers, frameHeight);
     setStandardButtonSize(*ui->lblAddMarker, *ui->btnAddMarker, frameHeight);
-
-    /*
-    setLineHeight(*ui->line_1, frameHeight);
-    setLineHeight(*ui->line_2, frameHeight);
-    */
 }
 
 void RibbonTabWorldMap::selectAction(QAction* action)
@@ -276,34 +182,6 @@ void RibbonTabWorldMap::setPartyButtonIcon(const QIcon &icon)
 {
     ui->btnShowParty->setIcon(icon);
 }
-
-/*
-void RibbonTabWorldMap::freeScaleEdited(const QString &text)
-{
-    bool ok = false;
-    int result = text.toInt(&ok);
-    if(ok)
-        emit distanceScaleChanged(result);
-}
-
-void RibbonTabWorldMap::selectLineTypeAction(QAction* action)
-{
-    if(!action)
-        return;
-
-    if(!action->icon().isNull())
-        ui->btnLineType->setIcon(action->icon());
-
-    RibbonTabWorldMap_LineTypeAction* lineTypeAction = dynamic_cast<RibbonTabWorldMap_LineTypeAction*>(action);
-    if(!lineTypeAction)
-        return;
-
-    emit distanceLineTypeChanged(lineTypeAction->getLineType());
-}
-*/
-
-
-
 
 RibbonTabWorldMap_PartyAction::RibbonTabWorldMap_PartyAction(Party* party, int partyType, QObject *parent) :
     QAction(parent),
@@ -345,24 +223,3 @@ void RibbonTabWorldMap_PartyAction::partyDestroyed()
 {
     _party = nullptr;
 }
-
-
-
-
-
-/*
-RibbonTabWorldMap_LineTypeAction::RibbonTabWorldMap_LineTypeAction(const QIcon &icon, const QString &text, int lineType, QObject *parent) :
-    QAction(icon, text, parent),
-    _lineType(lineType)
-{
-}
-
-RibbonTabWorldMap_LineTypeAction::~RibbonTabWorldMap_LineTypeAction()
-{
-}
-
-int RibbonTabWorldMap_LineTypeAction::getLineType() const
-{
-    return _lineType;
-}
-*/

@@ -1,5 +1,9 @@
 #include "unselectedellipse.h"
 #include "battledialogmodelobject.h"
+#include "battledialogmodel.h"
+#include "battleframe.h"
+#include "layertokens.h"
+#include "layergrid.h"
 #include "dmconstants.h"
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
@@ -34,7 +38,36 @@ void UnselectedEllipse::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 
 QVariant UnselectedEllipse::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if(change == ItemSelectedHasChanged)
+    if((change == ItemPositionChange) && (scene()))
+    {
+        scene()->update(mapRectToScene(boundingRect() | childrenBoundingRect()));
+
+        // Ensure the new position is within the scene rect
+        QPointF newPos = mapToScene(mapFromParent(value.toPointF()));
+
+        // Check if snap to grid is activated for this layer
+        if((_object) && (_object->getLayer()))
+        {
+            LayerTokens* tokenLayer = _object->getLayer();
+            BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
+            if((battleScene) && (battleScene->getModel()))
+            {
+                LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(battleScene->getModel()->getLayerScene().getNearest(tokenLayer, DMHelper::LayerType_Grid));
+                if((gridLayer) && (gridLayer->getConfig().isSnapToGrid()))
+                {
+                    // Snap the current position to the grid
+                    QPointF offset = gridLayer->getConfig().getGridOffset() * gridLayer->getConfig().getGridScale() / 100.0;
+                    newPos -= offset;
+                    int intGridSize = static_cast<int>(tokenLayer->getScale());
+                    newPos.setX((static_cast<qreal>(static_cast<int>(newPos.x()) / (intGridSize / 2)) * (tokenLayer->getScale() / 2.0)) + (tokenLayer->getScale() / 2.0));
+                    newPos.setY((static_cast<qreal>(static_cast<int>(newPos.y()) / (intGridSize / 2)) * (tokenLayer->getScale() / 2.0)) + (tokenLayer->getScale() / 2.0));
+                    newPos += offset;
+                    return mapToParent(mapFromScene(newPos));
+                }
+            }
+        }
+    }
+    else if(change == ItemSelectedHasChanged)
     {
         QPen itemPen = pen();
         itemPen.setWidth(isSelected() ? 3 : 1);

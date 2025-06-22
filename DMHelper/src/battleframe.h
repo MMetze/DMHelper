@@ -17,6 +17,7 @@ class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
 class GridConfig;
+class GridSizer;
 class Characterv2;
 class Map;
 class QTimer;
@@ -90,6 +91,7 @@ public slots:
 
     void setGridScale(int gridScale);
     void selectGridCount();
+    void resizeGrid();
     void setGridAngle(int gridAngle);
     void setGridType(int gridType);
     void setXOffset(int xOffset);
@@ -98,6 +100,7 @@ public slots:
     void setGridColor(const QColor& gridColor);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
+    void setSnapToGrid(bool snapToGrid);
 
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);
@@ -213,7 +216,7 @@ signals:
     void navigateBackwards();
 
 protected:
-    virtual void keyPressEvent(QKeyEvent * e) override;
+    virtual void keyPressEvent(QKeyEvent * event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
@@ -406,6 +409,7 @@ private:
     QSize _targetSize;
     QSize _targetLabelSize;
 
+    GridSizer* _gridSizer;
     bool _isGridLocked;
     qreal _gridLockScale;
 

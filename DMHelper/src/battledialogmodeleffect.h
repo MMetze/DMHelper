@@ -6,7 +6,6 @@
 #include <QColor>
 
 class BattleDialogEffectSettingsBase;
-class LayerTokens;
 class QAbstractGraphicsShapeItem;
 class QGraphicsItem;
 
@@ -49,9 +48,6 @@ public:
     virtual int getObjectType() const override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
-
-    virtual void setLayer(LayerTokens* tokensLayer);
-    LayerTokens* getLayer() const;
 
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettingsBase* getEffectEditor() const;
@@ -109,7 +105,6 @@ protected:
     virtual void prepareItem(QGraphicsItem& item) const;
     virtual void registerChange();
 
-    LayerTokens* _tokensLayer;
     bool _active;
     bool _visible;
     int _size;

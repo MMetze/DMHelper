@@ -266,6 +266,8 @@
         <file>data/firststart.txt</file>
         <file>data/icon_clouds.png</file>
         <file>data/icon_help.png</file>
+        <file>data/icon_gridresize.png</file>
+        <file>data/icon_snaptogrid.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

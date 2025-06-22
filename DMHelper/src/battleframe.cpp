@@ -45,6 +45,7 @@
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
 #include "spellbook.h"
+#include "gridsizer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -126,6 +127,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownFrame(),
     _targetSize(),
     _targetLabelSize(),
+    _gridSizer(nullptr),
     _isGridLocked(false),
     _gridLockScale(0.0),
     _mapDrawer(nullptr),
@@ -731,6 +733,24 @@ void BattleFrame::selectGridCount()
     }
 }
 
+void BattleFrame::resizeGrid()
+{
+    if((!_scene) || (!_model) || (_gridSizer))
+        return;
+
+    // Add a resizeable grid setter with a 5x5 grid to the battle frame
+    qreal currentScale = DMHelper::STARTING_GRID_SCALE;
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(gridLayer)
+        currentScale = gridLayer->getConfig().getGridScale();
+    else
+        currentScale = _model->getLayerScene().getScale();
+
+    _gridSizer = new GridSizer(currentScale);
+    _scene->addItem(_gridSizer);
+    _gridSizer->setPos(currentScale, currentScale);
+}
+
 void BattleFrame::setGridAngle(int gridAngle)
 {
     if(!_model)
@@ -739,7 +759,7 @@ void BattleFrame::setGridAngle(int gridAngle)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -755,7 +775,7 @@ void BattleFrame::setGridType(int gridType)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -771,7 +791,7 @@ void BattleFrame::setXOffset(int xOffset)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -787,7 +807,7 @@ void BattleFrame::setYOffset(int yOffset)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -803,7 +823,7 @@ void BattleFrame::setGridWidth(int gridWidth)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -819,7 +839,7 @@ void BattleFrame::setGridColor(const QColor& gridColor)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -837,6 +857,22 @@ void BattleFrame::setGridLocked(bool gridLocked)
 void BattleFrame::setGridLockScale(qreal gridLockScale)
 {
     _gridLockScale = gridLockScale;
+}
+
+void BattleFrame::setSnapToGrid(bool snapToGrid)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid type, no battle model is set!";
+        return;
+    }
+
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(!layer)
+        return;
+
+    layer->getConfig().setSnapToGrid(snapToGrid);
+    ui->graphicsView->update();
 }
 
 void BattleFrame::setInitiativeType(int initiativeType)
@@ -995,7 +1031,12 @@ void BattleFrame::zoomDelta(int delta)
 
 void BattleFrame::cancelSelect()
 {
-    qDebug() << "[BattleFrame] cancelSelect";
+    if(_gridSizer)
+    {
+        delete _gridSizer;
+        _gridSizer = nullptr;
+    }
+
     _stateMachine.deactivateState();
 }
 
@@ -1589,28 +1630,40 @@ void BattleFrame::setPointerOn(bool enabled)
     _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
 }
 
-void BattleFrame::keyPressEvent(QKeyEvent * e)
+void BattleFrame::keyPressEvent(QKeyEvent * event)
 {
-    if(e->key() == Qt::Key_Escape)
+    if(!event)
+        return;
+
+    if(event->key() == Qt::Key_Escape)
     {
         cancelSelect();
         return;
     }
-    else if(e->key() == Qt::Key_A)
+
+    if(_gridSizer)
+    {
+        setGridScale(_gridSizer->getSize());
+
+        delete _gridSizer;
+        _gridSizer = nullptr;
+    }
+
+    if(event->key() == Qt::Key_A)
     {
         _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
         return;
     }
-    else if((e->key() == Qt::Key_C) && (e->modifiers() == Qt::ControlModifier))
+    else if((event->key() == Qt::Key_C) && (event->modifiers() == Qt::ControlModifier))
     {
         copyMonsters();
     }
-    else if((e->key() == Qt::Key_V) && (e->modifiers() == Qt::ControlModifier))
+    else if((event->key() == Qt::Key_V) && (event->modifiers() == Qt::ControlModifier))
     {
         pasteMonsters();
     }
 
-    QFrame::keyPressEvent(e);
+    QFrame::keyPressEvent(event);
 }
 
 bool BattleFrame::eventFilter(QObject *obj, QEvent *event)

@@ -6,7 +6,6 @@
 #include "combatant.h"
 #include <QPoint>
 
-class LayerTokens;
 
 class BattleDialogModelCombatant : public BattleDialogModelObject
 {
@@ -26,9 +25,6 @@ public:
     // Local
     virtual int getCombatantType() const = 0;
     virtual BattleDialogModelCombatant* clone() const = 0;
-
-    void setLayer(LayerTokens* tokensLayer);
-    LayerTokens* getLayer() const;
 
     virtual bool getShown() const;
     virtual bool getKnown() const;
@@ -96,7 +92,6 @@ protected:
     void setCombatant(Combatant* combatant);
 
     Combatant* _combatant;
-    LayerTokens* _tokensLayer;
     int _initiative;
     int _sortPosition;
     qreal _moved;

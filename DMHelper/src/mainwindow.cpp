@@ -563,6 +563,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridResizeClicked, _battleFrame, &BattleFrame::resizeGrid);
     connect(_battleFrame, &BattleFrame::gridConfigChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridConfig);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selectGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
@@ -570,6 +571,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridWidthChanged, _battleFrame, &BattleFrame::setGridWidth);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridColorChanged, _battleFrame, &BattleFrame::setGridColor);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::snapToGridClicked, _battleFrame, &BattleFrame::setSnapToGrid);
 
     connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
     connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
@@ -637,6 +639,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, _mapFrame, &MapFrame::setPartyIcon);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, _mapFrame, &MapFrame::setShowParty);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::gridResizeClicked, _mapFrame, &MapFrame::resizeGrid);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _mapFrame, &MapFrame::layerSelected);
@@ -1176,13 +1179,9 @@ void MainWindow::newBattleEncounter()
     battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
     battle->getBattleDialogModel()->setMapRect(battle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
 
-//    battleFrame->setBattle(battle);
-//    if(!battleFrame->createNewBattle())
-//        battleFrame->editLayers();
     addNewObject(encounter);
 
-//    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
-//    battleFrame->recenterCombatants();
+    _battleFrame->resizeGrid();
 }
 
 void MainWindow::newMap(Layer* imageLayer)
@@ -1209,11 +1208,6 @@ void MainWindow::newMap(Layer* imageLayer)
 
     map->getLayerScene().appendLayer(mapLayer);
 
-    ok = false;
-    int gridCount = QInputDialog::getInt(this, QString("Map Scale"), QString("How many grid squares should the map have horizontally? This is used to set the size of tokens on the map, even if you don't use the map for combat or with a grid."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
-    if(ok)
-        map->setGridCount(gridCount);
-
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)
     {
@@ -1222,6 +1216,8 @@ void MainWindow::newMap(Layer* imageLayer)
     }
 
     addNewObject(map);
+
+    _mapFrame->resizeGrid();
 }
 
 void MainWindow::newMedia()
@@ -3079,18 +3075,6 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));
         if(gridLayer)
             _ribbonTabBattleMap->setGridConfig(gridLayer->getConfig());
-            /*
-        {
-            //_ribbonTabBattleMap->setGridOn(model->getGridOn());
-            _ribbonTabBattleMap->setGridType(layer->getConfig().getGridType());
-            _ribbonTabBattleMap->setGridScale(layer->getConfig().getGridScale());
-            _ribbonTabBattleMap->setGridAngle(layer->getConfig().getGridAngle());
-            _ribbonTabBattleMap->setGridXOffset(layer->getConfig().getGridOffsetX());
-            _ribbonTabBattleMap->setGridYOffset(layer->getConfig().getGridOffsetY());
-            _ribbonTabBattleMap->setGridWidth(layer->getConfig().getGridPen().width());
-            _ribbonTabBattleMap->setGridColor(layer->getConfig().getGridPen().color());
-        }
-        */
     }
 }
 

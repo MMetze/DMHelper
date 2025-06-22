@@ -32,6 +32,8 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     selectAction(gridAction);
     connect(_menu, &QMenu::triggered, this, &RibbonTabBattleMap::selectAction);
 
+    connect(ui->btnGridResize, SIGNAL(clicked(bool)), this, SIGNAL(gridResizeClicked()));
+
     connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->spinGridAngle, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->btnGridCount, &QAbstractButton::clicked, this, &RibbonTabBattleMap::gridScaleSetClicked);
@@ -42,6 +44,7 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     ui->btnGridColor->setColor(Qt::black);
     connect(ui->btnGridColor, &ColorPushButton::colorChanged, this, &RibbonTabBattleMap::gridColorChanged);
     connect(ui->spinGridWidth, SIGNAL(valueChanged(int)), this, SIGNAL(gridWidthChanged(int)));
+    connect(ui->btnSnapToGrid, SIGNAL(clicked(bool)), this, SIGNAL(snapToGridClicked(bool)));
 
     connect(ui->btnMapEdit, SIGNAL(clicked(bool)), this, SIGNAL(editFoWClicked(bool)));
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SIGNAL(drawEraseClicked(bool)));
@@ -85,6 +88,7 @@ void RibbonTabBattleMap::setGridConfig(const GridConfig& config)
     setGridYOffset(config.getGridOffsetY());
     setGridWidth(config.getGridPen().width());
     setGridColor(config.getGridPen().color());
+    setSnapToGrid(config.isSnapToGrid());
 }
 
 void RibbonTabBattleMap::setGridType(int gridType)
@@ -136,6 +140,11 @@ void RibbonTabBattleMap::setGridColor(const QColor& gridColor)
     ui->btnGridColor->setColor(gridColor);
 }
 
+void RibbonTabBattleMap::setSnapToGrid(bool checked)
+{
+    ui->btnSnapToGrid->setChecked(checked);
+}
+
 void RibbonTabBattleMap::setEditFoW(bool checked)
 {
     ui->btnMapEdit->setChecked(checked);
@@ -172,6 +181,8 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_6, frameHeight);
 
     setStandardButtonSize(*ui->lblGrid, *ui->btnGrid, frameHeight);
+    setStandardButtonSize(*ui->lblGridResize, *ui->btnGridResize, frameHeight);
+    setStandardButtonSize(*ui->lblSnapToGrid, *ui->btnSnapToGrid, frameHeight);
 
     setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit, frameHeight);
     setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase, frameHeight);
