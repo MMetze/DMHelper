@@ -4207,8 +4207,19 @@ void BattleFrame::updateCameraRect()
 {
     if(_cameraRect)
     {
-        if(_isGridLocked)
-            setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+        //if(_isGridLocked)
+        //    setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+        if((_isGridLocked) && (_model))
+        {
+            // Set the camera rect so that when published the grids on the target window will have the size of the lock scale
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+            qreal gridScale = gridLayer ? gridLayer->getConfig().getGridScale() : _model->getLayerScene().getScale();
+            QRectF newCameraRect = _cameraRect->getCameraRect();
+            newCameraRect.setWidth((static_cast<qreal>(_targetSize.width()) / _gridLockScale) * gridScale);
+            newCameraRect.setHeight((static_cast<qreal>(_targetSize.height()) / _gridLockScale) * gridScale);
+            if((newCameraRect.isValid()) && (newCameraRect != _cameraRect->getCameraRect()))
+                _cameraRect->setCameraRect(newCameraRect);
+        }
 
         _publishRectValue = _cameraRect->rect();
         _publishRectValue.moveTo(_cameraRect->pos());
