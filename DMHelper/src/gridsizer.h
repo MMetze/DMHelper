@@ -14,7 +14,6 @@ public:
     qreal getSize() const;
     qreal getHandleSize() const;
 
-public slots:
     void setSize(qreal size);
 
 protected:

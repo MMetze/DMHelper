@@ -24,6 +24,7 @@ public:
 
 public slots:
     void setIsBattle(bool isBattle);
+    void setGridLocked(bool locked);
 
     void setZoomSelect(bool checked);
     void setCameraSelect(bool checked);

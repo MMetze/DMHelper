@@ -532,6 +532,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, SIGNAL(combatantFrameChanged(const QString&)), _battleFrame, SLOT(setCombatantFrame(const QString&)));
     connect(_options, SIGNAL(countdownFrameChanged(const QString&)), _battleFrame, SLOT(setCountdownFrame(const QString&)));
     connect(_options, SIGNAL(gridLockedChanged(bool)), _battleFrame, SLOT(setGridLocked(bool)));
+    connect(_options, SIGNAL(gridLockedChanged(bool)), _ribbonTabBattleView, SLOT(setGridLocked(bool)));
     connect(_options, SIGNAL(gridLockScaleChanged(qreal)), _battleFrame, SLOT(setGridLockScale(qreal)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _battleFrame, SLOT(setTargetSize(QSize)));
     connect(_pubWindow, SIGNAL(labelResized(QSize)), _battleFrame, SLOT(setTargetLabelSize(QSize)));
@@ -1876,6 +1877,7 @@ void MainWindow::connectBattleView(bool toBattle)
         return;
 
     _ribbonTabBattleView->setIsBattle(toBattle);
+    _ribbonTabBattleView->setGridLocked(_options->getGridLocked());
 
     if(toBattle)
     {

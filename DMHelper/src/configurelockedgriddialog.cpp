@@ -1,8 +1,9 @@
 #include "configurelockedgriddialog.h"
 #include "ui_configurelockedgriddialog.h"
 #include "dmconstants.h"
-#include "battledialogmodel.h"
 #include "grid.h"
+#include "gridconfig.h"
+#include "gridsizer.h"
 #include <QGraphicsScene>
 #include <QScreen>
 #include <QDebug>
@@ -10,8 +11,9 @@
 ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConfigureLockedGridDialog),
-    _model(nullptr),
     _grid(nullptr),
+    _gridConfig(nullptr),
+    _gridSizer(nullptr),
     _scene(nullptr),
     _gridScale(10.0)
 {
@@ -33,9 +35,16 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     //      model.getGridOffsetX() - default 0
     //      model.getGridOffsetY() - default 0
     //      model.getGridAngle() - default 0
-    _model = new BattleDialogModel(nullptr, QString(), this);
+    //_model = new BattleDialogModel(nullptr, QString(), this);
+    _gridConfig = new GridConfig(this);
 
     _grid = new Grid(_scene, QRect());
+
+    _gridSizer = new GridSizer(DMHelper::STARTING_GRID_SCALE);
+    _scene->addItem(_gridSizer);
+    _gridSizer->setPos(DMHelper::STARTING_GRID_SCALE, DMHelper::STARTING_GRID_SCALE);
+
+    connect(_scene, &QGraphicsScene::changed, this, &ConfigureLockedGridDialog::gridSizerResized);
 }
 
 ConfigureLockedGridDialog::~ConfigureLockedGridDialog()
@@ -79,12 +88,13 @@ void ConfigureLockedGridDialog::gridScaleChanged(int value)
 {
     Q_UNUSED(value);
 
-    if(_model)
-    //{
-        // TODO: Layers
-        //_model->setGridScale(value);
-        rebuildGrid();
-    //}
+    if((!_gridConfig) || (!_gridSizer) || (value <= 0) || (value == _gridScale))
+        return;
+
+    _gridScale = value;
+    _gridSizer->setSize(_gridScale);
+    _gridConfig->setGridScale(_gridScale);
+    rebuildGrid();
 }
 
 void ConfigureLockedGridDialog::autoFit()
@@ -107,13 +117,20 @@ void ConfigureLockedGridDialog::autoFit()
         ui->spinGridSize->setValue(ppi);
 }
 
-void ConfigureLockedGridDialog::rebuildGrid()
+void ConfigureLockedGridDialog::gridSizerResized()
 {
-    if((!_grid) || (!_model))
+    if(!_gridSizer)
         return;
 
-    // TODO: Layers
-    //_grid->rebuildGrid(*_model);
+    setGridScale(_gridSizer->getSize());
+}
+
+void ConfigureLockedGridDialog::rebuildGrid()
+{
+    if((!_grid) || (!_gridConfig))
+        return;
+
+    _grid->rebuildGrid(*_gridConfig);
     if(ui->graphicsView->width() > 0)
         _gridScale = ui->spinGridSize->value();
 }

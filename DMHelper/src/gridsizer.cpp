@@ -65,10 +65,14 @@ qreal GridSizer::getHandleSize() const
 
 void GridSizer::setSize(qreal size)
 {
-    _gridSize = qMax(size, MINIMUM_GRID_SIZE); // Set the size, considering a minimum
+    qreal newSize = qMax(size, MINIMUM_GRID_SIZE); // Set the size, considering a minimum
+
+    if(newSize == _gridSize)
+        return; // No change, do not update
+
+    _gridSize = newSize;
 
     prepareGeometryChange();  // Tells the scene the bounding _gridSizerRect will change
-
     _gridSizerRect.setSize(QSizeF(_gridSize * GRID_COUNT, _gridSize * GRID_COUNT)); // Maintain square aspect ratio
 }
 
@@ -112,13 +116,6 @@ void GridSizer::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void GridSizer::updateAspectRatioResize(const QPointF &mousePos)
 {
-//    qreal delta = qMax(mousePos.x() - _mouseDownPos.x(), mousePos.y() - _mouseDownPos.y());
-//    delta = qMax(delta, 50.0); // Minimum size
-
-//    rect.setWidth(delta);
-//    rect.setHeight(delta); // Maintain square aspect ratio
-setSize((qMax(mousePos.x() - _gridSizerRect.left() + _mouseDownPos.x(), mousePos.y() - _gridSizerRect.top() + _mouseDownPos.y())) / GRID_COUNT);
-
-//    setSize((qMax(_gridSizerRect.width() + mouseDelta.x(), _gridSizerRect.height() + mouseDelta.y())) / GRID_COUNT);
+    setSize((qMax(mousePos.x() - _gridSizerRect.left() + _mouseDownPos.x(), mousePos.y() - _gridSizerRect.top() + _mouseDownPos.y())) / GRID_COUNT);
 }
 

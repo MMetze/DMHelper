@@ -79,6 +79,15 @@ void RibbonTabBattleView::setIsBattle(bool isBattle)
     _isBattle = isBattle;
 }
 
+void RibbonTabBattleView::setGridLocked(bool locked)
+{
+    ui->btnEditCamera->setEnabled(locked);
+    ui->btnCameraFullMap->setEnabled(locked);
+    ui->btnCameraCouple->setEnabled(locked);
+    ui->btnCameraVisible->setEnabled(locked);
+    ui->btnCameraSelect->setEnabled(locked);
+}
+
 void RibbonTabBattleView::setZoomSelect(bool checked)
 {
     ui->btnZoomSelect->setChecked(checked);
