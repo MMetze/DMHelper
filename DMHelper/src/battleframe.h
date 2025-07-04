@@ -98,6 +98,7 @@ public slots:
     void setYOffset(int yOffset);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
+    void setRatioLocked(bool ratioLocked);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
     void setSnapToGrid(bool snapToGrid);
@@ -410,6 +411,7 @@ private:
     QSize _targetLabelSize;
 
     GridSizer* _gridSizer;
+    bool _isRatioLocked;
     bool _isGridLocked;
     qreal _gridLockScale;
 

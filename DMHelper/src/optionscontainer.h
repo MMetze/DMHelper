@@ -55,6 +55,7 @@ public:
     QString getActiveIcon() const;
     QString getCombatantFrame() const;
     QString getCountdownFrame() const;
+    bool getRatioLocked() const;
     bool getGridLocked() const;
     qreal getGridLockScale() const;
 
@@ -127,6 +128,7 @@ signals:
     void activeIconChanged(const QString& activeIcon);
     void combatantFrameChanged(const QString& combatantFrame);
     void countdownFrameChanged(const QString& countdownFrame);
+    void ratioLockedChanged(bool ratioLocked);
     void gridLockedChanged(bool gridLocked);
     void gridLockScaleChanged(qreal gridLockScale);
 
@@ -212,6 +214,7 @@ public slots:
     void setActiveIcon(const QString& activeIcon);
     void setCombatantFrame(const QString& combatantFrame);
     void setCountdownFrame(const QString& countdownFrame);
+    void setRatioLocked(bool ratioLocked);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
 
@@ -292,6 +295,7 @@ private:
     QString _activeIcon;
     QString _combatantFrame;
     QString _countdownFrame;
+    bool _ratioLocked;
     bool _gridLocked;
     qreal _gridLockScale;
 

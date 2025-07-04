@@ -18,6 +18,7 @@ public:
     void setPublishing(bool publishing);
 
     void setRatioLocked(bool locked);
+    void setSizeLocked(bool locked);
 
 protected:
     virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
@@ -47,6 +48,7 @@ private:
     QGraphicsRectItem* _drawTextRect;
 
     bool _ratioLocked;
+    bool _sizeLocked;
     QWidget* _viewport;
 
     enum RectSection
@@ -61,6 +63,15 @@ private:
         RectSection_BottomLeft  = RectSection_Bottom | RectSection_Left,
         RectSection_BottomRight = RectSection_Bottom | RectSection_Right,
         RectSection_Middle      = 0x0010
+    };
+
+    // Add this class definition somewhere in your project (e.g., camerarect.h or a new file)
+    class FixedBorderRectItem : public QGraphicsRectItem
+    {
+    public:
+        FixedBorderRectItem(QGraphicsItem* parent = nullptr);
+
+        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
     };
 };
 

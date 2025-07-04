@@ -18,6 +18,7 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
+    void setRatioLocked(bool locked);
     void setGridLocked(bool locked);
 
 signals:
@@ -37,6 +38,7 @@ signals:
     void calendarClicked();
     void countdownClicked();
 
+    void lockRatioClicked(bool checked);
     void lockGridClicked(bool checked);
     void configureGridClicked();
 

@@ -128,6 +128,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _targetSize(),
     _targetLabelSize(),
     _gridSizer(nullptr),
+    _isRatioLocked(false),
     _isGridLocked(false),
     _gridLockScale(0.0),
     _mapDrawer(nullptr),
@@ -847,11 +848,18 @@ void BattleFrame::setGridColor(const QColor& gridColor)
     ui->graphicsView->update();
 }
 
+void BattleFrame::setRatioLocked(bool ratioLocked)
+{
+    _isRatioLocked = ratioLocked;
+    if(_cameraRect)
+        _cameraRect->setRatioLocked(_isRatioLocked);
+}
+
 void BattleFrame::setGridLocked(bool gridLocked)
 {
     _isGridLocked = gridLocked;
     if(_cameraRect)
-        _cameraRect->setRatioLocked(_isGridLocked);
+        _cameraRect->setSizeLocked(_isGridLocked);
 }
 
 void BattleFrame::setGridLockScale(qreal gridLockScale)
@@ -3065,7 +3073,7 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
             {
                 QRectF cameraRect = ui->graphicsView->mapToScene(_rubberBandRect).boundingRect();
 
-                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                if((_isRatioLocked) && (!_targetSize.isEmpty()))
                     cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
 
                 _cameraRect->setCameraRect(cameraRect);
@@ -4049,10 +4057,11 @@ void BattleFrame::createSceneContents()
     }
     else
     {
-        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
+        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isRatioLocked);
         _cameraRect->setPos(0, 0);
     }
-    _cameraRect->setRatioLocked(_isGridLocked);
+    _cameraRect->setRatioLocked(_isRatioLocked);
+    _cameraRect->setSizeLocked(_isGridLocked);
     updateCameraRect();
 
     if(_cameraRect->getCameraRect().isValid())

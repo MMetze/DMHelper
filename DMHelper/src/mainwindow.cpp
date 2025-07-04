@@ -359,6 +359,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
     connect(_ribbonTabTools, SIGNAL(randomMarketClicked()), this, SLOT(openRandomMarkets()));
+    _ribbonTabTools->setRatioLocked(_options->getRatioLocked());
+    connect(_ribbonTabTools, &RibbonTabTools::lockRatioClicked, _options, &OptionsContainer::setRatioLocked);
     _ribbonTabTools->setGridLocked(_options->getGridLocked());
     connect(_ribbonTabTools, &RibbonTabTools::lockGridClicked, _options, &OptionsContainer::setGridLocked);
     connect(_ribbonTabTools, &RibbonTabTools::configureGridClicked, this, &MainWindow::configureGridLock);
@@ -520,6 +522,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame->setActiveIcon(_options->getActiveIcon());
     _battleFrame->setCombatantFrame(_options->getCombatantFrame());
     _battleFrame->setCountdownFrame(_options->getCountdownFrame());
+    _battleFrame->setRatioLocked(_options->getRatioLocked());
     _battleFrame->setGridLocked(_options->getGridLocked());
     _battleFrame->setGridLockScale(_options->getGridLockScale());
     connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
@@ -531,6 +534,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, SIGNAL(activeIconChanged(const QString&)), _battleFrame, SLOT(setActiveIcon(const QString&)));
     connect(_options, SIGNAL(combatantFrameChanged(const QString&)), _battleFrame, SLOT(setCombatantFrame(const QString&)));
     connect(_options, SIGNAL(countdownFrameChanged(const QString&)), _battleFrame, SLOT(setCountdownFrame(const QString&)));
+    connect(_options, SIGNAL(ratioLockedChanged(bool)), _battleFrame, SLOT(setRatioLocked(bool)));
     connect(_options, SIGNAL(gridLockedChanged(bool)), _battleFrame, SLOT(setGridLocked(bool)));
     connect(_options, SIGNAL(gridLockedChanged(bool)), _ribbonTabBattleView, SLOT(setGridLocked(bool)));
     connect(_options, SIGNAL(gridLockScaleChanged(qreal)), _battleFrame, SLOT(setGridLockScale(qreal)));
