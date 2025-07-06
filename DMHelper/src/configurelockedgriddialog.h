@@ -31,8 +31,10 @@ protected:
 private slots:
     void toggleFullscreen();
     void gridScaleChanged(int value);
+    void gridAngleChanged(int value);
     void autoFit();
     void gridSizerResized();
+    void selectAction(QAction* action);
 
 private:
     void rebuildGrid();
@@ -45,6 +47,7 @@ private:
     GridSizer* _gridSizer;
     QGraphicsScene* _scene;
     qreal _gridScale;
+    QMenu* _menu;
 };
 
 #endif // CONFIGURELOCKEDGRIDDIALOG_H

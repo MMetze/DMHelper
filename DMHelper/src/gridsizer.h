@@ -16,6 +16,10 @@ public:
 
     void setSize(qreal size);
 
+    void setPenColor(const QColor &color);
+    void setPenWidth(int width);
+    void setBackgroundColor(const QColor &color);
+
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
@@ -29,6 +33,10 @@ private:
     bool _resizing;
     QPointF _mouseDownPos;
     qreal _gridSize;
+
+    QColor _penColor;
+    int _penWidth;
+    QColor _backgroundColor;
 };
 
 #endif // GRIDSIZER_H

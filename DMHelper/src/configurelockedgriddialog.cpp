@@ -4,9 +4,13 @@
 #include "grid.h"
 #include "gridconfig.h"
 #include "gridsizer.h"
+#include "ribbontabbattlemap.h"
 #include <QGraphicsScene>
 #include <QScreen>
+#include <QMenu>
 #include <QDebug>
+
+const int CONFIGURE_GRID_DEFAULT_ANGLE = 50;
 
 ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     QDialog(parent),
@@ -15,9 +19,28 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     _gridConfig(nullptr),
     _gridSizer(nullptr),
     _scene(nullptr),
-    _gridScale(10.0)
+    _gridScale(10.0),
+    _menu(new QMenu(this))
 {
     ui->setupUi(this);
+
+    _scene = new QGraphicsScene();
+    ui->graphicsView->setScene(_scene);
+
+    _gridConfig = new GridConfig(this);
+
+    ui->btnGrid->setMenu(_menu);
+
+    RibbonTabBattleMap_GridAction* gridAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Square, QString(":/img/data/icon_grid.png"), QString("Square Grid"));
+    _menu->addAction(gridAction);
+    RibbonTabBattleMap_GridAction* gridIsoAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Isosquare, QString(":/img/data/icon_gridiso.png"), QString("Isometric Grid"));
+    _menu->addAction(gridIsoAction);
+    RibbonTabBattleMap_GridAction* gridHexAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Hex, QString(":/img/data/icon_gridhex.png"), QString("Hex Grid"));
+    _menu->addAction(gridHexAction);
+    RibbonTabBattleMap_GridAction* gridHexIsoAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Isohex, QString(":/img/data/icon_gridhexiso.png"), QString("Isometric Hex Grid"));
+    _menu->addAction(gridHexIsoAction);
+    selectAction(gridAction);
+    connect(_menu, &QMenu::triggered, this, &ConfigureLockedGridDialog::selectAction);
 
     connect(ui->btnFullscreen, &QAbstractButton::clicked, this, &ConfigureLockedGridDialog::toggleFullscreen);
 
@@ -25,22 +48,16 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     connect(ui->spinGridSize, QOverload<int>::of(&QSpinBox::valueChanged), this, &ConfigureLockedGridDialog::gridScaleChanged);
     connect(ui->btnAutoFit, &QAbstractButton::clicked, this, &ConfigureLockedGridDialog::autoFit);
 
-    _scene = new QGraphicsScene();
-    ui->graphicsView->setScene(_scene);
-
-    // Requred model contents for a Grid as follows:
-    //      model.getGridPen() - default black, 1 pixel
-    //      model.getGridType() - default Square
-    //      model.getGridScale() - default START_GRID_SCALE
-    //      model.getGridOffsetX() - default 0
-    //      model.getGridOffsetY() - default 0
-    //      model.getGridAngle() - default 0
-    //_model = new BattleDialogModel(nullptr, QString(), this);
-    _gridConfig = new GridConfig(this);
+    ui->spinGridAngle->setValue(CONFIGURE_GRID_DEFAULT_ANGLE);
+    connect(ui->spinGridAngle, QOverload<int>::of(&QSpinBox::valueChanged), this, &ConfigureLockedGridDialog::gridAngleChanged);
+    _gridConfig->setGridAngle(CONFIGURE_GRID_DEFAULT_ANGLE);
 
     _grid = new Grid(_scene, QRect());
 
     _gridSizer = new GridSizer(DMHelper::STARTING_GRID_SCALE);
+    _gridSizer->setPenColor(QColor(115, 18, 0));
+    _gridSizer->setPenWidth(3);
+    _gridSizer->setBackgroundColor(Qt::gray);
     _scene->addItem(_gridSizer);
     _gridSizer->setPos(DMHelper::STARTING_GRID_SCALE, DMHelper::STARTING_GRID_SCALE);
 
@@ -86,14 +103,21 @@ void ConfigureLockedGridDialog::toggleFullscreen()
 
 void ConfigureLockedGridDialog::gridScaleChanged(int value)
 {
-    Q_UNUSED(value);
-
     if((!_gridConfig) || (!_gridSizer) || (value <= 0) || (value == _gridScale))
         return;
 
     _gridScale = value;
     _gridSizer->setSize(_gridScale);
     _gridConfig->setGridScale(_gridScale);
+    rebuildGrid();
+}
+
+void ConfigureLockedGridDialog::gridAngleChanged(int value)
+{
+    if((!_gridConfig) || (!_gridSizer) || (value <= 0) || (value == _gridConfig->getGridAngle()))
+        return;
+
+    _gridConfig->setGridScale(value);
     rebuildGrid();
 }
 
@@ -123,6 +147,21 @@ void ConfigureLockedGridDialog::gridSizerResized()
         return;
 
     setGridScale(_gridSizer->getSize());
+}
+
+void ConfigureLockedGridDialog::selectAction(QAction* action)
+{
+    if(!action)
+        return;
+
+    RibbonTabBattleMap_GridAction* gridAction = dynamic_cast<RibbonTabBattleMap_GridAction*>(action);
+    if(!gridAction)
+        return;
+
+    ui->btnGrid->setIcon(action->icon());
+    _gridConfig->setGridType(gridAction->getGridType());
+    ui->spinGridAngle->setEnabled((gridAction->getGridType() == Grid::GridType_Isosquare) || (gridAction->getGridType() == Grid::GridType_Isohex));
+    rebuildGrid();
 }
 
 void ConfigureLockedGridDialog::rebuildGrid()
