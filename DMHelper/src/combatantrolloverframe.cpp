@@ -91,11 +91,30 @@ void CombatantRolloverFrame::handleItemClicked(QListWidgetItem *item)
     if((!item) || (item->data(ROLLOVER_LISTITEM_DESCRIPTION).isNull()))
         return;
 
+    QString itemText = item->data(ROLLOVER_LISTITEM_TITLE).toString();
+
     // Expand the item to show the full description
-    if(item->text() != item->data(ROLLOVER_LISTITEM_TITLE).toString())
-        item->setText(item->data(ROLLOVER_LISTITEM_TITLE).toString());
-    else
-        item->setText(item->data(ROLLOVER_LISTITEM_TITLE).toString() + QChar::LineFeed + item->data(ROLLOVER_LISTITEM_DESCRIPTION).toString());
+    if(item->text() == itemText)
+    {
+        QString description = item->data(ROLLOVER_LISTITEM_DESCRIPTION).toString();
+
+        // Heuristic: only treat as HTML if string starts with '<' and ends with '>', or contains well-known tags
+        static const QRegularExpression htmlTagRegex("<\\s*\\w+.*?>");
+
+        if(htmlTagRegex.match(description).hasMatch())
+        {
+            QTextDocument doc;
+            doc.setHtml(description);
+            description = doc.toPlainText();
+        }
+
+        if(description.isEmpty())
+            return;
+
+        itemText += QString(QChar::LineFeed) + description;
+    }
+
+    item->setText(itemText);
     update();
 }
 
