@@ -601,6 +601,7 @@ void BattleFrame::setTargetSize(const QSize& targetSize)
         return;
 
     _targetSize = targetSize;
+    updateCameraRect();
 }
 
 void BattleFrame::setTargetLabelSize(const QSize& targetSize)
