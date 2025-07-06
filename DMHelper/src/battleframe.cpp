@@ -1754,18 +1754,26 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
-                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
+                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()))
                 {
                     if(_hoverFrame)
                         removeRollover();
 
                     // Mouse moved without button down on a combatant widget --> roll-over popup for this widget
-                    _hoverFrame = new CombatantRolloverFrame(widget, this);
-                    connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
-                    QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
-                                    ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
-                    _hoverFrame->move(framePos);
-                    _hoverFrame->show();
+                    CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
+                    if(newFrame->isEmpty())
+                    {
+                        delete newFrame;
+                    }
+                    else
+                    {
+                        _hoverFrame = newFrame;
+                        connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
+                        QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
+                                        ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
+                        _hoverFrame->move(framePos);
+                        _hoverFrame->show();
+                    }
                 }
             }
             else if(event->type() == QEvent::HoverLeave)

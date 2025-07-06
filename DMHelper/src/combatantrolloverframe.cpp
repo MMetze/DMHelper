@@ -6,6 +6,7 @@
 #include "monsterclassv2.h"
 #include "monsteraction.h"
 #include "monsterfactory.h"
+#include "combatantfactory.h"
 #include "combatantwidget.h"
 #include "ui_combatantrolloverframe.h"
 #include <QStringList>
@@ -66,6 +67,11 @@ CombatantRolloverFrame::~CombatantRolloverFrame()
         killTimer(_closeTimer);
 
     delete ui;
+}
+
+bool CombatantRolloverFrame::isEmpty() const
+{
+    return ui->listActions->count() == 0;
 }
 
 void CombatantRolloverFrame::triggerClose()
@@ -164,41 +170,35 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
     if(!character)
         return;
 
-    Characterv2* characterBase = character->getCharacter();
-    if(!characterBase)
+    if(!CombatantFactory::Instance()->hasElementList("actions"))
         return;
 
-    // HACK - should be a template
-    /*
-    const QList<MonsterAction>& actionList = characterBase->getActions();
+    Characterv2* characterBase = character->getCharacter();
+    if(!characterBase)
+        return;    
 
-    addSectionTitle(QString("Attacks"));
-    for(const MonsterAction& action : std::as_const(actionList))
+    QList<QVariant> listValue = characterBase->getListValue("actions");
+    if(listValue.isEmpty())
+        return;
+
+    addSectionTitle(QString("Actions"));
+
+    for(const auto &listEntry : std::as_const(listValue))
     {
-        if(action.hasDiceSummary())
-        {
-            QListWidgetItem *item = new QListWidgetItem(action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_TITLE, action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_DESCRIPTION, action.getDescription());
-            ui->listActions->addItem(item);
-        }
+        QHash<QString, QVariant> hashEntry = listEntry.toHash();
+        if((hashEntry.isEmpty()) || (!hashEntry.contains("name")))
+            continue;
+
+        QString summaryString = MonsterAction::createSummaryString(hashEntry);
+        QListWidgetItem *item = new QListWidgetItem(summaryString);
+        item->setData(ROLLOVER_LISTITEM_TITLE, summaryString);
+        if(!hashEntry.value("desc").isNull())
+            item->setData(ROLLOVER_LISTITEM_DESCRIPTION, hashEntry.value("desc").toString());
+        else
+            item->setFlags(Qt::NoItemFlags);
+
+        ui->listActions->addItem(item);
     }
-
-    addSeparator();
-
-    addSectionTitle(QString("Abilities"));
-
-    for(const MonsterAction& action : std::as_const(actionList))
-    {
-        if(!action.hasDiceSummary())
-        {
-            QListWidgetItem *item = new QListWidgetItem(action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_TITLE, action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_DESCRIPTION, action.getDescription());
-            ui->listActions->addItem(item);
-        }
-    }
-*/
 }
 
 void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)
