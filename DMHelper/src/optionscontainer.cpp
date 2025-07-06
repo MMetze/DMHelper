@@ -44,6 +44,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _activeIcon(),
     _combatantFrame(),
     _countdownFrame(),
+    _ratioLocked(false),
     _gridLocked(false),
     _gridLockScale(100.0),
     _lastAppVersion(),
@@ -218,6 +219,11 @@ QString OptionsContainer::getCombatantFrame() const
 QString OptionsContainer::getCountdownFrame() const
 {
     return _countdownFrame;
+}
+
+bool OptionsContainer::getRatioLocked() const
+{
+    return _ratioLocked;
 }
 
 bool OptionsContainer::getGridLocked() const
@@ -484,6 +490,7 @@ void OptionsContainer::readSettings()
     setActiveIcon(settings.value("activeIcon").toString());
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
+    setRatioLocked(settings.value("ratioLocked", QVariant(false)).toBool());
     setGridLocked(settings.value("gridLocked", QVariant(false)).toBool());
     setGridLockScale(settings.value("gridLockScale", QVariant(0.0)).toReal());
 
@@ -562,6 +569,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("activeIcon", getActiveIcon());
     settings.setValue("combatantFrame", getCombatantFrame());
     settings.setValue("countdownFrame", getCountdownFrame());
+    settings.setValue("ratioLocked", getRatioLocked());
     settings.setValue("gridLocked", getGridLocked());
     settings.setValue("gridLockScale", getGridLockScale());
 
@@ -1170,6 +1178,16 @@ void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
     if(ok)
     {
         setCountdownDuration(newDuration);
+    }
+}
+
+void OptionsContainer::setRatioLocked(bool ratioLocked)
+{
+    if(_ratioLocked != ratioLocked)
+    {
+        _ratioLocked = ratioLocked;
+        qDebug() << "[OptionsContainer] Ratio locked set to: " << _ratioLocked;
+        emit ratioLockedChanged(_ratioLocked);
     }
 }
 

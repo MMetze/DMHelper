@@ -3,6 +3,7 @@
 #include "camerascene.h"
 #include <QPen>
 #include <QCursor>
+#include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneHoverEvent>
 
@@ -27,6 +28,7 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _drawText(nullptr),
     _drawTextRect(nullptr),
     _ratioLocked(ratioLocked),
+    _sizeLocked(false),
     _viewport(viewport)
 {
     initialize(scene);
@@ -43,6 +45,7 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _drawText(nullptr),
     _drawTextRect(nullptr),
     _ratioLocked(ratioLocked),
+    _sizeLocked(false),
     _viewport(viewport)
 {
     initialize(scene);
@@ -99,21 +102,20 @@ void CameraRect::setPublishing(bool publishing)
     if((!_drawItem) || (!_drawText) || (!_drawTextRect))
         return;
 
-    if(publishing)
-    {
-        _drawItem->setPen(QPen(QColor(255, 0, 0, 255), CAMERA_RECT_BORDER_WIDTH));
-        _drawTextRect->setBrush(QBrush(QColor(255, 0, 0)));
-    }
-    else
-    {
-        _drawItem->setPen(QPen(QColor(0, 0, 255, 255), CAMERA_RECT_BORDER_WIDTH));
-        _drawTextRect->setBrush(QBrush(QColor(0, 0, 255)));
-    }
+    QColor color = publishing ? QColor(255, 0, 0, 255) : QColor(0, 0, 255, 255);
+    QPen p(color);
+    _drawItem->setPen(p);
+    _drawTextRect->setBrush(QBrush(color));
 }
 
 void CameraRect::setRatioLocked(bool locked)
 {
     _ratioLocked = locked;
+}
+
+void CameraRect::setSizeLocked(bool locked)
+{
+    _sizeLocked = locked;
 }
 
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -122,42 +124,28 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
         return;
 
     int section = getRectSection(event->pos());
-    if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
-        _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
-    else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
-        _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
-    else if(section == RectSection_Middle)
-        _viewport->setCursor(QCursor(Qt::SizeAllCursor));
-    else if((section == RectSection_Top) || (section == RectSection_Bottom))
-        _viewport->setCursor(QCursor(Qt::SizeVerCursor));
-    else if((section == RectSection_Left) || (section == RectSection_Right))
-        _viewport->setCursor(QCursor(Qt::SizeHorCursor));
-    else
-        _viewport->unsetCursor();
 
-
-    /*
-    switch(section)
+    if(section == RectSection_Middle)
     {
-        case RectSection_Top:
-        case RectSection_Bottom:
-            _viewport->setCursor(QCursor(Qt::SizeVerCursor)); break;
-        case RectSection_Left:
-        case RectSection_Right:
-            _viewport->setCursor(QCursor(Qt::SizeHorCursor)); break;
-        case RectSection_TopLeft:
-        case RectSection_BottomRight:
-            _viewport->setCursor(QCursor(Qt::SizeFDiagCursor)); break;
-        case RectSection_TopRight:
-        case RectSection_BottomLeft:
-            _viewport->setCursor(QCursor(Qt::SizeBDiagCursor)); break;
-        case RectSection_Middle:
-            _viewport->setCursor(QCursor(Qt::SizeAllCursor)); break;
-        default:
-            _viewport->unsetCursor();
-            break;
+        _viewport->setCursor(QCursor(Qt::SizeAllCursor));
     }
-    */
+    else if((section == RectSection_None) || (_sizeLocked))
+    {
+        _viewport->unsetCursor();
+    }
+    else
+    {
+        if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
+            _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
+        else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
+            _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
+        else if((section == RectSection_Top) || (section == RectSection_Bottom))
+            _viewport->setCursor(QCursor(Qt::SizeVerCursor));
+        else if((section == RectSection_Left) || (section == RectSection_Right))
+            _viewport->setCursor(QCursor(Qt::SizeHorCursor));
+        else
+            _viewport->unsetCursor();
+    }
 
     QGraphicsRectItem::hoverMoveEvent(event);
 }
@@ -249,15 +237,18 @@ void CameraRect::initialize(QGraphicsScene& scene)
 
     scene.addItem(this);
 
-    _drawItem = new QGraphicsRectItem;
+    _drawItem = new FixedBorderRectItem;
     _drawItem->setRect(0.0, 0.0, rect().width(), rect().height());
     _drawItem->setZValue(DMHelper::BattleDialog_Z_Overlay);
     scene.addItem(_drawItem);
 
-    _drawTextRect = new QGraphicsRectItem(_drawItem);
+    _drawTextRect = new FixedBorderRectItem(_drawItem);
+    _drawTextRect->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
     _drawText = new QGraphicsSimpleTextItem(QString(" Player's View "), _drawItem);
+    _drawText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+
     QFont textFont = _drawText->font();
-    textFont.setPointSize(5);
+    textFont.setPointSize(10);
     _drawText->setFont(textFont);
     _drawTextRect->setRect(_drawText->boundingRect().toRect());
 
@@ -372,4 +363,27 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
         dx = rect().size().width() - w;
         dy = 0.0;
     }
+}
+
+CameraRect::FixedBorderRectItem::FixedBorderRectItem(QGraphicsItem* parent) :
+    QGraphicsRectItem(parent)
+{
+}
+
+void CameraRect::FixedBorderRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    // Calculate scale factor from painter transform
+    qreal scaleX = painter->transform().m11();
+    qreal scaleY = painter->transform().m22();
+    qreal scale = (scaleX + scaleY) / 2.0; // Average to be safe
+
+    QPen p = pen();
+    p.setWidthF(1.0 / scale); // 1-pixel constant width
+    painter->setPen(p);
+    painter->setBrush(brush());
+
+    painter->drawRect(rect());
 }

@@ -22,6 +22,8 @@ public:
     explicit CombatantRolloverFrame(CombatantWidget* combatantWidget, QWidget *parent = nullptr);
     ~CombatantRolloverFrame();
 
+    bool isEmpty() const;
+
 signals:
     void hoverEnded();
 

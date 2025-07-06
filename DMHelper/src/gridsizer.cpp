@@ -12,7 +12,10 @@ GridSizer::GridSizer(qreal size, QGraphicsItem *parent) :
     _gridSizerRect(0, 0, size * GRID_COUNT, size * GRID_COUNT),
     _resizing(false),
     _mouseDownPos(),
-    _gridSize(size)
+    _gridSize(size),
+    _penColor(Qt::black),
+    _penWidth(1),
+    _backgroundColor(Qt::white)
 {
     setFlags(ItemIsSelectable | ItemIsMovable);
     setAcceptHoverEvents(true);
@@ -29,13 +32,13 @@ QRectF GridSizer::boundingRect() const
 void GridSizer::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     // Draw semi-transparent white background
-    QColor backgroundColor(255, 255, 255, 128); // RGBA: 50% transparent white
+    QColor backgroundColor(_backgroundColor.red(), _backgroundColor.blue(), _backgroundColor.green(), 128); // RGBA: 50% transparent white
     painter->setBrush(backgroundColor);
     painter->setPen(Qt::NoPen);
     painter->drawRect(_gridSizerRect);
 
-    QPen pen(Qt::black);
-    pen.setWidth(1);
+    QPen pen(_penColor);
+    pen.setWidth(_penWidth);
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
 
@@ -49,7 +52,7 @@ void GridSizer::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
     }
 
     // Draw resize handle (bottom-right corner)
-    painter->setBrush(Qt::gray);
+    painter->setBrush(_backgroundColor);
     painter->drawRect(_gridSizerRect.right() - getHandleSize(), _gridSizerRect.bottom() - getHandleSize(), getHandleSize(), getHandleSize());
 }
 
@@ -65,10 +68,14 @@ qreal GridSizer::getHandleSize() const
 
 void GridSizer::setSize(qreal size)
 {
-    _gridSize = qMax(size, MINIMUM_GRID_SIZE); // Set the size, considering a minimum
+    qreal newSize = qMax(size, MINIMUM_GRID_SIZE); // Set the size, considering a minimum
+
+    if(newSize == _gridSize)
+        return; // No change, do not update
+
+    _gridSize = newSize;
 
     prepareGeometryChange();  // Tells the scene the bounding _gridSizerRect will change
-
     _gridSizerRect.setSize(QSizeF(_gridSize * GRID_COUNT, _gridSize * GRID_COUNT)); // Maintain square aspect ratio
 }
 
@@ -76,6 +83,33 @@ bool GridSizer::isInResizeHandle(const QPointF &pos) const
 {
     QRectF handle(_gridSizerRect.right() - getHandleSize(), _gridSizerRect.bottom() - getHandleSize(), getHandleSize(), getHandleSize());
     return handle.contains(pos);
+}
+
+void GridSizer::setPenColor(const QColor &color)
+{
+    if(color == _penColor)
+        return;
+
+    _penColor = color;
+    update();
+}
+
+void GridSizer::setPenWidth(int width)
+{
+    if((width == _penWidth) || (width <= 0))
+        return;
+
+    _penWidth = width;
+    update();
+}
+
+void GridSizer::setBackgroundColor(const QColor &color)
+{
+    if(color == _backgroundColor)
+        return;
+
+    _backgroundColor = color;
+    update();
 }
 
 void GridSizer::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -112,13 +146,6 @@ void GridSizer::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void GridSizer::updateAspectRatioResize(const QPointF &mousePos)
 {
-//    qreal delta = qMax(mousePos.x() - _mouseDownPos.x(), mousePos.y() - _mouseDownPos.y());
-//    delta = qMax(delta, 50.0); // Minimum size
-
-//    rect.setWidth(delta);
-//    rect.setHeight(delta); // Maintain square aspect ratio
-setSize((qMax(mousePos.x() - _gridSizerRect.left() + _mouseDownPos.x(), mousePos.y() - _gridSizerRect.top() + _mouseDownPos.y())) / GRID_COUNT);
-
-//    setSize((qMax(_gridSizerRect.width() + mouseDelta.x(), _gridSizerRect.height() + mouseDelta.y())) / GRID_COUNT);
+    setSize((qMax(mousePos.x() - _gridSizerRect.left() + _mouseDownPos.x(), mousePos.y() - _gridSizerRect.top() + _mouseDownPos.y())) / GRID_COUNT);
 }
 

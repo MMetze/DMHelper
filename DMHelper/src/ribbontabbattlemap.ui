@@ -185,7 +185,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QToolButton" name="btnGridResize">
+      <widget class="QPushButton" name="btnGridResize">
        <property name="minimumSize">
         <size>
          <width>57</width>
@@ -213,9 +213,6 @@
        </property>
        <property name="checked">
         <bool>false</bool>
-       </property>
-       <property name="popupMode">
-        <enum>QToolButton::InstantPopup</enum>
        </property>
       </widget>
      </item>

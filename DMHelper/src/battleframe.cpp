@@ -128,6 +128,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _targetSize(),
     _targetLabelSize(),
     _gridSizer(nullptr),
+    _isRatioLocked(false),
     _isGridLocked(false),
     _gridLockScale(0.0),
     _mapDrawer(nullptr),
@@ -600,6 +601,7 @@ void BattleFrame::setTargetSize(const QSize& targetSize)
         return;
 
     _targetSize = targetSize;
+    updateCameraRect();
 }
 
 void BattleFrame::setTargetLabelSize(const QSize& targetSize)
@@ -847,11 +849,18 @@ void BattleFrame::setGridColor(const QColor& gridColor)
     ui->graphicsView->update();
 }
 
+void BattleFrame::setRatioLocked(bool ratioLocked)
+{
+    _isRatioLocked = ratioLocked;
+    if(_cameraRect)
+        _cameraRect->setRatioLocked(_isRatioLocked);
+}
+
 void BattleFrame::setGridLocked(bool gridLocked)
 {
     _isGridLocked = gridLocked;
     if(_cameraRect)
-        _cameraRect->setRatioLocked(_isGridLocked);
+        _cameraRect->setSizeLocked(_isGridLocked);
 }
 
 void BattleFrame::setGridLockScale(qreal gridLockScale)
@@ -1745,18 +1754,26 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
-                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
+                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()))
                 {
                     if(_hoverFrame)
                         removeRollover();
 
                     // Mouse moved without button down on a combatant widget --> roll-over popup for this widget
-                    _hoverFrame = new CombatantRolloverFrame(widget, this);
-                    connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
-                    QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
-                                    ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
-                    _hoverFrame->move(framePos);
-                    _hoverFrame->show();
+                    CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
+                    if(newFrame->isEmpty())
+                    {
+                        delete newFrame;
+                    }
+                    else
+                    {
+                        _hoverFrame = newFrame;
+                        connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
+                        QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
+                                        ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
+                        _hoverFrame->move(framePos);
+                        _hoverFrame->show();
+                    }
                 }
             }
             else if(event->type() == QEvent::HoverLeave)
@@ -3065,7 +3082,7 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
             {
                 QRectF cameraRect = ui->graphicsView->mapToScene(_rubberBandRect).boundingRect();
 
-                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                if((_isRatioLocked) && (!_targetSize.isEmpty()))
                     cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
 
                 _cameraRect->setCameraRect(cameraRect);
@@ -4049,10 +4066,11 @@ void BattleFrame::createSceneContents()
     }
     else
     {
-        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
+        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isRatioLocked);
         _cameraRect->setPos(0, 0);
     }
-    _cameraRect->setRatioLocked(_isGridLocked);
+    _cameraRect->setRatioLocked(_isRatioLocked);
+    _cameraRect->setSizeLocked(_isGridLocked);
     updateCameraRect();
 
     if(_cameraRect->getCameraRect().isValid())
@@ -4207,8 +4225,19 @@ void BattleFrame::updateCameraRect()
 {
     if(_cameraRect)
     {
-        if(_isGridLocked)
-            setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+        //if(_isGridLocked)
+        //    setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+        if((_isGridLocked) && (_model))
+        {
+            // Set the camera rect so that when published the grids on the target window will have the size of the lock scale
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+            qreal gridScale = gridLayer ? gridLayer->getConfig().getGridScale() : _model->getLayerScene().getScale();
+            QRectF newCameraRect = _cameraRect->getCameraRect();
+            newCameraRect.setWidth((static_cast<qreal>(_targetSize.width()) / _gridLockScale) * gridScale);
+            newCameraRect.setHeight((static_cast<qreal>(_targetSize.height()) / _gridLockScale) * gridScale);
+            if((newCameraRect.isValid()) && (newCameraRect != _cameraRect->getCameraRect()))
+                _cameraRect->setCameraRect(newCameraRect);
+        }
 
         _publishRectValue = _cameraRect->rect();
         _publishRectValue.moveTo(_cameraRect->pos());
