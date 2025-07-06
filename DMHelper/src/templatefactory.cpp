@@ -308,7 +308,7 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
             if(_textConnections.contains(textEdit))
                 disconnect(_textConnections[textEdit]);
 
-            auto connection = connect(textEdit, &QTextEdit::textChanged, textEdit, [=]() { templateFrame->handleEditBoxChange(textEdit, source, textEdit->toHtml()); });
+            auto connection = connect(textEdit, &QTextEdit::textChanged, textEdit, [=]() { templateFrame->handleEditBoxChange(textEdit, source, textEdit->toPlainText().isEmpty() ? QString() : textEdit->toHtml()); });
             _textConnections[textEdit] = connection;
         }
     }
