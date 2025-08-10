@@ -54,10 +54,10 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
 
     _grid = new Grid(_scene, QRect());
 
-    _gridSizer = new GridSizer(DMHelper::STARTING_GRID_SCALE);
+    _gridSizer = new GridSizer(DMHelper::STARTING_GRID_SCALE, false);
     _gridSizer->setPenColor(QColor(115, 18, 0));
     _gridSizer->setPenWidth(3);
-    _gridSizer->setBackgroundColor(Qt::gray);
+    _gridSizer->setBackgroundColor(QColor(160,160,160,204));
     _scene->addItem(_gridSizer);
     _gridSizer->setPos(DMHelper::STARTING_GRID_SCALE, DMHelper::STARTING_GRID_SCALE);
 

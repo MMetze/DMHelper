@@ -269,6 +269,7 @@
         <file>data/icon_gridresize.png</file>
         <file>data/icon_snaptogrid.png</file>
         <file>data/icon_lockedratio.png</file>
+        <file>data/icon_check.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

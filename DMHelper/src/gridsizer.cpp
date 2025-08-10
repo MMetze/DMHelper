@@ -7,19 +7,27 @@
 const int GRID_COUNT = 5;
 const qreal MINIMUM_GRID_SIZE = 10.0;
 
-GridSizer::GridSizer(qreal size, QGraphicsItem *parent) :
-    QGraphicsItem(parent),
+GridSizer::GridSizer(qreal size, bool showAccept, QGraphicsItem *parent) :
+    QGraphicsObject(parent),
     _gridSizerRect(0, 0, size * GRID_COUNT, size * GRID_COUNT),
     _resizing(false),
     _mouseDownPos(),
     _gridSize(size),
     _penColor(Qt::black),
     _penWidth(1),
-    _backgroundColor(Qt::white)
+    _backgroundColor(Qt::white),
+    _acceptPixmap(),
+    _rejectPixmap()
 {
     setFlags(ItemIsSelectable | ItemIsMovable);
     setAcceptHoverEvents(true);
     setZValue(DMHelper::BattleDialog_Z_Overlay);
+
+    if(showAccept)
+    {
+        _acceptPixmap = QPixmap(":/img/data/icon_check.png");
+        _rejectPixmap = QPixmap(":/img/data/icon_remove.png");
+    }
 
     setSize(size);
 }
@@ -53,7 +61,15 @@ void GridSizer::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
 
     // Draw resize handle (bottom-right corner)
     painter->setBrush(_backgroundColor);
-    painter->drawRect(_gridSizerRect.right() - getHandleSize(), _gridSizerRect.bottom() - getHandleSize(), getHandleSize(), getHandleSize());
+    painter->drawRect(_gridSizerRect.right() - (0.75 * getHandleSize()), _gridSizerRect.bottom() - (0.75 * getHandleSize()), getHandleSize(), getHandleSize());
+
+    if(!_acceptPixmap.isNull())
+    {
+        painter->drawRect(_gridSizerRect.right() - (2.2 * getHandleSize()), _gridSizerRect.top(), getHandleSize(), getHandleSize());
+        painter->drawPixmap(_gridSizerRect.right() - (2.2 * getHandleSize()), _gridSizerRect.top(), getHandleSize(), getHandleSize(), _acceptPixmap);
+        painter->drawRect(_gridSizerRect.right() - (1.0 * getHandleSize()), _gridSizerRect.top(), getHandleSize(), getHandleSize());
+        painter->drawPixmap(_gridSizerRect.right() - (1.0 * getHandleSize()), _gridSizerRect.top(), getHandleSize(), getHandleSize(), _rejectPixmap);
+    }
 }
 
 qreal GridSizer::getSize() const
@@ -81,7 +97,19 @@ void GridSizer::setSize(qreal size)
 
 bool GridSizer::isInResizeHandle(const QPointF &pos) const
 {
-    QRectF handle(_gridSizerRect.right() - getHandleSize(), _gridSizerRect.bottom() - getHandleSize(), getHandleSize(), getHandleSize());
+    QRectF handle(_gridSizerRect.right() - (0.75 * getHandleSize()), _gridSizerRect.bottom() - (0.75 * getHandleSize()), getHandleSize(), getHandleSize());
+    return handle.contains(pos);
+}
+
+bool GridSizer::isInAcceptButton(const QPointF &pos) const
+{
+    QRectF handle(_gridSizerRect.right() - (2.2 * getHandleSize()), _gridSizerRect.top(), getHandleSize(), getHandleSize());
+    return handle.contains(pos);
+}
+
+bool GridSizer::isInRejectButton(const QPointF &pos) const
+{
+    QRectF handle(_gridSizerRect.right() - (1.0 * getHandleSize()), _gridSizerRect.top(), getHandleSize(), getHandleSize());
     return handle.contains(pos);
 }
 
@@ -119,6 +147,10 @@ void GridSizer::mousePressEvent(QGraphicsSceneMouseEvent *event)
         _resizing = true;
         _mouseDownPos = _gridSizerRect.bottomRight() - event->pos();
     }
+    else if((isInAcceptButton(event->pos())) || (isInRejectButton(event->pos())))
+    {
+        _mouseDownPos = event->pos();
+    }
     else
     {
         QGraphicsItem::mousePressEvent(event);
@@ -127,7 +159,7 @@ void GridSizer::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void GridSizer::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (_resizing)
+    if(_resizing)
     {
         updateAspectRatioResize(event->pos());
         update();
@@ -141,7 +173,19 @@ void GridSizer::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void GridSizer::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     _resizing = false;
-    QGraphicsItem::mouseReleaseEvent(event);
+
+    if((isInAcceptButton(event->pos())) || (isInAcceptButton(_mouseDownPos)))
+    {
+        emit accepted();
+    }
+    else if((isInRejectButton(event->pos())) || (isInRejectButton(_mouseDownPos)))
+    {
+        emit rejected();
+    }
+    else
+    {
+        QGraphicsItem::mouseReleaseEvent(event);
+    }
 }
 
 void GridSizer::updateAspectRatioResize(const QPointF &mousePos)

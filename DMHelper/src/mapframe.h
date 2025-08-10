@@ -193,6 +193,9 @@ protected slots:
     void loadViewRect();
     void checkPartyUpdate();
 
+    void gridSizerAccepted();
+    void gridSizerRejected();
+
     void rendererActivated(PublishGLMapRenderer* renderer);
     void rendererDeactivated();
 

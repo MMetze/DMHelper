@@ -1881,7 +1881,7 @@ void MainWindow::connectBattleView(bool toBattle)
         return;
 
     _ribbonTabBattleView->setIsBattle(toBattle);
-    _ribbonTabBattleView->setGridLocked(_options->getGridLocked());
+    _ribbonTabBattleView->setGridLocked(_options->getGridLocked() && toBattle);
 
     if(toBattle)
     {

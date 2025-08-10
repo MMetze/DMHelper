@@ -42,6 +42,7 @@ private:
     QPointF _mouseDownPos;
     QPointF _mouseLastPos;
     int _mouseDownSection;
+    QRectF _trackingRect;
 
     QGraphicsRectItem* _drawItem;
     QGraphicsSimpleTextItem* _drawText;

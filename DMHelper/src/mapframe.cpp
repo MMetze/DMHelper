@@ -343,8 +343,11 @@ void MapFrame::resizeGrid()
         currentScale = _mapSource->getLayerScene().getScale();
 
     _gridSizer = new GridSizer(currentScale);
+    _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
     _gridSizer->setPos(currentScale, currentScale);
+    connect(_gridSizer, &GridSizer::accepted, this, &MapFrame::gridSizerAccepted);
+    connect(_gridSizer, &GridSizer::rejected, this, &MapFrame::gridSizerRejected);
 }
 
 void MapFrame::setShowMarkers(bool show)
@@ -506,12 +509,7 @@ void MapFrame::centerWindow(const QPointF& position)
 
 void MapFrame::cancelSelect()
 {
-    if(_gridSizer)
-    {
-        delete _gridSizer;
-        _gridSizer = nullptr;
-    }
-
+    gridSizerRejected();
     editModeToggled(DMHelper::EditMode_Move);
 }
 
@@ -964,13 +962,7 @@ void MapFrame::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    if(_gridSizer)
-    {
-        setPartyScale(_gridSizer->getSize());
-
-        delete _gridSizer;
-        _gridSizer = nullptr;
-    }
+    gridSizerAccepted();
 
     if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
     {
@@ -1400,12 +1392,13 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
         _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _distanceText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
 
         _mapItem = new MapDrawLine(QLine(scenePos.toPoint(), scenePos.toPoint()),
-                                false, true,
-                                _mapSource->getDistanceLineColor(),
-                                _mapSource->getDistanceLineWidth(),
-                                static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
+                                         false, true,
+                                         _mapSource->getDistanceLineColor(),
+                                         _mapSource->getDistanceLineWidth(),
+                                         static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
         _mapSource->addMapItem(_mapItem);
 
         mouseEvent->accept();
@@ -1466,6 +1459,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         _distanceText->setFont(textFont);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5, 5)));
         _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _distanceText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
 
         _mapItem = new MapDrawPath(1, DMHelper::BrushType_Circle,
                                    false, true,
@@ -1796,6 +1790,24 @@ void MapFrame::checkPartyUpdate()
 
         _partyIcon->setPixmap(partyPixmap);
     }
+}
+
+void MapFrame::gridSizerAccepted()
+{
+    if(!_gridSizer)
+        return;
+
+    setPartyScale(_gridSizer->getSize());
+    gridSizerRejected();
+}
+
+void MapFrame::gridSizerRejected()
+{
+    if(!_gridSizer)
+        return;
+
+    _gridSizer->deleteLater();
+    _gridSizer = nullptr;
 }
 
 void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)

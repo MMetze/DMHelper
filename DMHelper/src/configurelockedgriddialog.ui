@@ -277,7 +277,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Press &quot;F&quot; in the Player's Window to toggle fullscreen publishing</string>
+        <string>Note: Press &quot;F&quot; in the Player's Window to toggle fullscreen publishing</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

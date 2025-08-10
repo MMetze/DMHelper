@@ -1,6 +1,9 @@
 #include "camerarect.h"
 #include "dmconstants.h"
 #include "camerascene.h"
+#include "battledialogmodel.h"
+#include "battledialoggraphicsscene.h"
+#include "layergrid.h"
 #include <QPen>
 #include <QCursor>
 #include <QPainter>
@@ -10,13 +13,6 @@
 const qreal CAMERA_RECT_BORDER_SIZE = 4.0;
 const int CAMERA_RECT_BORDER_WIDTH = 1;
 
-/*
- * TODOs to finish this
- * changes to dialog need to impact camera when coupled
- * for videos, only restart the player when the camera changes, not when the view changes
- * decent icons and layout
- * DON'T DO: add camera rect to map view
- */
 CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked) :
     QGraphicsRectItem (0.0, 0.0, width, height, nullptr),
     _draw(true),
@@ -24,6 +20,7 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _mouseDownPos(),
     _mouseLastPos(),
     _mouseDownSection(0),
+    _trackingRect(),
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
@@ -41,6 +38,7 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _mouseDownPos(),
     _mouseLastPos(),
     _mouseDownSection(0),
+    _trackingRect(),
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
@@ -176,19 +174,50 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         // Resize the rectangle
         qreal dx = 0.0;
         qreal dy = 0.0;
-        qreal w = rect().width();
-        qreal h = rect().height();
+        qreal w = _trackingRect.width();
+        qreal h = _trackingRect.height();
 
         if(_ratioLocked)
             resizeRectangleFixed(*event, dx, dy, w, h); // Resize the rectangle with a fixed aspect ratio
         else
             resizeRectangle(*event, dx, dy, w, h); // Resize the rectangle normally
 
-        moveBy(dx, dy);
-        setRect(0.0, 0.0, w, h);
-        _drawItem->setRect(0.0, 0.0, w, h);
+        _trackingRect.translate(dx, dy);
+        _trackingRect.setWidth(w);
+        _trackingRect.setHeight(h);
 
-        _mouseLastPos = event->pos();
+        QPointF rectPos = mapToScene(mapFromParent(_trackingRect.topLeft()));
+        QPointF rectSize = mapToScene(mapFromParent(QPointF(w, h)));
+
+        BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
+        if((battleScene) && (battleScene->getModel()))
+        {
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(battleScene->getModel()->getLayerScene().getFirst(DMHelper::LayerType_Grid));
+            if((gridLayer) && (gridLayer->getConfig().isSnapToGrid()))
+            {
+                // Snap the current position to the grid
+                QPointF offset = gridLayer->getConfig().getGridOffset() * gridLayer->getConfig().getGridScale() / 100.0;
+                qreal gridSize = battleScene->getModel()->getLayerScene().getScale();
+                int intGridSize = static_cast<int>(gridSize);
+                rectPos -= offset;
+                QPointF rectOffset = rectPos;
+                rectPos.setX((static_cast<qreal>(static_cast<int>(rectPos.x()) / (intGridSize / 2)) * (gridSize / 2.0)));
+                rectPos.setY((static_cast<qreal>(static_cast<int>(rectPos.y()) / (intGridSize / 2)) * (gridSize / 2.0)));
+                rectOffset -= rectPos;
+                rectPos += offset;
+
+                rectSize += rectOffset;
+            }
+        }
+
+        rectPos = mapToParent(mapFromScene(rectPos));
+        rectSize = mapToParent(mapFromScene(rectSize));
+
+        setPos(rectPos);
+        setRect(0.0, 0.0, rectSize.x(), rectSize.y());
+        _drawItem->setRect(0.0, 0.0, rectSize.x(), rectSize.y());
+
+        _mouseLastPos = event->scenePos();
     }
 
     CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
@@ -199,9 +228,10 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void CameraRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     _mouseDown = true;
-    _mouseDownPos = event->pos();
+    _mouseDownPos = event->scenePos();
     _mouseLastPos = _mouseDownPos;
-    _mouseDownSection = getRectSection(_mouseDownPos);
+    _trackingRect = QRectF(pos(), rect().size());
+    _mouseDownSection = getRectSection(event->pos());
 
     QGraphicsRectItem::mousePressEvent(event);
 }
@@ -280,39 +310,43 @@ int CameraRect::getRectSection(const QPointF point)
 
 void CameraRect::resizeRectangle(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
 {
+    QPointF eventPos = event.scenePos();
+
     if((_mouseDownSection & RectSection_Left) == RectSection_Left)
     {
-        dx = event.pos().x() - _mouseDownPos.x();
+        dx = eventPos.x() - _mouseLastPos.x();
         w -= dx;
     }
     else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
     {
-        w += event.pos().x() - _mouseLastPos.x();
+        w += eventPos.x() - _mouseLastPos.x();
     }
 
     if((_mouseDownSection & RectSection_Top) == RectSection_Top)
     {
-        dy = event.pos().y() - _mouseDownPos.y();
+        dy = eventPos.y() - _mouseLastPos.y();
         h -= dy;
     }
     else if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
     {
-        h += event.pos().y() - _mouseLastPos.y();
+        h += eventPos.y() - _mouseLastPos.y();
     }
 }
 
 void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
 {
+    QPointF eventPos = event.scenePos();
+
     if((_mouseDownSection == RectSection_Left) || (_mouseDownSection == RectSection_Top) || (_mouseDownSection == RectSection_TopLeft))
     {
         if((_mouseDownSection & RectSection_Left) == RectSection_Left)
         {
-            dx = event.pos().x() - _mouseDownPos.x();
+            dx = eventPos.x() - _mouseDownPos.x();
             w -= dx;
         }
         if((_mouseDownSection & RectSection_Top) == RectSection_Top)
         {
-            dy = event.pos().y() - _mouseDownPos.y();
+            dy = eventPos.y() - _mouseDownPos.y();
             h -= dy;
         }
 
@@ -324,8 +358,8 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
     }
     else if(_mouseDownSection == RectSection_TopRight)
     {
-        w += event.pos().x() - _mouseLastPos.x();
-        dy = event.pos().y() - _mouseDownPos.y();
+        w += eventPos.x() - _mouseLastPos.x();
+        dy = eventPos.y() - _mouseDownPos.y();
         h -= dy;
 
         QSizeF newSize = rect().size().scaled(QSizeF(w, h), Qt::KeepAspectRatio);
@@ -338,11 +372,11 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
     {
         if((_mouseDownSection & RectSection_Right) == RectSection_Right)
         {
-            w += event.pos().x() - _mouseLastPos.x();
+            w += eventPos.x() - _mouseLastPos.x();
         }
         if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
         {
-            h += event.pos().y() - _mouseLastPos.y();
+            h += eventPos.y() - _mouseLastPos.y();
         }
 
         QSizeF newSize = rect().size().scaled(QSizeF(w, h), ((_mouseDownSection == RectSection_BottomRight) || (dx > 0.0) || (dy > 0.0)) ? Qt::KeepAspectRatio : Qt::KeepAspectRatioByExpanding);
@@ -353,9 +387,9 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
     }
     else if(_mouseDownSection == RectSection_BottomLeft)
     {
-        dx = event.pos().x() - _mouseDownPos.x();
+        dx = eventPos.x() - _mouseDownPos.x();
         w -= dx;
-        h += event.pos().y() - _mouseLastPos.y();
+        h += eventPos.y() - _mouseLastPos.y();
 
         QSizeF newSize = rect().size().scaled(QSizeF(w, h), Qt::KeepAspectRatio);
         w = newSize.width();

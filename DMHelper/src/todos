@@ -1,3 +1,11 @@
+DONE Add Accept and Cancel buttons to the grid size tool
+Add a "Grid Locked" visualization (text and color difference) to the camera tool
+Move the grid lock buttons to the battle tools tab
+DONE Snap to grid also valid for size and position of the player's window
+DONE Snap to grid also valid for measuring
+Remember different grid sized for different external monitors
+Use DPI from an image to guess the right size of the grid
+
 
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved

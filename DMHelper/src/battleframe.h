@@ -289,6 +289,9 @@ private slots:
     void setScale(qreal s);
     void storeViewRect();
 
+    void gridSizerAccepted();
+    void gridSizerRejected();
+
     void setModel(BattleDialogModel* model);
     Map* selectRelatedMap();
     void selectAddCharacter(QList<Characterv2*> characters, const QString& title, const QString& label);
