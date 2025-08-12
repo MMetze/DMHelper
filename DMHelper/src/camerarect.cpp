@@ -24,6 +24,8 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
+    _cameraIconRect(nullptr),
+    _cameraIcon(nullptr),
     _ratioLocked(ratioLocked),
     _sizeLocked(false),
     _viewport(viewport)
@@ -42,6 +44,8 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
+    _cameraIconRect(nullptr),
+    _cameraIcon(nullptr),
     _ratioLocked(ratioLocked),
     _sizeLocked(false),
     _viewport(viewport)
@@ -97,23 +101,29 @@ void CameraRect::setDraw(bool draw)
 
 void CameraRect::setPublishing(bool publishing)
 {
-    if((!_drawItem) || (!_drawText) || (!_drawTextRect))
+    if(publishing == _publishing)
         return;
 
-    QColor color = publishing ? QColor(255, 0, 0, 255) : QColor(0, 0, 255, 255);
-    QPen p(color);
-    _drawItem->setPen(p);
-    _drawTextRect->setBrush(QBrush(color));
+    _publishing = publishing;
+    setCameraRectColor();
 }
 
 void CameraRect::setRatioLocked(bool locked)
 {
+    if(locked == _ratioLocked)
+        return;
+
     _ratioLocked = locked;
+    setCameraRectColor();
 }
 
 void CameraRect::setSizeLocked(bool locked)
 {
+    if(locked == _sizeLocked)
+        return;
+
     _sizeLocked = locked;
+    setCameraRectColor();
 }
 
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -278,11 +288,25 @@ void CameraRect::initialize(QGraphicsScene& scene)
     _drawText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
 
     QFont textFont = _drawText->font();
-    textFont.setPointSize(10);
+    textFont.setPointSize(11);
     _drawText->setFont(textFont);
-    _drawTextRect->setRect(_drawText->boundingRect().toRect());
+
+    QRect rectSize = _drawText->boundingRect().toRect();
+    qreal rectHeight = rectSize.height();
+    _drawTextRect->setRect(rectSize);
+
+    _cameraIconRect = new FixedBorderRectItem(_drawTextRect);
+    _cameraIconRect->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    _cameraIconRect->setRect(QRect(rectSize.width(), 0, rectHeight, rectHeight));
+    _cameraIconRect->setBrush(QBrush(Qt::green));
+
+    QPixmap cameraIconPmp = QPixmap(":/img/data/icon_link.png").scaledToHeight(rectHeight, Qt::SmoothTransformation);
+    _cameraIcon = new QGraphicsPixmapItem(cameraIconPmp, _cameraIconRect);
+    _cameraIcon->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    _cameraIcon->setPos(rectSize.width(), 0);
 
     setPublishing(false);
+    setCameraRectColor();
 }
 
 int CameraRect::getRectSection(const QPointF point)
@@ -397,6 +421,23 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
         dx = rect().size().width() - w;
         dy = 0.0;
     }
+}
+
+void CameraRect::setCameraRectColor()
+{
+    if((!_drawItem) || (!_drawTextRect) || (!_cameraIconRect) || (!_cameraIcon))
+        return;
+
+    QColor color = _publishing ? Qt::red : ((_ratioLocked || _sizeLocked) ? Qt::green : Qt::blue);
+    QPen p(color);
+    _drawItem->setPen(p);
+    _drawTextRect->setBrush(QBrush(color));
+
+    QColor textColor = (color == Qt::green) ? Qt::black : Qt::white;
+    _drawText->setBrush(QBrush(textColor));
+
+    _cameraIconRect->setVisible(_ratioLocked || _sizeLocked);
+    _cameraIcon->setVisible(_ratioLocked || _sizeLocked);
 }
 
 CameraRect::FixedBorderRectItem::FixedBorderRectItem(QGraphicsItem* parent) :
