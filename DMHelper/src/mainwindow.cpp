@@ -1142,6 +1142,18 @@ void MainWindow::newBattleEncounter()
             if(mapLayer)
             {
                 mapLayer->initialize(QSize());
+
+                if(mapLayer->getType() == DMHelper::LayerType_Image)
+                {
+                    LayerImage* imageLayer = dynamic_cast<LayerImage*>(mapLayer);
+                    if((imageLayer) && (!imageLayer->getImageUnfiltered().isNull()))
+                    {
+                        int gridSizeGuess = qRound(static_cast<qreal>(imageLayer->getImageUnfiltered().dotsPerMeterX()) * 0.0254);
+                        if(gridSizeGuess >= 5)
+                            gridScale = gridSizeGuess;
+                    }
+                }
+
                 battle->getBattleDialogModel()->getLayerScene().appendLayer(mapLayer);
             }
         }
@@ -1221,6 +1233,17 @@ void MainWindow::newMap(Layer* imageLayer)
     }
 
     addNewObject(map);
+
+    if(mapLayer->getType() == DMHelper::LayerType_Image)
+    {
+        LayerImage* imageLayer = dynamic_cast<LayerImage*>(mapLayer);
+        if((imageLayer) && (!imageLayer->getImageUnfiltered().isNull()))
+        {
+            int gridSizeGuess = qRound(static_cast<qreal>(imageLayer->getImageUnfiltered().dotsPerMeterX()) * 0.0254);
+            if(gridSizeGuess >= 5)
+                map->setPartyScale(gridSizeGuess);
+        }
+    }
 
     _mapFrame->resizeGrid();
 }
