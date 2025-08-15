@@ -814,6 +814,7 @@ void MainWindow::newCampaign()
 
         _campaign = new Campaign(campaignName);
 
+        _campaign->getRuleset().setObjectName(newCampaignDialog->getRuleset());
         _campaign->getRuleset().setRuleInitiative(newCampaignDialog->getInitiativeType());
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
@@ -2419,6 +2420,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     _activeItems->clear();
     _treeModel->setCampaign(campaign);
+
+    ui->frameFear->setCampaign(campaign);
+    ui->frameFear->setVisible(campaign && campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 

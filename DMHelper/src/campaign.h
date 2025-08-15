@@ -51,6 +51,8 @@ public:
     QTime getTime() const;
     QStringList getNotes() const;
 
+    int getFearCount() const;
+
     Ruleset& getRuleset();
     const Ruleset& getRuleset() const;
 
@@ -66,6 +68,7 @@ public slots:
     void setTime(const QTime& time);
     void setNotes(const QString& notes);
     void addNote(const QString& note);
+    void setFearCount(int fearCount);
     bool validateCampaignIds();
     bool correctDuplicateIds();
 
@@ -85,6 +88,7 @@ protected:
     BasicDate _date;
     QTime _time;
     QStringList _notes;
+    int _fearCount; // Todo: add ruleset-specific data storage
 
     Ruleset _ruleset;
 

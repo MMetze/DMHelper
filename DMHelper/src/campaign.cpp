@@ -73,6 +73,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _date(1, 1, 0),
     _time(0, 0),
     _notes(),
+    _fearCount(0),
     _ruleset(),
     _batchChanges(false),
     _changesMade(false),
@@ -112,6 +113,9 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     BasicDate inputDate(element.attribute("date", QString("")));
     setDate(inputDate);
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time", QString::number(0)).toInt()));
+
+    // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
+    _fearCount = element.attribute("fear", QString::number(0)).toInt();
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -341,6 +345,11 @@ QTime Campaign::getTime() const
     return _time;
 }
 
+int Campaign::getFearCount() const
+{
+    return _fearCount;
+}
+
 Ruleset& Campaign::getRuleset()
 {
     return _ruleset;
@@ -420,6 +429,15 @@ void Campaign::addNote(const QString& note)
     emit dirty();
 }
 
+void Campaign::setFearCount(int fearCount)
+{
+    if((fearCount < 0) || (fearCount == _fearCount))
+        return;
+
+    _fearCount = fearCount;
+    emit dirty();
+}
+
 bool Campaign::validateCampaignIds()
 {
     QList<QUuid> knownIds;
@@ -472,6 +490,8 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
     element.setAttribute("calendar", BasicDateServer::Instance() ? BasicDateServer::Instance()->getActiveCalendarName() : QString());
     element.setAttribute("date", getDate().toStringDDMMYYYY());
     element.setAttribute("time", getTime().msecsSinceStartOfDay());
+    if(_fearCount > 0)
+        element.setAttribute("fear", _fearCount);
 
     if(_notes.count() > 0)
     {

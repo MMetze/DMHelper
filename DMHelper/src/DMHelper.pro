@@ -105,6 +105,7 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    fearframe.cpp \
     globalsearch.cpp \
     globalsearchframe.cpp \
     gridconfig.cpp \
@@ -402,6 +403,7 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    fearframe.h \
     globalsearch.h \
     globalsearchframe.h \
     gridconfig.h \
@@ -641,6 +643,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    fearframe.ui \
     globalsearchframe.ui \
     helpdialog.ui \
     initiativelistcombatantwidget.ui \
@@ -663,9 +666,11 @@ FORMS    += mainwindow.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
     resources/ui/action.ui \
+    resources/ui/character-daggerheart.ui \
     resources/ui/character2e.ui \
     resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \
+    resources/ui/monster-daggerheart.ui \
     resources/ui/monster2e.ui \
     resources/ui/monster5e-2024.ui \
     resources/ui/monster5e.ui \
@@ -750,11 +755,13 @@ DISTFILES += \
     preparebuilddirectory_msvc64.cmd \
     release_notes.txt \
     resources/calendar.xml \
+    resources/character-daggerheart.xml \
     resources/character.xml \
     resources/character2e.xml \
     resources/character5e-2024.xml \
     resources/character5e.xml \
     resources/equipment.xml \
+    resources/monster-daggerheart.xml \
     resources/monster2e.xml \
     resources/monster5e.xml \
     resources/quickref_data.xml \
