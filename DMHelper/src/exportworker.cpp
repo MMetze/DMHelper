@@ -214,7 +214,7 @@ void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement
 
     if(!bestiaryElement.isNull())
     {
-        monsterElement = doc.createElement("element");
+        monsterElement = doc.createElement("monster");
         monster->outputXML(doc, monsterElement, directory, true);
     }
 
