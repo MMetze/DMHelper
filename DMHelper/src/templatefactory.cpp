@@ -173,20 +173,25 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
         if(!scrollArea)
             continue;
 
-        if(QWidget* oldWidget = scrollArea->takeWidget())
+        QString keyString = scrollArea->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        QString widgetString = scrollArea->property(TemplateFactory::TEMPLATE_WIDGET).toString();
+        if((!keyString.isEmpty()) && (!widgetString.isEmpty()))
         {
-            if(QLayout* oldLayout = oldWidget->layout())
+            if(QWidget* oldWidget = scrollArea->takeWidget())
             {
-                QLayoutItem *child;
-                while((child = oldLayout->takeAt(0)) != nullptr)
+                if(QLayout* oldLayout = oldWidget->layout())
                 {
-                    if(child->widget())
-                        child->widget()->deleteLater();
-                    delete child;
+                    QLayoutItem *child;
+                    while((child = oldLayout->takeAt(0)) != nullptr)
+                    {
+                        if(child->widget())
+                            child->widget()->deleteLater();
+                        delete child;
+                    }
+                    delete oldLayout;
                 }
-                delete oldLayout;
+                oldWidget->deleteLater();
             }
-            oldWidget->deleteLater();
         }
     }
 

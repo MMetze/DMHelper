@@ -62,6 +62,7 @@ public:
 signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
+    void fearChanged(int fearCount);
 
 public slots:
     void setDate(const BasicDate& date);

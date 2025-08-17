@@ -1,9 +1,12 @@
+Templates for Daggerheart
 Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
-Templates for Daggerheart
-Fear counter in main window for daggerheart campaigns only
+DONE Fear counter in main window for daggerheart campaigns only
+DONE Render fear counter in Battles, top-right corner
 Create "Wizards" for add Map or add Combat rather than multiple questions
 Drag and drop to add a map/combat
+Add a custom ruleset file entry
+Make fear visualization able to be turned off for Daggerheart campaigns
 DONE Add Accept and Cancel buttons to the grid size tool
 DONE Add a "Grid Locked" visualization (text and color difference) to the camera tool
 DONE Snap to grid also valid for size and position of the player's window

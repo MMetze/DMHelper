@@ -435,6 +435,7 @@ void Campaign::setFearCount(int fearCount)
         return;
 
     _fearCount = fearCount;
+    emit fearChanged(_fearCount);
     emit dirty();
 }
 

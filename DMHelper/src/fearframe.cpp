@@ -81,7 +81,14 @@ void FearFrame::buttonClicked()
     if(buttonIndex == -1)
         return;
 
-    _campaign->setFearCount(_campaign->getFearCount() + ((buttonIndex > _campaign->getFearCount()) ? 1 : -1));
+    int newFearCount;
+
+    if(buttonIndex == _campaign->getFearCount())
+        newFearCount = buttonIndex - 1;
+    else
+        newFearCount = buttonIndex;
+
+    _campaign->setFearCount(newFearCount);
     setFear(_campaign->getFearCount());
 }
 
