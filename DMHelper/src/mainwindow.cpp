@@ -295,7 +295,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] BasicDateServer Initialized";
 
     qDebug() << "[MainWindow] Initializing Rule Factory";
-    RuleFactory::Initialize(_options->getRulesetFileName());
+    RuleFactory::Initialize(_options->getDefaultRulesetFileName(), _options->getUserRulesetFileName());
     RuleFactory::Instance()->setDefaultBestiary(_options->getBestiaryFileName());
     connect(_options, &OptionsContainer::rulesetFileNameChanged, RuleFactory::Instance(), &RuleFactory::readRuleset);
     // Set the default ruleset
@@ -814,6 +814,7 @@ void MainWindow::newCampaign()
 
         _campaign = new Campaign(campaignName);
 
+        _campaign->getRuleset().setObjectName(newCampaignDialog->getRuleset());
         _campaign->getRuleset().setRuleInitiative(newCampaignDialog->getInitiativeType());
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
@@ -821,6 +822,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMonsterDataFile(newCampaignDialog->getMonsterDataFile());
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        _campaign->setShowFear(newCampaignDialog->isShowFear());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
@@ -1142,6 +1144,18 @@ void MainWindow::newBattleEncounter()
             if(mapLayer)
             {
                 mapLayer->initialize(QSize());
+
+                if(mapLayer->getType() == DMHelper::LayerType_Image)
+                {
+                    LayerImage* imageLayer = dynamic_cast<LayerImage*>(mapLayer);
+                    if((imageLayer) && (!imageLayer->getImageUnfiltered().isNull()))
+                    {
+                        int gridSizeGuess = qRound(static_cast<qreal>(imageLayer->getImageUnfiltered().dotsPerMeterX()) * 0.0254);
+                        if(gridSizeGuess >= 5)
+                            gridScale = gridSizeGuess;
+                    }
+                }
+
                 battle->getBattleDialogModel()->getLayerScene().appendLayer(mapLayer);
             }
         }
@@ -1221,6 +1235,17 @@ void MainWindow::newMap(Layer* imageLayer)
     }
 
     addNewObject(map);
+
+    if(mapLayer->getType() == DMHelper::LayerType_Image)
+    {
+        LayerImage* imageLayer = dynamic_cast<LayerImage*>(mapLayer);
+        if((imageLayer) && (!imageLayer->getImageUnfiltered().isNull()))
+        {
+            int gridSizeGuess = qRound(static_cast<qreal>(imageLayer->getImageUnfiltered().dotsPerMeterX()) * 0.0254);
+            if(gridSizeGuess >= 5)
+                map->setPartyScale(gridSizeGuess);
+        }
+    }
 
     _mapFrame->resizeGrid();
 }
@@ -1881,7 +1906,7 @@ void MainWindow::connectBattleView(bool toBattle)
         return;
 
     _ribbonTabBattleView->setIsBattle(toBattle);
-    _ribbonTabBattleView->setGridLocked(_options->getGridLocked());
+    _ribbonTabBattleView->setGridLocked(_options->getGridLocked() && toBattle);
 
     if(toBattle)
     {
@@ -2396,6 +2421,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     _activeItems->clear();
     _treeModel->setCampaign(campaign);
+
+    ui->frameFear->setCampaign(campaign);
+    ui->frameFear->setVisible(campaign && campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 

@@ -248,6 +248,17 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="chkShowFear">
+        <property name="text">
+         <string>Show fear to players</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/img/hood.png</normaloff>:/img/data/img/hood.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

@@ -24,6 +24,7 @@ public:
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool isCombatantDone() const;
+    bool isShowFear() const;
 
     QString getRuleset() const;
     void setRuleset(const QString& rulesetName);

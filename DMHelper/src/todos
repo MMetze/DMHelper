@@ -1,3 +1,19 @@
+Move the grid lock buttons to the battle tools tab
+Remember different grid sized for different external monitors
+Create "Wizards" for add Map or add Combat rather than multiple questions
+Drag and drop to add a map/combat
+DONE Templates for Daggerheart
+DONE Fear counter in main window for daggerheart campaigns only
+DONE Render fear counter in Battles, top-right corner
+DONE Add a custom ruleset file entry
+DONE Make fear visualization able to be turned off for Daggerheart campaigns
+DONE Add Accept and Cancel buttons to the grid size tool
+DONE Add a "Grid Locked" visualization (text and color difference) to the camera tool
+DONE Snap to grid also valid for size and position of the player's window
+DONE Snap to grid also valid for measuring
+DONE Use DPI from an image to guess the right size of the grid
+DONE Double-click on select map dlg to make a selection
+
 
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved

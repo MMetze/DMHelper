@@ -115,6 +115,7 @@ public slots:
     void createCombatantFrame();
     void setCountdownFrame(const QString& countdownFrame);
     void createCountdownFrame();
+    void fearChanged();
 
     void zoomIn();
     void zoomOut();
@@ -288,6 +289,9 @@ private slots:
     void setCameraSelectable(bool selectable);
     void setScale(qreal s);
     void storeViewRect();
+
+    void gridSizerAccepted();
+    void gridSizerRejected();
 
     void setModel(BattleDialogModel* model);
     Map* selectRelatedMap();

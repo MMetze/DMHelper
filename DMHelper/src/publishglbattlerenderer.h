@@ -52,6 +52,8 @@ public slots:
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);
 
+    void fearChanged();
+
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
 
@@ -134,6 +136,7 @@ protected:
     bool _showCountdown;
     qreal _countdownScale;
     QColor _countdownColor;
+    PublishGLImage* _fearCounter;
 
     BattleDialogModelCombatant* _activeCombatant;
 

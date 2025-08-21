@@ -37,16 +37,23 @@ protected:
     void resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h);
 
 private:
+    void setCameraRectColor();
+
     bool _draw;
     bool _mouseDown;
     QPointF _mouseDownPos;
     QPointF _mouseLastPos;
     int _mouseDownSection;
+    QRectF _trackingRect;
 
     QGraphicsRectItem* _drawItem;
     QGraphicsSimpleTextItem* _drawText;
     QGraphicsRectItem* _drawTextRect;
+    QGraphicsRectItem* _cameraIconRect;
+    QGraphicsPixmapItem* _cameraIcon;
 
+
+    bool _publishing;
     bool _ratioLocked;
     bool _sizeLocked;
     QWidget* _viewport;

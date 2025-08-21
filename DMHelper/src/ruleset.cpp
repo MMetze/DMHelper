@@ -61,23 +61,23 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
 
     _characterDataFile = element.attribute("characterData");
     if(_characterDataFile.isEmpty())
-        _characterDataFile = RuleFactory::Instance()->getRulesetDir().absoluteFilePath(rulesetTemplate._characterData);
+        _characterDataFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterData);
 
     _characterUIFile = element.attribute("characterUI");
     if(_characterUIFile.isEmpty())
-        _characterUIFile = RuleFactory::Instance()->getRulesetDir().absoluteFilePath(rulesetTemplate._characterUI);
+        _characterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterUI);
 
     _monsterDataFile = element.attribute("monsterData");
     if(_monsterDataFile.isEmpty())
-        _monsterDataFile = RuleFactory::Instance()->getRulesetDir().absoluteFilePath(rulesetTemplate._monsterData);
+        _monsterDataFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterData);
 
     _monsterUIFile = element.attribute("monsterUI");
     if(_monsterUIFile.isEmpty())
-        _monsterUIFile = RuleFactory::Instance()->getRulesetDir().absoluteFilePath(rulesetTemplate._monsterUI);
+        _monsterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI);
 
     _bestiaryFile = element.attribute("bestiary");
     if(_bestiaryFile.isEmpty())
-        _bestiaryFile = RuleFactory::Instance()->getRulesetDir().absoluteFilePath(rulesetTemplate._bestiary);
+        _bestiaryFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
 
     _combatantDoneCheckbox = element.hasAttribute("combatantDone") ? static_cast<bool>(element.attribute("combatantDone").toInt()) : rulesetTemplate._combatantDone;
 }
@@ -105,13 +105,11 @@ void Ruleset::setValues(const RuleFactory::RulesetTemplate& rulesetTemplate)
     delete _ruleInitiative;
     _ruleInitiative = RuleFactory::createRuleInitiative(rulesetTemplate._initiative, this);
 
-    QDir rulesetDir = RuleFactory::Instance()->getRulesetDir();
-
-    _characterDataFile = rulesetDir.absoluteFilePath(rulesetTemplate._characterData);
-    _characterUIFile = rulesetDir.absoluteFilePath(rulesetTemplate._characterUI);
-    _bestiaryFile = rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
-    _monsterDataFile = rulesetDir.absoluteFilePath(rulesetTemplate._monsterData);
-    _monsterUIFile = rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI);
+    _characterDataFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterData);
+    _characterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterUI);
+    _bestiaryFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
+    _monsterDataFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterData);
+    _monsterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI);
 
     _combatantDoneCheckbox = rulesetTemplate._combatantDone;
 
@@ -264,24 +262,23 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
     // If the files are different, they are stored, and filenames made relative to the campaign file
 
     RuleFactory::RulesetTemplate rulesetTemplate = RuleFactory::Instance()->getRulesetTemplate(objectName());
-    QDir rulesetDir = RuleFactory::Instance()->getRulesetDir();
 
     if((_ruleInitiative) && (_ruleInitiative->getInitiativeType() != rulesetTemplate._initiative))
         element.setAttribute("initiative", _ruleInitiative->getInitiativeType());
 
-    if(!areSameFile(_characterDataFile, rulesetDir.absoluteFilePath(rulesetTemplate._characterData)))
+    if(!areSameFile(_characterDataFile, rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterData)))
         element.setAttribute("characterData", targetDirectory.relativeFilePath(_characterDataFile));
 
-    if(!areSameFile(_characterUIFile, rulesetDir.absoluteFilePath(rulesetTemplate._characterUI)))
+    if(!areSameFile(_characterUIFile, rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterUI)))
         element.setAttribute("characterUI", targetDirectory.relativeFilePath(_characterUIFile));
 
-    if(!areSameFile(_bestiaryFile, rulesetDir.absoluteFilePath(rulesetTemplate._bestiary)))
+    if(!areSameFile(_bestiaryFile, rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary)))
         element.setAttribute("bestiary", targetDirectory.relativeFilePath(_bestiaryFile));
 
-    if(!areSameFile(_monsterDataFile, rulesetDir.absoluteFilePath(rulesetTemplate._monsterData)))
+    if(!areSameFile(_monsterDataFile, rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterData)))
         element.setAttribute("monsterData", targetDirectory.relativeFilePath(_monsterDataFile));
 
-    if(!areSameFile(_monsterUIFile, rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI)))
+    if(!areSameFile(_monsterUIFile, rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI)))
         element.setAttribute("monsterUI", targetDirectory.relativeFilePath(_monsterUIFile));
 
     if(_combatantDoneCheckbox != rulesetTemplate._combatantDone)

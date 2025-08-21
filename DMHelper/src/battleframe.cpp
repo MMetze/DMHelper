@@ -296,6 +296,16 @@ void BattleFrame::deactivateObject()
 
 void BattleFrame::setBattle(EncounterBattle* battle)
 {
+    if(_battle)
+    {
+        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+        if(campaign)
+        {
+            disconnect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
+            disconnect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
+        }
+    }
+
     _battle = battle;
     setModel(_battle == nullptr ? nullptr : _battle->getBattleDialogModel());
 
@@ -306,6 +316,9 @@ void BattleFrame::setBattle(EncounterBattle* battle)
         {
             ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
             ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
+
+            connect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
+            connect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
         }
     }
 }
@@ -749,8 +762,11 @@ void BattleFrame::resizeGrid()
         currentScale = _model->getLayerScene().getScale();
 
     _gridSizer = new GridSizer(currentScale);
+    _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
     _gridSizer->setPos(currentScale, currentScale);
+    connect(_gridSizer, &GridSizer::accepted, this, &BattleFrame::gridSizerAccepted);
+    connect(_gridSizer, &GridSizer::rejected, this, &BattleFrame::gridSizerRejected);
 }
 
 void BattleFrame::setGridAngle(int gridAngle)
@@ -1003,6 +1019,12 @@ void BattleFrame::createCountdownFrame()
         _countdownFrame.load(QString(":/img/data/countdown_frame.png"));
 }
 
+void BattleFrame::fearChanged()
+{
+    if(_renderer)
+        _renderer->fearChanged();
+}
+
 void BattleFrame::zoomIn()
 {
     setScale(_scale * 1.1);
@@ -1040,12 +1062,7 @@ void BattleFrame::zoomDelta(int delta)
 
 void BattleFrame::cancelSelect()
 {
-    if(_gridSizer)
-    {
-        delete _gridSizer;
-        _gridSizer = nullptr;
-    }
-
+    gridSizerRejected();
     _stateMachine.deactivateState();
 }
 
@@ -1650,13 +1667,7 @@ void BattleFrame::keyPressEvent(QKeyEvent * event)
         return;
     }
 
-    if(_gridSizer)
-    {
-        setGridScale(_gridSizer->getSize());
-
-        delete _gridSizer;
-        _gridSizer = nullptr;
-    }
+    gridSizerAccepted();
 
     if(event->key() == Qt::Key_A)
     {
@@ -3173,6 +3184,24 @@ void BattleFrame::storeViewRect()
     }
 
     _model->setMapRect(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect());
+}
+
+void BattleFrame::gridSizerAccepted()
+{
+    if(!_gridSizer)
+        return;
+
+    setGridScale(_gridSizer->getSize());
+    gridSizerRejected();
+}
+
+void BattleFrame::gridSizerRejected()
+{
+    if(!_gridSizer)
+        return;
+
+    _gridSizer->deleteLater();
+    _gridSizer = nullptr;
 }
 
 void BattleFrame::setModel(BattleDialogModel* model)

@@ -121,7 +121,12 @@ QString OptionsContainer::getTablesDirectory() const
     return _tablesDirectory;
 }
 
-QString OptionsContainer::getRulesetFileName() const
+QString OptionsContainer::getDefaultRulesetFileName()
+{
+    return getStandardFile(QString("ruleset.xml"));
+}
+
+QString OptionsContainer::getUserRulesetFileName() const
 {
     return _rulesetFileName;
 }
@@ -450,16 +455,16 @@ void OptionsContainer::readSettings()
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
-    bool rulesetExists = true;
     QString appRulesetFile = getAppFile(QString("ruleset.xml"));
-    QString settingsRulesetFile = getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists);
-    if((QFile::exists(appRulesetFile)) && (QFile::exists(settingsRulesetFile)) && (QFileInfo(appRulesetFile).lastModified() > QFileInfo(settingsRulesetFile).lastModified()))
+    QString defaultRulesetFile = getDefaultRulesetFileName();
+    if((QFile::exists(appRulesetFile)) && (QFile::exists(defaultRulesetFile)) && (QFileInfo(appRulesetFile).lastModified() > QFileInfo(defaultRulesetFile).lastModified()))
     {
-        QFile::remove(settingsRulesetFile);
-        QFile::copy(appRulesetFile, settingsRulesetFile);
+        QFile::remove(defaultRulesetFile);
+        QFile::copy(appRulesetFile, defaultRulesetFile);
     }
+    QString settingsRulesetFile = settings.value(QString("ruleset"), QVariant()).toString();
     setRulesetFileName(settingsRulesetFile);
-//    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
+
     getDataDirectory(QString("ui"));
     copyCoreData(QString("DMHelperBestiary"));
     copyCoreData(QString("monster"));
@@ -553,7 +558,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("equipment", getEquipmentFileName());
     settings.setValue("shops", getShopsFileName());
     settings.setValue("tables", getTablesDirectory());
-    settings.setValue("ruleset", getRulesetFileName());
+    settings.setValue("ruleset", getUserRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("autoSave", getAutoSave());
     settings.setValue("fontFamily", getFontFamily());
@@ -776,12 +781,30 @@ void OptionsContainer::setTablesDirectory(const QString& directory)
 
 void OptionsContainer::setRulesetFileName(const QString& filename)
 {
-    if(_rulesetFileName != filename)
+    if(_rulesetFileName == filename)
+        return;
+
+    QFileInfo newRulesetFile(filename);
+    QFileInfo defaultRulesetFile(getDefaultRulesetFileName());
+
+    QString newRulesetFileCanonicalPath = newRulesetFile.canonicalFilePath();
+    QString defaultRulesetFileCanonicalPath = defaultRulesetFile.canonicalFilePath();
+
+    if((!newRulesetFileCanonicalPath.isEmpty()) && (newRulesetFileCanonicalPath == defaultRulesetFileCanonicalPath))
+    {
+        qDebug() << "[OptionsContainer] Custom ruleset file being set to default ruleset, no need to duplicate: " << filename;
+        if(_rulesetFileName.isEmpty())
+            return;
+
+        _rulesetFileName = QString();
+    }
+    else
     {
         _rulesetFileName = filename;
-        qDebug() << "[OptionsContainer] Ruleset file set to: " << filename;
-        emit rulesetFileNameChanged(_rulesetFileName);
     }
+
+    qDebug() << "[OptionsContainer] Custom ruleset file set to: " << _rulesetFileName;
+    emit rulesetFileNameChanged(_rulesetFileName);
 }
 
 QString OptionsContainer::getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir)
@@ -978,7 +1001,7 @@ void OptionsContainer::resetFileSettings()
     setShopsFileName(getStandardFile(QString("shops.xml")));
     setTablesDirectory(getDataDirectory(QString("tables"), true));
     getDataDirectory(QString("ui"), true);
-    setRulesetFileName(getStandardFile(QString("ruleset.xml")));
+    setRulesetFileName(QString());
     getDataDirectory(QString("Images"), true);
     copyCoreData(QString("DMHelperBestiary"), true);
     copyCoreData(QString("monster"), true);

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="monster.xsd">
+
+    <dmh:attribute type="dmh:boolean" name="private"/>
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:string" name="speed" default="30 ft"/>
+    <dmh:attribute type="dmh:integer" name="armor_class" default="10"/>
+    <dmh:attribute type="dmh:dice" name="hit_dice" default="1d8"/>
+    <dmh:attribute type="dmh:integer" name="hit_points" default="4"/>
+    <dmh:element type="dmh:string" name="icon"/>
+
+    <dmh:attribute type="dmh:string" name="type" default="Beast"/>
+    <dmh:attribute type="dmh:string" name="subtype"/>
+    <dmh:attribute type="dmh:string" name="alignment" default="neutral"/>
+    <dmh:attribute type="dmh:string" name="languages" default="---"/>
+    <dmh:attribute type="dmh:string" name="condition_immunities"/>
+    <dmh:attribute type="dmh:string" name="damage_immunities"/>
+    <dmh:attribute type="dmh:string" name="damage_resistances"/>
+    <dmh:attribute type="dmh:string" name="damage_vulnerabilities"/>
+    <dmh:attribute type="dmh:string" name="senses"/>
+    <dmh:attribute type="dmh:string" name="skills"/>
+    <dmh:attribute type="dmh:integer" name="challenge_rating" default="1"/>
+    <dmh:attribute type="dmh:integer" name="experience" default="100"/>
+    <dmh:attribute type="dmh:integer" name="legendary"/>
+
+    <dmh:attribute type="dmh:integer" name="strength" default="10"/>
+    <dmh:attribute type="dmh:integer" name="strengthMod"/>
+    <dmh:attribute type="dmh:integer" name="strengthSave"/>
+    <dmh:attribute type="dmh:integer" name="dexterity" default="10"/>
+    <dmh:attribute type="dmh:integer" name="dexterityMod"/>
+    <dmh:attribute type="dmh:integer" name="dexteritySave"/>
+    <dmh:attribute type="dmh:integer" name="constitution" default="10"/>
+    <dmh:attribute type="dmh:integer" name="constitutionMod"/>
+    <dmh:attribute type="dmh:integer" name="constitutionSave"/>
+    <dmh:attribute type="dmh:integer" name="intelligence" default="10"/>
+    <dmh:attribute type="dmh:integer" name="intelligenceMod"/>
+    <dmh:attribute type="dmh:integer" name="intelligenceSave"/>
+    <dmh:attribute type="dmh:integer" name="wisdom" default="10"/>
+    <dmh:attribute type="dmh:integer" name="wisdomMod"/>
+    <dmh:attribute type="dmh:integer" name="wisdomSave"/>
+    <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
+    <dmh:attribute type="dmh:integer" name="charismaMod"/>
+    <dmh:attribute type="dmh:integer" name="charismaSave"/>
+
+    <dmh:element type="dmh:html" name="lore"/>
+
+    <dmh:element type="dmh:list" name="actions">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:string" name="desc"/>
+        <dmh:element type="dmh:integer" name="attack_bonus"/>
+        <dmh:element type="dmh:dice" name="damage"/>
+    </dmh:element>
+
+    <dmh:element type="dmh:list" name="legendary_actions">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:string" name="desc"/>
+        <dmh:element type="dmh:integer" name="attack_bonus"/>
+        <dmh:element type="dmh:dice" name="damage"/>
+    </dmh:element>
+
+    <dmh:element type="dmh:list" name="special_abilities">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:string" name="desc"/>
+        <dmh:element type="dmh:integer" name="attack_bonus"/>
+        <dmh:element type="dmh:dice" name="damage"/>
+    </dmh:element>
+
+    <dmh:element type="dmh:list" name="reactions">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:string" name="desc"/>
+        <dmh:element type="dmh:integer" name="attack_bonus"/>
+        <dmh:element type="dmh:dice" name="damage"/>
+    </dmh:element>
+</dmh:template>

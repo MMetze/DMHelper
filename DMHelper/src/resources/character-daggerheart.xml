@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="character.xsd">
+    <dmh:attribute type="dmh:string" name="_baseID"/>
+    <dmh:attribute type="dmh:integer" name="type"/>
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:boolean" name="active" default="1"/>
+    <dmh:attribute type="dmh:boolean" name="expanded"/>
+    <dmh:attribute type="dmh:integer" name="row"/>
+    <dmh:attribute type="dmh:string" name="dndBeyondID" default="-1"/>
+    <dmh:attribute type="dmh:string" name="icon"/>
+    <dmh:attribute type="dmh:integer" name="initiative"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
+    <dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>
+    <dmh:attribute type="dmh:integer" name="speed" default="30"/>
+    <dmh:attribute type="dmh:integer" name="conditions"/>
+
+    <dmh:attribute type="dmh:integer" name="strength" default="10"/>
+    <dmh:attribute type="dmh:integer" name="strengthMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="strengthSave"/>
+    <dmh:attribute type="dmh:integer" name="dexterity" default="10"/>
+    <dmh:attribute type="dmh:integer" name="dexterityMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="dexteritySave"/>
+    <dmh:attribute type="dmh:integer" name="constitution" default="10"/>
+    <dmh:attribute type="dmh:integer" name="constitutionMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="constitutionSave"/>
+    <dmh:attribute type="dmh:integer" name="intelligence" default="10"/>
+    <dmh:attribute type="dmh:integer" name="intelligenceMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="intelligenceSave"/>
+    <dmh:attribute type="dmh:integer" name="wisdom" default="10"/>
+    <dmh:attribute type="dmh:integer" name="wisdomMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="wisdomSave"/>
+    <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
+    <dmh:attribute type="dmh:integer" name="charismaMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="charismaSave"/>
+
+    <dmh:attribute type="dmh:string" name="race"/>
+    <dmh:attribute type="dmh:string" name="subrace"/>
+    <dmh:attribute type="dmh:string" name="movement"/>
+    <dmh:attribute type="dmh:string" name="class"/>
+    <dmh:attribute type="dmh:string" name="level"/>
+    <dmh:attribute type="dmh:string" name="experience"/>
+    <dmh:attribute type="dmh:string" name="maximumHp" default="1"/>
+    <dmh:attribute type="dmh:string" name="tempHp"/>
+    <dmh:attribute type="dmh:string" name="player"/>
+    <dmh:attribute type="dmh:string" name="eyes"/>
+    <dmh:attribute type="dmh:string" name="age"/>
+    <dmh:attribute type="dmh:string" name="sex"/>
+    <dmh:attribute type="dmh:string" name="hair"/>
+    <dmh:attribute type="dmh:string" name="height"/>
+    <dmh:attribute type="dmh:string" name="weight"/>
+    <dmh:attribute type="dmh:string" name="alignment"/>
+    <dmh:attribute type="dmh:string" name="background"/>
+    <dmh:attribute type="dmh:boolean" name="inspiration"/>
+
+    <dmh:attribute type="dmh:integer" name="acrobatics"/>
+    <dmh:attribute type="dmh:integer" name="animalHandling"/>
+    <dmh:attribute type="dmh:integer" name="arcana"/>
+    <dmh:attribute type="dmh:integer" name="athletics"/>
+    <dmh:attribute type="dmh:integer" name="deception"/>
+    <dmh:attribute type="dmh:integer" name="history"/>
+    <dmh:attribute type="dmh:integer" name="insight"/>
+    <dmh:attribute type="dmh:integer" name="intimidation"/>
+    <dmh:attribute type="dmh:integer" name="investigation"/>
+    <dmh:attribute type="dmh:integer" name="medicine"/>
+    <dmh:attribute type="dmh:integer" name="nature"/>
+    <dmh:attribute type="dmh:integer" name="perception"/>
+    <dmh:attribute type="dmh:integer" name="performance"/>
+    <dmh:attribute type="dmh:integer" name="persuasion"/>
+    <dmh:attribute type="dmh:integer" name="religion"/>
+    <dmh:attribute type="dmh:integer" name="sleightOfHand"/>
+    <dmh:attribute type="dmh:integer" name="stealth"/>
+    <dmh:attribute type="dmh:integer" name="survival"/>
+    <dmh:attribute type="dmh:integer" name="passiveperception"/>
+
+    <dmh:attribute type="dmh:resource" name="bardic-inspiration"/>
+
+    <dmh:attribute type="dmh:string" name="pactmagiclevel"/>
+    <dmh:attribute type="dmh:resource" name="pactmagicslots"/>
+
+    <dmh:attribute type="dmh:integer" name="platinum"/>
+    <dmh:attribute type="dmh:integer" name="gold"/>
+    <dmh:attribute type="dmh:integer" name="electrum"/>
+    <dmh:attribute type="dmh:integer" name="silver"/>
+    <dmh:attribute type="dmh:integer" name="copper"/>
+
+    <dmh:element type="dmh:html" name="spell-data"/>
+    <dmh:element type="dmh:html" name="equipment"/>
+    <dmh:element type="dmh:html" name="proficiencies"/>
+    <dmh:element type="dmh:html" name="notes"/>
+
+    <dmh:element type="dmh:list" name="spellSlots">
+        <dmh:attribute type="dmh:integer" name="level"/>
+        <dmh:attribute type="dmh:resource" name="slots"/>
+    </dmh:element>
+
+    <dmh:element type="dmh:list" name="hitDice">
+        <dmh:attribute type="dmh:string" name="class"/>
+        <dmh:attribute type="dmh:dice" name="diceType"/>
+        <dmh:attribute type="dmh:resource" name="diceCount"/>
+    </dmh:element>
+
+    <dmh:element type="dmh:list" name="actions">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:string" name="desc"/>
+        <dmh:element type="dmh:integer" name="attack_bonus"/>
+        <dmh:element type="dmh:dice" name="damage"/>
+    </dmh:element>
+</dmh:template>

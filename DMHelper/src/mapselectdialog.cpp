@@ -20,6 +20,7 @@ MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWi
 {
     ui->setupUi(this);
     connect(ui->lstMaps, &QTreeWidget::currentItemChanged, this, &MapSelectDialog::handleItemChanged);
+    connect(ui->lstMaps, &QTreeWidget::itemDoubleClicked, this, &MapSelectDialog::accept);
     setupSelectTree(campaign, currentId);
 }
 

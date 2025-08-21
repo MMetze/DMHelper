@@ -8,6 +8,7 @@
 #include "layer.h"
 #include "layertokens.h"
 #include "characterv2.h"
+#include "campaign.h"
 #include "dmh_opengl.h"
 #include <QOpenGLWidget>
 #include <QMatrix4x4>
@@ -60,6 +61,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _showCountdown(false),
     _countdownScale(1.0),
     _countdownColor(Qt::white),
+    _fearCounter(nullptr),
     _activeCombatant(nullptr),
     //_activePC(false),
     _activeTokenFile(),
@@ -418,6 +420,12 @@ void PublishGLBattleRenderer::setInitiativeScale(qreal initiativeScale)
     emit updateWidget();
 }
 
+void PublishGLBattleRenderer::fearChanged()
+{
+    _updateInitiative = true;
+    emit updateWidget();
+}
+
 void PublishGLBattleRenderer::distanceChanged(const QString& distance)
 {
     Q_UNUSED(distance);
@@ -678,6 +686,7 @@ void PublishGLBattleRenderer::cleanupContents()
     delete _tokenFrame; _tokenFrame = nullptr;
     delete _countdownFrame; _countdownFrame = nullptr;
     delete _countdownFill; _countdownFill = nullptr;
+    delete _fearCounter; _fearCounter = nullptr;
     delete _initiativeBackground; _initiativeBackground = nullptr;
     delete _movementToken; _movementToken = nullptr;
     delete _lineImage; _lineImage = nullptr;
@@ -755,6 +764,48 @@ void PublishGLBattleRenderer::updateInitiative()
     _countdownFill->setX(_initiativeTokenHeight);
     _countdownFill->setScale(_initiativeTokenHeight / static_cast<qreal>(countdownFillImage.height()));
 
+    delete _fearCounter; _fearCounter = nullptr;
+    Campaign* campaign = dynamic_cast<Campaign*>(_model->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getShowFear()) && (campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive)))
+    {
+        QImage fearCounterImageBorder(QString(":/img/data/hoodeyelessborder.png"));
+        QImage fearCounterImageGrey(QString(":/img/data/hoodeyeless.png"));
+        QImage fearCounterImage(fearCounterImageGrey.size(), QImage::Format_ARGB32_Premultiplied);
+        fearCounterImage.fill(Qt::transparent);
+        QPainter p(&fearCounterImage);
+            QColor redColor(qBound(0, 255 * campaign->getFearCount() / 12, 255), 0, 0, 196);
+            p.setCompositionMode(QPainter::CompositionMode_Source);
+            p.fillRect(fearCounterImage.rect(), redColor);
+            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            p.drawImage(0, 0, fearCounterImageGrey);
+            p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            p.drawImage(0, 0, fearCounterImageBorder);
+
+            QFont f = p.font();
+            f.setPixelSize(256);
+
+            f.setStyleStrategy(QFont::ForceOutline);
+            QPainterPath path;
+            path.addText(0, 0, f, QString::number(campaign->getFearCount()));
+            QRectF bounds = path.boundingRect();
+            QPointF center(fearCounterImage.width()/2.0 - bounds.width()/2.0 - bounds.left(),
+                           fearCounterImage.height()/2.0 + bounds.height());
+            QTransform transform;
+            transform.translate(center.x(), center.y());
+            QPainterPath centeredPath = transform.map(path);
+
+            // Draw outline
+            p.setPen(QPen(Qt::white, 5));
+            p.setBrush(redColor);
+            p.drawPath(centeredPath);
+        p.end();
+
+        _fearCounter = new PublishGLImage(fearCounterImage, false);
+        _fearCounter->setX(_scene.getTargetSize().width() - (_initiativeTokenHeight * 2.5));
+        _fearCounter->setY(_scene.getTargetSize().height() - (_initiativeTokenHeight * 2.5));
+        _fearCounter->setScale(_initiativeTokenHeight * 2.0 / static_cast<qreal>(fearCounterImage.height()));
+    }
+
     _updateInitiative = false;
 }
 
@@ -771,6 +822,13 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     QMatrix4x4 tokenScreenCoords;
     qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) * _initiativeScale / 24.0;
     qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
+
+    if(_fearCounter)
+    {
+        DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fearCounter->getMatrixData(), _fearCounter->getMatrix());
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fearCounter->getMatrixData());
+        _fearCounter->paintGL(functions, nullptr);
+    }
 
     if(_initiativeBackground)
     {

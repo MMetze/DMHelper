@@ -101,7 +101,7 @@ void BestiaryExportDialog::exportSelected()
             MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(ui->listMonsters->item(i)->text());
             if(monsterClass)
             {
-                QDomElement monsterElement = doc.createElement("element");
+                QDomElement monsterElement = doc.createElement("monster");
                 monsterClass->outputXML(doc, monsterElement, targetDirectory, true);
                 bestiaryElement.appendChild(monsterElement);
                 ++monsterCount;
