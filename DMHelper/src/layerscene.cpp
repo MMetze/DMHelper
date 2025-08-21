@@ -324,6 +324,9 @@ void LayerScene::removeLayer(int position)
     if(!deleteLayer)
         return;
 
+    // Remove from image cache
+    _layerImageCache.remove(deleteLayer);
+
     disconnectLayer(deleteLayer);
     emit layerRemoved(deleteLayer);
     deleteLayer->deleteLater();
@@ -346,6 +349,7 @@ void LayerScene::clearLayers()
 
     qDeleteAll(_layers);
     _layers.clear();
+    _layerImageCache.clear(); // Clear image cache when clearing layers
     _selected = -1;
 }
 
@@ -855,34 +859,35 @@ const QImage& LayerScene::getLayerImage(Layer* layer)
         if(layerImage)
             return layerImage->getImage();
     }
-    else if(layer->getType() == DMHelper::LayerType_Video)
+    
+    // For non-LayerImage types, we need to cache the result to return a reference
+    // Use a per-layer cache to avoid issues with static variables
+    if(!_layerImageCache.contains(layer)) {
+        _layerImageCache[layer] = QImage(); // Initialize with empty image
+    }
+    
+    if(layer->getType() == DMHelper::LayerType_Video)
     {
         LayerVideo* layerVideo = dynamic_cast<LayerVideo*>(layer);
         if(layerVideo) {
-            // Note: getScreenshot() returns by value, but we cache it to return reference
-            static QImage videoImageCache = layerVideo->getScreenshot();
-            videoImageCache = layerVideo->getScreenshot(); // Update cache
-            return videoImageCache;
+            _layerImageCache[layer] = layerVideo->getScreenshot();
+            return _layerImageCache[layer];
         }
     }
     else if(layer->getType() == DMHelper::LayerType_Fow)
     {
         LayerFow* layerFow = dynamic_cast<LayerFow*>(layer);
         if(layerFow) {
-            // Note: getImage() returns by value, but we cache it to return reference
-            static QImage fowImageCache = layerFow->getImage();
-            fowImageCache = layerFow->getImage(); // Update cache
-            return fowImageCache;
+            _layerImageCache[layer] = layerFow->getImage();
+            return _layerImageCache[layer];
         }
     }
     else if(layer->getType() == DMHelper::LayerType_Blank)
     {
         LayerBlank* layerBlank = dynamic_cast<LayerBlank*>(layer);
         if(layerBlank) {
-            // Note: getImage() returns by value, but we cache it to return reference
-            static QImage blankImageCache = layerBlank->getImage();
-            blankImageCache = layerBlank->getImage(); // Update cache
-            return blankImageCache;
+            _layerImageCache[layer] = layerBlank->getImage();
+            return _layerImageCache[layer];
         }
     }
     else if(layer->getType() == DMHelper::LayerType_Reference)

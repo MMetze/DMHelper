@@ -2,6 +2,7 @@
 #define LAYERSCENE_H
 
 #include <QList>
+#include <QHash>
 #include "dmh_opengl.h"
 #include "dmconstants.h"
 #include "campaignobjectbase.h"
@@ -118,6 +119,9 @@ protected:
     QGraphicsScene* _dmScene;
     PublishGLScene* _playerGLScene;
     PublishGLRenderer* _renderer;
+    
+    // Cache for non-LayerImage types to enable const reference returns
+    mutable QHash<Layer*, QImage> _layerImageCache;
 };
 
 #endif // LAYERSCENE_H
