@@ -766,7 +766,7 @@ void PublishGLBattleRenderer::updateInitiative()
 
     delete _fearCounter; _fearCounter = nullptr;
     Campaign* campaign = dynamic_cast<Campaign*>(_model->getParentByType(DMHelper::CampaignType_Campaign));
-    if((campaign) && (campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive)))
+    if((campaign) && (campaign->getShowFear()) && (campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive)))
     {
         QImage fearCounterImageBorder(QString(":/img/data/hoodeyelessborder.png"));
         QImage fearCounterImageGrey(QString(":/img/data/hoodeyeless.png"));

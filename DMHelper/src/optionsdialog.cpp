@@ -103,6 +103,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
             }
 
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->chkShowFear->setChecked(_campaign->getShowFear());
+            ui->chkShowFear->setVisible(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
             ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
             ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
             ui->edtBestiaryFile->setText(_campaign->getRuleset().getBestiaryFile());
@@ -217,6 +219,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->setName(ui->edtCampaignName->text());
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
     _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
+    _campaign->setShowFear(ui->chkShowFear->isChecked());
     _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
     _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());
     _campaign->getRuleset().setBestiaryFile(ui->edtBestiaryFile->text());
@@ -418,10 +421,7 @@ void OptionsDialog::editRuleset()
 
 void OptionsDialog::setRuleset(const QString& rulesetFile)
 {
-    if(rulesetFile.isEmpty())
-        return;
-
-    if(!QFile::exists(rulesetFile))
+    if((!rulesetFile.isEmpty()) && (!QFile::exists(rulesetFile)))
     {
         QMessageBox::critical(this, QString("Ruleset file not found"), QString("The selected ruleset file could not be found!") + QChar::LineFeed + rulesetFile);
         qDebug() << "[OptionsDialog] ERROR: The selected ruleset file could not be found: " << rulesetFile;
@@ -431,6 +431,7 @@ void OptionsDialog::setRuleset(const QString& rulesetFile)
     ui->edtRuleset->setText(rulesetFile);
     _options->setRulesetFileName(rulesetFile);
 
+    QMessageBox::information(this, QString("Restart to reload ruleset"), QString("Please restart DMHelper to load the new ruleset file!"));
 }
 
 void OptionsDialog::handleInitiativeScaleChanged(qreal initiativeScale)
@@ -634,7 +635,7 @@ void OptionsDialog::updateFileLocations()
     ui->edtEquipment->setText(_options->getEquipmentFileName());
     ui->edtShops->setText(_options->getShopsFileName());
     ui->edtTables->setText(_options->getTablesDirectory());
-    ui->edtRuleset->setText(_options->getRulesetFileName());
+    ui->edtRuleset->setText(_options->getUserRulesetFileName());
 }
 
 void OptionsDialog::resetFileLocations()

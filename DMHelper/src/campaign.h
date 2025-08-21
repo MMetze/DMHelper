@@ -52,6 +52,7 @@ public:
     QStringList getNotes() const;
 
     int getFearCount() const;
+    bool getShowFear() const;
 
     Ruleset& getRuleset();
     const Ruleset& getRuleset() const;
@@ -63,6 +64,7 @@ signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
     void fearChanged(int fearCount);
+    void showFearChanged(bool showFear);
 
 public slots:
     void setDate(const BasicDate& date);
@@ -70,6 +72,7 @@ public slots:
     void setNotes(const QString& notes);
     void addNote(const QString& note);
     void setFearCount(int fearCount);
+    void setShowFear(bool showFear);
     bool validateCampaignIds();
     bool correctDuplicateIds();
 
@@ -90,6 +93,7 @@ protected:
     QTime _time;
     QStringList _notes;
     int _fearCount; // Todo: add ruleset-specific data storage
+    bool _showFear;
 
     Ruleset _ruleset;
 

@@ -27,7 +27,8 @@ public:
     QString getEquipmentFileName() const;
     QString getShopsFileName() const;
     QString getTablesDirectory() const;
-    QString getRulesetFileName() const;
+    QString getDefaultRulesetFileName();
+    QString getUserRulesetFileName() const;
     QString getLastMonster() const;
     QString getLastSpell() const;
     QString getLastRuleset() const;

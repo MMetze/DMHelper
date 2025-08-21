@@ -295,7 +295,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] BasicDateServer Initialized";
 
     qDebug() << "[MainWindow] Initializing Rule Factory";
-    RuleFactory::Initialize(_options->getRulesetFileName());
+    RuleFactory::Initialize(_options->getDefaultRulesetFileName(), _options->getUserRulesetFileName());
     RuleFactory::Instance()->setDefaultBestiary(_options->getBestiaryFileName());
     connect(_options, &OptionsContainer::rulesetFileNameChanged, RuleFactory::Instance(), &RuleFactory::readRuleset);
     // Set the default ruleset
@@ -822,6 +822,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMonsterDataFile(newCampaignDialog->getMonsterDataFile());
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        _campaign->setShowFear(newCampaignDialog->isShowFear());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));

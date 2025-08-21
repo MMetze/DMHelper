@@ -11,10 +11,10 @@ class RuleFactory : public QObject
 {
     Q_OBJECT
 public:
-    explicit RuleFactory(const QString& rulesetFile, QObject *parent = nullptr);
+    explicit RuleFactory(const QString& defaultRulesetFile, const QString& userRulesetFile, QObject *parent = nullptr);
 
     static RuleFactory* Instance();
-    static void Initialize(const QString& rulesetFile);
+    static void Initialize(const QString& defaultRulesetFile, const QString& userRulesetFile);
     static void Shutdown();
 
     static RuleInitiative* createRuleInitiative(const QString& ruleInitiativeType, QObject *parent = nullptr);
@@ -28,7 +28,6 @@ public:
     QList<RulesetTemplate> getRulesetTemplates() const;
     bool rulesetExists(const QString& rulesetName) const;
     RulesetTemplate getRulesetTemplate(const QString& rulesetName) const;
-    QDir getRulesetDir() const;
 
     void setDefaultBestiary(const QString& bestiaryFile);
     QString getDefaultBestiary() const;
@@ -41,7 +40,6 @@ public slots:
 private:
     static RuleFactory* _instance;
 
-    QDir _rulesetDir;
     QString _defaultBestiary;
     QHash<QString, RulesetTemplate> _rulesetTemplates;
 
@@ -59,11 +57,12 @@ public:
             _monsterData(),
             _monsterUI(),
             _bestiary(),
+            _rulesetDir(),
             _combatantDone(false)
         {}
 
         RulesetTemplate(const QString& name, const QString& initiative, const QString& characterData, const QString& characterUI,
-                        const QString& monsterData, const QString& monsterUI, const QString& bestiary, bool combatantDone = false) :
+                        const QString& monsterData, const QString& monsterUI, const QString& bestiary, QDir _rulesetDir, bool combatantDone = false) :
             _name(name),
             _initiative(initiative),
             _characterData(characterData),
@@ -71,6 +70,7 @@ public:
             _monsterData(monsterData),
             _monsterUI(monsterUI),
             _bestiary(bestiary),
+            _rulesetDir(_rulesetDir),
             _combatantDone(combatantDone)
         {}
 
@@ -81,6 +81,7 @@ public:
         QString _monsterData;
         QString _monsterUI;
         QString _bestiary;
+        QDir _rulesetDir;
         bool _combatantDone;
 
     };

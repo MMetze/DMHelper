@@ -300,7 +300,10 @@ void BattleFrame::setBattle(EncounterBattle* battle)
     {
         Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
         if(campaign)
+        {
             disconnect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
+            disconnect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
+        }
     }
 
     _battle = battle;
@@ -315,6 +318,7 @@ void BattleFrame::setBattle(EncounterBattle* battle)
             ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
 
             connect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
+            connect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
         }
     }
 }
