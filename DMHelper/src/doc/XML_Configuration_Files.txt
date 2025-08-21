@@ -1,0 +1,455 @@
+DMHelper XML Configuration Files Documentation
+=============================================
+
+This document describes the various XML configuration files used in the DMHelper 
+application and their usage. DMHelper is a D&D campaign management tool that uses 
+XML files to store game data, templates, and configuration information.
+
+FILE CATEGORIES
+===============
+
+The XML files in DMHelper fall into several categories:
+
+1. Ruleset Configuration Files
+2. Character and Monster Template Files  
+3. Data Files (Bestiary, Equipment, Spellbook)
+4. Reference and Utility Files
+5. Table Files
+
+-------------------------------------------------------------------------------
+
+1. RULESET CONFIGURATION FILES
+===============================
+
+ruleset.xml
+-----------
+Location: DMHelper/src/resources/ruleset.xml
+Schema: ruleset.xsd
+
+Purpose: Defines the different game system rulesets supported by DMHelper 
+(D&D 5e, 2e, Daggerheart, etc.)
+
+Structure:
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:noNamespaceSchemaLocation="ruleset.xsd">
+  <ruleset name="DnD 5e 2014" initiative="5e" characterdata="./character5e.xml" 
+           characterui="./ui/character5e.ui" monsterdata="./monster5e.xml" 
+           monsterui="./ui/monster5e.ui" bestiary="DMHelperBestiary.xml" 
+           combatantDone="0"/>
+  <!-- Additional rulesets... -->
+</root>
+
+Key Attributes:
+- name: Display name of the ruleset
+- initiative: Initiative system type (5e, 2e, group)
+- characterdata: Path to character template XML file
+- characterui: Path to character UI definition file
+- monsterdata: Path to monster template XML file
+- monsterui: Path to monster UI definition file
+- bestiary: Default bestiary file for this ruleset
+- combatantDone: Checkbox behavior configuration
+
+Usage: Loaded at application startup to determine available game systems and 
+their associated template files.
+
+-------------------------------------------------------------------------------
+
+2. CHARACTER AND MONSTER TEMPLATE FILES
+========================================
+
+These files define the data structure and attributes for characters and 
+monsters in different game systems.
+
+Character Templates
+-------------------
+
+character5e.xml, character5e-2024.xml
+Location: DMHelper/src/resources/
+Schema: character.xsd
+
+Purpose: Defines the data structure for D&D 5e characters
+
+Structure:
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:noNamespaceSchemaLocation="character.xsd">
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:integer" name="strength" default="10"/>
+    <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
+    <!-- Additional attributes... -->
+</dmh:template>
+
+character2e.xml
+Purpose: D&D 2nd Edition character template
+
+character-daggerheart.xml  
+Purpose: Daggerheart RPG character template
+
+Key Elements:
+- dmh:attribute: Defines character attributes with type, name, and default values
+- Supports types: dmh:string, dmh:integer, dmh:boolean, dmh:dice
+- Includes ability scores, skills, spell slots, and character-specific data
+
+Monster Templates
+-----------------
+
+monster5e.xml
+Location: DMHelper/src/resources/
+Schema: Not specified (uses monster.xsd pattern)
+
+Purpose: Defines the data structure for D&D 5e monsters/creatures
+
+Structure:
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:integer" name="armor_class" default="10"/>
+    <dmh:attribute type="dmh:dice" name="hit_dice" default="1d8"/>
+    <!-- Additional attributes... -->
+</dmh:template>
+
+monster2e.xml
+Purpose: D&D 2nd Edition monster template
+
+monster-daggerheart.xml
+Purpose: Daggerheart RPG monster template
+
+Key Elements:
+- Basic stats (AC, HP, speed, size)
+- Ability scores and modifiers
+- Challenge rating and experience
+- Special abilities structure
+- Actions and legendary actions structure
+
+-------------------------------------------------------------------------------
+
+3. DATA FILES
+=============
+
+Bestiary Files
+--------------
+
+DMHelperBestiary.xml
+Location: DMHelper/src/bestiary/
+
+Purpose: Contains the actual monster/creature data for D&D 5e
+
+Structure:
+<root>
+ <bestiary majorversion="2" minorversion="3">
+  <monster alignment="lawful evil" armor_class="17" name="Aboleth" ...>
+   <legendary_actions>
+    <entry name="Detect" desc="The aboleth makes a Wisdom (Perception) check."/>
+   </legendary_actions>
+   <special_abilities>
+    <entry name="Amphibious" desc="The aboleth can breathe air and water."/>
+   </special_abilities>
+   <actions>
+    <entry name="Multiattack" desc="The aboleth makes three tentacle attacks."/>
+   </actions>
+  </monster>
+  <!-- Additional monsters... -->
+ </bestiary>
+</root>
+
+DMHelperBestiary2e.xml
+Purpose: D&D 2nd Edition bestiary data
+
+DMHelperBestiary-daggerheart.xml
+Purpose: Daggerheart RPG bestiary data
+
+Key Elements:
+- Version information for compatibility checking
+- Individual monster entries with full stat blocks
+- Actions, legendary actions, and special abilities
+- Complete attribute sets matching the monster template
+
+Equipment File
+--------------
+
+equipment.xml
+Location: DMHelper/src/resources/
+Schema: equipment.xsd
+
+Purpose: Contains magic items, weapons, and equipment data
+
+Structure:
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:noNamespaceSchemaLocation="equipment.xsd">
+  <magicitems>
+    <magicitem name="Adamantine Armor" category="Armor (medium or heavy, but not hide)" 
+               probability="uncommon"/>
+    <magicitem name="Armor of Resistance" category="Armor (light, medium, or heavy)" 
+               probability="rare" attunement="y">
+      <subcategory name="Acid"/>
+      <subcategory name="Cold"/>
+    </magicitem>
+  </magicitems>
+</root>
+
+Key Elements:
+- Magic item entries with rarity levels
+- Categories and subcategories
+- Attunement requirements
+- Probability weights for random generation
+
+Spellbook File
+--------------
+
+spellbook.xml
+Location: DMHelper/src/resources/
+Schema: spellbook.xsd
+
+Purpose: Contains spell definitions and data
+
+Structure:
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:noNamespaceSchemaLocation="spellbook.xsd">
+ <spellbook majorversion="1" minorversion="0">
+  <spell>
+   <name>Acid Arrow</name>
+   <level>2</level>
+   <school>Evocation</school>
+   <time>1 action</time>
+   <range>90 feet</range>
+   <components>V, S, M (powdered rhubarb leaf and an adder's stomach)</components>
+   <duration>Instantaneous</duration>
+   <classes>Druid (Swamp), Wizard, Fighter (Eldritch Knight)</classes>
+   <text>Spell description text...</text>
+   <effect shapeActive="1" colorG="170" ... />
+  </spell>
+ </spellbook>
+</root>
+
+Key Elements:
+- Version tracking
+- Complete spell entries with all D&D 5e spell information
+- Visual effect definitions for battle map integration
+- Class availability information
+
+Shop Configuration File
+-----------------------
+
+shops.xml
+Location: DMHelper/src/resources/
+Schema: shops.xsd
+
+Purpose: Defines shop types and item probabilities for random market generation
+
+Structure:
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:noNamespaceSchemaLocation="shops.xsd">
+  <locations>
+    <location name="Metropolis" probability="10.0">
+      <shop name="General Store" mundane="1.0" goods="1.0" magic_armor="0.1" .../>
+      <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="1.0" .../>
+    </location>
+  </locations>
+</root>
+
+Key Elements:
+- Location types (Metropolis, City, Village)
+- Shop types within each location
+- Probability weights for different item categories
+- Supports random market generation functionality
+
+-------------------------------------------------------------------------------
+
+4. REFERENCE AND UTILITY FILES
+===============================
+
+Quick Reference Data
+--------------------
+
+quickref_data.xml
+Location: DMHelper/src/resources/
+Schema: quickref_data.xsd
+
+Purpose: Contains game rules quick reference information
+
+Structure:
+<root>
+<section>
+  <name>Action</name>
+  <limitation>1/turn</limitation>
+  <subsection>
+    <data title="Attack">
+        <icon>crossed-swords</icon>
+        <subtitle>Melee or ranged attack</subtitle>
+        <description>Perform a melee or ranged attack with your weapon</description>
+        <reference>PHB, pgs. 192,194-195.</reference>
+        <bullets>
+            <bullet><![CDATA[Detailed rule text...]]></bullet>
+        </bullets>
+    </data>
+  </subsection>
+</section>
+</root>
+
+Key Elements:
+- Organized by action types (Actions, Bonus Actions, Reactions)
+- Icons and descriptions for quick reference
+- Page references to official rulebooks
+- Detailed rule explanations with bullets
+
+Calendar Configuration
+----------------------
+
+calendar.xml
+Location: DMHelper/src/resources/
+Schema: calendar.xsd
+
+Purpose: Defines calendar systems for campaign date tracking
+
+Structure:
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:noNamespaceSchemaLocation="calendar.xsd">
+  <calendar name="Gregorian" weeklength="7">
+    <month name="January" days="31"/>
+    <month name="February" days="28">
+      <leapyear name="Leap Day" day="29" period="4"/>
+    </month>
+    <month name="March" days="31">
+      <specialday name="Spring Equinox" day="20"/>
+    </month>
+  </calendar>
+  <calendar name="Harptos" weeklength="10">
+    <!-- Forgotten Realms calendar... -->
+  </calendar>
+</root>
+
+Key Elements:
+- Multiple calendar systems (Gregorian, Harptos/Forgotten Realms)
+- Week length definition
+- Month structures with day counts
+- Special days and leap year configurations
+- Support for fantasy world calendars
+
+-------------------------------------------------------------------------------
+
+5. TABLE FILES
+==============
+
+Random Tables
+-------------
+Location: DMHelper/src/resources/tables/
+Schema: table.xsd
+
+Purpose: Random generation tables for various game effects
+
+Files:
+- Short Term Madness.xml
+- Long Term Madness.xml
+- Indefinite Madness.xml
+
+Structure:
+<dmhelperlist name="Short Term Madness" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:noNamespaceSchemaLocation="table.xsd">
+  <entry weight="20">The character retreats into his or her mind and becomes paralyzed...</entry>
+  <entry weight="10">The character becomes incapacitated and spends the duration screaming...</entry>
+</dmhelperlist>
+
+Key Elements:
+- Weighted entries for random selection
+- Text descriptions for table results
+- Used for random effect generation during gameplay
+
+-------------------------------------------------------------------------------
+
+FILE RELATIONSHIPS AND USAGE PATTERNS
+======================================
+
+Template System
+---------------
+1. ruleset.xml defines which template files to use for each game system
+2. Character/Monster template files define the data structure
+3. Actual data (bestiary, characters) conform to these templates
+4. UI files (.ui) provide the visual layout for the templates
+
+Data Loading Process
+--------------------
+1. Application loads ruleset.xml to determine available game systems
+2. Selected ruleset determines which template and data files to load
+3. Templates define the structure for character/monster creation
+4. Data files provide pre-built content (monsters, spells, equipment)
+
+Configuration Hierarchy
+------------------------
+ruleset.xml (defines game systems)
+    |
+    v
+character/monster template files (define data structure)
+    |
+    v
+bestiary/spellbook/equipment files (provide actual game content)
+    |
+    v
+table files (provide random generation content)
+
+Version Management
+------------------
+- Major/minor version numbers in data files (bestiary, spellbook)
+- Version compatibility checking in application code
+- Conversion routines for upgrading older file formats
+
+XML Processing
+--------------
+- Uses Qt's QDom framework for XML parsing and generation
+- Classes implement inputXML() and outputXML() methods
+- Schema validation using XSD files
+- CDATA sections used for large text blocks with formatting
+
+-------------------------------------------------------------------------------
+
+SCHEMA FILES
+============
+
+All XML files have corresponding XSD schema files for validation:
+
+- character.xsd - Character template validation
+- equipment.xsd - Equipment data validation
+- shops.xsd - Shop configuration validation
+- spellbook.xsd - Spellbook data validation
+- calendar.xsd - Calendar configuration validation
+- quickref_data.xsd - Quick reference validation
+- table.xsd - Random table validation
+- ruleset.xsd - Ruleset configuration validation
+
+These schemas define the valid structure, required attributes, and data types 
+for each XML file type, ensuring data integrity and compatibility.
+
+-------------------------------------------------------------------------------
+
+USAGE IN APPLICATION
+====================
+
+Loading XML Files
+-----------------
+The application uses these XML files in several ways:
+
+1. Startup Configuration - ruleset.xml loaded to populate game system options
+2. Template Loading - Character and monster templates loaded based on selected 
+   ruleset
+3. Data Population - Bestiary, spellbook, and equipment data loaded for content
+4. Reference Integration - Quick reference and table data loaded for gameplay 
+   features
+5. Campaign Storage - User campaign data saved/loaded using the defined XML 
+   structures
+
+Customization
+-------------
+Users and developers can:
+- Modify existing data files to customize content
+- Create new bestiary entries following the established format
+- Add custom equipment or spells
+- Create custom random tables
+- Modify templates for house rules (advanced)
+
+File Dependencies
+-----------------
+- Ruleset files reference template and data files by path
+- Template files must match the structure expected by data files
+- UI files must correspond to template structures
+- Schema files provide validation for all XML content
+
+This XML configuration system provides DMHelper with flexible, extensible data 
+management while maintaining structure and validation through schemas.
