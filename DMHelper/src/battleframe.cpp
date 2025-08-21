@@ -16,6 +16,7 @@
  * 4. Optimized buildCombatantWidgets():
  *    - Avoids duplicate widget additions to layout
  *    - Better reuse of existing widget instances
+ *    - Cached combatant count in loops to avoid repeated function calls
  * 
  * 5. Conditional debug output:
  *    - Added BATTLE_DIALOG_LOG_WIDGET_OPERATIONS flag
@@ -23,6 +24,13 @@
  * 
  * 6. Updated signal/slot connections:
  *    - Converted some old-style SIGNAL/SLOT to new-style for better performance
+ * 
+ * 7. Optimized map lookups:
+ *    - Replaced contains() + value() pattern with single value() call in createCombatantWidget()
+ *    - Reduced QMap lookup overhead
+ * 
+ * 8. Loop optimizations:
+ *    - Cached function call results (getCombatantCount()) in performance-critical loops
  */
 
 #include "battleframe.h"
@@ -3555,9 +3563,10 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
 
     CombatantWidget* newWidget = nullptr;
 
-    if(_combatantWidgets.contains(combatant))
+    // Optimized: Use single lookup instead of contains() + value()
+    newWidget = _combatantWidgets.value(combatant, nullptr);
+    if(newWidget)
     {
-        newWidget = _combatantWidgets.value(combatant);
         newWidget->setShowDone((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox()));
         qDebug() << "[Battle Frame] found widget for combatant " << combatant->getName() << ": " << reinterpret_cast<quint64>(newWidget);
         return newWidget;
@@ -3660,7 +3669,8 @@ void BattleFrame::buildCombatantWidgets()
         return;
 
     // Optimized: Build widgets more efficiently by reusing existing widgets when possible
-    for(int i = 0; i < _model->getCombatantCount(); ++i)
+    const int combatantCount = _model->getCombatantCount();
+    for(int i = 0; i < combatantCount; ++i)
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(i);
         CombatantWidget* widget = createCombatantWidget(combatant);
@@ -3710,7 +3720,8 @@ void BattleFrame::reorderCombatantWidgets()
     }
     
     // Re-add widgets in the correct order
-    for(int i = 0; i < _model->getCombatantCount(); ++i)
+    const int combatantCount = _model->getCombatantCount();
+    for(int i = 0; i < combatantCount; ++i)
     {
         CombatantWidget* widget = _combatantWidgets.value(_model->getCombatant(i));
         if(widget)
