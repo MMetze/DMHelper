@@ -13,6 +13,7 @@ class PublishGLImageRenderer : public PublishGLRenderer
     Q_OBJECT
 public:
     PublishGLImageRenderer(CampaignObjectBase* renderObject, const QImage& image, QColor color, QObject *parent = nullptr);
+    PublishGLImageRenderer(CampaignObjectBase* renderObject, QImage&& image, QColor color, QObject *parent = nullptr);
     virtual ~PublishGLImageRenderer() override;
 
     virtual QColor getBackgroundColor() override;
@@ -35,6 +36,7 @@ public slots:
     virtual void updateProjectionMatrix() override;
 
     void setImage(const QImage& image);
+    void setImage(QImage&& image);
     //void setColor(QColor color);
 
 protected:

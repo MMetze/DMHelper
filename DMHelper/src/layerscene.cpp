@@ -515,7 +515,7 @@ QImage LayerScene::mergedImage()
     {
         if(_layers.at(i))
         {
-            QImage oneImage = getLayerImage(_layers.at(i));
+            const QImage& oneImage = getLayerImage(_layers.at(i));
             if(!oneImage.isNull())
                 painter.drawImage(_layers.at(i)->getPosition(), oneImage);
         }
@@ -842,10 +842,12 @@ void LayerScene::resetLayerOrders()
         _layers[i]->setOrder(i);
 }
 
-QImage LayerScene::getLayerImage(Layer* layer)
+const QImage& LayerScene::getLayerImage(Layer* layer)
 {
+    static const QImage emptyImage; // Static empty image for null returns
+    
     if(!layer)
-        return QImage();
+        return emptyImage;
 
     if(layer->getType() == DMHelper::LayerType_Image)
     {
@@ -856,20 +858,32 @@ QImage LayerScene::getLayerImage(Layer* layer)
     else if(layer->getType() == DMHelper::LayerType_Video)
     {
         LayerVideo* layerVideo = dynamic_cast<LayerVideo*>(layer);
-        if(layerVideo)
-            return layerVideo->getScreenshot();
+        if(layerVideo) {
+            // Note: getScreenshot() returns by value, but we cache it to return reference
+            static QImage videoImageCache = layerVideo->getScreenshot();
+            videoImageCache = layerVideo->getScreenshot(); // Update cache
+            return videoImageCache;
+        }
     }
     else if(layer->getType() == DMHelper::LayerType_Fow)
     {
         LayerFow* layerFow = dynamic_cast<LayerFow*>(layer);
-        if(layerFow)
-            return layerFow->getImage();
+        if(layerFow) {
+            // Note: getImage() returns by value, but we cache it to return reference
+            static QImage fowImageCache = layerFow->getImage();
+            fowImageCache = layerFow->getImage(); // Update cache
+            return fowImageCache;
+        }
     }
     else if(layer->getType() == DMHelper::LayerType_Blank)
     {
         LayerBlank* layerBlank = dynamic_cast<LayerBlank*>(layer);
-        if(layerBlank)
-            return layerBlank->getImage();
+        if(layerBlank) {
+            // Note: getImage() returns by value, but we cache it to return reference
+            static QImage blankImageCache = layerBlank->getImage();
+            blankImageCache = layerBlank->getImage(); // Update cache
+            return blankImageCache;
+        }
     }
     else if(layer->getType() == DMHelper::LayerType_Reference)
     {
@@ -878,5 +892,5 @@ QImage LayerScene::getLayerImage(Layer* layer)
             return getLayerImage(layerReference->getReferenceLayer());
     }
 
-    return QImage();
+    return emptyImage;
 }

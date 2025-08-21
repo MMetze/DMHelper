@@ -31,8 +31,8 @@ public:
     virtual void applySize(const QSize& size) override;
 
     QString getImageFile() const;
-    QImage getImage() const;
-    QImage getImageUnfiltered() const;
+    const QImage& getImage() const;
+    const QImage& getImageUnfiltered() const;
 
     bool isFilterApplied() const;
     MapColorizeFilter getFilter() const;
@@ -72,6 +72,9 @@ protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    // Internal helper methods
+    void invalidateFilteredCache();
+
     // DM Window Methods
     void cleanupDM();
 
@@ -91,6 +94,8 @@ protected:
     QImage _layerImage;
     bool _filterApplied;
     MapColorizeFilter _filter;
+    mutable QImage _filteredImageCache;
+    mutable bool _filteredImageCacheValid;
 
 };
 

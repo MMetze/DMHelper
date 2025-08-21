@@ -53,6 +53,11 @@ protected:
     float _x;
     float _y;
     QSize _imageSize;
+    
+    // Cache for the converted OpenGL image to avoid repeated conversions
+    mutable QImage _originalImageCache;
+    mutable QImage _glImageCache;
+    mutable bool _glImageCacheValid;
 };
 
 inline bool operator==(const PublishGLImage& lhs, const PublishGLImage& rhs){ return lhs.getTextureID() == rhs.getTextureID(); }

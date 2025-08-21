@@ -15,7 +15,10 @@ PublishGLImage::PublishGLImage(const QImage& image, bool centered, QObject *pare
     _scaleY(1.f),
     _x(0.f),
     _y(0.f),
-    _imageSize()
+    _imageSize(),
+    _originalImageCache(),
+    _glImageCache(),
+    _glImageCacheValid(false)
 {
     createImageObjects(image);
 }
@@ -32,7 +35,10 @@ PublishGLImage::PublishGLImage(const QImage& image, int textureParam, bool cente
     _scaleY(1.f),
     _x(0.f),
     _y(0.f),
-    _imageSize()
+    _imageSize(),
+    _originalImageCache(),
+    _glImageCache(),
+    _glImageCacheValid(false)
 {
     createImageObjects(image);
 }
@@ -45,6 +51,11 @@ PublishGLImage::~PublishGLImage()
 void PublishGLImage::cleanup()
 {
     // qDebug() << "[PublishGLImage] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+
+    // Invalidate image cache
+    _glImageCacheValid = false;
+    _originalImageCache = QImage();
+    _glImageCache = QImage();
 
     if(QOpenGLContext::currentContext())
     {
@@ -301,11 +312,25 @@ void PublishGLImage::createImageObjects(const QImage& image)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
 
     // load and generate the background texture
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    // Check if we can reuse the cached converted image
+    const QImage* glBackgroundImage;
+    QImage convertedImage;
+    
+    if (_originalImageCache.cacheKey() == image.cacheKey() && _glImageCacheValid) {
+        // Reuse cached converted image
+        glBackgroundImage = &_glImageCache;
+    } else {
+        // Convert and cache the image
+        _originalImageCache = image;
+        _glImageCache = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+        _glImageCacheValid = true;
+        glBackgroundImage = &_glImageCache;
+    }
+    
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage->width(), glBackgroundImage->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage->bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 
-    _imageSize = glBackgroundImage.size();
+    _imageSize = glBackgroundImage->size();
 }
 
 void PublishGLImage::updateMatrix()

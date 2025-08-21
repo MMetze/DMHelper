@@ -109,7 +109,7 @@ protected:
     void connectLayer(Layer* layer);
     void disconnectLayer(Layer* layer);
     void resetLayerOrders();
-    QImage getLayerImage(Layer* layer);
+    const QImage& getLayerImage(Layer* layer);
 
     bool _initialized;
     QList<Layer*> _layers;

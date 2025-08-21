@@ -17,6 +17,19 @@ PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject,
 {
 }
 
+PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject, QImage&& image, QColor color, QObject *parent) :
+    PublishGLRenderer(parent),
+    _renderObject(renderObject),
+    _image(std::move(image)),
+    _color(color),
+    _scene(),
+    _initialized(false),
+    _newProjection(false),
+    _shaderProgram(0),
+    _imageGLObject(nullptr)
+{
+}
+
 PublishGLImageRenderer::~PublishGLImageRenderer()
 {
     PublishGLImageRenderer::cleanupGL();
@@ -250,6 +263,21 @@ void PublishGLImageRenderer::setImage(const QImage& image)
         if(_imageGLObject)
         {
             _imageGLObject->setImage(image);
+            _newProjection = true;
+            emit updateWidget();
+        }
+    }
+}
+
+void PublishGLImageRenderer::setImage(QImage&& image)
+{
+    if(image != _image)
+    {
+        _image = std::move(image);
+
+        if(_imageGLObject)
+        {
+            _imageGLObject->setImage(_image);
             _newProjection = true;
             emit updateWidget();
         }

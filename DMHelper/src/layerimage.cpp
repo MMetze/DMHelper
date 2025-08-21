@@ -17,7 +17,9 @@ LayerImage::LayerImage(const QString& name, const QString& filename, int order, 
     _originalImage(),
     _layerImage(),
     _filterApplied(false),
-    _filter()
+    _filter(),
+    _filteredImageCache(),
+    _filteredImageCacheValid(false)
 {
 }
 
@@ -136,8 +138,9 @@ void LayerImage::applySize(const QSize& size)
         return;
 
     _layerImage = _originalImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    invalidateFilteredCache(); // Layer image changed
 
-    QImage newImage = getImage();
+    const QImage& newImage = getImage();
     emit dirty();
     emit imageChanged(newImage);
 
@@ -152,12 +155,24 @@ QString LayerImage::getImageFile() const
     return _filename;
 }
 
-QImage LayerImage::getImage() const
+const QImage& LayerImage::getImage() const
 {
-    return _filterApplied ? _filter.apply(_layerImage) : _layerImage;
+    if (!_filterApplied) {
+        return _layerImage;
+    }
+    
+    // Return cached filtered image if valid
+    if (_filteredImageCacheValid) {
+        return _filteredImageCache;
+    }
+    
+    // Generate and cache filtered image
+    _filteredImageCache = _filter.apply(_layerImage);
+    _filteredImageCacheValid = true;
+    return _filteredImageCache;
 }
 
-QImage LayerImage::getImageUnfiltered() const
+const QImage& LayerImage::getImageUnfiltered() const
 {
     return _layerImage;
 }
@@ -287,6 +302,7 @@ void LayerImage::initialize(const QSize& sceneSize)
         {
             _filename = reader->getFilename();
             _layerImage = _originalImage;
+            invalidateFilteredCache(); // Layer image was set
         }
         delete reader;
     }
@@ -299,6 +315,7 @@ void LayerImage::uninitialize()
 {
     _layerImage = QImage();
     _originalImage = QImage();
+    invalidateFilteredCache(); // Images were cleared
 }
 
 void LayerImage::updateImage(const QImage& image)
@@ -311,7 +328,10 @@ void LayerImage::updateImage(const QImage& image)
     _layerImage = _originalImage;
     _size = _layerImage.size();
 
-    QImage newImage = getImage();
+    // Invalidate filtered cache since layerImage changed
+    invalidateFilteredCache();
+
+    const QImage& newImage = getImage();
     emit dirty();
     emit imageChanged(newImage);
     changeImageInternal(newImage);
@@ -326,7 +346,7 @@ void LayerImage::setFileName(const QString& filename)
     cleanupPlayer();
     _filename = filename;
 
-    QImage newImage = getImage();
+    const QImage& newImage = getImage();
     emit dirty();
     emit imageChanged(newImage); // TODO: Layers - make sure this really shares the updated image
     changeImageInternal(newImage);
@@ -338,7 +358,9 @@ void LayerImage::setApplyFilter(bool applyFilter)
         return;
 
     _filterApplied = applyFilter;
-    QImage newImage = getImage();
+    invalidateFilteredCache(); // Filter state changed
+    
+    const QImage& newImage = getImage();
     emit dirty();
     emit imageChanged(newImage);
     changeImageInternal(newImage);
@@ -350,7 +372,9 @@ void LayerImage::setFilter(const MapColorizeFilter& filter)
         return;
 
     _filter = filter;
-    QImage newImage = getImage();
+    invalidateFilteredCache(); // Filter changed
+    
+    const QImage& newImage = getImage();
     emit dirty();
     emit imageChanged(newImage);
     changeImageInternal(newImage);
@@ -368,6 +392,11 @@ void LayerImage::changeImageInternal(const QImage& newImage)
 
     if(_imageGLObject)
         _imageGLObject->setImage(newImage);
+}
+
+void LayerImage::invalidateFilteredCache()
+{
+    _filteredImageCacheValid = false;
 }
 
 void LayerImage::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
