@@ -89,6 +89,7 @@
 #include "mapselectdialog.h"
 #include "mapblankdialog.h"
 #include "battledialogmodelcharacter.h"
+#include "newentrydialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -1007,6 +1008,11 @@ void MainWindow::newCharacter()
 
 void MainWindow::importCharacter()
 {
+    importCharacter(QString());
+}
+
+void MainWindow::importCharacter(const QString& importLinkName)
+{
     if(!_campaign)
         return;
 
@@ -1015,7 +1021,7 @@ void MainWindow::importCharacter()
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::updateCampaignTree);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
-    importer->importCharacter(_campaign, true);
+    importer->importCharacter(_campaign, importLinkName, true);
 }
 
 void MainWindow::importItem()
@@ -1041,7 +1047,21 @@ void MainWindow::newParty()
 
 void MainWindow::newTextEncounter()
 {
-    newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
+//    newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
+    NewEntryDialog dlg(_options, this);
+    if(dlg.exec() != QDialog::Accepted)
+        return;
+
+    CampaignObjectBase* newEntry = dlg.createNewEntry();
+    if(newEntry)
+    {
+        addNewObject(newEntry);
+    }
+    else
+    {
+        if((dlg.isImportNeeded()) && (!dlg.getImportString().isEmpty()))
+            importCharacter(dlg.getImportString());
+    }
 }
 
 void MainWindow::newLinkedText()

@@ -30,7 +30,7 @@ void Party::copyValues(const CampaignObjectBase* other)
         return;
 
     _icon = otherParty->_icon;
-    _iconPixmap.setBasePixmap(_icon.isEmpty() ? QString(":/img/data/icon_party.png") : _icon);
+    _iconPixmap.setBasePixmap(_icon.isEmpty() ? QString(":/img/data/icon_contentparty.png") : _icon);
 
     EncounterText::copyValues(other);
 }
@@ -57,7 +57,7 @@ QString Party::getPartyIcon(bool localOnly) const
 QPixmap Party::getIconPixmap(DMHelper::PixmapSize iconSize)
 {
     if(!_iconPixmap.isValid())
-        _iconPixmap.setBasePixmap(QString(":/img/data/icon_party.png"));
+        _iconPixmap.setBasePixmap(QString(":/img/data/icon_contentparty.png"));
 
     return _iconPixmap.getPixmap(iconSize);
 }
@@ -81,7 +81,7 @@ void Party::setIcon(const QString &newIcon)
     if(newIcon != _icon)
     {
         _icon = newIcon;
-        _iconPixmap.setBasePixmap(_icon.isEmpty() ? QString(":/img/data/icon_party.png") : _icon);
+        _iconPixmap.setBasePixmap(_icon.isEmpty() ? QString(":/img/data/icon_contentparty.png") : _icon);
         emit dirty();
         emit iconChanged(this);
     }

@@ -140,6 +140,7 @@ SOURCES += main.cpp\
     monsterclassv2converter.cpp \
     monsterfactory.cpp \
     newcampaigndialog.cpp \
+    newentrydialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
     objectimportworker.cpp \
@@ -438,6 +439,7 @@ HEADERS  += mainwindow.h \
     monsterclassv2converter.h \
     monsterfactory.h \
     newcampaigndialog.h \
+    newentrydialog.h \
     objectfactory.h \
     objectimportdialog.h \
     objectimportworker.h \
@@ -657,6 +659,7 @@ FORMS    += mainwindow.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
     newcampaigndialog.ui \
+    newentrydialog.ui \
     objectimportdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
