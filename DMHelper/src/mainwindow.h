@@ -82,6 +82,7 @@ public slots:
 
     void newCharacter();
     void importCharacter();
+    void importCharacter(const QString& importLinkName);
     void importItem();
     void newParty();
     void newTextEncounter();

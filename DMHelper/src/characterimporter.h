@@ -23,7 +23,7 @@ signals:
     void characterCreated(CampaignObjectBase* character);
 
 public slots:
-    void importCharacter(Campaign* campaign, bool isCharacter = true);
+    void importCharacter(Campaign* campaign, const QString& importLinkName = QString(), bool isCharacter = true);
     void updateCharacter(Characterv2* character);
     void updateCharacters(QList<Characterv2*> characters);
 

@@ -2,6 +2,11 @@ Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
 Create "Wizards" for add Map or add Combat rather than multiple questions
 Drag and drop to add a map/combat
+    - add map/battle/media layer
+    - add an object to a battle
+    - add a token to a monster
+    - add an icon to a PC (including enabling multiple tokens for PCs/NPCs
+DONE Enhanced drop downs with completers
 DONE Templates for Daggerheart
 DONE Fear counter in main window for daggerheart campaigns only
 DONE Render fear counter in Battles, top-right corner

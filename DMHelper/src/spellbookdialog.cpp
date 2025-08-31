@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QPainter>
+#include <QCompleter>
 #include <QDebug>
 
 const int CONDITION_FRAME_SPACING = 8;
@@ -28,7 +29,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->btnRight, SIGNAL(clicked()), this, SLOT(nextSpell()));
     connect(ui->btnNewSpell, SIGNAL(clicked()), this, SLOT(createNewSpell()));
     connect(ui->btnDeleteSpell, SIGNAL(clicked()), this, SLOT(deleteCurrentSpell()));
-    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setSpell(newValue);});
+    connect(ui->cmbSearch, &QComboBox::textActivated, this, [=](const QString &newValue) {setSpell(newValue);});
 
     ui->edtLevel->setValidator(new QIntValidator(0, 100));
     connect(ui->edtName, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
@@ -65,6 +66,13 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    // Create a completer and attach it to the search combo box
+    QCompleter *completer = new QCompleter(ui->cmbSearch->model(), this);
+    completer->setFilterMode(Qt::MatchContains);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    ui->cmbSearch->setCompleter(completer);
 }
 
 SpellbookDialog::~SpellbookDialog()

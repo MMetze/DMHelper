@@ -58,6 +58,9 @@ color: rgb(50, 50, 50);</string>
          <height>16777215</height>
         </size>
        </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
        <property name="insertPolicy">
         <enum>QComboBox::NoInsert</enum>
        </property>
@@ -306,7 +309,6 @@ color: rgb(50, 50, 50);</string>
             </property>
             <property name="font">
              <font>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -897,7 +899,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QLabel" name="label_47">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -946,7 +947,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QLabel" name="label_58">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -962,7 +962,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QLabel" name="label_5">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -988,7 +987,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QLabel" name="label_59">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1018,7 +1016,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QLabel" name="label_54">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1047,7 +1044,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QLabel" name="label_14">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1063,7 +1059,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QCheckBox" name="chkConcentration">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1076,7 +1071,6 @@ color: rgb(50, 50, 50);</string>
               <widget class="QCheckBox" name="chkRitual">
                <property name="font">
                 <font>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1413,7 +1407,6 @@ color: rgb(50, 50, 50);</string>
              </property>
              <property name="font">
               <font>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -1729,7 +1722,6 @@ color: rgb(50, 50, 50);</string>
             <widget class="QLabel" name="label_40">
              <property name="font">
               <font>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>

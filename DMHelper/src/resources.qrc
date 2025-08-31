@@ -272,6 +272,7 @@
         <file>data/icon_check.png</file>
         <file>data/hoodeyeless.png</file>
         <file>data/hoodeyelessborder.png</file>
+        <file>data/icon_media.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

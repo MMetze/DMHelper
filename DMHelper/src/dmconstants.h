@@ -185,7 +185,10 @@ namespace DMHelper
         FileType_Unknown = 0,
         FileType_Text,
         FileType_HTML,
-        FileType_Markdown
+        FileType_Markdown,
+        FileType_Image,
+        FileType_Video,
+        FileType_Audio
     };
 
     enum TransparentType
