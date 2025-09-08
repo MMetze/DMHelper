@@ -2723,6 +2723,26 @@ void BattleFrame::handleLayerSelected(Layer* layer)
         _scene->setDistanceScale(newGrid->getConfig().getGridScale());
         emit gridConfigChanged(newGrid->getConfig());
     }
+
+    if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWEdit)
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_model->getLayerScene().getNearest(layer, DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
+    }
 }
 
 void BattleFrame::itemLink()
@@ -3377,7 +3397,12 @@ void BattleFrame::setEditMode()
                 {
                     LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
                     if(fowLayer)
-                        fowLayer->applyOpacity(fowLayer == activeLayer ? 1.3 : 0.5);
+                    {
+                        if(fowLayer == activeLayer)
+                            fowLayer->raiseOpacity();
+                        else
+                            fowLayer->dipOpacity();
+                    }
                 }
             }
 
@@ -3395,6 +3420,17 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+
+        if(_model)
+        {
+            QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                if(fowLayer)
+                    fowLayer->resetOpacity();
+            }
+        }
     }
 }
 

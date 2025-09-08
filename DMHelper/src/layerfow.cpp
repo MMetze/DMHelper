@@ -16,6 +16,8 @@
 #include <QDebug>
 
 const qreal LAYER_FOW_DM_OPACITY = 0.6;
+const qreal LAYER_FOW_DM_DIP = 0.5;
+const qreal LAYER_FOW_DM_RAISE = 1.3;
 
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -455,6 +457,24 @@ QRect LayerFow::getFoWVisibleRect() const
     }
 
     return QRect(left, top, right - left, bottom - top);
+}
+
+void LayerFow::dipOpacity()
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(_opacityReference * LAYER_FOW_DM_OPACITY * LAYER_FOW_DM_DIP);
+}
+
+void LayerFow::raiseOpacity()
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(_opacityReference * LAYER_FOW_DM_OPACITY * LAYER_FOW_DM_RAISE);
+}
+
+void LayerFow::resetOpacity()
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(_opacityReference * LAYER_FOW_DM_OPACITY);
 }
 
 void LayerFow::dmInitialize(QGraphicsScene* scene)
