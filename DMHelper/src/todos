@@ -1,4 +1,3 @@
-Leaving the map area with the pointer turns it off on the dm view
 
 Daggerheart: show a range-finder with circles of close, near far range
 DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
@@ -27,6 +26,7 @@ DONE Use DPI from an image to guess the right size of the grid
 DONE Double-click on select map dlg to make a selection
 DONE Selected FOW layer highlighted when editing
 
+FIXED: Leaving the map area with the pointer turns it off on the dm view
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved
     TESTED Battle

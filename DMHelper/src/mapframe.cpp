@@ -683,8 +683,30 @@ void MapFrame::publishWindowMouseRelease(const QPointF& position)
 
 void MapFrame::layerSelected(int selected)
 {
-    if(_mapSource)
-        _mapSource->getLayerScene().setSelectedLayerIndex(selected);
+    if(!_mapSource)
+        return;
+
+    _mapSource->getLayerScene().setSelectedLayerIndex(selected);
+
+    if(_editMode == DMHelper::EditMode_FoW)
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
+    }
 }
 
 void MapFrame::publishClicked(bool checked)
@@ -1002,6 +1024,17 @@ bool MapFrame::editModeToggled(int editMode)
     if(_editMode == editMode)
         return false;
 
+    if((_mapSource) && (_editMode == DMHelper::EditMode_FoW))
+    {
+        QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+        foreach(Layer* l, allFows)
+        {
+            LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+            if(fowLayer)
+                fowLayer->resetOpacity();
+        }
+    }
+
     changeEditMode(_editMode, false);
     changeEditMode(editMode, true);
 
@@ -1028,6 +1061,26 @@ bool MapFrame::editModeToggled(int editMode)
             break;
         default:
             break;
+    }
+
+    if((_mapSource) && (_editMode == DMHelper::EditMode_FoW))
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
     }
 
     setMapCursor();
