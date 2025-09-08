@@ -8,17 +8,19 @@ namespace Ui {
 class NewEntryDialog;
 }
 
+class Campaign;
 class OptionsContainer;
 class CampaignObjectBase;
 class QLabel;
 class VideoPlayerScreenshot;
+class Map;
 
 class NewEntryDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit NewEntryDialog(OptionsContainer* options, QWidget *parent = nullptr);
+    explicit NewEntryDialog(Campaign* campaign, OptionsContainer* options, CampaignObjectBase* currentObject, QWidget *parent = nullptr);
     ~NewEntryDialog();
 
     CampaignObjectBase* createNewEntry();
@@ -61,6 +63,11 @@ protected slots:
     void readMapFile();
     void browseMapFile();
 
+    // Combat Page members
+    void readCombatFile();
+    void browseCombatFile();
+    void selectCombatSource();
+
     // Helper functions
     bool isSelectedEntryValid();
 
@@ -75,11 +82,17 @@ protected slots:
 private:
     Ui::NewEntryDialog *ui;
 
+    Campaign* _campaign;
     OptionsContainer* _options;
+    CampaignObjectBase* _currentObject;
     QString _primaryImageFile;
     VideoPlayerScreenshot* _screenshot;
     DMHelper::FileType _imageType;
     int _gridSizeGuess;
+
+    Map* _referenceMap;
+    QSize _imageSize;
+    QColor _imageColor;
 };
 
 #endif // NEWENTRYDIALOG_H

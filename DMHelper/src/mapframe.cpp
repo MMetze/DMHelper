@@ -240,7 +240,7 @@ void MapFrame::resetFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(128, 0, 0, 255)));
@@ -258,7 +258,7 @@ void MapFrame::clearFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(128, 0, 0, 0)));
@@ -1245,7 +1245,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
                 if(layer)
                 {
                     shapeRect.translate(-layer->getPosition());
@@ -1285,7 +1285,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
-            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
             if(layer)
             {
                 drawPoint -= layer->getPosition();

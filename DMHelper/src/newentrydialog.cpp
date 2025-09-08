@@ -16,9 +16,14 @@
 #include "layerimage.h"
 #include "layervideo.h"
 #include "layerfow.h"
+#include "layergrid.h"
+#include "layertokens.h"
 #include "videoplayerscreenshot.h"
 #include "map.h"
 #include "mapfactory.h"
+#include "encounterbattle.h"
+#include "mapselectdialog.h"
+#include "mapblankdialog.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -26,14 +31,19 @@
 #include <QMimeDatabase>
 #include <QDebug>
 
-NewEntryDialog::NewEntryDialog(OptionsContainer* options, QWidget *parent) :
+NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, CampaignObjectBase* currentObject, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::NewEntryDialog),
+    _campaign(campaign),
     _options(options),
+    _currentObject(currentObject),
     _primaryImageFile(),
     _screenshot(nullptr),
     _imageType(DMHelper::FileType_Unknown),
-    _gridSizeGuess(DMHelper::STARTING_GRID_SCALE)
+    _gridSizeGuess(DMHelper::STARTING_GRID_SCALE),
+    _referenceMap(nullptr),
+    _imageSize(),
+    _imageColor()
 {
     ui->setupUi(this);
 
@@ -71,6 +81,11 @@ NewEntryDialog::NewEntryDialog(OptionsContainer* options, QWidget *parent) :
     // Map Page
     connect(ui->edtMapFile, &QLineEdit::editingFinished, this, &NewEntryDialog::readMapFile);
     connect(ui->btnMapBrowse, &QPushButton::clicked, this, &NewEntryDialog::browseMapFile);
+
+    // Combat Page
+    connect(ui->edtCombatFile, &QLineEdit::editingFinished, this, &NewEntryDialog::readCombatFile);
+    connect(ui->btnCombatBrowse, &QPushButton::clicked, this, &NewEntryDialog::browseCombatFile);
+    connect(ui->btnCombatSelectMap, &QPushButton::clicked, this, &NewEntryDialog::selectCombatSource);
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Create Entry"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
@@ -290,7 +305,134 @@ CampaignObjectBase* NewEntryDialog::createMapEntry()
 
 CampaignObjectBase* NewEntryDialog::createBattleEntry()
 {
+    //now this...
     return nullptr;
+    /*
+    EncounterBattle* battle = dynamic_cast<EncounterBattle*>(EncounterFactory().createObject(DMHelper::CampaignType_Battle, -1, getNewEntryName(), false));
+    if(!battle)
+        return nullptr;
+
+    battle->createBattleDialogModel();
+    if(!battle->getBattleDialogModel())
+        return nullptr;
+
+    int gridScale = DMHelper::STARTING_GRID_SCALE;
+    LayerGrid* gridLayer = nullptr;
+    LayerTokens* monsterTokens = nullptr;
+    LayerTokens* pcTokens = nullptr;
+    bool hasGrid = false;
+
+    MapSelectDialog mapSelectDlg(*_campaign, currentObject->getID());
+    if(mapSelectDlg.exec() == QDialog::Accepted)
+    {
+        if(mapSelectDlg.isMapSelected())
+        {
+            Map* battleMap = mapSelectDlg.getSelectedMap();
+            if(battleMap)
+            {
+                battleMap->initialize();
+                gridScale = battleMap->getLayerScene().getScale();
+                hasGrid = battleMap->getLayerScene().layerCount(DMHelper::LayerType_Grid) > 0;
+
+                // Create a grid after the first image layer, a monster token layer before the FoW
+                for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
+                {
+                    Layer* layer = battleMap->getLayerScene().layerAt(i);
+                    if(layer)
+                    {
+                        if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                        {
+                            monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
+                            battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                        }
+
+                        battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
+
+                        if((!hasGrid) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                        {
+                            gridLayer = new LayerGrid(QString("Grid"));
+                            battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                            hasGrid = true;
+                        }
+                    }
+                }
+            }
+        }
+        else if(mapSelectDlg.isBlankMap())
+        {
+            MapBlankDialog blankDlg;
+            int result = blankDlg.exec();
+            if(result == QDialog::Accepted)
+            {
+                LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
+                blankLayer->setSize(blankDlg.getMapSize());
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(blankLayer);
+            }
+        }
+        else if(mapSelectDlg.isNewMapImage())
+        {
+            Layer* mapLayer = selectMapFile();
+            if(mapLayer)
+            {
+                mapLayer->initialize(QSize());
+
+                if(mapLayer->getType() == DMHelper::LayerType_Image)
+                {
+                    LayerImage* imageLayer = dynamic_cast<LayerImage*>(mapLayer);
+                    if((imageLayer) && (!imageLayer->getImageUnfiltered().isNull()))
+                    {
+                        int gridSizeGuess = qRound(static_cast<qreal>(imageLayer->getImageUnfiltered().dotsPerMeterX()) * 0.0254);
+                        if(gridSizeGuess >= 5)
+                            gridScale = gridSizeGuess;
+                    }
+                }
+
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(mapLayer);
+            }
+        }
+    }
+
+    if((!gridLayer) && (!hasGrid))
+    {
+        gridLayer = new LayerGrid(QString("Grid"));
+        battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+    }
+
+    if(gridLayer)
+        gridLayer->getConfig().setGridScale(gridScale);
+    battle->getBattleDialogModel()->getLayerScene().setScale(gridScale);
+
+    if(!monsterTokens)
+    {
+        monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
+        battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+    }
+
+    pcTokens = new LayerTokens(battle->getBattleDialogModel(), QString("PC tokens"));
+    battle->getBattleDialogModel()->getLayerScene().appendLayer(pcTokens);
+
+    // Add the active characters
+    battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
+    QPointF mapCenter = battle->getBattleDialogModel()->getLayerScene().boundingRect().center();
+    if(mapCenter.isNull())
+        mapCenter = QPointF(gridScale, gridScale);
+    QPointF multiplePos(gridScale / 10.0, gridScale / 10.0);
+    QList<Characterv2*> activeCharacters = _campaign->getActiveCharacters();
+    for(int i = 0; i < activeCharacters.count(); ++i)
+    {
+        BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
+        newCharacter->setPosition(mapCenter + (multiplePos * i));
+        battle->getBattleDialogModel()->appendCombatant(newCharacter);
+    }
+
+    // Select the monster layer as a default to add monsters
+    battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
+    battle->getBattleDialogModel()->setMapRect(battle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
+
+    addNewObject(encounter);
+
+    _battleFrame->resizeGrid();
+*/
 }
 
 void NewEntryDialog::validateNewEntry()
@@ -338,6 +480,8 @@ void NewEntryDialog::newPageSelected()
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeMap)
     {
+        loadPrimaryImage(ui->lblMediaPreview, nullptr, ui->lblMediaPreview->width() - 20, ui->lblMediaPreview->height() - 20, QString());
+        ui->edtMediaFile->setText(_primaryImageFile);
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeCombat)
     {
@@ -504,6 +648,95 @@ void NewEntryDialog::browseMapFile()
     readMapFile();
 }
 
+void NewEntryDialog::readCombatFile()
+{
+    readNewFile(ui->edtCombatFile->text().trimmed(), ui->lblCombatPreview, ui->lblCombatPreview->width() - 20, ui->lblCombatPreview->height() - 20, QString(":/img/data/icon_combat.png"));
+    ui->edtCombatGrid->setText(QString::number(_gridSizeGuess));
+}
+
+void NewEntryDialog::browseCombatFile()
+{
+    QString newCombatFile = QFileDialog::getOpenFileName(this, QString("Select Combat Map File"));
+    if(newCombatFile.isEmpty())
+        return;
+
+    ui->edtCombatFile->setText(newCombatFile);
+    ui->edtCombatFile->setReadOnly(false);
+    readMapFile();
+}
+
+void NewEntryDialog::selectCombatSource()
+{
+    if(!_campaign)
+        return;
+
+    _referenceMap = nullptr;
+
+    MapSelectDialog mapSelectDlg(*_campaign, (_currentObject ? _currentObject->getID() : QUuid()));
+    if(mapSelectDlg.exec() != QDialog::Accepted)
+        return;
+
+    if(mapSelectDlg.isMapSelected())
+    {
+        _referenceMap = mapSelectDlg.getSelectedMap();
+        if(!_referenceMap)
+            return;
+
+        ui->edtCombatFile->setText(QString("Map: ") + _referenceMap->getName());
+        ui->edtCombatFile->setReadOnly(true);
+        ui->btnCombatBrowse->setEnabled(false);
+
+        readNewFile(_referenceMap->getFileName(), ui->lblCombatPreview, ui->lblCombatPreview->width() - 20, ui->lblCombatPreview->height() - 20, QString(":/img/data/icon_combat.png"));
+
+        LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_referenceMap->getLayerScene().getFirst(DMHelper::LayerType_Grid));
+        ui->chkCombatGrid->setChecked(gridLayer != nullptr);
+        ui->edtCombatGrid->setText(QString::number(gridLayer ? gridLayer->getConfig().getGridScale() : _gridSizeGuess));
+        ui->chkCombatGrid->setEnabled(gridLayer == nullptr);
+
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(_referenceMap->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+        ui->chkCombatFow->setChecked(fowLayer != nullptr);
+        ui->chkCombatFow->setEnabled(fowLayer == nullptr);
+    }
+    else if(mapSelectDlg.isBlankMap())
+    {
+        _imageColor = Qt::white;
+        _imageSize = QSize(400, 300);
+        MapBlankDialog blankDlg;
+        int result = blankDlg.exec();
+        if(result == QDialog::Accepted)
+        {
+            _imageColor = blankDlg.getMapColor();
+            _imageSize = blankDlg.getMapSize();
+        }
+
+        QPixmap blankPixmap(_imageSize);
+        blankPixmap.fill(_imageColor);
+
+        _primaryImageFile = QString();
+        _imageType = DMHelper::FileType_Unknown;
+        _gridSizeGuess = DMHelper::STARTING_GRID_SCALE;
+
+        ui->edtCombatFile->setText(QString("Blank Map"));
+        ui->edtCombatFile->setReadOnly(true);
+        ui->btnCombatBrowse->setEnabled(false);
+        ui->chkCombatFow->setEnabled(true);
+        ui->chkCombatGrid->setEnabled(true);
+        ui->chkCombatGrid->setChecked(false);
+        ui->edtCombatGrid->setText(QString::number(_gridSizeGuess));
+    }
+    else if(mapSelectDlg.isNewMapImage())
+    {
+        browseCombatFile();
+
+        ui->btnCombatBrowse->setEnabled(true);
+        ui->chkCombatFow->setEnabled(true);
+        ui->chkCombatGrid->setEnabled(true);
+        ui->chkCombatGrid->setChecked(false);
+    }
+
+    validateNewEntry();
+}
+
 bool NewEntryDialog::isSelectedEntryValid()
 {
     if(getNewEntryName().isEmpty())
@@ -535,9 +768,13 @@ bool NewEntryDialog::isSelectedEntryValid()
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeMap)
     {
+        if((ui->edtMapFile->text().isEmpty()) || (_imageType == DMHelper::FileType_Unknown))
+            return false;
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeCombat)
     {
+        if(ui->edtCombatFile->text().isEmpty())
+            return false;
     }
 
     return true;

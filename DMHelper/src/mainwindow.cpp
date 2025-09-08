@@ -1048,7 +1048,7 @@ void MainWindow::newParty()
 void MainWindow::newTextEncounter()
 {
 //    newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
-    NewEntryDialog dlg(_options, this);
+    NewEntryDialog dlg(_campaign, _options, ui->treeView->currentCampaignObject(), this);
     if(dlg.exec() != QDialog::Accepted)
         return;
 

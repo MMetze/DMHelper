@@ -895,7 +895,7 @@
                 <item>
                  <widget class="QLabel" name="label_6">
                   <property name="text">
-                   <string>Combat  File:</string>
+                   <string>Combat  Source:</string>
                   </property>
                  </widget>
                 </item>
@@ -908,6 +908,80 @@
                    <string>Browse...</string>
                   </property>
                  </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnCombatSelectMap">
+                  <property name="text">
+                   <string>Select Source...</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="0,1,0,0,0,1">
+                <item>
+                 <widget class="QCheckBox" name="chkCombatFow">
+                  <property name="text">
+                   <string>Add Fow Layer</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_10">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="chkCombatGrid">
+                  <property name="text">
+                   <string>Add Grid Layer</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblCombatGrid">
+                  <property name="text">
+                   <string>Grid Size</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="edtCombatGrid">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_11">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </item>

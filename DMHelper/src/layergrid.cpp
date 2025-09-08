@@ -216,6 +216,55 @@ void LayerGrid::setScale(int scale)
     emit layerScaleChanged(this);
 }
 
+void LayerGrid::setGridScaleAndOffset(int scale, int xOffset, int yOffset)
+{
+    int changed = false;
+
+    if(_config.getGridScale() != scale)
+    {
+        _config.setGridScale(scale);
+        changed = true;
+    }
+
+    if((xOffset >= 0) && (xOffset <= 100) && (_config.getGridOffsetX() != xOffset))
+    {
+        _config.setGridOffsetX(xOffset);
+        changed = true;
+    }
+
+    if((yOffset >= 0) && (yOffset <= 100) && (_config.getGridOffsetY() != yOffset))
+    {
+        _config.setGridOffsetY(yOffset);
+        changed = true;
+    }
+
+    if(!changed)
+        return;
+
+    triggerRebuild();
+    emit layerScaleChanged(this);
+}
+
+void LayerGrid::setGridOffsetX(int xOffset)
+{
+    if((xOffset < 0) || (xOffset > 100) || (_config.getGridOffsetX() == xOffset))
+        return;
+
+    _config.setGridOffsetX(xOffset);
+    triggerRebuild();
+    emit layerScaleChanged(this);
+}
+
+void LayerGrid::setGridOffsetY(int yOffset)
+{
+    if((yOffset < 0) || (yOffset > 100) || (_config.getGridOffsetY() == yOffset))
+        return;
+
+    _config.setGridOffsetY(yOffset);
+    triggerRebuild();
+    emit layerScaleChanged(this);
+}
+
 void LayerGrid::setConfig(const GridConfig& config)
 {
     _config.copyValues(config);

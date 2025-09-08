@@ -1,3 +1,10 @@
+Moving the grid size tool also shifts the H and V of the grid
+Leaving the map area with the pointer turns it off on the dm view
+
+Daggerheart: show a range-finder with circles of close, near far range
+DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
+Bug: Rendering distance is tiny font
+
 Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
 Create "Wizards" for add Map or add Combat rather than multiple questions
