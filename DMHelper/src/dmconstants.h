@@ -31,6 +31,7 @@ namespace DMHelper
         CampaignType_BattleContentCombatant,
         CampaignType_BattleContentEffect,
         CampaignType_Ruleset,
+        CampaignType_Media, // Note: For identification only, Media are implemented as simplified Maps
 
         CampaignType_Placeholder = 0xffff
     };

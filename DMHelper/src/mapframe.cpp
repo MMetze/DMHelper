@@ -696,7 +696,7 @@ void MapFrame::layerSelected(int selected)
             QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
             foreach(Layer* l, allFows)
             {
-                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
                 if(fowLayer)
                 {
                     if(fowLayer == activeLayer)
@@ -1029,7 +1029,7 @@ bool MapFrame::editModeToggled(int editMode)
         QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
         foreach(Layer* l, allFows)
         {
-            LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+            LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
             if(fowLayer)
                 fowLayer->resetOpacity();
         }
@@ -1071,7 +1071,7 @@ bool MapFrame::editModeToggled(int editMode)
             QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
             foreach(Layer* l, allFows)
             {
-                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
                 if(fowLayer)
                 {
                     if(fowLayer == activeLayer)

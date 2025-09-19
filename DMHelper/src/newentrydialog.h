@@ -23,13 +23,19 @@ public:
     explicit NewEntryDialog(Campaign* campaign, OptionsContainer* options, CampaignObjectBase* currentObject, QWidget *parent = nullptr);
     ~NewEntryDialog();
 
+    void setEntryType(DMHelper::CampaignType type, const QString& filename = QString());
+    void setEntryFile(const QString& filename);
+
     CampaignObjectBase* createNewEntry();
     bool isImportNeeded();
+    DMHelper::CampaignType getEntryType();
 
     QString getNewEntryName() const;
     QString getImportString() const;
 
 protected:
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+
     CampaignObjectBase* createTextEntry();
     CampaignObjectBase* createLinkedEntry();
     CampaignObjectBase* createPartyEntry();
@@ -42,7 +48,11 @@ protected slots:
     void validateNewEntry();
     void newPageSelected();
 
+    // Text Page members
+    void readTextFile(const QString& filename);
+
     // Linked Text Page members
+    void setLinkedTextFile(const QString& filename);
     void browseLinkedTextFile();
 
     // Party Page members
@@ -56,15 +66,18 @@ protected slots:
     void loadMonsterIcon();
 
     // Media Page members
-    void readMediaFile();
+    void readMediaFile(const QString& mediaFile);
+    void readMediaFileFromEdit();
     void browseMediaFile();
 
     // Map Page members
-    void readMapFile();
+    void readMapFile(const QString& mapFile);
+    void readMapFileFromEdit();
     void browseMapFile();
 
     // Combat Page members
-    void readCombatFile();
+    void readCombatFile(const QString& combatFile);
+    void readCombatFileFromEdit();
     void browseCombatFile();
     void selectCombatSource();
 

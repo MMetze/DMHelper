@@ -1,3 +1,24 @@
+Why doesn't resizegrid trigger the resize overlay?
+Clean up commented code in newentrydialog.cpp
+
+daggerheart - implement move zones
+daggerheart - make initiative entries custom
+
+Run tests again to validate
+
+Camapign notes - add a text saying how to take quick notes
+Add a Did You Know text to the welcome page with as much text as possible
+
+
+Create combat test cases
+    blank white
+    blank with color with grid
+    map reference with only an image layer
+    map reference with image and fow, add fow unchecked
+    map reference with image and fow, add fow checked
+    map reference with image and grid, add grid unchecked
+    map reference with image and grid, add grid checked
+    Drag text notes and images into newentrydialog
 
 Daggerheart: show a range-finder with circles of close, near far range
 DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase

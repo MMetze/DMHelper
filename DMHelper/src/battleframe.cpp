@@ -1819,7 +1819,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     if(dragEnterEvent)
                     {
                         const QMimeData* mimeData = dragEnterEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             qDebug() << "[Battle Frame] combatant widget drag enter accepted";
                             dragEnterEvent->accept();
@@ -1838,7 +1838,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     if(dragMoveEvent)
                     {
                         const QMimeData* mimeData = dragMoveEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -1872,7 +1872,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         qDebug() << "[Battle Frame] combatant widget drag dropped (" << dropEvent->position().x() << ", " << dropEvent->position().y() << ")";
 
                         const QMimeData* mimeData = dropEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -2732,7 +2732,7 @@ void BattleFrame::handleLayerSelected(Layer* layer)
             QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
             foreach(Layer* l, allFows)
             {
-                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
                 if(fowLayer)
                 {
                     if(fowLayer == activeLayer)
@@ -3395,7 +3395,7 @@ void BattleFrame::setEditMode()
                 QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
                 foreach(Layer* l, allFows)
                 {
-                    LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                    LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
                     if(fowLayer)
                     {
                         if(fowLayer == activeLayer)
@@ -3426,7 +3426,7 @@ void BattleFrame::setEditMode()
             QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
             foreach(Layer* l, allFows)
             {
-                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l);
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
                 if(fowLayer)
                     fowLayer->resetOpacity();
             }

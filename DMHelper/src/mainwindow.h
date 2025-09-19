@@ -88,7 +88,7 @@ public slots:
     void newTextEncounter();
     void newLinkedText();
     void newBattleEncounter();
-    void newMap(Layer* imageLayer = nullptr);
+    void newMap();
     void newMedia();
     void newAudioEntry();
     void newSyrinscapeEntry();
@@ -102,6 +102,7 @@ public slots:
     void clearCurrentItemIcon();
     void exportCurrentItem();
     void addNewObject(CampaignObjectBase* newObject);
+    void addNewObjectToTarget(CampaignObjectBase* newObject, CampaignObjectBase* targetObject);
 
     void clearDirty();
     void setDirty();
@@ -157,7 +158,7 @@ protected:
 
     void writeSpellbook();
 
-    CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
+    CampaignObjectBase* newEncounter(DMHelper::CampaignType encounterType, const QString& filename = QString(), CampaignObjectBase* targetObject = nullptr);
     void addNewAudioObject(const QString& audioFile);
     Layer* selectMapFile();
 
@@ -174,6 +175,7 @@ protected slots:
     void handleTreeItemExpanded(const QModelIndex & index);
     void handleTreeItemCollapsed(const QModelIndex & index);
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
+    void handleTreeDrop(const QModelIndex & index, const QString& filename);
     void handleEditSettings();
 
     void handleOpenDMScreen();
