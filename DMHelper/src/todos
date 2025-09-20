@@ -25,8 +25,9 @@ Bug: Rendering distance is tiny font
 
 Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
-Create "Wizards" for add Map or add Combat rather than multiple questions
-Drag and drop to add a map/combat
+
+DONE Create "Wizards" for add Map or add Combat rather than multiple questions
+DONE Drag and drop to add a map/combat
     - add map/battle/media layer
     - add an object to a battle
     - add a token to a monster
@@ -45,6 +46,7 @@ DONE Snap to grid also valid for measuring
 DONE Use DPI from an image to guess the right size of the grid
 DONE Double-click on select map dlg to make a selection
 DONE Selected FOW layer highlighted when editing
+DONE Allow transparency in FoW textures
 
 FIXED: Leaving the map area with the pointer turns it off on the dm view
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
