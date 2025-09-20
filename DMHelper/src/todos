@@ -1,11 +1,38 @@
+Clean up commented code in newentrydialog.cpp
+
+daggerheart - implement move zones
+daggerheart - make initiative entries custom
+
+Run tests again to validate
+
+Camapign notes - add a text saying how to take quick notes
+Add a Did You Know text to the welcome page with as much text as possible
+
+
+Create combat test cases
+    blank white
+    blank with color with grid
+    map reference with only an image layer
+    map reference with image and fow, add fow unchecked
+    map reference with image and fow, add fow checked
+    map reference with image and grid, add grid unchecked
+    map reference with image and grid, add grid checked
+    Drag text notes and images into newentrydialog
+
+Daggerheart: show a range-finder with circles of close, near far range
+DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
+Bug: Rendering distance is tiny font
+
 Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
-Create "Wizards" for add Map or add Combat rather than multiple questions
-Drag and drop to add a map/combat
+
+DONE Create "Wizards" for add Map or add Combat rather than multiple questions
+DONE Drag and drop to add a map/combat
     - add map/battle/media layer
     - add an object to a battle
     - add a token to a monster
     - add an icon to a PC (including enabling multiple tokens for PCs/NPCs
+    DONE Moving the grid size tool also shifts the H and V of the grid
 DONE Enhanced drop downs with completers
 DONE Templates for Daggerheart
 DONE Fear counter in main window for daggerheart campaigns only
@@ -18,8 +45,10 @@ DONE Snap to grid also valid for size and position of the player's window
 DONE Snap to grid also valid for measuring
 DONE Use DPI from an image to guess the right size of the grid
 DONE Double-click on select map dlg to make a selection
+DONE Selected FOW layer highlighted when editing
+DONE Allow transparency in FoW textures
 
-
+FIXED: Leaving the map area with the pointer turns it off on the dm view
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved
     TESTED Battle

@@ -128,31 +128,31 @@ void CameraRect::setSizeLocked(bool locked)
 
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0) || (!_viewport))
-        return;
+    if((event) && ((flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable) && (_viewport))
+    {
+        int section = getRectSection(event->pos());
 
-    int section = getRectSection(event->pos());
-
-    if(section == RectSection_Middle)
-    {
-        _viewport->setCursor(QCursor(Qt::SizeAllCursor));
-    }
-    else if((section == RectSection_None) || (_sizeLocked))
-    {
-        _viewport->unsetCursor();
-    }
-    else
-    {
-        if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
-            _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
-        else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
-            _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
-        else if((section == RectSection_Top) || (section == RectSection_Bottom))
-            _viewport->setCursor(QCursor(Qt::SizeVerCursor));
-        else if((section == RectSection_Left) || (section == RectSection_Right))
-            _viewport->setCursor(QCursor(Qt::SizeHorCursor));
-        else
+        if(section == RectSection_Middle)
+        {
+            _viewport->setCursor(QCursor(Qt::SizeAllCursor));
+        }
+        else if((section == RectSection_None) || (_sizeLocked))
+        {
             _viewport->unsetCursor();
+        }
+        else
+        {
+            if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
+                _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
+            else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
+                _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
+            else if((section == RectSection_Top) || (section == RectSection_Bottom))
+                _viewport->setCursor(QCursor(Qt::SizeVerCursor));
+            else if((section == RectSection_Left) || (section == RectSection_Right))
+                _viewport->setCursor(QCursor(Qt::SizeHorCursor));
+            else
+                _viewport->unsetCursor();
+        }
     }
 
     QGraphicsRectItem::hoverMoveEvent(event);
@@ -160,7 +160,7 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void CameraRect::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if(_viewport)
+    if(((flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable) && (_viewport))
         _viewport->unsetCursor();
 
     QGraphicsRectItem::hoverLeaveEvent(event);
@@ -274,6 +274,8 @@ void CameraRect::initialize(QGraphicsScene& scene)
 
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemIsMovable, false);
+    setFlag(QGraphicsItem::ItemIsSelectable, false);
 
     scene.addItem(this);
 

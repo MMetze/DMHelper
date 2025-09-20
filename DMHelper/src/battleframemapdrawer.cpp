@@ -76,7 +76,7 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
 
     // TODO: Layers
     // Math says divide by 10: radius of 5 to adjust scale to "one square"
-    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         _undoPath = new UndoFowPath(layer, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint() - layer->getPosition()));
@@ -125,7 +125,7 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
         return;
 
     // TODO: Layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowShape* undoShape = new UndoFowShape(layer, MapEditShape(rect.translated(-layer->getPosition()), _erase, false));
@@ -184,7 +184,7 @@ void BattleFrameMapDrawer::resetFoW()
         return;
 
     // TODO: Layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 128, 0, 255)));
@@ -212,7 +212,7 @@ void BattleFrameMapDrawer::clearFoW()
         return;
 
     // TODO: Layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 128, 0, 0)));

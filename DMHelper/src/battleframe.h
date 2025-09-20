@@ -90,6 +90,7 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void setGridScale(int gridScale, int xOffset, int yOffset);
     void selectGridCount();
     void resizeGrid();
     void setGridAngle(int gridAngle);

@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Configure Blank Map</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
     <spacer name="verticalSpacer_4">
@@ -126,7 +129,7 @@
                </size>
               </property>
               <property name="text">
-               <string>2000</string>
+               <string>500</string>
               </property>
              </widget>
             </item>
@@ -145,7 +148,7 @@
                </size>
               </property>
               <property name="text">
-               <string>2000</string>
+               <string>500</string>
               </property>
              </widget>
             </item>

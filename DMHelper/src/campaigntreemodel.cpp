@@ -78,6 +78,12 @@ CampaignTreeItem *CampaignTreeModel::campaignItemFromIndex(const QModelIndex &in
     return dynamic_cast<CampaignTreeItem*>(itemFromIndex(index));
 }
 
+Qt::ItemFlags CampaignTreeModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags defaultFlags = QStandardItemModel::flags(index);
+    return defaultFlags | Qt::ItemIsDropEnabled;
+}
+
 QMimeData* CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
 {
     QMimeData *data = QStandardItemModel::mimeData(indexes);

@@ -716,6 +716,11 @@ void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 
 void BattleFrame::setGridScale(int gridScale)
 {
+    setGridScale(gridScale, -1, -1);
+}
+
+void BattleFrame::setGridScale(int gridScale, int xOffset, int yOffset)
+{
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to set the grid scale, no battle model is set!";
@@ -726,7 +731,7 @@ void BattleFrame::setGridScale(int gridScale)
 
     LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(gridLayer)
-        gridLayer->setScale(gridScale);
+        gridLayer->setGridScaleAndOffset(gridScale, xOffset, yOffset);
     else
         _model->getLayerScene().setScale(gridScale);
 
@@ -1814,7 +1819,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     if(dragEnterEvent)
                     {
                         const QMimeData* mimeData = dragEnterEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             qDebug() << "[Battle Frame] combatant widget drag enter accepted";
                             dragEnterEvent->accept();
@@ -1833,7 +1838,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     if(dragMoveEvent)
                     {
                         const QMimeData* mimeData = dragMoveEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -1867,7 +1872,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         qDebug() << "[Battle Frame] combatant widget drag dropped (" << dropEvent->position().x() << ", " << dropEvent->position().y() << ")";
 
                         const QMimeData* mimeData = dropEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -2718,6 +2723,26 @@ void BattleFrame::handleLayerSelected(Layer* layer)
         _scene->setDistanceScale(newGrid->getConfig().getGridScale());
         emit gridConfigChanged(newGrid->getConfig());
     }
+
+    if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWEdit)
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_model->getLayerScene().getNearest(layer, DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
+    }
 }
 
 void BattleFrame::itemLink()
@@ -3191,7 +3216,10 @@ void BattleFrame::gridSizerAccepted()
     if(!_gridSizer)
         return;
 
-    setGridScale(_gridSizer->getSize());
+    int intSize = _gridSizer->getSize();
+    int xOffset = static_cast<int>(_gridSizer->x()) % intSize;
+    int yOffset = static_cast<int>(_gridSizer->y()) % intSize;
+    setGridScale(intSize, (100 * xOffset) / intSize, (100 * yOffset) / intSize);
     gridSizerRejected();
 }
 
@@ -3215,6 +3243,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         disconnect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
         disconnect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
@@ -3255,6 +3284,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         connect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         connect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
         connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
@@ -3359,7 +3389,24 @@ void BattleFrame::setEditMode()
 
         if((_mapDrawer) && (_model))
         {
-            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getPriority(DMHelper::LayerType_Fow), DMHelper::LayerType_Grid));
+            LayerFow* activeLayer = dynamic_cast<LayerFow*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+            if(activeLayer)
+            {
+                QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+                foreach(Layer* l, allFows)
+                {
+                    LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                    if(fowLayer)
+                    {
+                        if(fowLayer == activeLayer)
+                            fowLayer->raiseOpacity();
+                        else
+                            fowLayer->dipOpacity();
+                    }
+                }
+            }
+
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow), DMHelper::LayerType_Grid));
             _mapDrawer->setScale(gridLayer ? gridLayer->getConfig().getGridScale() : _model->getGridScale(), _scale);
         }
     }
@@ -3373,6 +3420,17 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+
+        if(_model)
+        {
+            QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                    fowLayer->resetOpacity();
+            }
+        }
     }
 }
 

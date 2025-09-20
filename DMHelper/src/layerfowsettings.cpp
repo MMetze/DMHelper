@@ -17,6 +17,7 @@ LayerFowSettings::LayerFowSettings(QWidget *parent) :
     connect(ui->edtTextureFile, &QLineEdit::editingFinished, this, &LayerFowSettings::handleTextureFileChanged);
     connect(ui->btnBrowseTexture, &QPushButton::clicked, this, &LayerFowSettings::handleTextureBrowseClicked);
     connect(ui->sliderScale, &QSlider::valueChanged, this, &LayerFowSettings::handleScaleChanged);
+    connect(ui->chkTransparent, &QCheckBox::clicked, this, &LayerFowSettings::updatePreview);
 
     ui->lblPreview->setAutoFillBackground(true);
     ui->btnColor->setRotationVisible(false);
@@ -31,7 +32,10 @@ LayerFowSettings::~LayerFowSettings()
 
 QColor LayerFowSettings::fowColor() const
 {
-    return ui->btnColor->getColor();
+    QColor result = ui->btnColor->getColor();
+    if(ui->chkTransparent->isChecked())
+        result.setAlpha(0);
+    return result;
 }
 
 QString LayerFowSettings::fowTextureFile() const
@@ -46,7 +50,8 @@ int LayerFowSettings::fowScale() const
 
 void LayerFowSettings::setFowColor(const QColor& color)
 {
-    ui->btnColor->setColor(color);
+    ui->btnColor->setColor(QColor(color.red(), color.green(), color.blue()));
+    ui->chkTransparent->setChecked(color.alpha() == 0);
     updatePreview();
 }
 
@@ -125,7 +130,7 @@ void LayerFowSettings::updatePreview()
     if(ui->edtTextureFile->text().isEmpty())
     {
         QPixmap colorPixmap(ui->lblPreview->size());
-        colorPixmap.fill(ui->btnColor->getColor());
+        colorPixmap.fill(fowColor());
         ui->lblPreview->setPixmap(colorPixmap);
     }
     else
@@ -142,7 +147,7 @@ void LayerFowSettings::updatePreview()
 
         // Draw a scaled and tiled version of the texture
         QPixmap pixmap = _texturePixmap;
-        pixmap.fill(ui->btnColor->getColor());
+        pixmap.fill(fowColor());
         QPixmap scaledPixmap = _texturePixmap.scaled(_texturePixmap.size() * ui->sliderScale->value() / 100);
         QPainter p(&pixmap);
             for(int x = 0; x < pixmap.width(); x += scaledPixmap.width())

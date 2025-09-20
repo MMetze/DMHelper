@@ -25,6 +25,7 @@ public:
     CampaignTreeItem* campaignItemFromIndex(const QModelIndex &index) const;
 
     // From QAbstractItemModel
+    virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
     virtual QMimeData *	mimeData(const QModelIndexList & indexes) const override;
     virtual QStringList	mimeTypes() const override;
     virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;

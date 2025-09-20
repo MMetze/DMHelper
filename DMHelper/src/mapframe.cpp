@@ -240,7 +240,7 @@ void MapFrame::resetFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(128, 0, 0, 255)));
@@ -258,7 +258,7 @@ void MapFrame::clearFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(128, 0, 0, 0)));
@@ -683,8 +683,30 @@ void MapFrame::publishWindowMouseRelease(const QPointF& position)
 
 void MapFrame::layerSelected(int selected)
 {
-    if(_mapSource)
-        _mapSource->getLayerScene().setSelectedLayerIndex(selected);
+    if(!_mapSource)
+        return;
+
+    _mapSource->getLayerScene().setSelectedLayerIndex(selected);
+
+    if(_editMode == DMHelper::EditMode_FoW)
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
+    }
 }
 
 void MapFrame::publishClicked(bool checked)
@@ -1002,6 +1024,17 @@ bool MapFrame::editModeToggled(int editMode)
     if(_editMode == editMode)
         return false;
 
+    if((_mapSource) && (_editMode == DMHelper::EditMode_FoW))
+    {
+        QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+        foreach(Layer* l, allFows)
+        {
+            LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+            if(fowLayer)
+                fowLayer->resetOpacity();
+        }
+    }
+
     changeEditMode(_editMode, false);
     changeEditMode(editMode, true);
 
@@ -1028,6 +1061,26 @@ bool MapFrame::editModeToggled(int editMode)
             break;
         default:
             break;
+    }
+
+    if((_mapSource) && (_editMode == DMHelper::EditMode_FoW))
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
     }
 
     setMapCursor();
@@ -1245,7 +1298,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
                 if(layer)
                 {
                     shapeRect.translate(-layer->getPosition());
@@ -1285,7 +1338,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
-            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
             if(layer)
             {
                 drawPoint -= layer->getPosition();
