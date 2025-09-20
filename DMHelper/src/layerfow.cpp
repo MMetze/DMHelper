@@ -628,7 +628,7 @@ void LayerFow::updateFowInternal()
 void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     if(_fowColor != Qt::black)
-        element.setAttribute("fowColor", _fowColor.name());
+        element.setAttribute("fowColor", _fowColor.name(QColor::HexArgb));
 
     if(!_fowTextureFile.isEmpty())
         element.setAttribute("textureFile", targetDirectory.relativeFilePath(_fowTextureFile));
@@ -726,7 +726,7 @@ void LayerFow::cleanupPlayer()
 void LayerFow::fillFoWImage()
 {
     // Todo: Use QBrush to draw tiled scaled images to the image
-    _imageFow.fill(_fowColor);
+    _imageFow.fill(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue()));
     if(_fowTextureFile.isEmpty())
     {
         _imageFowTexture = QImage();
@@ -744,6 +744,8 @@ void LayerFow::fillFoWImage()
             newTexture.convertTo(QImage::Format_ARGB32_Premultiplied);
             newTexture = newTexture.scaled(_imageFowTexture.size() * _fowTextureScale / 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
             QPainter p(&_imageFowTexture);
+                if(_fowColor.alpha() == 0)
+                    p.setCompositionMode(QPainter::CompositionMode_Source);
                 for(int x = 0; x < _imageFowTexture.width(); x += newTexture.width())
                     for(int y = 0; y < _imageFowTexture.height(); y += newTexture.height())
                         p.drawImage(x, y, newTexture);

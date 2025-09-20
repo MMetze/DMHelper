@@ -37,6 +37,7 @@ protected:
     void handleTextureBrowseClicked();
     void handleScaleChanged(int scale);
 
+protected slots:
     void updatePreview();
 
 private:
