@@ -1,7 +1,6 @@
-Clean up commented code in newentrydialog.cpp
-
 daggerheart - implement move zones
 daggerheart - make initiative entries custom
+daggerheart - show fear across all published views (move it to a higher level overlay function)
 
 Run tests again to validate
 

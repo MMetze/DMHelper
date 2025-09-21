@@ -167,6 +167,13 @@ namespace DMHelper
         InitiativeType_ImagePCNames
     };
 
+    enum MovementType
+    {
+        MovementType_None = 0,
+        MovementType_Distance,
+        MovementType_Range
+    };
+
     enum LayerType
     {
         LayerType_Unknown = -1,

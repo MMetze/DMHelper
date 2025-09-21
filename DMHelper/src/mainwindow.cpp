@@ -823,6 +823,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setBestiaryFile(newCampaignDialog->getBestiaryFile());
         _campaign->getRuleset().setMonsterDataFile(newCampaignDialog->getMonsterDataFile());
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
+        _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
         _campaign->setShowFear(newCampaignDialog->isShowFear());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);

@@ -87,21 +87,15 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
             ui->edtCampaignName->setText(_campaign->getName());
 
             QString ruleInitiativeType = _campaign->getRuleset().getRuleInitiativeType();
-            if(ruleInitiativeType.isEmpty())
+            QStringList ruleInitiativeNames = RuleFactory::getRuleInitiativeNames();
+            for(int i = 0; i  < ruleInitiativeNames.count() / 2; ++i)
             {
-                ui->cmbInitiative->setEnabled(false);
-            }
-            else
-            {
-                QStringList ruleInitiativeNames = RuleFactory::getRuleInitiativeNames();
-                for(int i = 0; i  < ruleInitiativeNames.count() / 2; ++i)
-                {
-                    ui->cmbInitiative->addItem(ruleInitiativeNames.at(2 * i + 1), ruleInitiativeNames.at(2 * i));
-                    if(ruleInitiativeType == ruleInitiativeNames.at(2 * i))
-                        ui->cmbInitiative->setCurrentIndex(i);
-                }
+                ui->cmbInitiative->addItem(ruleInitiativeNames.at(2 * i + 1), ruleInitiativeNames.at(2 * i));
+                if(ruleInitiativeType == ruleInitiativeNames.at(2 * i))
+                    ui->cmbInitiative->setCurrentIndex(i);
             }
 
+            ui->edtMovement->setText(_campaign->getRuleset().getMovementString());
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
             ui->chkShowFear->setChecked(_campaign->getShowFear());
             ui->chkShowFear->setVisible(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
@@ -225,6 +219,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->getRuleset().setBestiaryFile(ui->edtBestiaryFile->text());
     _campaign->getRuleset().setMonsterDataFile(ui->edtMonsterData->text());
     _campaign->getRuleset().setMonsterUIFile(ui->edtMonsterUI->text());
+    _campaign->getRuleset().setMovementString(ui->edtMovement->text());
 }
 
 void OptionsDialog::browseDefaultBestiary()

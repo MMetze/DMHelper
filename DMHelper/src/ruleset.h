@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "rulefactory.h"
+#include "dmconstants.h"
 
 class RuleInitiative;
 
@@ -32,6 +33,12 @@ public:
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool getCombatantDoneCheckbox() const;
+    QString getMovementString() const;
+    DMHelper::MovementType getMovementType() const;
+    QList<int> getMovementRanges() const;
+
+    static DMHelper::MovementType movementTypeFromString(const QString& movementStr, QList<int>* movementRanges = nullptr);
+    static QString movementStringFromType(DMHelper::MovementType movementType, const QList<int>* movementRanges = nullptr);
 
 signals:
     void initiativeRuleChanged();
@@ -49,6 +56,9 @@ public slots:
     void setMonsterDataFile(const QString& monsterDataFile);
     void setMonsterUIFile(const QString& monsterUIFile);
     void setCombatantDoneCheckbox(bool checked);
+    void setMovementString(const QString& movement);
+    void setMovementType(DMHelper::MovementType type);
+    void setMovementRanges(QList<int> ranges);
 
 protected slots:
 
@@ -66,6 +76,8 @@ protected:
     QString _monsterDataFile;
     QString _monsterUIFile;
     bool _combatantDoneCheckbox;
+    DMHelper::MovementType _movementType;
+    QList<int> _movementRanges;
 };
 
 #endif // RULESET_H
