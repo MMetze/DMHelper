@@ -106,6 +106,7 @@ public slots:
 
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);
+    void setCombatantTokenType(int combatantTokenType);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -426,6 +427,7 @@ private:
 
     int _initiativeType;
     qreal _initiativeScale;
+    int _combatantTokenType;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;

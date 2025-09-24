@@ -37,6 +37,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _audioVolume(100),
     _initiativeType(DMHelper::InitiativeType_None),
     _initiativeScale(1.0),
+    _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
@@ -189,6 +190,11 @@ int OptionsContainer::getInitiativeType() const
 qreal OptionsContainer::getInitiativeScale() const
 {
     return _initiativeScale;
+}
+
+int OptionsContainer::getCombatantTokenType() const
+{
+    return _combatantTokenType;
 }
 
 bool OptionsContainer::getShowCountdown() const
@@ -488,6 +494,7 @@ void OptionsContainer::readSettings()
     else
         setInitiativeType(settings.value("showOnDeck", QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
     setInitiativeScale(settings.value("initiativeScale", QVariant(1.0)).toReal());
+    setCombatantTokenType(settings.value("combatantTokenType", QVariant(DMHelper::CombatantTokenType_CharactersAndMonsters)).toInt());
     setShowCountdown(settings.value("showCountdown", QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration", QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
@@ -567,6 +574,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("initiativeType", getInitiativeType());
     settings.setValue("initiativeScale", getInitiativeScale());
+    settings.setValue("combatantTokenType", getCombatantTokenType());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
@@ -1126,6 +1134,15 @@ void OptionsContainer::setInitiativeScale(qreal initiativeScale)
     }
 }
 
+void OptionsContainer::setCombatantTokenType(int combatantTokenType)
+{
+    if(_combatantTokenType != combatantTokenType)
+    {
+        _combatantTokenType = combatantTokenType;
+        emit combatantTokenTypeChanged(_combatantTokenType);
+    }
+}
+
 void OptionsContainer::setShowCountdown(bool showCountdown)
 {
     if(_showCountdown != showCountdown)
@@ -1459,6 +1476,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);
         setInitiativeScale(other->_initiativeScale);
+        setCombatantTokenType(other->_combatantTokenType);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);

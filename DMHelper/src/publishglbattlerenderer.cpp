@@ -420,6 +420,11 @@ void PublishGLBattleRenderer::setInitiativeScale(qreal initiativeScale)
     emit updateWidget();
 }
 
+void PublishGLBattleRenderer::combatantTokenTypeChanged()
+{
+    tokensChanged();
+}
+
 void PublishGLBattleRenderer::fearChanged()
 {
     _updateInitiative = true;
@@ -581,6 +586,7 @@ void PublishGLBattleRenderer::updateSelectionTokens()
 void PublishGLBattleRenderer::updateTokens()
 {
     QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+
     foreach(Layer* layer, tokenLayers)
     {
         if(LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer))

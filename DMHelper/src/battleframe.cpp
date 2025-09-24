@@ -135,6 +135,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
     _initiativeScale(1.0),
+    _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0, 0, 0),
@@ -917,6 +918,19 @@ void BattleFrame::setInitiativeScale(qreal initiativeScale)
     _initiativeScale = initiativeScale;
     if(_renderer)
         _renderer->setInitiativeScale(_initiativeScale);
+}
+
+void BattleFrame::setCombatantTokenType(int combatantTokenType)
+{
+    _combatantTokenType = combatantTokenType;
+
+    if(_model)
+        _model->setCombatantTokenType(_combatantTokenType);
+
+    if(_renderer)
+        _renderer->combatantTokenTypeChanged();
+
+    replaceBattleMap();
 }
 
 void BattleFrame::setShowCountdown(bool showCountdown)
@@ -3290,6 +3304,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
         connect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
+        _model->setCombatantTokenType(_combatantTokenType);
         setBattleMap();
         recreateCombatantWidgets();
 

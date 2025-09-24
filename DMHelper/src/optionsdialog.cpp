@@ -23,6 +23,11 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
     ui->cmbInitiativeType->addItem("Icons and All Names", QVariant(DMHelper::InitiativeType_ImageName));
     ui->cmbInitiativeType->addItem("Icons and PC Names Only", QVariant(DMHelper::InitiativeType_ImagePCNames));
 
+    ui->cmbCombatantTokenType->addItem("No Tokens", QVariant(DMHelper::CombatantTokenType_None));
+    ui->cmbCombatantTokenType->addItem("Monsters Only", QVariant(DMHelper::CombatantTokenType_MonstersOnly));
+    ui->cmbCombatantTokenType->addItem("Characters Only", QVariant(DMHelper::CombatantTokenType_CharactersOnly));
+    ui->cmbCombatantTokenType->addItem("Characters and Monsters", QVariant(DMHelper::CombatantTokenType_CharactersAndMonsters));
+
     ui->edtInitiativeScale->setValidator(new QDoubleValidator(0.1, 10.0, 2));
 
     if(_options)
@@ -69,6 +74,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         ui->cmbInitiativeType->setCurrentIndex(_options->getInitiativeType());
         ui->edtInitiativeScale->setText(QString::number(_options->getInitiativeScale()));
         ui->sliderInitiativeScale->setValue(static_cast<int>(_options->getInitiativeScale() * 100.0));
+        ui->cmbCombatantTokenType->setCurrentIndex(_options->getCombatantTokenType());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1, 1000, this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
@@ -145,6 +151,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
                 this, [=](int newValue) { this->handleInitiativeScaleChanged(static_cast<qreal>(newValue) / 100.0); });
         connect(ui->edtInitiativeScale, &QLineEdit::editingFinished,
                 this, [=]() { this->handleInitiativeScaleChanged(ui->edtInitiativeScale->text().toDouble()); });
+        connect(ui->cmbCombatantTokenType, SIGNAL(currentIndexChanged(int)), _options, SLOT(setCombatantTokenType(int)));
         connect(ui->chkShowCountdown, SIGNAL(clicked(bool)), _options, SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);

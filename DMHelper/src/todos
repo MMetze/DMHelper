@@ -46,6 +46,7 @@ DONE Use DPI from an image to guess the right size of the grid
 DONE Double-click on select map dlg to make a selection
 DONE Selected FOW layer highlighted when editing
 DONE Allow transparency in FoW textures
+DONE Add combatant token type setting to battle options
 
 FIXED: Leaving the map area with the pointer turns it off on the dm view
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
