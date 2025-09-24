@@ -66,7 +66,9 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     }
 
     if((currentLayerIndex >= 0) && (currentLayerIndex < ui->cmbLayer->count()))
-        ui->cmbLayer->setCurrentIndex(currentLayerIndex);    
+        ui->cmbLayer->setCurrentIndex(currentLayerIndex);
+
+    monsterClassChanged(ui->cmbMonsterClass->currentText());
 }
 
 CombatantDialog::~CombatantDialog()

@@ -135,6 +135,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
     _initiativeScale(1.0),
+    _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0, 0, 0),
@@ -917,6 +918,19 @@ void BattleFrame::setInitiativeScale(qreal initiativeScale)
     _initiativeScale = initiativeScale;
     if(_renderer)
         _renderer->setInitiativeScale(_initiativeScale);
+}
+
+void BattleFrame::setCombatantTokenType(int combatantTokenType)
+{
+    _combatantTokenType = combatantTokenType;
+
+    if(_model)
+        _model->setCombatantTokenType(_combatantTokenType);
+
+    if(_renderer)
+        _renderer->combatantTokenTypeChanged();
+
+    replaceBattleMap();
 }
 
 void BattleFrame::setShowCountdown(bool showCountdown)
@@ -3290,6 +3304,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
         connect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
+        _model->setCombatantTokenType(_combatantTokenType);
         setBattleMap();
         recreateCombatantWidgets();
 
@@ -4142,9 +4157,24 @@ void BattleFrame::createSceneContents()
     createCountdownFrame();
 
     QPen movementPen(QColor(23, 23, 23, 200), 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
-    _movementPixmap = _scene->addEllipse(0, 0, 100, 100, movementPen, QBrush(QColor(255, 255, 255, 25)));
-    _movementPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+    QBrush movementBrush(QColor(255, 255, 255, 25));
+    _movementPixmap = _scene->addEllipse(0, 0, 100, 100, movementPen, movementBrush);
+    _movementPixmap->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
     _movementPixmap->setVisible(false);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Range))
+    {
+        QList<int> movementRanges = campaign->getRuleset().getMovementRanges();
+        for(int i = 1; i < movementRanges.count(); ++i)
+        {
+            QGraphicsEllipseItem* rangeItem = new QGraphicsEllipseItem(0, 0, 100, 100);
+            rangeItem->setPen(movementPen);
+            rangeItem->setBrush(movementBrush);
+            rangeItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+            rangeItem->setParentItem(_movementPixmap);
+        }
+    }
 
     if(_model->getCameraRect().isValid())
     {
@@ -4455,14 +4485,45 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
     if(!tokenLayer)
         return;
 
-    int speedSquares = 2 * (speed / 5) + 1;
-    _moveRadius = tokenLayer->getScale() * speedSquares;
-    if(_moveRadius <= tokenLayer->getScale())
-        return;
-
     _moveStart = item->scenePos();
     _movementPixmap->setPos(_moveStart);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Range))
+    {
+        QList<int> movementRanges = campaign->getRuleset().getMovementRanges();
+        if(movementRanges.count() > 0)
+        {
+            int rangeSquares = 2 * (movementRanges.at(0) / 5) + 1;
+            _moveRadius = tokenLayer->getScale() * rangeSquares;
+            _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+            QList<QGraphicsItem *> childItems = _movementPixmap->childItems();
+            if(childItems.count() == movementRanges.count() - 1)
+            {
+                for(int i = 1; i < movementRanges.count(); ++i)
+                {
+                    QGraphicsEllipseItem* rangeItem = dynamic_cast<QGraphicsEllipseItem*>(childItems.at(i - 1));
+                    if(rangeItem)
+                    {
+                        rangeSquares = 2 * (movementRanges.at(i) / 5) + 1;
+                        qreal rangeRadius = tokenLayer->getScale() * rangeSquares;
+                        rangeItem->setRect(-rangeRadius/2.0, -rangeRadius/2.0, rangeRadius, rangeRadius);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        int speedSquares = 2 * (speed / 5) + 1;
+        _moveRadius = tokenLayer->getScale() * speedSquares;
+        if(_moveRadius <= tokenLayer->getScale())
+            return;
+
+        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+    }
+
     _movementPixmap->setVisible(true);
 
     emit movementChanged(true, combatant, _moveRadius);
@@ -4488,6 +4549,10 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(!_movementPixmap)
         return;
 
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Range))
+        return;
+
     if(_model->getShowMovement())
     {
         if(_moveRadius > tokenLayer->getScale())
@@ -4496,7 +4561,7 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
         if(_moveRadius <= tokenLayer->getScale())
         {
             _moveRadius = tokenLayer->getScale();
-            _movementPixmap->setRotation(0.0);
+//            _movementPixmap->setRotation(0.0);
             _movementPixmap->setVisible(false);
         }
     }
@@ -4504,7 +4569,7 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(_moveRadius <= tokenLayer->getScale())
     {
         _moveRadius = tokenLayer->getScale();
-        _movementPixmap->setRotation(0.0);
+//        _movementPixmap->setRotation(0.0);
         _movementPixmap->setVisible(false);
     }
     else
@@ -4523,7 +4588,7 @@ void BattleFrame::endMovement()
     if(!_movementPixmap)
         return;
 
-    _movementPixmap->setRotation(0.0);
+//    _movementPixmap->setRotation(0.0);
     _movementPixmap->setVisible(false);
     emit movementChanged(false, nullptr, 0.0);
 }

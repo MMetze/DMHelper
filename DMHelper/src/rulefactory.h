@@ -58,11 +58,13 @@ public:
             _monsterUI(),
             _bestiary(),
             _rulesetDir(),
-            _combatantDone(false)
+            _combatantDone(false),
+            _movement()
         {}
 
-        RulesetTemplate(const QString& name, const QString& initiative, const QString& characterData, const QString& characterUI,
-                        const QString& monsterData, const QString& monsterUI, const QString& bestiary, QDir _rulesetDir, bool combatantDone = false) :
+        RulesetTemplate(const QString& name, const QString& initiative, const QString& characterData,
+                        const QString& characterUI, const QString& monsterData, const QString& monsterUI,
+                        const QString& bestiary, QDir _rulesetDir, const QString& movement, bool combatantDone = false) :
             _name(name),
             _initiative(initiative),
             _characterData(characterData),
@@ -71,7 +73,8 @@ public:
             _monsterUI(monsterUI),
             _bestiary(bestiary),
             _rulesetDir(_rulesetDir),
-            _combatantDone(combatantDone)
+            _combatantDone(combatantDone),
+            _movement(movement)
         {}
 
         QString _name;
@@ -83,6 +86,7 @@ public:
         QString _bestiary;
         QDir _rulesetDir;
         bool _combatantDone;
+        QString _movement;
 
     };
 

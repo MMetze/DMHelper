@@ -13,7 +13,9 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
     _bestiaryFile(),
     _monsterDataFile(),
     _monsterUIFile(),
-    _combatantDoneCheckbox()
+    _combatantDoneCheckbox(),
+    _movementType(DMHelper::MovementType_Distance),
+    _movementRanges()
 {
 }
 
@@ -25,7 +27,9 @@ Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *p
     _bestiaryFile(),
     _monsterDataFile(),
     _monsterUIFile(),
-    _combatantDoneCheckbox()
+    _combatantDoneCheckbox(),
+    _movementType(DMHelper::MovementType_Distance),
+    _movementRanges()
 {
     setValues(rulesetTemplate);
 }
@@ -80,6 +84,8 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
         _bestiaryFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
 
     _combatantDoneCheckbox = element.hasAttribute("combatantDone") ? static_cast<bool>(element.attribute("combatantDone").toInt()) : rulesetTemplate._combatantDone;
+
+    setMovementString(element.attribute("movementType"));
 }
 
 int Ruleset::getObjectType() const
@@ -167,6 +173,64 @@ bool Ruleset::getCombatantDoneCheckbox() const
     return _combatantDoneCheckbox;
 }
 
+QString Ruleset::getMovementString() const
+{
+    return movementStringFromType(_movementType, &_movementRanges);
+}
+
+DMHelper::MovementType Ruleset::getMovementType() const
+{
+    return _movementType;
+}
+
+QList<int> Ruleset::getMovementRanges() const
+{
+    return _movementRanges;
+}
+
+DMHelper::MovementType Ruleset::movementTypeFromString(const QString& movementStr, QList<int>* movementRanges)
+{
+    if(movementRanges)
+        movementRanges->clear();
+
+    if(movementStr.startsWith(QString("range")))
+    {
+        if(movementRanges)
+        {
+            QStringList movementRangeStrings = movementStr.right(movementStr.length() - 6).split(QString(";"));
+            for(QString rangeStr : movementRangeStrings)
+            {
+                bool ok = false;
+                int rangeValue = rangeStr.toInt(&ok);
+                if(ok)
+                    movementRanges->append(rangeValue);
+            }
+        }
+
+        return DMHelper::MovementType_Range;
+    }
+    else
+    {
+        return DMHelper::MovementType_Distance;
+    }
+}
+
+QString Ruleset::movementStringFromType(DMHelper::MovementType movementType, const QList<int>* movementRanges)
+{
+    if(movementType == DMHelper::MovementType_Range)
+    {
+        QString result = QString("range");
+        if(movementRanges)
+        {
+            for(int range : *movementRanges)
+                result.append(QString(";") + QString::number(range));
+        }
+        return result;
+    }
+
+    return QString("distance");
+}
+
 void Ruleset::setRuleInitiative(const QString& initiativeType)
 {
     if((_ruleInitiative) && (_ruleInitiative->getInitiativeType() == initiativeType))
@@ -239,6 +303,29 @@ void Ruleset::setCombatantDoneCheckbox(bool checked)
     emit initiativeRuleChanged();
 }
 
+void Ruleset::setMovementString(const QString& movement)
+{
+    _movementType = movementTypeFromString(movement, &_movementRanges);
+}
+
+void Ruleset::setMovementType(DMHelper::MovementType type)
+{
+    if(_movementType == type)
+        return;
+
+    _movementType = type;
+    emit dirty();
+}
+
+void Ruleset::setMovementRanges(QList<int> ranges)
+{
+    if(_movementRanges == ranges)
+        return;
+
+    _movementRanges = ranges;
+    emit dirty();
+}
+
 QDomElement Ruleset::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("ruleset");
@@ -283,6 +370,9 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
 
     if(_combatantDoneCheckbox != rulesetTemplate._combatantDone)
         element.setAttribute("combatantDone", _combatantDoneCheckbox);
+
+    if(_movementType != DMHelper::MovementType_Distance)
+        element.setAttribute("movementType", movementStringFromType(_movementType, &_movementRanges));
 }
 
 bool Ruleset::areSameFile(const QString &file1, const QString &file2) const

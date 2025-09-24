@@ -27,6 +27,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _showEffects(true),
     _showMovement(true),
     _showLairActions(false),
+    _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _activeCombatant(nullptr),
     _logger(),
     _backgroundImage()
@@ -619,6 +620,11 @@ bool BattleDialogModel::getShowLairActions() const
     return _showLairActions;
 }
 
+int BattleDialogModel::getCombatantTokenType() const
+{
+    return _combatantTokenType;
+}
+
 const BattleDialogLogger& BattleDialogModel::getLogger() const
 {
     return _logger;
@@ -756,6 +762,11 @@ void BattleDialogModel::setShowLairActions(bool showLairActions)
         emit showLairActionsChanged(_showLairActions);
         emit dirty();
     }
+}
+
+void BattleDialogModel::setCombatantTokenType(int combatantTokenType)
+{
+    _combatantTokenType = combatantTokenType;
 }
 
 void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCombatant)

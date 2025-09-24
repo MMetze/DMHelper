@@ -23,6 +23,11 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
     ui->cmbInitiativeType->addItem("Icons and All Names", QVariant(DMHelper::InitiativeType_ImageName));
     ui->cmbInitiativeType->addItem("Icons and PC Names Only", QVariant(DMHelper::InitiativeType_ImagePCNames));
 
+    ui->cmbCombatantTokenType->addItem("No Tokens", QVariant(DMHelper::CombatantTokenType_None));
+    ui->cmbCombatantTokenType->addItem("Monsters Only", QVariant(DMHelper::CombatantTokenType_MonstersOnly));
+    ui->cmbCombatantTokenType->addItem("Characters Only", QVariant(DMHelper::CombatantTokenType_CharactersOnly));
+    ui->cmbCombatantTokenType->addItem("Characters and Monsters", QVariant(DMHelper::CombatantTokenType_CharactersAndMonsters));
+
     ui->edtInitiativeScale->setValidator(new QDoubleValidator(0.1, 10.0, 2));
 
     if(_options)
@@ -69,6 +74,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
         ui->cmbInitiativeType->setCurrentIndex(_options->getInitiativeType());
         ui->edtInitiativeScale->setText(QString::number(_options->getInitiativeScale()));
         ui->sliderInitiativeScale->setValue(static_cast<int>(_options->getInitiativeScale() * 100.0));
+        ui->cmbCombatantTokenType->setCurrentIndex(_options->getCombatantTokenType());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1, 1000, this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
@@ -87,21 +93,15 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
             ui->edtCampaignName->setText(_campaign->getName());
 
             QString ruleInitiativeType = _campaign->getRuleset().getRuleInitiativeType();
-            if(ruleInitiativeType.isEmpty())
+            QStringList ruleInitiativeNames = RuleFactory::getRuleInitiativeNames();
+            for(int i = 0; i  < ruleInitiativeNames.count() / 2; ++i)
             {
-                ui->cmbInitiative->setEnabled(false);
-            }
-            else
-            {
-                QStringList ruleInitiativeNames = RuleFactory::getRuleInitiativeNames();
-                for(int i = 0; i  < ruleInitiativeNames.count() / 2; ++i)
-                {
-                    ui->cmbInitiative->addItem(ruleInitiativeNames.at(2 * i + 1), ruleInitiativeNames.at(2 * i));
-                    if(ruleInitiativeType == ruleInitiativeNames.at(2 * i))
-                        ui->cmbInitiative->setCurrentIndex(i);
-                }
+                ui->cmbInitiative->addItem(ruleInitiativeNames.at(2 * i + 1), ruleInitiativeNames.at(2 * i));
+                if(ruleInitiativeType == ruleInitiativeNames.at(2 * i))
+                    ui->cmbInitiative->setCurrentIndex(i);
             }
 
+            ui->edtMovement->setText(_campaign->getRuleset().getMovementString());
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
             ui->chkShowFear->setChecked(_campaign->getShowFear());
             ui->chkShowFear->setVisible(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
@@ -151,6 +151,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
                 this, [=](int newValue) { this->handleInitiativeScaleChanged(static_cast<qreal>(newValue) / 100.0); });
         connect(ui->edtInitiativeScale, &QLineEdit::editingFinished,
                 this, [=]() { this->handleInitiativeScaleChanged(ui->edtInitiativeScale->text().toDouble()); });
+        connect(ui->cmbCombatantTokenType, SIGNAL(currentIndexChanged(int)), _options, SLOT(setCombatantTokenType(int)));
         connect(ui->chkShowCountdown, SIGNAL(clicked(bool)), _options, SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);
@@ -225,6 +226,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->getRuleset().setBestiaryFile(ui->edtBestiaryFile->text());
     _campaign->getRuleset().setMonsterDataFile(ui->edtMonsterData->text());
     _campaign->getRuleset().setMonsterUIFile(ui->edtMonsterUI->text());
+    _campaign->getRuleset().setMovementString(ui->edtMovement->text());
 }
 
 void OptionsDialog::browseDefaultBestiary()

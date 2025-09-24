@@ -167,6 +167,21 @@ namespace DMHelper
         InitiativeType_ImagePCNames
     };
 
+    enum CombatantTokenType
+    {
+        CombatantTokenType_None = 0,
+        CombatantTokenType_MonstersOnly,
+        CombatantTokenType_CharactersOnly,
+        CombatantTokenType_CharactersAndMonsters
+    };
+
+    enum MovementType
+    {
+        MovementType_None = 0,
+        MovementType_Distance,
+        MovementType_Range
+    };
+
     enum LayerType
     {
         LayerType_Unknown = -1,

@@ -51,6 +51,7 @@ public slots:
     void setCameraRect(const QRectF& cameraRect);
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);
+    void combatantTokenTypeChanged();
 
     void fearChanged();
 

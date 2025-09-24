@@ -16,6 +16,7 @@ const char* DEFAULT_MONSTER_DATA = "monster5e.xml";
 const char* DEFAULT_MONSTER_UI = "./ui/monster5e.ui";
 const char* DEFAULT_BESTIARY = "DMHelperBestiary.xml";
 bool DEFAULT_CHARACTER_DONE = true;
+const char* DEFAULT_MOVEMENT = "distance";
 
 RuleFactory* RuleFactory::_instance = nullptr;
 
@@ -115,6 +116,7 @@ RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rule
                                DEFAULT_MONSTER_UI,
                                getDefaultBestiary(),
                                QDir(),
+                               QString(),
                                DEFAULT_CHARACTER_DONE);
     }
 }
@@ -191,6 +193,7 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
             newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
             newRuleset._rulesetDir = QFileInfo(rulesetFile).absolutePath();
             newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
+            newRuleset._movement = rulesetElement.attribute(QString("movement"));
 
             if((newRuleset._name == DEFAULT_RULESET_NAME) && (newRuleset._bestiary == DEFAULT_BESTIARY) && (!getDefaultBestiary().isEmpty()))
                 newRuleset._bestiary = getDefaultBestiary();

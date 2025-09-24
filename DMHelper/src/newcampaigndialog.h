@@ -18,6 +18,7 @@ public:
     QString getCampaignName() const;
     QString getInitiativeType() const;
     QString getInitiativeDescription() const;
+    QString getMovementString() const;
     QString getCharacterDataFile() const;
     QString getCharacterUIFile() const;
     QString getBestiaryFile() const;

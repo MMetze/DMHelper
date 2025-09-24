@@ -54,6 +54,11 @@ QString NewCampaignDialog::getInitiativeDescription() const
     return ui->cmbInitiative->currentText();
 }
 
+QString NewCampaignDialog::getMovementString() const
+{
+    return ui->edtMovement->text();
+}
+
 QString NewCampaignDialog::getCharacterDataFile() const
 {
     return ui->edtCharacterData->text();
@@ -119,6 +124,8 @@ void NewCampaignDialog::handleRulesetSelected()
     int initiativeIndex = ui->cmbInitiative->findData(ruleset._initiative);
     if(initiativeIndex != -1)
         ui->cmbInitiative->setCurrentIndex(initiativeIndex);
+
+    ui->edtMovement->setText(ruleset._movement.isEmpty() ? QString("distance") : ruleset._movement);
 
     ui->edtCharacterData->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._characterData)));
     ui->edtCharacterUI->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._characterUI)));
