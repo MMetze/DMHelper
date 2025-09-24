@@ -5,7 +5,7 @@
     <dmh:attribute type="dmh:string" name="name"/>
     <dmh:attribute type="dmh:string" name="size" default="medium"/>
     <dmh:attribute type="dmh:string" name="tier" default="Tier 1"/>
-    <dmh:attribute type="dmh:string" name="type" default="Bruiser"/>
+    <dmh:attribute type="dmh:string" name="monster_type" default="Bruiser"/>
     <dmh:attribute type="dmh:string" name="description"/>
     <dmh:attribute type="dmh:string" name="motives"/>
     
