@@ -221,7 +221,10 @@ void CombatantDialog::monsterClassChanged(const QString &text)
     ui->chkRandomTokens->setEnabled(monsterClass->getIconCount() > 1);
 
     ui->edtName->setText(text);
-    ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
+    if(monsterClass->hasValue("hit_dice"))
+        ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
+    else
+        ui->edtHitPointsLocal->setText(QString::number(monsterClass->getIntValue("hit_points")));
 
     setHitPointAverageChanged();
 

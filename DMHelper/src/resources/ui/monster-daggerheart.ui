@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
+    <width>480</width>
     <height>567</height>
    </rect>
   </property>
@@ -95,17 +95,17 @@ color: rgb(50, 50, 50);</string>
     </layout>
    </item>
    <item>
-    <widget class="QLineEdit" name="edtAlignment">
+    <widget class="QLineEdit" name="edtDescription">
      <property name="font">
       <font>
        <italic>true</italic>
       </font>
      </property>
      <property name="text">
-      <string>alignment</string>
+      <string>description</string>
      </property>
      <property name="dmhValue" stdset="0">
-      <string>alignment</string>
+      <string>description</string>
      </property>
     </widget>
    </item>
@@ -128,9 +128,6 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>motives</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
        <property name="dmhValue" stdset="0">
         <string>motives</string>
        </property>
@@ -143,9 +140,6 @@ color: rgb(50, 50, 50);</string>
      <property name="styleSheet">
       <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Shadow::Plain</enum>
-     </property>
      <property name="lineWidth">
       <number>-1</number>
      </property>
@@ -153,7 +147,7 @@ color: rgb(50, 50, 50);</string>
       <number>0</number>
      </property>
      <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
     </widget>
    </item>
@@ -183,11 +177,8 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <spacer name="horizontalSpacer_16">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Policy::Preferred</enum>
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -221,11 +212,8 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <spacer name="horizontalSpacer_15">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Policy::Preferred</enum>
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -259,11 +247,8 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <spacer name="horizontalSpacer_14">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Policy::Preferred</enum>
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -316,9 +301,6 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>attack</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
        <property name="dmhValue" stdset="0">
         <string>attack</string>
        </property>
@@ -326,11 +308,8 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <spacer name="horizontalSpacer_13">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Policy::Preferred</enum>
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -360,9 +339,6 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>standard_attack</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
        <property name="dmhValue" stdset="0">
         <string>standard_attack</string>
        </property>
@@ -389,9 +365,6 @@ color: rgb(50, 50, 50);</string>
        <property name="text">
         <string>experience</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
        <property name="dmhValue" stdset="0">
         <string>experience</string>
        </property>
@@ -404,9 +377,6 @@ color: rgb(50, 50, 50);</string>
      <property name="styleSheet">
       <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Shadow::Plain</enum>
-     </property>
      <property name="lineWidth">
       <number>-1</number>
      </property>
@@ -414,7 +384,7 @@ color: rgb(50, 50, 50);</string>
       <number>0</number>
      </property>
      <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
     </widget>
    </item>
@@ -448,8 +418,8 @@ color: rgb(50, 50, 50);</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>399</width>
-          <height>275</height>
+          <width>458</width>
+          <height>281</height>
          </rect>
         </property>
        </widget>
