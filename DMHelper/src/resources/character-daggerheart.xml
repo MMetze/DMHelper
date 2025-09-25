@@ -17,8 +17,8 @@
     <dmh:attribute type="dmh:string" name="subclass"/>
     <dmh:attribute type="dmh:integer" name="level"/>
     <dmh:attribute type="dmh:integer" name="evasion"/>
-    <dmh:attribute type="dmh:resource" name="armor"/>
-    <dmh:attribute type="dmh:integer" name="armor_used"/>
+    <dmh:attribute type="dmh:integer" name="armor"/>
+    <dmh:attribute type="dmh:resource" name="armor_used"/>
 
     <dmh:attribute type="dmh:integer" name="agility" default="0"/>
     <dmh:attribute type="dmh:integer" name="strength" default="0"/>
