@@ -797,6 +797,280 @@
                 <entry name="Relentless (2)" description="Legion can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight." />
             </features>
         </monster>
+        <monster private="0" name="The Gate Guardian" size="medium" tier="Tier 1" monster_type="Leader" description="An ancient warrior, buried with the gate to protect entry;" motives="Push into groups, swing at multiple targets, raise" difficulty="13" thresholds="6/13" hit_points="7" stress="3" attack="2" standard_attack="Holy Buckler - Passive: The Guardian has resistance to physical" experience="">
+            <features>
+                <entry name="Holy Buckler" description="The Guardian has resistance to physical" />
+                <entry name="Sweeping Strike" description="Spend a Fear to make an attack against" />
+            </features>
+        </monster>
+        <monster private="0" name="Velk the Forsaken" size="medium" tier="Tier 1" monster_type="Solo" description="Velk Dravenmoor, wounded and corrupted by dark powers," motives="Focus fire, leap to vulnerable targets, throw off" difficulty="14" thresholds="7/14" hit_points="10" stress="0" attack="3" standard_attack="" experience="Push +2">
+            <features>
+                <entry name="Relentless (2)" description="Velk can be spotlighted up to two times per GM" />
+                <entry name="Leaping Strike" description="Spend a Fear to allow Velk to leap anywhere" />
+                <entry name="Spinning Blade" description="Spend a Fear to make a standard attack" />
+                <entry name="Throw" description="Mark a Stress to make an attack against a target" />
+                <entry name="Momentum" description="When Velk makes a successful attack against a" />
+            </features>
+        </monster>
+        <monster private="0" name="Eryn (Limb Wreath)" size="medium" tier="Tier 1" monster_type="Leader" description="Eryn has become something of nightmares, a host for" motives="Multiply tentacles, devour" difficulty="13" thresholds="6/13" hit_points="8" stress="5" attack="3" standard_attack="Limb Slam: Close - 2d6+2 phy" experience="Slimy +2">
+            <features>
+                <entry name="Horrifying" description="Targets who mark HP from the Limb Wreath’s" />
+                <entry name="Barrage of Tendrils" description="Spend a Fear to make an attack roll" />
+                <entry name="Taste for Blood" description="Spend a Fear to make an attack against a" />
+                <entry name="Living Tentacles" description="When the Limb Wreath marks 2 or more" />
+            </features>
+        </monster>
+        <monster private="0" name="Living Tentacle" size="medium" tier="Tier 1" monster_type="Minion" description="A part of the Limb Wreath is severed, twitching and moving" motives="Rush, surround" difficulty="14" thresholds="None" hit_points="1" stress="1" attack="1" standard_attack="Whip: Very Close - 2 phy" experience="">
+            <features>
+                <entry name="Horrifying" description="Targets who mark HP from the Tentacle’s attacks" />
+                <entry name="Minion (5)" description="The Tentacle is defeated when they take any" />
+                <entry name="Group Attack" description="Spend a Fear to choose a target and spotlight" />
+            </features>
+        </monster>
+        <monster private="0" name="Pain Beast" size="medium" tier="Tier 1" monster_type="Bruiser" description="Mutated, feral predators covered in patchy fur and scales," motives="Pounce, gang up, bite and drag off" difficulty="13" thresholds="7/14" hit_points="7" stress="3" attack="2" standard_attack="Claws: Very Close - 1d12+3 phy" experience="">
+            <features>
+                <entry name="Paired Hunters" description="When a Pain Beast attacks a target within" />
+                <entry name="Venomous Tail" description="Spend a Fear to make an attack roll against a" />
+                <entry name="Hide Spines" description="If an attacker is within Very Close range when" />
+            </features>
+        </monster>
+        <monster private="0" name="Rotlord" size="medium" tier="Tier 1" monster_type="Bruiser" description="A massive nexus of forest will and dark magic, this tower of" motives="Charge, swallow, spore the battlefield" difficulty="11" thresholds="9/18" hit_points="11" stress="2" attack="2" standard_attack="" experience="">
+            <features>
+                <entry name="Horrid Smell" description="Targets who fail an action or roll with Fear within" />
+                <entry name="Envelop" description="Make an attack against a target within Melee range." />
+                <entry name="Funky Backup" description="Spend a Fear to conjure 2 Caustic Fungus" />
+                <entry name="Fear Spores" description="When a creature within Close range cannot" />
+            </features>
+        </monster>
+        <monster private="0" name="Caustic Fungus" size="medium" tier="Tier 1" monster_type="Minion" description="The underbrush of the Screaming Forest has a hive mind of" motives="Swarm, destroy armor" difficulty="12" thresholds="None" hit_points="1" stress="1" attack="0" standard_attack="Slam: Melee - 2 phy" experience="">
+            <features>
+                <entry name="Minion (4)" description="Caustic Fungus is defeated when they take any" />
+                <entry name="Corrosive" description="Targets who are successfully hit by the Fungus’" />
+                <entry name="Group Attack" description="Spend a Fear to choose a target and spotlight" />
+            </features>
+        </monster>
+        <monster private="0" name="Hive Collector" size="medium" tier="Tier 1" monster_type="Standard" description="Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" difficulty="14" thresholds="7/16" hit_points="9" stress="3" attack="2" standard_attack="" experience="">
+            <features>
+                <entry name="Sleeping Sting" description="Make an attack against a target within Very" />
+                <entry name="Tangle Net" description="Mark a Stress to make a target within Close range" />
+            </features>
+        </monster>
+        <monster private="0" name="Mother" size="medium" tier="Tier 2" monster_type="Solo" description="The Mother of the Hive, she seeks materials and subjects to" motives="Envenom, ensnare, capture" difficulty="15" thresholds="14/28" hit_points="11" stress="4" attack="3" standard_attack="" experience="">
+            <features>
+                <entry name="Surgical Accuracy" description="Before Mother makes an attack, roll a d6." />
+                <entry name="To Me, My Children!" description="Mark a Stress to spotlight 1d4+1 allies." />
+                <entry name="Sweeping Incision" description="Spend a Fear to make an attack against all" />
+                <entry name="Acidic Mist" description="When Mother marks 2 or more HP from an" />
+            </features>
+        </monster>
+        <monster private="0" name="Glomtower Thrall" size="medium" tier="Tier 2" monster_type="Solo" description="A towering being of sorrow and service, forever doomed to" motives="Ram, capture, batter against allies" difficulty="15" thresholds="13/26" hit_points="10" stress="3" attack="3" standard_attack="Chain Swing: Close - 2d20+15 phy" experience="Overwhelming +3">
+            <features>
+                <entry name="Slow" description="When you spotlight the Thrall and they don’t have a" />
+                <entry name="Dense But Clumsy" description="An attack that would move the Thrall" />
+                <entry name="Cage The Judged" description="Spend a Fear to make an attack against a" />
+                <entry name="Cage Slam" description="Spend a Fear to make an attack against a target" />
+                <entry name="Momentum" description="When the Thrall makes a successful attack" />
+                <entry name="Kick" description="Mark a Stress when the Thrall marks 2 or more HP" />
+            </features>
+        </monster>
+        <monster private="0" name="Elite Hive Collector" size="medium" tier="Tier 2" monster_type="Standard" description="Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" difficulty="15" thresholds="8/19" hit_points="9" stress="3" attack="2" standard_attack="" experience="">
+            <features>
+                <entry name="Sleeping Sting" description="Make an attack against a target within Very" />
+                <entry name="Tangle Net" description="Mark a Stress to make a target within Close range" />
+            </features>
+        </monster>
+        <monster private="0" name="Terrorgut" size="medium" tier="Tier 2" monster_type="Solo" description="A ravenous demon unleashed through dark magic, it claims" motives="Consume, whip and pull, release zombies" difficulty="15" thresholds="14/28" hit_points="11" stress="4" attack="3" standard_attack="Bone Whip: Close - 2d12+10 phy" experience="Infernal Strength +3">
+            <features>
+                <entry name="Terrifying" description="When Terrorgut makes a successful attack, all PCs" />
+                <entry name="Demon Armor" description="When Terrorgut takes physical damage, reduce" />
+                <entry name="Release Shambling Zombie" description="Spend a Fear to create a" />
+                <entry name="Devour" description="Spend a Fear to make an attack against a PC within" />
+                <entry name="Get Over Here" description="When you mark 2 or more HP from a PC" />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Ambusher" size="medium" tier="Tier 2" monster_type="Skulk" description="A hardened cutthroat and thief who hunts for the Queens." motives="Evade, hide, ambush, pilfer" difficulty="14" thresholds="8/17" hit_points="5" stress="4" attack="2" standard_attack="Long Knife: Melee - 2d6+8 phy" experience="">
+            <features>
+                <entry name="Backstab" description="When the Ambusher succeeds on a standard attack" />
+                <entry name="Cloaked" description="Become Hidden until after the Ambusher’s next" />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Marauder Band" size="medium" tier="Tier 2" monster_type="Horde" description="A crew of cackling killers relishing in chaos and plunder." motives="Surround, gang up, divide and conquer" difficulty="14" thresholds="10/21" hit_points="6" stress="4" attack="1" standard_attack="Long Blade: Melee - 2d8+5 phy" experience="">
+            <features>
+                <entry name="Horde (2d4+2)" description="When the Band has marked half or more of" />
+                <entry name="Sadistic Laughter" description="When a target of the Band’s attack marks" />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Archer Squad" size="medium" tier="Tier 2" monster_type="Horde" description="Ranged raiders of the Damask Queens." motives="Stick together, survive, volley fire" difficulty="13" thresholds="8/16" hit_points="4" stress="3" attack="0" standard_attack="Bow: Far - 2d6+5 phy" experience="">
+            <features>
+                <entry name="Horde (1d6+3)" description="When the Squad has marked half or more of" />
+                <entry name="Focused Volley" description="Spend a Fear to target a point within Far" />
+                <entry name="Suppressing Fire" description="Mark a Stress to target a point within Far" />
+            </features>
+        </monster>
+        <monster private="0" name="Corrupted Fane Warden" size="medium" tier="Tier 2" monster_type="Solo" description="The once beloved protector of the weald now stews in" motives="Hunt, punish" difficulty="15" thresholds="13/25" hit_points="9" stress="4" attack="3" standard_attack="Glimmer Within - Passive: A flame of ancient magic still burns within" experience="">
+            <features>
+                <entry name="Relentless (2)" description="The Fane Guardian can be spotlighted up to" />
+                <entry name="Glimmer Within" description="A flame of ancient magic still burns within" />
+                <entry name="Overwhelming Arc" description="Spend a Fear to make an attack against" />
+                <entry name="Vine Spear" description="Spend a Fear to have a target within Far range" />
+                <entry name="Take Root" description="Mark a Stress to Root the Fane Warden in place." />
+                <entry name="Righteous Vengeance" description="When the Fane Warden marks 2 or" />
+            </features>
+        </monster>
+        <monster private="0" name="Blasphemous Angel Evelyar" size="medium" tier="Tier 2" monster_type="Solo" description="Her holy mission slandered and her compassion punished" motives="Punish many, dishearten, void stare." difficulty="14" thresholds="12/24" hit_points="12" stress="8" attack="3" standard_attack="Unholy Aura - Passive: When Evelyar takes damage, reduce it by the" experience="Unholy Strength +3">
+            <features>
+                <entry name="Relentless (2)" description="Evelyar can be spotlighted up to two times per" />
+                <entry name="Unholy Aura" description="When Evelyar takes damage, reduce it by the" />
+                <entry name="Arc of Judgement" description="Spend a Fear to make an attack against all" />
+                <entry name="The Flock’s Call" description="Mark a Stress to spotlight 1d4+1 allies." />
+                <entry name="Look Into The Void" description="Mark a Stress to have a PC within Very" />
+                <entry name="Blasphemous Choir" description="Countdown (Loop 1d8). When Evelyar" />
+                <entry name="Momentum" description="When the Fane Warden makes a successful" />
+            </features>
+        </monster>
+        <monster private="0" name="Profane Disciple" size="medium" tier="Tier 2" monster_type="Standard" description="One of the disciples of Evelyar, betrayed by the clergy and" motives="Protect Evelyar, condemn, pass judgement" difficulty="14" thresholds="10/20" hit_points="7" stress="3" attack="2" standard_attack="Retaliation - Reaction: When Evelyar takes damage from an attack" experience="">
+            <features>
+                <entry name="Dance of Condemnation" description="When the Disciple is within Melee" />
+                <entry name="Retaliation" description="When Evelyar takes damage from an attack" />
+            </features>
+        </monster>
+        <monster private="0" name="The Gate Guardian" size="medium" tier="Tier 1" monster_type="Leader" description="An ancient warrior, buried with the gate to protect entry;" motives="Push into groups, swing at multiple targets, raise" difficulty="13" thresholds="6/13" hit_points="6" stress="3" attack="2" standard_attack="Holy Buckler - Passive: The Guardian has resistance to physical" experience="">
+            <features>
+                <entry name="Holy Buckler" description="The Guardian has resistance to physical" />
+                <entry name="Sweeping Strike" description="Spend a Fear to make an attack against" />
+            </features>
+        </monster>
+        <monster private="0" name="Velk the Forsaken" size="medium" tier="Tier 1" monster_type="Solo" description="Velk Dravenmoor, wounded and corrupted by dark powers," motives="Focus fire, leap to vulnerable targets, throw off" difficulty="14" thresholds="7/14" hit_points="9" stress="0" attack="3" standard_attack="" experience="Push +2">
+            <features>
+                <entry name="Relentless (2)" description="Velk can be spotlighted up to two times per GM" />
+                <entry name="Leaping Strike" description="Spend a Fear to allow Velk to leap anywhere" />
+                <entry name="Spinning Blade" description="Spend a Fear to make a standard attack" />
+                <entry name="Throw" description="Mark a Stress to make an attack against a target" />
+                <entry name="Momentum" description="When Velk makes a successful attack against a" />
+            </features>
+        </monster>
+        <monster private="0" name="Eryn (Limb Wreath)" size="medium" tier="Tier 1" monster_type="Leader" description="Eryn has become something of nightmares, a host for" motives="Multiply tentacles, devour" difficulty="13" thresholds="6/13" hit_points="7" stress="5" attack="3" standard_attack="Limb Slam: Close - 2d6+2 phy" experience="Slimy +2">
+            <features>
+                <entry name="Horrifying" description="Targets who mark HP from the Limb Wreath’s" />
+                <entry name="Barrage of Tendrils" description="Spend a Fear to make an attack roll" />
+                <entry name="Taste for Blood" description="Spend a Fear to make an attack against a" />
+                <entry name="Living Tentacles" description="When the Limb Wreath marks 2 or more" />
+            </features>
+        </monster>
+        <monster private="0" name="Living Tentacle" size="medium" tier="Tier 1" monster_type="Minion" description="A part of the Limb Wreath is severed, twitching and moving" motives="Rush, surround" difficulty="14" thresholds="None" hit_points="1" stress="1" attack="1" standard_attack="Whip: Very Close - 2 phy" experience="">
+            <features>
+                <entry name="Horrifying" description="Targets who mark HP from the Tentacle’s attacks" />
+                <entry name="Minion (5)" description="The Tentacle is defeated when they take any" />
+                <entry name="Group Attack" description="Spend a Fear to choose a target and spotlight" />
+            </features>
+        </monster>
+        <monster private="0" name="Pain Beast" size="medium" tier="Tier 1" monster_type="Bruiser" description="Mutated, feral predators covered in patchy fur and scales," motives="Pounce, gang up, bite and drag off" difficulty="13" thresholds="7/14" hit_points="6" stress="3" attack="2" standard_attack="Claws: Very Close - 1d12+3 phy" experience="">
+            <features>
+                <entry name="Paired Hunters" description="When a Pain Beast attacks a target within" />
+                <entry name="Venomous Tail" description="Spend a Fear to make an attack roll against a" />
+                <entry name="Hide Spines" description="If an attacker is within Very Close range when" />
+            </features>
+        </monster>
+        <monster private="0" name="Rotlord" size="medium" tier="Tier 1" monster_type="Bruiser" description="A massive nexus of forest will and dark magic, this tower of" motives="Charge, swallow, spore the battlefield" difficulty="11" thresholds="9/18" hit_points="9" stress="2" attack="2" standard_attack="" experience="">
+            <features>
+                <entry name="Horrid Smell" description="Targets who fail an action or roll with Fear within" />
+                <entry name="Envelop" description="Make an attack against a target within Melee range." />
+                <entry name="Funky Backup" description="Spend a Fear to conjure 2 Caustic Fungus" />
+                <entry name="Fear Spores" description="When a creature within Close range cannot" />
+            </features>
+        </monster>
+        <monster private="0" name="Caustic Fungus" size="medium" tier="Tier 1" monster_type="Minion" description="The underbrush of the Screaming Forest has a hive mind of" motives="Swarm, destroy armor" difficulty="12" thresholds="None" hit_points="1" stress="1" attack="0" standard_attack="Slam: Melee - 2 phy" experience="">
+            <features>
+                <entry name="Minion (4)" description="Caustic Fungus is defeated when they take any" />
+                <entry name="Corrosive" description="Targets who are successfully hit by the Fungus’" />
+                <entry name="Group Attack" description="Spend a Fear to choose a target and spotlight" />
+            </features>
+        </monster>
+        <monster private="0" name="Hive Collector" size="medium" tier="Tier 1" monster_type="Standard" description="Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" difficulty="14" thresholds="7/16" hit_points="8" stress="3" attack="2" standard_attack="" experience="">
+            <features>
+                <entry name="Sleeping Sting" description="Make an attack against a target within Very" />
+                <entry name="Tangle Net" description="Mark a Stress to make a target within Close range" />
+            </features>
+        </monster>
+        <monster private="0" name="Mother" size="medium" tier="Tier 2" monster_type="Solo" description="The Mother of the Hive, she seeks materials and subjects to" motives="Envenom, ensnare, capture" difficulty="15" thresholds="14/28" hit_points="9" stress="4" attack="3" standard_attack="Surgical Glaive: Close - 2d12+8 phy" experience="">
+            <features>
+                <entry name="Surgical Accuracy" description="Before Mother makes an attack, roll a d6." />
+                <entry name="To Me, My Children!" description="Mark a Stress to spotlight 1d4+1 allies." />
+                <entry name="Sweeping Incision" description="Spend a Fear to make an attack against all" />
+                <entry name="Acidic Mist" description="When Mother marks 2 or more HP from an" />
+            </features>
+        </monster>
+        <monster private="0" name="Glomtower Thrall" size="medium" tier="Tier 2" monster_type="Solo" description="A towering being of sorrow and service, forever doomed to" motives="Ram, capture, batter against allies" difficulty="15" thresholds="13/26" hit_points="9" stress="3" attack="3" standard_attack="Chain Swing: Close - 2d20+10 phy" experience="Overwhelming +3">
+            <features>
+                <entry name="Slow" description="When you spotlight the Thrall and they don’t have a" />
+                <entry name="Dense But Clumsy" description="An attack that would move the Thrall" />
+                <entry name="Cage The Judged" description="Spend a Fear to make an attack against a" />
+                <entry name="Cage Slam" description="Spend a Fear to make an attack against a target" />
+                <entry name="Momentum" description="When the Thrall makes a successful attack" />
+                <entry name="Kick" description="Mark a Stress when the Thrall marks 2 or more HP" />
+            </features>
+        </monster>
+        <monster private="0" name="Elite Hive Collector" size="medium" tier="Tier 2" monster_type="Standard" description="Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" difficulty="15" thresholds="8/19" hit_points="8" stress="3" attack="2" standard_attack="" experience="">
+            <features>
+                <entry name="Sleeping Sting" description="Make an attack against a target within Very" />
+                <entry name="Tangle Net" description="Mark a Stress to make a target within Close range" />
+            </features>
+        </monster>
+        <monster private="0" name="Terrorgut" size="medium" tier="Tier 2" monster_type="Solo" description="A ravenous demon unleashed through dark magic, it claims" motives="Consume, whip and pull, release zombies" difficulty="15" thresholds="14/28" hit_points="10" stress="4" attack="3" standard_attack="Bone Whip: Close - 2d12+8 phy" experience="Infernal Strength +3">
+            <features>
+                <entry name="Terrifying" description="When Terrorgut makes a successful attack, all PCs" />
+                <entry name="Demon Armor" description="When Terrorgut takes physical damage, reduce" />
+                <entry name="Release Shambling Zombie" description="Spend a Fear to create a" />
+                <entry name="Devour" description="Spend a Fear to make an attack against a PC within" />
+                <entry name="Get Over Here" description="When you mark 2 or more HP from a PC" />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Ambusher" size="medium" tier="Tier 2" monster_type="Skulk" description="A hardened cutthroat and thief who hunts for the Queens." motives="Evade, hide, ambush, pilfer" difficulty="14" thresholds="8/17" hit_points="5" stress="4" attack="2" standard_attack="Long Knife: Melee - 2d6+6 phy" experience="">
+            <features>
+                <entry name="Backstab" description="When the Ambusher succeeds on a standard attack" />
+                <entry name="Cloaked" description="Become Hidden until after the Ambusher’s next" />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Marauder Band" size="medium" tier="Tier 2" monster_type="Horde" description="A crew of cackling killers relishing in chaos and plunder." motives="Surround, gang up, divide and conquer" difficulty="14" thresholds="10/21" hit_points="6" stress="4" attack="1" standard_attack="Long Blade: Melee - 2d8+5 phy" experience="">
+            <features>
+                <entry name="Horde (2d4+2)" description="When the Band has marked half or more of" />
+                <entry name="Sadistic Laughter" description="When a target of the Band’s attack marks" />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Archer Squad" size="medium" tier="Tier 2" monster_type="Horde" description="Ranged raiders of the Damask Queens." motives="Stick together, survive, volley fire" difficulty="13" thresholds="8/16" hit_points="4" stress="3" attack="0" standard_attack="Bow: Far - 2d6+5 phy" experience="">
+            <features>
+                <entry name="Horde (1d6+3)" description="When the Squad has marked half or more of" />
+                <entry name="Focused Volley" description="Spend a Fear to target a point within Far" />
+                <entry name="Suppressing Fire" description="Mark a Stress to target a point within Far" />
+            </features>
+        </monster>
+        <monster private="0" name="Corrupted Fane Warden" size="medium" tier="Tier 2" monster_type="Solo" description="The once beloved protector of the weald now stews in" motives="Hunt, punish" difficulty="15" thresholds="13/25" hit_points="8" stress="4" attack="3" standard_attack="Glimmer Within - Passive: A flame of ancient magic still burns within" experience="">
+            <features>
+                <entry name="Relentless (2)" description="The Fane Guardian can be spotlighted up to" />
+                <entry name="Glimmer Within" description="A flame of ancient magic still burns within" />
+                <entry name="Overwhelming Arc" description="Spend a Fear to make an attack against" />
+                <entry name="Vine Spear" description="Spend a Fear to have a target within Far range" />
+                <entry name="Take Root" description="Mark a Stress to Root the Fane Warden in place." />
+                <entry name="Righteous Vengeance" description="When the Fane Warden marks 2 or" />
+            </features>
+        </monster>
+        <monster private="0" name="Blasphemous Angel Evelyar" size="medium" tier="Tier 2" monster_type="Solo" description="Her holy mission slandered and her compassion punished" motives="Punish many, dishearten, void stare." difficulty="14" thresholds="12/24" hit_points="10" stress="6" attack="3" standard_attack="Unholy Aura - Passive: When Evelyar takes damage, reduce it by the" experience="Unholy Strength +3">
+            <features>
+                <entry name="Relentless (2)" description="Evelyar can be spotlighted up to two times per" />
+                <entry name="Unholy Aura" description="When Evelyar takes damage, reduce it by the" />
+                <entry name="Arc of Judgement" description="Spend a Fear to make an attack against all" />
+                <entry name="The Flock’s Call" description="Mark a Stress to spotlight 1d4+1 allies." />
+                <entry name="Look Into The Void" description="Mark a Stress to have a PC within Very" />
+                <entry name="Blasphemous Choir" description="Countdown (Loop 1d8). When Evelyar" />
+                <entry name="Momentum" description="When the Fane Warden makes a successful" />
+            </features>
+        </monster>
+        <monster private="0" name="Profane Disciple" size="medium" tier="Tier 2" monster_type="Standard" description="One of the disciples of Evelyar, betrayed by the clergy and" motives="Protect Evelyar, condemn, pass judgement" difficulty="14" thresholds="10/20" hit_points="6" stress="3" attack="2" standard_attack="Retaliation - Reaction: When Evelyar takes damage from an attack" experience="">
+            <features>
+                <entry name="Dance of Condemnation" description="When the Disciple is within Melee" />
+                <entry name="Retaliation" description="When Evelyar takes damage from an attack" />
+            </features>
+        </monster>
         <license>
             <element>Copyright Notice: This product includes materials from the Daggerheart System Reference Document 1.0 © Critical Role, LLC. All rights reserved.</element>
             <element>The contents of this DMH Bestiary are Public Game Content from the Daggerheart System Reference Document 1.0 and Darrington Press, LLC is the creator of that material</element>
