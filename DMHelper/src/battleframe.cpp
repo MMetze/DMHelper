@@ -3751,9 +3751,13 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         updateCountdownText();
     }
 
-    _model->setActiveCombatant(active);
-    active->setDone(true);
-    connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    if(active)
+    {
+        _model->setActiveCombatant(active);
+        active->setDone(true);
+        connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    }
+
     updateHighlights();
 }
 

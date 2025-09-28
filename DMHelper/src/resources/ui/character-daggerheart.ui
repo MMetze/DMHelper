@@ -33,95 +33,6 @@ color: rgb(50, 50, 50);</string>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <layout class="QFormLayout" name="formLayout_2">
-       <property name="horizontalSpacing">
-        <number>1</number>
-       </property>
-       <property name="verticalSpacing">
-        <number>1</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_52">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Class</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="edtClass">
-         <property name="font">
-          <font>
-           <italic>true</italic>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(0, 0, 0);</string>
-         </property>
-         <property name="text">
-          <string>class</string>
-         </property>
-         <property name="cursorPosition">
-          <number>0</number>
-         </property>
-         <property name="dmhValue" stdset="0">
-          <string>class</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_53">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Domains</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="edtDomains">
-         <property name="font">
-          <font>
-           <italic>true</italic>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(0, 0, 0);</string>
-         </property>
-         <property name="text">
-          <string>domains</string>
-         </property>
-         <property name="cursorPosition">
-          <number>0</number>
-         </property>
-         <property name="dmhValue" stdset="0">
-          <string>domains</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <layout class="QFormLayout" name="formLayout_5">
        <property name="horizontalSpacing">
         <number>1</number>
@@ -224,6 +135,92 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
+      <spacer name="horizontalSpacer">
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QFormLayout" name="formLayout_2">
+       <property name="horizontalSpacing">
+        <number>1</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>1</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_52">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Class</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="edtClass">
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>class</string>
+         </property>
+         <property name="cursorPosition">
+          <number>0</number>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>class</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_53">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Domains</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="edtDomains">
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>domains</string>
+         </property>
+         <property name="cursorPosition">
+          <number>0</number>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>domains</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <layout class="QFormLayout" name="formLayout_4">
        <property name="horizontalSpacing">
         <number>1</number>
@@ -301,9 +298,6 @@ color: rgb(50, 50, 50);</string>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -394,6 +388,19 @@ color: rgb(50, 50, 50);</string>
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_12">
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -424,7 +431,7 @@ color: rgb(50, 50, 50);</string>
               <number>0</number>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>evasion</string>
@@ -442,7 +449,7 @@ color: rgb(50, 50, 50);</string>
               <string>Evasion</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -470,7 +477,7 @@ color: rgb(50, 50, 50);</string>
               <number>0</number>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>armor</string>
@@ -488,13 +495,26 @@ color: rgb(50, 50, 50);</string>
               <string>Armor</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
           </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_11">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_15">
@@ -509,7 +529,7 @@ color: rgb(50, 50, 50);</string>
             <string>Armor Used</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -534,10 +554,7 @@ color: rgb(50, 50, 50);</string>
             </size>
            </property>
            <property name="frameShape">
-            <enum>QFrame::Shape::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Shadow::Raised</enum>
+            <enum>QFrame::NoFrame</enum>
            </property>
            <property name="dmhValue" stdset="0">
             <string>armor_used</string>
@@ -553,14 +570,11 @@ color: rgb(50, 50, 50);</string>
        <property name="styleSheet">
         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
        </property>
-       <property name="frameShadow">
-        <enum>QFrame::Shadow::Plain</enum>
-       </property>
        <property name="lineWidth">
         <number>-1</number>
        </property>
        <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -587,7 +601,7 @@ color: rgb(50, 50, 50);</string>
               <string>Agility</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -605,7 +619,7 @@ color: rgb(50, 50, 50);</string>
               <string>+0</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>agility</string>
@@ -627,7 +641,7 @@ color: rgb(50, 50, 50);</string>
               <string>Strength</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -645,7 +659,7 @@ color: rgb(50, 50, 50);</string>
               <string>+0</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>strength</string>
@@ -667,7 +681,7 @@ color: rgb(50, 50, 50);</string>
               <string>Finesse</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -685,7 +699,7 @@ color: rgb(50, 50, 50);</string>
               <string>+0</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>finesse</string>
@@ -707,7 +721,7 @@ color: rgb(50, 50, 50);</string>
               <string>Instinct</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -725,10 +739,10 @@ color: rgb(50, 50, 50);</string>
               <string>+0</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
-              <string>strengthMod</string>
+              <string>instinct</string>
              </property>
             </widget>
            </item>
@@ -747,7 +761,7 @@ color: rgb(50, 50, 50);</string>
               <string>Presence</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -765,7 +779,7 @@ color: rgb(50, 50, 50);</string>
               <string>+0</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>presence</string>
@@ -787,7 +801,7 @@ color: rgb(50, 50, 50);</string>
               <string>Knowledge</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -805,7 +819,7 @@ color: rgb(50, 50, 50);</string>
               <string>+0</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>knowledge</string>
@@ -818,11 +832,8 @@ color: rgb(50, 50, 50);</string>
        </item>
        <item>
         <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Policy::Preferred</enum>
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -837,7 +848,20 @@ color: rgb(50, 50, 50);</string>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="2,3">
+    <widget class="Line" name="line_7">
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="2,0,3">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_10">
        <property name="spacing">
@@ -860,17 +884,14 @@ color: rgb(50, 50, 50);</string>
             <string>Damage &amp; Health</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QFrame" name="frame">
            <property name="frameShape">
-            <enum>QFrame::Shape::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Shadow::Raised</enum>
+            <enum>QFrame::NoFrame</enum>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <property name="spacing">
@@ -913,7 +934,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Minor</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -938,7 +959,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Damage</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -969,7 +990,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Mark 1 HP</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -992,7 +1013,7 @@ color: rgb(50, 50, 50);</string>
                  <string>+0</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="dmhValue" stdset="0">
                  <string>minor_damage_threshold</string>
@@ -1019,7 +1040,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Major</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -1044,7 +1065,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Damage</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -1075,7 +1096,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Mark 2 HP</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -1098,7 +1119,7 @@ color: rgb(50, 50, 50);</string>
                  <string>+0</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="dmhValue" stdset="0">
                  <string>major_damage_threshold</string>
@@ -1125,7 +1146,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Severe</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -1150,7 +1171,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Damage</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -1181,7 +1202,7 @@ color: rgb(50, 50, 50);</string>
                    <string>Mark 3 HP</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="wordWrap">
                    <bool>true</bool>
@@ -1210,9 +1231,6 @@ color: rgb(50, 50, 50);</string>
                 <property name="text">
                  <string>HP</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-                </property>
                </widget>
               </item>
               <item row="0" column="1">
@@ -1236,10 +1254,7 @@ color: rgb(50, 50, 50);</string>
                  </size>
                 </property>
                 <property name="frameShape">
-                 <enum>QFrame::Shape::StyledPanel</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Shadow::Raised</enum>
+                 <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="dmhValue" stdset="0">
                  <string>hit_points</string>
@@ -1255,9 +1270,6 @@ color: rgb(50, 50, 50);</string>
                 </property>
                 <property name="text">
                  <string>Stress</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -1282,10 +1294,7 @@ color: rgb(50, 50, 50);</string>
                  </size>
                 </property>
                 <property name="frameShape">
-                 <enum>QFrame::Shape::StyledPanel</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Shadow::Raised</enum>
+                 <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="dmhValue" stdset="0">
                  <string>stress</string>
@@ -1298,6 +1307,19 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_4">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -1316,42 +1338,88 @@ color: rgb(50, 50, 50);</string>
             <string>Hope</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="frameHitPoints_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Shape::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Shadow::Raised</enum>
-           </property>
-           <property name="dmhValue" stdset="0">
-            <string>hit_points</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="0,0,0">
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QFrame" name="frameHitPoints_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="dmhValue" stdset="0">
+              <string>hope</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_3">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -1370,7 +1438,7 @@ color: rgb(50, 50, 50);</string>
             <string>Experience</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1390,7 +1458,7 @@ color: rgb(50, 50, 50);</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>280</width>
+              <width>277</width>
               <height>68</height>
              </rect>
             </property>
@@ -1398,6 +1466,19 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_24">
@@ -1413,7 +1494,7 @@ color: rgb(50, 50, 50);</string>
             <string>Gold</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1431,9 +1512,6 @@ color: rgb(50, 50, 50);</string>
              </property>
              <property name="text">
               <string>Handfuls</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -1458,13 +1536,10 @@ color: rgb(50, 50, 50);</string>
               </size>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Shape::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Shadow::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <property name="dmhValue" stdset="0">
-              <string>hit_points</string>
+              <string>gold_handfuls</string>
              </property>
             </widget>
            </item>
@@ -1479,7 +1554,7 @@ color: rgb(50, 50, 50);</string>
               <string>Chest</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -1492,9 +1567,6 @@ color: rgb(50, 50, 50);</string>
              </property>
              <property name="text">
               <string>Bags</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -1519,13 +1591,10 @@ color: rgb(50, 50, 50);</string>
               </size>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Shape::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Shadow::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <property name="dmhValue" stdset="0">
-              <string>hit_points</string>
+              <string>gold_bags</string>
              </property>
             </widget>
            </item>
@@ -1550,19 +1619,29 @@ color: rgb(50, 50, 50);</string>
               </size>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Shape::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Shadow::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <property name="dmhValue" stdset="0">
-              <string>hit_points</string>
+              <string>gold_chest</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_25">
@@ -1581,7 +1660,7 @@ color: rgb(50, 50, 50);</string>
             <string>Class Features</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1601,7 +1680,7 @@ color: rgb(50, 50, 50);</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>280</width>
+              <width>277</width>
               <height>68</height>
              </rect>
             </property>
@@ -1611,6 +1690,19 @@ color: rgb(50, 50, 50);</string>
         </layout>
        </item>
       </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_9">
+       <property name="styleSheet">
+        <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+       </property>
+       <property name="lineWidth">
+        <number>-1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1631,7 +1723,7 @@ color: rgb(50, 50, 50);</string>
             <string>Active Weapons</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1644,6 +1736,9 @@ color: rgb(50, 50, 50);</string>
            </property>
            <property name="text">
             <string>Proficiency:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -1659,6 +1754,9 @@ color: rgb(50, 50, 50);</string>
            </property>
            <property name="cursorPosition">
             <number>0</number>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>proficiency</string>
@@ -1800,6 +1898,9 @@ color: rgb(50, 50, 50);</string>
              </property>
              <property name="cursorPosition">
               <number>0</number>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>primary_weapon_damage</string>
@@ -1981,6 +2082,9 @@ color: rgb(50, 50, 50);</string>
              <property name="cursorPosition">
               <number>0</number>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
              <property name="dmhValue" stdset="0">
               <string>secondary_weapon_damage</string>
              </property>
@@ -2028,6 +2132,19 @@ color: rgb(50, 50, 50);</string>
         </layout>
        </item>
        <item>
+        <widget class="Line" name="line_5">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_24">
          <property name="font">
           <font>
@@ -2039,7 +2156,7 @@ color: rgb(50, 50, 50);</string>
           <string>Active Armor</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -2132,6 +2249,9 @@ color: rgb(50, 50, 50);</string>
              <property name="cursorPosition">
               <number>0</number>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
              <property name="dmhValue" stdset="0">
               <string>armor_thresholds</string>
              </property>
@@ -2164,6 +2284,9 @@ color: rgb(50, 50, 50);</string>
              </property>
              <property name="cursorPosition">
               <number>0</number>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>armor_base</string>
@@ -2212,6 +2335,19 @@ color: rgb(50, 50, 50);</string>
         </layout>
        </item>
        <item>
+        <widget class="Line" name="line_6">
+         <property name="styleSheet">
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -2226,6 +2362,9 @@ color: rgb(50, 50, 50);</string>
              <property name="text">
               <string>Inventory</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
             </widget>
            </item>
            <item>
@@ -2236,6 +2375,19 @@ color: rgb(50, 50, 50);</string>
             </widget>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="Line" name="line_10">
+           <property name="styleSheet">
+            <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+           </property>
+           <property name="lineWidth">
+            <number>-1</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -2249,6 +2401,9 @@ color: rgb(50, 50, 50);</string>
              </property>
              <property name="text">
               <string>Notes</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>

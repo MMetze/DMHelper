@@ -15,10 +15,10 @@
     <dmh:attribute type="dmh:string" name="pronouns"/>
     <dmh:attribute type="dmh:string" name="heritage"/>
     <dmh:attribute type="dmh:string" name="subclass"/>
-    <dmh:attribute type="dmh:integer" name="level"/>
-    <dmh:attribute type="dmh:integer" name="evasion"/>
-    <dmh:attribute type="dmh:integer" name="armor"/>
-    <dmh:attribute type="dmh:resource" name="armor_used"/>
+    <dmh:attribute type="dmh:integer" name="level" default="1"/>
+    <dmh:attribute type="dmh:integer" name="evasion" default="10"/>
+    <dmh:attribute type="dmh:integer" name="armor" default="1"/>
+    <dmh:attribute type="dmh:resource" name="armor_used" default="0,1"/>
 
     <dmh:attribute type="dmh:integer" name="agility" default="0"/>
     <dmh:attribute type="dmh:integer" name="strength" default="0"/>
@@ -27,19 +27,19 @@
     <dmh:attribute type="dmh:integer" name="presence" default="0"/>
     <dmh:attribute type="dmh:integer" name="knowledge" default="0"/>
 
-    <dmh:attribute type="dmh:integer" name="minor_damage_threshold" default="0"/>
-    <dmh:attribute type="dmh:integer" name="major_damage_threshold" default="0"/>
-    <dmh:attribute type="dmh:resource" name="hit_points"/>
-    <dmh:attribute type="dmh:resource" name="stress"/>
+    <dmh:attribute type="dmh:integer" name="minor_damage_threshold" default="1"/>
+    <dmh:attribute type="dmh:integer" name="major_damage_threshold" default="2"/>
+    <dmh:attribute type="dmh:resource" name="hit_points" default="0,5"/>
+    <dmh:attribute type="dmh:resource" name="stress" default="0,5"/>
     <dmh:attribute type="dmh:resource" name="hope" default="0,6"/>
 
     <dmh:element type="dmh:list" name="experience">
         <dmh:attribute type="dmh:string" name="description"/>
-        <dmh:attribute type="dmh:integer" name="bonus"/>
+        <dmh:attribute type="dmh:integer" name="bonus" default="2"/>
     </dmh:element>
 
     <dmh:attribute type="dmh:resource" name="gold_handfuls" default="0,9"/>
-    <dmh:attribute type="dmh:resource" name="gold_handfuls" default="0,9"/>
+    <dmh:attribute type="dmh:resource" name="gold_bags" default="0,9"/>
     <dmh:attribute type="dmh:resource" name="gold_chest" default="0,1"/>
 
     <dmh:element type="dmh:list" name="class_feature">
@@ -47,7 +47,7 @@
         <dmh:attribute type="dmh:string" name="description"/>
     </dmh:element>
 
-    <dmh:attribute type="dmh:integer" name="proficiency" default="1"/>
+    <dmh:attribute type="dmh:integer" name="proficiency" default="2"/>
     <dmh:attribute type="dmh:string" name="primary_weapon_name"/>
     <dmh:attribute type="dmh:string" name="primary_weapon_trait"/>
     <dmh:attribute type="dmh:string" name="primary_weapon_damage"/>
