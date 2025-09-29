@@ -1052,6 +1052,286 @@
                 <entry name="Regeneration - Action" description="Up to three times per scene, spend any number of Fear to clear an equal number of HP." />
             </features>
         </monster>
+        <monster private="0" name="The Gate Guardian" size="medium" tier="Tier 1" monster_type=" Leader (Umbra-Touched)" description="Description: An ancient warrior, buried with the gate to protect entry; their skeletal mass is armored and their curved blade is deadly. " motives="Push into groups, swing at multiple targets, raise allies to help" standard_attack="Curved Blade: Very Close - 1d10+3 phy" attack="+2" difficulty="13" thresholds="6/13" hit_points="5" stress="3">
+            <features>
+                <entry name="Holy Buckler - Passive" description="The Guardian has resistance to physical damage. When the Guardian takes physical damage from a PC within Melee range, the PC is pushed anywhere up to Very Close range of where it stood." />
+                <entry name="Sweeping Strike - Action" description="Spend a Fear to make an attack against every PC within Very Close range in front of the Guardian." />
+                <entry name="Hallowed Cry- Reaction" description="When the Guardian takes physical damage from an attack, you can spend a Fear to call a Skeleton Dredge from a nearby corpse." />
+            </features>
+        </monster>
+        <monster private="0" name="The Gate Guardian (deadly)" size="medium" tier="Tier 1" monster_type=" Leader (Umbra-Touched)" description="Description: An ancient warrior, buried with the gate to protect entry; their skeletal mass is armored and their curved blade is deadly." motives="Push into groups, swing at multiple targets, raise allies to help" standard_attack="Curved Blade: Very Close - 1d10+3 phy" attack="+2" difficulty="13" thresholds="6/13" hit_points="6" stress="3">
+            <features>
+                <entry name="Holy Buckler - Passive" description="The Guardian has resistance to physical damage. When the Guardian takes physical damage from a PC within Melee range, the PC is pushed anywhere up to Very Close range of where it stood." />
+                <entry name="Sweeping Strike - Action" description="Spend a Fear to make an attack against every PC within Very Close range in front of the Guardian." />
+                <entry name="Hallowed Cry- Reaction" description="When the Guardian takes physical damage from an attack, you can spend a Fear to call a Skeleton Dredge from a nearby corpse." />
+            </features>
+        </monster>
+        <monster private="0" name="Velk the Forsaken" size="large" tier="Tier 1" monster_type=" Solo (Umbra-Touched)" description="Description: Velk Dravenmoor, wounded and corrupted by dark powers, swells into a feral terror, frenzied and murderous." motives="Focus fire, leap to vulnerable targets, throw off ledges" experience="Push +2" standard_attack="Gravesword: Very Close - 1d12+3 phy" attack="+3" difficulty="14" thresholds="7/14" hit_points="9" stress="3">
+            <features>
+                <entry name="Relentless (2) - Passive" description="Velk can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight him." />
+                <entry name="Leaping Strike - Action" description="Spend a Fear to allow Velk to leap anywhere within Far range and make an attack. On a success, he deals an additional 1d12 damage." />
+                <entry name="Spinning Blade - Action" description="Spend a Fear to make a standard attack against all targets within Very Close range." />
+                <entry name="Throw - Action" description="Mark a Stress to make an attack against a target within Melee range. On a success, deal 1d8+3 physical damage and the target must make a Strength Reaction Roll (13) or be moved anywhere within Close range." />
+                <entry name="Momentum - Reaction" description="When Velk makes a successful attack against a PC, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Velk the Forsaken (deadly)" size="large" tier="Tier 1" monster_type=" Solo (Umbra-Touched)" description="Description: Velk Dravenmoor, wounded and corrupted by dark powers, swells into a feral terror, frenzied and murderous." motives="Focus fire, leap to vulnerable targets, throw off ledges" experience="Push +2" standard_attack="Gravesword: Very Close - 1d12+3 phy" attack="+3" difficulty="14" thresholds="7/14" hit_points="10" stress="4">
+            <features>
+                <entry name="Relentless (2) - Passive" description="Velk can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight him." />
+                <entry name="Leaping Strike - Action" description="Spend a Fear to allow Velk to leap anywhere within Far range and make an attack. On a success, he deals an additional 1d12 damage." />
+                <entry name="Spinning Blade - Action" description="Spend a Fear to make a standard attack against all targets within Very Close range." />
+                <entry name="Throw - Action" description="Mark a Stress to make an attack against a target within Melee range. On a success, deal 1d8+3 physical damage and the target must make a Strength Reaction Roll (13) or be moved anywhere within Close range." />
+                <entry name="Momentum - Reaction" description="When Velk makes a successful attack against a PC, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Eryn (Limb Wreath)" size="large" tier="Tier 1" monster_type=" Leader (Umbra-Touched)" description="Description: Eryn has become something of nightmares, a host for numerous tentacle limbs that grasp and spear, tearing apart all she once loved." motives="Multiply tentacles, devour" experience="Slimy +2" standard_attack="Limb Slam: Close - 2d6+2 phy" attack="+3" difficulty="13" thresholds="6/13" hit_points="7" stress="5">
+            <features>
+                <entry name="Horrifying - Passive" description="Targets who mark HP from the Limb Wreath’s attacks must also mark a Stress. " />
+                <entry name="Barrage of Tendrils - Action" description="Spend a Fear to make an attack roll against up to 3 targets within Close range. Any you succeed against take 1d8+2 physical damage and must succeed on a Strength Reaction Roll (13) or be pulled in Melee range of the Limb Wreath." />
+                <entry name="Taste for Blood - Action" description="Spend a Fear to make an attack against a target within Melee range. On a success, the target takes 2d8 physical damage, and the Limb Wreath clears 2 HP." />
+                <entry name="Living Tentacles - Reaction" description="When the Limb Wreath marks 2 or more HP from an attack, you can mark a Stress to create a Living Tentacle within Very Close range. The Tentacle is immediately spotlighted." />
+            </features>
+        </monster>
+        <monster private="0" name="Eryn (Limb Wreath) (deadly)" size="large" tier="Tier 1" monster_type=" Leader (Umbra-Touched)" description="Description: Eryn has become something of nightmares, a host for numerous tentacle limbs that grasp and spear, tearing apart all she once loved." motives="Multiply tentacles, devour" experience="Slimy +2" standard_attack="Limb Slam: Close - 2d6+2 phy" attack="+3" difficulty="13" thresholds="6/13" hit_points="8" stress="5">
+            <features>
+                <entry name="Horrifying - Passive" description="Targets who mark HP from the Limb Wreath’s attacks must also mark a Stress." />
+                <entry name="Barrage of Tendrils - Action" description="Spend a Fear to make an attack roll against up to 3 targets within Close range. Any you succeed against take 1d8+2 physical damage and must succeed on a Strength Reaction Roll (13) or be pulled in Melee range of the Limb Wreath." />
+                <entry name="Taste for Blood - Action" description="Spend a Fear to make an attack against a target within Melee range. On a success, the target takes 2d8 physical damage, and the Limb Wreath clears 2 HP." />
+                <entry name="Living Tentacles - Reaction" description="When the Limb Wreath marks 2 or more HP from an attack, you can mark a Stress to create a Living Tentacle within Very Close range. The Tentacle is immediately spotlighted." />
+            </features>
+        </monster>
+        <monster private="0" name="Living Tentacle" size="small" tier="Tier 1" monster_type=" Minion (Umbra-Touched)" description="Description: A part of the Limb Wreath is severed, twitching and moving on its own." motives="Rush, surround" standard_attack="Whip: Very Close - 2 phy" attack="+1" difficulty="14" thresholds="None" hit_points="1" stress="1">
+            <features>
+                <entry name="Horrifying - Passive" description="Targets who mark HP from the Tentacle’s attacks must also mark a Stress." />
+                <entry name="Minion (5) - Passive" description="The Tentacle is defeated when they take any damage. For every 5 damage a PC deals to a Tentacle, defeat an additional Minion within range the attack would succeed against." />
+                <entry name="Group Attack - Action" description="Spend a Fear to choose a target and spotlight all Tentacles within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 2 physical damage each. Combine this damage." />
+            </features>
+        </monster>
+        <monster private="0" name="Living Tentacle (deadly)" size="small" tier="Tier 1" monster_type=" Minion (Umbra-Touched)" description="Description: A part of the Limb Wreath is severed, twitching and moving on its own." motives="Rush, surround" standard_attack="Whip: Very Close - 2 phy" attack="+1" difficulty="14" thresholds="None" hit_points="1" stress="1">
+            <features>
+                <entry name="Horrifying - Passive" description="Targets who mark HP from the Tentacle’s attacks must also mark a Stress." />
+                <entry name="Minion (5) - Passive" description="The Tentacle is defeated when they take any damage. For every 5 damage a PC deals to a Tentacle, defeat an additional Minion within range the attack would succeed against." />
+                <entry name="Group Attack - Action" description="Spend a Fear to choose a target and spotlight all Tentacles within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 2 physical damage each. Combine this damage." />
+            </features>
+        </monster>
+        <monster private="0" name="Pain Beast" size="large" tier="Tier 1" monster_type=" Bruiser" description="Description: Mutated, feral predators covered in patchy fur and scales, their claws deadly and their barbed tails venomous." motives="Pounce, gang up, bite and drag off" standard_attack="Claws: Very Close - 1d12+3 phy" attack="+2" difficulty="13" thresholds="7/14" hit_points="6" stress="3">
+            <features>
+                <entry name="Paired Hunters - Passive" description="When a Pain Beast attacks a target within Very Close range of another Pain Beast, the attack has advantage." />
+                <entry name="Pounce- Action" description="Mark a Stress to move anywhere within Far range and make an attack against a target within Very Close range. On a success, the target takes 2d8+4 physical damage and marks a Stress." />
+                <entry name="Venomous Tail - Action" description="Spend a Fear to make an attack roll against a target within Close range. On a success, the target takes 2d8 physical damage and, if they mark any number of HP, becomes Infected until they heal any number of HP. While Infected, they have disadvantage on action rolls." />
+                <entry name="Hide Spines - Reaction" description="If an attacker is within Very Close range when the Pain Beast marks 2 or more HP, spend a Fear to deal 1d8+3 physical damage to the attacker." />
+            </features>
+        </monster>
+        <monster private="0" name="Pain Beast (deadly)" size="large" tier="Tier 1" monster_type=" Bruiser" description="Description: Mutated, feral predators covered in patchy fur and scales, their claws deadly and their barbed tails venomous." motives="Pounce, gang up, bite and drag off" standard_attack="Claws: Very Close - 1d12+3 phy" attack="+2" difficulty="13" thresholds="7/14" hit_points="7" stress="3">
+            <features>
+                <entry name="Paired Hunters - Passive" description="When a Pain Beast attacks a target within Very Close range of another Pain Beast, the attack has advantage." />
+                <entry name="Pounce- Action" description="Mark a Stress to move anywhere within Far range and make an attack against a target within Very Close range. On a success, the target takes 2d8+4 physical damage and marks a Stress." />
+                <entry name="Venomous Tail - Action" description="Spend a Fear to make an attack roll against a target within Close range. On a success, the target takes 2d8 physical damage and, if they mark any number of HP, becomes Infected until they heal any number of HP. While Infected, they have disadvantage on action rolls." />
+                <entry name="Hide Spines - Reaction" description="If an attacker is within Very Close range when the Pain Beast marks 2 or more HP, spend a Fear to deal 1d8+3 physical damage to the attacker." />
+            </features>
+        </monster>
+        <monster private="0" name="Rotlord" size="huge" tier="Tier 1" monster_type=" Bruiser" description="Description: A massive nexus of forest will and dark magic, this tower of rotting flesh and fungal might seeks to increase its mass." motives="Charge, swallow, spore the battlefield" experience=" Slimy +2" standard_attack="Limb Slam: Very Close - 1d20+3 phy" attack="+2" difficulty="11" thresholds="9/18" hit_points="9" stress="2">
+            <features>
+                <entry name="Horrid Smell - Passive" description="Targets who fail an action or roll with Fear within Close range of the Rotlord must mark a Stress." />
+                <entry name="Envelop - Action" description="Make an attack against a target within Melee range. On a success, the Rotlord Envelops them and the target must mark a Stress. While Enveloped, the target must mark an additional Stress every time they make an action roll. When the Rotlord takes Severe damage, all Enveloped targets are freed and the condition is cleared." />
+                <entry name="Funky Backup - Action" description="Spend a Fear to conjure 2 Caustic Fungus anywhere within Close range. These Fungus are immediately spotlighted." />
+                <entry name="Fear Spores - Reaction" description="When a creature within Close range cannot mark a Stress and instead must mark HP, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Rotlord (deadly)" size="huge" tier="Tier 1" monster_type=" Bruiser" description="Description: A massive nexus of forest will and dark magic, this tower of rotting flesh and fungal might seeks to increase its mass." motives="Charge, swallow, spore the battlefield" experience=" Slimy +2" standard_attack="Limb Slam: Very Close - 1d20+3 phy" attack="+2" difficulty="11" thresholds="9/18" hit_points="11" stress="2">
+            <features>
+                <entry name="Horrid Smell - Passive" description="Targets who fail an action or roll with Fear within Close range of the Rotlord must mark a Stress." />
+                <entry name="Envelop - Action" description="Make an attack against a target within Melee range. On a success, the Rotlord Envelops them and the target must mark a Stress. While Enveloped, the target must mark an additional Stress every time they make an action roll. When the Rotlord takes Severe damage, all Enveloped targets are freed and the condition is cleared." />
+                <entry name="Funky Backup - Action" description="Spend a Fear to conjure 2 Caustic Fungus anywhere within Close range. These Fungus are immediately spotlighted." />
+                <entry name="Fear Spores - Reaction" description="When a creature within Close range cannot mark a Stress and instead must mark HP, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Caustic Fungus" size="small" tier="Tier 1" monster_type=" Minion" description="Description: The underbrush of the Screaming Forest has a hive mind of its own." motives="Swarm, destroy armor" standard_attack="Slam: Melee - 2 phy" attack="+0" difficulty="12" thresholds="None" hit_points="1" stress="1">
+            <features>
+                <entry name="Minion (4) - Passive" description="Caustic Fungus is defeated when they take any damage. For every 4 damage a PC deals to a Caustic Fungus, defeat an additional Minion within range the attack would succeed against." />
+                <entry name="Corrosive - Passive" description="Targets who are successfully hit by the Fungus' attacks must also mark an Armor Slot without receiving its benefits." />
+                <entry name="Group Attack - Action" description="Spend a Fear to choose a target and spotlight all Caustic Fungus within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 2 physical damage each. Combine this damage." />
+            </features>
+        </monster>
+        <monster private="0" name="Caustic Fungus (deadly)" size="small" tier="Tier 1" monster_type=" Minion" description="Description: The underbrush of the Screaming Forest has a hive mind of its own." motives="Swarm, destroy armor" standard_attack="Slam: Melee - 2 phy" attack="+0" difficulty="12" thresholds="None" hit_points="1" stress="1">
+            <features>
+                <entry name="Minion (4) - Passive" description="Caustic Fungus is defeated when they take any damage. For every 4 damage a PC deals to a Caustic Fungus, defeat an additional Minion within range the attack would succeed against." />
+                <entry name="Corrosive - Passive" description="Targets who are successfully hit by the Fungus' attacks must also mark an Armor Slot without receiving its benefits." />
+                <entry name="Group Attack - Action" description="Spend a Fear to choose a target and spotlight all Caustic Fungus within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 2 physical damage each. Combine this damage." />
+            </features>
+        </monster>
+        <monster private="0" name="Hive Collector" size="medium" tier="Tier 1" monster_type=" Standard" description="Description: Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" standard_attack="Face Stinger: Very Close - 1d8+3 phy" attack="+2" difficulty="14" thresholds="7/16" hit_points="8" stress="3">
+            <features>
+                <entry name="Sleeping Sting - Action" description="Make an attack against a target within Very Close range. On a success, they take 1d8+3 physical damage and must make a Instinct Reaction Roll (13). On a failure, they become Asleep until they take damage, or until 1d4 hours have passed. While Asleep, a PC cannot be spotlighted." />
+                <entry name="Tangle Net - Action" description="Mark a Stress to make a target within Close range roll an Agility Reaction Roll (13). On a failure, they are Restrained and Vulnerable until they succeed on a Strength or Agility Action Roll (15)." />
+            </features>
+        </monster>
+        <monster private="0" name="Hive Collector (deadly)" size="medium" tier="Tier 1" monster_type=" Standard" description="Description: Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" standard_attack="Face Stinger: Very Close - 1d8+3 phy" attack="+2" difficulty="14" thresholds="7/16" hit_points="9" stress="3">
+            <features>
+                <entry name="Sleeping Sting - Action" description="Make an attack against a target within Very Close range. On a success, they take 1d8+3 physical damage and must make a Instinct Reaction Roll (13). On a failure, they become Asleep until they take damage, or until 1d4 hours have passed. While Asleep, a PC cannot be spotlighted." />
+                <entry name="Tangle Net - Action" description="Mark a Stress to make a target within Close range roll an Agility Reaction Roll (13). On a failure, they are Restrained and Vulnerable until they succeed on a Strength or Agility Action Roll (15)." />
+            </features>
+        </monster>
+        <monster private="0" name="Mother" size="large" tier="Tier 2" monster_type=" Solo" description="Description: The Mother of the Hive, she seeks materials and subjects to conduct her strange biological experiments on. " motives="Envenom, ensnare, capture" standard_attack="Surgical Glaive: Close - 2d12+8 phy" attack="+3" difficulty="15" thresholds="14/28" hit_points="9" stress="4">
+            <features>
+                <entry name="Surgical Accuracy - Passive" description="Before Mother makes an attack, roll a d6. On a result of 4 or higher, the target’s Evasion is halved against the attack." />
+                <entry name="To Me, My Children! - Action" description="Mark a Stress to spotlight 1d4+1 allies. Attacks they make while spotlighted in this way deal half damage. " />
+                <entry name="Sweeping Incision - Action" description="Spend a Fear to make an attack against all targets within Close range. On a success, Mother deals 2d6+10 physical damage." />
+                <entry name="Acidic Mist - Reaction" description="When Mother marks 2 or more HP from an attack within Very Close range, a cloud of caustic mist emits from her abdomen and all PCs within Very Close range mark an Armor Slot." />
+                <entry name="Momentum - Reaction" description="When Mother makes a successful attack against a PC, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Mother (deadly)" size="large" tier="Tier 2" monster_type=" Solo" description="Description: The Mother of the Hive, she seeks materials and subjects to conduct her strange biological experiments on." motives="Envenom, ensnare, capture" standard_attack="Surgical Glaive: Close - 2d12+10 phy" attack="+3" difficulty="15" thresholds="14/28" hit_points="11" stress="4">
+            <features>
+                <entry name="Surgical Accuracy - Passive" description="Before Mother makes an attack, roll a d6. On a result of 4 or higher, the target’s Evasion is halved against the attack." />
+                <entry name="To Me, My Children! - Action" description="Mark a Stress to spotlight 1d4+1 allies. Attacks they make while spotlighted in this way deal half damage." />
+                <entry name="Sweeping Incision - Action" description="Spend a Fear to make an attack against all targets within Close range. On a success, Mother deals 2d6+15 physical damage." />
+                <entry name="Acidic Mist - Reaction" description="When Mother marks 2 or more HP from an attack within Very Close range, a cloud of caustic mist emits from her abdomen and all PCs within Very Close range mark an Armor Slot." />
+                <entry name="Momentum - Reaction" description="When Mother makes a successful attack against a PC, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Glomtower Thrall" size="huge" tier="Tier 2" monster_type=" Solo" description="Description: A towering being of sorrow and service, forever doomed to wander at Terrorgut’s behest." motives="Ram, capture, batter against allies" experience="Overwhelming +3" standard_attack="Chain Swing: Close - 2d20+10 phy" attack="+3" difficulty="15" thresholds="13/26" hit_points="9" stress="3">
+            <features>
+                <entry name="Slow - Passive" description="When you spotlight the Thrall and they don’t have a token on their stat block, they can’t act yet. Place a token on their stat block and describe what they’re preparing to do. When you spotlight the Thrall and they have a token on their stat block, clear the token and they can act." />
+                <entry name="Dense But Clumsy - Passive" description="An attack that would move the Thrall moves them two fewer range steps, and the Thrall must succeed on a Reaction Roll (10). On a failure, it falls over and becomes temporarily Restrained and Vulnerable. When it is no longer Restrained, it also is no longer Vulnerable." />
+                <entry name="Cage The Judged - Action" description="Spend a Fear to make an attack against a target within Very Close range. On a success, the target takes 2d12+7 physical damage, is Restrained, and has disadvantage on attack rolls until they succeed on a Strength or Agility Action Roll (16)." />
+                <entry name="Cage Slam - Action" description="Spend a Fear to make an attack against a target within Very Close range. On a success, the target and any PCs in the cage take 2d12+15 physical damage." />
+                <entry name="Momentum - Reaction" description="When the Thrall makes a successful attack against a PC, you gain a Fear." />
+                <entry name="Kick - Reaction" description="Mark a Stress when the Thrall marks 2 or more HP from a PC attack within Very Close range. Then, immediately make an attack against the attacker. On a success, they take 2d6+7 physical damage and are pushed to Far range." />
+            </features>
+        </monster>
+        <monster private="0" name="Glomtower Thrall (deadly)" size="huge" tier="Tier 2" monster_type=" Solo" description="Description: A towering being of sorrow and service, forever doomed to wander at Terrorgut’s behest." motives="Ram, capture, batter against allies" experience="Overwhelming +3" standard_attack="Chain Swing: Close - 2d20+15 phy" attack="+3" difficulty="15" thresholds="13/26" hit_points="10" stress="3">
+            <features>
+                <entry name="Slow - Passive" description="When you spotlight the Thrall and they don’t have a token on their stat block, they can’t act yet. Place a token on their stat block and describe what they’re preparing to do. When you spotlight the Thrall and they have a token on their stat block, clear the token and they can act." />
+                <entry name="Dense But Clumsy - Passive" description="An attack that would move the Thrall moves them two fewer range steps, and the Thrall must succeed on a Reaction Roll (10). On a failure, it falls over and becomes temporarily Restrained and Vulnerable. When it is no longer Restrained, it also is no longer Vulnerable." />
+                <entry name="Cage The Judged - Action" description="Spend a Fear to make an attack against a target within Very Close range. On a success, the target takes 2d12+8 physical damage, is Restrained, and has disadvantage on attack rolls until they succeed on a Strength or Agility Action Roll (16)." />
+                <entry name="Cage Slam - Action" description="Spend a Fear to make an attack against a target within Very Close range. On a success, the target and any PCs in the cage take 2d12+15 physical damage." />
+                <entry name="Momentum - Reaction" description="When the Thrall makes a successful attack against a PC, you gain a Fear." />
+                <entry name="Kick - Reaction" description="Mark a Stress when the Thrall marks 2 or more HP from a PC attack within Very Close range. Then, immediately make an attack against the attacker. On a success, they take 2d6+8 physical damage and are pushed to Far range." />
+            </features>
+        </monster>
+        <monster private="0" name="Elite Hive Collector" size="medium" tier="Tier 2" monster_type=" Standard" description="Description: Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" standard_attack="Face Stinger: Very Close - 2d6+7 phy" attack="+2" difficulty="15" thresholds="8/19" hit_points="8" stress="3">
+            <features>
+                <entry name="Sleeping Sting - Action" description="Make an attack against a target within Very Close range. On a success, they take 2d6+8 physical damage and must make a Instinct Reaction Roll (15). On a failure, they become Asleep until they take damage, or until 1d4 hours have passed. While Asleep, a PC cannot be spotlighted." />
+                <entry name="Tangle Net - Action" description="Mark a Stress to make a target within Close range roll an Agility Reaction Roll (13). On a failure, they are Restrained and Vulnerable until they succeed on a Strength or Agility Action Roll (15)." />
+            </features>
+        </monster>
+        <monster private="0" name="Elite Hive Collector (deadly)" size="medium" tier="Tier 2" monster_type=" Standard" description="Description: Seekers for Mother, they collect what might please her." motives="Envenom, ensnare, capture" standard_attack="Face Stinger: Very Close - 2d6+9 phy" attack="+2" difficulty="15" thresholds="8/19" hit_points="9" stress="3">
+            <features>
+                <entry name="Sleeping Sting - Action" description="Make an attack against a target within Very Close range. On a success, they take 2d6+10 physical damage and must make a Instinct Reaction Roll (15). On a failure, they become Asleep until they take damage, or until 1d4 hours have passed. While Asleep, a PC cannot be spotlighted." />
+                <entry name="Tangle Net - Action" description="Mark a Stress to make a target within Close range roll an Agility Reaction Roll (13). On a failure, they are Restrained and Vulnerable until they succeed on a Strength or Agility Action Roll (15)." />
+            </features>
+        </monster>
+        <monster private="0" name="Terrorgut" size="large" tier="Tier 2" monster_type=" Solo (Umbra-Touched)" description="Description: A ravenous demon unleashed through dark magic, it claims its domain to enslave and devour the souls of those who fail to bend to its will." motives="Consume, whip and pull, release zombies" experience="Infernal Strength +3" standard_attack="Bone Whip: Close - 2d12+8 phy" attack="+3" difficulty="15" thresholds="14/28" hit_points="10" stress="4">
+            <features>
+                <entry name="Terrifying - Passive" description="When Terrorgut makes a successful attack, all PCs within Far range lose a Hope and you gain a Fear." />
+                <entry name="Demon Armor - Passive" description="When Terrorgut takes physical damage, reduce it by 3." />
+                <entry name="Release Shambling Zombie - Action" description="Spend a Fear to create a Shambling Zombie within Very Close range. The Shambling Zombie is immediately spotlighted." />
+                <entry name="Devour - Action" description="Spend a Fear to make an attack against a PC within Very Close range. On a success, they take 2d8+10 physical damage and must succeed on a Strength Reaction Roll (16). On a failure, they are eaten and become Restrained until they succeed on a Strength or Agility Action Roll (16). Along with having the Restrained condition, every time they attempt an action roll, or an ally attempts an action roll to help them escape, they take 2d8+10 magical damage." />
+                <entry name="Get Over Here - Reaction" description="When you mark 2 or more HP from a PC attack within Close range, you can mark a Stress and roll an attack against the attacker. On a success, they take 2d10+10 physical damage, mark a Stress, and are pulled into Melee range." />
+            </features>
+        </monster>
+        <monster private="0" name="Terrorgut (deadly)" size="large" tier="Tier 2" monster_type=" Solo (Umbra-Touched)" description="Description: A ravenous demon unleashed through dark magic, it claims its domain to enslave and devour the souls of those who fail to bend to its will." motives="Consume, whip and pull, release zombies" experience="Infernal Strength +3" standard_attack="Bone Whip: Close - 2d12+10 phy" attack="+3" difficulty="15" thresholds="14/28" hit_points="11" stress="4">
+            <features>
+                <entry name="Terrifying - Passive" description="When Terrorgut makes a successful attack, all PCs within Far range lose a Hope and you gain a Fear." />
+                <entry name="Demon Armor - Passive" description="When Terrorgut takes physical damage, reduce it by 3." />
+                <entry name="Release Shambling Zombie - Action" description="Spend a Fear to create a Shambling Zombie within Very Close range. The Shambling Zombie is immediately spotlighted." />
+                <entry name="Devour - Action" description="Spend a Fear to make an attack against a PC within Very Close range. On a success, they take 2d8+10 physical damage and must succeed on a Strength Reaction Roll (16). On a failure, they are eaten and become Restrained until they succeed on a Strength or Agility Action Roll (16). Along with having the Restrained condition, every time they attempt an action roll, or an ally attempts an action roll to help them escape, they take 2d8+10 magical damage." />
+                <entry name="Get Over Here - Reaction" description="When you mark 2 or more HP from a PC attack within Close range, you can mark a Stress and roll an attack against the attacker. On a success, they take 2d10+10 physical damage, mark a Stress, and are pulled into Melee range." />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Ambusher" size="medium" tier="Tier 2" monster_type=" Skulk" description="Description: A hardened cutthroat and thief who hunts for the Queens." motives="Evade, hide, ambush, pilfer" standard_attack="Long Knife: Melee - 2d6+6 phy" attack="+2" difficulty="14" thresholds="8/17" hit_points="5" stress="4">
+            <features>
+                <entry name="Backstab - Passive" description="When the Ambusher succeeds on a standard attack that has advantage, they deal 2d10+8 physical damage instead of their standard damage." />
+                <entry name="Cloaked - Action" description="Become Hidden until after the Ambusher’s next attack. Attacks made while Hidden from this feature have advantage." />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Ambusher (deadly)" size="medium" tier="Tier 2" monster_type=" Skulk" description="Description: A hardened cutthroat and thief who hunts for the Queens." motives="Evade, hide, ambush, pilfer" standard_attack="Long Knife: Melee - 2d6+8 phy" attack="+2" difficulty="14" thresholds="8/17" hit_points="5" stress="4">
+            <features>
+                <entry name="Backstab - Passive" description="When the Ambusher succeeds on a standard attack that has advantage, they deal 2d10+10 physical damage instead of their standard damage." />
+                <entry name="Cloaked - Action" description="Become Hidden until after the Ambusher’s next attack. Attacks made while Hidden from this feature have advantage." />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Marauder Band" size="large" tier="Tier 2" monster_type=" Horde (2/HP)" description="Description: A crew of cackling killers relishing in chaos and plunder." motives="Surround, gang up, divide and conquer" standard_attack="Long Blade: Melee - 2d8+5 phy" attack="+1" difficulty="14" thresholds="10/21" hit_points="6" stress="4">
+            <features>
+                <entry name="Horde (2d4+2) - Passive" description="When the Band has marked half or more of their HP, their standard attack deals 2d4+2 physical damage instead." />
+                <entry name="Sadistic Laughter - Reaction" description="When a target of the Band’s attack marks 2 or more HP, you can mark a Stress to make all targets within Very Close range lose a Hope. If a target is not able to lose a Hope, they must instead mark 2 Stress." />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Marauder Band (deadly)" size="large" tier="Tier 2" monster_type=" Horde (2/HP)" description="Description: A crew of cackling killers relishing in chaos and plunder." motives="Surround, gang up, divide and conquer" standard_attack="Long Blade: Melee - 2d8+5 phy" attack="+1" difficulty="14" thresholds="10/21" hit_points="6" stress="4">
+            <features>
+                <entry name="Horde (2d4+2) - Passive" description="When the Band has marked half or more of their HP, their standard attack deals 2d4+2 physical damage instead." />
+                <entry name="Sadistic Laughter - Reaction" description="When a target of the Band’s attack marks 2 or more HP, you can mark a Stress to make all targets within Very Close range lose a Hope. If a target is not able to lose a Hope, they must instead mark 2 Stress." />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Archer Squad" size="large" tier="Tier 2" monster_type=" Horde (2/HP)" description="Description: Ranged raiders of the Damask Queens." motives="Stick together, survive, volley fire" standard_attack="Bow: Far - 2d6+5 phy" attack="+0" difficulty="13" thresholds="8/16" hit_points="4" stress="3">
+            <features>
+                <entry name="Horde (1d6+3) - Passive" description="When the Squad has marked half or more of their HP, their standard attack deals 1d6+3 physical damage instead. " />
+                <entry name="Focused Volley - Action" description="Spend a Fear to target a point within Far range. Make an attack with advantage against all targets within Close range of that point. Any you succeed against take 1d10+4 physical damage." />
+                <entry name="Suppressing Fire - Action" description="Mark a Stress to target a point within Far range. Until the next roll with Fear, a creature who moves within Close range of that point must make an Agility Reaction Roll (14). On a failure, they take 2d6+3 physical damage. On a success, they take half." />
+            </features>
+        </monster>
+        <monster private="0" name="Damask Archer Squad (deadly)" size="large" tier="Tier 2" monster_type=" Horde (2/HP)" description="Description: Ranged raiders of the Damask Queens." motives="Stick together, survive, volley fire" standard_attack="Bow: Far - 2d6+5 phy" attack="+0" difficulty="13" thresholds="8/16" hit_points="4" stress="3">
+            <features>
+                <entry name="Horde (1d6+3) - Passive" description="When the Squad has marked half or more of their HP, their standard attack deals 1d6+3 physical damage instead." />
+                <entry name="Focused Volley - Action" description="Spend a Fear to target a point within Far range. Make an attack with advantage against all targets within Close range of that point. Any you succeed against take 1d10+4 physical damage." />
+                <entry name="Suppressing Fire - Action" description="Mark a Stress to target a point within Far range. Until the next roll with Fear, a creature who moves within Close range of that point must make an Agility Reaction Roll (14). On a failure, they take 2d6+3 physical damage. On a success, they take half." />
+            </features>
+        </monster>
+        <monster private="0" name="Corrupted Fane Warden" size="medium" tier="Tier 2" monster_type=" Solo (Umbra-Touched)" description="Description: The once beloved protector of the weald now stews in corruption, half-mad and seeking blood for their blade as penance for the land’s decay." motives="Hunt, punish" standard_attack="Blade of the Fane: Very Close - 2d10+5 phy" attack="+3" difficulty="15" thresholds="13/25" hit_points="8" stress="4">
+            <features>
+                <entry name="Relentless (2) - Passive" description="The Fane Guardian can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight them." />
+                <entry name="Glimmer Within - Passive" description="A flame of ancient magic still burns within the Fane Warden. Whenever a PC would cause the Fane Warden to heal HP or Stress, start a Progress Countdown (4), reducing it by 1 each additional time it would be healed one HP or Stress. When this countdown would count below 1, the Warden is restored." />
+                <entry name="Overwhelming Arc - Action" description="Spend a Fear to make an attack against every target within Very Close range. On a success, they take 2d10+8 physical damage and must make a Strength Reaction Roll (15). On a failure, they are pushed away to Far range of their location." />
+                <entry name="Vine Spear - Action" description="Spend a Fear to have a target within Far range make a Strength Reaction Roll (15). On a failure, they are pulled to anywhere within Very Close range of the Fane Warden and the Fane Warden immediately makes an attack against them." />
+                <entry name="Take Root - Action" description="Mark a Stress to Root the Fane Warden in place. Fane Warden is Restrained while Rooted, and can end this effect instead of moving while they are spotlighted. While Rooted, Fane Warden has resistance to physical damage." />
+                <entry name="Righteous Vengeance - Reaction" description="When the Fane Warden marks 2 or more HP from an attack within Very Close range, mark a Stress to make a standard attack against the attacker. On a success, the Fane Warden deals 2d10+8 physical damage and the target is pushed to Far range." />
+            </features>
+        </monster>
+        <monster private="0" name="Corrupted Fane Warden (deadly)" size="medium" tier="Tier 2" monster_type=" Solo (Umbra-Touched)" description="Description: The once beloved protector of the weald now stews in corruption, half-mad and seeking blood for their blade as penance for the land’s decay." motives="Hunt, punish" standard_attack="Blade of the Fane: Very Close - 2d10+5 phy" attack="+3" difficulty="15" thresholds="13/25" hit_points="9" stress="4">
+            <features>
+                <entry name="Relentless (2) - Passive" description="The Fane Guardian can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight them." />
+                <entry name="Glimmer Within - Passive" description="A flame of ancient magic still burns within the Fane Warden. Whenever a PC would cause the Fane Warden to heal HP or Stress, start a Progress Countdown (4), reducing it by 1 each additional time it would be healed one HP or Stress. When this countdown would count below 1, the Warden is restored." />
+                <entry name="Overwhelming Arc - Action" description="Spend a Fear to make an attack against every target within Very Close range. On a success, they take 2d10+10 physical damage and must make a Strength Reaction Roll (15). On a failure, they are pushed away to Far range of their location." />
+                <entry name="Vine Spear - Action" description="Spend a Fear to have a target within Far range make a Strength Reaction Roll (15). On a failure, they are pulled to anywhere within Very Close range of the Fane Warden and the Fane Warden immediately makes an attack against them." />
+                <entry name="Take Root - Action" description="Mark a Stress to Root the Fane Warden in place. Fane Warden is Restrained while Rooted, and can end this effect instead of moving while they are spotlighted. While Rooted, Fane Warden has resistance to physical damage." />
+                <entry name="Righteous Vengeance - Reaction" description="When the Fane Warden marks 2 or more HP from an attack within Very Close range, mark a Stress to make a standard attack against the attacker. On a success, the Fane Warden deals 2d10+10 physical damage and the target is pushed to Far range." />
+            </features>
+        </monster>
+        <monster private="0" name="Blasphemous Angel Evelyar" size="medium" tier="Tier 2" monster_type=" Solo (Umbra-Touched)" description="Description: Her holy mission slandered and her compassion punished for audacity, a darker power became seeded within her buried and bound soul. The Grand Ordinants created their own dark prophesy." motives="Punish many, dishearten, void stare." experience="Unholy Strength +3" standard_attack="Malediction Axe: Very Close - 2d10+4 phy" attack="+3" difficulty="14" thresholds="12/24" hit_points="10" stress="6">
+            <features>
+                <entry name="Relentless (2) - Passive" description="Evelyar can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight her." />
+                <entry name="Unholy Aura - Passive" description="When Evelyar takes damage, reduce it by the number of Profane Disciples within Close range. When a PC marks their last HP within Close range of Evelyar, she heals a HP and clears a Stress." />
+                <entry name="Arc of Judgement - Action" description="Spend a Fear to make an attack against all targets within Very Close range. On a success, they take 2d8+5 physical damage." />
+                <entry name="The Flock’s Call - Action" description="Mark a Stress to spotlight 1d4+1 allies. Attacks they make during this spotlight deal half damage." />
+                <entry name="Look Into The Void - Action" description="Mark a Stress to have a PC within Very Close range make an Insight or Presence Reaction Roll. On a failure, they mark a Stress, they become Vulnerable until they roll a success with Hope, and Evelyar heals 2 HP." />
+                <entry name="Blasphemous Choir - Reaction" description="Countdown (Loop 1d8). When Evelyar is in the spotlight for the first time, activate the countdown. When it triggers, a choir of discordant voices covers an area within Far range of Evelyar. When a target marks HP from an attack by Evelyar within the dark song, all PCs within Far range of the target lose a Hope. This song can be ended by dealing Severe damage to Evelyar, after which the countdown restarts." />
+                <entry name="Momentum - Reaction" description="When Evelyar makes a successful attack against a PC, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Blasphemous Angel Evelyar (deadly)" size="medium" tier="Tier 2" monster_type=" Solo (Umbra-Touched)" description="Description: Her holy mission slandered and her compassion punished for audacity, a darker power became seeded within her buried and bound soul. The Grand Ordinants created their own dark prophesy." motives="Punish many, dishearten, void stare." experience="Unholy Strength +3" standard_attack="Malediction Axe: Very Close - 2d10+4 phy" attack="+3" difficulty="14" thresholds="12/24" hit_points="12" stress="8">
+            <features>
+                <entry name="Relentless (2) - Passive" description="Evelyar can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight her." />
+                <entry name="Unholy Aura - Passive" description="When Evelyar takes damage, reduce it by the number of Profane Disciples within Close range. When a PC marks their last HP within Close range of Evelyar, she heals a HP and clears a Stress." />
+                <entry name="Arc of Judgement - Action" description="Spend a Fear to make an attack against all targets within Very Close range. On a success, they take 2d8+5 physical damage." />
+                <entry name="The Flock’s Call - Action" description="Mark a Stress to spotlight 1d4+1 allies. Attacks they make during this spotlight deal half damage. " />
+                <entry name="Look Into The Void - Action" description="Mark a Stress to have a PC within Very Close range make an Insight or Presence Reaction Roll. On a failure, they mark a Stress, they become Vulnerable until they roll a success with Hope, and Evelyar heals 2 HP." />
+                <entry name="Blasphemous Choir - Reaction" description="Countdown (Loop 1d8). When Evelyar is in the spotlight for the first time, activate the countdown. When it triggers, a choir of discordant voices covers an area within Far range of Evelyar. When a target marks HP from an attack by Evelyar within the dark song, all PCs within Far range of the target lose a Hope. This song can be ended by dealing Severe damage to Evelyar, after which the countdown restarts." />
+                <entry name="Momentum - Reaction" description="When the Evelyar makes a successful attack against a PC, you gain a Fear." />
+            </features>
+        </monster>
+        <monster private="0" name="Profane Disciple" size="medium" tier="Tier 2" monster_type=" Standard" description="Description: One of the disciples of Evelyar, betrayed by the clergy and forgotten with their heretical Saint. Their vengeful furvor is fueled by Evelyar’s madness." motives="Protect Evelyar, condemn, pass judgement" standard_attack="Sorrowscythe: Very Close - 2d6+4 mag" attack="+2" difficulty="14" thresholds="10/20" hit_points="6" stress="3">
+            <features>
+                <entry name="Dance of Condemnation - Passive" description="When the Disciple is within Melee range of a creature and at least one other Disciple is within Close range, all attacks against that creature have advantage." />
+                <entry name="Retaliation - Reaction" description="When Evelyar takes damage from an attack within Very Close range of the Disciple, mark a Stress to make a standard attack against the attacker." />
+            </features>
+        </monster>
+        <monster private="0" name="Profane Disciple (deadly)" size="medium" tier="Tier 2" monster_type=" Standard" description="Description: One of the disciples of Evelyar, betrayed by the clergy and forgotten with their heretical Saint. Their vengeful furvor is fueled by Evelyar’s madness." motives="Protect Evelyar, condemn, pass judgement" standard_attack="Sorrowscythe: Very Close - 2d6+4 mag" attack="+2" difficulty="14" thresholds="10/20" hit_points="7" stress="3">
+            <features>
+                <entry name="Dance of Condemnation - Passive" description="When the Disciple is within Melee range of a creature and at least one other Disciple is within Close range, all attacks against that creature have advantage." />
+                <entry name="Retaliation - Reaction" description="When Evelyar takes damage from an attack within Very Close range of the Disciple, mark a Stress to make a standard attack against the attacker." />
+            </features>
+        </monster>
         <license>
             <element>Copyright Notice: This product includes materials from the Daggerheart System Reference Document 1.0 © Critical Role, LLC. All rights reserved.</element>
             <element>The contents of this DMH Bestiary are Public Game Content from the Daggerheart System Reference Document 1.0 and Darrington Press, LLC is the creator of that material</element>
