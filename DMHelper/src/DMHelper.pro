@@ -145,6 +145,13 @@ SOURCES += main.cpp\
     objectimportdialog.cpp \
     objectimportworker.cpp \
     optionsaccessor.cpp \
+    overlay.cpp \
+    overlaycountdown.cpp \
+    overlayfear.cpp \
+    overlayframe.cpp \
+    overlaymanager.cpp \
+    overlayseditdialog.cpp \
+    overlaytimer.cpp \
     party.cpp \
     partycharactergridframe.cpp \
     partyframe.cpp \
@@ -444,6 +451,13 @@ HEADERS  += mainwindow.h \
     objectimportdialog.h \
     objectimportworker.h \
     optionsaccessor.h \
+    overlay.h \
+    overlaycountdown.h \
+    overlayfear.h \
+    overlayframe.h \
+    overlaymanager.h \
+    overlayseditdialog.h \
+    overlaytimer.h \
     party.h \
     partycharactergridframe.h \
     partyframe.h \
@@ -661,6 +675,8 @@ FORMS    += mainwindow.ui \
     newcampaigndialog.ui \
     newentrydialog.ui \
     objectimportdialog.ui \
+    overlayframe.ui \
+    overlayseditdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \

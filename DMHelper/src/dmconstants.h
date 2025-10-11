@@ -196,6 +196,14 @@ namespace DMHelper
         LayerType_Effect,
     };
 
+    enum OverlayType
+    {
+        OverlayType_Unknown = -1,
+        OverlayType_Fear = 0,
+        OverlayType_Counter,
+        OverlayType_Timer,
+    };
+
     enum FileType
     {
         FileType_Unknown = 0,

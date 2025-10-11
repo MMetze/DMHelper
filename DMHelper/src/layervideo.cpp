@@ -236,7 +236,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     _videoGLPlayer->paintGL();
 #else
 
-    if((!_videoPlayer) || (!_videoPlayer->getImage()))
+    if(!_videoPlayer)
         return;
 
     DMH_DEBUG_OPENGL_PAINTGL();
@@ -249,14 +249,28 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         if((!_videoPlayer->isNewImage()) && (getScreenshot().isNull()))
             return;
 
-        _videoObject = new PublishGLBattleBackground(nullptr, *(_videoPlayer->getImage()), GL_NEAREST);
-        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
-        _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
-        _videoObject->setTargetSize(_size);
+        if(_videoPlayer->lockMutex())
+        {
+            QImage* playerImage = _videoPlayer->getLockedImage();
+            if(playerImage)
+            {
+                _videoObject = new PublishGLBattleBackground(nullptr, *playerImage, GL_NEAREST);
+                QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+                _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
+                _videoObject->setTargetSize(_size);
+            }
+            _videoPlayer->unlockMutex();
+        }
     }
     else if(_videoPlayer->isNewImage())
     {
-        _videoObject->updateImage(*(_videoPlayer->getImage()));
+        if(_videoPlayer->lockMutex())
+        {
+            QImage* playerImage = _videoPlayer->getLockedImage();
+            if(playerImage)
+                _videoObject->updateImage(*playerImage);
+            _videoPlayer->unlockMutex();
+        }
     }
 
     playerGLSetUniforms(functions, defaultModelMatrix, projectionMatrix);

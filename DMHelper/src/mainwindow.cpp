@@ -393,6 +393,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _pubWindow->resize(width() * 9 / 10, height() * 9 / 10);
     connect(_pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), _pubWindow, SLOT(setBackgroundColor(const QColor&)));
+    connect(this, &MainWindow::campaignLoaded, _pubWindow, &PublishWindow::setCampaign);
     qDebug() << "[MainWindow] Player's Window Created";
 
     qDebug() << "[MainWindow] Creating Tree Model";

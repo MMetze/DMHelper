@@ -5,6 +5,7 @@
 
 class PublishGLFrame;
 class PublishGLRenderer;
+class Campaign;
 
 class PublishWindow : public QMainWindow
 {
@@ -30,6 +31,7 @@ public slots:
     void setBackgroundColor(const QColor& color);
 
     void setRenderer(PublishGLRenderer* renderer);
+    void setCampaign(Campaign* campaign);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);

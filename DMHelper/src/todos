@@ -1,7 +1,7 @@
 daggerheart - need HP to count down for now
 new campaign doesn't open the newly selected bestiary
 new entry (PC, maybe anything) should highlight the entry name first
-daggerheart - implement move zones
+DONE daggerheart - implement move zones
 daggerheart - make initiative entries custom
 ---> add config to convert a resource number into checkboxes (HP and Stress)
 daggerheart - show fear across all published views (move it to a higher level overlay function)
@@ -10,7 +10,6 @@ Run tests again to validate
 
 Camapign notes - add a text saying how to take quick notes
 Add a Did You Know text to the welcome page with as much text as possible
-
 
 Create combat test cases
     blank white

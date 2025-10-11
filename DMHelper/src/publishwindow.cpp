@@ -80,6 +80,11 @@ void PublishWindow::setRenderer(PublishGLRenderer* renderer)
     _publishFrame->setRenderer(renderer);
 }
 
+void PublishWindow::setCampaign(Campaign* campaign)
+{
+    _publishFrame->setCampaign(campaign);
+}
+
 void PublishWindow::keyPressEvent(QKeyEvent * event)
 {
     if(event->key() == Qt::Key_Escape)

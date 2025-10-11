@@ -273,6 +273,11 @@
         <file>data/hoodeyeless.png</file>
         <file>data/hoodeyelessborder.png</file>
         <file>data/icon_media.png</file>
+        <file>data/icon_minus.png</file>
+        <file>data/icon_overlaycounter.png</file>
+        <file>data/icon_overlaycounterbackground.png</file>
+        <file>data/icon_overlaytimer.png</file>
+        <file>data/icon_overlaytimerbackground.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

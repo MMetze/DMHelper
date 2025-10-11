@@ -6,12 +6,20 @@
 #include <QTimer>
 #include <QDebug>
 
+
+#include "overlayfear.h"
+#include "overlaytimer.h"
+
+
 PublishGLFrame::PublishGLFrame(QWidget *parent) :
     QOpenGLWidget(parent),
     _initialized(false),
     _targetSize(),
-    _renderer(nullptr)
+    _renderer(nullptr),
+    _overlayManager(nullptr)
 {
+    _overlayManager = new OverlayManager(nullptr, this);
+    connect(_overlayManager, &OverlayManager::updateWindow, this, &PublishGLFrame::updateWidget);
 }
 
 PublishGLFrame::~PublishGLFrame()
@@ -95,6 +103,11 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
         _renderer->setBackgroundColor(color);
 }
 
+void PublishGLFrame::setCampaign(Campaign* campaign)
+{
+    _overlayManager->setCampaign(campaign);
+}
+
 void PublishGLFrame::mousePressEvent(QMouseEvent* event)
 {
     if((_renderer) && (event))
@@ -158,6 +171,13 @@ void PublishGLFrame::initializeGL()
         qDebug() << "[PublishGLFrame]     Max Texture Size:" << maxTextureSize;
     }
 
+    _overlayManager->addOverlay(new OverlayFear());
+    OverlayTimer* overlayTimer = new OverlayTimer(500);
+    _overlayManager->addOverlay(overlayTimer);
+    overlayTimer->start();
+
+    _overlayManager->initializeGL();
+
     QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
 
     _initialized = true;
@@ -175,6 +195,8 @@ void PublishGLFrame::resizeGL(int w, int h)
     if(_renderer)
         _renderer->resizeGL(w, h);
 
+    _overlayManager->resizeGL(w, h);
+
     emit labelResized(_targetSize);
     emit frameResized(_targetSize);
 }
@@ -186,6 +208,8 @@ void PublishGLFrame::paintGL()
         DMH_DEBUG_OPENGL_FRAME_START();
         _renderer->paintGL();
     }
+
+    _overlayManager->paintGL();
 }
 
 bool PublishGLFrame::convertMousePosition(QMouseEvent& event, const QRect& scissorRect, QPointF& result)

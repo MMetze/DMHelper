@@ -74,7 +74,9 @@ VideoPlayer::~VideoPlayer()
     VideoPlayer::stopPlayer();
     VideoPlayer::cleanupBuffers();
 
-    delete _mutex;
+    QRecursiveMutex* deleteMutex = _mutex;
+    _mutex = nullptr;
+    delete deleteMutex;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Player object destroyed: " << this;
@@ -143,22 +145,35 @@ bool VideoPlayer::isError() const
     return _vlcError;
 }
 
-QRecursiveMutex* VideoPlayer::getMutex() const
+bool VideoPlayer::lockMutex()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Getting mutex: " << _mutex;
+    qDebug() << "[VideoPlayer] Locking mutex: " << _mutex;
 #endif
 
-    return _mutex;
+    return (_mutex) ? _mutex->tryLock(1000) : false;
 }
 
-QImage* VideoPlayer::getImage() const
+void VideoPlayer::unlockMutex()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Getting image. Playing state: " << _status << ", display index: " << _idxDisplay << ", render index: " << _idxRender << ", display buffer: " << _buffers[_idxDisplay];
+    qDebug() << "[VideoPlayer] Unlocking mutex: " << _mutex;
 #endif
 
-    return ((isPlaying()) && (_buffers[_idxDisplay])) ? _buffers[_idxDisplay]->getFrame() : nullptr;
+    if(_mutex)
+        _mutex->unlock();
+}
+
+QImage* VideoPlayer::getLockedImage() const
+{
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayer] Returning locking image. Playing state: " << _status << ", display index: " << _idxDisplay << ", render index: " << _idxRender << ", display buffer: " << _buffers[_idxDisplay];
+#endif
+
+    if(!isPlaying())
+        return nullptr;
+
+    return _buffers[_idxDisplay] ? _buffers[_idxDisplay]->getFrame() : nullptr;
 }
 
 QSize VideoPlayer::getOriginalSize() const
@@ -193,6 +208,9 @@ void* VideoPlayer::lockCallback(void **planes)
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Lock callback called";
 #endif
+
+    if(!_mutex)
+        return nullptr;
 
     _mutex->lock();
 
@@ -589,6 +607,9 @@ void VideoPlayer::cleanupBuffers()
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Cleaning up buffers";
 #endif
+
+    if(!_mutex)
+        return;
 
     _newImage = false;
     //_firstImage = false;

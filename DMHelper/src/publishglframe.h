@@ -1,6 +1,7 @@
 #ifndef PUBLISHGLFRAME_H
 #define PUBLISHGLFRAME_H
 
+#include "overlaymanager.h"
 #include <QOpenGLWidget>
 
 class PublishGLRenderer;
@@ -31,6 +32,7 @@ public slots:
     void clearRenderer();
 
     void setBackgroundColor(const QColor& color);
+    void setCampaign(Campaign* campaign);
 
 protected:
     virtual void mousePressEvent(QMouseEvent* event) override;
@@ -50,6 +52,7 @@ private:
     bool _initialized;
     QSize _targetSize;
     PublishGLRenderer* _renderer;
+    OverlayManager* _overlayManager;
 
 };
 
