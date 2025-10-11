@@ -194,6 +194,9 @@ void* VideoPlayer::lockCallback(void **planes)
     qDebug() << "[VideoPlayer] Lock callback called";
 #endif
 
+    if(!_mutex)
+        return nullptr;
+
     _mutex->lock();
 
     if((planes) && (_buffers[_idxRender]) && (_buffers[_idxRender]->getNativeBuffer()))
@@ -595,12 +598,22 @@ void VideoPlayer::cleanupBuffers()
     _frameCount = 0;
     _originalSize = QSize();
 
-    QMutexLocker locker(_mutex);
+    if(_mutex)
+    {
+        QMutexLocker locker(_mutex);
 
-    delete _buffers[0];
-    _buffers[0] = nullptr;
-    delete _buffers[1];
-    _buffers[1] = nullptr;
+        delete _buffers[0];
+        _buffers[0] = nullptr;
+        delete _buffers[1];
+        _buffers[1] = nullptr;
+    }
+    else
+    {
+        delete _buffers[0];
+        _buffers[0] = nullptr;
+        delete _buffers[1];
+        _buffers[1] = nullptr;
+    }
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Buffer cleanup completed";
