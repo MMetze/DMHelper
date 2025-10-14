@@ -16,6 +16,7 @@ public:
     virtual void paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix) override;
 
     void setImage(const QImage& image);
+    void updateImage(const QImage& image);
     void setScale(float scaleFactor);
     void setScaleX(float scaleFactor);
     void setScaleY(float scaleFactor);

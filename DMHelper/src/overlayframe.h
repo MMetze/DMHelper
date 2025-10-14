@@ -14,12 +14,22 @@ class OverlayFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit OverlayFrame(Overlay& overlay, QWidget *parent = nullptr);
+    explicit OverlayFrame(Overlay* overlay, QWidget *parent = nullptr);
     ~OverlayFrame();
+
+    Overlay* getOverlay() const;
+    void setSelected(bool selected);
+
+protected slots:
+    void handleOpacityChanged(int value);
+    void handleScaleSliderChanged(int value);
+    void handleScaleSpinChanged(qreal value);
+
+    QString getStyleString(bool selected);
 
 private:
     Ui::OverlayFrame *ui;
-    Overlay& _overlay;
+    Overlay* _overlay;
 };
 
 #endif // OVERLAYFRAME_H

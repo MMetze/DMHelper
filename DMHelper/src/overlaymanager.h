@@ -18,7 +18,14 @@ public:
     void setCampaign(Campaign* camapaign);
     Campaign* getCampaign() const;
 
-    void addOverlay(Overlay* overlay);
+    bool isEmpty() const;
+
+    QList<Overlay*> getOverlays();
+    int getOverlayCount() const;
+    int getOverlayIndex(Overlay* overlay);
+    bool addOverlay(Overlay* overlay);
+    bool removeOverlay(Overlay* overlay);
+    bool moveOverlay(int from, int to);
     void clearOverlays();
 
     virtual void initializeGL();
@@ -37,7 +44,6 @@ private:
     int _shaderProjectionMatrixRGB;
 
     QList<Overlay*> _overlays;
-    QList<Overlay*> _newOverlays;
 
 };
 

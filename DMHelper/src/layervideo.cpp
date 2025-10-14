@@ -273,6 +273,9 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         }
     }
 
+    if(!_videoObject)
+        return;
+
     playerGLSetUniforms(functions, defaultModelMatrix, projectionMatrix);
 
     _videoObject->paintGL(functions, projectionMatrix);

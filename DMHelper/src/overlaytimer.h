@@ -2,6 +2,7 @@
 #define OVERLAYTIMER_H
 
 #include <QObject>
+#include <QImage>
 #include "overlay.h"
 
 class PublishGLImage;
@@ -15,11 +16,13 @@ public:
 
     virtual int getOverlayType() const override;
 
-    void setTimerValue(int seconds);
-    int getTimerValue() const;
+    virtual int getTimerValue() const;
 
-    void start();
-    void stop();
+public slots:
+    virtual void setTimerValue(int seconds);
+    virtual void toggle(bool play);
+    virtual void start();
+    virtual void stop();
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
@@ -27,9 +30,13 @@ protected:
     virtual void doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix) override;
 
     virtual void createContentsGL() override;
+    virtual void updateContentsGL() override;
     virtual void updateContentsScale(int w, int h) override;
 
-    PublishGLImage* _timerImage;
+    void createTimerImage();
+
+    PublishGLImage* _timerPublishImage;
+    QImage _timerImage;
     int _seconds;
     int _timerId;
 };

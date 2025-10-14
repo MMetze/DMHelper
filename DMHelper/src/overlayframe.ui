@@ -240,11 +240,17 @@
        <property name="toolTip">
         <string>Set the opacity of the layer</string>
        </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
-        <number>100</number>
+        <number>1000</number>
+       </property>
+       <property name="pageStep">
+        <number>5</number>
        </property>
        <property name="value">
-        <number>100</number>
+        <number>10</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -458,7 +464,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btnSettings_2">
+      <widget class="QPushButton" name="btnSettings">
        <property name="minimumSize">
         <size>
          <width>55</width>

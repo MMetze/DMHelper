@@ -146,7 +146,7 @@ SOURCES += main.cpp\
     objectimportworker.cpp \
     optionsaccessor.cpp \
     overlay.cpp \
-    overlaycountdown.cpp \
+    overlaycounter.cpp \
     overlayfear.cpp \
     overlayframe.cpp \
     overlaymanager.cpp \
@@ -452,7 +452,7 @@ HEADERS  += mainwindow.h \
     objectimportworker.h \
     optionsaccessor.h \
     overlay.h \
-    overlaycountdown.h \
+    overlaycounter.h \
     overlayfear.h \
     overlayframe.h \
     overlaymanager.h \

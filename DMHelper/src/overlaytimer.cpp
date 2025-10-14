@@ -6,7 +6,8 @@
 
 OverlayTimer::OverlayTimer(int seconds, QObject *parent) :
     Overlay{parent},
-    _timerImage(nullptr),
+    _timerPublishImage(nullptr),
+    _timerImage(),
     _seconds(seconds),
     _timerId(0)
 {
@@ -17,15 +18,26 @@ int OverlayTimer::getOverlayType() const
     return DMHelper::OverlayType_Timer;
 }
 
+int OverlayTimer::getTimerValue() const
+{
+    return _seconds;
+}
+
 void OverlayTimer::setTimerValue(int seconds)
 {
+    if(_seconds == seconds)
+        return;
+
     _seconds = seconds;
     emit triggerUpdate();
 }
 
-int OverlayTimer::getTimerValue() const
+void OverlayTimer::toggle(bool play)
 {
-    return _seconds;
+    if(play)
+        start();
+    else
+        stop();
 }
 
 void OverlayTimer::start()
@@ -55,32 +67,56 @@ void OverlayTimer::timerEvent(QTimerEvent *event)
     if(--_seconds <= 0)
         stop();
 
-    recreateContents();
+    updateContents();
 }
 
 void OverlayTimer::doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix)
 {
     Q_UNUSED(targetSize);
 
-    if((!_timerImage) || (!functions))
+    if((!_timerPublishImage) || (!functions))
         return;
 
-    DMH_DEBUG_OPENGL_glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _timerImage->getMatrixData(), _timerImage->getMatrix());
-    functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _timerImage->getMatrixData());
-    _timerImage->paintGL(functions, nullptr);
+    DMH_DEBUG_OPENGL_glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _timerPublishImage->getMatrixData(), _timerPublishImage->getMatrix());
+    functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _timerPublishImage->getMatrixData());
+    _timerPublishImage->paintGL(functions, nullptr);
 }
 
 void OverlayTimer::createContentsGL()
 {
-    if(_timerImage)
+    if(_timerPublishImage)
     {
-        delete _timerImage;
-        _timerImage = nullptr;
+        delete _timerPublishImage;
+        _timerPublishImage = nullptr;
     }
 
-    if(!_campaign)
+    _timerImage = QImage();
+    createTimerImage();
+    _timerPublishImage = new PublishGLImage(_timerImage, false);
+}
+
+void OverlayTimer::updateContentsGL()
+{
+    if(!_timerPublishImage)
         return;
 
+    createTimerImage();
+    _timerPublishImage->updateImage(_timerImage);
+}
+
+void OverlayTimer::updateContentsScale(int w, int h)
+{
+    if(!_timerPublishImage)
+        return;
+
+    qreal tokenHeight = static_cast<qreal>(h) / 10.0;
+    _timerPublishImage->setScale(tokenHeight / static_cast<qreal>(_timerPublishImage->getImageSize().height()));
+    _timerPublishImage->setX(static_cast<qreal>(w) - _timerPublishImage->getSize().width());
+    _timerPublishImage->setY(static_cast<qreal>(h) - (_timerPublishImage->getSize().height() * 3));
+}
+
+void OverlayTimer::createTimerImage()
+{
     QFont f;
     f.setPixelSize(256);
     f.setStyleStrategy(QFont::ForceOutline);
@@ -98,11 +134,12 @@ void OverlayTimer::createContentsGL()
     QRectF bounds = path.boundingRect();
 
     // Create an image just large enough
-    QImage timerImage(bounds.size().toSize().grownBy(QMargins(4, 4, 4, 4)), QImage::Format_ARGB32_Premultiplied);
-    timerImage.fill(Qt::transparent);
+    if(_timerImage.isNull())
+        _timerImage = QImage(bounds.size().toSize().grownBy(QMargins(4, 4, 4, 4)), QImage::Format_ARGB32_Premultiplied);
+    _timerImage.fill(Qt::transparent);
 
     // Prepare painter
-    QPainter p(&timerImage);
+    QPainter p(&_timerImage);
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen(QPen(Qt::white, 5));
     p.setBrush(QColor(115, 18, 0));
@@ -113,18 +150,4 @@ void OverlayTimer::createContentsGL()
     // Draw it
     p.drawPath(path);
     p.end();
-
-
-    _timerImage = new PublishGLImage(timerImage, false);
-}
-
-void OverlayTimer::updateContentsScale(int w, int h)
-{
-    if(!_timerImage)
-        return;
-
-    qreal tokenHeight = static_cast<qreal>(h) / 10.0;
-    _timerImage->setScale(tokenHeight / static_cast<qreal>(_timerImage->getImageSize().height()));
-    _timerImage->setX(static_cast<qreal>(w) - _timerImage->getSize().width());
-    _timerImage->setY(static_cast<qreal>(h) - (_timerImage->getSize().height() * 3));
 }
