@@ -1,17 +1,17 @@
 #include "overlayseditdialog.h"
 #include "ui_overlayseditdialog.h"
-#include "overlaymanager.h"
+#include "campaign.h"
 #include "overlayframe.h"
 #include "overlaytimer.h"
 #include "overlayfear.h"
 #include "overlaycounter.h"
 #include <QInputDialog>
 
-OverlaysEditDialog::OverlaysEditDialog(OverlayManager& overlayManager, QWidget *parent) :
+OverlaysEditDialog::OverlaysEditDialog(Campaign& campaign, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OverlaysEditDialog),
     _overlayLayout(nullptr),
-    _overlayManager(overlayManager),
+    _campaign(campaign),
     _selectedFrame(nullptr)
 {
     ui->setupUi(this);
@@ -75,7 +75,7 @@ void OverlaysEditDialog::handleNewOverlay()
     else if(selectedItem == tr("Fear"))
         newOverlay = new OverlayFear();
 
-    _overlayManager.addOverlay(newOverlay);
+    _campaign.addOverlay(newOverlay);
 
     OverlayFrame* newFrame = addOverlayFrame(newOverlay);
     if(newFrame)
@@ -87,11 +87,11 @@ void OverlaysEditDialog::handleDeleteOverlay()
     if(!_selectedFrame)
         return;
 
-    int currentIndex = _overlayManager.getOverlayIndex(_selectedFrame->getOverlay());
-    if((currentIndex == -1) || (currentIndex >= _overlayManager.getOverlayCount()))
+    int currentIndex = _campaign.getOverlayIndex(_selectedFrame->getOverlay());
+    if((currentIndex == -1) || (currentIndex >= _campaign.getOverlayCount()))
         return;
 
-    _overlayManager.removeOverlay(_selectedFrame->getOverlay());
+    _campaign.removeOverlay(_selectedFrame->getOverlay());
     QLayoutItem* child = _overlayLayout->takeAt(currentIndex);
     if(child)
     {
@@ -106,11 +106,11 @@ void OverlaysEditDialog::handleMoveOverlayUp()
     if(!_selectedFrame)
         return;
 
-    int currentIndex = _overlayManager.getOverlayIndex(_selectedFrame->getOverlay());
+    int currentIndex = _campaign.getOverlayIndex(_selectedFrame->getOverlay());
     if((currentIndex == -1) || (currentIndex == 0))
         return;
 
-    if(_overlayManager.moveOverlay(currentIndex, currentIndex - 1))
+    if(_campaign.moveOverlay(currentIndex, currentIndex - 1))
     {
         resetLayout();
         if((_overlayLayout) && (_overlayLayout->itemAt(currentIndex - 1)))
@@ -123,11 +123,11 @@ void OverlaysEditDialog::handleMoveOverlayDown()
     if(!_selectedFrame)
         return;
 
-    int currentIndex = _overlayManager.getOverlayIndex(_selectedFrame->getOverlay());
-    if((currentIndex == -1) || (currentIndex >= _overlayManager.getOverlayCount()))
+    int currentIndex = _campaign.getOverlayIndex(_selectedFrame->getOverlay());
+    if((currentIndex == -1) || (currentIndex >= _campaign.getOverlayCount()))
         return;
 
-    if(_overlayManager.moveOverlay(currentIndex, currentIndex + 1))
+    if(_campaign.moveOverlay(currentIndex, currentIndex + 1))
     {
         resetLayout();
         if((_overlayLayout) && (_overlayLayout->itemAt(currentIndex + 1)))
@@ -147,7 +147,7 @@ void OverlaysEditDialog::readOverlays()
     if(!_overlayLayout)
         return;
 
-    for(Overlay* overlay : _overlayManager.getOverlays())
+    for(Overlay* overlay : _campaign.getOverlays())
     {
         addOverlayFrame(overlay);
     }

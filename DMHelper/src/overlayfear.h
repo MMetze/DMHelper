@@ -10,7 +10,7 @@ class OverlayFear : public Overlay
 {
     Q_OBJECT
 public:
-    explicit OverlayFear(QObject *parent = nullptr);
+    explicit OverlayFear(const QString& name = QString("Fear"), QObject *parent = nullptr);
 
     virtual int getOverlayType() const override;
 

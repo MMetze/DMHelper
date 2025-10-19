@@ -297,15 +297,8 @@ void BattleFrame::deactivateObject()
 
 void BattleFrame::setBattle(EncounterBattle* battle)
 {
-    if(_battle)
-    {
-        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-        if(campaign)
-        {
-            disconnect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
-            disconnect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
-        }
-    }
+    if(_battle == battle)
+        return;
 
     _battle = battle;
     setModel(_battle == nullptr ? nullptr : _battle->getBattleDialogModel());
@@ -317,9 +310,6 @@ void BattleFrame::setBattle(EncounterBattle* battle)
         {
             ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
             ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-
-            connect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
-            connect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
         }
     }
 }
@@ -1036,12 +1026,6 @@ void BattleFrame::createCountdownFrame()
 {
     if((_countdownFile.isEmpty()) || (!_countdownFrame.load(_countdownFile)))
         _countdownFrame.load(QString(":/img/data/countdown_frame.png"));
-}
-
-void BattleFrame::fearChanged()
-{
-    if(_renderer)
-        _renderer->fearChanged();
 }
 
 void BattleFrame::zoomIn()

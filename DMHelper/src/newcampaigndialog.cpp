@@ -89,11 +89,6 @@ bool NewCampaignDialog::isCombatantDone() const
     return ui->chkCombatantDone->isChecked();
 }
 
-bool NewCampaignDialog::isShowFear() const
-{
-    return ui->chkShowFear->isChecked();
-}
-
 QString NewCampaignDialog::getRuleset() const
 {
     return ui->cmbRulesets->currentText();
@@ -138,10 +133,6 @@ void NewCampaignDialog::handleRulesetSelected()
         ui->edtBestiaryFile->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._bestiary)));
 
     ui->chkCombatantDone->setChecked(ruleset._combatantDone);
-
-    bool daggerheart = ruleset._name.contains(QString("daggerheart"), Qt::CaseInsensitive);
-    ui->chkShowFear->setChecked(daggerheart);
-    ui->chkShowFear->setVisible(daggerheart);
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()

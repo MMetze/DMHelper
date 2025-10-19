@@ -6,11 +6,6 @@
 #include <QTimer>
 #include <QDebug>
 
-
-#include "overlayfear.h"
-#include "overlaytimer.h"
-
-
 PublishGLFrame::PublishGLFrame(QWidget *parent) :
     QOpenGLWidget(parent),
     _initialized(false),
@@ -35,6 +30,11 @@ bool PublishGLFrame::isInitialized() const
 PublishGLRenderer* PublishGLFrame::getRenderer() const
 {
     return _renderer;
+}
+
+OverlayManager* PublishGLFrame::getOverlayManager() const
+{
+    return _overlayManager;
 }
 
 void PublishGLFrame::cleanup()
@@ -102,11 +102,6 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
         _renderer->setBackgroundColor(color);
 }
 
-void PublishGLFrame::setCampaign(Campaign* campaign)
-{
-    _overlayManager->setCampaign(campaign);
-}
-
 void PublishGLFrame::mousePressEvent(QMouseEvent* event)
 {
     if((_renderer) && (event))
@@ -170,11 +165,6 @@ void PublishGLFrame::initializeGL()
         qDebug() << "[PublishGLFrame]     Max Texture Size:" << maxTextureSize;
     }
 
-    //_overlayManager->addOverlay(new OverlayFear());
-    //OverlayTimer* overlayTimer = new OverlayTimer(500);
-    //_overlayManager->addOverlay(overlayTimer);
-    //overlayTimer->start();
-
     _overlayManager->initializeGL();
 
     QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
@@ -208,7 +198,7 @@ void PublishGLFrame::paintGL()
         _renderer->paintGL();
     }
 
-    if(!_overlayManager->isEmpty())
+    if(_overlayManager)
         _overlayManager->paintGL();
 }
 

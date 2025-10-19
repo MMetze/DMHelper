@@ -7,6 +7,7 @@
 class PublishGLRenderer;
 class PublishGLImage;
 
+
 class PublishGLFrame : public QOpenGLWidget
 {
     Q_OBJECT
@@ -16,6 +17,7 @@ public:
 
     bool isInitialized() const;
     PublishGLRenderer* getRenderer() const;
+    OverlayManager* getOverlayManager() const;
 
 signals:
     void publishMouseDown(const QPointF& position);
@@ -32,7 +34,6 @@ public slots:
     void clearRenderer();
 
     void setBackgroundColor(const QColor& color);
-    void setCampaign(Campaign* campaign);
 
 protected:
     virtual void mousePressEvent(QMouseEvent* event) override;

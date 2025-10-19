@@ -1,22 +1,21 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
 
-#include "dmhobjectbase.h"
+#include "campaignobjectbase.h"
 #include <QSize>
 #include <QOpenGLFunctions>
 
 class Campaign;
 
-class Overlay : public DMHObjectBase
+class Overlay : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit Overlay(QObject *parent = nullptr);
+    explicit Overlay(const QString& name = QString(), QObject *parent = nullptr);
 
     // DMHObjectBase
-    virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport);
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     // Local interface
     virtual int getOverlayType() const = 0;
@@ -44,7 +43,8 @@ signals:
     void triggerUpdate();
 
 protected:
-    // DMHObjectBase
+    // CampaignObjectBase
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     // Local interface

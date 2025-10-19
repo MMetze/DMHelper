@@ -37,6 +37,11 @@ PublishGLRenderer* PublishWindow::getRenderer() const
     return _publishFrame ? _publishFrame->getRenderer() : nullptr;
 }
 
+OverlayManager* PublishWindow::getOverlayManager() const
+{
+    return _publishFrame ? _publishFrame->getOverlayManager() : nullptr;
+}
+
 void PublishWindow::setImage(QImage img)
 {
     PublishGLImageRenderer* newRenderer = new PublishGLImageRenderer(nullptr, img, _globalColor);
@@ -78,11 +83,6 @@ void PublishWindow::setRenderer(PublishGLRenderer* renderer)
         renderer->setBackgroundColor(_globalColor);
 
     _publishFrame->setRenderer(renderer);
-}
-
-void PublishWindow::setCampaign(Campaign* campaign)
-{
-    _publishFrame->setCampaign(campaign);
 }
 
 void PublishWindow::keyPressEvent(QKeyEvent * event)

@@ -1,14 +1,33 @@
 #include "overlaycounter.h"
 #include "publishglimage.h"
 #include "dmconstants.h"
+#include <QDomElement>
 #include <QPainter>
 #include <QPainterPath>
 
-OverlayCounter::OverlayCounter(int counter, QObject *parent) :
-    Overlay{parent},
+OverlayCounter::OverlayCounter(int counter, const QString& name, QObject *parent) :
+    Overlay{name, parent},
     _counterImage(nullptr),
     _counter(counter)
 {
+}
+
+void OverlayCounter::inputXML(const QDomElement &element, bool isImport)
+{
+    setCounterValue(element.attribute(QString("counter"), QString::number(0)).toInt());
+
+    Overlay::inputXML(element, isImport);
+}
+
+void OverlayCounter::copyValues(const CampaignObjectBase* other)
+{
+    const OverlayCounter* otherOverlayCounter = dynamic_cast<const OverlayCounter*>(other);
+    if(!otherOverlayCounter)
+        return;
+
+    _counter = otherOverlayCounter->_counter;
+
+    Overlay::copyValues(other);
 }
 
 int OverlayCounter::getOverlayType() const
@@ -40,6 +59,13 @@ void OverlayCounter::decrease()
 {
     --_counter;
     emit triggerUpdate();
+}
+
+void OverlayCounter::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute(QString("counter"), QString::number(_counter));
+
+    Overlay::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void OverlayCounter::doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix)

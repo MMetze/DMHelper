@@ -90,6 +90,8 @@
 #include "mapblankdialog.h"
 #include "battledialogmodelcharacter.h"
 #include "newentrydialog.h"
+#include "overlaymanager.h"
+#include "overlayfear.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -393,7 +395,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _pubWindow->resize(width() * 9 / 10, height() * 9 / 10);
     connect(_pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), _pubWindow, SLOT(setBackgroundColor(const QColor&)));
-    connect(this, &MainWindow::campaignLoaded, _pubWindow, &PublishWindow::setCampaign);
     qDebug() << "[MainWindow] Player's Window Created";
 
     qDebug() << "[MainWindow] Creating Tree Model";
@@ -828,13 +829,18 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
-        _campaign->setShowFear(newCampaignDialog->isShowFear());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
+
+        if(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive))
+        {
+            _campaign->addOverlay(new OverlayFear());
+        }
+
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
         emit campaignLoaded(_campaign);
@@ -1787,12 +1793,14 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     QDir targetDir(fileInfo.absoluteDir());
     _campaign->outputXML(doc, root, targetDir, false);
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(currentObject)
+    QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+    if(!campaignElement.isNull())
     {
-        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
-        if(!campaignElement.isNull())
-            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+        CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+        if(currentObject)
+        {
+                campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+        }
     }
 
     QFile file(_campaignFileName);
@@ -1839,7 +1847,9 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
 void MainWindow::deleteCampaign()
 {
     if(_pubWindow)
+    {
         _pubWindow->setRenderer(nullptr);
+    }
 
     if(_treeModel)
     {
@@ -2150,6 +2160,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     ui->frameFear->setVisible(campaign && campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
+
+    if(_pubWindow->getOverlayManager())
+        _pubWindow->getOverlayManager()->setCampaign(campaign);
 
     if(campaign)
     {

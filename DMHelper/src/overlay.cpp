@@ -1,8 +1,8 @@
 #include "overlay.h"
 #include <QDomElement>
 
-Overlay::Overlay(QObject *parent) :
-    DMHObjectBase{parent},
+Overlay::Overlay(const QString& name, QObject *parent) :
+    CampaignObjectBase{name, parent},
     _visible(true),
     _scale(1.0),
     _opacity(100),
@@ -12,20 +12,26 @@ Overlay::Overlay(QObject *parent) :
 {
 }
 
-QDomElement Overlay::outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport)
-{
-    // TODO
-    return QDomElement();
-}
-
 void Overlay::inputXML(const QDomElement &element, bool isImport)
 {
-    // TODO
+    setVisible(static_cast<bool>(element.attribute(QString("visible"), QString::number(1)).toInt()));
+    setScale(element.attribute(QString("scale"), QString::number(1.0, 'g', 1)).toDouble());
+    setOpacity(element.attribute(QString("opacity"), QString::number(100)).toInt());
+
+    CampaignObjectBase::inputXML(element, isImport);
 }
 
-void Overlay::postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport)
+void Overlay::copyValues(const CampaignObjectBase* other)
 {
-    // TODO
+    const Overlay* otherOverlay = dynamic_cast<const Overlay*>(other);
+    if(!otherOverlay)
+        return;
+
+    _visible = otherOverlay->_visible;
+    _scale = otherOverlay->_scale;
+    _opacity = otherOverlay->_opacity;
+
+    CampaignObjectBase::copyValues(other);
 }
 
 bool Overlay::isInitialized() const
@@ -123,9 +129,18 @@ void Overlay::setOpacity(int opacity)
     emit dirty();
 }
 
+QDomElement Overlay::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("overlay");
+}
+
 void Overlay::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    // TODO
+    element.setAttribute(QString("visible"), _visible);
+    element.setAttribute(QString("scale"), QString::number(_scale, 'g', 6));
+    element.setAttribute(QString("opacity"), _opacity);
+
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void Overlay::doSetCampaign(Campaign* campaign)

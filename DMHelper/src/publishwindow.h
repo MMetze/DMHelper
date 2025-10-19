@@ -5,6 +5,7 @@
 
 class PublishGLFrame;
 class PublishGLRenderer;
+class OverlayManager;
 class Campaign;
 
 class PublishWindow : public QMainWindow
@@ -15,6 +16,7 @@ public:
 
     QUuid getObjectId() const;
     PublishGLRenderer* getRenderer() const;
+    OverlayManager* getOverlayManager() const;
 
 signals:
     void windowVisible(bool visible);
@@ -31,7 +33,6 @@ public slots:
     void setBackgroundColor(const QColor& color);
 
     void setRenderer(PublishGLRenderer* renderer);
-    void setCampaign(Campaign* campaign);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);

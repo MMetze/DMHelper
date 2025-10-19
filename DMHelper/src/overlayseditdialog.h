@@ -7,7 +7,7 @@ namespace Ui {
 class OverlaysEditDialog;
 }
 
-class OverlayManager;
+class Campaign;
 class OverlayFrame;
 class Overlay;
 class QVBoxLayout;
@@ -17,7 +17,7 @@ class OverlaysEditDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OverlaysEditDialog(OverlayManager& overlayManager, QWidget *parent = nullptr);
+    explicit OverlaysEditDialog(Campaign& campaign, QWidget *parent = nullptr);
     ~OverlaysEditDialog();
 
 protected:
@@ -38,7 +38,7 @@ protected:
 private:
     Ui::OverlaysEditDialog *ui;
     QVBoxLayout* _overlayLayout;
-    OverlayManager& _overlayManager;
+    Campaign& _campaign;
     OverlayFrame* _selectedFrame;
 };
 

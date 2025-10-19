@@ -12,7 +12,11 @@ class OverlayTimer : public Overlay
 {
     Q_OBJECT
 public:
-    explicit OverlayTimer(int seconds = 0, QObject *parent = nullptr);
+    explicit OverlayTimer(int seconds = 0, const QString& name = QString("Timer"), QObject *parent = nullptr);
+
+    // From CampaignObjectBase
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual int getOverlayType() const override;
 
@@ -25,7 +29,11 @@ public slots:
     virtual void stop();
 
 protected:
+    // From QObject
     virtual void timerEvent(QTimerEvent *event) override;
+
+    // From CampaignObjectBase
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     virtual void doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix) override;
 

@@ -4,6 +4,8 @@
 #include "dmh_opengl.h"
 #include "overlay.h"
 #include <QMatrix4x4>
+#include <QDomDocument>
+#include <QDir>
 #include <QDebug>
 
 OverlayManager::OverlayManager(Campaign* campaign, QObject* parent) :
@@ -12,8 +14,7 @@ OverlayManager::OverlayManager(Campaign* campaign, QObject* parent) :
     _targetSize(),
     _shaderProgramRGB(0),
     _shaderModelMatrixRGB(0),
-    _shaderProjectionMatrixRGB(0),
-    _overlays()
+    _shaderProjectionMatrixRGB(0)
 {
 }
 
@@ -28,82 +29,10 @@ Campaign* OverlayManager::getCampaign() const
 
 void OverlayManager::setCampaign(Campaign* campaign)
 {
+    if(_campaign == campaign)
+        return;
+
     _campaign = campaign;
-    for(Overlay* overlay : _overlays)
-    {
-        if(overlay)
-            overlay->setCampaign(_campaign);
-    }
-}
-
-bool OverlayManager::isEmpty() const
-{
-    return _overlays.isEmpty();
-}
-
-QList<Overlay*> OverlayManager::getOverlays()
-{
-    return _overlays;
-}
-
-int OverlayManager::getOverlayCount() const
-{
-    return _overlays.size();
-}
-
-int OverlayManager::getOverlayIndex(Overlay* overlay)
-{
-    if(!overlay)
-        return -1;
-
-    return _overlays.indexOf(overlay);
-}
-
-bool OverlayManager::addOverlay(Overlay* overlay)
-{
-    if(!overlay)
-        return false;
-
-    overlay->setParent(this);
-    _overlays.append(overlay);
-    connect(overlay, &Overlay::triggerUpdate, this, &OverlayManager::updateWindow);
-
-    emit updateWindow();
-    return true;
-}
-
-bool OverlayManager::removeOverlay(Overlay* overlay)
-{
-    if(!overlay)
-        return false;
-
-    int index = _overlays.indexOf(overlay);
-    if(index == -1)
-        return false;
-    _overlays.removeAt(index);
-    delete overlay;
-
-    emit updateWindow();
-    return true;
-}
-
-bool OverlayManager::moveOverlay(int from, int to)
-{
-    if((from < 0) || (from >= _overlays.size()) || (to < 0) || (to >= _overlays.size()) || (from == to))
-        return false;
-
-    _overlays.swapItemsAt(from, to);
-    return true;
-}
-
-void OverlayManager::clearOverlays()
-{
-    while(!_overlays.isEmpty())
-    {
-        Overlay* overlay = _overlays.takeFirst();
-        delete overlay;
-    }
-
     emit updateWindow();
 }
 
@@ -200,20 +129,16 @@ void OverlayManager::initializeGL()
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    /*
-
-    QImage fearCounterImageGrey(QString(":/img/data/astrolobe.png"));
-
-    PublishGLImage* _fearCounter = new PublishGLImage(fearCounterImageGrey, false);
-    _fearCounter->setX(0);
-    _fearCounter->setY(0);
-    _fearCounter->setScale(1);//_initiativeTokenHeight * 2.0 / static_cast<qreal>(fearCounterImage.height()));
-    */
-
-    for(Overlay* overlay : _overlays)
+    if(_campaign)
     {
-        if(overlay)
-            overlay->initializeGL();
+        for(Overlay* overlay : _campaign->getOverlays())
+        {
+            if(overlay)
+            {
+                connect(overlay, &Overlay::triggerUpdate, this, &OverlayManager::updateWindow);
+                overlay->initializeGL();
+            }
+        }
     }
 }
 
@@ -237,43 +162,34 @@ void OverlayManager::resizeGL(int w, int h)
         f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, screenCoords.constData());
     }
 
-    for(Overlay* overlay : _overlays)
+    if(_campaign)
     {
-        if(overlay)
-            overlay->resizeGL(w, h);
+        for(Overlay* overlay : _campaign->getOverlays())
+        {
+            if(overlay)
+                overlay->resizeGL(w, h);
+        }
     }
 }
 
 void OverlayManager::paintGL()
 {
-    if((!_shaderProgramRGB) || (_targetSize.isNull()) || ((_overlays.isEmpty())))
+    if((!_shaderProgramRGB) || (_targetSize.isNull()) || (!_campaign) || (_campaign->getOverlays().isEmpty()))
         return;
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     if(!f)
         return;
 
-//    f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fearCounter->getMatrixData());
-//    _fearCounter->paintGL(f, nullptr);
-
     DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     f->glUseProgram(_shaderProgramRGB);
-  /*  QMatrix4x4 viewMatrix;
-    viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGB, "view"), 1, GL_FALSE, viewMatrix.constData());
 
-    QMatrix4x4 screenCoords;
-    screenCoords.ortho(0.f, _targetSize.width(), 0.f, _targetSize.height(), 0.1f, 1000.f);
-    f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, screenCoords.constData());
-*/
-
-    for(Overlay* overlay : _overlays)
+    for(Overlay* overlay : _campaign->getOverlays())
     {
         if(overlay)
         {
             if(!overlay->isInitialized())
             {
-                overlay->setCampaign(_campaign);
                 overlay->initializeGL();
                 overlay->resizeGL(_targetSize.width(), _targetSize.height());
             }
@@ -281,8 +197,3 @@ void OverlayManager::paintGL()
         }
     }
 }
-
-
-
-
-

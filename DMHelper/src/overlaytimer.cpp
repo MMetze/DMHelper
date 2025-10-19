@@ -1,16 +1,35 @@
 #include "overlaytimer.h"
 #include "publishglimage.h"
 #include "dmconstants.h"
+#include <QDomElement>
 #include <QPainter>
 #include <QPainterPath>
 
-OverlayTimer::OverlayTimer(int seconds, QObject *parent) :
-    Overlay{parent},
+OverlayTimer::OverlayTimer(int seconds, const QString& name, QObject *parent) :
+    Overlay{name, parent},
     _timerPublishImage(nullptr),
     _timerImage(),
     _seconds(seconds),
     _timerId(0)
 {
+}
+
+void OverlayTimer::inputXML(const QDomElement &element, bool isImport)
+{
+    setTimerValue(element.attribute(QString("seconds"), QString::number(0)).toInt());
+
+    Overlay::inputXML(element, isImport);
+}
+
+void OverlayTimer::copyValues(const CampaignObjectBase* other)
+{
+    const OverlayTimer* otherOverlayTimer = dynamic_cast<const OverlayTimer*>(other);
+    if(!otherOverlayTimer)
+        return;
+
+    _seconds = otherOverlayTimer->_seconds;
+
+    Overlay::copyValues(other);
 }
 
 int OverlayTimer::getOverlayType() const
@@ -68,6 +87,13 @@ void OverlayTimer::timerEvent(QTimerEvent *event)
         stop();
 
     updateContents();
+}
+
+void OverlayTimer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute(QString("seconds"), QString::number(_seconds));
+
+    Overlay::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void OverlayTimer::doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix)

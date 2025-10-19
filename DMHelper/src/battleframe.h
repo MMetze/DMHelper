@@ -117,7 +117,6 @@ public slots:
     void createCombatantFrame();
     void setCountdownFrame(const QString& countdownFrame);
     void createCountdownFrame();
-    void fearChanged();
 
     void zoomIn();
     void zoomOut();

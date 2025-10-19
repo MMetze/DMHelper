@@ -6,8 +6,8 @@
 #include <QPainter>
 #include <QPainterPath>
 
-OverlayFear::OverlayFear(QObject *parent) :
-    Overlay{parent},
+OverlayFear::OverlayFear(const QString& name, QObject *parent) :
+    Overlay{name, parent},
     _fearCounter(nullptr)
 {
 }
@@ -46,7 +46,7 @@ void OverlayFear::createContentsGL()
         _fearCounter = nullptr;
     }
 
-    if((!_campaign) || (!_campaign->getShowFear()) || (!_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive)))
+    if(!_campaign)
         return;
 
     QImage fearCounterImageBorder(QString(":/img/data/hoodeyelessborder.png"));

@@ -10,6 +10,9 @@
 #include "basicdateserver.h"
 #include "soundboardgroup.h"
 #include "campaignobjectfactory.h"
+#include "overlaycounter.h"
+#include "overlayfear.h"
+#include "overlaytimer.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QHash>
@@ -74,7 +77,6 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _time(0, 0),
     _notes(),
     _fearCount(0),
-    _showFear(false),
     _ruleset(),
     _batchChanges(false),
     _changesMade(false),
@@ -117,7 +119,6 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
-    _showFear = static_cast<bool>(element.attribute("showFear", QString::number(0)).toInt());
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -128,6 +129,9 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         QDomCDATASection notesData = notesElement.firstChild().toCDATASection();
         setNotes(notesData.data());
     }
+
+    // Load the overlays
+    loadOverlayXML(element.firstChildElement(QString("overlays")), isImport);
 
     // TODO: add back in some kind of object counting
     // Sum up all the elements loaded. The +2 is for the campaign object itself and the notes object
@@ -195,6 +199,40 @@ void Campaign::preloadRulesetXML(const QDomElement &element, bool isImport)
         _ruleset.inputXML(rulesetElement, isImport);
     else
         _ruleset.setValues(RuleFactory::Instance()->getRulesetTemplate(RuleFactory::DEFAULT_RULESET_NAME));
+}
+
+void Campaign::loadOverlayXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    QDomElement overlayElement = element.firstChildElement(QString("overlay"));
+    while(!overlayElement.isNull())
+    {
+        int overlayType = overlayElement.attribute(QString("type")).toInt();
+        Overlay* overlay = nullptr;
+        switch(overlayType)
+        {
+        case DMHelper::OverlayType_Fear:
+            overlay = new OverlayFear();
+            break;
+        case DMHelper::OverlayType_Counter:
+            overlay = new OverlayCounter();
+            break;
+        case DMHelper::OverlayType_Timer:
+            overlay = new OverlayTimer();
+            break;
+        default:
+            break;
+        }
+
+        if(overlay)
+        {
+            overlay->inputXML(overlayElement, false);
+            addOverlay(overlay);
+        }
+
+        overlayElement = overlayElement.nextSiblingElement(QString("overlay"));
+    }
 }
 
 void Campaign::beginBatchChanges()
@@ -337,6 +375,74 @@ void Campaign::removeSoundboardGroup(SoundboardGroup* soundboardGroup)
     delete soundboardGroup;
 }
 
+QList<Overlay*> Campaign::getOverlays()
+{
+    return _overlays;
+}
+
+int Campaign::getOverlayCount() const
+{
+    return _overlays.size();
+}
+
+int Campaign::getOverlayIndex(Overlay* overlay)
+{
+    if(!overlay)
+        return -1;
+
+    return _overlays.indexOf(overlay);
+}
+
+bool Campaign::addOverlay(Overlay* overlay)
+{
+    if(!overlay)
+        return false;
+
+    overlay->setParent(this);
+    overlay->setCampaign(this);
+    _overlays.append(overlay);
+
+    emit overlaysChanged();
+    return true;
+}
+
+bool Campaign::removeOverlay(Overlay* overlay)
+{
+    if(!overlay)
+        return false;
+
+    int index = _overlays.indexOf(overlay);
+    if(index == -1)
+        return false;
+    _overlays.removeAt(index);
+    delete overlay;
+
+    emit overlaysChanged();
+    return true;
+}
+
+bool Campaign::moveOverlay(int from, int to)
+{
+    if((from < 0) || (from >= _overlays.size()) || (to < 0) || (to >= _overlays.size()) || (from == to))
+        return false;
+
+    _overlays.swapItemsAt(from, to);
+
+    emit overlaysChanged();
+    return true;
+}
+
+void Campaign::clearOverlays()
+{
+    while(!_overlays.isEmpty())
+    {
+        Overlay* overlay = _overlays.takeFirst();
+        delete overlay;
+    }
+
+    emit overlaysChanged();
+}
+
 BasicDate Campaign::getDate() const
 {
     return _date;
@@ -350,11 +456,6 @@ QTime Campaign::getTime() const
 int Campaign::getFearCount() const
 {
     return _fearCount;
-}
-
-bool Campaign::getShowFear() const
-{
-    return _showFear;
 }
 
 Ruleset& Campaign::getRuleset()
@@ -446,16 +547,6 @@ void Campaign::setFearCount(int fearCount)
     emit dirty();
 }
 
-void Campaign::setShowFear(bool showFear)
-{
-    if(showFear == _showFear)
-        return;
-
-    _showFear = showFear;
-    emit fearChanged(_showFear);
-    emit dirty();
-}
-
 bool Campaign::validateCampaignIds()
 {
     QList<QUuid> knownIds;
@@ -510,8 +601,6 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
     element.setAttribute("time", getTime().msecsSinceStartOfDay());
     if(_fearCount > 0)
         element.setAttribute("fear", _fearCount);
-    if(_showFear)
-        element.setAttribute("showFear", _showFear);
 
     if(_notes.count() > 0)
     {
@@ -534,13 +623,29 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
         }
     }
     element.appendChild(soundboardElement);
+
+    if(!_overlays.isEmpty())
+    {
+        QDomElement overlaysElement = doc.createElement("overlays");
+        for(Overlay* overlay : _overlays)
+        {
+            if(overlay)
+            {
+                QDomElement overlayElement = overlay->outputXML(doc, overlaysElement, targetDirectory, false);
+                if(!overlayElement.isNull())
+                    overlaysElement.appendChild(overlayElement);
+            }
+        }
+        element.appendChild(overlaysElement);
+    }
 }
 
 bool Campaign::belongsToObject(QDomElement& element)
 {
     if((element.tagName() == QString("soundboard")) ||
        (element.tagName() == QString("ruleset")) ||
-       (element.tagName() == QString("notes")))
+       (element.tagName() == QString("notes")) ||
+       (element.tagName() == QString("overlays")))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);

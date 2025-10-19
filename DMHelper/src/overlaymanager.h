@@ -7,6 +7,9 @@
 
 class Overlay;
 class Campaign;
+class QDomElement;
+class QDomDocument;
+class QDir;
 
 class OverlayManager : public QObject
 {
@@ -17,16 +20,6 @@ public:
 
     void setCampaign(Campaign* camapaign);
     Campaign* getCampaign() const;
-
-    bool isEmpty() const;
-
-    QList<Overlay*> getOverlays();
-    int getOverlayCount() const;
-    int getOverlayIndex(Overlay* overlay);
-    bool addOverlay(Overlay* overlay);
-    bool removeOverlay(Overlay* overlay);
-    bool moveOverlay(int from, int to);
-    void clearOverlays();
 
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
@@ -42,9 +35,6 @@ private:
     int _shaderProgramRGB;
     int _shaderModelMatrixRGB;
     int _shaderProjectionMatrixRGB;
-
-    QList<Overlay*> _overlays;
-
 };
 
 #endif // OVERLAYMANAGER_H
