@@ -1,9 +1,13 @@
 #include "overlaytimer.h"
 #include "publishglimage.h"
 #include "dmconstants.h"
+#include "overlayframe.h"
 #include <QDomElement>
 #include <QPainter>
 #include <QPainterPath>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 OverlayTimer::OverlayTimer(int seconds, const QString& name, QObject *parent) :
     Overlay{name, parent},
@@ -14,22 +18,11 @@ OverlayTimer::OverlayTimer(int seconds, const QString& name, QObject *parent) :
 {
 }
 
-void OverlayTimer::inputXML(const QDomElement &element, bool isImport)
+void OverlayTimer::inputXML(const QDomElement &element)
 {
     setTimerValue(element.attribute(QString("seconds"), QString::number(0)).toInt());
 
-    Overlay::inputXML(element, isImport);
-}
-
-void OverlayTimer::copyValues(const CampaignObjectBase* other)
-{
-    const OverlayTimer* otherOverlayTimer = dynamic_cast<const OverlayTimer*>(other);
-    if(!otherOverlayTimer)
-        return;
-
-    _seconds = otherOverlayTimer->_seconds;
-
-    Overlay::copyValues(other);
+    Overlay::inputXML(element);
 }
 
 int OverlayTimer::getOverlayType() const
@@ -37,9 +30,63 @@ int OverlayTimer::getOverlayType() const
     return DMHelper::OverlayType_Timer;
 }
 
+QSize OverlayTimer::getSize() const
+{
+    return _timerPublishImage ? _timerPublishImage->getSize() : QSize();
+}
+
+void OverlayTimer::prepareFrame(OverlayFrame* frame)
+{
+    if((!frame) || (!frame->getLayout()))
+        return;
+
+    QLineEdit* edtTimerValue = new QLineEdit();
+    edtTimerValue->setText(QString::number(_seconds));
+    connect(edtTimerValue, &QLineEdit::textEdited, this, &OverlayTimer::setTimerString);
+    connect(this, &OverlayTimer::timerTick, edtTimerValue, [edtTimerValue](int seconds){ edtTimerValue->setText(QString::number(seconds)); });
+
+    QPushButton* btnStart = new QPushButton(QIcon(":/img/data/icon_play.png"), QString());
+    btnStart->setCheckable(true);
+    btnStart->setChecked(_timerId > 0);
+    connect(btnStart, &QPushButton::toggled, this, [this, btnStart](bool checked)
+    {
+        if(checked)
+        {
+            this->start();
+            btnStart->setIcon(QIcon(":/img/data/icon_stop.png"));
+        }
+        else
+        {
+            this->stop();
+            btnStart->setIcon(QIcon(":/img/data/icon_play.png"));
+        }
+    });
+    connect(this, &OverlayTimer::timerExpired, btnStart, [btnStart]()
+    {
+        btnStart->setChecked(false);
+        btnStart->setIcon(QIcon(":/img/data/icon_play.png"));
+    });
+
+    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, btnStart);
+    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, edtTimerValue);
+
+}
+
 int OverlayTimer::getTimerValue() const
 {
     return _seconds;
+}
+
+void OverlayTimer::setX(int x)
+{
+    if(_timerPublishImage)
+        _timerPublishImage->setX(static_cast<qreal>(x));
+}
+
+void OverlayTimer::setY(int y)
+{
+    if(_timerPublishImage)
+        _timerPublishImage->setY(static_cast<qreal>(y));
 }
 
 void OverlayTimer::setTimerValue(int seconds)
@@ -48,7 +95,15 @@ void OverlayTimer::setTimerValue(int seconds)
         return;
 
     _seconds = seconds;
-    emit triggerUpdate();
+    recreateContents();
+}
+
+void OverlayTimer::setTimerString(const QString& seconds)
+{
+    if(seconds.isEmpty())
+        return;
+
+    setTimerValue(seconds.toInt());
 }
 
 void OverlayTimer::toggle(bool play)
@@ -83,17 +138,23 @@ void OverlayTimer::timerEvent(QTimerEvent *event)
     if(_timerId == 0)
         return;
 
-    if(--_seconds <= 0)
-        stop();
+    --_seconds;
 
     updateContents();
+    emit timerTick(_seconds);
+
+    if(_seconds <= 0)
+    {
+        stop();
+        emit timerExpired();
+    }
 }
 
-void OverlayTimer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+void OverlayTimer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
 {
     element.setAttribute(QString("seconds"), QString::number(_seconds));
 
-    Overlay::internalOutputXML(doc, element, targetDirectory, isExport);
+    Overlay::internalOutputXML(doc, element, targetDirectory);
 }
 
 void OverlayTimer::doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix)
@@ -106,6 +167,18 @@ void OverlayTimer::doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int 
     DMH_DEBUG_OPENGL_glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _timerPublishImage->getMatrixData(), _timerPublishImage->getMatrix());
     functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _timerPublishImage->getMatrixData());
     _timerPublishImage->paintGL(functions, nullptr);
+}
+
+void OverlayTimer::doResizeGL(int w, int h)
+{
+    Q_UNUSED(w);
+
+    if(!_timerPublishImage)
+        return;
+
+    _timerPublishImage->setScale(static_cast<qreal>(h) * getScale() / static_cast<qreal>(_timerPublishImage->getImageSize().height()));
+//    _timerPublishImage->setX(static_cast<qreal>(w) - _timerPublishImage->getSize().width());
+//    _timerPublishImage->setY(static_cast<qreal>(h) - (_timerPublishImage->getSize().height() * 3));
 }
 
 void OverlayTimer::createContentsGL()
@@ -130,50 +203,37 @@ void OverlayTimer::updateContentsGL()
     _timerPublishImage->updateImage(_timerImage);
 }
 
-void OverlayTimer::updateContentsScale(int w, int h)
-{
-    if(!_timerPublishImage)
-        return;
-
-    qreal tokenHeight = static_cast<qreal>(h) / 10.0;
-    _timerPublishImage->setScale(tokenHeight / static_cast<qreal>(_timerPublishImage->getImageSize().height()));
-    _timerPublishImage->setX(static_cast<qreal>(w) - _timerPublishImage->getSize().width());
-    _timerPublishImage->setY(static_cast<qreal>(h) - (_timerPublishImage->getSize().height() * 3));
-}
-
 void OverlayTimer::createTimerImage()
 {
-    QFont f;
-    f.setPixelSize(256);
-    f.setStyleStrategy(QFont::ForceOutline);
-
     // Build text path at origin
-    QPainterPath path;
     QString timerString = QString::number(_seconds / 60) + QString(":");
     int modSeconds = _seconds % 60;
     if(modSeconds < 10)
         timerString += QString("0");
     timerString += QString::number(modSeconds);
-    path.addText(0, 0, f, timerString);
 
-    // Measure it
-    QRectF bounds = path.boundingRect();
+    QImage timerImageBorder(QString(":/img/data/icon_overlaytimerbackground.png"));
+
+    // Draw the number for the counter
+    QImage timerNumberImage = textToImage(timerString).scaledToWidth(static_cast<int>(static_cast<qreal>(timerImageBorder.width()) * 0.75), Qt::SmoothTransformation);
+    QPoint textLocation = QPoint((timerImageBorder.width() - timerNumberImage.width()) / 2,
+                                 (timerImageBorder.height() - timerNumberImage.height()) / 2);
 
     // Create an image just large enough
     if(_timerImage.isNull())
-        _timerImage = QImage(bounds.size().toSize().grownBy(QMargins(4, 4, 4, 4)), QImage::Format_ARGB32_Premultiplied);
+        _timerImage = QImage(timerImageBorder.size()/*.grownBy(QMargins(4, 4, 4, 4))*/, QImage::Format_ARGB32_Premultiplied);
+
     _timerImage.fill(Qt::transparent);
 
     // Prepare painter
     QPainter p(&_timerImage);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setPen(QPen(Qt::white, 5));
-    p.setBrush(QColor(115, 18, 0));
+        p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        p.drawImage(0, 0, timerImageBorder);
 
-    // Translate so that text fits fully inside the image (since bounds may start <0)
-    p.translate(-bounds.topLeft() + QPointF(2.f, 2.f));
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(Qt::white, 5));
+        p.setBrush(QColor(115, 18, 0));
+        p.drawImage(textLocation, timerNumberImage);
 
-    // Draw it
-    p.drawPath(path);
     p.end();
 }

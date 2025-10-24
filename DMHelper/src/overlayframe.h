@@ -8,6 +8,7 @@ class OverlayFrame;
 }
 
 class Overlay;
+class QHBoxLayout;
 
 class OverlayFrame : public QFrame
 {
@@ -20,7 +21,11 @@ public:
     Overlay* getOverlay() const;
     void setSelected(bool selected);
 
+    QHBoxLayout* getLayout() const;
+    static const int OVERLAY_FRAME_INSERT_POINT;
+
 protected slots:
+    void handleNameChanged();
     void handleOpacityChanged(int value);
     void handleScaleSliderChanged(int value);
     void handleScaleSpinChanged(qreal value);

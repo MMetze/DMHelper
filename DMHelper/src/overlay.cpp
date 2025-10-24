@@ -1,37 +1,47 @@
 #include "overlay.h"
 #include <QDomElement>
+#include <QImage>
+#include <QFont>
+#include <QPainter>
+#include <QPainterPath>
+#include <QDir>
+
+const qreal OVERLAY_WINDOW_SCALE = 0.1;
 
 Overlay::Overlay(const QString& name, QObject *parent) :
-    CampaignObjectBase{name, parent},
+    QObject{parent},
     _visible(true),
-    _scale(1.0),
+    _scale(OVERLAY_WINDOW_SCALE),
     _opacity(100),
     _campaign(nullptr),
     _recreateContents(false),
     _updateContents(false)
 {
+    setObjectName(name);
 }
 
-void Overlay::inputXML(const QDomElement &element, bool isImport)
+void Overlay::inputXML(const QDomElement &element)
 {
+    setObjectName(element.attribute(QString("name"), QString("Overlay")));
     setVisible(static_cast<bool>(element.attribute(QString("visible"), QString::number(1)).toInt()));
-    setScale(element.attribute(QString("scale"), QString::number(1.0, 'g', 1)).toDouble());
+    setScale(element.attribute(QString("scale"), QString::number(OVERLAY_WINDOW_SCALE, 'g', 1)).toDouble());
     setOpacity(element.attribute(QString("opacity"), QString::number(100)).toInt());
-
-    CampaignObjectBase::inputXML(element, isImport);
 }
 
-void Overlay::copyValues(const CampaignObjectBase* other)
+QDomElement Overlay::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
 {
-    const Overlay* otherOverlay = dynamic_cast<const Overlay*>(other);
-    if(!otherOverlay)
-        return;
+    QDomElement element = doc.createElement(QString("overlay"));
 
-    _visible = otherOverlay->_visible;
-    _scale = otherOverlay->_scale;
-    _opacity = otherOverlay->_opacity;
+    element.setAttribute(QString("name"), objectName());
+    element.setAttribute(QString("type"), getOverlayType());
+    element.setAttribute(QString("visible"), isVisible() ? 1 : 0);
+    element.setAttribute(QString("scale"), QString::number(getScale(), 'g', 1));
+    element.setAttribute(QString("opacity"), QString::number(getOpacity()));
 
-    CampaignObjectBase::copyValues(other);
+    internalOutputXML(doc, element, targetDirectory);
+
+    parent.appendChild(element);
+    return element;
 }
 
 bool Overlay::isInitialized() const
@@ -54,6 +64,11 @@ int Overlay::getOpacity() const
     return _opacity;
 }
 
+QSize Overlay::getSize() const
+{
+    return QSize();
+}
+
 void Overlay::setCampaign(Campaign* campaign)
 {
     doSetCampaign(campaign);
@@ -69,24 +84,27 @@ void Overlay::initializeGL()
 
 void Overlay::resizeGL(int w, int h)
 {
-    updateContentsScale(w, h);
     doResizeGL(w, h);
+    setX(w - getSize().width());
 }
 
-void Overlay::paintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix)
+void Overlay::paintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix, int yOffset)
 {
     if(_recreateContents)
     {
         createContentsGL();
-        updateContentsScale(targetSize.width(), targetSize.height());
+        doResizeGL(targetSize.width(), targetSize.height());
+        setX(targetSize.width() - getSize().width());
         _recreateContents = false;
         _updateContents = false;
     }
     else if(_updateContents)
     {
+        updateContentsGL();
         _updateContents = false;
     }
 
+    setY(targetSize.height() - getSize().height() - yOffset);
     doPaintGL(functions, targetSize, modelMatrix);
 }
 
@@ -129,18 +147,11 @@ void Overlay::setOpacity(int opacity)
     emit dirty();
 }
 
-QDomElement Overlay::createOutputXML(QDomDocument &doc)
+void Overlay::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
 {
-    return doc.createElement("overlay");
-}
-
-void Overlay::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
-{
-    element.setAttribute(QString("visible"), _visible);
-    element.setAttribute(QString("scale"), QString::number(_scale, 'g', 6));
-    element.setAttribute(QString("opacity"), _opacity);
-
-    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+    Q_UNUSED(doc);
+    Q_UNUSED(element);
+    Q_UNUSED(targetDirectory);
 }
 
 void Overlay::doSetCampaign(Campaign* campaign)
@@ -169,8 +180,36 @@ void Overlay::updateContentsGL()
 {
 }
 
-void Overlay::updateContentsScale(int w, int h)
+QImage Overlay::textToImage(const QString& text)
 {
-    Q_UNUSED(w);
-    Q_UNUSED(h);
+    QFont f;
+    f.setPixelSize(256);
+    f.setStyleStrategy(QFont::ForceOutline);
+
+    // Build text path at origin
+    QPainterPath path;
+    path.addText(0, 0, f, text);
+
+    // Measure it
+    QRectF bounds = path.boundingRect();
+
+    // Create an image just large enough
+    QImage resultImage(bounds.size().toSize().grownBy(QMargins(4, 4, 4, 4)), QImage::Format_ARGB32_Premultiplied);
+    resultImage.fill(Qt::transparent);
+
+    // Prepare painter
+    QPainter p(&resultImage);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(Qt::white, 5));
+        p.setBrush(QColor(115, 18, 0));
+
+        // Translate so that text fits fully inside the image (since bounds may start <0)
+        p.translate(-bounds.topLeft() + QPointF(2.f, 2.f));
+
+        // Draw it
+        p.drawPath(path);
+    p.end();
+
+    return resultImage;
 }
+

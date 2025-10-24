@@ -131,7 +131,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     }
 
     // Load the overlays
-    loadOverlayXML(element.firstChildElement(QString("overlays")), isImport);
+    loadOverlayXML(element.firstChildElement(QString("overlays")));
 
     // TODO: add back in some kind of object counting
     // Sum up all the elements loaded. The +2 is for the campaign object itself and the notes object
@@ -199,40 +199,6 @@ void Campaign::preloadRulesetXML(const QDomElement &element, bool isImport)
         _ruleset.inputXML(rulesetElement, isImport);
     else
         _ruleset.setValues(RuleFactory::Instance()->getRulesetTemplate(RuleFactory::DEFAULT_RULESET_NAME));
-}
-
-void Campaign::loadOverlayXML(const QDomElement &element, bool isImport)
-{
-    Q_UNUSED(isImport);
-
-    QDomElement overlayElement = element.firstChildElement(QString("overlay"));
-    while(!overlayElement.isNull())
-    {
-        int overlayType = overlayElement.attribute(QString("type")).toInt();
-        Overlay* overlay = nullptr;
-        switch(overlayType)
-        {
-        case DMHelper::OverlayType_Fear:
-            overlay = new OverlayFear();
-            break;
-        case DMHelper::OverlayType_Counter:
-            overlay = new OverlayCounter();
-            break;
-        case DMHelper::OverlayType_Timer:
-            overlay = new OverlayTimer();
-            break;
-        default:
-            break;
-        }
-
-        if(overlay)
-        {
-            overlay->inputXML(overlayElement, false);
-            addOverlay(overlay);
-        }
-
-        overlayElement = overlayElement.nextSiblingElement(QString("overlay"));
-    }
 }
 
 void Campaign::beginBatchChanges()
@@ -631,7 +597,7 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
         {
             if(overlay)
             {
-                QDomElement overlayElement = overlay->outputXML(doc, overlaysElement, targetDirectory, false);
+                QDomElement overlayElement = overlay->outputXML(doc, overlaysElement, targetDirectory);
                 if(!overlayElement.isNull())
                     overlaysElement.appendChild(overlayElement);
             }
@@ -668,6 +634,38 @@ void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
     }
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
+}
+
+void Campaign::loadOverlayXML(const QDomElement &element)
+{
+    QDomElement overlayElement = element.firstChildElement(QString("overlay"));
+    while(!overlayElement.isNull())
+    {
+        int overlayType = overlayElement.attribute(QString("type"), QString("-1")).toInt();
+        Overlay* overlay = nullptr;
+        switch(overlayType)
+        {
+        case DMHelper::OverlayType_Fear:
+            overlay = new OverlayFear();
+            break;
+        case DMHelper::OverlayType_Counter:
+            overlay = new OverlayCounter();
+            break;
+        case DMHelper::OverlayType_Timer:
+            overlay = new OverlayTimer();
+            break;
+        default:
+            break;
+        }
+
+        if(overlay)
+        {
+            overlay->inputXML(overlayElement);
+            addOverlay(overlay);
+        }
+
+        overlayElement = overlayElement.nextSiblingElement(QString("overlay"));
+    }
 }
 
 bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject, bool correctDuplicates)

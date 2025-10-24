@@ -20,6 +20,7 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
     connect(ui->btnYouTube, SIGNAL(clicked(bool)), this, SIGNAL(newYoutubeClicked()));
     connect(ui->btnRemove, SIGNAL(clicked(bool)), this, SIGNAL(removeItemClicked()));
     connect(ui->btnNotes, SIGNAL(clicked(bool)), this, SIGNAL(showNotesClicked()));
+    connect(ui->btnOverlays, SIGNAL(clicked(bool)), this, SIGNAL(showOverlaysClicked()));
     connect(ui->btnExportItem, SIGNAL(clicked(bool)), this, SIGNAL(exportItemClicked()));
     connect(ui->btnImportItem, SIGNAL(clicked(bool)), this, SIGNAL(importItemClicked()));
     connect(ui->btnImportCharacter, SIGNAL(clicked(bool)), this, SIGNAL(importCharacterClicked()));
@@ -62,6 +63,7 @@ void RibbonTabCampaign::setCampaignEnabled(bool enabled)
     ui->btnYouTube->setEnabled(enabled);
     ui->btnRemove->setEnabled(enabled);
     ui->btnNotes->setEnabled(enabled);
+    ui->btnOverlays->setEnabled(enabled);
     ui->btnExportItem->setEnabled(enabled);
     ui->btnImportItem->setEnabled(enabled);
     ui->btnImportCharacter->setEnabled(enabled);
@@ -101,6 +103,7 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblRemove, *ui->btnRemove, frameHeight);
     setLineHeight(*ui->line, frameHeight);
     setStandardButtonSize(*ui->lblNotes, *ui->btnNotes, frameHeight);
+    setStandardButtonSize(*ui->lblOverlays, *ui->btnOverlays, frameHeight);
     setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblExportItem, *ui->btnExportItem, frameHeight);
     setStandardButtonSize(*ui->lblImportItem, *ui->btnImportItem, frameHeight);

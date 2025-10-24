@@ -14,33 +14,43 @@ class OverlayTimer : public Overlay
 public:
     explicit OverlayTimer(int seconds = 0, const QString& name = QString("Timer"), QObject *parent = nullptr);
 
-    // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void copyValues(const CampaignObjectBase* other) override;
-
+    // From Overlay
+    virtual void inputXML(const QDomElement &element) override;
     virtual int getOverlayType() const override;
+    virtual QSize getSize() const override;
+    virtual void prepareFrame(OverlayFrame* frame) override;
 
+    // Local Interface
     virtual int getTimerValue() const;
 
 public slots:
+    // From Overlay
+    virtual void setX(int x) override;
+    virtual void setY(int y) override;
+
+    // Local Interface
     virtual void setTimerValue(int seconds);
+    virtual void setTimerString(const QString& seconds);
     virtual void toggle(bool play);
     virtual void start();
     virtual void stop();
+
+signals:
+    void timerTick(int seconds);
+    void timerExpired();
 
 protected:
     // From QObject
     virtual void timerEvent(QTimerEvent *event) override;
 
-    // From CampaignObjectBase
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
-
+    // From Overlay
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) override;
     virtual void doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix) override;
-
+    virtual void doResizeGL(int w, int h) override;
     virtual void createContentsGL() override;
     virtual void updateContentsGL() override;
-    virtual void updateContentsScale(int w, int h) override;
 
+    // Local Interface
     void createTimerImage();
 
     PublishGLImage* _timerPublishImage;

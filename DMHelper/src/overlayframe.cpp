@@ -4,7 +4,10 @@
 #include "overlaycounter.h"
 #include "overlaytimer.h"
 #include "dmconstants.h"
+#include <QHBoxLayout>
 #include <QDebug>
+
+const int OverlayFrame::OVERLAY_FRAME_INSERT_POINT = 3;
 
 OverlayFrame::OverlayFrame(Overlay* overlay, QWidget *parent) :
     QFrame(parent),
@@ -35,18 +38,22 @@ OverlayFrame::OverlayFrame(Overlay* overlay, QWidget *parent) :
             break;
     }
 
+    ui->edtName->setText(_overlay->objectName());
     ui->chkVisible->setChecked(_overlay->isVisible());
+    connect(ui->edtName, &QLineEdit::editingFinished, this, &OverlayFrame::handleNameChanged);
+    connect(ui->chkVisible, &QCheckBox::toggled, _overlay, &Overlay::setVisible);
+
+    _overlay->prepareFrame(this);
+
+    // TEMP TEMP TEMP - remove these programmatically
     ui->spinScale->setValue(_overlay->getScale());
     ui->sliderScale->setValue(static_cast<int>(_overlay->getScale() * 10.0));
     ui->spinOpacity->setValue(_overlay->getOpacity());
     ui->sliderOpacity->setValue(_overlay->getOpacity());
-
-    connect(ui->chkVisible, &QCheckBox::toggled, _overlay, &Overlay::setVisible);
     connect(ui->sliderOpacity, &QSlider::valueChanged, this, &OverlayFrame::handleOpacityChanged);
     connect(ui->spinOpacity, qOverload<int>(&QSpinBox::valueChanged), this, &OverlayFrame::handleOpacityChanged);
     connect(ui->sliderScale, &QSlider::valueChanged, this, &OverlayFrame::handleScaleSliderChanged);
     connect(ui->spinScale, qOverload<qreal>(&QDoubleSpinBox::valueChanged), this, &OverlayFrame::handleScaleSpinChanged);
-
     int overlayType = _overlay->getOverlayType();
     ui->btnIncrease->setEnabled(overlayType == DMHelper::OverlayType_Counter);
     ui->btnDecrease->setEnabled(overlayType == DMHelper::OverlayType_Counter);
@@ -55,12 +62,24 @@ OverlayFrame::OverlayFrame(Overlay* overlay, QWidget *parent) :
         connect(ui->btnIncrease, &QPushButton::clicked, static_cast<OverlayCounter*>(_overlay), &OverlayCounter::increase);
         connect(ui->btnDecrease, &QPushButton::clicked, static_cast<OverlayCounter*>(_overlay), &OverlayCounter::decrease);
     }
-
     ui->btnPlay->setEnabled(overlayType == DMHelper::OverlayType_Timer);
     if(overlayType == DMHelper::OverlayType_Timer)
     {
         connect(ui->btnPlay, &QPushButton::toggled, static_cast<OverlayTimer*>(_overlay), &OverlayTimer::toggle);
     }
+
+    // TEMP TEMP TEMP - remove these programmatically
+    ui->btnPlay->hide();
+    ui->btnIncrease->hide();
+    ui->btnDecrease->hide();
+    ui->lblScale->hide();
+    ui->lblOpacity->hide();
+    ui->sliderScale->hide();
+    ui->sliderOpacity->hide();
+    ui->spinOpacity->hide();
+    ui->spinScale->hide();
+    ui->btnSettings->hide();
+
 }
 
 OverlayFrame::~OverlayFrame()
@@ -76,6 +95,17 @@ Overlay* OverlayFrame::getOverlay() const
 void OverlayFrame::setSelected(bool selected)
 {
     setStyleSheet(getStyleString(selected));
+}
+
+QHBoxLayout* OverlayFrame::getLayout() const
+{
+    return dynamic_cast<QHBoxLayout*>(layout());
+}
+
+void OverlayFrame::handleNameChanged()
+{
+    if((_overlay) && (!ui->edtName->text().isEmpty()) && (_overlay->objectName() != ui->edtName->text()))
+        _overlay->setObjectName(ui->edtName->text());
 }
 
 void OverlayFrame::handleOpacityChanged(int value)
@@ -115,7 +145,7 @@ void OverlayFrame::handleScaleSpinChanged(qreal value)
 QString OverlayFrame::getStyleString(bool selected)
 {
     if(selected)
-        return QString("LayerFrame{ background-color: rgb(64, 64, 64); }");
+        return QString("OverlayFrame{ background-color: rgb(64, 64, 64); }");
     else
-        return QString("LayerFrame{ background-color: none; }");
+        return QString("OverlayFrame{ background-color: none; }");
 }

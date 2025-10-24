@@ -12,27 +12,32 @@ class OverlayCounter : public Overlay
 public:
     explicit OverlayCounter(int counter = 0, const QString& name = QString("Counter"), QObject *parent = nullptr);
 
-    // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void copyValues(const CampaignObjectBase* other) override;
-
+    // From Overlay
+    virtual void inputXML(const QDomElement &element) override;
     virtual int getOverlayType() const override;
+    virtual QSize getSize() const override;
+    virtual void prepareFrame(OverlayFrame* frame) override;
 
+    // Local Interface
     virtual int getCounterValue() const;
 
 public slots:
+    // From Overlay
+    virtual void setX(int x) override;
+    virtual void setY(int y) override;
+
+    // Local Interface
     virtual void setCounterValue(int value);
+    virtual void setCounterString(const QString& valueString);
     virtual void increase();
     virtual void decrease();
 
 protected:
-    // From CampaignObjectBase
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
-
+    // From Overlay
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) override;
     virtual void doPaintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix) override;
-
+    virtual void doResizeGL(int w, int h) override;
     virtual void createContentsGL() override;
-    virtual void updateContentsScale(int w, int h) override;
 
     PublishGLImage* _counterImage;
     int _counter;

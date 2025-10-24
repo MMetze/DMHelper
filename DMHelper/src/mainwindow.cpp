@@ -92,6 +92,7 @@
 #include "newentrydialog.h"
 #include "overlaymanager.h"
 #include "overlayfear.h"
+#include "overlayseditdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -342,6 +343,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
+    connect(_ribbonTabCampaign, SIGNAL(showOverlaysClicked()), this, SLOT(showOverlays()));
     QShortcut* notesShortcut = new QShortcut(QKeySequence(tr("Ctrl+Alt+N", "Add Note")), this);
     connect(notesShortcut, SIGNAL(activated()), this, SLOT(addNote()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
@@ -837,9 +839,7 @@ void MainWindow::newCampaign()
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
 
         if(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive))
-        {
             _campaign->addOverlay(new OverlayFear());
-        }
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -1169,6 +1169,20 @@ void MainWindow::addNote()
     QString newNote = inputDlg.textValue();
     if(!newNote.isEmpty())
         _campaign->addNote(newNote);
+}
+
+void MainWindow::showOverlays()
+{
+    if(!_campaign)
+        return;
+
+    OverlaysEditDialog* dlg = new OverlaysEditDialog(*_campaign, this);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg->resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->open();
 }
 
 void MainWindow::editCurrentItem()
@@ -1950,6 +1964,9 @@ void MainWindow::writeSpellbook()
 
 CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterType, const QString& filename, CampaignObjectBase* targetObject)
 {
+    if(!_campaign)
+        return nullptr;
+
     NewEntryDialog dlg(_campaign, _options, ui->treeView->currentCampaignObject(), this);
     dlg.setEntryType(encounterType, filename);
     if(dlg.exec() != QDialog::Accepted)

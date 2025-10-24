@@ -167,7 +167,9 @@ void OverlayManager::resizeGL(int w, int h)
         for(Overlay* overlay : _campaign->getOverlays())
         {
             if(overlay)
+            {
                 overlay->resizeGL(w, h);
+            }
         }
     }
 }
@@ -184,16 +186,20 @@ void OverlayManager::paintGL()
     DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     f->glUseProgram(_shaderProgramRGB);
 
+    int yOffset = 0;
+
     for(Overlay* overlay : _campaign->getOverlays())
     {
         if(overlay)
         {
             if(!overlay->isInitialized())
             {
+                connect(overlay, &Overlay::triggerUpdate, this, &OverlayManager::updateWindow);
                 overlay->initializeGL();
                 overlay->resizeGL(_targetSize.width(), _targetSize.height());
             }
-            overlay->paintGL(f, _targetSize, _shaderModelMatrixRGB);
+            overlay->paintGL(f, _targetSize, _shaderModelMatrixRGB, yOffset);
+            yOffset += overlay->getSize().height();
         }
     }
 }

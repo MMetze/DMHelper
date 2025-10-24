@@ -97,6 +97,7 @@ public slots:
     void removeCurrentItem();
     void showNotes();
     void addNote();
+    void showOverlays();
     void editCurrentItem();
     void setCurrentItemIcon();
     void clearCurrentItemIcon();
