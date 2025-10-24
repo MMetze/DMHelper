@@ -270,7 +270,6 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
     }
 
     setBattle(battle);
-
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
     _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());

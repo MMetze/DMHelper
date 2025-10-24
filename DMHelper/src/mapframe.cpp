@@ -96,7 +96,6 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
 
     setMap(map);
     connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
-
     rendererActivated(dynamic_cast<PublishGLMapRenderer*>(currentRenderer));
 
     _isPublishing = (currentRenderer) && (_mapSource) && (currentRenderer->getObject() == _mapSource);

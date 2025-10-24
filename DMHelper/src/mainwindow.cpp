@@ -17,7 +17,6 @@
 #include "combatantfactory.h"
 #include "campaignobjectfactory.h"
 #include "map.h"
-#include "mapfactory.h"
 #include "mapframe.h"
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
@@ -25,7 +24,6 @@
 #include "monsterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
-#include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "campaignobjectframe.h"
 #include "campaigntreemodel.h"
@@ -48,7 +46,7 @@
 #include "dmscreentabwidget.h"
 #include "timeanddateframe.h"
 #include "audiotrackedit.h"
-#include "audioplayer.h"
+#include "audiotrack.h"
 #include "basicdateserver.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
@@ -80,15 +78,11 @@
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
 #include "layerimage.h"
-#include "layerfow.h"
 #include "layervideo.h"
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
-#include "layerblank.h"
 #include "mapselectdialog.h"
-#include "mapblankdialog.h"
-#include "battledialogmodelcharacter.h"
 #include "newentrydialog.h"
 #include "overlaymanager.h"
 #include "overlayfear.h"
@@ -671,8 +665,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), _mapFrame, SLOT(publishWindowMouseDown(const QPointF&)));
     connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
     connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
-
-    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
 
     // Connect the battle view ribbon to the battle frame and map frame
     connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
@@ -1631,6 +1623,8 @@ void MainWindow::setupRibbonBar()
     connect(_ribbon->getPublishRibbon(), SIGNAL(playersWindowClicked(bool)), this, SLOT(showPublishWindow(bool)));
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
     connect(publishShortcut, SIGNAL(activated()), _ribbon, SLOT(clickPublish()));
+
+    connect(_ribbon, &QTabWidget::currentChanged, this, &MainWindow::cancelSelect);
 
     _ribbon->setCurrentIndex(0);
     setMenuWidget(_ribbon);
