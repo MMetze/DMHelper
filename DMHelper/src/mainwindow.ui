@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>669</width>
-    <height>439</height>
+    <width>695</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,9 +40,9 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0,0">
         <property name="spacing">
-         <number>3</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="CampaignTree" name="treeView">
@@ -175,6 +175,52 @@
          </layout>
         </item>
         <item>
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::HLine</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <layout class="QVBoxLayout" name="dividerLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QToolButton" name="btnCollapse">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>10</width>
+               <height>10</height>
+              </size>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+             <property name="arrowType">
+              <enum>Qt::UpArrow</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="FearFrame" name="frameFear">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
@@ -218,7 +264,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>669</width>
+     <width>695</width>
      <height>21</height>
     </rect>
    </property>

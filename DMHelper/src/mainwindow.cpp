@@ -276,6 +276,11 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     setupRibbonBar();
 
+    ui->dividerLayout->setContentsMargins(0, 0, 0, 0);
+    ui->dividerLayout->setAlignment(Qt::AlignCenter);
+    ui->btnCollapse->setArrowType(Qt::DownArrow);
+    connect(ui->btnCollapse, &QToolButton::clicked, this, &MainWindow::toggleOverlayFrame);
+
     // Set the MRU menu to the created menu bar
     mruHandler->setActionsMenu(_ribbonTabFile->getMRUMenu());
 
@@ -2379,6 +2384,13 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
         contextMenu->addSeparator();
     }
 
+    if((campaignObject->getObjectType() == DMHelper::CampaignType_Text) || (campaignObject->getObjectType() == DMHelper::CampaignType_LinkedText))
+    {
+        QAction* previewWindowItem = new QAction(QIcon(":/img/data/icon_preview.png"), QString("Preview Item..."));
+        connect(previewWindowItem, SIGNAL(triggered()), this, SLOT(previewCurrentTextEntry()));
+        contextMenu->addAction(previewWindowItem);
+    }
+
     QAction* exportItem = new QAction(QIcon(":/img/data/icon_exportitem.png"), QString("Export Item..."));
     connect(exportItem, SIGNAL(triggered()), this, SLOT(exportCurrentItem()));
     contextMenu->addAction(exportItem);
@@ -2616,6 +2628,39 @@ void MainWindow::handleAnimationStarted()
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
 }
 
+void MainWindow::previewCurrentTextEntry()
+{
+    if(!_treeModel)
+        return;
+
+    QModelIndex index = ui->treeView->currentIndex();
+    if(!index.isValid())
+        return;
+
+    CampaignTreeItem* campaignItem = _treeModel->campaignItemFromIndex(index);
+    if(!campaignItem)
+        return;
+
+    EncounterText* encounter = dynamic_cast<EncounterText*>(campaignItem->getCampaignItemObject());
+    if(!encounter)
+        return;
+
+    QDialog* previewDialog = new QDialog(this);
+    EncounterTextEdit* editWidget = new EncounterTextEdit();
+    editWidget->activateObject(encounter, nullptr);
+    QVBoxLayout *layout = new QVBoxLayout(previewDialog);
+    layout->addWidget(editWidget);
+
+    previewDialog->setWindowTitle(QString("Entry Preview: ") + encounter->getName());
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        previewDialog->resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+    else
+        previewDialog->resize(600, 400);
+    previewDialog->setAttribute(Qt::WA_DeleteOnClose);
+    previewDialog->show();
+}
+
 bool MainWindow::selectItemFromStack(const QUuid& itemId)
 {
     if((!_treeModel) || (itemId.isNull()))
@@ -2782,6 +2827,12 @@ void MainWindow::exportSpellbook()
 void MainWindow::importSpellbook()
 {
     // TODO: add import/export for spells
+}
+
+void MainWindow::toggleOverlayFrame()
+{
+    ui->frameFear->setVisible(!ui->frameFear->isVisible());
+    ui->btnCollapse->setArrowType(ui->frameFear->isVisible() ? Qt::DownArrow : Qt::UpArrow);
 }
 
 void MainWindow::openAboutDialog()

@@ -190,6 +190,7 @@ protected slots:
     void handleAutoSaveChanged();
     void handleAnimationStarted();
 
+    void previewCurrentTextEntry();
     bool selectItemFromStack(const QUuid& itemId);
 
     // Bestiary
@@ -203,6 +204,9 @@ protected slots:
     void openSpellbook();
     void exportSpellbook();
     void importSpellbook();
+
+    // Overlays
+    void toggleOverlayFrame();
 
     void openAboutDialog();
     void openHelpDialog();
