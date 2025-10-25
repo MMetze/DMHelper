@@ -2,9 +2,12 @@
 #include "publishglimage.h"
 #include "campaign.h"
 #include "dmconstants.h"
+#include "overlayframe.h"
+#include "fearframe.h"
 #include <QImage>
 #include <QPainter>
 #include <QPainterPath>
+#include <QHBoxLayout>
 
 OverlayFear::OverlayFear(const QString& name, QObject *parent) :
     Overlay{name, parent},
@@ -19,7 +22,13 @@ int OverlayFear::getOverlayType() const
 
 void OverlayFear::prepareFrame(OverlayFrame* frame)
 {
-    Q_UNUSED(frame);
+    if(!_campaign)
+        return;
+
+    FearFrame* fearFrame = new FearFrame();
+    fearFrame->setCampaign(_campaign);
+
+    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, fearFrame);
 }
 
 QSize OverlayFear::getSize() const

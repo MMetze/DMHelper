@@ -8,7 +8,7 @@ class FearFrame;
 }
 
 class Campaign;
-class QPushButton;
+class QToolButton;
 
 class FearFrame : public QFrame
 {
@@ -22,14 +22,14 @@ public:
 
 protected slots:
     void buttonClicked();
+    void setFear(int fear);
 
 private:
-    void setFear(int fear);
 
     Ui::FearFrame *ui;
 
     Campaign* _campaign;
-    QMap<int, QPushButton*> _buttonMap;
+    QMap<int, QToolButton*> _buttonMap;
     QIcon _fearOff;
     QIcon _fearOn;
 };
