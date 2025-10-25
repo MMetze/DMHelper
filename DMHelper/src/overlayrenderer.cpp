@@ -1,4 +1,4 @@
-#include "overlaymanager.h"
+#include "overlayrenderer.h"
 #include "overlay.h"
 #include "campaign.h"
 #include "dmh_opengl.h"
@@ -8,7 +8,7 @@
 #include <QDir>
 #include <QDebug>
 
-OverlayManager::OverlayManager(Campaign* campaign, QObject* parent) :
+OverlayRenderer::OverlayRenderer(Campaign* campaign, QObject* parent) :
     QObject(parent),
     _campaign(campaign),
     _targetSize(),
@@ -18,16 +18,16 @@ OverlayManager::OverlayManager(Campaign* campaign, QObject* parent) :
 {
 }
 
-OverlayManager::~OverlayManager()
+OverlayRenderer::~OverlayRenderer()
 {
 }
 
-Campaign* OverlayManager::getCampaign() const
+Campaign* OverlayRenderer::getCampaign() const
 {
     return _campaign;
 }
 
-void OverlayManager::setCampaign(Campaign* campaign)
+void OverlayRenderer::setCampaign(Campaign* campaign)
 {
     if(_campaign == campaign)
         return;
@@ -36,9 +36,9 @@ void OverlayManager::setCampaign(Campaign* campaign)
     emit updateWindow();
 }
 
-void OverlayManager::initializeGL()
+void OverlayRenderer::initializeGL()
 {
-    qDebug() << "[OverlayManager] initializing overlay GL";
+    qDebug() << "[OverlayRenderer] initializing overlay GL";
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 
@@ -70,7 +70,7 @@ void OverlayManager::initializeGL()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShaderRGB, 512, NULL, infoLog);
-        qDebug() << "[OverlayManager] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[OverlayRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -93,7 +93,7 @@ void OverlayManager::initializeGL()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShaderRGB, 512, NULL, infoLog);
-        qDebug() << "[OverlayManager] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[OverlayRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -108,7 +108,7 @@ void OverlayManager::initializeGL()
     if(!success)
     {
         f->glGetProgramInfoLog(_shaderProgramRGB, 512, NULL, infoLog);
-        qDebug() << "[OverlayManager] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[OverlayRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -135,14 +135,14 @@ void OverlayManager::initializeGL()
         {
             if(overlay)
             {
-                connect(overlay, &Overlay::triggerUpdate, this, &OverlayManager::updateWindow);
+                connect(overlay, &Overlay::triggerUpdate, this, &OverlayRenderer::updateWindow);
                 overlay->initializeGL();
             }
         }
     }
 }
 
-void OverlayManager::resizeGL(int w, int h)
+void OverlayRenderer::resizeGL(int w, int h)
 {
     if(_targetSize == QSize(w, h))
         return;
@@ -174,7 +174,7 @@ void OverlayManager::resizeGL(int w, int h)
     }
 }
 
-void OverlayManager::paintGL()
+void OverlayRenderer::paintGL()
 {
     if((!_shaderProgramRGB) || (_targetSize.isNull()) || (!_campaign) || (_campaign->getOverlays().isEmpty()))
         return;
@@ -194,12 +194,15 @@ void OverlayManager::paintGL()
         {
             if(!overlay->isInitialized())
             {
-                connect(overlay, &Overlay::triggerUpdate, this, &OverlayManager::updateWindow);
+                connect(overlay, &Overlay::triggerUpdate, this, &OverlayRenderer::updateWindow);
                 overlay->initializeGL();
                 overlay->resizeGL(_targetSize.width(), _targetSize.height());
             }
-            overlay->paintGL(f, _targetSize, _shaderModelMatrixRGB, yOffset);
-            yOffset += overlay->getSize().height();
+            if(overlay->isVisible())
+            {
+                overlay->paintGL(f, _targetSize, _shaderModelMatrixRGB, yOffset);
+                yOffset += overlay->getSize().height();
+            }
         }
     }
 }

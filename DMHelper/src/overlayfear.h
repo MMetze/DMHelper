@@ -15,7 +15,7 @@ public:
     // From Overlay
     virtual int getOverlayType() const override;
     virtual QSize getSize() const override;
-    virtual void prepareFrame(OverlayFrame* frame) override;
+    virtual void prepareFrame(QBoxLayout* frameLayout, int insertIndex) override;
 
 public slots:
     // From Overlay

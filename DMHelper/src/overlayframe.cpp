@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 #include <QDebug>
 
-const int OverlayFrame::OVERLAY_FRAME_INSERT_POINT = 3;
+const int OVERLAY_FRAME_INSERT_POINT = 3;
 
 OverlayFrame::OverlayFrame(Overlay* overlay, QWidget *parent) :
     QFrame(parent),
@@ -43,7 +43,7 @@ OverlayFrame::OverlayFrame(Overlay* overlay, QWidget *parent) :
     connect(ui->edtName, &QLineEdit::editingFinished, this, &OverlayFrame::handleNameChanged);
     connect(ui->chkVisible, &QCheckBox::toggled, _overlay, &Overlay::setVisible);
 
-    _overlay->prepareFrame(this);
+    _overlay->prepareFrame(dynamic_cast<QBoxLayout*>(layout()), OVERLAY_FRAME_INSERT_POINT);
 
     // TEMP TEMP TEMP - remove these programmatically
     ui->spinScale->setValue(_overlay->getScale());

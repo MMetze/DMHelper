@@ -99,6 +99,10 @@ void OverlaysEditDialog::handleDeleteOverlay()
             child->widget()->deleteLater();
         delete child;
     }
+
+    _selectedFrame = nullptr;
+    if(_overlayLayout->count() > 0)
+        selectFrame(static_cast<OverlayFrame*>(_overlayLayout->itemAt(0)->widget()));
 }
 
 void OverlaysEditDialog::handleMoveOverlayUp()

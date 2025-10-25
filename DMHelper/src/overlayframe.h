@@ -22,7 +22,6 @@ public:
     void setSelected(bool selected);
 
     QHBoxLayout* getLayout() const;
-    static const int OVERLAY_FRAME_INSERT_POINT;
 
 protected slots:
     void handleNameChanged();

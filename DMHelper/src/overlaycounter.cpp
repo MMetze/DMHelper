@@ -33,14 +33,16 @@ QSize OverlayCounter::getSize() const
     return _counterImage ? _counterImage->getSize() : QSize();
 }
 
-void OverlayCounter::prepareFrame(OverlayFrame* frame)
+void OverlayCounter::prepareFrame(QBoxLayout* frameLayout, int insertIndex)
 {
-    if((!frame) || (!frame->getLayout()))
+    if(!frameLayout)
         return;
 
     QLineEdit* edtCounter = new QLineEdit();
     edtCounter->setText(QString::number(_counter));
+    edtCounter->setStyleSheet("font-weight: bold; font-size: 14pt;");
     connect(edtCounter, &QLineEdit::textEdited, this, &OverlayCounter::setCounterString);
+    connect(this, &OverlayCounter::counterChanged, edtCounter, &QLineEdit::setText);
 
     QVBoxLayout* upDownLayout = new QVBoxLayout();
     upDownLayout->setSpacing(0);
@@ -51,8 +53,8 @@ void OverlayCounter::prepareFrame(OverlayFrame* frame)
     connect(btnDown, &QPushButton::clicked, [this, edtCounter](){ this->decrease(); edtCounter->setText(QString::number(this->_counter)); } );
     upDownLayout->addWidget(btnDown);
 
-    frame->getLayout()->insertLayout(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, upDownLayout);
-    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, edtCounter);
+    frameLayout->insertLayout(insertIndex, upDownLayout);
+    frameLayout->insertWidget(insertIndex, edtCounter);
 }
 
 int OverlayCounter::getCounterValue() const
@@ -79,6 +81,7 @@ void OverlayCounter::setCounterValue(int value)
 
     _counter = value;
     recreateContents();
+    emit counterChanged(QString::number(_counter));
 }
 
 void OverlayCounter::setCounterString(const QString& valueString)
@@ -88,13 +91,13 @@ void OverlayCounter::setCounterString(const QString& valueString)
 
 void OverlayCounter::increase()
 {
-    ++_counter;
+    setCounterValue(getCounterValue() + 1);
     recreateContents();
 }
 
 void OverlayCounter::decrease()
 {
-    --_counter;
+    setCounterValue(getCounterValue() - 1);
     recreateContents();
 }
 

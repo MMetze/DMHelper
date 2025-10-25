@@ -37,9 +37,9 @@ PublishGLRenderer* PublishWindow::getRenderer() const
     return _publishFrame ? _publishFrame->getRenderer() : nullptr;
 }
 
-OverlayManager* PublishWindow::getOverlayManager() const
+OverlayRenderer* PublishWindow::getOverlayRenderer() const
 {
-    return _publishFrame ? _publishFrame->getOverlayManager() : nullptr;
+    return _publishFrame ? _publishFrame->getOverlayRenderer() : nullptr;
 }
 
 void PublishWindow::setImage(QImage img)

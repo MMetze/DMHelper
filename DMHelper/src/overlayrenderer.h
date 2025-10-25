@@ -1,5 +1,5 @@
-#ifndef OVERLAYMANAGER_H
-#define OVERLAYMANAGER_H
+#ifndef OVERLAYRENDERER_H
+#define OVERLAYRENDERER_H
 
 #include <QObject>
 #include <QSize>
@@ -11,12 +11,12 @@ class QDomElement;
 class QDomDocument;
 class QDir;
 
-class OverlayManager : public QObject
+class OverlayRenderer : public QObject
 {
     Q_OBJECT
 public:
-    OverlayManager(Campaign* campaign, QObject* parent = nullptr);
-    virtual ~OverlayManager() override;
+    OverlayRenderer(Campaign* campaign, QObject* parent = nullptr);
+    virtual ~OverlayRenderer() override;
 
     void setCampaign(Campaign* camapaign);
     Campaign* getCampaign() const;
@@ -37,4 +37,4 @@ private:
     int _shaderProjectionMatrixRGB;
 };
 
-#endif // OVERLAYMANAGER_H
+#endif // OVERLAYRENDERER_H

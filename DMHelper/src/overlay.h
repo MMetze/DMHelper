@@ -6,7 +6,7 @@
 #include <QOpenGLFunctions>
 
 class Campaign;
-class OverlayFrame;
+class QBoxLayout;
 class QDomElement;
 class QDomDocument;
 class QDir;
@@ -34,7 +34,7 @@ public:
     void resizeGL(int w, int h);
     void paintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix, int yOffset);
 
-    virtual void prepareFrame(OverlayFrame* frame) = 0;
+    virtual void prepareFrame(QBoxLayout* frameLayout, int insertIndex) = 0;
 
 public slots:
     virtual void recreateContents();

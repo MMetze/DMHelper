@@ -1898,7 +1898,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 
 void BattleFrame::resizeEvent(QResizeEvent *event)
 {
-    qDebug() << "[Battle Frame] resized: " << event->size().width() << "x" << event->size().height();
     if(_model)
     {
         if(!_model->getMapRect().isValid())

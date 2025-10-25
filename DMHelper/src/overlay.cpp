@@ -127,6 +127,7 @@ void Overlay::setVisible(bool visible)
 
     _visible = visible;
     emit dirty();
+    emit triggerUpdate();
 }
 
 void Overlay::setScale(qreal scale)

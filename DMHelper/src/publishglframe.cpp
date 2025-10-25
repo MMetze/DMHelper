@@ -11,9 +11,9 @@ PublishGLFrame::PublishGLFrame(QWidget *parent) :
     _initialized(false),
     _targetSize(),
     _renderer(nullptr),
-    _overlayManager(new OverlayManager(nullptr, this))
+    _overlayRenderer(new OverlayRenderer(nullptr, this))
 {
-    connect(_overlayManager, &OverlayManager::updateWindow, this, &PublishGLFrame::updateWidget);
+    connect(_overlayRenderer, &OverlayRenderer::updateWindow, this, &PublishGLFrame::updateWidget);
 }
 
 PublishGLFrame::~PublishGLFrame()
@@ -32,9 +32,9 @@ PublishGLRenderer* PublishGLFrame::getRenderer() const
     return _renderer;
 }
 
-OverlayManager* PublishGLFrame::getOverlayManager() const
+OverlayRenderer* PublishGLFrame::getOverlayRenderer() const
 {
-    return _overlayManager;
+    return _overlayRenderer;
 }
 
 void PublishGLFrame::cleanup()
@@ -165,7 +165,7 @@ void PublishGLFrame::initializeGL()
         qDebug() << "[PublishGLFrame]     Max Texture Size:" << maxTextureSize;
     }
 
-    _overlayManager->initializeGL();
+    _overlayRenderer->initializeGL();
 
     QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
 
@@ -184,7 +184,7 @@ void PublishGLFrame::resizeGL(int w, int h)
     if(_renderer)
         _renderer->resizeGL(w, h);
 
-    _overlayManager->resizeGL(w, h);
+    _overlayRenderer->resizeGL(w, h);
 
     emit labelResized(_targetSize);
     emit frameResized(_targetSize);
@@ -198,8 +198,8 @@ void PublishGLFrame::paintGL()
         _renderer->paintGL();
     }
 
-    if(_overlayManager)
-        _overlayManager->paintGL();
+    if(_overlayRenderer)
+        _overlayRenderer->paintGL();
 }
 
 bool PublishGLFrame::convertMousePosition(QMouseEvent& event, const QRect& scissorRect, QPointF& result)

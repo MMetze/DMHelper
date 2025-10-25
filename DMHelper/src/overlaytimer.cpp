@@ -35,40 +35,32 @@ QSize OverlayTimer::getSize() const
     return _timerPublishImage ? _timerPublishImage->getSize() : QSize();
 }
 
-void OverlayTimer::prepareFrame(OverlayFrame* frame)
+void OverlayTimer::prepareFrame(QBoxLayout* frameLayout, int insertIndex)
 {
-    if((!frame) || (!frame->getLayout()))
+    if(!frameLayout)
         return;
 
     QLineEdit* edtTimerValue = new QLineEdit();
     edtTimerValue->setText(QString::number(_seconds));
+    edtTimerValue->setStyleSheet("font-weight: bold; font-size: 14pt;");
     connect(edtTimerValue, &QLineEdit::textEdited, this, &OverlayTimer::setTimerString);
-    connect(this, &OverlayTimer::timerTick, edtTimerValue, [edtTimerValue](int seconds){ edtTimerValue->setText(QString::number(seconds)); });
+    connect(this, &OverlayTimer::timerValueChanged, edtTimerValue, [edtTimerValue](int seconds){ edtTimerValue->setText(QString::number(seconds)); });
 
     QPushButton* btnStart = new QPushButton(QIcon(":/img/data/icon_play.png"), QString());
     btnStart->setCheckable(true);
     btnStart->setChecked(_timerId > 0);
-    connect(btnStart, &QPushButton::toggled, this, [this, btnStart](bool checked)
+    connect(btnStart, &QPushButton::toggled, this, &OverlayTimer::toggle);
+    connect(this, &OverlayTimer::timerStatusChanged, btnStart, [btnStart](bool running)
     {
-        if(checked)
-        {
-            this->start();
+        btnStart->setChecked(running);
+        if(running)
             btnStart->setIcon(QIcon(":/img/data/icon_stop.png"));
-        }
         else
-        {
-            this->stop();
             btnStart->setIcon(QIcon(":/img/data/icon_play.png"));
-        }
-    });
-    connect(this, &OverlayTimer::timerExpired, btnStart, [btnStart]()
-    {
-        btnStart->setChecked(false);
-        btnStart->setIcon(QIcon(":/img/data/icon_play.png"));
     });
 
-    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, btnStart);
-    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, edtTimerValue);
+    frameLayout->insertWidget(insertIndex, btnStart);
+    frameLayout->insertWidget(insertIndex, edtTimerValue);
 
 }
 
@@ -96,6 +88,7 @@ void OverlayTimer::setTimerValue(int seconds)
 
     _seconds = seconds;
     recreateContents();
+    emit timerValueChanged(_seconds);
 }
 
 void OverlayTimer::setTimerString(const QString& seconds)
@@ -120,6 +113,7 @@ void OverlayTimer::start()
         return;
 
     _timerId = startTimer(1000);
+    emit timerStatusChanged(true);
 }
 
 void OverlayTimer::stop()
@@ -129,6 +123,7 @@ void OverlayTimer::stop()
 
     killTimer(_timerId);
     _timerId = 0;
+    emit timerStatusChanged(false);
 }
 
 void OverlayTimer::timerEvent(QTimerEvent *event)
@@ -138,12 +133,10 @@ void OverlayTimer::timerEvent(QTimerEvent *event)
     if(_timerId == 0)
         return;
 
-    --_seconds;
-
+    setTimerValue(getTimerValue() - 1);
     updateContents();
-    emit timerTick(_seconds);
 
-    if(_seconds <= 0)
+    if(getTimerValue() <= 0)
     {
         stop();
         emit timerExpired();

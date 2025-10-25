@@ -40,7 +40,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -175,53 +175,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QFrame" name="frame">
-          <property name="frameShape">
-           <enum>QFrame::HLine</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <layout class="QVBoxLayout" name="dividerLayout">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QToolButton" name="btnCollapse">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>10</width>
-               <height>10</height>
-              </size>
-             </property>
-             <property name="autoRaise">
-              <bool>true</bool>
-             </property>
-             <property name="arrowType">
-              <enum>Qt::UpArrow</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="FearFrame" name="frameFear">
+         <widget class="OverlaysPreviewFrame" name="frameOverlays">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -551,9 +505,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>FearFrame</class>
+   <class>OverlaysPreviewFrame</class>
    <extends>QFrame</extends>
-   <header>fearframe.h</header>
+   <header>overlayspreviewframe.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

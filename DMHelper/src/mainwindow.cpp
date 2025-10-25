@@ -84,7 +84,7 @@
 #include "layerreference.h"
 #include "mapselectdialog.h"
 #include "newentrydialog.h"
-#include "overlaymanager.h"
+#include "overlayrenderer.h"
 #include "overlayfear.h"
 #include "overlayseditdialog.h"
 #include <QResizeEvent>
@@ -275,11 +275,6 @@ MainWindow::MainWindow(QWidget *parent) :
         resize(screen->availableSize().width() * 4 / 5, screen->availableSize().height() * 4 / 5);
     }
     setupRibbonBar();
-
-    ui->dividerLayout->setContentsMargins(0, 0, 0, 0);
-    ui->dividerLayout->setAlignment(Qt::AlignCenter);
-    ui->btnCollapse->setArrowType(Qt::DownArrow);
-    connect(ui->btnCollapse, &QToolButton::clicked, this, &MainWindow::toggleOverlayFrame);
 
     // Set the MRU menu to the created menu bar
     mruHandler->setActionsMenu(_ribbonTabFile->getMRUMenu());
@@ -2172,13 +2167,12 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
-    ui->frameFear->setCampaign(campaign);
-    ui->frameFear->setVisible(campaign && campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
+    ui->frameOverlays->setCampaign(campaign);
+    if(_pubWindow->getOverlayRenderer())
+        _pubWindow->getOverlayRenderer()->setCampaign(campaign);
 
+    ui->frameOverlays->setMinimumWidth(ui->frameOverlays->sizeHint().width());
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
-
-    if(_pubWindow->getOverlayManager())
-        _pubWindow->getOverlayManager()->setCampaign(campaign);
 
     if(campaign)
     {
@@ -2827,12 +2821,6 @@ void MainWindow::exportSpellbook()
 void MainWindow::importSpellbook()
 {
     // TODO: add import/export for spells
-}
-
-void MainWindow::toggleOverlayFrame()
-{
-    ui->frameFear->setVisible(!ui->frameFear->isVisible());
-    ui->btnCollapse->setArrowType(ui->frameFear->isVisible() ? Qt::DownArrow : Qt::UpArrow);
 }
 
 void MainWindow::openAboutDialog()

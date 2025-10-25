@@ -205,9 +205,6 @@ protected slots:
     void exportSpellbook();
     void importSpellbook();
 
-    // Overlays
-    void toggleOverlayFrame();
-
     void openAboutDialog();
     void openHelpDialog();
     void openBackupDirectory();

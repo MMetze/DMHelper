@@ -1,7 +1,7 @@
 #ifndef PUBLISHGLFRAME_H
 #define PUBLISHGLFRAME_H
 
-#include "overlaymanager.h"
+#include "overlayrenderer.h"
 #include <QOpenGLWidget>
 
 class PublishGLRenderer;
@@ -17,7 +17,7 @@ public:
 
     bool isInitialized() const;
     PublishGLRenderer* getRenderer() const;
-    OverlayManager* getOverlayManager() const;
+    OverlayRenderer* getOverlayRenderer() const;
 
 signals:
     void publishMouseDown(const QPointF& position);
@@ -53,7 +53,7 @@ private:
     bool _initialized;
     QSize _targetSize;
     PublishGLRenderer* _renderer;
-    OverlayManager* _overlayManager;
+    OverlayRenderer* _overlayRenderer;
 
 };
 

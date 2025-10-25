@@ -18,7 +18,7 @@ public:
     virtual void inputXML(const QDomElement &element) override;
     virtual int getOverlayType() const override;
     virtual QSize getSize() const override;
-    virtual void prepareFrame(OverlayFrame* frame) override;
+    virtual void prepareFrame(QBoxLayout* frameLayout, int insertIndex) override;
 
     // Local Interface
     virtual int getTimerValue() const;
@@ -36,8 +36,9 @@ public slots:
     virtual void stop();
 
 signals:
-    void timerTick(int seconds);
+    void timerValueChanged(int seconds);
     void timerExpired();
+    void timerStatusChanged(bool running);
 
 protected:
     // From QObject

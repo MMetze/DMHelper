@@ -20,15 +20,15 @@ int OverlayFear::getOverlayType() const
     return DMHelper::OverlayType_Fear;
 }
 
-void OverlayFear::prepareFrame(OverlayFrame* frame)
+void OverlayFear::prepareFrame(QBoxLayout* frameLayout, int insertIndex)
 {
-    if(!_campaign)
+    if((!frameLayout) || (!_campaign))
         return;
 
     FearFrame* fearFrame = new FearFrame();
     fearFrame->setCampaign(_campaign);
 
-    frame->getLayout()->insertWidget(OverlayFrame::OVERLAY_FRAME_INSERT_POINT, fearFrame);
+    frameLayout->insertWidget(insertIndex, fearFrame);
 }
 
 QSize OverlayFear::getSize() const

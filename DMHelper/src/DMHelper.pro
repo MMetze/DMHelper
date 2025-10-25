@@ -149,8 +149,9 @@ SOURCES += main.cpp\
     overlaycounter.cpp \
     overlayfear.cpp \
     overlayframe.cpp \
-    overlaymanager.cpp \
+    overlayrenderer.cpp \
     overlayseditdialog.cpp \
+    overlayspreviewframe.cpp \
     overlaytimer.cpp \
     party.cpp \
     partycharactergridframe.cpp \
@@ -455,8 +456,9 @@ HEADERS  += mainwindow.h \
     overlaycounter.h \
     overlayfear.h \
     overlayframe.h \
-    overlaymanager.h \
+    overlayrenderer.h \
     overlayseditdialog.h \
+    overlayspreviewframe.h \
     overlaytimer.h \
     party.h \
     partycharactergridframe.h \
@@ -677,6 +679,7 @@ FORMS    += mainwindow.ui \
     objectimportdialog.ui \
     overlayframe.ui \
     overlayseditdialog.ui \
+    overlayspreviewframe.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \

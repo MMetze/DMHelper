@@ -16,7 +16,7 @@ public:
     virtual void inputXML(const QDomElement &element) override;
     virtual int getOverlayType() const override;
     virtual QSize getSize() const override;
-    virtual void prepareFrame(OverlayFrame* frame) override;
+    virtual void prepareFrame(QBoxLayout* frameLayout, int insertIndex) override;
 
     // Local Interface
     virtual int getCounterValue() const;
@@ -31,6 +31,9 @@ public slots:
     virtual void setCounterString(const QString& valueString);
     virtual void increase();
     virtual void decrease();
+
+signals:
+    void counterChanged(const QString& valueString);
 
 protected:
     // From Overlay
