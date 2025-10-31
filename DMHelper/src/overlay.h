@@ -1,21 +1,23 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
 
-#include <QObject>
+#include "popup.h"
 #include <QSize>
 #include <QOpenGLFunctions>
 
 class Campaign;
-class QBoxLayout;
 class QDomElement;
 class QDomDocument;
 class QDir;
 
-class Overlay : public QObject
+class Overlay : public Popup
 {
     Q_OBJECT
 public:
     explicit Overlay(const QString& name = QString(), QObject *parent = nullptr);
+
+    // From Popup
+    virtual bool isDMOnly() const override;
 
     // Local interface
     virtual void inputXML(const QDomElement &element);
@@ -34,8 +36,6 @@ public:
     void resizeGL(int w, int h);
     void paintGL(QOpenGLFunctions *functions, QSize targetSize, int modelMatrix, int yOffset);
 
-    virtual void prepareFrame(QBoxLayout* frameLayout, int insertIndex) = 0;
-
 public slots:
     virtual void recreateContents();
     virtual void updateContents();
@@ -46,10 +46,6 @@ public slots:
 
     virtual void setX(int x) = 0;
     virtual void setY(int y) = 0;
-
-signals:
-    void dirty();
-    void triggerUpdate();
 
 protected:
     // Local interface

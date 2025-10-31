@@ -9,7 +9,7 @@
 const qreal OVERLAY_WINDOW_SCALE = 0.1;
 
 Overlay::Overlay(const QString& name, QObject *parent) :
-    QObject{parent},
+    Popup{parent},
     _visible(true),
     _scale(OVERLAY_WINDOW_SCALE),
     _opacity(100),
@@ -18,6 +18,11 @@ Overlay::Overlay(const QString& name, QObject *parent) :
     _updateContents(false)
 {
     setObjectName(name);
+}
+
+bool Overlay::isDMOnly() const
+{
+    return false;
 }
 
 void Overlay::inputXML(const QDomElement &element)

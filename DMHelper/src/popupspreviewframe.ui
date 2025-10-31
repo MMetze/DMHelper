@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OverlaysPreviewFrame</class>
- <widget class="QFrame" name="OverlaysPreviewFrame">
+ <class>PopupsPreviewFrame</class>
+ <widget class="QFrame" name="PopupsPreviewFrame">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -73,7 +73,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QScrollArea" name="scrollOverlays">
+    <widget class="QScrollArea" name="scrollPopups">
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>

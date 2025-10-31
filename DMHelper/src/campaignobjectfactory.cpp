@@ -6,6 +6,9 @@
 #include "combatantfactory.h"
 #include "mapfactory.h"
 #include "placeholder.h"
+#include "audiofactory.h"
+#include "encounterfactory.h"
+#include "audiotrack.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -16,7 +19,9 @@ CampaignObjectFactory::CampaignObjectFactory(QObject *parent) :
     _factoryList()
 {
     _factoryList.append(new EncounterFactory());
-    _factoryList.append(new AudioFactory());
+    AudioFactory* audioFactory = new AudioFactory();
+    connect(audioFactory, &AudioFactory::trackCreated, this, &CampaignObjectFactory::objectCreated);
+    _factoryList.append(audioFactory);
     _factoryList.append(CombatantFactory::Instance());
     _factoryList.append(new MapFactory());
 }

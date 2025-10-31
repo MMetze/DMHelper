@@ -151,13 +151,15 @@ SOURCES += main.cpp\
     overlayframe.cpp \
     overlayrenderer.cpp \
     overlayseditdialog.cpp \
-    overlayspreviewframe.cpp \
     overlaytimer.cpp \
     party.cpp \
     partycharactergridframe.cpp \
     partyframe.cpp \
     partyframecharacter.cpp \
     placeholder.cpp \
+    popup.cpp \
+    popupaudio.cpp \
+    popupspreviewframe.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
@@ -458,13 +460,15 @@ HEADERS  += mainwindow.h \
     overlayframe.h \
     overlayrenderer.h \
     overlayseditdialog.h \
-    overlayspreviewframe.h \
     overlaytimer.h \
     party.h \
     partycharactergridframe.h \
     partyframe.h \
     partyframecharacter.h \
     placeholder.h \
+    popup.h \
+    popupaudio.h \
+    popupspreviewframe.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
@@ -679,7 +683,7 @@ FORMS    += mainwindow.ui \
     objectimportdialog.ui \
     overlayframe.ui \
     overlayseditdialog.ui \
-    overlayspreviewframe.ui \
+    popupspreviewframe.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \

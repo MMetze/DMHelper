@@ -20,19 +20,24 @@ CampaignObjectBase* AudioFactory::createObject(int objectType, int subType, cons
     if(objectType != DMHelper::CampaignType_AudioTrack)
         return nullptr;
 
+    AudioTrack* track = nullptr;
+
     switch(subType)
     {
         case DMHelper::AudioType_File:
-            return new AudioTrackFile(objectName);
+            track = new AudioTrackFile(objectName); break;
         case DMHelper::AudioType_Syrinscape:
-            return new AudioTrackSyrinscape(objectName);
+            track = new AudioTrackSyrinscape(objectName); break;
         case DMHelper::AudioType_SyrinscapeOnline:
-            return new AudioTrackSyrinscapeOnline(objectName);
+            track = new AudioTrackSyrinscapeOnline(objectName); break;
         case DMHelper::AudioType_Youtube:
-            return new AudioTrackYoutube(objectName);
+            track = new AudioTrackYoutube(objectName); break;
         default:
             return nullptr;
     }
+
+    emit trackCreated(track);
+    return track;
 }
 
 CampaignObjectBase* AudioFactory::createObject(const QDomElement& element, bool isImport)
@@ -58,19 +63,24 @@ CampaignObjectBase* AudioFactory::createObject(const QDomElement& element, bool 
         audioType = identifyAudioSubtype(url);
     }
 
+    AudioTrack* track = nullptr;
+
     switch(audioType)
     {
         case DMHelper::AudioType_File:
-            return new AudioTrackFile();
+            track = new AudioTrackFile(); break;
         case DMHelper::AudioType_Syrinscape:
-            return new AudioTrackSyrinscape();
+            track = new AudioTrackSyrinscape(); break;
         case DMHelper::AudioType_SyrinscapeOnline:
-            return new AudioTrackSyrinscapeOnline();
+            track = new AudioTrackSyrinscapeOnline(); break;
         case DMHelper::AudioType_Youtube:
-            return new AudioTrackYoutube();
+            track = new AudioTrackYoutube(); break;
         default:
             return nullptr;
     }
+
+    emit trackCreated(track);
+    return track;
 }
 
 void AudioFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
@@ -91,7 +101,12 @@ AudioTrack* AudioFactory::createTrackFromUrl(const QUrl& url, const QString& obj
     if(urlTrack)
         urlTrack->setUrl(url);
 
-    return dynamic_cast<AudioTrack*>(newObject);
+    AudioTrack* track = dynamic_cast<AudioTrack*>(newObject);
+
+    if(track)
+        emit trackCreated(track);
+
+    return track;
 }
 
 int AudioFactory::identifyAudioSubtype(const QUrl& url)

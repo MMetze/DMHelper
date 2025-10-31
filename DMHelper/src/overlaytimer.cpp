@@ -53,10 +53,7 @@ void OverlayTimer::prepareFrame(QBoxLayout* frameLayout, int insertIndex)
     connect(this, &OverlayTimer::timerStatusChanged, btnStart, [btnStart](bool running)
     {
         btnStart->setChecked(running);
-        if(running)
-            btnStart->setIcon(QIcon(":/img/data/icon_stop.png"));
-        else
-            btnStart->setIcon(QIcon(":/img/data/icon_play.png"));
+        btnStart->setIcon(running ? QIcon(":/img/data/icon_stop.png") : QIcon(":/img/data/icon_play.png"));
     });
 
     frameLayout->insertWidget(insertIndex, btnStart);

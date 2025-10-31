@@ -175,7 +175,7 @@
          </layout>
         </item>
         <item>
-         <widget class="OverlaysPreviewFrame" name="frameOverlays">
+         <widget class="PopupsPreviewFrame" name="framePopups">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -505,9 +505,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>OverlaysPreviewFrame</class>
+   <class>PopupsPreviewFrame</class>
    <extends>QFrame</extends>
-   <header>overlayspreviewframe.h</header>
+   <header>popupspreviewframe.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

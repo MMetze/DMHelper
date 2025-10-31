@@ -28,7 +28,8 @@ Bug: Rendering distance is tiny font
 Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
 
-DONE Add Overlays for Fear, Counters and Timers
+DONE Added an interactive preview dialog for text entries
+DONE Add Overlays for Fear, Counters and Timers as well as audio
 DONE Create "Wizards" for add Map or add Combat rather than multiple questions
 DONE Drag and drop to add a map/combat
     - add map/battle/media layer

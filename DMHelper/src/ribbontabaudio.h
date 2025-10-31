@@ -19,13 +19,15 @@ public:
 
 public slots:
     void setTrackType(int type);
-    void setPlay(bool checked);
+    void setTrackStatus(int status);
     void setRepeat(bool checked);
     void setMute(bool checked);
     void setVolume(float volume);
 
 signals:
-    void playClicked(bool checked);
+    void playClicked();
+    void pauseClicked();
+    void stopClicked();
     void repeatClicked(bool checked);
     void muteClicked(bool checked);
     void volumeChanged(float volume);
@@ -36,8 +38,13 @@ protected slots:
 protected:
     virtual void showEvent(QShowEvent *event) override;
 
+    void updateButtonStatus();
+
 private:
     Ui::RibbonTabAudio *ui;
+
+    int _trackType;
+    int _trackStatus;
 };
 
 #endif // RIBBONTABAUDIO_H

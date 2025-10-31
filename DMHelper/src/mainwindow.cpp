@@ -675,15 +675,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(audioTrackEdit, SIGNAL(trackTypeChanged(int)), _ribbonTabAudio, SLOT(setTrackType(int)));
-    connect(_ribbonTabAudio, SIGNAL(playClicked(bool)), audioTrackEdit, SLOT(setPlay(bool)));
-    connect(audioTrackEdit, SIGNAL(playChanged(bool)), _ribbonTabAudio, SLOT(setPlay(bool)));
-    connect(_ribbonTabAudio, SIGNAL(repeatClicked(bool)), audioTrackEdit, SLOT(setRepeat(bool)));
-    connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
-    connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
-    connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
-    connect(_ribbonTabAudio, SIGNAL(volumeChanged(float)), audioTrackEdit, SLOT(setVolume(float)));
-    connect(audioTrackEdit, SIGNAL(volumeChanged(float)), _ribbonTabAudio, SLOT(setVolume(float)));
+    connect(audioTrackEdit, &AudioTrackEdit::trackTypeChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackType);
+    connect(_ribbonTabAudio, &RibbonTabAudio::playClicked, audioTrackEdit, &AudioTrackEdit::play);
+    connect(_ribbonTabAudio, &RibbonTabAudio::pauseClicked, audioTrackEdit, &AudioTrackEdit::pause);
+    connect(_ribbonTabAudio, &RibbonTabAudio::stopClicked, audioTrackEdit, &AudioTrackEdit::stop);
+    connect(audioTrackEdit, &AudioTrackEdit::trackStatusChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackStatus);
+    connect(_ribbonTabAudio, &RibbonTabAudio::repeatClicked, audioTrackEdit, &AudioTrackEdit::setRepeat);
+    connect(audioTrackEdit, &AudioTrackEdit::repeatChanged, _ribbonTabAudio, &RibbonTabAudio::setRepeat);
+    connect(_ribbonTabAudio, &RibbonTabAudio::muteClicked, audioTrackEdit, &AudioTrackEdit::setMute);
+    connect(audioTrackEdit, &AudioTrackEdit::muteChanged, _ribbonTabAudio, &RibbonTabAudio::setMute);
+    connect(_ribbonTabAudio, &RibbonTabAudio::volumeChanged, audioTrackEdit, &AudioTrackEdit::setVolume);
+    connect(audioTrackEdit, &AudioTrackEdit::volumeChanged, _ribbonTabAudio, &RibbonTabAudio::setVolume);
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -757,6 +759,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
     connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
+    connect(CampaignObjectFactory::Instance(), &CampaignObjectFactory::objectCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
+    connect(this, &MainWindow::audioTrackAdded, ui->framePopups, &PopupsPreviewFrame::trackAdded);
     //_audioPlayer = new AudioPlayer(this);
     //_audioPlayer->setVolume(_options->getAudioVolume());
     //connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
@@ -2167,11 +2171,11 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
-    ui->frameOverlays->setCampaign(campaign);
+    ui->framePopups->setCampaign(campaign);
     if(_pubWindow->getOverlayRenderer())
         _pubWindow->getOverlayRenderer()->setCampaign(campaign);
 
-    ui->frameOverlays->setMinimumWidth(ui->frameOverlays->sizeHint().width());
+    ui->framePopups->setMinimumWidth(ui->framePopups->sizeHint().width());
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 
     if(campaign)
@@ -2536,6 +2540,7 @@ void MainWindow::handleOpenSoundboard()
         connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
         connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
         connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+        connect(soundboard, &SoundboardFrame::trackCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
         connect(soundboard, &SoundboardFrame::dirty, this, &MainWindow::setDirty);
         _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 

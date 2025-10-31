@@ -16,6 +16,7 @@ public:
 
     virtual int getAudioType() const override;
 
+    virtual int getTrackStatus() const override;
     virtual bool isPlaying() const override;
     virtual bool isRepeat() const override;
     virtual bool isMuted() const override;
@@ -23,6 +24,7 @@ public:
 
 public slots:
     virtual void play() override;
+    virtual void pause() override;
     virtual void stop() override;
     virtual void setMute(bool mute) override;
     virtual void setVolume(float volume) override;
