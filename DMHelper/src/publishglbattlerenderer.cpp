@@ -788,6 +788,9 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
 
     int activeCombatant = _model->getCombatantIndex(_model->getActiveCombatant());
     int currentCombatant = activeCombatant;
+    if(activeCombatant < 0)
+        currentCombatant = 0;
+
     do
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(currentCombatant);
@@ -866,7 +869,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
         }
 
         if(++currentCombatant >= _model->getCombatantCount())
-            currentCombatant = 0;
+            currentCombatant = activeCombatant <= 0 ? activeCombatant : 0;
 
     } while(currentCombatant != activeCombatant);
 
@@ -1298,6 +1301,27 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
         {
             DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _movementToken->getMatrixData(), _movementToken->getMatrix());
             functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _movementToken->getMatrixData());
+
+
+
+/*
+            Campaign* campaign = dynamic_cast<Campaign*>(_model->getParentByType(DMHelper::CampaignType_Campaign));
+            QList<int> movementRanges = campaign->getRuleset().getMovementRanges();
+            if(movementRanges.count() > 0)
+            {
+                for(int i = 0; i < movementRanges.count(); ++i)
+                {
+                    int rangeSquares = 2 * (movementRanges.at(i) / 5) + 1;
+                    qreal rangeRadius = combatant->getLayer()->getScale() * rangeSquares;
+                    _movementToken->setScale(rangeRadius / MOVEMENT_TOKEN_SIZE);
+                    _movementToken->paintGL(functions, nullptr);
+                }
+            }
+*/
+
+
+
+
             _movementToken->paintGL(functions, nullptr);
         }
     }
