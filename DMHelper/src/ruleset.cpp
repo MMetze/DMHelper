@@ -198,7 +198,7 @@ DMHelper::MovementType Ruleset::movementTypeFromString(const QString& movementSt
         if(movementRanges)
         {
             QStringList movementRangeStrings = movementStr.right(movementStr.length() - 6).split(QString(";"));
-            for(QString rangeStr : movementRangeStrings)
+            for(QString& rangeStr : movementRangeStrings)
             {
                 bool ok = false;
                 int rangeValue = rangeStr.toInt(&ok);
@@ -209,6 +209,10 @@ DMHelper::MovementType Ruleset::movementTypeFromString(const QString& movementSt
 
         return DMHelper::MovementType_Range;
     }
+    else if(movementStr.startsWith(QString("none")))
+    {
+        return DMHelper::MovementType_None;
+    }
     else
     {
         return DMHelper::MovementType_Distance;
@@ -217,18 +221,24 @@ DMHelper::MovementType Ruleset::movementTypeFromString(const QString& movementSt
 
 QString Ruleset::movementStringFromType(DMHelper::MovementType movementType, const QList<int>* movementRanges)
 {
-    if(movementType == DMHelper::MovementType_Range)
+    switch(movementType)
     {
-        QString result = QString("range");
-        if(movementRanges)
+        case DMHelper::MovementType_Range:
         {
-            for(int range : *movementRanges)
-                result.append(QString(";") + QString::number(range));
+            QString result = QString("range");
+            if(movementRanges)
+            {
+                for(int range : *movementRanges)
+                    result.append(QString(";") + QString::number(range));
+            }
+            return result;
         }
-        return result;
+        case DMHelper::MovementType_None:
+            return QString("none");
+        case DMHelper::MovementType_Distance:
+        default:
+            return QString("distance");
     }
-
-    return QString("distance");
 }
 
 void Ruleset::setRuleInitiative(const QString& initiativeType)

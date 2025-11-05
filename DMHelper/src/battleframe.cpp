@@ -4547,7 +4547,6 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
         if(_moveRadius <= tokenLayer->getScale())
         {
             _moveRadius = tokenLayer->getScale();
-//            _movementPixmap->setRotation(0.0);
             _movementPixmap->setVisible(false);
         }
     }
@@ -4555,7 +4554,6 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(_moveRadius <= tokenLayer->getScale())
     {
         _moveRadius = tokenLayer->getScale();
-//        _movementPixmap->setRotation(0.0);
         _movementPixmap->setVisible(false);
     }
     else

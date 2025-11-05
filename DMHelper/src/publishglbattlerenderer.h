@@ -125,6 +125,8 @@ protected:
     qreal _initiativeScale;
     qreal _initiativeTokenHeight;
     bool _movementVisible;
+    int _movementType;
+    QList<int> _movementRanges;
     BattleDialogModelCombatant* _movementCombatant;
     PublishGLImage* _movementToken;
     QString _tokenFrameFile;

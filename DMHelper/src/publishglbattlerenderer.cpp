@@ -50,8 +50,9 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _initiativeScale(1.0),
     _initiativeTokenHeight(0.0),
     _movementVisible(false),
+    _movementType(DMHelper::MovementType_None),
+    _movementRanges(),
     _movementCombatant(nullptr),
-    //_movementPC(false),
     _movementToken(nullptr),
     _tokenFrameFile(),
     _tokenFrame(nullptr),
@@ -62,7 +63,6 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _countdownScale(1.0),
     _countdownColor(Qt::white),
     _activeCombatant(nullptr),
-    //_activePC(false),
     _activeTokenFile(),
     _activeToken(nullptr),
     _selectionTokenFile(),
@@ -148,6 +148,11 @@ void PublishGLBattleRenderer::initializeGL()
     createShaders();
     _model->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
 
+    // Store the movement type from the campaign ruleset
+    Campaign* campaign = dynamic_cast<Campaign*>(_model->getParentByType(DMHelper::CampaignType_Campaign));
+    _movementType = campaign ? campaign->getRuleset().getMovementType() : DMHelper::MovementType_None;
+    _movementRanges = ((campaign) && (_movementType == DMHelper::MovementType_Range)) ? campaign->getRuleset().getMovementRanges() : QList<int>();
+
     // Create the objects
     _scene.deriveSceneRectFromSize(_model->getLayerScene().sceneSize());
     createContents();
@@ -231,6 +236,9 @@ void PublishGLBattleRenderer::cleanupGL()
     disconnect(_model, &BattleDialogModel::showEffectsChanged, this, &PublishGLBattleRenderer::updateWidget);
 
     cleanupContents();
+
+    _movementType = DMHelper::MovementType_None;
+    _movementRanges.clear();
 
     _projectionMatrix.setToIdentity();
 
@@ -445,7 +453,7 @@ void PublishGLBattleRenderer::distanceItemChanged(QGraphicsItem* shapeItem, QGra
 
 void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining)
 {
-    if(!_movementToken)
+    if((_movementType == DMHelper::MovementType_None) || (!_movementToken))
         return;
 
     if(!combatant)
@@ -661,15 +669,18 @@ void PublishGLBattleRenderer::createContents()
 
     _unknownToken = new PublishGLImage(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate).toImage());
 
-    QImage movementImage(QSize(MOVEMENT_TOKEN_SIZE, MOVEMENT_TOKEN_SIZE), QImage::Format_RGBA8888);
-    movementImage.fill(Qt::transparent);
-    QPainter movementPainter;
-    movementPainter.begin(&movementImage);
-        movementPainter.setPen(QPen(QColor(23, 23, 23, 200), 3, Qt::DashDotLine));
-        movementPainter.setBrush(QBrush(QColor(255, 255, 255, 25)));
-        movementPainter.drawEllipse(0, 0, 512, 512);
-    movementPainter.end();
-    _movementToken = new PublishGLImage(movementImage);
+    if(_movementType != DMHelper::MovementType_None)
+    {
+        QImage movementImage(QSize(MOVEMENT_TOKEN_SIZE, MOVEMENT_TOKEN_SIZE), QImage::Format_RGBA8888);
+        movementImage.fill(Qt::transparent);
+        QPainter movementPainter;
+        movementPainter.begin(&movementImage);
+            movementPainter.setPen(QPen(QColor(23, 23, 23, 200), 3, Qt::DashDotLine));
+            movementPainter.setBrush(QBrush(QColor(255, 255, 255, 25)));
+            movementPainter.drawEllipse(0, 0, 512, 512);
+        movementPainter.end();
+        _movementToken = new PublishGLImage(movementImage);
+    }
 
     // Check if we need a pointer
     evaluatePointer();
@@ -1291,38 +1302,32 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
     if((!functions) || (!combatant))
         return;
 
-    if(combatant == _movementCombatant)
+    if((combatant == _movementCombatant) && (_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
+       ((combatantToken->isPC()) || ((_movementCombatant->getKnown()) &&
+                                     (_movementCombatant->getShown()) &&
+                                     ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
+                                     ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
     {
-        if((_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
-           ((combatantToken->isPC()) || ((_movementCombatant->getKnown()) &&
-                                         (_movementCombatant->getShown()) &&
-                                         ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
-                                         ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
+        if(_movementType == DMHelper::MovementType_Distance)
         {
             DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _movementToken->getMatrixData(), _movementToken->getMatrix());
             functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _movementToken->getMatrixData());
-
-
-
-/*
-            Campaign* campaign = dynamic_cast<Campaign*>(_model->getParentByType(DMHelper::CampaignType_Campaign));
-            QList<int> movementRanges = campaign->getRuleset().getMovementRanges();
-            if(movementRanges.count() > 0)
+            _movementToken->paintGL(functions, nullptr);
+        }
+        else if(_movementType == DMHelper::MovementType_Range)
+        {
+            if(_movementRanges.count() > 0)
             {
-                for(int i = 0; i < movementRanges.count(); ++i)
+                for(int i = 0; i < _movementRanges.count(); ++i)
                 {
-                    int rangeSquares = 2 * (movementRanges.at(i) / 5) + 1;
+                    int rangeSquares = 2 * (_movementRanges.at(i) / 5) + 1;
                     qreal rangeRadius = combatant->getLayer()->getScale() * rangeSquares;
                     _movementToken->setScale(rangeRadius / MOVEMENT_TOKEN_SIZE);
+                    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _movementToken->getMatrixData(), _movementToken->getMatrix());
+                    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _movementToken->getMatrixData());
                     _movementToken->paintGL(functions, nullptr);
                 }
             }
-*/
-
-
-
-
-            _movementToken->paintGL(functions, nullptr);
         }
     }
 
