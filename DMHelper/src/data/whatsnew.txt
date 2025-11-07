@@ -22,21 +22,35 @@ If you are coming from an earlier version, DMHelper will try to update your Best
 
 <h3>New v3.7 Features:</h3>
 <ul>
-<li><b>TBD</b>: tbd
+<li><b>Daggerheart Support</b>: Added Daggerheart-specific SRD content, monster and character templates and an easy-access fear counter. Support for configurable movement ranges lets you run Daggerheart battles seamlessly!
+<li><b>Overlay Elements</b>: Added overlays for fear, counters, timers, and audio, plus improved dropdowns with auto-completion for faster selection. Overlays are shown on the Player Window regardless of the currently published entry.
+<li><b>Fog of War editing</b>: The selected Fog of War layer is now highlighted on the DM Window during editing. FoW textures with partial transparency are now supported.
+<li><b>Streamlined Map and Combat Creation</b>: A new "wizard" guides users through adding maps or combats, replacing all the setup questions. Drag and drop now allows quick addition of maps, battles, media layers, tokens, and icons directly to the DM Window.
+<li><b>Improved Grid and Measurement Tools</b>: A new grid sizing tool combined with automatic grid size detection makes it easier than ever to set the size of tokens. Snap-to-grid behavior applies to both player windows and measurement tools.
+<li><b>Interactive Entry Preview Window</b>: Introduced the ability to pop out an interactive preview dialog for text entries.
+<li><b>Monster Skinning</b>: Convert your favorite goblin into a dragon by applying a new icon to any monster.
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>Bug: tbd
-</ul>
+<li>Major crash source in video playback eliminated; stability verified through stress testing.
+<li>Area filling, zoom-to-FoW, and size-to-FoW functions now operate correctly in Fog of War.
+<li>Background color now saves properly across all content types, including battles, characters, monsters, text entries, and maps.
+<li>Hidden combatants in multi-layer battles are no longer skipped during turn progression.
+<li>Movement circles now display correctly for monsters.
+<li>Video playback now maintains proper zoom level when adding new media.
+<li>Pointer no longer deactivates on the DM view when leaving the map area.
+<li>Override hit dice functionality now works as intended.
+<li>Next combatant logic correctly includes hidden entities.</ul>
 
 <!-- Commenting this section out for now
 <p>
 <h3>Other Improvements:</h3>
 <ul>
-<li> tbd
+<li> Active tool is now deselected when switching menus.
+<li> General performance and UI polish for map and combat interactions.
 </ul>
 -->
 

@@ -38,3 +38,22 @@ QSize MapBlankDialog::getMapSize() const
 {
     return QSize(getMapWidth(), getMapHeight());
 }
+
+void MapBlankDialog::setMapColor(const QColor& color)
+{
+    ui->btnColor->setColor(color);
+}
+
+void MapBlankDialog::setMapSize(const QSize& size)
+{
+    ui->edtWidth->setText(QString::number(size.width()));
+    ui->edtHeight->setText(QString::number(size.height()));
+}
+
+void MapBlankDialog::enableSizeEditing(bool enable)
+{
+    ui->lblWidth->setEnabled(enable);
+    ui->edtWidth->setEnabled(enable);
+    ui->lblHeight->setEnabled(enable);
+    ui->edtHeight->setEnabled(enable);
+}
