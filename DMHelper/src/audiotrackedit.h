@@ -26,46 +26,25 @@ public:
 
 signals:
     void trackTypeChanged(int type);
-    void playChanged(bool checked);
+    void trackStatusChanged(int status);
     void repeatChanged(bool checked);
     void muteChanged(bool checked);
     void volumeChanged(float volume);
 
 public slots:
-    void setPlay(bool checked);
+    void play();
+    void pause();
+    void stop();
     void setRepeat(bool checked);
     void setMute(bool checked);
     void setVolume(float volume);
 
-private slots:
-    void unclick();
+protected slots:
+//    void unclick();
 
-/*
-signals:
-    void trackSelected(AudioTrack* track);
-
-public slots:
-    void addTrack(const QUrl& url);
-    void removeTrack();
-
-    void setCampaign(Campaign* campaign);
-
-private slots:
-    void addLocalFile();
-    void addGlobalUrl();
-    void addSyrinscape();
-    void itemSelected(QListWidgetItem *item);
-*/
-private:
-/*
-    AudioTrack* getCurrentTrack();
-    void addTrackToList(AudioTrack* track);
-    void enableButtons(bool enable);
-*/
-
+protected:
     Ui::AudioTrackEdit *ui;
 
-    //Campaign* _campaign;
     AudioTrack* _track;
 };
 

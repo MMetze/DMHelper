@@ -17,7 +17,6 @@
 #include "combatantfactory.h"
 #include "campaignobjectfactory.h"
 #include "map.h"
-#include "mapfactory.h"
 #include "mapframe.h"
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
@@ -25,7 +24,6 @@
 #include "monsterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
-#include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "campaignobjectframe.h"
 #include "campaigntreemodel.h"
@@ -48,7 +46,7 @@
 #include "dmscreentabwidget.h"
 #include "timeanddateframe.h"
 #include "audiotrackedit.h"
-#include "audioplayer.h"
+#include "audiotrack.h"
 #include "basicdateserver.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
@@ -80,16 +78,15 @@
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
 #include "layerimage.h"
-#include "layerfow.h"
 #include "layervideo.h"
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
-#include "layerblank.h"
 #include "mapselectdialog.h"
-#include "mapblankdialog.h"
-#include "battledialogmodelcharacter.h"
 #include "newentrydialog.h"
+#include "overlayrenderer.h"
+#include "overlayfear.h"
+#include "overlayseditdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -340,6 +337,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
+    connect(_ribbonTabCampaign, SIGNAL(showOverlaysClicked()), this, SLOT(showOverlays()));
     QShortcut* notesShortcut = new QShortcut(QKeySequence(tr("Ctrl+Alt+N", "Add Note")), this);
     connect(notesShortcut, SIGNAL(activated()), this, SLOT(addNote()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
@@ -668,8 +666,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
     connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
 
-    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
-
     // Connect the battle view ribbon to the battle frame and map frame
     connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
@@ -679,15 +675,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(audioTrackEdit, SIGNAL(trackTypeChanged(int)), _ribbonTabAudio, SLOT(setTrackType(int)));
-    connect(_ribbonTabAudio, SIGNAL(playClicked(bool)), audioTrackEdit, SLOT(setPlay(bool)));
-    connect(audioTrackEdit, SIGNAL(playChanged(bool)), _ribbonTabAudio, SLOT(setPlay(bool)));
-    connect(_ribbonTabAudio, SIGNAL(repeatClicked(bool)), audioTrackEdit, SLOT(setRepeat(bool)));
-    connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
-    connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
-    connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
-    connect(_ribbonTabAudio, SIGNAL(volumeChanged(float)), audioTrackEdit, SLOT(setVolume(float)));
-    connect(audioTrackEdit, SIGNAL(volumeChanged(float)), _ribbonTabAudio, SLOT(setVolume(float)));
+    connect(audioTrackEdit, &AudioTrackEdit::trackTypeChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackType);
+    connect(_ribbonTabAudio, &RibbonTabAudio::playClicked, audioTrackEdit, &AudioTrackEdit::play);
+    connect(_ribbonTabAudio, &RibbonTabAudio::pauseClicked, audioTrackEdit, &AudioTrackEdit::pause);
+    connect(_ribbonTabAudio, &RibbonTabAudio::stopClicked, audioTrackEdit, &AudioTrackEdit::stop);
+    connect(audioTrackEdit, &AudioTrackEdit::trackStatusChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackStatus);
+    connect(_ribbonTabAudio, &RibbonTabAudio::repeatClicked, audioTrackEdit, &AudioTrackEdit::setRepeat);
+    connect(audioTrackEdit, &AudioTrackEdit::repeatChanged, _ribbonTabAudio, &RibbonTabAudio::setRepeat);
+    connect(_ribbonTabAudio, &RibbonTabAudio::muteClicked, audioTrackEdit, &AudioTrackEdit::setMute);
+    connect(audioTrackEdit, &AudioTrackEdit::muteChanged, _ribbonTabAudio, &RibbonTabAudio::setMute);
+    connect(_ribbonTabAudio, &RibbonTabAudio::volumeChanged, audioTrackEdit, &AudioTrackEdit::setVolume);
+    connect(audioTrackEdit, &AudioTrackEdit::volumeChanged, _ribbonTabAudio, &RibbonTabAudio::setVolume);
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -761,6 +759,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
     connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
+    connect(CampaignObjectFactory::Instance(), &CampaignObjectFactory::objectCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
+    connect(this, &MainWindow::audioTrackAdded, ui->framePopups, &PopupsPreviewFrame::trackAdded);
     //_audioPlayer = new AudioPlayer(this);
     //_audioPlayer->setVolume(_options->getAudioVolume());
     //connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
@@ -827,13 +827,16 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
-        _campaign->setShowFear(newCampaignDialog->isShowFear());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
+
+        if(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive))
+            _campaign->addOverlay(new OverlayFear());
+
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
         emit campaignLoaded(_campaign);
@@ -1162,6 +1165,20 @@ void MainWindow::addNote()
     QString newNote = inputDlg.textValue();
     if(!newNote.isEmpty())
         _campaign->addNote(newNote);
+}
+
+void MainWindow::showOverlays()
+{
+    if(!_campaign)
+        return;
+
+    OverlaysEditDialog* dlg = new OverlaysEditDialog(*_campaign, this);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg->resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->open();
 }
 
 void MainWindow::editCurrentItem()
@@ -1611,6 +1628,8 @@ void MainWindow::setupRibbonBar()
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
     connect(publishShortcut, SIGNAL(activated()), _ribbon, SLOT(clickPublish()));
 
+    connect(_ribbon, &QTabWidget::currentChanged, this, &MainWindow::cancelSelect);
+
     _ribbon->setCurrentIndex(0);
     setMenuWidget(_ribbon);
 }
@@ -1786,12 +1805,14 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     QDir targetDir(fileInfo.absoluteDir());
     _campaign->outputXML(doc, root, targetDir, false);
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(currentObject)
+    QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+    if(!campaignElement.isNull())
     {
-        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
-        if(!campaignElement.isNull())
-            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+        CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+        if(currentObject)
+        {
+                campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+        }
     }
 
     QFile file(_campaignFileName);
@@ -1838,7 +1859,9 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
 void MainWindow::deleteCampaign()
 {
     if(_pubWindow)
+    {
         _pubWindow->setRenderer(nullptr);
+    }
 
     if(_treeModel)
     {
@@ -1939,6 +1962,9 @@ void MainWindow::writeSpellbook()
 
 CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterType, const QString& filename, CampaignObjectBase* targetObject)
 {
+    if(!_campaign)
+        return nullptr;
+
     NewEntryDialog dlg(_campaign, _options, ui->treeView->currentCampaignObject(), this);
     dlg.setEntryType(encounterType, filename);
     if(dlg.exec() != QDialog::Accepted)
@@ -2145,9 +2171,11 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
-    ui->frameFear->setCampaign(campaign);
-    ui->frameFear->setVisible(campaign && campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive));
+    ui->framePopups->setCampaign(campaign);
+    if(_pubWindow->getOverlayRenderer())
+        _pubWindow->getOverlayRenderer()->setCampaign(campaign);
 
+    ui->framePopups->setMinimumWidth(ui->framePopups->sizeHint().width());
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 
     if(campaign)
@@ -2354,6 +2382,13 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
         contextMenu->addSeparator();
     }
 
+    if((campaignObject->getObjectType() == DMHelper::CampaignType_Text) || (campaignObject->getObjectType() == DMHelper::CampaignType_LinkedText))
+    {
+        QAction* previewWindowItem = new QAction(QIcon(":/img/data/icon_preview.png"), QString("Preview Item..."));
+        connect(previewWindowItem, SIGNAL(triggered()), this, SLOT(previewCurrentTextEntry()));
+        contextMenu->addAction(previewWindowItem);
+    }
+
     QAction* exportItem = new QAction(QIcon(":/img/data/icon_exportitem.png"), QString("Export Item..."));
     connect(exportItem, SIGNAL(triggered()), this, SLOT(exportCurrentItem()));
     contextMenu->addAction(exportItem);
@@ -2505,6 +2540,7 @@ void MainWindow::handleOpenSoundboard()
         connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
         connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
         connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+        connect(soundboard, &SoundboardFrame::trackCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
         connect(soundboard, &SoundboardFrame::dirty, this, &MainWindow::setDirty);
         _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
@@ -2589,6 +2625,39 @@ void MainWindow::handleAnimationStarted()
     if(_pubWindow)
         _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+}
+
+void MainWindow::previewCurrentTextEntry()
+{
+    if(!_treeModel)
+        return;
+
+    QModelIndex index = ui->treeView->currentIndex();
+    if(!index.isValid())
+        return;
+
+    CampaignTreeItem* campaignItem = _treeModel->campaignItemFromIndex(index);
+    if(!campaignItem)
+        return;
+
+    EncounterText* encounter = dynamic_cast<EncounterText*>(campaignItem->getCampaignItemObject());
+    if(!encounter)
+        return;
+
+    QDialog* previewDialog = new QDialog(this);
+    EncounterTextEdit* editWidget = new EncounterTextEdit();
+    editWidget->activateObject(encounter, nullptr);
+    QVBoxLayout *layout = new QVBoxLayout(previewDialog);
+    layout->addWidget(editWidget);
+
+    previewDialog->setWindowTitle(QString("Entry Preview: ") + encounter->getName());
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        previewDialog->resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+    else
+        previewDialog->resize(600, 400);
+    previewDialog->setAttribute(Qt::WA_DeleteOnClose);
+    previewDialog->show();
 }
 
 bool MainWindow::selectItemFromStack(const QUuid& itemId)

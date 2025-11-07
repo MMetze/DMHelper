@@ -29,7 +29,12 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
     _iconPixmap(nullptr)
 {
     if(_monsterClass)
-        _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
+    {
+        if(monsterClass->hasValue("hit_dice"))
+            _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
+        else
+            _monsterHP = _monsterClass->getIntValue("hit_points");
+    }
 }
 
 BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* monsterClass, const QString& monsterName, int initiative, const QPointF& position) :
@@ -42,8 +47,10 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
     _iconFile(),
     _iconPixmap(nullptr)
 {
-    if(_monsterClass)
+    if(monsterClass->hasValue("hit_dice"))
         _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
+    else
+        _monsterHP = _monsterClass->getIntValue("hit_points");
 }
 
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
@@ -203,7 +210,10 @@ int BattleDialogModelMonsterClass::getArmorClass() const
         return 10;
     }
 
-    return _monsterClass->getIntValue("armor_class");
+    if(_monsterClass->hasValue("armor_class"))
+        return _monsterClass->getIntValue("armor_class");
+    else
+        return _monsterClass->getIntValue("difficulty");
 }
 
 int BattleDialogModelMonsterClass::getHitPoints() const

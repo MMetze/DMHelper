@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>669</width>
-    <height>439</height>
+    <width>695</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,7 +42,7 @@
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0">
         <property name="spacing">
-         <number>3</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="CampaignTree" name="treeView">
@@ -175,7 +175,7 @@
          </layout>
         </item>
         <item>
-         <widget class="FearFrame" name="frameFear">
+         <widget class="PopupsPreviewFrame" name="framePopups">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -218,7 +218,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>669</width>
+     <width>695</width>
      <height>21</height>
     </rect>
    </property>
@@ -505,9 +505,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>FearFrame</class>
+   <class>PopupsPreviewFrame</class>
    <extends>QFrame</extends>
-   <header>fearframe.h</header>
+   <header>popupspreviewframe.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

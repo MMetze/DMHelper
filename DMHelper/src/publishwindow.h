@@ -5,6 +5,8 @@
 
 class PublishGLFrame;
 class PublishGLRenderer;
+class OverlayRenderer;
+class Campaign;
 
 class PublishWindow : public QMainWindow
 {
@@ -14,6 +16,7 @@ public:
 
     QUuid getObjectId() const;
     PublishGLRenderer* getRenderer() const;
+    OverlayRenderer* getOverlayRenderer() const;
 
 signals:
     void windowVisible(bool visible);

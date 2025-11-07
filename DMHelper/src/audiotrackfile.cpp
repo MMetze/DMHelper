@@ -43,9 +43,26 @@ int AudioTrackFile::getAudioType() const
     return DMHelper::AudioType_File;
 }
 
+int AudioTrackFile::getTrackStatus() const
+{
+    if(!_player)
+        return AudioTrack::AudioTrackStatus_Stop;
+
+    switch(_player->playbackState())
+    {
+        case QMediaPlayer::PlayingState:
+            return AudioTrack::AudioTrackStatus_Play;
+        case QMediaPlayer::PausedState:
+            return AudioTrack::AudioTrackStatus_Pause;
+        case QMediaPlayer::StoppedState:
+        default:
+            return AudioTrack::AudioTrackStatus_Stop;
+    }
+}
+
 bool AudioTrackFile::isPlaying() const
 {
-    return ((_player) && (_player->playbackState() == QMediaPlayer::PlayingState));
+    return ((_player) && (_player->isPlaying()));
 }
 
 bool AudioTrackFile::isRepeat() const
@@ -66,7 +83,11 @@ float AudioTrackFile::getVolume() const
 void AudioTrackFile::play()
 {
     if(_player)
+    {
+        if(!_player->isPlaying())
+            _player->play();
         return;
+    }
 
     QString fileString = getUrl().toString();
     if(!QFile::exists(fileString))
@@ -100,6 +121,10 @@ void AudioTrackFile::play()
     connect(_player, &QMediaPlayer::durationChanged, this, &AudioTrackFile::handleDurationChanged);
     connect(_player, &QMediaPlayer::positionChanged, this, &AudioTrackFile::handlePositionChanged);
     connect(_player, &QMediaPlayer::errorOccurred, this, &AudioTrackFile::handleErrorOccurred);
+    connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState newState)
+            {
+                emit trackStatusChanged(static_cast<AudioTrack::AudioTrackStatus>(newState));
+            });
 
     if(_mute)
         _player->audioOutput()->setMuted(_mute);
@@ -129,6 +154,7 @@ void AudioTrackFile::setMute(bool mute)
     _mute = mute;
     if((_player) && (_player->audioOutput()))
         _player->audioOutput()->setMuted(mute);
+    emit trackMuteChanged(_mute);
     emit dirty();
 }
 
@@ -140,6 +166,7 @@ void AudioTrackFile::setVolume(float volume)
     _volume = volume;
     if((_player) && (_player->audioOutput()))
         _player->audioOutput()->setVolume(volume);
+    emit trackVolumeChanged(_volume);
     emit dirty();
 }
 
@@ -151,7 +178,16 @@ void AudioTrackFile::setRepeat(bool repeat)
     _repeat = repeat;
     if(_player)
         _player->setLoops(_repeat ? QMediaPlayer::Infinite : 1);
+    emit trackRepeatChanged(_repeat);
     emit dirty();
+}
+
+void AudioTrackFile::pause()
+{
+    if(!_player)
+        return;
+
+    _player->pause();
 }
 
 void AudioTrackFile::handleDurationChanged(qint64 position)

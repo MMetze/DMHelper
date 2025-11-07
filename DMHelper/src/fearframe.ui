@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>242</width>
-    <height>87</height>
+    <width>146</width>
+    <height>52</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,29 +36,22 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="btnFear1">
+      <widget class="QToolButton" name="btnFear1">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -70,27 +63,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear2">
+      <widget class="QToolButton" name="btnFear2">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -102,27 +95,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear3">
+      <widget class="QToolButton" name="btnFear3">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -134,27 +127,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear4">
+      <widget class="QToolButton" name="btnFear4">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -166,27 +159,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear5">
+      <widget class="QToolButton" name="btnFear5">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -198,27 +191,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear6">
+      <widget class="QToolButton" name="btnFear6">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -230,11 +223,11 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
@@ -247,17 +240,17 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="btnFear7">
+      <widget class="QToolButton" name="btnFear7">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -269,27 +262,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear8">
+      <widget class="QToolButton" name="btnFear8">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -301,27 +294,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear9">
+      <widget class="QToolButton" name="btnFear9">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -333,27 +326,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear10">
+      <widget class="QToolButton" name="btnFear10">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -365,27 +358,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear11">
+      <widget class="QToolButton" name="btnFear11">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -397,27 +390,27 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFear12">
+      <widget class="QToolButton" name="btnFear12">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
@@ -429,11 +422,11 @@
        </property>
        <property name="iconSize">
         <size>
-         <width>35</width>
-         <height>35</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="flat">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>

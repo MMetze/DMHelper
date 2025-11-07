@@ -36,6 +36,7 @@ signals:
     void newYoutubeClicked();
     void removeItemClicked();
     void showNotesClicked();
+    void showOverlaysClicked();
     void exportItemClicked();
     void importItemClicked();
     void importCharacterClicked();

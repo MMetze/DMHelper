@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>668</width>
-    <height>651</height>
+    <height>683</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
@@ -1074,17 +1074,6 @@
             <property name="icon">
              <iconset resource="resources.qrc">
               <normaloff>:/img/data/icon_contentbattle.png</normaloff>:/img/data/icon_contentbattle.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkShowFear">
-            <property name="text">
-             <string>Show fear to players</string>
-            </property>
-            <property name="icon">
-             <iconset resource="resources.qrc">
-              <normaloff>:/img/data/img/hood.png</normaloff>:/img/data/img/hood.png</iconset>
             </property>
            </widget>
           </item>

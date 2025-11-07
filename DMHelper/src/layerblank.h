@@ -20,6 +20,7 @@ public:
 
     virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;
+    virtual bool hasSettings() const override;
     virtual Layer* clone() const override;
 
     // Local Layer Interface
@@ -48,6 +49,7 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
+    virtual void editSettings() override;
 
 protected:
     // Layer Specific Interface

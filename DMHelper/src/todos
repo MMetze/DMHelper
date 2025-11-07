@@ -1,30 +1,23 @@
-daggerheart - implement move zones
+daggerheart - need HP to count down for now
+new campaign doesn't open the newly selected bestiary
+new entry (PC, maybe anything) should highlight the entry name first
 daggerheart - make initiative entries custom
-daggerheart - show fear across all published views (move it to a higher level overlay function)
-
-Run tests again to validate
+---> add config to convert a resource number into checkboxes (HP and Stress)
+Daggerheart: show a range-finder with circles of close, near far range
 
 Camapign notes - add a text saying how to take quick notes
 Add a Did You Know text to the welcome page with as much text as possible
-
-
-Create combat test cases
-    blank white
-    blank with color with grid
-    map reference with only an image layer
-    map reference with image and fow, add fow unchecked
-    map reference with image and fow, add fow checked
-    map reference with image and grid, add grid unchecked
-    map reference with image and grid, add grid checked
-    Drag text notes and images into newentrydialog
-
-Daggerheart: show a range-finder with circles of close, near far range
-DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
-Bug: Rendering distance is tiny font
-
 Move the grid lock buttons to the battle tools tab
 Remember different grid sized for different external monitors
 
+Bug: Rendering distance is tiny font
+
+DONE daggerheart - implement move zones
+DONE daggerheart - show fear across all published views (move it to a higher level overlay function)
+DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
+
+DONE Added an interactive preview dialog for text entries
+DONE Add Overlays for Fear, Counters and Timers as well as audio
 DONE Create "Wizards" for add Map or add Combat rather than multiple questions
 DONE Drag and drop to add a map/combat
     - add map/battle/media layer
@@ -48,6 +41,10 @@ DONE Selected FOW layer highlighted when editing
 DONE Allow transparency in FoW textures
 DONE Add combatant token type setting to battle options
 
+OTHER: When switching menus, the active tool is deselected
+
+FIXED: Major source of crashes in video playback - stress test looks very good now!
+FIXED: filling an area on FOW
 FIXED: Leaving the map area with the pointer turns it off on the dm view
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved

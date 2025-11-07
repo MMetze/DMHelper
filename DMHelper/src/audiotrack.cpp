@@ -57,6 +57,11 @@ void AudioTrack::setMD5(const QString& md5)
     _md5 = md5;
 }
 
+int AudioTrack::getTrackStatus() const
+{
+    return AudioTrack::AudioTrackStatus_Stop;
+}
+
 bool AudioTrack::isPlaying() const
 {
     return false;
@@ -75,6 +80,10 @@ bool AudioTrack::isMuted() const
 float AudioTrack::getVolume() const
 {
     return 0;
+}
+
+void AudioTrack::pause()
+{
 }
 
 QDomElement AudioTrack::createOutputXML(QDomDocument &doc)

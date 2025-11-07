@@ -21,8 +21,9 @@ public:
     virtual void setPlayingAudio(bool playAudio);
 
     virtual bool isError() const;
-    virtual QRecursiveMutex* getMutex() const;
-    virtual QImage* getImage() const;
+    virtual bool lockMutex();
+    virtual void unlockMutex();
+    virtual QImage* getLockedImage() const;
     virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
     virtual void clearNewImage();

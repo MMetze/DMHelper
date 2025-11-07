@@ -270,7 +270,6 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
     }
 
     setBattle(battle);
-
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
     _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());
@@ -297,15 +296,8 @@ void BattleFrame::deactivateObject()
 
 void BattleFrame::setBattle(EncounterBattle* battle)
 {
-    if(_battle)
-    {
-        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-        if(campaign)
-        {
-            disconnect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
-            disconnect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
-        }
-    }
+    if(_battle == battle)
+        return;
 
     _battle = battle;
     setModel(_battle == nullptr ? nullptr : _battle->getBattleDialogModel());
@@ -317,9 +309,6 @@ void BattleFrame::setBattle(EncounterBattle* battle)
         {
             ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
             ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-
-            connect(campaign, &Campaign::fearChanged, this, &BattleFrame::fearChanged);
-            connect(campaign, &Campaign::showFearChanged, this, &BattleFrame::fearChanged);
         }
     }
 }
@@ -1036,12 +1025,6 @@ void BattleFrame::createCountdownFrame()
 {
     if((_countdownFile.isEmpty()) || (!_countdownFrame.load(_countdownFile)))
         _countdownFrame.load(QString(":/img/data/countdown_frame.png"));
-}
-
-void BattleFrame::fearChanged()
-{
-    if(_renderer)
-        _renderer->fearChanged();
 }
 
 void BattleFrame::zoomIn()
@@ -1915,7 +1898,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 
 void BattleFrame::resizeEvent(QResizeEvent *event)
 {
-    qDebug() << "[Battle Frame] resized: " << event->size().width() << "x" << event->size().height();
     if(_model)
     {
         if(!_model->getMapRect().isValid())
@@ -3751,9 +3733,13 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         updateCountdownText();
     }
 
-    _model->setActiveCombatant(active);
-    active->setDone(true);
-    connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    if(active)
+    {
+        _model->setActiveCombatant(active);
+        active->setDone(true);
+        connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    }
+
     updateHighlights();
 }
 
@@ -4561,7 +4547,6 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
         if(_moveRadius <= tokenLayer->getScale())
         {
             _moveRadius = tokenLayer->getScale();
-//            _movementPixmap->setRotation(0.0);
             _movementPixmap->setVisible(false);
         }
     }
@@ -4569,7 +4554,6 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(_moveRadius <= tokenLayer->getScale())
     {
         _moveRadius = tokenLayer->getScale();
-//        _movementPixmap->setRotation(0.0);
         _movementPixmap->setVisible(false);
     }
     else

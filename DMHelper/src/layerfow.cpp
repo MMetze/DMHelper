@@ -385,7 +385,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     else
     {
         p.setBrush(_fowColor);
-        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        p.setCompositionMode(QPainter::CompositionMode_Source);
         p.drawRect(rect);
     }
 

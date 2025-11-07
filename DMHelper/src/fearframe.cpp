@@ -26,18 +26,18 @@ FearFrame::FearFrame(QWidget *parent) :
     _buttonMap.insert(11, ui->btnFear11);
     _buttonMap.insert(12, ui->btnFear12);
 
-    connect(ui->btnFear1, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear2, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear3, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear4, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear5, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear6, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear7, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear8, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear9, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear10, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear11, &QPushButton::clicked, this, &FearFrame::buttonClicked);
-    connect(ui->btnFear12, &QPushButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear1, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear2, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear3, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear4, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear5, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear6, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear7, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear8, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear9, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear10, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear11, &QToolButton::clicked, this, &FearFrame::buttonClicked);
+    connect(ui->btnFear12, &QToolButton::clicked, this, &FearFrame::buttonClicked);
 
     QPixmap pmpFearOff(":/img/data/img/hood.png");
     if(!pmpFearOff.isNull())
@@ -66,6 +66,7 @@ void FearFrame::setCampaign(Campaign* campaign)
 {
     _campaign = campaign;
     setFear(_campaign ? _campaign->getFearCount() : 0);
+    connect(_campaign, &Campaign::fearChanged, this, &FearFrame::setFear);
 }
 
 void FearFrame::buttonClicked()
@@ -73,7 +74,7 @@ void FearFrame::buttonClicked()
     if(!_campaign)
         return;
 
-    QPushButton* clickedButton = dynamic_cast<QPushButton*>(sender());
+    QToolButton* clickedButton = dynamic_cast<QToolButton*>(sender());
     if(!clickedButton)
         return;
 
@@ -96,7 +97,7 @@ void FearFrame::setFear(int fear)
 {
     for(int i = 1; i <= 12; ++i)
     {
-        QPushButton* button = _buttonMap.value(i, nullptr);
+        QToolButton* button = _buttonMap.value(i, nullptr);
         if(button)
         {
             if(i <= fear)

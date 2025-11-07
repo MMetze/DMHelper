@@ -53,8 +53,6 @@ public slots:
     void setInitiativeScale(qreal initiativeScale);
     void combatantTokenTypeChanged();
 
-    void fearChanged();
-
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
 
@@ -127,6 +125,8 @@ protected:
     qreal _initiativeScale;
     qreal _initiativeTokenHeight;
     bool _movementVisible;
+    int _movementType;
+    QList<int> _movementRanges;
     BattleDialogModelCombatant* _movementCombatant;
     PublishGLImage* _movementToken;
     QString _tokenFrameFile;
@@ -137,7 +137,6 @@ protected:
     bool _showCountdown;
     qreal _countdownScale;
     QColor _countdownColor;
-    PublishGLImage* _fearCounter;
 
     BattleDialogModelCombatant* _activeCombatant;
 

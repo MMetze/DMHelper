@@ -26,13 +26,22 @@ public:
     virtual QString getMD5() const;
     virtual void setMD5(const QString& md5);
 
+    virtual int getTrackStatus() const;
     virtual bool isPlaying() const;
     virtual bool isRepeat() const;
     virtual bool isMuted() const;
     virtual float getVolume() const;
 
+    enum AudioTrackStatus
+    {
+        AudioTrackStatus_Stop = 0,
+        AudioTrackStatus_Play,
+        AudioTrackStatus_Pause
+    };
+
 public slots:
     virtual void play() = 0;
+    virtual void pause();
     virtual void stop() = 0;
     virtual void setMute(bool mute) = 0;
     virtual void setVolume(float volume) = 0;
@@ -41,6 +50,10 @@ public slots:
 signals:
     void trackLengthChanged(int length);
     void trackPositionChanged(int length);
+    void trackStatusChanged(AudioTrackStatus status);
+    void trackRepeatChanged(bool repeat);
+    void trackVolumeChanged(float volume);
+    void trackMuteChanged(bool mute);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

@@ -19,6 +19,9 @@ public slots:
 
     AudioTrack* createTrackFromUrl(const QUrl& url, const QString& objectName);
     int identifyAudioSubtype(const QUrl& url);
+
+signals:
+    void trackCreated(AudioTrack* track);
 };
 
 #endif // AUDIOFACTORY_H
