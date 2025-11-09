@@ -282,6 +282,11 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
     if((!chroma) || (!width) || (!height) || (!pitches) || (!lines))
         return 0;
 
+    if(!_mutex)
+        return 0;
+
+    QMutexLocker locker(_mutex);
+
     if((_buffers[0]) || (_buffers[1]))
         return 0;
 
@@ -349,6 +354,10 @@ void VideoPlayer::exitEventCallback()
 
 void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
 {
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayer] Event callback called. p_event: " << p_event;
+#endif
+
     if(p_event)
     {
         switch(p_event->type)
@@ -380,6 +389,10 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
 
         _status = p_event->type;
     }
+
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayer] Event callback completed";
+#endif
 }
 
 void VideoPlayer::targetResized(const QSize& newSize)
