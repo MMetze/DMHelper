@@ -103,6 +103,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
 
             ui->edtMovement->setText(_campaign->getRuleset().getMovementString());
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->chkHitPointsCoundDown->setChecked(_campaign->getRuleset().getHitPointsCoundDown());
             ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
             ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
             ui->edtBestiaryFile->setText(_campaign->getRuleset().getBestiaryFile());
@@ -218,6 +219,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->setName(ui->edtCampaignName->text());
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
     _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
+    _campaign->getRuleset().setHitPointsCountDown(ui->chkHitPointsCoundDown ->isChecked());
     _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
     _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());
     _campaign->getRuleset().setBestiaryFile(ui->edtBestiaryFile->text());

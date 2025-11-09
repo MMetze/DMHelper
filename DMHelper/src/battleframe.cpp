@@ -3155,20 +3155,19 @@ void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* comba
     if((!_model) || (!combatant))
         return;
 
-    bool vis = ((combatant->getHitPoints() > 0) ||
-                (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+    bool visible = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
 
     LayerTokens* tokensLayer = combatant->getLayer();
     if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
-        vis = false;
+        visible = false;
 
     QWidget* widget = _combatantWidgets.value(combatant);
     if(widget)
-        widget->setVisible(vis);
+        widget->setVisible(visible);
 
     // Set the visibility of the active rect
     if((_activePixmap) && (combatant == _model->getActiveCombatant()))
-        _activePixmap->setVisible(vis);
+        _activePixmap->setVisible(visible);
 }
 
 void BattleFrame::setMapCursor()

@@ -193,6 +193,7 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
             newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
             newRuleset._rulesetDir = QFileInfo(rulesetFile).absolutePath();
             newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
+            newRuleset._hitPointsCountDown = rulesetElement.hasAttribute("hitPointsCountDown") ? static_cast<bool>(rulesetElement.attribute("hitPointsCountDown").toInt()) : true;
             newRuleset._movement = rulesetElement.attribute(QString("movement"));
 
             if((newRuleset._name == DEFAULT_RULESET_NAME) && (newRuleset._bestiary == DEFAULT_BESTIARY) && (!getDefaultBestiary().isEmpty()))

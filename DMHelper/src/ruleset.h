@@ -33,6 +33,7 @@ public:
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool getCombatantDoneCheckbox() const;
+    bool getHitPointsCoundDown() const;
     QString getMovementString() const;
     DMHelper::MovementType getMovementType() const;
     QList<int> getMovementRanges() const;
@@ -47,6 +48,7 @@ signals:
     void bestiaryFileChanged(const QString& bestiaryFile);
     void monsterDataFileChanged(const QString& monsterDataFile);
     void monsterUIFileChanged(const QString& monsterUIFile);
+    void hitPointsCountDownChanged(bool countDown);
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
@@ -56,6 +58,7 @@ public slots:
     void setMonsterDataFile(const QString& monsterDataFile);
     void setMonsterUIFile(const QString& monsterUIFile);
     void setCombatantDoneCheckbox(bool checked);
+    void setHitPointsCountDown(bool countDown);
     void setMovementString(const QString& movement);
     void setMovementType(DMHelper::MovementType type);
     void setMovementRanges(QList<int> ranges);
@@ -76,6 +79,7 @@ protected:
     QString _monsterDataFile;
     QString _monsterUIFile;
     bool _combatantDoneCheckbox;
+    bool _hitPointsCountDown;
     DMHelper::MovementType _movementType;
     QList<int> _movementRanges;
 };

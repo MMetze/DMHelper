@@ -1,3 +1,13 @@
+v3.7 Bugs
+- in Daggerheart campaigns, "dead at zero HP" is wrong (connect HP to HP as well)
+- Publish button reactivation isn't always working (switch back and forth) for combats
+- Fiddling with the bestiary and the default bestiary don't work right
+- Select a location, add monster - places them at the middle of the map...
+- Cast a spell Fireball doesn't do anything
+        - Local spellbook has effects relative in the wrong spot - check the default and new copy/paste please
+- VLC stale cache handling
+
+
 User Guide
 It appears no changes were made to the User Guide so I will say all items here still apply
 pg. 9 Scroll Text no longer exists.

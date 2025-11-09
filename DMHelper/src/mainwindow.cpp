@@ -827,6 +827,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));

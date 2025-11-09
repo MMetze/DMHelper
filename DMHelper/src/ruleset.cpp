@@ -14,6 +14,7 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
     _monsterDataFile(),
     _monsterUIFile(),
     _combatantDoneCheckbox(),
+    _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
     _movementRanges()
 {
@@ -28,6 +29,7 @@ Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *p
     _monsterDataFile(),
     _monsterUIFile(),
     _combatantDoneCheckbox(),
+    _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
     _movementRanges()
 {
@@ -84,6 +86,7 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
         _bestiaryFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
 
     _combatantDoneCheckbox = element.hasAttribute("combatantDone") ? static_cast<bool>(element.attribute("combatantDone").toInt()) : rulesetTemplate._combatantDone;
+    _hitPointsCountDown = element.hasAttribute("hitPointsCountDown") ? static_cast<bool>(element.attribute("hitPointsCountDown").toInt()) : rulesetTemplate._hitPointsCountDown;
 
     setMovementString(element.attribute("movementType"));
 }
@@ -118,6 +121,7 @@ void Ruleset::setValues(const RuleFactory::RulesetTemplate& rulesetTemplate)
     _monsterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI);
 
     _combatantDoneCheckbox = rulesetTemplate._combatantDone;
+    _hitPointsCountDown = rulesetTemplate._hitPointsCountDown;
 
     qDebug() << "[Ruleset] Values for the ruleset set to the default values for the template: " << rulesetTemplate._name;
 }
@@ -176,6 +180,11 @@ bool Ruleset::getCombatantDoneCheckbox() const
 QString Ruleset::getMovementString() const
 {
     return movementStringFromType(_movementType, &_movementRanges);
+}
+
+bool Ruleset::getHitPointsCoundDown() const
+{
+    return _hitPointsCountDown;
 }
 
 DMHelper::MovementType Ruleset::getMovementType() const
@@ -313,6 +322,16 @@ void Ruleset::setCombatantDoneCheckbox(bool checked)
     emit initiativeRuleChanged();
 }
 
+void Ruleset::setHitPointsCountDown(bool countDown)
+{
+    if(_hitPointsCountDown == countDown)
+        return;
+
+    _hitPointsCountDown = countDown;
+    emit dirty();
+    emit hitPointsCountDownChanged(_hitPointsCountDown);
+}
+
 void Ruleset::setMovementString(const QString& movement)
 {
     _movementType = movementTypeFromString(movement, &_movementRanges);
@@ -380,6 +399,9 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
 
     if(_combatantDoneCheckbox != rulesetTemplate._combatantDone)
         element.setAttribute("combatantDone", _combatantDoneCheckbox);
+
+    if(_hitPointsCountDown != rulesetTemplate._hitPointsCountDown)
+        element.setAttribute("hitPointsCountDown", _hitPointsCountDown);
 
     if(_movementType != DMHelper::MovementType_Distance)
         element.setAttribute("movementType", movementStringFromType(_movementType, &_movementRanges));

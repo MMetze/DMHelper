@@ -25,6 +25,7 @@ public:
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool isCombatantDone() const;
+    bool isHitPointsCountDown() const;
 
     QString getRuleset() const;
     void setRuleset(const QString& rulesetName);
