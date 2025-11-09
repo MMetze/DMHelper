@@ -77,15 +77,13 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
         return;
     }
     QImage* videoPlayerImage = _videoPlayer->getLockedImage();
-    QImage otherImage;
-    /*
     if(!videoPlayerImage)
     {
         _videoPlayer->unlockMutex();
         qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
         return;
-    }*/
-    QImage effectImage = otherImage.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    }
+    QImage effectImage = videoPlayerImage->scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
     _videoPlayer->unlockMutex();
 
     _textureSize = effectImage.size();
