@@ -83,7 +83,8 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
         qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
         return;
     }
-    QImage effectImage = videoPlayerImage->scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    QImage imageCopy = videoPlayerImage->copy();
+    QImage effectImage = imageCopy.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
     _videoPlayer->unlockMutex();
 
     _textureSize = effectImage.size();
@@ -211,14 +212,14 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
 
         // load and generate the background texture
         QImage* videoPlayerImage = _videoPlayer->getLockedImage();
-        QImage otherImage;
         if(!videoPlayerImage)
         {
             qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
         }
         else
         {
-            QImage effectImage = otherImage.scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+            QImage imageCopy = videoPlayerImage->copy();
+            QImage effectImage = imageCopy.scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
             functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
             functions->glGenerateMipmap(GL_TEXTURE_2D);
         }
