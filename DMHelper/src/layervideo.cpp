@@ -254,7 +254,8 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
             {
-                _videoObject = new PublishGLBattleBackground(nullptr, *playerImage, GL_NEAREST);
+                QImage otherImage;
+                _videoObject = new PublishGLBattleBackground(nullptr, otherImage, GL_NEAREST);
                 QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
                 _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
                 _videoObject->setTargetSize(_size);
@@ -267,8 +268,9 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         if(_videoPlayer->lockMutex())
         {
             QImage* playerImage = _videoPlayer->getLockedImage();
-            if(playerImage)
-                _videoObject->updateImage(*playerImage);
+            QImage otherImage;
+            //if(playerImage)
+                _videoObject->updateImage(otherImage);
             _videoPlayer->unlockMutex();
         }
     }
