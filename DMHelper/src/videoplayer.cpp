@@ -4,6 +4,8 @@
 
 #define VIDEO_DEBUG_MESSAGES
 
+int COUNT_CALLBACKS = 0;
+
 const int VIDEOPLAYER_STOP_CALL_STARTED = 0x01;
 const int VIDEOPLAYER_STOP_CALL_COMPLETE = 0x02;
 const int VIDEOPLAYER_STOP_CONFIRMED = 0x04;
@@ -744,7 +746,7 @@ QImage* VideoPlayer::VideoPlayerImageBuffer::getFrame()
 void * playerLockCallback(void *opaque, void **planes)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerLockCallback: " << opaque;
+    qDebug() << "[VideoPlayer] playerLockCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
 
     if(!opaque)
@@ -773,7 +775,7 @@ void * playerLockCallback(void *opaque, void **planes)
 void playerUnlockCallback(void *opaque, void *picture, void *const *planes)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerUnlockCallback: " << opaque;
+    qDebug() << "[VideoPlayer] playerUnlockCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
 
     if(!opaque)
@@ -796,7 +798,7 @@ void playerUnlockCallback(void *opaque, void *picture, void *const *planes)
 void playerDisplayCallback(void *opaque, void *picture)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerDisplayCallback: " << opaque;
+    qDebug() << "[VideoPlayer] playerDisplayCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
 
     if(!opaque)
@@ -838,7 +840,7 @@ unsigned playerFormatCallback(void **opaque, char *chroma,
                               unsigned *lines)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerFormatCallback: " << opaque;
+    qDebug() << "[VideoPlayer] playerFormatCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
 
     if((!opaque)||(!(*opaque)))
@@ -857,7 +859,7 @@ unsigned playerFormatCallback(void **opaque, char *chroma,
 void playerCleanupCallback(void *opaque)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerCleanupCallback: " << opaque;
+    qDebug() << "[VideoPlayer] playerCleanupCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
     if(!opaque)
         return;
@@ -886,7 +888,7 @@ void playerCleanupCallback(void *opaque)
 void playerExitEventCallback(void *opaque)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerExitEventCallback: " << opaque;
+    qDebug() << "[VideoPlayer] playerExitEventCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
     if(!opaque)
         return;
@@ -916,7 +918,7 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
     Q_UNUSED(args);
 
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] VLC Log: " << QString::vasprintf(fmt, args);
+    qDebug() << "[VideoPlayer] VLC Log: " << QString::vasprintf(fmt, args) << ", " << COUNT_CALLBACKS++;
 #endif
 
     return;
@@ -929,7 +931,7 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerEventCallback: " << p_data;
+    qDebug() << "[VideoPlayer] playerEventCallback: " << p_data << ", " << COUNT_CALLBACKS++;
 #endif
     if(!p_data)
         return;
