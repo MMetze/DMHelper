@@ -418,7 +418,7 @@ void VideoPlayer::stopThenDelete()
 
 
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] stopThenDelete completed" << ", " << this;
+    qDebug() << "[VideoPlayer] stopThenDelete completed";
 #endif
 
 }
