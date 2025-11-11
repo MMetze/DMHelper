@@ -14,6 +14,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QOpenGLWidget>
+#include <QDebug>
 
 LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -248,6 +249,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     {
         if(_videoPlayer->lockMutex())
         {
+            qDebug() << "[LayerVideo] Getting new image from video player: " << _videoPlayer << ", " << this << ", " << COUNT_CALLBACKS;
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
             {
