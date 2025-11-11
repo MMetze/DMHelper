@@ -249,7 +249,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     {
         if(_videoPlayer->lockMutex())
         {
-            qDebug() << "[LayerVideo] Getting new image from video player: " << _videoPlayer << ", " << this << ", " << COUNT_CALLBACKS;
+            qDebug() << "[LayerVideo] Getting new image from video player: " << _videoPlayer << ", " << this;
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
             {
