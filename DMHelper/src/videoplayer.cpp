@@ -406,18 +406,21 @@ void VideoPlayer::targetResized(const QSize& newSize)
 
 void VideoPlayer::stopThenDelete()
 {
-    if(isProcessing())
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayer] stopThenDelete called, " << this << ", " << COUNT_CALLBACKS;
+#endif
+
+  if(isProcessing())
     {
-        qDebug() << "[VideoPlayer] Stop Then Delete triggered, stop called..." << ", " << this << ", " << COUNT_CALLBACKS;
+        qDebug() << "[VideoPlayer] Stop Then Delete triggered, stop called, " << this << ", " << COUNT_CALLBACKS;
         _deleteOnStop = true;
         stopPlayer();
     }
     else
     {
-        qDebug() << "[VideoPlayer] Stop Then Delete triggered, immediate delete possible." << ", " << this << ", " << COUNT_CALLBACKS;
-        delete this;
+        qDebug() << "[VideoPlayer] Stop Then Delete triggered, immediate delete possible, " << this << ", " << COUNT_CALLBACKS;
+// HACKHACKHACK        delete this;
     }
-
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] stopThenDelete completed, " << COUNT_CALLBACKS;
@@ -468,11 +471,12 @@ void VideoPlayer::internalStopCheck(int status)
         qDebug() << "[VideoPlayer] Internal Stop Check: VLC player destroyed" << ", " << this << ", " << COUNT_CALLBACKS;
     }
 
+      /* DON'T THINK THIS IS NEEDED???? 
     if(_vlcMedia)
     {
         libvlc_media_release(_vlcMedia);
         _vlcMedia = nullptr;
-    }
+    }*/
 
     cleanupBuffers();
 
@@ -486,6 +490,7 @@ void VideoPlayer::internalStopCheck(int status)
     if(_deleteOnStop)
     {
         qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed." << ", " << this << ", " << COUNT_CALLBACKS;
+// TODO: should this not delete the player?
         return;
     }
 }
@@ -513,6 +518,10 @@ bool VideoPlayer::initializeVLC()
 
 bool VideoPlayer::startPlayer()
 {
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayer] Starting player " << ", " << this << ", " << COUNT_CALLBACKS;
+#endif
+
     if(!DMH_VLC::vlcInstance())
     {
         qDebug() << "[VideoPlayer] ERROR: VLC not instantiated - not able to start player!" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -637,9 +646,9 @@ void VideoPlayer::cleanupBuffers()
 
     QMutexLocker locker(_mutex);
 
-    delete _buffers[0];
+// HACKHACKHACK    delete _buffers[0];
     _buffers[0] = nullptr;
-    delete _buffers[1];
+// HACKHACKHACK    delete _buffers[1];
     _buffers[1] = nullptr;
 
 #ifdef VIDEO_DEBUG_MESSAGES
