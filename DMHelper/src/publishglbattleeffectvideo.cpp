@@ -210,7 +210,7 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
             return;
         }
 
-        qDebug() << "[PublishGLBattleEffectVideo] Getting new image from video player: " << _videoPlayer << ", " << this << ", " << COUNT_CALLBACKS;
+        qDebug() << "[PublishGLBattleEffectVideo] Getting new image from video player: " << _videoPlayer << ", " << this;
 
         // load and generate the background texture
         QImage* videoPlayerImage = _videoPlayer->getLockedImage();
