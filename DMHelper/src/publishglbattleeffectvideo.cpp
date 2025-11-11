@@ -210,6 +210,8 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
             return;
         }
 
+        qDebug() << "[PublishGLBattleEffectVideo] Getting new image from video player: " << _videoPlayer << ", " << this << ", " << COUNT_CALLBACKS;
+
         // load and generate the background texture
         QImage* videoPlayerImage = _videoPlayer->getLockedImage();
         if(!videoPlayerImage)
@@ -223,6 +225,7 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
             functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
             functions->glGenerateMipmap(GL_TEXTURE_2D);
         }
+        _videoPlayer->clearNewImage();
         _videoPlayer->unlockMutex();
     }
 
