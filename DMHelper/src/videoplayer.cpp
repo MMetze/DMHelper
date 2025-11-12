@@ -287,10 +287,10 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
     if(!_mutex)
         return 0;
 
-    QMutexLocker locker(_mutex);
-
     if((_buffers[0]) || (_buffers[1]))
         return 0;
+
+    QMutexLocker locker(_mutex);
 
     qDebug() << "[VideoPlayer] Format Callback with chroma: " << QString(chroma) << ", width: " << *width << ", height: " << *height << ", pitches: " << *pitches << ", lines: " << *lines << ", " << this;
 

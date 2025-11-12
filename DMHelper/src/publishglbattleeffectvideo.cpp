@@ -85,6 +85,7 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
     }
     QImage imageCopy = videoPlayerImage->copy();
     QImage effectImage = imageCopy.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    _videoPlayer->clearNewImage();
     _videoPlayer->unlockMutex();
 
     _textureSize = effectImage.size();

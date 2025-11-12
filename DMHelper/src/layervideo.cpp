@@ -245,7 +245,6 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
 
-
     if(!_videoObject)
     {
         if((!_videoPlayer->isNewImage()) && (getScreenshot().isNull()))
@@ -262,6 +261,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
                 _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
                 _videoObject->setTargetSize(_size);
             }
+            _videoPlayer->clearNewImage();
             _videoPlayer->unlockMutex();
         }
     }
@@ -275,6 +275,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
                 QImage imageCopy = playerImage->copy();
                 _videoObject->updateImage(imageCopy);
             }
+            _videoPlayer->clearNewImage();
             _videoPlayer->unlockMutex();
         }
     }
@@ -306,7 +307,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
             _videoPlayer->unlockMutex();
         }
     }
-*/
+    */
 
     if(!_videoObject)
         return;
@@ -359,7 +360,7 @@ void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultM
 {
     Q_UNUSED(defaultModelMatrix);
 
-    if(!functions)
+    if((!functions) || (!_videoObject))
         return;
 
     DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
