@@ -31,7 +31,7 @@ PublishGLBattleEffectVideo::PublishGLBattleEffectVideo(PublishGLScene* scene, Ba
     if(effect)
     {
         _videoPlayer = new VideoPlayer(effect->getImageFile(), QSize(), true, effect->isPlayAudio());
-        connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget);
+        connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget, Qt::QueuedConnection);
         _videoPlayer->restartPlayer();
     }
 }

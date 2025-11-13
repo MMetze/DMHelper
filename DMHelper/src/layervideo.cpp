@@ -513,7 +513,7 @@ void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)
     _videoGLPlayer->restartPlayer();
 #else
     _videoPlayer = new VideoPlayer(_filename, QSize(), true, _playAudio);
-    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget, Qt::QueuedConnection);
     _videoPlayer->restartPlayer();
 #endif
 }

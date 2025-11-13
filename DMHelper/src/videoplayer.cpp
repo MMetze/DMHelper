@@ -256,11 +256,6 @@ void VideoPlayer::unlockCallback(void *picture, void *const *planes)
     _newImage = true;
     _mutex->unlock();
 
-    if(++_frameCount == 3)
-        emit screenShotAvailable();
-
-    emit frameAvailable();
-
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Unlock completed" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
@@ -269,6 +264,11 @@ void VideoPlayer::unlockCallback(void *picture, void *const *planes)
 void VideoPlayer::displayCallback(void *picture)
 {
     Q_UNUSED(picture);
+
+    if(++_frameCount == 3)
+        emit screenShotAvailable();
+
+    emit frameAvailable();
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Display callback called" << ", " << this << ", " << COUNT_CALLBACKS;
