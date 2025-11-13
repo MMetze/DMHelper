@@ -265,10 +265,10 @@ void VideoPlayer::displayCallback(void *picture)
 {
     Q_UNUSED(picture);
 
-    if(++_frameCount == 3)
-        emit screenShotAvailable();
+//    if(++_frameCount == 3)
+//        emit screenShotAvailable();
 
-    emit frameAvailable();
+//    emit frameAvailable();
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Display callback called" << ", " << this << ", " << COUNT_CALLBACKS;
