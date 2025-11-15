@@ -145,6 +145,9 @@ QString RuleFactory::getDefaultBestiary() const
 
 void RuleFactory::readRuleset(const QString& rulesetFile)
 {
+    if(rulesetFile.isEmpty())
+        return;
+
     qDebug() << "[RuleFactory] Reading ruleset from " << rulesetFile;
 
     QDomDocument doc("DMHelperDataXML");
