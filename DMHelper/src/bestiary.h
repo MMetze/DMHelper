@@ -32,6 +32,7 @@ public:
 
     // Local Interface
     bool writeBestiary(const QString& targetFilename);
+    void closeBestiary();
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, const QString& importFile = QString());
 

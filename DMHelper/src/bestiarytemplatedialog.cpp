@@ -290,7 +290,12 @@ void BestiaryTemplateDialog::dataChanged()
     {
         int index = ui->cmbSearch->findText(previousMonster);
         if(index >= 0)
-            ui->cmbSearch->setCurrentIndex(index);
+        {
+            if(ui->cmbSearch->currentIndex() == index)
+                setMonster(previousMonster);
+            else
+                ui->cmbSearch->setCurrentIndex(index);
+        }
     }
     else
     {

@@ -829,6 +829,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
         _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -837,6 +838,10 @@ void MainWindow::newCampaign()
 
         if(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive))
             _campaign->addOverlay(new OverlayFear());
+
+        _bestiaryDlg.setMonster(nullptr);
+        _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
+        Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -899,6 +904,10 @@ bool MainWindow::closeCampaign()
 
     writeBestiary();
     deleteCampaign();
+
+    if(Bestiary::Instance())
+        Bestiary::Instance()->closeBestiary();
+
     clearDirty();
 
     qDebug() << "[MainWindow] Campaign closed";

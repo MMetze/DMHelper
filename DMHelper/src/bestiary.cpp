@@ -135,9 +135,29 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
     file.close();
     setDirty(false);
 
-    qDebug() << "[MainWindow] Bestiary file writing complete: " << targetFilename;
+    qDebug() << "[Bestiary] Bestiary file writing complete: " << targetFilename;
 
     return true;
+}
+
+void Bestiary::closeBestiary()
+{
+    if(isDirty())
+        qDebug() << "[Bestiary] WARNING: closing the bestiary although it is still dirty! It should be saved first";
+
+    if(_bestiaryMap.count() > 0)
+    {
+        qDeleteAll(_bestiaryMap);
+        _bestiaryMap.clear();
+    }
+
+    _bestiaryDirectory = QDir();
+    _bestiaryFile = QString();
+    _majorVersion = 0;
+    _minorVersion = 0;
+    _licenseText.clear();
+
+    setDirty(false);
 }
 
 int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const
@@ -585,12 +605,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     startBatchChanges();
 
     // Remove the existing bestiary before resetting the directory and filename
-    if(_bestiaryMap.count() > 0)
-    {
-        qDebug() << "[Bestiary]    Unloading previous bestiary";
-        qDeleteAll(_bestiaryMap);
-        _bestiaryMap.clear();
-    }
+    closeBestiary();
 
     QFileInfo fileInfo(absoluteTargetFilename);
     setDirectory(fileInfo.absoluteDir());
@@ -598,6 +613,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     inputXML(root);
 
     finishBatchChanges();
+    setDirty(false);
 
     if(isVersionCompatible())
         emit bestiaryLoaded(_bestiaryFile, !isVersionIdentical());
