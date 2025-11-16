@@ -142,6 +142,9 @@ void BestiaryPopulateTokensDialog::urlRequestFinished(QNetworkReply *reply)
         QMessageBox::critical(this, tr("Token Search Error"), tr("Error encountered retrieving link to token for ") + _currentMonster + tr(": ") + reply->errorString());
 
         reply->deleteLater();
+        cancelRequests();
+        accept();
+
         return;
     }
 
