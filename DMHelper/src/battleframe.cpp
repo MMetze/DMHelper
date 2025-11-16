@@ -272,7 +272,7 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
     setBattle(battle);
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
-    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());
+    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle);
     if(_cameraRect)
         _cameraRect->setPublishing(_isPublishing);
 
@@ -2119,7 +2119,7 @@ void BattleFrame::layerSelected(int selected)
 
 void BattleFrame::publishClicked(bool checked)
 {
-    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _model)))
+    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _battle)))
         return;
 
     _isPublishing = checked;
@@ -3481,7 +3481,7 @@ void BattleFrame::clearDoneFlags()
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
-    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
+    if((!renderer) || (!_battle) || (renderer->getObject() != _battle))
         return;
 
     connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
