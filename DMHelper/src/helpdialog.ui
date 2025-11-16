@@ -76,7 +76,7 @@
        <item>
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Get Help at our Discord: &lt;/span&gt;&lt;a href=&quot;https://discord.gg/Uzum3mCeDG&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://discord.gg/Uzum3mCeDG&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Get Help at our Discord: &lt;/span&gt;&lt;a href=&quot;https://discord.gg/Uzum3mCeDG&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://discord.gg/Uzum3mCeDG&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Get the (free) &lt;/span&gt;&lt;a href=&quot;https://forum.dm-helper.com/t/bestiary-almost-complete-bestiary/35&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Fan Content Bestiary&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-weight:700;&quot;&gt; on our &lt;/span&gt;&lt;a href=&quot;https://forum.dm-helper.com/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Community Forums&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textFormat">
           <enum>Qt::RichText</enum>
