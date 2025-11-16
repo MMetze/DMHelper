@@ -22,6 +22,8 @@ public:
 
     // Local interface
     void setValues(const RuleFactory::RulesetTemplate& rulesetTemplate);
+    void startBatchProcessing();
+    void endBatchProcessing();
 
     // Local accessors
     bool isInitialized() const;
@@ -42,13 +44,7 @@ public:
     static QString movementStringFromType(DMHelper::MovementType movementType, const QList<int>* movementRanges = nullptr);
 
 signals:
-    void initiativeRuleChanged();
-    void characterDataFileChanged(const QString& characterDataFile);
-    void characterUIFileChanged(const QString& characterUIFile);
-    void bestiaryFileChanged(const QString& bestiaryFile);
-    void monsterDataFileChanged(const QString& monsterDataFile);
-    void monsterUIFileChanged(const QString& monsterUIFile);
-    void hitPointsCountDownChanged(bool countDown);
+    void rulesetChanged();
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
@@ -72,6 +68,8 @@ protected:
 
     bool areSameFile(const QString& file1, const QString& file2) const;
 
+    void registerChange();
+
     RuleInitiative* _ruleInitiative;
     QString _characterDataFile;
     QString _characterUIFile;
@@ -82,6 +80,9 @@ protected:
     bool _hitPointsCountDown;
     DMHelper::MovementType _movementType;
     QList<int> _movementRanges;
+
+    bool _batchProcessing;
+    bool _changed;
 };
 
 #endif // RULESET_H

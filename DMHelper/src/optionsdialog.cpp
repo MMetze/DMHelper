@@ -217,6 +217,7 @@ void OptionsDialog::applyCampaignChanges()
         return;
 
     _campaign->setName(ui->edtCampaignName->text());
+    _campaign->getRuleset().startBatchProcessing();
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
     _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
     _campaign->getRuleset().setHitPointsCountDown(ui->chkHitPointsCoundDown ->isChecked());
@@ -226,6 +227,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->getRuleset().setMonsterDataFile(ui->edtMonsterData->text());
     _campaign->getRuleset().setMonsterUIFile(ui->edtMonsterUI->text());
     _campaign->getRuleset().setMovementString(ui->edtMovement->text());
+    _campaign->getRuleset().endBatchProcessing();
 }
 
 void OptionsDialog::browseDefaultBestiary()

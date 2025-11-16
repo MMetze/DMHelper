@@ -1471,18 +1471,18 @@ void MainWindow::closeEvent(QCloseEvent * event)
     // Save the Bestiary
     writeBestiary();
 
-    if(!closeCampaign())
-    {
-        event->ignore();
-        return;
-    }
-
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
         writeSpellbook();
 
     _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getStringValue("name") : "");
     _options->setLastSpell(_spellDlg.getSpell() ? _spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
+
+    if(!closeCampaign())
+    {
+        event->ignore();
+        return;
+    }
 
     qApp->quit();
 }
@@ -2055,7 +2055,8 @@ void MainWindow::openCampaign(const QString& filename)
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        QMessageBox::critical(this,
+                              QString("Campaign file open failed"),
                               QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Unable to open campaign file";
         return;
@@ -2170,6 +2171,27 @@ void MainWindow::openCampaign(const QString& filename)
     clearDirty();
 }
 
+void MainWindow::reloadCampaign()
+{
+    if((!_campaign) || (_campaignFileName.isEmpty()))
+        return;
+
+    QMessageBox::StandardButton result = QMessageBox::question(this,
+                                                               QString("Reload Campaign"),
+                                                               QString("You have changed the ruleset for this campaign. To reconfigure it safely, the campaign needs to be closed and reopened:") + QChar::LineFeed + QChar::LineFeed + _campaignFileName + QChar::LineFeed + QChar::LineFeed + QString("Would you like to continue?"),
+                                                               QMessageBox::Yes | QMessageBox::Cancel);
+    if(result == QMessageBox::Cancel)
+        return;
+
+    QString currentCampaignFile = _campaignFileName;
+    qDebug() << "[MainWindow] Reopening: " << currentCampaignFile;
+
+    if(!closeCampaign())
+        return;
+
+    openCampaign(currentCampaignFile);
+}
+
 void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
     qDebug() << "[MainWindow] Campaign Loaded: " << _campaignFileName;
@@ -2199,10 +2221,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(campaign, &Campaign::nameChanged, this, &MainWindow::setDirty);
 
         _characterFrame->loadCharacterUITemplate(campaign->getRuleset().getCharacterUIFile());
-        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
-        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
-        connect(&campaign->getRuleset(), &Ruleset::characterUIFileChanged, _characterFrame, &CharacterTemplateFrame::loadCharacterUITemplate);
-        connect(&campaign->getRuleset(), &Ruleset::monsterUIFileChanged, &_bestiaryDlg, &BestiaryTemplateDialog::loadMonsterUITemplate);
+        connect(&campaign->getRuleset(), &Ruleset::rulesetChanged, this, &MainWindow::reloadCampaign);
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);

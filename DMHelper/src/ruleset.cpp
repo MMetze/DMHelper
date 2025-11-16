@@ -16,7 +16,9 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
     _combatantDoneCheckbox(),
     _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
-    _movementRanges()
+    _movementRanges(),
+    _batchProcessing(false),
+    _changed(false)
 {
 }
 
@@ -31,7 +33,9 @@ Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *p
     _combatantDoneCheckbox(),
     _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
-    _movementRanges()
+    _movementRanges(),
+    _batchProcessing(false),
+    _changed(false)
 {
     setValues(rulesetTemplate);
 }
@@ -124,6 +128,22 @@ void Ruleset::setValues(const RuleFactory::RulesetTemplate& rulesetTemplate)
     _hitPointsCountDown = rulesetTemplate._hitPointsCountDown;
 
     qDebug() << "[Ruleset] Values for the ruleset set to the default values for the template: " << rulesetTemplate._name;
+}
+
+void Ruleset::startBatchProcessing()
+{
+    _batchProcessing = true;
+    _changed = false;
+}
+
+void Ruleset::endBatchProcessing()
+{
+    _batchProcessing = false;
+    if(_changed)
+    {
+        emit rulesetChanged();
+        _changed = false;
+    }
 }
 
 bool Ruleset::isInitialized() const
@@ -259,7 +279,7 @@ void Ruleset::setRuleInitiative(const QString& initiativeType)
 
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
     emit dirty();
-    emit initiativeRuleChanged();
+    registerChange();
 }
 
 void Ruleset::setCharacterDataFile(const QString& characterDataFile)
@@ -269,7 +289,7 @@ void Ruleset::setCharacterDataFile(const QString& characterDataFile)
 
     _characterDataFile = characterDataFile;
     emit dirty();
-    emit characterDataFileChanged(_characterDataFile);
+    registerChange();
 }
 
 void Ruleset::setCharacterUIFile(const QString& characterUIFile)
@@ -279,7 +299,7 @@ void Ruleset::setCharacterUIFile(const QString& characterUIFile)
 
     _characterUIFile = characterUIFile;
     emit dirty();
-    emit characterUIFileChanged(_characterUIFile);
+    registerChange();
 }
 
 void Ruleset::setBestiaryFile(const QString& bestiaryFile)
@@ -289,7 +309,7 @@ void Ruleset::setBestiaryFile(const QString& bestiaryFile)
 
     _bestiaryFile = bestiaryFile;
     emit dirty();
-    emit bestiaryFileChanged(_bestiaryFile);
+    registerChange();
 }
 
 void Ruleset::setMonsterDataFile(const QString& monsterDataFile)
@@ -299,7 +319,7 @@ void Ruleset::setMonsterDataFile(const QString& monsterDataFile)
 
     _monsterDataFile = monsterDataFile;
     emit dirty();
-    emit monsterDataFileChanged(_monsterDataFile);
+    registerChange();
 }
 
 void Ruleset::setMonsterUIFile(const QString& monsterUIFile)
@@ -309,7 +329,7 @@ void Ruleset::setMonsterUIFile(const QString& monsterUIFile)
 
     _monsterUIFile = monsterUIFile;
     emit dirty();
-    emit monsterUIFileChanged(_monsterUIFile);
+    registerChange();
 }
 
 void Ruleset::setCombatantDoneCheckbox(bool checked)
@@ -319,7 +339,7 @@ void Ruleset::setCombatantDoneCheckbox(bool checked)
 
     _combatantDoneCheckbox = checked;
     emit dirty();
-    emit initiativeRuleChanged();
+    registerChange();
 }
 
 void Ruleset::setHitPointsCountDown(bool countDown)
@@ -329,7 +349,7 @@ void Ruleset::setHitPointsCountDown(bool countDown)
 
     _hitPointsCountDown = countDown;
     emit dirty();
-    emit hitPointsCountDownChanged(_hitPointsCountDown);
+    registerChange();
 }
 
 void Ruleset::setMovementString(const QString& movement)
@@ -416,4 +436,12 @@ bool Ruleset::areSameFile(const QString &file1, const QString &file2) const
     QString canonicalPath2 = fileInfo2.canonicalFilePath();
 
     return ((!canonicalPath1.isEmpty()) && (canonicalPath1 == canonicalPath2));
+}
+
+void Ruleset::registerChange()
+{
+    if(_batchProcessing)
+        _changed = true;
+    else
+        emit rulesetChanged();
 }

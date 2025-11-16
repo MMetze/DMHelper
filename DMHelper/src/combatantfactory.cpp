@@ -86,7 +86,5 @@ CampaignObjectBase* CombatantFactory::createObject(const QDomElement& element, b
 void CombatantFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     loadTemplate(ruleset.getCharacterDataFile());
-    connect(&ruleset, &Ruleset::characterDataFileChanged, this, &CombatantFactory::loadTemplate);
-
     _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 4));
 }

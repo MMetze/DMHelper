@@ -32,7 +32,6 @@ public:
 
     // Local Interface
     bool writeBestiary(const QString& targetFilename);
-    void closeBestiary();
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, const QString& importFile = QString());
 
@@ -77,6 +76,8 @@ signals:
 
 public slots:
     bool readBestiary(const QString& targetFilename);
+    void reloadBestiary();
+    void closeBestiary();
 
     void startBatchProcessing();
     void finishBatchProcessing();

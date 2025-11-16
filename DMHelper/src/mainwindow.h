@@ -165,6 +165,7 @@ protected:
 
 protected slots:
     void openCampaign(const QString& filename);
+    void reloadCampaign();
     void handleCampaignLoaded(Campaign* campaign);
     void updateCampaignTree();
     void updateMapFiles();
@@ -250,8 +251,6 @@ private:
     SpellbookDialog _spellDlg;
 
     BattleDialogManager* _battleDlgMgr;
-
-    //AudioPlayer* _audioPlayer;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;

@@ -275,13 +275,15 @@ void BestiaryTemplateDialog::nextMonster()
 void BestiaryTemplateDialog::dataChanged()
 {
     QString previousMonster = ui->cmbSearch->currentText();
+
     setMonster(nullptr);
+    disconnect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+    ui->cmbSearch->clear();
 
     QList<QString> monsterList = Bestiary::Instance()->getMonsterList();
+    if(monsterList.isEmpty())
+        return;
 
-    disconnect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
-
-    ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
 
     connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
@@ -552,7 +554,6 @@ void BestiaryTemplateDialog::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
     qDebug() << "[BestiaryTemplateDialog] Bestiary Dialog shown";
-    connect(Bestiary::Instance(), &Bestiary::changed, this, &BestiaryTemplateDialog::dataChanged);
     setMonster(ui->cmbSearch->currentText());
     QDialog::showEvent(event);
 }

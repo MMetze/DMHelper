@@ -140,26 +140,6 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
     return true;
 }
 
-void Bestiary::closeBestiary()
-{
-    if(isDirty())
-        qDebug() << "[Bestiary] WARNING: closing the bestiary although it is still dirty! It should be saved first";
-
-    if(_bestiaryMap.count() > 0)
-    {
-        qDeleteAll(_bestiaryMap);
-        _bestiaryMap.clear();
-    }
-
-    _bestiaryDirectory = QDir();
-    _bestiaryFile = QString();
-    _majorVersion = 0;
-    _minorVersion = 0;
-    _licenseText.clear();
-
-    setDirty(false);
-}
-
 int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const
 {
     int monsterCount = 0;
@@ -619,6 +599,39 @@ bool Bestiary::readBestiary(const QString& targetFilename)
         emit bestiaryLoaded(_bestiaryFile, !isVersionIdentical());
 
     return true;
+}
+
+void Bestiary::reloadBestiary()
+{
+    if(_bestiaryFile.isEmpty())
+    {
+        qDebug() << "[Bestiary] ERROR! No bestiary file known, unable to reload bestiary.";
+        return;
+    }
+
+    QString bestiaryFile = _bestiaryFile;
+    closeBestiary();
+    readBestiary(bestiaryFile);
+}
+
+void Bestiary::closeBestiary()
+{
+    if(isDirty())
+        qDebug() << "[Bestiary] WARNING: closing the bestiary although it is still dirty! It should be saved first";
+
+    if(_bestiaryMap.count() > 0)
+    {
+        qDeleteAll(_bestiaryMap);
+        _bestiaryMap.clear();
+    }
+
+    _bestiaryDirectory = QDir();
+    _bestiaryFile = QString();
+    _majorVersion = 0;
+    _minorVersion = 0;
+    _licenseText.clear();
+
+    setDirty(false);
 }
 
 void Bestiary::startBatchProcessing()

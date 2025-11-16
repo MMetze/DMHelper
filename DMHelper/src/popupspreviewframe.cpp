@@ -45,7 +45,8 @@ void PopupsPreviewFrame::setCampaign(Campaign* campaign)
 
     populatePopups();
 
-    connect(_campaign, &Campaign::overlaysChanged, this, &PopupsPreviewFrame::populatePopups);
+    if(campaign)
+        connect(_campaign, &Campaign::overlaysChanged, this, &PopupsPreviewFrame::populatePopups);
 }
 
 void PopupsPreviewFrame::trackAdded(CampaignObjectBase* trackObject)

@@ -579,23 +579,6 @@ void BattleFrame::next()
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
 
-//make sure clear done button is hidden initially
-//make sure all init values are updated properly
-
-void BattleFrame::initiativeRuleChanged()
-{
-    if(!_battle)
-        return;
-
-    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-    if(!campaign)
-        return;
-
-    ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-    ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-    recreateCombatantWidgets();
-}
-
 void BattleFrame::setTargetSize(const QSize& targetSize)
 {
     qDebug() << "[Battle Frame] Target size being set to: " << targetSize;
