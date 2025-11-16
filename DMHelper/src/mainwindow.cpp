@@ -1408,36 +1408,36 @@ void MainWindow::showEvent(QShowEvent * event)
     {
         if((_options) && (!_recoveryMode))
         {
-            // Implement any one-time initialization here
+            // Implement any one-time application initialization here
             bool firstStart = !_options->doDataSettingsExist();
             if(firstStart)
             {
-                LegalDialog dlg;
-                dlg.exec();
-                _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
-                _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
-            }
-
-            checkForUpdates(true);
-
-            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
-                openCampaign(_options->getMRUHandler()->getMRUList().first());
-
-            QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
-                                                       .arg(DMHelper::DMHELPER_MINOR_VERSION)
-                                                       .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
-            if(_options->getLastAppVersion() != versionString)
-            {
-                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
-                whatsNewDlg->show();
-                whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
-            }
-
-            if(firstStart)
-            {
                 WhatsNewDialog* firstStartDlg = new WhatsNewDialog(QString(":/img/data/firststart.txt"), QString("Welcome to DMHelper!"), this);
-                firstStartDlg->show();
                 firstStartDlg->move((frameGeometry().center() - firstStartDlg->rect().center()) / 2);
+                firstStartDlg->exec(); // Note: delete's itself "later"
+
+                LegalDialog* legalDlg = new LegalDialog();
+                legalDlg->exec();
+                _options->setUpdatesEnabled(legalDlg->isUpdatesEnabled());
+                _options->setStatisticsAccepted(legalDlg->isStatisticsAccepted());
+                legalDlg->deleteLater();
+            }
+            else
+            {
+                QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                            .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                            .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+                if(_options->getLastAppVersion() != versionString)
+                {
+                    WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
+                    whatsNewDlg->show();
+                    whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
+                }
+
+                checkForUpdates(true);
+
+                if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
+                    openCampaign(_options->getMRUHandler()->getMRUList().first());
             }
         }
 

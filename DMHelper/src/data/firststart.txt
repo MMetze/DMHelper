@@ -25,6 +25,7 @@ To get started, here's a few ideas:
 <li> Register for our <a href="https://forum.dm-helper.com/">Community Forums</a> and grab the (free) <a href="https://forum.dm-helper.com/t/bestiary-almost-complete-bestiary/35">Fan Content Bestiary</a><p>
 <li> Our single most Frequency Asked Question is how to make the Player's Window full-screen: <b>Just press <i>"F"</i>!</b><p>
 <li> Check out the <i>Getting Started Guide</i> (link in the app)<p>
+<li> Decide whether you want DMHelper to collect anonymous user data or check automatically for updates (coming up in the next popup...)<p>
 </ol>
 </p>
 <p>

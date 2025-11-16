@@ -36,6 +36,7 @@ If you are coming from an earlier version, DMHelper will try to update your Best
 <h3>Fixes:</h3>
 <ul>
 <li>Major crash source in video playback eliminated; stability verified through stress testing.
+<li>Bestiary import revitalized: importing monsters from XML files now works correctly.
 <li>Area filling, zoom-to-FoW, and size-to-FoW functions now operate correctly in Fog of War.
 <li>Background color now saves properly across all content types, including battles, characters, monsters, text entries, and maps.
 <li>Hidden combatants in multi-layer battles are no longer skipped during turn progression.
