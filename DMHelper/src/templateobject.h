@@ -46,6 +46,8 @@ public:
     virtual void appendListEntry(const QString& key, QHash<QString, QVariant> listEntryValues);
     virtual void removeListEntry(const QString& key, int index);
 
+    virtual void copyValues(const TemplateObject& other);
+
 protected:
     virtual QHash<QString, QVariant>* valueHash() = 0;
     virtual const QHash<QString, QVariant>* valueHash() const = 0;

@@ -363,6 +363,14 @@ void TemplateObject::removeListEntry(const QString& key, int index)
     setValue(key, QVariant(list));
 }
 
+void TemplateObject::copyValues(const TemplateObject& other)
+{
+    const QHash<QString, QVariant>* otherValues = other.valueHash();
+    for(auto keyIt = otherValues->keyBegin(), end = otherValues->keyEnd(); keyIt != end; ++keyIt)
+    {
+        setValue(*keyIt, otherValues->value(*keyIt));
+    }
+}
 
 void TemplateObject::readXMLValues(const QDomElement& element, bool isImport)
 {

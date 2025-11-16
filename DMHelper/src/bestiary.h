@@ -33,7 +33,7 @@ public:
     // Local Interface
     bool writeBestiary(const QString& targetFilename);
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
-    void inputXML(const QDomElement &element, const QString& importFile = QString());
+    bool inputXML(const QDomElement &element, const QString& importFile = QString());
 
     QString getVersion() const;
     int getMajorVersion() const;
@@ -55,7 +55,7 @@ public:
     MonsterClassv2* getNextMonsterClass(MonsterClassv2* monsterClass) const;
     MonsterClassv2* getPreviousMonsterClass(MonsterClassv2* monsterClass) const;
 
-    bool insertMonsterClass(MonsterClassv2* monsterClass);
+    bool insertMonsterClass(MonsterClassv2* monsterClass, bool overwrite = false);
     void removeMonsterClass(MonsterClassv2* monsterClass);
     void renameMonster(MonsterClassv2* monsterClass, const QString& newName);
 
