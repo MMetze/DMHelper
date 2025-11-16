@@ -686,11 +686,9 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
 
     _currentToken = index;
     loadMonsterImage();
-    ui->btnPreviousToken->setEnabled(_currentToken > 0);
-    ui->btnNextToken->setEnabled(_currentToken < _monster->getIconCount() - 1);
+    ui->btnPreviousToken->setEnabled((_monster->getIconCount() > 1) && (_currentToken > 0));
+    ui->btnNextToken->setEnabled((_monster->getIconCount() > 1) && (_currentToken < _monster->getIconCount() - 1));
     ui->btnClear->setEnabled(_monster->getIconCount() > 0);
-    ui->btnPreviousToken->setEnabled(_monster->getIconCount() > 1);
-    ui->btnNextToken->setEnabled(_monster->getIconCount() > 1);
 }
 
 QLineEdit* BestiaryTemplateDialog::getValueEdit(const QString& key)
