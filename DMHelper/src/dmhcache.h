@@ -8,9 +8,9 @@ class DMHCache
 public:
     explicit DMHCache();
 
-    QString getCacheFilePath(const QString& filename, const QString& fileExtension = QString());
-    void ensureCacheExists();
-    QString getCachePath();
+    QString getCacheFilePath(const QString& filename, const QString& fileExtension = QString(), const QString& subdirectory = QString());
+    void ensureCacheExists(const QString& subdirectory = QString());
+    QString getCachePath(const QString& subdirectory = QString());
 
 protected:
     QString getCacheFileName(const QString& filename);

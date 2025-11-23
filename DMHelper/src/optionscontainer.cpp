@@ -55,6 +55,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _instanceUuid(),
     _lastUpdateDate(),
     _heroForgeToken(),
+    _lastMapDirectory(),
     _tokenSearchString(),
     _tokenBackgroundFill(false),
     _tokenBackgroundFillColor(Qt::white),
@@ -293,6 +294,11 @@ QString OptionsContainer::getHeroForgeToken() const
     return _heroForgeToken;
 }
 
+QString OptionsContainer::getLastMapDirectory() const
+{
+    return _lastMapDirectory;
+}
+
 QString OptionsContainer::getTokenSearchString() const
 {
     return _tokenSearchString;
@@ -517,6 +523,7 @@ void OptionsContainer::readSettings()
     }
 
     setHeroForgeToken(settings.value("heroforgeToken").toString());
+    setLastMapDirectory(settings.value("lastMapDirectory").toString());
 
     setTokenSearchString(settings.value("tokenSearchString", QVariant(QString("dnd 5e"))).toString());
     setTokenFrameFile(getSettingsFile(settings, QString("tokenFrame"), QString("dmh_default_frame.png")));
@@ -609,6 +616,11 @@ void OptionsContainer::writeSettings()
         settings.remove("heroforgeToken");
     else
         settings.setValue("heroforgeToken", _heroForgeToken);
+
+    if(_lastMapDirectory.isEmpty())
+        settings.remove("lastMapDirectory");
+    else
+        settings.setValue("lastMapDirectory", _lastMapDirectory);
 
     settings.setValue("tokenSearchString", getTokenSearchString());
     if(_tokenFrameFile.isEmpty())
@@ -1276,6 +1288,11 @@ void OptionsContainer::setHeroForgeToken(const QString& token)
         qDebug() << "[OptionsContainer] Heroforge Token set to: " << _heroForgeToken;
         emit heroForgeTokenChanged(_heroForgeToken);
     }
+}
+
+void OptionsContainer::setLastMapDirectory(const QString& mapDirectory)
+{
+    _lastMapDirectory = mapDirectory;
 }
 
 void OptionsContainer::setTokenSearchString(const QString& tokenSearchString)

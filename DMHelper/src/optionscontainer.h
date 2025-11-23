@@ -70,6 +70,7 @@ public:
     QString getInstanceUuidStr();
     QDate getLastUpdateCheck() const;
     QString getHeroForgeToken() const;
+    QString getLastMapDirectory() const;
 
     // Token search settings
     QString getTokenSearchString() const;
@@ -227,6 +228,7 @@ public slots:
     void setStatisticsAccepted(bool statisticsAccepted);
     void setLastUpdateDate(const QDate& date);
     void setHeroForgeToken(const QString& token);
+    void setLastMapDirectory(const QString& mapDirectory);
 
     // Token search settings
     void setTokenSearchString(const QString& tokenSearchString);
@@ -312,6 +314,7 @@ private:
     QUuid _instanceUuid;
     QDate _lastUpdateDate;
     QString _heroForgeToken;
+    QString _lastMapDirectory;
 
     // Token search settings
     QString _tokenSearchString;

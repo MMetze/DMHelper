@@ -33,6 +33,7 @@ signals:
     void spellbookClicked();
     void searchClicked();
 
+    void mapManagerClicked();
     void rollDiceClicked();
     void randomMarketClicked();
     void calendarClicked();

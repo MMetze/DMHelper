@@ -51,6 +51,7 @@
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
 #endif
+#include "mapmanagerdialog.h"
 #include "aboutdialog.h"
 #include "helpdialog.h"
 #include "dmhlogger.h"
@@ -354,6 +355,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabTools, SIGNAL(spellbookClicked()), this, SLOT(openSpellbook()));
     QShortcut* openSpellbookShortcut = new QShortcut(QKeySequence(tr("Ctrl+H", "Open Spellbook")), this);
     connect(openSpellbookShortcut, SIGNAL(activated()), this, SLOT(openSpellbook()));
+    connect(_ribbonTabTools, SIGNAL(mapManagerClicked()), this, SLOT(openMapManager()));
     connect(_ribbonTabTools, SIGNAL(rollDiceClicked()), this, SLOT(openDiceDialog()));
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
@@ -2826,6 +2828,18 @@ void MainWindow::exportSpellbook()
 void MainWindow::importSpellbook()
 {
     // TODO: add import/export for spells
+}
+
+void MainWindow::openMapManager()
+{
+    if(!_options)
+        return;
+
+    qDebug() << "[MainWindow] Opening Map Manager";
+
+    MapManagerDialog dlg(*_options);
+    dlg.resize(qMax(dlg.width(), width() * 3 / 4), qMax(dlg.height(), height() * 3 / 4));
+    dlg.exec();
 }
 
 void MainWindow::openAboutDialog()
