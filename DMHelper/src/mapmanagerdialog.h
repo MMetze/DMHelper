@@ -8,7 +8,10 @@ class MapManagerDialog;
 }
 
 class OptionsContainer;
-class QTreeWidgetItem;
+class QStandardItemModel;
+class QSortFilterProxyModel;
+class QStandardItem;
+class QItemSelection;
 
 class MapManagerDialog : public QDialog
 {
@@ -19,19 +22,24 @@ public:
     ~MapManagerDialog();
 
 protected slots:
-    void selectItem(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-    void openPreviewDialog(QTreeWidgetItem *item, int column);
+    void selectItem(const QItemSelection &current, const QItemSelection &previous);
+    void openPreviewDialog(const QModelIndex &current);
 
     void browsePath();
     void findMaps();
     void scanNextDirectory();
-    void scanDirectory(QTreeWidgetItem* parent, const QString& absolutePath);
+    void scanDirectory(QStandardItem* parent, const QString& absolutePath);
 
 private:
+    void readModel();
+    void writeModel();
+
     Ui::MapManagerDialog *ui;
 
+    QStandardItemModel* _model;
+    QSortFilterProxyModel* _proxy;
     OptionsContainer& _options;
-    QList<QPair<QTreeWidgetItem*, QString>> _searchList;
+    QList<QPair<QStandardItem*, QString>> _searchList;
 };
 
 #endif // MAPMANAGERDIALOG_H

@@ -22,16 +22,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QTreeWidget" name="treeMaps">
-         <attribute name="headerVisible">
-          <bool>false</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
-        </widget>
+        <widget class="QTreeView" name="treeView"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">

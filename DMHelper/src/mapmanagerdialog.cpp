@@ -2,15 +2,17 @@
 #include "ui_mapmanagerdialog.h"
 #include "optionscontainer.h"
 #include "dmhcache.h"
+#include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 #include <QFileDialog>
 #include <QDir>
-#include <QTreeWidgetItem>
 #include <QImageReader>
 #include <QStandardPaths>
 #include <QTimer>
 #include <QScrollArea>
 
 const int MAPMANAGERDIALOG_CACHE_IMAGE_SIZE = 256;
+const int MAPMANAGERDIALOG_PATH = Qt::UserRole + 1;
 
 /*
  * Next Steps
@@ -23,6 +25,8 @@ const int MAPMANAGERDIALOG_CACHE_IMAGE_SIZE = 256;
 MapManagerDialog::MapManagerDialog(OptionsContainer& options, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MapManagerDialog),
+    _model(new QStandardItemModel()),
+    _proxy(new QSortFilterProxyModel()),
     _options(options),
     _searchList()
 {
@@ -30,10 +34,13 @@ MapManagerDialog::MapManagerDialog(OptionsContainer& options, QWidget *parent) :
 
     DMHCache().ensureCacheExists(QString("maps"));
 
+    _proxy->setSourceModel(_model);
+    ui->treeView->setModel(_proxy);
+
     connect(ui->btnBrowse, &QPushButton::clicked, this, &MapManagerDialog::browsePath);
     connect(ui->btnRefresh, &QPushButton::clicked, this, &MapManagerDialog::findMaps);
-    connect(ui->treeMaps, &QTreeWidget::currentItemChanged, this, &MapManagerDialog::selectItem);
-    connect(ui->treeMaps, &QTreeWidget::itemDoubleClicked, this, &MapManagerDialog::openPreviewDialog);
+    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MapManagerDialog::selectItem);
+    connect(ui->treeView, &QTreeView::doubleClicked, this, &MapManagerDialog::openPreviewDialog);
 
     ui->edtMapPath->setText(_options.getLastMapDirectory());
 }
@@ -44,12 +51,13 @@ MapManagerDialog::~MapManagerDialog()
     delete ui;
 }
 
-void MapManagerDialog::selectItem(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+void MapManagerDialog::selectItem(const QItemSelection &current, const QItemSelection &previous)
 {
     Q_UNUSED(previous);
-    if(current)
+    QStandardItem* currentItem = _model->itemFromIndex(_proxy->mapToSource(current.indexes().first()));
+    if(currentItem)
     {
-        QString itemPath = current->data(0, Qt::UserRole).toString();
+        QString itemPath = currentItem->data(MAPMANAGERDIALOG_PATH).toString();
         if(!itemPath.isEmpty())
         {
             QPixmap itemPixmap;
@@ -83,14 +91,14 @@ void MapManagerDialog::selectItem(QTreeWidgetItem *current, QTreeWidgetItem *pre
     ui->lblPreview->setText(tr("No Preview Available"));
 }
 
-void MapManagerDialog::openPreviewDialog(QTreeWidgetItem *item, int column)
+void MapManagerDialog::openPreviewDialog(const QModelIndex &current)
 {
-    Q_UNUSED(column);
+    QStandardItem* item = _model->itemFromIndex(_proxy->mapToSource(current));
 
     if(!item)
         return;
 
-    QString itemPath = item->data(0, Qt::UserRole).toString();
+    QString itemPath = item->data(MAPMANAGERDIALOG_PATH).toString();
     if(itemPath.isEmpty())
         return;
 
@@ -133,7 +141,7 @@ void MapManagerDialog::findMaps()
 
     //scanDirectory(ui->treeMaps->invisibleRootItem(), ui->edtMapPath->text());
     _searchList.clear();
-    _searchList.append(QPair<QTreeWidgetItem*, const QString&>(ui->treeMaps->invisibleRootItem(), ui->edtMapPath->text()));
+    _searchList.append(QPair<QStandardItem*, const QString&>(_model->invisibleRootItem(), ui->edtMapPath->text()));
     QTimer::singleShot(0, this, &MapManagerDialog::scanNextDirectory);
 
     /*
@@ -156,14 +164,14 @@ void MapManagerDialog::scanNextDirectory()
     if(_searchList.isEmpty())
         return;
 
-    QPair<QTreeWidgetItem*, QString> currentPair = _searchList.takeFirst();
+    QPair<QStandardItem*, QString> currentPair = _searchList.takeFirst();
     scanDirectory(currentPair.first, currentPair.second);
 
     if(!_searchList.isEmpty())
         QTimer::singleShot(0, this, &MapManagerDialog::scanNextDirectory);
 }
 
-void MapManagerDialog::scanDirectory(QTreeWidgetItem* parent, const QString& absolutePath)
+void MapManagerDialog::scanDirectory(QStandardItem* parent, const QString& absolutePath)
 {
     if((!parent) || (absolutePath.isEmpty()))
         return;
@@ -178,17 +186,18 @@ void MapManagerDialog::scanDirectory(QTreeWidgetItem* parent, const QString& abs
 
     for(const QFileInfo &entry : dirEntries)
     {
-        QTreeWidgetItem* newItem = new QTreeWidgetItem(static_cast<QTreeWidgetItem *>(nullptr), QStringList(entry.fileName()));
+        QStandardItem* newItem = new QStandardItem(entry.fileName());
+        newItem->setEditable(false);
         if(entry.isDir())
         {
             //scanDirectory(newItem, entry.absoluteFilePath());
-            _searchList.append(QPair<QTreeWidgetItem*, QString>(newItem, entry.absoluteFilePath()));
+            _searchList.append(QPair<QStandardItem*, QString>(newItem, entry.absoluteFilePath()));
         }
         else if(entry.isFile())
         {
             //if(QImageReader(entry.absoluteFilePath()).canRead())
-                newItem->setData(0, Qt::UserRole, entry.absoluteFilePath());
+                newItem->setData(entry.absoluteFilePath(), MAPMANAGERDIALOG_PATH);
         }
-        parent->addChild(newItem);
+        parent->appendRow(newItem);
     }    
 }
