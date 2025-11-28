@@ -167,8 +167,6 @@ void OverlayTimer::doResizeGL(int w, int h)
         return;
 
     _timerPublishImage->setScale(static_cast<qreal>(h) * getScale() / static_cast<qreal>(_timerPublishImage->getImageSize().height()));
-//    _timerPublishImage->setX(static_cast<qreal>(w) - _timerPublishImage->getSize().width());
-//    _timerPublishImage->setY(static_cast<qreal>(h) - (_timerPublishImage->getSize().height() * 3));
 }
 
 void OverlayTimer::createContentsGL()

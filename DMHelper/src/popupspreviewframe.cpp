@@ -188,7 +188,6 @@ void PopupsPreviewFrame::updateFrameVisibility()
                 if((item) && (item->widget()))
                 {
                     int widgetSize = item->widget()->sizeHint().height();
-                    qDebug() << "[PopupsPreviewFrame] widget: " << item->widget()->objectName() << " size: " << widgetSize;
                     overlayMaxSize += widgetSize + 3;
                 }
             }
