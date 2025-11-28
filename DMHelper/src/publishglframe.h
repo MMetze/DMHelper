@@ -55,6 +55,7 @@ private:
     PublishGLRenderer* _renderer;
     OverlayRenderer* _overlayRenderer;
 
+    bool _showOverlays;
 };
 
 #endif // PUBLISHGLFRAME_H
