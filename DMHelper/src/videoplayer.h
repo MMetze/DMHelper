@@ -94,7 +94,7 @@ protected:
 
     unsigned int _nativeWidth;
     unsigned int _nativeHeight;
-    QRecursiveMutex* _mutex;
+    QMutex* _mutex;
     class VideoPlayerImageBuffer *_buffers[2];
     size_t _idxRender;
     size_t _idxDisplay;

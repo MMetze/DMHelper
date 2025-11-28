@@ -31,7 +31,7 @@ PublishGLBattleEffectVideo::PublishGLBattleEffectVideo(PublishGLScene* scene, Ba
     if(effect)
     {
         _videoPlayer = new VideoPlayer(effect->getImageFile(), QSize(), true, effect->isPlayAudio());
-        connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget);
+        connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget, Qt::QueuedConnection);
         _videoPlayer->restartPlayer();
     }
 }
@@ -69,7 +69,6 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
     createShadersGL();
 
     int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
-    //int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
 
     if((!_videoPlayer->lockMutex()))
     {
@@ -83,7 +82,9 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
         qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
         return;
     }
-    QImage effectImage = videoPlayerImage->scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    QImage imageCopy = videoPlayerImage->copy();
+    QImage effectImage = imageCopy.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    _videoPlayer->clearNewImage();
     _videoPlayer->unlockMutex();
 
     _textureSize = effectImage.size();
@@ -217,10 +218,12 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
         }
         else
         {
-            QImage effectImage = videoPlayerImage->scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+            QImage imageCopy = videoPlayerImage->copy();
+            QImage effectImage = imageCopy.scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
             functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
             functions->glGenerateMipmap(GL_TEXTURE_2D);
         }
+        _videoPlayer->clearNewImage();
         _videoPlayer->unlockMutex();
     }
 
