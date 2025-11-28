@@ -69,7 +69,6 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
     createShadersGL();
 
     int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
-    //int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
 
     if((!_videoPlayer->lockMutex()))
     {
@@ -210,8 +209,6 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
             qDebug() << "[PublishGLBattleEffectVideo] ERROR: Unable to lock the video player mutex to create the effect objects!";
             return;
         }
-
-        qDebug() << "[PublishGLBattleEffectVideo] Getting new image from video player: " << _videoPlayer << ", " << this;
 
         // load and generate the background texture
         QImage* videoPlayerImage = _videoPlayer->getLockedImage();

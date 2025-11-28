@@ -4,7 +4,9 @@
 
 //#define VIDEO_DEBUG_MESSAGES
 
+#ifdef VIDEO_DEBUG_MESSAGES
 int COUNT_CALLBACKS = 0;
+#endif
 
 const int VIDEOPLAYER_STOP_CALL_STARTED = 0x01;
 const int VIDEOPLAYER_STOP_CALL_COMPLETE = 0x02;
@@ -37,7 +39,6 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _vlcMedia(nullptr),
     _nativeWidth(0),
     _nativeHeight(0),
-    //_mutex(new QRecursiveMutex()),
     _mutex(new QMutex()),
     _buffers(),
     _idxRender(0),
@@ -49,7 +50,6 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _selfRestart(false),
     _deleteOnStop(false),
     _stopStatus(0),
-    //_firstImage(false),
     _frameCount(0),
     _originalTrack(INVALID_TRACK_ID)
 {
@@ -77,7 +77,6 @@ VideoPlayer::~VideoPlayer()
     VideoPlayer::stopPlayer();
     VideoPlayer::cleanupBuffers();
 
-//    QRecursiveMutex* deleteMutex = _mutex;
     QMutex* deleteMutex = _mutex;
     _mutex = nullptr;
     delete deleteMutex;
@@ -520,13 +519,6 @@ void VideoPlayer::internalStopCheck(int status)
 #endif
     }
 
-      /* DON'T THINK THIS IS NEEDED???? 
-    if(_vlcMedia)
-    {
-        libvlc_media_release(_vlcMedia);
-        _vlcMedia = nullptr;
-    }*/
-
     cleanupBuffers();
 
     if(_selfRestart)
@@ -543,7 +535,7 @@ void VideoPlayer::internalStopCheck(int status)
 #ifdef VIDEO_DEBUG_MESSAGES
         qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed." << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
-// TODO: should this not delete the player?
+        // TODO: should this not delete the player?
         return;
     }
 }
@@ -655,19 +647,12 @@ bool VideoPlayer::startPlayer()
                                       playerFormatCallback,
                                       playerCleanupCallback);
 
-    /*
-    libvlc_audio_set_callbacks(_vlcPlayer,
-                               playerAudioPlayCallback,
-                               nullptr,
-                               nullptr,
-                               nullptr,
-                               nullptr,
-                               nullptr);
-*/
-
-
     // And start playback
+#ifdef VIDEO_DEBUG_MESSAGES
     int playResult = libvlc_media_player_play(_vlcPlayer);
+#else
+    libvlc_media_player_play(_vlcPlayer);
+#endif
     libvlc_audio_set_volume(_vlcPlayer, _playAudio ? 100 : 0);
 
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -711,7 +696,6 @@ void VideoPlayer::cleanupBuffers()
         return;
 
     _newImage = false;
-    //_firstImage = false;
     _frameCount = 0;
     _originalSize = QSize();
 
