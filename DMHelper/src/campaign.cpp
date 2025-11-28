@@ -282,7 +282,7 @@ QList<Characterv2*> Campaign::getActiveCharacters()
         QList<Characterv2*> characterList = partyList.at(p)->findChildren<Characterv2*>();
         for(int i = 0; i < characterList.count(); ++i)
         {
-            if(characterList.at(i)->getBoolValue(QString("active")))
+            if((characterList.at(i)->getBoolValue(QString("active"))) && (!actives.contains(characterList.at(i))))
                 actives.append(characterList.at(i));
         }
     }
