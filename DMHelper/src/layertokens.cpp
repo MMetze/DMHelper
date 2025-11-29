@@ -354,7 +354,7 @@ void LayerTokens::dmUpdate()
 
 void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
-    if(!scene)
+    if((!scene) || (!_model))
         return;
 
     _glScene = scene;
@@ -364,8 +364,13 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
         BattleDialogModelCombatant* combatant = _combatants.at(i);
         if(combatant)
         {
-            PublishGLBattleToken* combatantToken = new PublishGLBattleToken(_glScene, combatant);
-            _combatantTokenHash.insert(combatant, combatantToken);
+            if((_model->getCombatantTokenType() == DMHelper::CombatantTokenType_CharactersAndMonsters) ||
+              ((_model->getCombatantTokenType() == DMHelper::CombatantTokenType_CharactersOnly) && (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ||
+              ((_model->getCombatantTokenType() == DMHelper::CombatantTokenType_MonstersOnly) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster)))
+            {
+                PublishGLBattleToken* combatantToken = new PublishGLBattleToken(_glScene, combatant);
+                _combatantTokenHash.insert(combatant, combatantToken);
+            }
         }
     }
 
@@ -452,12 +457,13 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     // Draw the combatants
     foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
-        if((combatant) && (combatant->getKnown()) && (combatant->getShown()) &&
-           ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
-           ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))
+        PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
+        if((combatant) && (combatantToken))
         {
-            PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
-            if(combatantToken)
+            if((combatantToken->isPC()) || ((combatant->getKnown()) &&
+                                            (combatant->getShown()) &&
+                                            ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
+                                            ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0))))
             {
                 localMatrix = combatantToken->getMatrix();
                 localMatrix.translate(_position.x(), _position.y());
@@ -570,10 +576,7 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     {
         QGraphicsPixmapItem* combatantItem = createCombatantIcon(getLayerScene()->getDMScene(), combatant);
         if(!combatantItem)
-        {
-            qDebug() << "[LayerTokens] ERROR: Failed to create combatant icon for combatant: " << combatant->getName();
             return;
-        }
 
         combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, getOrder()));
         combatantItem->setVisible(getLayerVisibleDM());
@@ -1033,7 +1036,12 @@ void LayerTokens::cleanupDM()
 
 QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant)
 {
-    if((!combatant) || (_combatantIconHash.contains(combatant)))
+    if((!combatant) || (_combatantIconHash.contains(combatant)) || (!_model))
+        return nullptr;
+
+    if((_model->getCombatantTokenType() == DMHelper::CombatantTokenType_None) ||
+       ((_model->getCombatantTokenType() == DMHelper::CombatantTokenType_CharactersOnly) && (combatant->getCombatantType() != DMHelper::CombatantType_Character)) ||
+       ((_model->getCombatantTokenType() == DMHelper::CombatantTokenType_MonstersOnly) && (combatant->getCombatantType() != DMHelper::CombatantType_Monster)))
         return nullptr;
 
     QPixmap pix = generateCombatantPixmap(combatant);
@@ -1339,7 +1347,7 @@ void LayerTokens::removeEffectFromToken(PublishGLBattleToken* token, BattleDialo
 
 QPixmap LayerTokens::generateCombatantPixmap(BattleDialogModelCombatant* combatant)
 {
-    if(!combatant)
+    if((!combatant) || (!_model))
         return QPixmap();
 
     QPixmap result = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);

@@ -1,4 +1,51 @@
+daggerheart - need HP to count down for now
+new campaign doesn't open the newly selected bestiary
+new entry (PC, maybe anything) should highlight the entry name first
+daggerheart - make initiative entries custom
+---> add config to convert a resource number into checkboxes (HP and Stress)
+Daggerheart: show a range-finder with circles of close, near far range
 
+Camapign notes - add a text saying how to take quick notes
+Add a Did You Know text to the welcome page with as much text as possible
+Move the grid lock buttons to the battle tools tab
+Remember different grid sized for different external monitors
+
+Bug: Rendering distance is tiny font
+
+DONE daggerheart - implement move zones
+DONE daggerheart - show fear across all published views (move it to a higher level overlay function)
+DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
+
+DONE Added an interactive preview dialog for text entries
+DONE Add Overlays for Fear, Counters and Timers as well as audio
+DONE Create "Wizards" for add Map or add Combat rather than multiple questions
+DONE Drag and drop to add a map/combat
+    - add map/battle/media layer
+    - add an object to a battle
+    - add a token to a monster
+    - add an icon to a PC (including enabling multiple tokens for PCs/NPCs
+    DONE Moving the grid size tool also shifts the H and V of the grid
+DONE Enhanced drop downs with completers
+DONE Templates for Daggerheart
+DONE Fear counter in main window for daggerheart campaigns only
+DONE Render fear counter in Battles, top-right corner
+DONE Add a custom ruleset file entry
+DONE Make fear visualization able to be turned off for Daggerheart campaigns
+DONE Add Accept and Cancel buttons to the grid size tool
+DONE Add a "Grid Locked" visualization (text and color difference) to the camera tool
+DONE Snap to grid also valid for size and position of the player's window
+DONE Snap to grid also valid for measuring
+DONE Use DPI from an image to guess the right size of the grid
+DONE Double-click on select map dlg to make a selection
+DONE Selected FOW layer highlighted when editing
+DONE Allow transparency in FoW textures
+DONE Add combatant token type setting to battle options
+
+OTHER: When switching menus, the active tool is deselected
+
+FIXED: Major source of crashes in video playback - stress test looks very good now!
+FIXED: filling an area on FOW
+FIXED: Leaving the map area with the pointer turns it off on the dm view
 FIXED - Zoom to FOW doesn't work (setCameraVisible)
 FIXED Background color isn't saved
     TESTED Battle

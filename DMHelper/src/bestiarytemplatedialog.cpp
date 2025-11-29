@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QAbstractItemView>
+#include <QCompleter>
 #include <QDebug>
 
 BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
@@ -28,8 +29,7 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     connect(ui->btnRight, &QPushButton::clicked, this, &BestiaryTemplateDialog::nextMonster);
     connect(ui->btnNewMonster, &QPushButton::clicked, this, &BestiaryTemplateDialog::createNewMonster);
     connect(ui->btnDeleteMonster, &QPushButton::clicked, this, &BestiaryTemplateDialog::deleteCurrentMonster);
-    //connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, [=](const QString &newValue) {setMonster(newValue);});
-    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+    connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
     connect(ui->framePublish, &PublishButtonFrame::clicked, this, &BestiaryTemplateDialog::handlePublishButton);
     connect(ui->framePublish, &PublishButtonFrame::colorChanged, this, &BestiaryTemplateDialog::handleBackgroundColorChanged);
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
@@ -47,6 +47,13 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     connect(ui->btnPopulateTokens, &QPushButton::clicked, this, &BestiaryTemplateDialog::handlePopulateTokens);
 
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+    // Create a completer and attach it to the search combo box
+    QCompleter *completer = new QCompleter(ui->cmbSearch->model(), this);
+    completer->setFilterMode(Qt::MatchContains);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    ui->cmbSearch->setCompleter(completer);
 }
 
 BestiaryTemplateDialog::~BestiaryTemplateDialog()
@@ -268,21 +275,29 @@ void BestiaryTemplateDialog::nextMonster()
 void BestiaryTemplateDialog::dataChanged()
 {
     QString previousMonster = ui->cmbSearch->currentText();
+
     setMonster(nullptr);
+    disconnect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+    ui->cmbSearch->clear();
 
     QList<QString> monsterList = Bestiary::Instance()->getMonsterList();
+    if(monsterList.isEmpty())
+        return;
 
-//    _monster = nullptr;
-    disconnect(ui->cmbSearch, &QComboBox::currentTextChanged, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
-    ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
-    connect(ui->cmbSearch, &QComboBox::currentTextChanged, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+
+    connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
 
     if(!previousMonster.isEmpty())
     {
         int index = ui->cmbSearch->findText(previousMonster);
         if(index >= 0)
-            ui->cmbSearch->setCurrentIndex(index);
+        {
+            if(ui->cmbSearch->currentIndex() == index)
+                setMonster(previousMonster);
+            else
+                ui->cmbSearch->setCurrentIndex(index);
+        }
     }
     else
     {
@@ -539,7 +554,6 @@ void BestiaryTemplateDialog::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
     qDebug() << "[BestiaryTemplateDialog] Bestiary Dialog shown";
-    connect(Bestiary::Instance(), &Bestiary::changed, this, &BestiaryTemplateDialog::dataChanged);
     setMonster(ui->cmbSearch->currentText());
     QDialog::showEvent(event);
 }
@@ -656,8 +670,8 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
 {
     if(!_monster)
     {
-        ui->btnPreviousToken->setVisible(false);
-        ui->btnNextToken->setVisible(false);
+        ui->btnPreviousToken->setEnabled(false);
+        ui->btnNextToken->setEnabled(false);
         ui->btnClear->setEnabled(false);
         return;
     }
@@ -665,18 +679,16 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
     if((index < 0) || (index >= _monster->getIconCount()))
     {
         ui->lblIcon->setPixmap(QPixmap());
-        ui->btnPreviousToken->setVisible(false);
-        ui->btnNextToken->setVisible(false);
+        ui->btnPreviousToken->setEnabled(false);
+        ui->btnNextToken->setEnabled(false);
         return;
     }
 
     _currentToken = index;
     loadMonsterImage();
-    ui->btnPreviousToken->setEnabled(_currentToken > 0);
-    ui->btnNextToken->setEnabled(_currentToken < _monster->getIconCount() - 1);
+    ui->btnPreviousToken->setEnabled((_monster->getIconCount() > 1) && (_currentToken > 0));
+    ui->btnNextToken->setEnabled((_monster->getIconCount() > 1) && (_currentToken < _monster->getIconCount() - 1));
     ui->btnClear->setEnabled(_monster->getIconCount() > 0);
-    ui->btnPreviousToken->setVisible(_monster->getIconCount() > 1);
-    ui->btnNextToken->setVisible(_monster->getIconCount() > 1);
 }
 
 QLineEdit* BestiaryTemplateDialog::getValueEdit(const QString& key)

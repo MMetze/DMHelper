@@ -17,7 +17,6 @@
 #include "combatantfactory.h"
 #include "campaignobjectfactory.h"
 #include "map.h"
-#include "mapfactory.h"
 #include "mapframe.h"
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
@@ -25,7 +24,6 @@
 #include "monsterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
-#include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "campaignobjectframe.h"
 #include "campaigntreemodel.h"
@@ -48,7 +46,7 @@
 #include "dmscreentabwidget.h"
 #include "timeanddateframe.h"
 #include "audiotrackedit.h"
-#include "audioplayer.h"
+#include "audiotrack.h"
 #include "basicdateserver.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
@@ -80,15 +78,15 @@
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
 #include "layerimage.h"
-#include "layerfow.h"
 #include "layervideo.h"
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
-#include "layerblank.h"
 #include "mapselectdialog.h"
-#include "mapblankdialog.h"
-#include "battledialogmodelcharacter.h"
+#include "newentrydialog.h"
+#include "overlayrenderer.h"
+#include "overlayfear.h"
+#include "overlayseditdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -295,7 +293,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] BasicDateServer Initialized";
 
     qDebug() << "[MainWindow] Initializing Rule Factory";
-    RuleFactory::Initialize(_options->getRulesetFileName());
+    RuleFactory::Initialize(_options->getDefaultRulesetFileName(), _options->getUserRulesetFileName());
     RuleFactory::Instance()->setDefaultBestiary(_options->getBestiaryFileName());
     connect(_options, &OptionsContainer::rulesetFileNameChanged, RuleFactory::Instance(), &RuleFactory::readRuleset);
     // Set the default ruleset
@@ -339,6 +337,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
+    connect(_ribbonTabCampaign, SIGNAL(showOverlaysClicked()), this, SLOT(showOverlays()));
     QShortcut* notesShortcut = new QShortcut(QKeySequence(tr("Ctrl+Alt+N", "Add Note")), this);
     connect(notesShortcut, SIGNAL(activated()), this, SLOT(addNote()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
@@ -359,6 +358,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
     connect(_ribbonTabTools, SIGNAL(randomMarketClicked()), this, SLOT(openRandomMarkets()));
+    _ribbonTabTools->setRatioLocked(_options->getRatioLocked());
+    connect(_ribbonTabTools, &RibbonTabTools::lockRatioClicked, _options, &OptionsContainer::setRatioLocked);
     _ribbonTabTools->setGridLocked(_options->getGridLocked());
     connect(_ribbonTabTools, &RibbonTabTools::lockGridClicked, _options, &OptionsContainer::setGridLocked);
     connect(_ribbonTabTools, &RibbonTabTools::configureGridClicked, this, &MainWindow::configureGridLock);
@@ -408,6 +409,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleCustomContextMenu(QPoint)));
     connect(ui->treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(handleTreeItemSelected(QModelIndex, QModelIndex)));
     connect(ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(handleTreeItemDoubleClicked(QModelIndex)));
+    connect(ui->treeView, &CampaignTree::treeDrop, this, &MainWindow::handleTreeDrop);
     connect(_treeModel, &CampaignTreeModel::campaignChanged, ui->treeView, &CampaignTree::campaignChanged);
     connect(_treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
     connect(_treeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(handleTreeItemChanged(QStandardItem*)));
@@ -513,6 +515,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame = new BattleFrame;
     _battleFrame->setInitiativeType(_options->getInitiativeType());
     _battleFrame->setInitiativeScale(_options->getInitiativeScale());
+    _battleFrame->setCombatantTokenType(_options->getCombatantTokenType());
     _battleFrame->setShowCountdown(_options->getShowCountdown());
     _battleFrame->setCountdownDuration(_options->getCountdownDuration());
     _battleFrame->setPointerFile(_options->getPointerFile());
@@ -520,10 +523,12 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame->setActiveIcon(_options->getActiveIcon());
     _battleFrame->setCombatantFrame(_options->getCombatantFrame());
     _battleFrame->setCountdownFrame(_options->getCountdownFrame());
+    _battleFrame->setRatioLocked(_options->getRatioLocked());
     _battleFrame->setGridLocked(_options->getGridLocked());
     _battleFrame->setGridLockScale(_options->getGridLockScale());
     connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
     connect(_options, SIGNAL(initiativeScaleChanged(qreal)), _battleFrame, SLOT(setInitiativeScale(qreal)));
+    connect(_options, SIGNAL(combatantTokenTypeChanged(int)), _battleFrame, SLOT(setCombatantTokenType(int)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _battleFrame, SLOT(setPointerFile(const QString&)));
@@ -531,7 +536,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, SIGNAL(activeIconChanged(const QString&)), _battleFrame, SLOT(setActiveIcon(const QString&)));
     connect(_options, SIGNAL(combatantFrameChanged(const QString&)), _battleFrame, SLOT(setCombatantFrame(const QString&)));
     connect(_options, SIGNAL(countdownFrameChanged(const QString&)), _battleFrame, SLOT(setCountdownFrame(const QString&)));
+    connect(_options, SIGNAL(ratioLockedChanged(bool)), _battleFrame, SLOT(setRatioLocked(bool)));
     connect(_options, SIGNAL(gridLockedChanged(bool)), _battleFrame, SLOT(setGridLocked(bool)));
+    connect(_options, SIGNAL(gridLockedChanged(bool)), _ribbonTabBattleView, SLOT(setGridLocked(bool)));
     connect(_options, SIGNAL(gridLockScaleChanged(qreal)), _battleFrame, SLOT(setGridLockScale(qreal)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _battleFrame, SLOT(setTargetSize(QSize)));
     connect(_pubWindow, SIGNAL(labelResized(QSize)), _battleFrame, SLOT(setTargetLabelSize(QSize)));
@@ -557,12 +564,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(duplicateClicked()), _battleFrame, SLOT(duplicateSelection()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);
-    QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
-    connect(nextShortcut, SIGNAL(activated()), _battleFrame, SLOT(next()));
+    QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "New Entry")), this);
+    connect(nextShortcut, SIGNAL(activated()), this, SLOT(newTextEncounter()));
 
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridResizeClicked, _battleFrame, &BattleFrame::resizeGrid);
     connect(_battleFrame, &BattleFrame::gridConfigChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridConfig);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selectGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
@@ -570,6 +578,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridWidthChanged, _battleFrame, &BattleFrame::setGridWidth);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridColorChanged, _battleFrame, &BattleFrame::setGridColor);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::snapToGridClicked, _battleFrame, &BattleFrame::setSnapToGrid);
 
     connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
     connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
@@ -637,6 +646,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, _mapFrame, &MapFrame::setPartyIcon);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, _mapFrame, &MapFrame::setShowParty);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::gridResizeClicked, _mapFrame, &MapFrame::resizeGrid);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _mapFrame, &MapFrame::layerSelected);
@@ -656,8 +666,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
     connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
 
-    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
-
     // Connect the battle view ribbon to the battle frame and map frame
     connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
@@ -667,15 +675,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(audioTrackEdit, SIGNAL(trackTypeChanged(int)), _ribbonTabAudio, SLOT(setTrackType(int)));
-    connect(_ribbonTabAudio, SIGNAL(playClicked(bool)), audioTrackEdit, SLOT(setPlay(bool)));
-    connect(audioTrackEdit, SIGNAL(playChanged(bool)), _ribbonTabAudio, SLOT(setPlay(bool)));
-    connect(_ribbonTabAudio, SIGNAL(repeatClicked(bool)), audioTrackEdit, SLOT(setRepeat(bool)));
-    connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
-    connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
-    connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
-    connect(_ribbonTabAudio, SIGNAL(volumeChanged(float)), audioTrackEdit, SLOT(setVolume(float)));
-    connect(audioTrackEdit, SIGNAL(volumeChanged(float)), _ribbonTabAudio, SLOT(setVolume(float)));
+    connect(audioTrackEdit, &AudioTrackEdit::trackTypeChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackType);
+    connect(_ribbonTabAudio, &RibbonTabAudio::playClicked, audioTrackEdit, &AudioTrackEdit::play);
+    connect(_ribbonTabAudio, &RibbonTabAudio::pauseClicked, audioTrackEdit, &AudioTrackEdit::pause);
+    connect(_ribbonTabAudio, &RibbonTabAudio::stopClicked, audioTrackEdit, &AudioTrackEdit::stop);
+    connect(audioTrackEdit, &AudioTrackEdit::trackStatusChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackStatus);
+    connect(_ribbonTabAudio, &RibbonTabAudio::repeatClicked, audioTrackEdit, &AudioTrackEdit::setRepeat);
+    connect(audioTrackEdit, &AudioTrackEdit::repeatChanged, _ribbonTabAudio, &RibbonTabAudio::setRepeat);
+    connect(_ribbonTabAudio, &RibbonTabAudio::muteClicked, audioTrackEdit, &AudioTrackEdit::setMute);
+    connect(audioTrackEdit, &AudioTrackEdit::muteChanged, _ribbonTabAudio, &RibbonTabAudio::setMute);
+    connect(_ribbonTabAudio, &RibbonTabAudio::volumeChanged, audioTrackEdit, &AudioTrackEdit::setVolume);
+    connect(audioTrackEdit, &AudioTrackEdit::volumeChanged, _ribbonTabAudio, &RibbonTabAudio::setVolume);
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -749,6 +759,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
     connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
+    connect(CampaignObjectFactory::Instance(), &CampaignObjectFactory::objectCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
+    connect(this, &MainWindow::audioTrackAdded, ui->framePopups, &PopupsPreviewFrame::trackAdded);
     //_audioPlayer = new AudioPlayer(this);
     //_audioPlayer->setVolume(_options->getAudioVolume());
     //connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
@@ -806,19 +818,31 @@ void MainWindow::newCampaign()
 
         _campaign = new Campaign(campaignName);
 
+        _campaign->getRuleset().setObjectName(newCampaignDialog->getRuleset());
         _campaign->getRuleset().setRuleInitiative(newCampaignDialog->getInitiativeType());
         _campaign->getRuleset().setCharacterDataFile(newCampaignDialog->getCharacterDataFile());
         _campaign->getRuleset().setCharacterUIFile(newCampaignDialog->getCharacterUIFile());
         _campaign->getRuleset().setBestiaryFile(newCampaignDialog->getBestiaryFile());
         _campaign->getRuleset().setMonsterDataFile(newCampaignDialog->getMonsterDataFile());
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
+        _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
+
+        if(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive))
+            _campaign->addOverlay(new OverlayFear());
+
+        _bestiaryDlg.setMonster(nullptr);
+        _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
+        Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
         emit campaignLoaded(_campaign);
@@ -880,6 +904,10 @@ bool MainWindow::closeCampaign()
 
     writeBestiary();
     deleteCampaign();
+
+    if(Bestiary::Instance())
+        Bestiary::Instance()->closeBestiary();
+
     clearDirty();
 
     qDebug() << "[MainWindow] Campaign closed";
@@ -930,72 +958,15 @@ void MainWindow::openQuickref(const QString& quickRefSection)
 
 void MainWindow::newCharacter()
 {
-    qDebug() << "[MainWindow] Creating a new character...";
-
-    if(!_campaign)
-    {
-        qDebug() << "[MainWindow] New character cannot be created without a valid campaign open.";
-        return;
-    }
-
-    bool ok;
-    QString characterName = QInputDialog::getText(this,
-                                                  QString("New Character"),
-                                                  QString("Characters added without a party are treated as NPCs. To add a PC, either create the character directly in a party or drag an NPC into a party.") + QChar::LineFeed + QChar::LineFeed + QString("Enter character name:"),
-                                                  QLineEdit::Normal,
-                                                  QString(),
-                                                  &ok);
-    if((!ok) || (characterName.isEmpty()))
-    {
-        qDebug() << "[MainWindow] New character not created because the character name dialog was cancelled";
-        return;
-    }
-
-    if(!CombatantFactory::Instance())
-    {
-        qDebug() << "[MainWindow] New character not created because the combatant factory could not be found";
-        return;
-    }
-
-    Characterv2* character = dynamic_cast<Characterv2*>(CombatantFactory::Instance()->createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
-
-    if(Bestiary::Instance()->count() > 0)
-    {
-        QMessageBox::StandardButton monsterQuestion = QMessageBox::question(this,
-                                                                            QString("New Character"),
-                                                                            QString("Do you want to base this character on a monster from the bestiary?"));
-
-        if(monsterQuestion == QMessageBox::Yes)
-        {
-            QString monsterName = QInputDialog::getItem(this,
-                                                        QString("New Character Monster Selection"),
-                                                        QString("Select the monster you would like to base the new chararacter on:"),
-                                                        Bestiary::Instance()->getMonsterList(),
-                                                        0,
-                                                        false,
-                                                        &ok);
-            if((!ok) || (monsterName.isEmpty()))
-            {
-                qDebug() << "[MainWindow] New character not created because the select monster dialog was cancelled";
-                return;
-            }
-
-            MonsterClassv2* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
-            if(!monsterClass)
-            {
-                qDebug() << "[MainWindow] New character not created because not able to find selected monster: " << monsterName;
-                return;
-            }
-
-            character->copyMonsterValues(*monsterClass);
-            character->setName(characterName);
-        }
-    }
-
-    addNewObject(character);
+    newEncounter(DMHelper::CampaignType_Combatant);
 }
 
 void MainWindow::importCharacter()
+{
+    importCharacter(QString());
+}
+
+void MainWindow::importCharacter(const QString& importLinkName)
 {
     if(!_campaign)
         return;
@@ -1005,7 +976,7 @@ void MainWindow::importCharacter()
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::updateCampaignTree);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
-    importer->importCharacter(_campaign, true);
+    importer->importCharacter(_campaign, importLinkName, true);
 }
 
 void MainWindow::importItem()
@@ -1025,245 +996,34 @@ void MainWindow::importItem()
 
 void MainWindow::newParty()
 {
-    Party* newParty = dynamic_cast<Party*>(newEncounter(DMHelper::CampaignType_Party, QString("New Party"), QString("Enter new party name:")));
-    _ribbonTabWorldMap->registerPartyIcon(newParty);
+    Party* newParty = dynamic_cast<Party*>(newEncounter(DMHelper::CampaignType_Party));
+    if(newParty)
+        _ribbonTabWorldMap->registerPartyIcon(newParty);
 }
 
 void MainWindow::newTextEncounter()
 {
-    newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
+    newEncounter(DMHelper::CampaignType_Text);//, QString("New Entry"), QString("Enter new entry name:"));
 }
 
 void MainWindow::newLinkedText()
 {
-    QString extFilename = QFileDialog::getOpenFileName(this, QString("Select linked file"), QString(), tr("Text Files(*.txt);;HTML files (*.htm *.html);;Markdown files (*.md)"));
-    if(extFilename.isEmpty())
-        return;
-
-    EncounterTextLinked* encounter = dynamic_cast<EncounterTextLinked*>(newEncounter(DMHelper::CampaignType_LinkedText, QString("New Linked Entry"), QString("Enter new entry name:")));
-    if(!encounter)
-        return;
-
-    encounter->setLinkedFile(extFilename);
+    newEncounter(DMHelper::CampaignType_LinkedText);
 }
 
 void MainWindow::newBattleEncounter()
 {
-    if(!_campaign)
-        return;
-
-    bool ok;
-    QString encounterName = QInputDialog::getText(this, QString("New Combat"), QString("Enter new combat name:"), QLineEdit::Normal, QString(), &ok);
-    if(!ok)
-        return;
-
-    CampaignObjectBase* encounter = EncounterFactory().createObject(DMHelper::CampaignType_Battle, -1, encounterName, false);
-    if(!encounter)
-        return;
-
-    EncounterBattle* battle = dynamic_cast<EncounterBattle*>(encounter);
-    if(!battle)
-        return;
-
-    battle->createBattleDialogModel();
-    if(!battle->getBattleDialogModel())
-        return;
-
-    int gridScale = DMHelper::STARTING_GRID_SCALE;
-    LayerGrid* gridLayer = nullptr;
-    LayerTokens* monsterTokens = nullptr;
-    LayerTokens* pcTokens = nullptr;
-    bool hasGrid = false;
-
-    qDebug() << "[Battle Frame] Selecting a new map...";
-
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = _campaign;
-
-    MapSelectDialog mapSelectDlg(*_campaign, currentObject->getID());
-    if(mapSelectDlg.exec() == QDialog::Accepted)
-    {
-        if(mapSelectDlg.isMapSelected())
-        {
-            Map* battleMap = mapSelectDlg.getSelectedMap();
-            if(battleMap)
-            {
-                battleMap->initialize();
-                gridScale = battleMap->getLayerScene().getScale();
-                hasGrid = battleMap->getLayerScene().layerCount(DMHelper::LayerType_Grid) > 0;
-
-                // Create a grid after the first image layer, a monster token layer before the FoW
-                for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
-                {
-                    Layer* layer = battleMap->getLayerScene().layerAt(i);
-                    if(layer)
-                    {
-                        if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
-                        {
-                            monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
-                            battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
-                        }
-
-                        battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
-
-                        if((!hasGrid) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
-                        {
-                             gridLayer = new LayerGrid(QString("Grid"));
-                             battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
-                             hasGrid = true;
-                        }
-                    }
-                }
-            }
-        }
-        else if(mapSelectDlg.isBlankMap())
-        {
-            MapBlankDialog blankDlg;
-            int result = blankDlg.exec();
-            if(result == QDialog::Accepted)
-            {
-                LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
-                blankLayer->setSize(blankDlg.getMapSize());
-                battle->getBattleDialogModel()->getLayerScene().appendLayer(blankLayer);
-            }
-        }
-        else if(mapSelectDlg.isNewMapImage())
-        {
-            Layer* mapLayer = selectMapFile();
-            if(mapLayer)
-            {
-                mapLayer->initialize(QSize());
-                battle->getBattleDialogModel()->getLayerScene().appendLayer(mapLayer);
-            }
-        }
-    }
-
-    if((!gridLayer) && (!hasGrid))
-    {
-        gridLayer = new LayerGrid(QString("Grid"));
-        battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
-    }
-
-    if(gridLayer)
-        gridLayer->getConfig().setGridScale(gridScale);
-    battle->getBattleDialogModel()->getLayerScene().setScale(gridScale);
-
-    if(!monsterTokens)
-    {
-        monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
-        battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
-    }
-
-    pcTokens = new LayerTokens(battle->getBattleDialogModel(), QString("PC tokens"));
-    battle->getBattleDialogModel()->getLayerScene().appendLayer(pcTokens);
-
-    // Add the active characters
-    battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
-    QPointF mapCenter = battle->getBattleDialogModel()->getLayerScene().boundingRect().center();
-    if(mapCenter.isNull())
-            mapCenter = QPointF(gridScale, gridScale);
-    QPointF multiplePos(gridScale / 10.0, gridScale / 10.0);
-    QList<Characterv2*> activeCharacters = _campaign->getActiveCharacters();
-    for(int i = 0; i < activeCharacters.count(); ++i)
-    {
-        BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
-        newCharacter->setPosition(mapCenter + (multiplePos * i));
-        battle->getBattleDialogModel()->appendCombatant(newCharacter);
-    }
-
-    // Select the monster layer as a default to add monsters
-    battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
-    battle->getBattleDialogModel()->setMapRect(battle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
-
-//    battleFrame->setBattle(battle);
-//    if(!battleFrame->createNewBattle())
-//        battleFrame->editLayers();
-    addNewObject(encounter);
-
-//    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
-//    battleFrame->recenterCombatants();
+    newEncounter(DMHelper::CampaignType_Battle);
 }
 
-void MainWindow::newMap(Layer* imageLayer)
+void MainWindow::newMap()
 {
-    // TODO: throw a message box when it doesn't work.
-    if(!_campaign)
-        return;
-
-    bool ok = false;
-    QString mapName = QInputDialog::getText(this, QString("Enter Map Name"), QString("New Map"), QLineEdit::Normal, QString(), &ok);
-    if(!ok)
-        return;
-
-    Layer* mapLayer = (imageLayer != nullptr) ? imageLayer : selectMapFile();
-    if(!mapLayer)
-        return;
-
-    Map* map = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
-    if(!map)
-    {
-        delete mapLayer;
-        return;
-    }
-
-    map->getLayerScene().appendLayer(mapLayer);
-
-    ok = false;
-    int gridCount = QInputDialog::getInt(this, QString("Map Scale"), QString("How many grid squares should the map have horizontally? This is used to set the size of tokens on the map, even if you don't use the map for combat or with a grid."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
-    if(ok)
-        map->setGridCount(gridCount);
-
-    QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
-    if(result == QMessageBox::Yes)
-    {
-        LayerFow* fowLayer = new LayerFow(QString("FoW"));
-        map->getLayerScene().appendLayer(fowLayer);
-    }
-
-    addNewObject(map);
+    newEncounter(DMHelper::CampaignType_Map);
 }
 
 void MainWindow::newMedia()
 {
-    if(!_campaign)
-        return;
-
-    bool ok = false;
-    QString mediaName = QInputDialog::getText(this, QString("Enter Media Entry Name"), QString("New Media"), QLineEdit::Normal, QString(), &ok);
-    if(!ok)
-        return;
-
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Media File..."));
-    if(filename.isEmpty())
-        return;
-
-    Layer* mediaLayer;
-    QImageReader reader(filename);
-    if(reader.canRead())
-    {
-        mediaLayer = new LayerImage(QString("Media Image: ") + QFileInfo(filename).fileName(), filename);
-    }
-    else
-    {
-        QMessageBox::StandardButton result = QMessageBox::question(this, QString("Video"), QString("Is the selected media file a video?"));
-        if(result != QMessageBox::Yes)
-            return;
-
-        mediaLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(filename).fileName(), filename);
-    }
-
-    Map* mediaMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mediaName, false));
-    if(!mediaMap)
-    {
-        delete mediaLayer;
-        return;
-    }
-
-    mediaMap->getLayerScene().appendLayer(mediaLayer);
-    mediaMap->getLayerScene().setScale(DMHelper::STARTING_GRID_SCALE);
-
-    addNewObject(mediaMap);
+    newEncounter(DMHelper::CampaignType_Media);
 }
 
 void MainWindow::newAudioEntry()
@@ -1354,13 +1114,6 @@ void MainWindow::removeCurrentItem()
 
             _ribbon->getPublishRibbon()->cancelPublish();
         }
-            /*
-        {
-            CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
-            if(objectFrame)
-                objectFrame->publishClicked(false);
-        }
-        */
     }
 
     QUuid nextObjectId;
@@ -1387,7 +1140,6 @@ void MainWindow::removeCurrentItem()
 
     qDebug() << "[MainWindow] Removed object from the campaign tree: " << removeObject->getName() << ", ID: " << removeObject->getID();
 
-//    delete _campaign->removeObject(removeObject->getID());
     _campaign->removeObject(removeObject->getID());
     removeObject->deleteLater();
     updateCampaignTree();
@@ -1423,6 +1175,20 @@ void MainWindow::addNote()
     QString newNote = inputDlg.textValue();
     if(!newNote.isEmpty())
         _campaign->addNote(newNote);
+}
+
+void MainWindow::showOverlays()
+{
+    if(!_campaign)
+        return;
+
+    OverlaysEditDialog* dlg = new OverlaysEditDialog(*_campaign, this);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg->resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->open();
 }
 
 void MainWindow::editCurrentItem()
@@ -1497,10 +1263,15 @@ void MainWindow::exportCurrentItem()
 
 void MainWindow::addNewObject(CampaignObjectBase* newObject)
 {
+    addNewObjectToTarget(newObject, nullptr);
+}
+
+void MainWindow::addNewObjectToTarget(CampaignObjectBase* newObject, CampaignObjectBase* targetObject)
+{
     if(!_campaign || !_treeModel || !newObject)
         return;
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    CampaignObjectBase* currentObject = targetObject ? targetObject : ui->treeView->currentCampaignObject();
     if(!currentObject)
         currentObject = _campaign;
 
@@ -1637,36 +1408,36 @@ void MainWindow::showEvent(QShowEvent * event)
     {
         if((_options) && (!_recoveryMode))
         {
-            // Implement any one-time initialization here
+            // Implement any one-time application initialization here
             bool firstStart = !_options->doDataSettingsExist();
             if(firstStart)
             {
-                LegalDialog dlg;
-                dlg.exec();
-                _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
-                _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
-            }
-
-            checkForUpdates(true);
-
-            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
-                openCampaign(_options->getMRUHandler()->getMRUList().first());
-
-            QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
-                                                       .arg(DMHelper::DMHELPER_MINOR_VERSION)
-                                                       .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
-            if(_options->getLastAppVersion() != versionString)
-            {
-                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
-                whatsNewDlg->show();
-                whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
-            }
-
-            if(firstStart)
-            {
                 WhatsNewDialog* firstStartDlg = new WhatsNewDialog(QString(":/img/data/firststart.txt"), QString("Welcome to DMHelper!"), this);
-                firstStartDlg->show();
                 firstStartDlg->move((frameGeometry().center() - firstStartDlg->rect().center()) / 2);
+                firstStartDlg->exec(); // Note: delete's itself "later"
+
+                LegalDialog* legalDlg = new LegalDialog();
+                legalDlg->exec();
+                _options->setUpdatesEnabled(legalDlg->isUpdatesEnabled());
+                _options->setStatisticsAccepted(legalDlg->isStatisticsAccepted());
+                legalDlg->deleteLater();
+            }
+            else
+            {
+                QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                            .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                            .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+                if(_options->getLastAppVersion() != versionString)
+                {
+                    WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
+                    whatsNewDlg->show();
+                    whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
+                }
+
+                checkForUpdates(true);
+
+                if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
+                    openCampaign(_options->getMRUHandler()->getMRUList().first());
             }
         }
 
@@ -1700,18 +1471,18 @@ void MainWindow::closeEvent(QCloseEvent * event)
     // Save the Bestiary
     writeBestiary();
 
-    if(!closeCampaign())
-    {
-        event->ignore();
-        return;
-    }
-
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
         writeSpellbook();
 
     _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getStringValue("name") : "");
     _options->setLastSpell(_spellDlg.getSpell() ? _spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
+
+    if(!closeCampaign())
+    {
+        event->ignore();
+        return;
+    }
 
     qApp->quit();
 }
@@ -1807,18 +1578,9 @@ void MainWindow::dropEvent(QDropEvent *event)
         QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
         if(mimeType.isValid())
         {
-            if(mimeType.name().startsWith("image/"))
+            if((mimeType.name().startsWith("image/")) || (mimeType.name().startsWith("video/")))
             {
-                QImageReader reader(filename);
-                if(reader.canRead())
-                    newMap(new LayerImage(QString("Map Image: ") + QFileInfo(filename).fileName(), filename));
-
-                event->acceptProposedAction();
-                return;
-            }
-            else if(mimeType.name().startsWith("video/"))
-            {
-                newMap(new LayerVideo(QString("Map Video: ") + QFileInfo(filename).fileName(), filename));
+                newEncounter(DMHelper::CampaignType_Map, filename);
                 event->acceptProposedAction();
                 return;
             }
@@ -1828,9 +1590,15 @@ void MainWindow::dropEvent(QDropEvent *event)
                 event->acceptProposedAction();
                 return;
             }
+            else if(mimeType.suffixes().contains("md")) // Markdown first because it is a form of text
+            {
+                newEncounter(DMHelper::CampaignType_LinkedText, filename);
+                event->acceptProposedAction();
+                return;
+            }
             else if(mimeType.name().startsWith("text/"))
             {
-                //_bestiaryDlg.addMonsterText(filename);
+                newEncounter(DMHelper::CampaignType_Text, filename);
                 event->acceptProposedAction();
                 return;
             }
@@ -1870,6 +1638,8 @@ void MainWindow::setupRibbonBar()
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
     connect(publishShortcut, SIGNAL(activated()), _ribbon, SLOT(clickPublish()));
 
+    connect(_ribbon, &QTabWidget::currentChanged, this, &MainWindow::cancelSelect);
+
     _ribbon->setCurrentIndex(0);
     setMenuWidget(_ribbon);
 }
@@ -1880,6 +1650,7 @@ void MainWindow::connectBattleView(bool toBattle)
         return;
 
     _ribbonTabBattleView->setIsBattle(toBattle);
+    _ribbonTabBattleView->setGridLocked(_options->getGridLocked() && toBattle);
 
     if(toBattle)
     {
@@ -2044,12 +1815,14 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     QDir targetDir(fileInfo.absoluteDir());
     _campaign->outputXML(doc, root, targetDir, false);
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(currentObject)
+    QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+    if(!campaignElement.isNull())
     {
-        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
-        if(!campaignElement.isNull())
-            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+        CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+        if(currentObject)
+        {
+                campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+        }
     }
 
     QFile file(_campaignFileName);
@@ -2096,7 +1869,9 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
 void MainWindow::deleteCampaign()
 {
     if(_pubWindow)
+    {
         _pubWindow->setRenderer(nullptr);
+    }
 
     if(_treeModel)
     {
@@ -2195,23 +1970,34 @@ void MainWindow::writeSpellbook()
         qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
 }
 
-CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)
+CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterType, const QString& filename, CampaignObjectBase* targetObject)
 {
-    if((!_campaign)||(!_treeModel))
+    if(!_campaign)
         return nullptr;
 
-    bool ok;
-    QString encounterName = QInputDialog::getText(this, dialogTitle, dialogText, QLineEdit::Normal, QString(), &ok);
-    if(!ok)
+    NewEntryDialog dlg(_campaign, _options, ui->treeView->currentCampaignObject(), this);
+    dlg.setEntryType(encounterType, filename);
+    if(dlg.exec() != QDialog::Accepted)
         return nullptr;
 
-    CampaignObjectBase* encounter = EncounterFactory().createObject(encounterType, -1, encounterName, false);
-    if(!encounter)
-        return nullptr;
+    CampaignObjectBase* newEntry = dlg.createNewEntry();
+    if(newEntry)
+    {
+        addNewObjectToTarget(newEntry, targetObject);
+        if(dlg.getEntryType() == DMHelper::CampaignType_Battle)
+            _battleFrame->resizeGrid();
+        else if(dlg.getEntryType() == DMHelper::CampaignType_Map)
+            _mapFrame->resizeGrid();
 
-    addNewObject(encounter);
+        return newEntry;
+    }
+    else
+    {
+        if((dlg.isImportNeeded()) && (!dlg.getImportString().isEmpty()))
+            importCharacter(dlg.getImportString());
+    }
 
-    return encounter;
+    return nullptr;
 }
 
 void MainWindow::addNewAudioObject(const QString& audioFile)
@@ -2269,7 +2055,8 @@ void MainWindow::openCampaign(const QString& filename)
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        QMessageBox::critical(this,
+                              QString("Campaign file open failed"),
                               QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Unable to open campaign file";
         return;
@@ -2384,6 +2171,27 @@ void MainWindow::openCampaign(const QString& filename)
     clearDirty();
 }
 
+void MainWindow::reloadCampaign()
+{
+    if((!_campaign) || (_campaignFileName.isEmpty()))
+        return;
+
+    QMessageBox::StandardButton result = QMessageBox::question(this,
+                                                               QString("Reload Campaign"),
+                                                               QString("You have changed the ruleset for this campaign. To reconfigure it safely, the campaign needs to be closed and reopened:") + QChar::LineFeed + QChar::LineFeed + _campaignFileName + QChar::LineFeed + QChar::LineFeed + QString("Would you like to continue?"),
+                                                               QMessageBox::Yes | QMessageBox::Cancel);
+    if(result == QMessageBox::Cancel)
+        return;
+
+    QString currentCampaignFile = _campaignFileName;
+    qDebug() << "[MainWindow] Reopening: " << currentCampaignFile;
+
+    if(!closeCampaign())
+        return;
+
+    openCampaign(currentCampaignFile);
+}
+
 void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
     qDebug() << "[MainWindow] Campaign Loaded: " << _campaignFileName;
@@ -2395,6 +2203,11 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
+    ui->framePopups->setCampaign(campaign);
+    if(_pubWindow->getOverlayRenderer())
+        _pubWindow->getOverlayRenderer()->setCampaign(campaign);
+
+    ui->framePopups->setMinimumWidth(ui->framePopups->sizeHint().width());
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 
     if(campaign)
@@ -2408,10 +2221,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(campaign, &Campaign::nameChanged, this, &MainWindow::setDirty);
 
         _characterFrame->loadCharacterUITemplate(campaign->getRuleset().getCharacterUIFile());
-        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
-        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
-        connect(&campaign->getRuleset(), &Ruleset::characterUIFileChanged, _characterFrame, &CharacterTemplateFrame::loadCharacterUITemplate);
-        connect(&campaign->getRuleset(), &Ruleset::monsterUIFileChanged, &_bestiaryDlg, &BestiaryTemplateDialog::loadMonsterUITemplate);
+        connect(&campaign->getRuleset(), &Ruleset::rulesetChanged, this, &MainWindow::reloadCampaign);
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
@@ -2601,6 +2411,13 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
         contextMenu->addSeparator();
     }
 
+    if((campaignObject->getObjectType() == DMHelper::CampaignType_Text) || (campaignObject->getObjectType() == DMHelper::CampaignType_LinkedText))
+    {
+        QAction* previewWindowItem = new QAction(QIcon(":/img/data/icon_preview.png"), QString("Preview Item..."));
+        connect(previewWindowItem, SIGNAL(triggered()), this, SLOT(previewCurrentTextEntry()));
+        contextMenu->addAction(previewWindowItem);
+    }
+
     QAction* exportItem = new QAction(QIcon(":/img/data/icon_exportitem.png"), QString("Export Item..."));
     connect(exportItem, SIGNAL(triggered()), this, SLOT(exportCurrentItem()));
     contextMenu->addAction(exportItem);
@@ -2695,6 +2512,34 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
     object->setExpanded(expanded);
 }
 
+void MainWindow::handleTreeDrop(const QModelIndex & index, const QString& filename)
+{
+    QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+    if(!mimeType.isValid())
+        return;
+
+    if(mimeType.suffixes().contains("xml")) // XML first because it is a form of text
+    {
+        openCampaign(filename);
+        return;
+    }
+
+    CampaignTreeItem* item = _treeModel->campaignItemFromIndex(index);
+    if(!item)
+        return;
+
+    CampaignObjectBase* targetObject = item->getCampaignItemObject();
+    if(!targetObject)
+        return;
+
+    if((mimeType.name().startsWith("image/")) || (mimeType.name().startsWith("video/")))
+        newEncounter(DMHelper::CampaignType_Map, filename, targetObject);
+    else if(mimeType.suffixes().contains("md")) // Markdown first because it is a form of text
+        newEncounter(DMHelper::CampaignType_LinkedText, filename, targetObject);
+    else if(mimeType.name().startsWith("text/"))
+        newEncounter(DMHelper::CampaignType_Text, filename, targetObject);
+}
+
 void MainWindow::handleEditSettings()
 {
     _options->editSettings(_campaign);
@@ -2724,6 +2569,7 @@ void MainWindow::handleOpenSoundboard()
         connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
         connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
         connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+        connect(soundboard, &SoundboardFrame::trackCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
         connect(soundboard, &SoundboardFrame::dirty, this, &MainWindow::setDirty);
         _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
@@ -2808,6 +2654,39 @@ void MainWindow::handleAnimationStarted()
     if(_pubWindow)
         _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+}
+
+void MainWindow::previewCurrentTextEntry()
+{
+    if(!_treeModel)
+        return;
+
+    QModelIndex index = ui->treeView->currentIndex();
+    if(!index.isValid())
+        return;
+
+    CampaignTreeItem* campaignItem = _treeModel->campaignItemFromIndex(index);
+    if(!campaignItem)
+        return;
+
+    EncounterText* encounter = dynamic_cast<EncounterText*>(campaignItem->getCampaignItemObject());
+    if(!encounter)
+        return;
+
+    QDialog* previewDialog = new QDialog(this);
+    EncounterTextEdit* editWidget = new EncounterTextEdit();
+    editWidget->activateObject(encounter, nullptr);
+    QVBoxLayout *layout = new QVBoxLayout(previewDialog);
+    layout->addWidget(editWidget);
+
+    previewDialog->setWindowTitle(QString("Entry Preview: ") + encounter->getName());
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        previewDialog->resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+    else
+        previewDialog->resize(600, 400);
+    previewDialog->setAttribute(Qt::WA_DeleteOnClose);
+    previewDialog->show();
 }
 
 bool MainWindow::selectItemFromStack(const QUuid& itemId)
@@ -3079,18 +2958,6 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));
         if(gridLayer)
             _ribbonTabBattleMap->setGridConfig(gridLayer->getConfig());
-            /*
-        {
-            //_ribbonTabBattleMap->setGridOn(model->getGridOn());
-            _ribbonTabBattleMap->setGridType(layer->getConfig().getGridType());
-            _ribbonTabBattleMap->setGridScale(layer->getConfig().getGridScale());
-            _ribbonTabBattleMap->setGridAngle(layer->getConfig().getGridAngle());
-            _ribbonTabBattleMap->setGridXOffset(layer->getConfig().getGridOffsetX());
-            _ribbonTabBattleMap->setGridYOffset(layer->getConfig().getGridOffsetY());
-            _ribbonTabBattleMap->setGridWidth(layer->getConfig().getGridPen().width());
-            _ribbonTabBattleMap->setGridColor(layer->getConfig().getGridPen().color());
-        }
-        */
     }
 }
 

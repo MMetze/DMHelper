@@ -100,6 +100,25 @@ void PublishGLImage::setImage(const QImage& image)
     createImageObjects(image);
 }
 
+void PublishGLImage::updateImage(const QImage& image)
+{
+    if(image.size() != _imageSize)
+    {
+        qDebug() << "[PublishGLImage] ERROR: Trying to update image to something of a different size!";
+        return;
+    }
+
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if(!f)
+        return;
+
+    // update and generate the background texture
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    f->glBindTexture(GL_TEXTURE_2D, _textureID);
+    f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, glBackgroundImage.width(), glBackgroundImage.height(), GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    f->glGenerateMipmap(GL_TEXTURE_2D);
+}
+
 void PublishGLImage::setScale(float scaleFactor)
 {
     if(scaleFactor != _scaleFactor)

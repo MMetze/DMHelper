@@ -154,6 +154,7 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
 
     readEncounter();
     connect(_encounter, SIGNAL(textWidthChanged(int)), this, SIGNAL(textWidthChanged(int)));
+    connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
     connect(_encounter, &EncounterText::textWidthChanged, ui->textBrowser, &TextBrowserMargins::setTextWidth);
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
     connect(_encounter, &EncounterText::animatedChanged, this, &EncounterTextEdit::animatedChanged);
@@ -610,6 +611,8 @@ void EncounterTextEdit::storeEncounter()
     if(!_encounter)
         return;
 
+    disconnect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
+
     if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
     {
         if(_encounter->getTranslated())
@@ -621,6 +624,9 @@ void EncounterTextEdit::storeEncounter()
     {
         _encounter->setText(toHtml());
     }
+
+    connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
+
 }
 
 void EncounterTextEdit::readEncounter()

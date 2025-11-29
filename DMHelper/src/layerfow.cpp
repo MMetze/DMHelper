@@ -16,6 +16,8 @@
 #include <QDebug>
 
 const qreal LAYER_FOW_DM_OPACITY = 0.6;
+const qreal LAYER_FOW_DM_DIP = 0.5;
+const qreal LAYER_FOW_DM_RAISE = 1.3;
 
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -383,7 +385,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     else
     {
         p.setBrush(_fowColor);
-        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        p.setCompositionMode(QPainter::CompositionMode_Source);
         p.drawRect(rect);
     }
 
@@ -455,6 +457,24 @@ QRect LayerFow::getFoWVisibleRect() const
     }
 
     return QRect(left, top, right - left, bottom - top);
+}
+
+void LayerFow::dipOpacity()
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(_opacityReference * LAYER_FOW_DM_OPACITY * LAYER_FOW_DM_DIP);
+}
+
+void LayerFow::raiseOpacity()
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(_opacityReference * LAYER_FOW_DM_OPACITY * LAYER_FOW_DM_RAISE);
+}
+
+void LayerFow::resetOpacity()
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(_opacityReference * LAYER_FOW_DM_OPACITY);
 }
 
 void LayerFow::dmInitialize(QGraphicsScene* scene)
@@ -608,7 +628,7 @@ void LayerFow::updateFowInternal()
 void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     if(_fowColor != Qt::black)
-        element.setAttribute("fowColor", _fowColor.name());
+        element.setAttribute("fowColor", _fowColor.name(QColor::HexArgb));
 
     if(!_fowTextureFile.isEmpty())
         element.setAttribute("textureFile", targetDirectory.relativeFilePath(_fowTextureFile));
@@ -706,7 +726,7 @@ void LayerFow::cleanupPlayer()
 void LayerFow::fillFoWImage()
 {
     // Todo: Use QBrush to draw tiled scaled images to the image
-    _imageFow.fill(_fowColor);
+    _imageFow.fill(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue()));
     if(_fowTextureFile.isEmpty())
     {
         _imageFowTexture = QImage();
@@ -724,6 +744,8 @@ void LayerFow::fillFoWImage()
             newTexture.convertTo(QImage::Format_ARGB32_Premultiplied);
             newTexture = newTexture.scaled(_imageFowTexture.size() * _fowTextureScale / 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
             QPainter p(&_imageFowTexture);
+                if(_fowColor.alpha() == 0)
+                    p.setCompositionMode(QPainter::CompositionMode_Source);
                 for(int x = 0; x < _imageFowTexture.width(); x += newTexture.width())
                     for(int y = 0; y < _imageFowTexture.height(); y += newTexture.height())
                         p.drawImage(x, y, newTexture);

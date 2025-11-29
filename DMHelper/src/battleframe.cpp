@@ -45,6 +45,7 @@
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
 #include "spellbook.h"
+#include "gridsizer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -126,12 +127,15 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownFrame(),
     _targetSize(),
     _targetLabelSize(),
+    _gridSizer(nullptr),
+    _isRatioLocked(false),
     _isGridLocked(false),
     _gridLockScale(0.0),
     _mapDrawer(nullptr),
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
     _initiativeScale(1.0),
+    _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0, 0, 0),
@@ -266,10 +270,9 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
     }
 
     setBattle(battle);
-
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
-    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());
+    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle);
     if(_cameraRect)
         _cameraRect->setPublishing(_isPublishing);
 
@@ -293,6 +296,9 @@ void BattleFrame::deactivateObject()
 
 void BattleFrame::setBattle(EncounterBattle* battle)
 {
+    if(_battle == battle)
+        return;
+
     _battle = battle;
     setModel(_battle == nullptr ? nullptr : _battle->getBattleDialogModel());
 
@@ -573,23 +579,6 @@ void BattleFrame::next()
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
 
-//make sure clear done button is hidden initially
-//make sure all init values are updated properly
-
-void BattleFrame::initiativeRuleChanged()
-{
-    if(!_battle)
-        return;
-
-    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-    if(!campaign)
-        return;
-
-    ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-    ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-    recreateCombatantWidgets();
-}
-
 void BattleFrame::setTargetSize(const QSize& targetSize)
 {
     qDebug() << "[Battle Frame] Target size being set to: " << targetSize;
@@ -598,6 +587,7 @@ void BattleFrame::setTargetSize(const QSize& targetSize)
         return;
 
     _targetSize = targetSize;
+    updateCameraRect();
 }
 
 void BattleFrame::setTargetLabelSize(const QSize& targetSize)
@@ -699,6 +689,11 @@ void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 
 void BattleFrame::setGridScale(int gridScale)
 {
+    setGridScale(gridScale, -1, -1);
+}
+
+void BattleFrame::setGridScale(int gridScale, int xOffset, int yOffset)
+{
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to set the grid scale, no battle model is set!";
@@ -709,7 +704,7 @@ void BattleFrame::setGridScale(int gridScale)
 
     LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(gridLayer)
-        gridLayer->setScale(gridScale);
+        gridLayer->setGridScaleAndOffset(gridScale, xOffset, yOffset);
     else
         _model->getLayerScene().setScale(gridScale);
 
@@ -731,6 +726,27 @@ void BattleFrame::selectGridCount()
     }
 }
 
+void BattleFrame::resizeGrid()
+{
+    if((!_scene) || (!_model) || (_gridSizer))
+        return;
+
+    // Add a resizeable grid setter with a 5x5 grid to the battle frame
+    qreal currentScale = DMHelper::STARTING_GRID_SCALE;
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(gridLayer)
+        currentScale = gridLayer->getConfig().getGridScale();
+    else
+        currentScale = _model->getLayerScene().getScale();
+
+    _gridSizer = new GridSizer(currentScale);
+    _gridSizer->setBackgroundColor(QColor(255,255,255,204));
+    _scene->addItem(_gridSizer);
+    _gridSizer->setPos(currentScale, currentScale);
+    connect(_gridSizer, &GridSizer::accepted, this, &BattleFrame::gridSizerAccepted);
+    connect(_gridSizer, &GridSizer::rejected, this, &BattleFrame::gridSizerRejected);
+}
+
 void BattleFrame::setGridAngle(int gridAngle)
 {
     if(!_model)
@@ -739,7 +755,7 @@ void BattleFrame::setGridAngle(int gridAngle)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -755,7 +771,7 @@ void BattleFrame::setGridType(int gridType)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -771,7 +787,7 @@ void BattleFrame::setXOffset(int xOffset)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -787,7 +803,7 @@ void BattleFrame::setYOffset(int yOffset)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -803,7 +819,7 @@ void BattleFrame::setGridWidth(int gridWidth)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -819,7 +835,7 @@ void BattleFrame::setGridColor(const QColor& gridColor)
         return;
     }
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
     if(!layer)
         return;
 
@@ -827,16 +843,39 @@ void BattleFrame::setGridColor(const QColor& gridColor)
     ui->graphicsView->update();
 }
 
+void BattleFrame::setRatioLocked(bool ratioLocked)
+{
+    _isRatioLocked = ratioLocked;
+    if(_cameraRect)
+        _cameraRect->setRatioLocked(_isRatioLocked);
+}
+
 void BattleFrame::setGridLocked(bool gridLocked)
 {
     _isGridLocked = gridLocked;
     if(_cameraRect)
-        _cameraRect->setRatioLocked(_isGridLocked);
+        _cameraRect->setSizeLocked(_isGridLocked);
 }
 
 void BattleFrame::setGridLockScale(qreal gridLockScale)
 {
     _gridLockScale = gridLockScale;
+}
+
+void BattleFrame::setSnapToGrid(bool snapToGrid)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid type, no battle model is set!";
+        return;
+    }
+
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(!layer)
+        return;
+
+    layer->getConfig().setSnapToGrid(snapToGrid);
+    ui->graphicsView->update();
 }
 
 void BattleFrame::setInitiativeType(int initiativeType)
@@ -851,6 +890,19 @@ void BattleFrame::setInitiativeScale(qreal initiativeScale)
     _initiativeScale = initiativeScale;
     if(_renderer)
         _renderer->setInitiativeScale(_initiativeScale);
+}
+
+void BattleFrame::setCombatantTokenType(int combatantTokenType)
+{
+    _combatantTokenType = combatantTokenType;
+
+    if(_model)
+        _model->setCombatantTokenType(_combatantTokenType);
+
+    if(_renderer)
+        _renderer->combatantTokenTypeChanged();
+
+    replaceBattleMap();
 }
 
 void BattleFrame::setShowCountdown(bool showCountdown)
@@ -995,7 +1047,7 @@ void BattleFrame::zoomDelta(int delta)
 
 void BattleFrame::cancelSelect()
 {
-    qDebug() << "[BattleFrame] cancelSelect";
+    gridSizerRejected();
     _stateMachine.deactivateState();
 }
 
@@ -1589,28 +1641,34 @@ void BattleFrame::setPointerOn(bool enabled)
     _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
 }
 
-void BattleFrame::keyPressEvent(QKeyEvent * e)
+void BattleFrame::keyPressEvent(QKeyEvent * event)
 {
-    if(e->key() == Qt::Key_Escape)
+    if(!event)
+        return;
+
+    if(event->key() == Qt::Key_Escape)
     {
         cancelSelect();
         return;
     }
-    else if(e->key() == Qt::Key_A)
+
+    gridSizerAccepted();
+
+    if(event->key() == Qt::Key_A)
     {
         _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
         return;
     }
-    else if((e->key() == Qt::Key_C) && (e->modifiers() == Qt::ControlModifier))
+    else if((event->key() == Qt::Key_C) && (event->modifiers() == Qt::ControlModifier))
     {
         copyMonsters();
     }
-    else if((e->key() == Qt::Key_V) && (e->modifiers() == Qt::ControlModifier))
+    else if((event->key() == Qt::Key_V) && (event->modifiers() == Qt::ControlModifier))
     {
         pasteMonsters();
     }
 
-    QFrame::keyPressEvent(e);
+    QFrame::keyPressEvent(event);
 }
 
 bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
@@ -1692,18 +1750,26 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
-                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
+                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()))
                 {
                     if(_hoverFrame)
                         removeRollover();
 
                     // Mouse moved without button down on a combatant widget --> roll-over popup for this widget
-                    _hoverFrame = new CombatantRolloverFrame(widget, this);
-                    connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
-                    QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
-                                    ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
-                    _hoverFrame->move(framePos);
-                    _hoverFrame->show();
+                    CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
+                    if(newFrame->isEmpty())
+                    {
+                        delete newFrame;
+                    }
+                    else
+                    {
+                        _hoverFrame = newFrame;
+                        connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
+                        QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
+                                        ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
+                        _hoverFrame->move(framePos);
+                        _hoverFrame->show();
+                    }
                 }
             }
             else if(event->type() == QEvent::HoverLeave)
@@ -1733,7 +1799,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     if(dragEnterEvent)
                     {
                         const QMimeData* mimeData = dragEnterEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             qDebug() << "[Battle Frame] combatant widget drag enter accepted";
                             dragEnterEvent->accept();
@@ -1752,7 +1818,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     if(dragMoveEvent)
                     {
                         const QMimeData* mimeData = dragMoveEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -1786,7 +1852,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         qDebug() << "[Battle Frame] combatant widget drag dropped (" << dropEvent->position().x() << ", " << dropEvent->position().y() << ")";
 
                         const QMimeData* mimeData = dropEvent->mimeData();
-                        if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
+                        if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -1815,7 +1881,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 
 void BattleFrame::resizeEvent(QResizeEvent *event)
 {
-    qDebug() << "[Battle Frame] resized: " << event->size().width() << "x" << event->size().height();
     if(_model)
     {
         if(!_model->getMapRect().isValid())
@@ -2054,7 +2119,7 @@ void BattleFrame::layerSelected(int selected)
 
 void BattleFrame::publishClicked(bool checked)
 {
-    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _model)))
+    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _battle)))
         return;
 
     _isPublishing = checked;
@@ -2637,6 +2702,26 @@ void BattleFrame::handleLayerSelected(Layer* layer)
         _scene->setDistanceScale(newGrid->getConfig().getGridScale());
         emit gridConfigChanged(newGrid->getConfig());
     }
+
+    if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWEdit)
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_model->getLayerScene().getNearest(layer, DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
+    }
 }
 
 void BattleFrame::itemLink()
@@ -3012,7 +3097,7 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
             {
                 QRectF cameraRect = ui->graphicsView->mapToScene(_rubberBandRect).boundingRect();
 
-                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                if((_isRatioLocked) && (!_targetSize.isEmpty()))
                     cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
 
                 _cameraRect->setCameraRect(cameraRect);
@@ -3053,20 +3138,19 @@ void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* comba
     if((!_model) || (!combatant))
         return;
 
-    bool vis = ((combatant->getHitPoints() > 0) ||
-                (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+    bool visible = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
 
     LayerTokens* tokensLayer = combatant->getLayer();
     if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
-        vis = false;
+        visible = false;
 
     QWidget* widget = _combatantWidgets.value(combatant);
     if(widget)
-        widget->setVisible(vis);
+        widget->setVisible(visible);
 
     // Set the visibility of the active rect
     if((_activePixmap) && (combatant == _model->getActiveCombatant()))
-        _activePixmap->setVisible(vis);
+        _activePixmap->setVisible(visible);
 }
 
 void BattleFrame::setMapCursor()
@@ -3105,6 +3189,27 @@ void BattleFrame::storeViewRect()
     _model->setMapRect(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect());
 }
 
+void BattleFrame::gridSizerAccepted()
+{
+    if(!_gridSizer)
+        return;
+
+    int intSize = _gridSizer->getSize();
+    int xOffset = static_cast<int>(_gridSizer->x()) % intSize;
+    int yOffset = static_cast<int>(_gridSizer->y()) % intSize;
+    setGridScale(intSize, (100 * xOffset) / intSize, (100 * yOffset) / intSize);
+    gridSizerRejected();
+}
+
+void BattleFrame::gridSizerRejected()
+{
+    if(!_gridSizer)
+        return;
+
+    _gridSizer->deleteLater();
+    _gridSizer = nullptr;
+}
+
 void BattleFrame::setModel(BattleDialogModel* model)
 {
     qDebug() << "[Battle Frame] Setting battle model to: " << model;
@@ -3116,6 +3221,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         disconnect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
         disconnect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
@@ -3156,11 +3262,13 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         connect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         connect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
         connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
         connect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
+        _model->setCombatantTokenType(_combatantTokenType);
         setBattleMap();
         recreateCombatantWidgets();
 
@@ -3260,7 +3368,24 @@ void BattleFrame::setEditMode()
 
         if((_mapDrawer) && (_model))
         {
-            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getPriority(DMHelper::LayerType_Fow), DMHelper::LayerType_Grid));
+            LayerFow* activeLayer = dynamic_cast<LayerFow*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+            if(activeLayer)
+            {
+                QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+                foreach(Layer* l, allFows)
+                {
+                    LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                    if(fowLayer)
+                    {
+                        if(fowLayer == activeLayer)
+                            fowLayer->raiseOpacity();
+                        else
+                            fowLayer->dipOpacity();
+                    }
+                }
+            }
+
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow), DMHelper::LayerType_Grid));
             _mapDrawer->setScale(gridLayer ? gridLayer->getConfig().getGridScale() : _model->getGridScale(), _scale);
         }
     }
@@ -3274,6 +3399,17 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+
+        if(_model)
+        {
+            QList<Layer*> allFows = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                    fowLayer->resetOpacity();
+            }
+        }
     }
 }
 
@@ -3345,7 +3481,7 @@ void BattleFrame::clearDoneFlags()
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
-    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
+    if((!renderer) || (!_battle) || (renderer->getObject() != _battle))
         return;
 
     connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
@@ -3579,9 +3715,13 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         updateCountdownText();
     }
 
-    _model->setActiveCombatant(active);
-    active->setDone(true);
-    connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    if(active)
+    {
+        _model->setActiveCombatant(active);
+        active->setDone(true);
+        connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    }
+
     updateHighlights();
 }
 
@@ -3985,9 +4125,24 @@ void BattleFrame::createSceneContents()
     createCountdownFrame();
 
     QPen movementPen(QColor(23, 23, 23, 200), 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
-    _movementPixmap = _scene->addEllipse(0, 0, 100, 100, movementPen, QBrush(QColor(255, 255, 255, 25)));
-    _movementPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+    QBrush movementBrush(QColor(255, 255, 255, 25));
+    _movementPixmap = _scene->addEllipse(0, 0, 100, 100, movementPen, movementBrush);
+    _movementPixmap->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
     _movementPixmap->setVisible(false);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Range))
+    {
+        QList<int> movementRanges = campaign->getRuleset().getMovementRanges();
+        for(int i = 1; i < movementRanges.count(); ++i)
+        {
+            QGraphicsEllipseItem* rangeItem = new QGraphicsEllipseItem(0, 0, 100, 100);
+            rangeItem->setPen(movementPen);
+            rangeItem->setBrush(movementBrush);
+            rangeItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+            rangeItem->setParentItem(_movementPixmap);
+        }
+    }
 
     if(_model->getCameraRect().isValid())
     {
@@ -3996,10 +4151,11 @@ void BattleFrame::createSceneContents()
     }
     else
     {
-        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
+        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isRatioLocked);
         _cameraRect->setPos(0, 0);
     }
-    _cameraRect->setRatioLocked(_isGridLocked);
+    _cameraRect->setRatioLocked(_isRatioLocked);
+    _cameraRect->setSizeLocked(_isGridLocked);
     updateCameraRect();
 
     if(_cameraRect->getCameraRect().isValid())
@@ -4154,8 +4310,19 @@ void BattleFrame::updateCameraRect()
 {
     if(_cameraRect)
     {
-        if(_isGridLocked)
-            setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+        //if(_isGridLocked)
+        //    setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+        if((_isGridLocked) && (_model))
+        {
+            // Set the camera rect so that when published the grids on the target window will have the size of the lock scale
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+            qreal gridScale = gridLayer ? gridLayer->getConfig().getGridScale() : _model->getLayerScene().getScale();
+            QRectF newCameraRect = _cameraRect->getCameraRect();
+            newCameraRect.setWidth((static_cast<qreal>(_targetSize.width()) / _gridLockScale) * gridScale);
+            newCameraRect.setHeight((static_cast<qreal>(_targetSize.height()) / _gridLockScale) * gridScale);
+            if((newCameraRect.isValid()) && (newCameraRect != _cameraRect->getCameraRect()))
+                _cameraRect->setCameraRect(newCameraRect);
+        }
 
         _publishRectValue = _cameraRect->rect();
         _publishRectValue.moveTo(_cameraRect->pos());
@@ -4286,14 +4453,45 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
     if(!tokenLayer)
         return;
 
-    int speedSquares = 2 * (speed / 5) + 1;
-    _moveRadius = tokenLayer->getScale() * speedSquares;
-    if(_moveRadius <= tokenLayer->getScale())
-        return;
-
     _moveStart = item->scenePos();
     _movementPixmap->setPos(_moveStart);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Range))
+    {
+        QList<int> movementRanges = campaign->getRuleset().getMovementRanges();
+        if(movementRanges.count() > 0)
+        {
+            int rangeSquares = 2 * (movementRanges.at(0) / 5) + 1;
+            _moveRadius = tokenLayer->getScale() * rangeSquares;
+            _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+            QList<QGraphicsItem *> childItems = _movementPixmap->childItems();
+            if(childItems.count() == movementRanges.count() - 1)
+            {
+                for(int i = 1; i < movementRanges.count(); ++i)
+                {
+                    QGraphicsEllipseItem* rangeItem = dynamic_cast<QGraphicsEllipseItem*>(childItems.at(i - 1));
+                    if(rangeItem)
+                    {
+                        rangeSquares = 2 * (movementRanges.at(i) / 5) + 1;
+                        qreal rangeRadius = tokenLayer->getScale() * rangeSquares;
+                        rangeItem->setRect(-rangeRadius/2.0, -rangeRadius/2.0, rangeRadius, rangeRadius);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        int speedSquares = 2 * (speed / 5) + 1;
+        _moveRadius = tokenLayer->getScale() * speedSquares;
+        if(_moveRadius <= tokenLayer->getScale())
+            return;
+
+        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+    }
+
     _movementPixmap->setVisible(true);
 
     emit movementChanged(true, combatant, _moveRadius);
@@ -4319,6 +4517,10 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(!_movementPixmap)
         return;
 
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Range))
+        return;
+
     if(_model->getShowMovement())
     {
         if(_moveRadius > tokenLayer->getScale())
@@ -4327,7 +4529,6 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
         if(_moveRadius <= tokenLayer->getScale())
         {
             _moveRadius = tokenLayer->getScale();
-            _movementPixmap->setRotation(0.0);
             _movementPixmap->setVisible(false);
         }
     }
@@ -4335,7 +4536,6 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(_moveRadius <= tokenLayer->getScale())
     {
         _moveRadius = tokenLayer->getScale();
-        _movementPixmap->setRotation(0.0);
         _movementPixmap->setVisible(false);
     }
     else
@@ -4354,7 +4554,7 @@ void BattleFrame::endMovement()
     if(!_movementPixmap)
         return;
 
-    _movementPixmap->setRotation(0.0);
+//    _movementPixmap->setRotation(0.0);
     _movementPixmap->setVisible(false);
     emit movementChanged(false, nullptr, 0.0);
 }

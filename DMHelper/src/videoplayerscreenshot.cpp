@@ -43,22 +43,26 @@ void VideoPlayerScreenshot::retrieveScreenshot()
 
 void VideoPlayerScreenshot::handleScreenshot()
 {
-    QImage* screenshot = getImage();
+    QImage screenshot;
+    if(!lockMutex())
+        return;
+
+    QImage* screenshotImage = getLockedImage(); // Note - not actually locked here, just using this as an accessor
+    if(screenshotImage)
+        screenshot = screenshotImage->copy();
     qDebug() << "[VideoPlayerScreenshot] Screenshot frame received: " << screenshot;
 
-    if(screenshot)
+    unlockMutex();
+
+    if(!screenshot.isNull())
     {
         // Try to add the screenshot to the cache
         QString cacheFilePath = DMHCache().getCacheFilePath(_videoFile, QString("png"));
         if((!cacheFilePath.isEmpty()) && (!QFile::exists(cacheFilePath)))
-            screenshot->save(cacheFilePath);
+            screenshot.save(cacheFilePath);
+    }
 
-        emit screenshotReady(*screenshot);
-    }
-    else
-    {
-        emit screenshotReady(QImage());
-    }
+    emit screenshotReady(screenshot);
 
     stopThenDelete();
 }

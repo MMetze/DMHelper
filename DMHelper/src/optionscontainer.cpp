@@ -37,6 +37,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _audioVolume(100),
     _initiativeType(DMHelper::InitiativeType_None),
     _initiativeScale(1.0),
+    _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
@@ -44,6 +45,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _activeIcon(),
     _combatantFrame(),
     _countdownFrame(),
+    _ratioLocked(false),
     _gridLocked(false),
     _gridLockScale(100.0),
     _lastAppVersion(),
@@ -120,7 +122,12 @@ QString OptionsContainer::getTablesDirectory() const
     return _tablesDirectory;
 }
 
-QString OptionsContainer::getRulesetFileName() const
+QString OptionsContainer::getDefaultRulesetFileName()
+{
+    return getStandardFile(QString("ruleset.xml"));
+}
+
+QString OptionsContainer::getUserRulesetFileName() const
 {
     return _rulesetFileName;
 }
@@ -185,6 +192,11 @@ qreal OptionsContainer::getInitiativeScale() const
     return _initiativeScale;
 }
 
+int OptionsContainer::getCombatantTokenType() const
+{
+    return _combatantTokenType;
+}
+
 bool OptionsContainer::getShowCountdown() const
 {
     return _showCountdown;
@@ -218,6 +230,11 @@ QString OptionsContainer::getCombatantFrame() const
 QString OptionsContainer::getCountdownFrame() const
 {
     return _countdownFrame;
+}
+
+bool OptionsContainer::getRatioLocked() const
+{
+    return _ratioLocked;
 }
 
 bool OptionsContainer::getGridLocked() const
@@ -444,16 +461,16 @@ void OptionsContainer::readSettings()
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
-    bool rulesetExists = true;
     QString appRulesetFile = getAppFile(QString("ruleset.xml"));
-    QString settingsRulesetFile = getSettingsFile(settings, QString("ruleset"), QString("ruleset.xml"), &rulesetExists);
-    if((QFile::exists(appRulesetFile)) && (QFile::exists(settingsRulesetFile)) && (QFileInfo(appRulesetFile).lastModified() > QFileInfo(settingsRulesetFile).lastModified()))
+    QString defaultRulesetFile = getDefaultRulesetFileName();
+    if((QFile::exists(appRulesetFile)) && (QFile::exists(defaultRulesetFile)) && (QFileInfo(appRulesetFile).lastModified() > QFileInfo(defaultRulesetFile).lastModified()))
     {
-        QFile::remove(settingsRulesetFile);
-        QFile::copy(appRulesetFile, settingsRulesetFile);
+        QFile::remove(defaultRulesetFile);
+        QFile::copy(appRulesetFile, defaultRulesetFile);
     }
+    QString settingsRulesetFile = settings.value(QString("ruleset"), QVariant()).toString();
     setRulesetFileName(settingsRulesetFile);
-//    if((!settings.contains(QString("ruleset"))) || (!rulesetExists))
+
     getDataDirectory(QString("ui"));
     copyCoreData(QString("DMHelperBestiary"));
     copyCoreData(QString("monster"));
@@ -477,6 +494,7 @@ void OptionsContainer::readSettings()
     else
         setInitiativeType(settings.value("showOnDeck", QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
     setInitiativeScale(settings.value("initiativeScale", QVariant(1.0)).toReal());
+    setCombatantTokenType(settings.value("combatantTokenType", QVariant(DMHelper::CombatantTokenType_CharactersAndMonsters)).toInt());
     setShowCountdown(settings.value("showCountdown", QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration", QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
@@ -484,6 +502,7 @@ void OptionsContainer::readSettings()
     setActiveIcon(settings.value("activeIcon").toString());
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
+    setRatioLocked(settings.value("ratioLocked", QVariant(false)).toBool());
     setGridLocked(settings.value("gridLocked", QVariant(false)).toBool());
     setGridLockScale(settings.value("gridLockScale", QVariant(0.0)).toReal());
 
@@ -546,7 +565,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("equipment", getEquipmentFileName());
     settings.setValue("shops", getShopsFileName());
     settings.setValue("tables", getTablesDirectory());
-    settings.setValue("ruleset", getRulesetFileName());
+    settings.setValue("ruleset", getUserRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("autoSave", getAutoSave());
     settings.setValue("fontFamily", getFontFamily());
@@ -555,6 +574,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("initiativeType", getInitiativeType());
     settings.setValue("initiativeScale", getInitiativeScale());
+    settings.setValue("combatantTokenType", getCombatantTokenType());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
@@ -562,6 +582,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("activeIcon", getActiveIcon());
     settings.setValue("combatantFrame", getCombatantFrame());
     settings.setValue("countdownFrame", getCountdownFrame());
+    settings.setValue("ratioLocked", getRatioLocked());
     settings.setValue("gridLocked", getGridLocked());
     settings.setValue("gridLockScale", getGridLockScale());
 
@@ -768,12 +789,30 @@ void OptionsContainer::setTablesDirectory(const QString& directory)
 
 void OptionsContainer::setRulesetFileName(const QString& filename)
 {
-    if(_rulesetFileName != filename)
+    if(_rulesetFileName == filename)
+        return;
+
+    QFileInfo newRulesetFile(filename);
+    QFileInfo defaultRulesetFile(getDefaultRulesetFileName());
+
+    QString newRulesetFileCanonicalPath = newRulesetFile.canonicalFilePath();
+    QString defaultRulesetFileCanonicalPath = defaultRulesetFile.canonicalFilePath();
+
+    if((!newRulesetFileCanonicalPath.isEmpty()) && (newRulesetFileCanonicalPath == defaultRulesetFileCanonicalPath))
+    {
+        qDebug() << "[OptionsContainer] Custom ruleset file being set to default ruleset, no need to duplicate: " << filename;
+        if(_rulesetFileName.isEmpty())
+            return;
+
+        _rulesetFileName = QString();
+    }
+    else
     {
         _rulesetFileName = filename;
-        qDebug() << "[OptionsContainer] Ruleset file set to: " << filename;
-        emit rulesetFileNameChanged(_rulesetFileName);
     }
+
+    qDebug() << "[OptionsContainer] Custom ruleset file set to: " << _rulesetFileName;
+    emit rulesetFileNameChanged(_rulesetFileName);
 }
 
 QString OptionsContainer::getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir)
@@ -970,7 +1009,7 @@ void OptionsContainer::resetFileSettings()
     setShopsFileName(getStandardFile(QString("shops.xml")));
     setTablesDirectory(getDataDirectory(QString("tables"), true));
     getDataDirectory(QString("ui"), true);
-    setRulesetFileName(getStandardFile(QString("ruleset.xml")));
+    setRulesetFileName(QString());
     getDataDirectory(QString("Images"), true);
     copyCoreData(QString("DMHelperBestiary"), true);
     copyCoreData(QString("monster"), true);
@@ -1095,6 +1134,15 @@ void OptionsContainer::setInitiativeScale(qreal initiativeScale)
     }
 }
 
+void OptionsContainer::setCombatantTokenType(int combatantTokenType)
+{
+    if(_combatantTokenType != combatantTokenType)
+    {
+        _combatantTokenType = combatantTokenType;
+        emit combatantTokenTypeChanged(_combatantTokenType);
+    }
+}
+
 void OptionsContainer::setShowCountdown(bool showCountdown)
 {
     if(_showCountdown != showCountdown)
@@ -1170,6 +1218,16 @@ void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
     if(ok)
     {
         setCountdownDuration(newDuration);
+    }
+}
+
+void OptionsContainer::setRatioLocked(bool ratioLocked)
+{
+    if(_ratioLocked != ratioLocked)
+    {
+        _ratioLocked = ratioLocked;
+        qDebug() << "[OptionsContainer] Ratio locked set to: " << _ratioLocked;
+        emit ratioLockedChanged(_ratioLocked);
     }
 }
 
@@ -1418,6 +1476,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);
         setInitiativeScale(other->_initiativeScale);
+        setCombatantTokenType(other->_combatantTokenType);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);

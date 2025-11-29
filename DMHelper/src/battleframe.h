@@ -17,6 +17,7 @@ class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
 class GridConfig;
+class GridSizer;
 class Characterv2;
 class Map;
 class QTimer;
@@ -80,7 +81,6 @@ public slots:
     void sort();
     void top();
     void next();
-    void initiativeRuleChanged();
 
     void setTargetSize(const QSize& targetSize);
     void setTargetLabelSize(const QSize& targetSize);
@@ -89,18 +89,23 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void setGridScale(int gridScale, int xOffset, int yOffset);
     void selectGridCount();
+    void resizeGrid();
     void setGridAngle(int gridAngle);
     void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
+    void setRatioLocked(bool ratioLocked);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
+    void setSnapToGrid(bool snapToGrid);
 
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);
+    void setCombatantTokenType(int combatantTokenType);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -213,7 +218,7 @@ signals:
     void navigateBackwards();
 
 protected:
-    virtual void keyPressEvent(QKeyEvent * e) override;
+    virtual void keyPressEvent(QKeyEvent * event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
@@ -284,6 +289,9 @@ private slots:
     void setCameraSelectable(bool selectable);
     void setScale(qreal s);
     void storeViewRect();
+
+    void gridSizerAccepted();
+    void gridSizerRejected();
 
     void setModel(BattleDialogModel* model);
     Map* selectRelatedMap();
@@ -406,6 +414,8 @@ private:
     QSize _targetSize;
     QSize _targetLabelSize;
 
+    GridSizer* _gridSizer;
+    bool _isRatioLocked;
     bool _isGridLocked;
     qreal _gridLockScale;
 
@@ -415,6 +425,7 @@ private:
 
     int _initiativeType;
     qreal _initiativeScale;
+    int _combatantTokenType;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;

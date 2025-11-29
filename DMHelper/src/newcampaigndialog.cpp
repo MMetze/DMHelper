@@ -54,6 +54,11 @@ QString NewCampaignDialog::getInitiativeDescription() const
     return ui->cmbInitiative->currentText();
 }
 
+QString NewCampaignDialog::getMovementString() const
+{
+    return ui->edtMovement->text();
+}
+
 QString NewCampaignDialog::getCharacterDataFile() const
 {
     return ui->edtCharacterData->text();
@@ -82,6 +87,11 @@ QString NewCampaignDialog::getMonsterUIFile() const
 bool NewCampaignDialog::isCombatantDone() const
 {
     return ui->chkCombatantDone->isChecked();
+}
+
+bool NewCampaignDialog::isHitPointsCountDown() const
+{
+    return ui->chkHitPointsCountDown->isChecked();
 }
 
 QString NewCampaignDialog::getRuleset() const
@@ -115,18 +125,20 @@ void NewCampaignDialog::handleRulesetSelected()
     if(initiativeIndex != -1)
         ui->cmbInitiative->setCurrentIndex(initiativeIndex);
 
-    QDir rulesetDir = RuleFactory::Instance()->getRulesetDir();
-    ui->edtCharacterData->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._characterData)));
-    ui->edtCharacterUI->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._characterUI)));
-    ui->edtMonsterData->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._monsterData)));
-    ui->edtMonsterUI->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._monsterUI)));
+    ui->edtMovement->setText(ruleset._movement.isEmpty() ? QString("distance") : ruleset._movement);
+
+    ui->edtCharacterData->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._characterData)));
+    ui->edtCharacterUI->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._characterUI)));
+    ui->edtMonsterData->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._monsterData)));
+    ui->edtMonsterUI->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._monsterUI)));
 
     if((RuleFactory::Instance()) && (rulesetName == RuleFactory::DEFAULT_RULESET_NAME) && (!RuleFactory::Instance()->getDefaultBestiary().isEmpty()))
         ui->edtBestiaryFile->setText(RuleFactory::Instance()->getDefaultBestiary());
     else
-        ui->edtBestiaryFile->setText(QDir::cleanPath(rulesetDir.absoluteFilePath(ruleset._bestiary)));
+        ui->edtBestiaryFile->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._bestiary)));
 
     ui->chkCombatantDone->setChecked(ruleset._combatantDone);
+    ui->chkHitPointsCountDown->setChecked(ruleset._hitPointsCountDown);
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()

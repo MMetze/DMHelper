@@ -3,8 +3,9 @@
 
 #include <QDialog>
 
-class BattleDialogModel;
 class Grid;
+class GridConfig;
+class GridSizer;
 class QGraphicsScene;
 
 namespace Ui {
@@ -30,7 +31,10 @@ protected:
 private slots:
     void toggleFullscreen();
     void gridScaleChanged(int value);
+    void gridAngleChanged(int value);
     void autoFit();
+    void gridSizerResized();
+    void selectAction(QAction* action);
 
 private:
     void rebuildGrid();
@@ -38,10 +42,12 @@ private:
 
     Ui::ConfigureLockedGridDialog *ui;
 
-    BattleDialogModel* _model;
     Grid* _grid;
+    GridConfig* _gridConfig;
+    GridSizer* _gridSizer;
     QGraphicsScene* _scene;
     qreal _gridScale;
+    QMenu* _menu;
 };
 
 #endif // CONFIGURELOCKEDGRIDDIALOG_H

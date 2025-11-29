@@ -51,6 +51,10 @@ public slots:
     virtual void uninitialize() override;
     virtual void setScale(int scale) override;
 
+    virtual void setGridScaleAndOffset(int scale, int xOffset, int yOffset);
+    virtual void setGridOffsetX(int xOffset);
+    virtual void setGridOffsetY(int yOffset);
+
     void setConfig(const GridConfig& config);
 
 protected slots:

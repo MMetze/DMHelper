@@ -18,12 +18,14 @@ public:
     QString getCampaignName() const;
     QString getInitiativeType() const;
     QString getInitiativeDescription() const;
+    QString getMovementString() const;
     QString getCharacterDataFile() const;
     QString getCharacterUIFile() const;
     QString getBestiaryFile() const;
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool isCombatantDone() const;
+    bool isHitPointsCountDown() const;
 
     QString getRuleset() const;
     void setRuleset(const QString& rulesetName);

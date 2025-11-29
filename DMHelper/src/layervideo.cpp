@@ -14,6 +14,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QOpenGLWidget>
+#include <QDebug>
 
 LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -236,7 +237,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     _videoGLPlayer->paintGL();
 #else
 
-    if((!_videoPlayer) || (!_videoPlayer->getImage()))
+    if(!_videoPlayer)
         return;
 
     DMH_DEBUG_OPENGL_PAINTGL();
@@ -249,15 +250,38 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         if((!_videoPlayer->isNewImage()) && (getScreenshot().isNull()))
             return;
 
-        _videoObject = new PublishGLBattleBackground(nullptr, *(_videoPlayer->getImage()), GL_NEAREST);
-        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
-        _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
-        _videoObject->setTargetSize(_size);
+        if(_videoPlayer->lockMutex())
+        {
+            QImage* playerImage = _videoPlayer->getLockedImage();
+            if(playerImage)
+            {
+                QImage imageCopy = playerImage->copy();
+                _videoObject = new PublishGLBattleBackground(nullptr, imageCopy, GL_NEAREST);
+                QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+                _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
+                _videoObject->setTargetSize(_size);
+            }
+            _videoPlayer->clearNewImage();
+            _videoPlayer->unlockMutex();
+        }
     }
     else if(_videoPlayer->isNewImage())
     {
-        _videoObject->updateImage(*(_videoPlayer->getImage()));
+        if(_videoPlayer->lockMutex())
+        {
+            QImage* playerImage = _videoPlayer->getLockedImage();
+            if(playerImage)
+            {
+                QImage imageCopy = playerImage->copy();
+                _videoObject->updateImage(imageCopy);
+            }
+            _videoPlayer->clearNewImage();
+            _videoPlayer->unlockMutex();
+        }
     }
+
+    if(!_videoObject)
+        return;
 
     playerGLSetUniforms(functions, defaultModelMatrix, projectionMatrix);
 
@@ -307,7 +331,7 @@ void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultM
 {
     Q_UNUSED(defaultModelMatrix);
 
-    if(!functions)
+    if((!functions) || (!_videoObject))
         return;
 
     DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
@@ -460,7 +484,7 @@ void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)
     _videoGLPlayer->restartPlayer();
 #else
     _videoPlayer = new VideoPlayer(_filename, QSize(), true, _playAudio);
-    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget, Qt::QueuedConnection);
     _videoPlayer->restartPlayer();
 #endif
 }

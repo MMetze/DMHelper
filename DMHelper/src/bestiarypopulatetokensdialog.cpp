@@ -111,7 +111,7 @@ void BestiaryPopulateTokensDialog::populateTokens()
 
     _tokenDir.setPath(tokenPath);
 
-    qDebug() << "[BestiaryPopulateTokensDialog] Polulating Bestiary tokens with string " << _searchString << " to directory " << _tokenDir.absolutePath();
+    qDebug() << "[BestiaryPopulateTokensDialog] Populating Bestiary tokens with string " << _searchString << " to directory " << _tokenDir.absolutePath();
 
     _waitingDlg = new DMHWaitingDialog(QString("Populating Bestiary tokens..."), this);
     _waitingDlg->setModal(true);
@@ -142,6 +142,9 @@ void BestiaryPopulateTokensDialog::urlRequestFinished(QNetworkReply *reply)
         QMessageBox::critical(this, tr("Token Search Error"), tr("Error encountered retrieving link to token for ") + _currentMonster + tr(": ") + reply->errorString());
 
         reply->deleteLater();
+        cancelRequests();
+        accept();
+
         return;
     }
 

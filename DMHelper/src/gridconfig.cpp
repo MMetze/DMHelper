@@ -10,7 +10,8 @@ GridConfig::GridConfig(QObject *parent) :
     _gridAngle(50),
     _gridOffsetX(0),
     _gridOffsetY(0),
-    _gridPen()
+    _gridPen(),
+    _snapToGrid(false)
 {
 }
 
@@ -36,6 +37,7 @@ void GridConfig::inputXML(const QDomElement &element, bool isImport)
     QColor gridColor = gridElement.attribute("gridColor", QString("#000000"));
     _gridPen = QPen(QBrush(gridColor), gridWidth);
     _gridOffsetY = gridElement.attribute("gridOffsetY", QString::number(0)).toInt();
+    _snapToGrid = static_cast<bool>(gridElement.attribute("snapToGrid", QString::number(0)).toInt());
 }
 
 void GridConfig::outputXML(QDomDocument &doc, QDomElement &parentElement, bool isExport) const
@@ -51,6 +53,7 @@ void GridConfig::outputXML(QDomDocument &doc, QDomElement &parentElement, bool i
     gridElement.setAttribute("gridOffsetY", _gridOffsetY);
     gridElement.setAttribute("gridWidth", _gridPen.width());
     gridElement.setAttribute("gridColor", _gridPen.color().name());
+    gridElement.setAttribute("snapToGrid", _snapToGrid);
 
     parentElement.appendChild(gridElement);
 }
@@ -63,6 +66,7 @@ void GridConfig::copyValues(const GridConfig& other)
     _gridOffsetX = other._gridOffsetX;
     _gridOffsetY = other._gridOffsetY;
     _gridPen = other._gridPen;
+    _snapToGrid = other._snapToGrid;
 }
 
 int GridConfig::getGridType() const
@@ -90,9 +94,19 @@ int GridConfig::getGridOffsetY() const
     return _gridOffsetY;
 }
 
+QPointF GridConfig::getGridOffset() const
+{
+    return QPointF(_gridOffsetX, _gridOffsetY);
+}
+
 const QPen& GridConfig::getGridPen() const
 {
     return _gridPen;
+}
+
+bool GridConfig::isSnapToGrid() const
+{
+    return _snapToGrid;
 }
 
 void GridConfig::setGridType(int gridType)
@@ -161,6 +175,16 @@ void GridConfig::setGridColor(const QColor& gridColor)
     {
         _gridPen.setColor(gridColor);
         emit gridPenChanged(_gridPen);
+        emit dirty();
+    }
+}
+
+void GridConfig::setSnapToGrid(bool snapToGrid)
+{
+    if(_snapToGrid != snapToGrid)
+    {
+        _snapToGrid = snapToGrid;
+        emit snapToGridChanged(_snapToGrid);
         emit dirty();
     }
 }

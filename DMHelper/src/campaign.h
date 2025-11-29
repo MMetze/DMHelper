@@ -14,6 +14,7 @@ class Encounter;
 class Map;
 class AudioTrack;
 class SoundboardGroup;
+class Overlay;
 class QDomDocument;
 class QDomElement;
 
@@ -47,9 +48,19 @@ public:
     void addSoundboardGroup(SoundboardGroup* soundboardGroup);
     void removeSoundboardGroup(SoundboardGroup* soundboardGroup);
 
+    QList<Overlay*> getOverlays();
+    int getOverlayCount() const;
+    int getOverlayIndex(Overlay* overlay);
+    bool addOverlay(Overlay* overlay);
+    bool removeOverlay(Overlay* overlay);
+    bool moveOverlay(int from, int to);
+    void clearOverlays();
+
     BasicDate getDate() const;
     QTime getTime() const;
     QStringList getNotes() const;
+
+    int getFearCount() const;
 
     Ruleset& getRuleset();
     const Ruleset& getRuleset() const;
@@ -60,12 +71,15 @@ public:
 signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
+    void fearChanged(int fearCount);
+    void overlaysChanged();
 
 public slots:
     void setDate(const BasicDate& date);
     void setTime(const QTime& time);
     void setNotes(const QString& notes);
     void addNote(const QString& note);
+    void setFearCount(int fearCount);
     bool validateCampaignIds();
     bool correctDuplicateIds();
 
@@ -79,12 +93,14 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
+    void loadOverlayXML(const QDomElement &element);
     bool validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject, bool correctDuplicates = false);
     bool isVersionCompatible(int majorVersion, int minorVersion) const;
 
     BasicDate _date;
     QTime _time;
     QStringList _notes;
+    int _fearCount; // Todo: add ruleset-specific data storage
 
     Ruleset _ruleset;
 
@@ -95,6 +111,7 @@ protected:
     bool _isValid;
 
     QList<SoundboardGroup*> _soundboardGroups;
+    QList<Overlay*> _overlays;
 };
 
 #endif // CAMPAIGN_H

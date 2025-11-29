@@ -5,11 +5,6 @@
 #include "dmhwaitingdialog.h"
 #include <QDebug>
 
-/*
-#include <QFile>
-#include <QFileInfo>
-*/
-
 const int ICON_SPACING = 8;
 
 CharacterImportHeroForgeDialog::CharacterImportHeroForgeDialog(const QString& token, QWidget *parent) :
@@ -109,8 +104,6 @@ void CharacterImportHeroForgeDialog::dataReady(CharacterImportHeroForgeData* dat
         _iconGrid->setColumnStretch(spacingColumn, 10);
     }
 
-    //for(int i = 0; i < spacingColumn; ++i)
-    //    _iconGrid->setColumnStretch(i, 1);
     _iconGrid->setColumnStretch(newRow, 1);
 
     update();
@@ -120,24 +113,6 @@ void CharacterImportHeroForgeDialog::addDataRow(CharacterImportHeroForgeData* da
 {
     if(!data)
         return;
-
-    /*
-    data->getThumbImage().save(data->getName() + QString("_thumb.png"));
-    QFile meshFile(data->getName() + QString("_mesh.txt"));
-    if(meshFile.open(QIODevice::WriteOnly))
-    {
-        qDebug() << "[CharacterImportHeroForgeDialog] INFO: MESH FILE: " << QFileInfo(meshFile).absoluteFilePath();
-        meshFile.write(data->getMesh().toUtf8());
-        meshFile.close();
-    }
-    QFile metaFile(data->getName() + QString("_meta.txt"));
-    if(metaFile.open(QIODevice::WriteOnly))
-    {
-        qDebug() << "[CharacterImportHeroForgeDialog] INFO: META FILE: " << QFileInfo(metaFile).absoluteFilePath();
-        metaFile.write(data->getMeta().toUtf8());
-        metaFile.close();
-    }
-    */
 
     addData(data->getThumbImage(), data->getName() + QString(" Thumbnail"), row, 0);
     addData(data->getPerspectiveImage(), data->getName() + QString(" Perspective"), row, 1);
@@ -149,13 +124,6 @@ void CharacterImportHeroForgeDialog::addData(QImage image, QString dataName, int
 {
     if(image.isNull())
         return;
-
-    /*
-    QLabel* iconLabel = new QLabel(this);
-    iconLabel->setPixmap(QPixmap::fromImage(image).scaled(40, 40));
-    iconLabel->setToolTip(dataName);
-    _iconGrid->addWidget(iconLabel, row, column);
-    */
 
     HeroForgeButton* iconButton = new HeroForgeButton(image, dataName, this);
     connect(iconButton, &HeroForgeButton::selectButton, this, &QDialog::accept);

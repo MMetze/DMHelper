@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QImageReader>
 #include <QLineEdit>
+#include <QCompleter>
 #include <QDebug>
 
 CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
@@ -29,7 +30,7 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     connect(ui->btnCustomToken, &QAbstractButton::clicked, this, &CombatantDialog::selectCustomToken);
     connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CombatantDialog::nextIcon);
 
-    connect(ui->cmbMonsterClass,  &QComboBox::currentTextChanged, this, &CombatantDialog::monsterClassChanged);
+    connect(ui->cmbMonsterClass,  &QComboBox::textActivated, this, &CombatantDialog::monsterClassChanged);
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
     connect(ui->btnOpenMonster, SIGNAL(clicked(bool)), this, SLOT(openMonsterClicked()));
 
@@ -43,6 +44,12 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     fillSizeCombo();
 
     ui->cmbMonsterClass->addItems(Bestiary::Instance()->getMonsterList());
+    // Create a completer and attach it to the search combo box
+    QCompleter *completer = new QCompleter(ui->cmbMonsterClass->model(), this);
+    completer->setFilterMode(Qt::MatchContains);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    ui->cmbMonsterClass->setCompleter(completer);
 
     Layer* currentLayer = layerScene.getPriority(DMHelper::LayerType_Tokens);
     int currentLayerIndex = -1;
@@ -60,6 +67,8 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
 
     if((currentLayerIndex >= 0) && (currentLayerIndex < ui->cmbLayer->count()))
         ui->cmbLayer->setCurrentIndex(currentLayerIndex);
+
+    monsterClassChanged(ui->cmbMonsterClass->currentText());
 }
 
 CombatantDialog::~CombatantDialog()
@@ -212,7 +221,10 @@ void CombatantDialog::monsterClassChanged(const QString &text)
     ui->chkRandomTokens->setEnabled(monsterClass->getIconCount() > 1);
 
     ui->edtName->setText(text);
-    ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
+    if(monsterClass->hasValue("hit_dice"))
+        ui->edtHitDice->setText(monsterClass->getDiceValue("hit_dice").toString());
+    else
+        ui->edtHitPointsLocal->setText(QString::number(monsterClass->getIntValue("hit_points")));
 
     setHitPointAverageChanged();
 

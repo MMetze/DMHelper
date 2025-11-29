@@ -54,7 +54,6 @@ CampaignObjectBase* MonsterFactory::createObject(const QDomElement& element, boo
 void MonsterFactory::configureFactory(const Ruleset& ruleset, int inputMajorVersion, int inputMinorVersion)
 {
     loadTemplate(ruleset.getMonsterDataFile());
-    connect(&ruleset, &Ruleset::monsterDataFileChanged, this, &MonsterFactory::loadTemplate);
 
     _compatibilityMode = (inputMajorVersion < 2) || ((inputMajorVersion == 2) && (inputMinorVersion < 2));
     _rulesetName = ruleset.getName();

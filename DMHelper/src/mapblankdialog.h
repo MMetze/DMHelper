@@ -20,6 +20,11 @@ public:
     int getMapHeight() const;
     QSize getMapSize() const;
 
+public slots:
+    void setMapColor(const QColor& color);
+    void setMapSize(const QSize& size);
+    void enableSizeEditing(bool enable);
+
 private:
     Ui::MapBlankDialog *ui;
 };

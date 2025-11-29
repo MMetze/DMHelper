@@ -31,7 +31,7 @@ PublishGLBattleEffectVideo::PublishGLBattleEffectVideo(PublishGLScene* scene, Ba
     if(effect)
     {
         _videoPlayer = new VideoPlayer(effect->getImageFile(), QSize(), true, effect->isPlayAudio());
-        connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget);
+        connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget, Qt::QueuedConnection);
         _videoPlayer->restartPlayer();
     }
 }
@@ -58,7 +58,7 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
     if(!QOpenGLContext::currentContext())
         return;
 
-    if((!_effect) || (!_videoPlayer) || (!_videoPlayer->getImage()))
+    if((!_effect) || (!_videoPlayer))
         return;
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -69,9 +69,24 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
     createShadersGL();
 
     int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
-    //int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
 
-    QImage effectImage = _videoPlayer->getImage()->scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    if((!_videoPlayer->lockMutex()))
+    {
+        qDebug() << "[PublishGLBattleEffectVideo] ERROR: Unable to lock the video player mutex to create the effect objects!";
+        return;
+    }
+    QImage* videoPlayerImage = _videoPlayer->getLockedImage();
+    if(!videoPlayerImage)
+    {
+        _videoPlayer->unlockMutex();
+        qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
+        return;
+    }
+    QImage imageCopy = videoPlayerImage->copy();
+    QImage effectImage = imageCopy.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    _videoPlayer->clearNewImage();
+    _videoPlayer->unlockMutex();
+
     _textureSize = effectImage.size();
 
     float vertices[] = {
@@ -139,7 +154,7 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
     if(!tokensLayer)
         return;
 
-    if((!_videoPlayer) || (!_videoPlayer->getImage()))
+    if(!_videoPlayer)
         return;
 
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
@@ -189,10 +204,27 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
 
     if(_videoPlayer->isNewImage())
     {
+        if((!_videoPlayer->lockMutex()))
+        {
+            qDebug() << "[PublishGLBattleEffectVideo] ERROR: Unable to lock the video player mutex to create the effect objects!";
+            return;
+        }
+
         // load and generate the background texture
-        QImage effectImage = _videoPlayer->getImage()->scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
-        functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
-        functions->glGenerateMipmap(GL_TEXTURE_2D);
+        QImage* videoPlayerImage = _videoPlayer->getLockedImage();
+        if(!videoPlayerImage)
+        {
+            qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
+        }
+        else
+        {
+            QImage imageCopy = videoPlayerImage->copy();
+            QImage effectImage = imageCopy.scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+            functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
+            functions->glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        _videoPlayer->clearNewImage();
+        _videoPlayer->unlockMutex();
     }
 
     functions->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -235,7 +267,7 @@ void PublishGLBattleEffectVideo::createShadersGL()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShaderRGBA, 512, NULL, infoLog);
-        qDebug() << "[LayerVideoEffect] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleEffectVideo] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -249,7 +281,7 @@ void PublishGLBattleEffectVideo::createShadersGL()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShaderRGBA, 512, NULL, infoLog);
-        qDebug() << "[LayerVideoEffect] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleEffectVideo] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -264,7 +296,7 @@ void PublishGLBattleEffectVideo::createShadersGL()
     if(!success)
     {
         f->glGetProgramInfoLog(_shaderProgramRGBA, 512, NULL, infoLog);
-        qDebug() << "[LayerVideoEffect] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleEffectVideo] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 

@@ -15,6 +15,7 @@ public:
     CampaignObjectBase* currentCampaignObject();
 
 signals:
+    void treeDrop(const QModelIndex & index, const QString& filename);
 
 public slots:
     void campaignChanged();
@@ -22,7 +23,9 @@ public slots:
     void publishCurrent(bool publish);
 
 protected:
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
     virtual void dragMoveEvent(QDragMoveEvent * event) override;
+    virtual void dropEvent(QDropEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
 
     void updateExpandedState();

@@ -3,6 +3,7 @@
 #include "publishglscene.h"
 #include "publishglrect.h"
 #include "layerscene.h"
+#include "mapblankdialog.h"
 #include <QImage>
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
@@ -42,6 +43,11 @@ QRectF LayerBlank::boundingRect() const
 QImage LayerBlank::getLayerIcon() const
 {
     return QImage(":/img/data/icon_rectangle.png");
+}
+
+bool LayerBlank::hasSettings() const
+{
+    return true;
 }
 
 DMHelper::LayerType LayerBlank::getType() const
@@ -209,6 +215,30 @@ void LayerBlank::initialize(const QSize& sceneSize)
 
 void LayerBlank::uninitialize()
 {
+}
+
+void LayerBlank::editSettings()
+{
+    MapBlankDialog* dlg = new MapBlankDialog();
+
+    dlg->setMapColor(_color);
+    dlg->setMapSize(getSize());
+    dlg->enableSizeEditing(false);
+
+    if((dlg->exec() == QDialog::Accepted) && (dlg->getMapColor() != _color))
+    {
+        _color = dlg->getMapColor();
+        if(_graphicsItem)
+        {
+            QGraphicsRectItem* rectItem = static_cast<QGraphicsRectItem*>(_graphicsItem);
+            if(rectItem)
+                rectItem->setBrush(QBrush(_color));
+        }
+
+        emit dirty();
+    }
+
+    dlg->deleteLater();
 }
 
 void LayerBlank::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

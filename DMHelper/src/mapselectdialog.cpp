@@ -1,10 +1,7 @@
 #include "mapselectdialog.h"
 #include "ui_mapselectdialog.h"
 #include "map.h"
-#include "characterv2.h"
-#include "audiotrack.h"
 #include "campaign.h"
-#include "mapfactory.h"
 #include "mapblankdialog.h"
 #include "layerblank.h"
 #include <QBrush>
@@ -20,6 +17,7 @@ MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWi
 {
     ui->setupUi(this);
     connect(ui->lstMaps, &QTreeWidget::currentItemChanged, this, &MapSelectDialog::handleItemChanged);
+    connect(ui->lstMaps, &QTreeWidget::itemDoubleClicked, this, &MapSelectDialog::accept);
     setupSelectTree(campaign, currentId);
 }
 
@@ -90,21 +88,31 @@ void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetIte
 {
     Q_UNUSED(previous);
 
-    QImage img;
+    if(!current)
+        return;
 
-    if(current)
+    QImage image;
+
+    if((current == _loadNewMap) || (current == _createBlankMap))
     {
+        // Show a generic blank map
+        image = QImage(400, 300, QImage::Format_ARGB32);
+        image.fill(Qt::white);
+    }
+    else
+    {
+        // Read the data from the selected map
         Map* map = current->data(0, Qt::UserRole).value<Map*>();
         if(map)
         {
             if(!map->isInitialized())
                 map->initialize();
 
-            img = map->getPreviewImage();
+            image = map->getPreviewImage();
         }
     }
 
-    ui->lblPreview->setPixmap(QPixmap::fromImage(img).scaled(ui->lblPreview->size(), Qt::KeepAspectRatio));
+    ui->lblPreview->setPixmap(image.isNull() ? QPixmap() : QPixmap::fromImage(image).scaled(ui->lblPreview->size(), Qt::KeepAspectRatio));
 }
 
 void MapSelectDialog::setupSelectTree(Campaign& campaign, const QUuid& currentId)

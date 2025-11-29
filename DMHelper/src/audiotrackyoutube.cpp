@@ -82,6 +82,14 @@ void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
     }
 }
 
+int AudioTrackYoutube::getTrackStatus() const
+{
+    if(isPlaying())
+        return AudioTrack::AudioTrackStatus_Play;
+    else
+        return AudioTrack::AudioTrackStatus_Stop;
+}
+
 bool AudioTrackYoutube::isPlaying() const
 {
     return((_vlcPlayer) && (_stopStatus < AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE));

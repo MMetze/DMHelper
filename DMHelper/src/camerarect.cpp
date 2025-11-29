@@ -1,21 +1,18 @@
 #include "camerarect.h"
 #include "dmconstants.h"
 #include "camerascene.h"
+#include "battledialogmodel.h"
+#include "battledialoggraphicsscene.h"
+#include "layergrid.h"
 #include <QPen>
 #include <QCursor>
+#include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneHoverEvent>
 
 const qreal CAMERA_RECT_BORDER_SIZE = 4.0;
 const int CAMERA_RECT_BORDER_WIDTH = 1;
 
-/*
- * TODOs to finish this
- * changes to dialog need to impact camera when coupled
- * for videos, only restart the player when the camera changes, not when the view changes
- * decent icons and layout
- * DON'T DO: add camera rect to map view
- */
 CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked) :
     QGraphicsRectItem (0.0, 0.0, width, height, nullptr),
     _draw(true),
@@ -23,10 +20,14 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _mouseDownPos(),
     _mouseLastPos(),
     _mouseDownSection(0),
+    _trackingRect(),
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
+    _cameraIconRect(nullptr),
+    _cameraIcon(nullptr),
     _ratioLocked(ratioLocked),
+    _sizeLocked(false),
     _viewport(viewport)
 {
     initialize(scene);
@@ -39,10 +40,14 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _mouseDownPos(),
     _mouseLastPos(),
     _mouseDownSection(0),
+    _trackingRect(),
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
+    _cameraIconRect(nullptr),
+    _cameraIcon(nullptr),
     _ratioLocked(ratioLocked),
+    _sizeLocked(false),
     _viewport(viewport)
 {
     initialize(scene);
@@ -96,75 +101,66 @@ void CameraRect::setDraw(bool draw)
 
 void CameraRect::setPublishing(bool publishing)
 {
-    if((!_drawItem) || (!_drawText) || (!_drawTextRect))
+    if(publishing == _publishing)
         return;
 
-    if(publishing)
-    {
-        _drawItem->setPen(QPen(QColor(255, 0, 0, 255), CAMERA_RECT_BORDER_WIDTH));
-        _drawTextRect->setBrush(QBrush(QColor(255, 0, 0)));
-    }
-    else
-    {
-        _drawItem->setPen(QPen(QColor(0, 0, 255, 255), CAMERA_RECT_BORDER_WIDTH));
-        _drawTextRect->setBrush(QBrush(QColor(0, 0, 255)));
-    }
+    _publishing = publishing;
+    setCameraRectColor();
 }
 
 void CameraRect::setRatioLocked(bool locked)
 {
+    if(locked == _ratioLocked)
+        return;
+
     _ratioLocked = locked;
+    setCameraRectColor();
+}
+
+void CameraRect::setSizeLocked(bool locked)
+{
+    if(locked == _sizeLocked)
+        return;
+
+    _sizeLocked = locked;
+    setCameraRectColor();
 }
 
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0) || (!_viewport))
-        return;
-
-    int section = getRectSection(event->pos());
-    if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
-        _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
-    else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
-        _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
-    else if(section == RectSection_Middle)
-        _viewport->setCursor(QCursor(Qt::SizeAllCursor));
-    else if((section == RectSection_Top) || (section == RectSection_Bottom))
-        _viewport->setCursor(QCursor(Qt::SizeVerCursor));
-    else if((section == RectSection_Left) || (section == RectSection_Right))
-        _viewport->setCursor(QCursor(Qt::SizeHorCursor));
-    else
-        _viewport->unsetCursor();
-
-
-    /*
-    switch(section)
+    if((event) && ((flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable) && (_viewport))
     {
-        case RectSection_Top:
-        case RectSection_Bottom:
-            _viewport->setCursor(QCursor(Qt::SizeVerCursor)); break;
-        case RectSection_Left:
-        case RectSection_Right:
-            _viewport->setCursor(QCursor(Qt::SizeHorCursor)); break;
-        case RectSection_TopLeft:
-        case RectSection_BottomRight:
-            _viewport->setCursor(QCursor(Qt::SizeFDiagCursor)); break;
-        case RectSection_TopRight:
-        case RectSection_BottomLeft:
-            _viewport->setCursor(QCursor(Qt::SizeBDiagCursor)); break;
-        case RectSection_Middle:
-            _viewport->setCursor(QCursor(Qt::SizeAllCursor)); break;
-        default:
+        int section = getRectSection(event->pos());
+
+        if(section == RectSection_Middle)
+        {
+            _viewport->setCursor(QCursor(Qt::SizeAllCursor));
+        }
+        else if((section == RectSection_None) || (_sizeLocked))
+        {
             _viewport->unsetCursor();
-            break;
+        }
+        else
+        {
+            if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
+                _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
+            else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
+                _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
+            else if((section == RectSection_Top) || (section == RectSection_Bottom))
+                _viewport->setCursor(QCursor(Qt::SizeVerCursor));
+            else if((section == RectSection_Left) || (section == RectSection_Right))
+                _viewport->setCursor(QCursor(Qt::SizeHorCursor));
+            else
+                _viewport->unsetCursor();
+        }
     }
-    */
 
     QGraphicsRectItem::hoverMoveEvent(event);
 }
 
 void CameraRect::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if(_viewport)
+    if(((flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable) && (_viewport))
         _viewport->unsetCursor();
 
     QGraphicsRectItem::hoverLeaveEvent(event);
@@ -188,19 +184,50 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         // Resize the rectangle
         qreal dx = 0.0;
         qreal dy = 0.0;
-        qreal w = rect().width();
-        qreal h = rect().height();
+        qreal w = _trackingRect.width();
+        qreal h = _trackingRect.height();
 
         if(_ratioLocked)
             resizeRectangleFixed(*event, dx, dy, w, h); // Resize the rectangle with a fixed aspect ratio
         else
             resizeRectangle(*event, dx, dy, w, h); // Resize the rectangle normally
 
-        moveBy(dx, dy);
-        setRect(0.0, 0.0, w, h);
-        _drawItem->setRect(0.0, 0.0, w, h);
+        _trackingRect.translate(dx, dy);
+        _trackingRect.setWidth(w);
+        _trackingRect.setHeight(h);
 
-        _mouseLastPos = event->pos();
+        QPointF rectPos = mapToScene(mapFromParent(_trackingRect.topLeft()));
+        QPointF rectSize = mapToScene(mapFromParent(QPointF(w, h)));
+
+        BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
+        if((battleScene) && (battleScene->getModel()))
+        {
+            LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(battleScene->getModel()->getLayerScene().getFirst(DMHelper::LayerType_Grid));
+            if((gridLayer) && (gridLayer->getConfig().isSnapToGrid()))
+            {
+                // Snap the current position to the grid
+                QPointF offset = gridLayer->getConfig().getGridOffset() * gridLayer->getConfig().getGridScale() / 100.0;
+                qreal gridSize = battleScene->getModel()->getLayerScene().getScale();
+                int intGridSize = static_cast<int>(gridSize);
+                rectPos -= offset;
+                QPointF rectOffset = rectPos;
+                rectPos.setX((static_cast<qreal>(static_cast<int>(rectPos.x()) / (intGridSize / 2)) * (gridSize / 2.0)));
+                rectPos.setY((static_cast<qreal>(static_cast<int>(rectPos.y()) / (intGridSize / 2)) * (gridSize / 2.0)));
+                rectOffset -= rectPos;
+                rectPos += offset;
+
+                rectSize += rectOffset;
+            }
+        }
+
+        rectPos = mapToParent(mapFromScene(rectPos));
+        rectSize = mapToParent(mapFromScene(rectSize));
+
+        setPos(rectPos);
+        setRect(0.0, 0.0, rectSize.x(), rectSize.y());
+        _drawItem->setRect(0.0, 0.0, rectSize.x(), rectSize.y());
+
+        _mouseLastPos = event->scenePos();
     }
 
     CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
@@ -211,9 +238,10 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void CameraRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     _mouseDown = true;
-    _mouseDownPos = event->pos();
+    _mouseDownPos = event->scenePos();
     _mouseLastPos = _mouseDownPos;
-    _mouseDownSection = getRectSection(_mouseDownPos);
+    _trackingRect = QRectF(pos(), rect().size());
+    _mouseDownSection = getRectSection(event->pos());
 
     QGraphicsRectItem::mousePressEvent(event);
 }
@@ -246,22 +274,41 @@ void CameraRect::initialize(QGraphicsScene& scene)
 
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemIsMovable, false);
+    setFlag(QGraphicsItem::ItemIsSelectable, false);
 
     scene.addItem(this);
 
-    _drawItem = new QGraphicsRectItem;
+    _drawItem = new FixedBorderRectItem;
     _drawItem->setRect(0.0, 0.0, rect().width(), rect().height());
     _drawItem->setZValue(DMHelper::BattleDialog_Z_Overlay);
     scene.addItem(_drawItem);
 
-    _drawTextRect = new QGraphicsRectItem(_drawItem);
+    _drawTextRect = new FixedBorderRectItem(_drawItem);
+    _drawTextRect->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
     _drawText = new QGraphicsSimpleTextItem(QString(" Player's View "), _drawItem);
+    _drawText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+
     QFont textFont = _drawText->font();
-    textFont.setPointSize(5);
+    textFont.setPointSize(11);
     _drawText->setFont(textFont);
-    _drawTextRect->setRect(_drawText->boundingRect().toRect());
+
+    QRect rectSize = _drawText->boundingRect().toRect();
+    qreal rectHeight = rectSize.height();
+    _drawTextRect->setRect(rectSize);
+
+    _cameraIconRect = new FixedBorderRectItem(_drawTextRect);
+    _cameraIconRect->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    _cameraIconRect->setRect(QRect(rectSize.width(), 0, rectHeight, rectHeight));
+    _cameraIconRect->setBrush(QBrush(Qt::green));
+
+    QPixmap cameraIconPmp = QPixmap(":/img/data/icon_link.png").scaledToHeight(rectHeight, Qt::SmoothTransformation);
+    _cameraIcon = new QGraphicsPixmapItem(cameraIconPmp, _cameraIconRect);
+    _cameraIcon->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    _cameraIcon->setPos(rectSize.width(), 0);
 
     setPublishing(false);
+    setCameraRectColor();
 }
 
 int CameraRect::getRectSection(const QPointF point)
@@ -289,39 +336,43 @@ int CameraRect::getRectSection(const QPointF point)
 
 void CameraRect::resizeRectangle(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
 {
+    QPointF eventPos = event.scenePos();
+
     if((_mouseDownSection & RectSection_Left) == RectSection_Left)
     {
-        dx = event.pos().x() - _mouseDownPos.x();
+        dx = eventPos.x() - _mouseLastPos.x();
         w -= dx;
     }
     else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
     {
-        w += event.pos().x() - _mouseLastPos.x();
+        w += eventPos.x() - _mouseLastPos.x();
     }
 
     if((_mouseDownSection & RectSection_Top) == RectSection_Top)
     {
-        dy = event.pos().y() - _mouseDownPos.y();
+        dy = eventPos.y() - _mouseLastPos.y();
         h -= dy;
     }
     else if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
     {
-        h += event.pos().y() - _mouseLastPos.y();
+        h += eventPos.y() - _mouseLastPos.y();
     }
 }
 
 void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
 {
+    QPointF eventPos = event.scenePos();
+
     if((_mouseDownSection == RectSection_Left) || (_mouseDownSection == RectSection_Top) || (_mouseDownSection == RectSection_TopLeft))
     {
         if((_mouseDownSection & RectSection_Left) == RectSection_Left)
         {
-            dx = event.pos().x() - _mouseDownPos.x();
+            dx = eventPos.x() - _mouseDownPos.x();
             w -= dx;
         }
         if((_mouseDownSection & RectSection_Top) == RectSection_Top)
         {
-            dy = event.pos().y() - _mouseDownPos.y();
+            dy = eventPos.y() - _mouseDownPos.y();
             h -= dy;
         }
 
@@ -333,8 +384,8 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
     }
     else if(_mouseDownSection == RectSection_TopRight)
     {
-        w += event.pos().x() - _mouseLastPos.x();
-        dy = event.pos().y() - _mouseDownPos.y();
+        w += eventPos.x() - _mouseLastPos.x();
+        dy = eventPos.y() - _mouseDownPos.y();
         h -= dy;
 
         QSizeF newSize = rect().size().scaled(QSizeF(w, h), Qt::KeepAspectRatio);
@@ -347,11 +398,11 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
     {
         if((_mouseDownSection & RectSection_Right) == RectSection_Right)
         {
-            w += event.pos().x() - _mouseLastPos.x();
+            w += eventPos.x() - _mouseLastPos.x();
         }
         if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
         {
-            h += event.pos().y() - _mouseLastPos.y();
+            h += eventPos.y() - _mouseLastPos.y();
         }
 
         QSizeF newSize = rect().size().scaled(QSizeF(w, h), ((_mouseDownSection == RectSection_BottomRight) || (dx > 0.0) || (dy > 0.0)) ? Qt::KeepAspectRatio : Qt::KeepAspectRatioByExpanding);
@@ -362,9 +413,9 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
     }
     else if(_mouseDownSection == RectSection_BottomLeft)
     {
-        dx = event.pos().x() - _mouseDownPos.x();
+        dx = eventPos.x() - _mouseDownPos.x();
         w -= dx;
-        h += event.pos().y() - _mouseLastPos.y();
+        h += eventPos.y() - _mouseLastPos.y();
 
         QSizeF newSize = rect().size().scaled(QSizeF(w, h), Qt::KeepAspectRatio);
         w = newSize.width();
@@ -372,4 +423,44 @@ void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx
         dx = rect().size().width() - w;
         dy = 0.0;
     }
+}
+
+void CameraRect::setCameraRectColor()
+{
+    if((!_drawItem) || (!_drawTextRect) || (!_cameraIconRect) || (!_cameraIcon))
+        return;
+
+    QColor color = _publishing ? Qt::red : ((_ratioLocked || _sizeLocked) ? Qt::green : Qt::blue);
+    QPen p(color);
+    _drawItem->setPen(p);
+    _drawTextRect->setBrush(QBrush(color));
+
+    QColor textColor = (color == Qt::green) ? Qt::black : Qt::white;
+    _drawText->setBrush(QBrush(textColor));
+
+    _cameraIconRect->setVisible(_ratioLocked || _sizeLocked);
+    _cameraIcon->setVisible(_ratioLocked || _sizeLocked);
+}
+
+CameraRect::FixedBorderRectItem::FixedBorderRectItem(QGraphicsItem* parent) :
+    QGraphicsRectItem(parent)
+{
+}
+
+void CameraRect::FixedBorderRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    // Calculate scale factor from painter transform
+    qreal scaleX = painter->transform().m11();
+    qreal scaleY = painter->transform().m22();
+    qreal scale = (scaleX + scaleY) / 2.0; // Average to be safe
+
+    QPen p = pen();
+    p.setWidthF(1.0 / scale); // 1-pixel constant width
+    painter->setPen(p);
+    painter->setBrush(brush());
+
+    painter->drawRect(rect());
 }

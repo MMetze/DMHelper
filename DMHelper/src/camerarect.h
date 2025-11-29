@@ -18,6 +18,7 @@ public:
     void setPublishing(bool publishing);
 
     void setRatioLocked(bool locked);
+    void setSizeLocked(bool locked);
 
 protected:
     virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
@@ -36,17 +37,25 @@ protected:
     void resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h);
 
 private:
+    void setCameraRectColor();
+
     bool _draw;
     bool _mouseDown;
     QPointF _mouseDownPos;
     QPointF _mouseLastPos;
     int _mouseDownSection;
+    QRectF _trackingRect;
 
     QGraphicsRectItem* _drawItem;
     QGraphicsSimpleTextItem* _drawText;
     QGraphicsRectItem* _drawTextRect;
+    QGraphicsRectItem* _cameraIconRect;
+    QGraphicsPixmapItem* _cameraIcon;
 
+
+    bool _publishing;
     bool _ratioLocked;
+    bool _sizeLocked;
     QWidget* _viewport;
 
     enum RectSection
@@ -61,6 +70,15 @@ private:
         RectSection_BottomLeft  = RectSection_Bottom | RectSection_Left,
         RectSection_BottomRight = RectSection_Bottom | RectSection_Right,
         RectSection_Middle      = 0x0010
+    };
+
+    // Add this class definition somewhere in your project (e.g., camerarect.h or a new file)
+    class FixedBorderRectItem : public QGraphicsRectItem
+    {
+    public:
+        FixedBorderRectItem(QGraphicsItem* parent = nullptr);
+
+        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
     };
 };
 

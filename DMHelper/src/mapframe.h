@@ -22,6 +22,7 @@ class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
 class Layer;
+class GridSizer;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -88,12 +89,10 @@ signals:
     void publishCancelled();
 
 public slots:
-//    void updateFoW();
     void fillFoW();
     void resetFoW();
     void clearFoW();
     void undoPaint();
-  // void clear();
 
     void colorize();
 
@@ -102,11 +101,11 @@ public slots:
     void setShowParty(bool showParty);
     void setPartyScale(int partyScale);
     void setPartySelected(bool selected);
+    void resizeGrid();
 
     void setShowMarkers(bool show);
     void addNewMarker();
     void addMarker(const QPointF& markerPosition);
-//    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
     void editMapMarker(UndoMarker* marker);
     void deleteMapMarker(UndoMarker* marker);
 
@@ -194,6 +193,9 @@ protected slots:
     void loadViewRect();
     void checkPartyUpdate();
 
+    void gridSizerAccepted();
+    void gridSizerRejected();
+
     void rendererActivated(PublishGLMapRenderer* renderer);
     void rendererDeactivated();
 
@@ -246,6 +248,7 @@ private:
 
     QRubberBand* _rubberBand;
     qreal _scale;
+    GridSizer* _gridSizer;
 
     Map* _mapSource;
     PublishGLMapRenderer* _renderer;

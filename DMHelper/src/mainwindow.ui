@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1127</width>
-    <height>461</height>
+    <width>695</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,7 +40,10 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <widget class="CampaignTree" name="treeView">
           <property name="sizePolicy">
@@ -159,17 +162,27 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::MinimumExpanding</enum>
+             <enum>QSizePolicy::Preferred</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>10</width>
-              <height>10</height>
+              <width>5</width>
+              <height>5</height>
              </size>
             </property>
            </spacer>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="PopupsPreviewFrame" name="framePopups">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -205,7 +218,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1127</width>
+     <width>695</width>
      <height>21</height>
     </rect>
    </property>
@@ -296,9 +309,6 @@
    <property name="text">
     <string>Exit</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+Q</string>
-   </property>
   </action>
   <action name="action_OpenCampaign">
    <property name="text">
@@ -330,9 +340,6 @@
    </property>
    <property name="text">
     <string>&amp;New Campaign</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionNew_Adventure">
@@ -495,6 +502,12 @@
    <class>CampaignObjectFrameStack</class>
    <extends>QStackedWidget</extends>
    <header>campaignobjectframestack.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PopupsPreviewFrame</class>
+   <extends>QFrame</extends>
+   <header>popupspreviewframe.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

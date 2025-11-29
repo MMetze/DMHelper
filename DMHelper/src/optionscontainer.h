@@ -27,7 +27,8 @@ public:
     QString getEquipmentFileName() const;
     QString getShopsFileName() const;
     QString getTablesDirectory() const;
-    QString getRulesetFileName() const;
+    QString getDefaultRulesetFileName();
+    QString getUserRulesetFileName() const;
     QString getLastMonster() const;
     QString getLastSpell() const;
     QString getLastRuleset() const;
@@ -48,6 +49,7 @@ public:
     // Battle settings
     int getInitiativeType() const;
     qreal getInitiativeScale() const;
+    int getCombatantTokenType() const;
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
@@ -55,6 +57,7 @@ public:
     QString getActiveIcon() const;
     QString getCombatantFrame() const;
     QString getCountdownFrame() const;
+    bool getRatioLocked() const;
     bool getGridLocked() const;
     qreal getGridLockScale() const;
 
@@ -120,6 +123,7 @@ signals:
     // Battle settings
     void initiativeTypeChanged(int initiativeType);
     void initiativeScaleChanged(qreal initiativeScale);
+    void combatantTokenTypeChanged(int combatantTokenType);
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
@@ -127,6 +131,7 @@ signals:
     void activeIconChanged(const QString& activeIcon);
     void combatantFrameChanged(const QString& combatantFrame);
     void countdownFrameChanged(const QString& countdownFrame);
+    void ratioLockedChanged(bool ratioLocked);
     void gridLockedChanged(bool gridLocked);
     void gridLockScaleChanged(qreal gridLockScale);
 
@@ -204,6 +209,7 @@ public slots:
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(int initiativeScale);
     void setInitiativeScale(qreal initiativeScale);
+    void setCombatantTokenType(int combatantTokenType);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
@@ -212,6 +218,7 @@ public slots:
     void setActiveIcon(const QString& activeIcon);
     void setCombatantFrame(const QString& combatantFrame);
     void setCountdownFrame(const QString& countdownFrame);
+    void setRatioLocked(bool ratioLocked);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
 
@@ -285,6 +292,7 @@ private:
     // Battle settings
     int _initiativeType;
     qreal _initiativeScale;
+    int _combatantTokenType;
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;
@@ -292,6 +300,7 @@ private:
     QString _activeIcon;
     QString _combatantFrame;
     QString _countdownFrame;
+    bool _ratioLocked;
     bool _gridLocked;
     qreal _gridLockScale;
 

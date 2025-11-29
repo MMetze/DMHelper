@@ -21,8 +21,9 @@ public:
     virtual void setPlayingAudio(bool playAudio);
 
     virtual bool isError() const;
-    virtual QRecursiveMutex* getMutex() const;
-    virtual QImage* getImage() const;
+    virtual bool lockMutex();
+    virtual void unlockMutex();
+    virtual QImage* getLockedImage() const;
     virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
     virtual void clearNewImage();
@@ -93,7 +94,7 @@ protected:
 
     unsigned int _nativeWidth;
     unsigned int _nativeHeight;
-    QRecursiveMutex* _mutex;
+    QMutex* _mutex;
     class VideoPlayerImageBuffer *_buffers[2];
     size_t _idxRender;
     size_t _idxDisplay;

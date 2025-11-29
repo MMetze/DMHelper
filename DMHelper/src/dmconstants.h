@@ -31,6 +31,7 @@ namespace DMHelper
         CampaignType_BattleContentCombatant,
         CampaignType_BattleContentEffect,
         CampaignType_Ruleset,
+        CampaignType_Media, // Note: For identification only, Media are implemented as simplified Maps
 
         CampaignType_Placeholder = 0xffff
     };
@@ -166,6 +167,21 @@ namespace DMHelper
         InitiativeType_ImagePCNames
     };
 
+    enum CombatantTokenType
+    {
+        CombatantTokenType_None = 0,
+        CombatantTokenType_MonstersOnly,
+        CombatantTokenType_CharactersOnly,
+        CombatantTokenType_CharactersAndMonsters
+    };
+
+    enum MovementType
+    {
+        MovementType_None = 0,
+        MovementType_Distance,
+        MovementType_Range
+    };
+
     enum LayerType
     {
         LayerType_Unknown = -1,
@@ -180,12 +196,23 @@ namespace DMHelper
         LayerType_Effect,
     };
 
+    enum OverlayType
+    {
+        OverlayType_Unknown = -1,
+        OverlayType_Fear = 0,
+        OverlayType_Counter,
+        OverlayType_Timer,
+    };
+
     enum FileType
     {
         FileType_Unknown = 0,
         FileType_Text,
         FileType_HTML,
-        FileType_Markdown
+        FileType_Markdown,
+        FileType_Image,
+        FileType_Video,
+        FileType_Audio
     };
 
     enum TransparentType

@@ -6,6 +6,7 @@
 #include "monsterclassv2.h"
 #include "monsteraction.h"
 #include "monsterfactory.h"
+#include "combatantfactory.h"
 #include "combatantwidget.h"
 #include "ui_combatantrolloverframe.h"
 #include <QStringList>
@@ -68,6 +69,11 @@ CombatantRolloverFrame::~CombatantRolloverFrame()
     delete ui;
 }
 
+bool CombatantRolloverFrame::isEmpty() const
+{
+    return ui->listActions->count() == 0;
+}
+
 void CombatantRolloverFrame::triggerClose()
 {
     if(_closeTimer > 0)
@@ -91,11 +97,30 @@ void CombatantRolloverFrame::handleItemClicked(QListWidgetItem *item)
     if((!item) || (item->data(ROLLOVER_LISTITEM_DESCRIPTION).isNull()))
         return;
 
+    QString itemText = item->data(ROLLOVER_LISTITEM_TITLE).toString();
+
     // Expand the item to show the full description
-    if(item->text() != item->data(ROLLOVER_LISTITEM_TITLE).toString())
-        item->setText(item->data(ROLLOVER_LISTITEM_TITLE).toString());
-    else
-        item->setText(item->data(ROLLOVER_LISTITEM_TITLE).toString() + QChar::LineFeed + item->data(ROLLOVER_LISTITEM_DESCRIPTION).toString());
+    if(item->text() == itemText)
+    {
+        QString description = item->data(ROLLOVER_LISTITEM_DESCRIPTION).toString();
+
+        // Heuristic: only treat as HTML if string starts with '<' and ends with '>', or contains well-known tags
+        static const QRegularExpression htmlTagRegex("<\\s*\\w+.*?>");
+
+        if(htmlTagRegex.match(description).hasMatch())
+        {
+            QTextDocument doc;
+            doc.setHtml(description);
+            description = doc.toPlainText();
+        }
+
+        if(description.isEmpty())
+            return;
+
+        itemText += QString(QChar::LineFeed) + description;
+    }
+
+    item->setText(itemText);
     update();
 }
 
@@ -145,41 +170,35 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
     if(!character)
         return;
 
-    Characterv2* characterBase = character->getCharacter();
-    if(!characterBase)
+    if(!CombatantFactory::Instance()->hasElementList("actions"))
         return;
 
-    // HACK - should be a template
-    /*
-    const QList<MonsterAction>& actionList = characterBase->getActions();
+    Characterv2* characterBase = character->getCharacter();
+    if(!characterBase)
+        return;    
 
-    addSectionTitle(QString("Attacks"));
-    for(const MonsterAction& action : std::as_const(actionList))
+    QList<QVariant> listValue = characterBase->getListValue("actions");
+    if(listValue.isEmpty())
+        return;
+
+    addSectionTitle(QString("Actions"));
+
+    for(const auto &listEntry : std::as_const(listValue))
     {
-        if(action.hasDiceSummary())
-        {
-            QListWidgetItem *item = new QListWidgetItem(action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_TITLE, action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_DESCRIPTION, action.getDescription());
-            ui->listActions->addItem(item);
-        }
+        QHash<QString, QVariant> hashEntry = listEntry.toHash();
+        if((hashEntry.isEmpty()) || (!hashEntry.contains("name")))
+            continue;
+
+        QString summaryString = MonsterAction::createSummaryString(hashEntry);
+        QListWidgetItem *item = new QListWidgetItem(summaryString);
+        item->setData(ROLLOVER_LISTITEM_TITLE, summaryString);
+        if(!hashEntry.value("desc").isNull())
+            item->setData(ROLLOVER_LISTITEM_DESCRIPTION, hashEntry.value("desc").toString());
+        else
+            item->setFlags(Qt::NoItemFlags);
+
+        ui->listActions->addItem(item);
     }
-
-    addSeparator();
-
-    addSectionTitle(QString("Abilities"));
-
-    for(const MonsterAction& action : std::as_const(actionList))
-    {
-        if(!action.hasDiceSummary())
-        {
-            QListWidgetItem *item = new QListWidgetItem(action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_TITLE, action.summaryString());
-            item->setData(ROLLOVER_LISTITEM_DESCRIPTION, action.getDescription());
-            ui->listActions->addItem(item);
-        }
-    }
-*/
 }
 
 void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)

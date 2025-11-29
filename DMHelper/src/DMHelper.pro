@@ -105,9 +105,11 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    fearframe.cpp \
     globalsearch.cpp \
     globalsearchframe.cpp \
     gridconfig.cpp \
+    gridsizer.cpp \
     helpdialog.cpp \
     initiativelistcombatantwidget.cpp \
     initiativelistdialog.cpp \
@@ -138,15 +140,26 @@ SOURCES += main.cpp\
     monsterclassv2converter.cpp \
     monsterfactory.cpp \
     newcampaigndialog.cpp \
+    newentrydialog.cpp \
     objectfactory.cpp \
     objectimportdialog.cpp \
     objectimportworker.cpp \
     optionsaccessor.cpp \
+    overlay.cpp \
+    overlaycounter.cpp \
+    overlayfear.cpp \
+    overlayframe.cpp \
+    overlayrenderer.cpp \
+    overlayseditdialog.cpp \
+    overlaytimer.cpp \
     party.cpp \
     partycharactergridframe.cpp \
     partyframe.cpp \
     partyframecharacter.cpp \
     placeholder.cpp \
+    popup.cpp \
+    popupaudio.cpp \
+    popupspreviewframe.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
@@ -401,9 +414,11 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    fearframe.h \
     globalsearch.h \
     globalsearchframe.h \
     gridconfig.h \
+    gridsizer.h \
     helpdialog.h \
     initiativelistcombatantwidget.h \
     initiativelistdialog.h \
@@ -434,15 +449,26 @@ HEADERS  += mainwindow.h \
     monsterclassv2converter.h \
     monsterfactory.h \
     newcampaigndialog.h \
+    newentrydialog.h \
     objectfactory.h \
     objectimportdialog.h \
     objectimportworker.h \
     optionsaccessor.h \
+    overlay.h \
+    overlaycounter.h \
+    overlayfear.h \
+    overlayframe.h \
+    overlayrenderer.h \
+    overlayseditdialog.h \
+    overlaytimer.h \
     party.h \
     partycharactergridframe.h \
     partyframe.h \
     partyframecharacter.h \
     placeholder.h \
+    popup.h \
+    popupaudio.h \
+    popupspreviewframe.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
@@ -639,6 +665,7 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    fearframe.ui \
     globalsearchframe.ui \
     helpdialog.ui \
     initiativelistcombatantwidget.ui \
@@ -652,7 +679,11 @@ FORMS    += mainwindow.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
     newcampaigndialog.ui \
+    newentrydialog.ui \
     objectimportdialog.ui \
+    overlayframe.ui \
+    overlayseditdialog.ui \
+    popupspreviewframe.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
@@ -661,9 +692,11 @@ FORMS    += mainwindow.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
     resources/ui/action.ui \
+    resources/ui/character-daggerheart.ui \
     resources/ui/character2e.ui \
     resources/ui/character5e-2024.ui \
     resources/ui/character5e.ui \
+    resources/ui/monster-daggerheart.ui \
     resources/ui/monster2e.ui \
     resources/ui/monster5e-2024.ui \
     resources/ui/monster5e.ui \
@@ -748,11 +781,13 @@ DISTFILES += \
     preparebuilddirectory_msvc64.cmd \
     release_notes.txt \
     resources/calendar.xml \
+    resources/character-daggerheart.xml \
     resources/character.xml \
     resources/character2e.xml \
     resources/character5e-2024.xml \
     resources/character5e.xml \
     resources/equipment.xml \
+    resources/monster-daggerheart.xml \
     resources/monster2e.xml \
     resources/monster5e.xml \
     resources/quickref_data.xml \

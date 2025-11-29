@@ -23,6 +23,7 @@ RibbonTabTools::RibbonTabTools(QWidget *parent) :
     connect(ui->btnTimeDate, SIGNAL(clicked(bool)), this, SIGNAL(calendarClicked()));
     connect(ui->btnCountdown, SIGNAL(clicked(bool)), this, SIGNAL(countdownClicked()));
 
+    connect(ui->btnLockedRatio, &QAbstractButton::toggled, this, &RibbonTabTools::lockRatioClicked);
     connect(ui->btnLockedGrid, &QAbstractButton::toggled, this, &RibbonTabTools::lockGridClicked);
     connect(ui->btnConfigureGrid, &QAbstractButton::clicked, this, &RibbonTabTools::configureGridClicked);
 }
@@ -35,6 +36,12 @@ RibbonTabTools::~RibbonTabTools()
 PublishButtonRibbon* RibbonTabTools::getPublishRibbon()
 {
     return ui->framePublish;
+}
+
+void RibbonTabTools::setRatioLocked(bool locked)
+{
+    if(ui->btnLockedRatio->isChecked() != locked)
+        ui->btnLockedRatio->setChecked(locked);
 }
 
 void RibbonTabTools::setGridLocked(bool locked)
@@ -67,6 +74,7 @@ void RibbonTabTools::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate, frameHeight);
     setStandardButtonSize(*ui->lblCountdown, *ui->btnCountdown, frameHeight);
     setLineHeight(*ui->line_5, frameHeight);
+    setStandardButtonSize(*ui->lblLockedRatio, *ui->btnLockedRatio, frameHeight);
     setStandardButtonSize(*ui->lblLockedGrid, *ui->btnLockedGrid, frameHeight);
     setStandardButtonSize(*ui->lblConfigureGrid, *ui->btnConfigureGrid, frameHeight);
 }

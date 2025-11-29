@@ -23,7 +23,9 @@ public:
     int getGridAngle() const;
     int getGridOffsetX() const;
     int getGridOffsetY() const;
+    QPointF getGridOffset() const;
     const QPen& getGridPen() const;
+    bool isSnapToGrid() const;
 
 public slots:
     void setGridType(int gridType);
@@ -33,6 +35,7 @@ public slots:
     void setGridOffsetY(int gridOffsetY);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
+    void setSnapToGrid(bool snapToGrid);
 
 signals:
     void gridTypeChanged(int gridType);
@@ -41,6 +44,7 @@ signals:
     void gridOffsetXChanged(int gridOffsetX);
     void gridOffsetYChanged(int gridOffsetY);
     void gridPenChanged(const QPen& gridPen);
+    void snapToGridChanged(bool snapToGrid);
     void dirty();
 
 protected:
@@ -50,6 +54,7 @@ protected:
     int _gridOffsetX;
     int _gridOffsetY;
     QPen _gridPen;
+    bool _snapToGrid;
 
 };
 

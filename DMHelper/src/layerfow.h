@@ -46,6 +46,10 @@ public:
 
     QRect getFoWVisibleRect() const;
 
+    void dipOpacity();
+    void raiseOpacity();
+    void resetOpacity();
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene* scene) override;

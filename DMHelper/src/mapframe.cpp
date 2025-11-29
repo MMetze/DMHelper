@@ -9,6 +9,7 @@
 #include "undomarker.h"
 #include "layerscene.h"
 #include "layervideo.h"
+#include "layergrid.h"
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
 #include "layerseditdialog.h"
@@ -17,6 +18,7 @@
 #include "unselectedpixmap.h"
 #include "camerarect.h"
 #include "publishglmaprenderer.h"
+#include "gridsizer.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -55,6 +57,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _publishMouseDownPos(),
     _rubberBand(nullptr),
     _scale(1.0),
+    _gridSizer(nullptr),
     _mapSource(nullptr),
     _renderer(nullptr),
     _targetSize(),
@@ -93,7 +96,6 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
 
     setMap(map);
     connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
-
     rendererActivated(dynamic_cast<PublishGLMapRenderer*>(currentRenderer));
 
     _isPublishing = (currentRenderer) && (_mapSource) && (currentRenderer->getObject() == _mapSource);
@@ -118,6 +120,7 @@ void MapFrame::deactivateObject()
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
     rendererDeactivated();
+    cancelSelect();
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
 
@@ -236,7 +239,7 @@ void MapFrame::resetFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(128, 0, 0, 255)));
@@ -254,7 +257,7 @@ void MapFrame::clearFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(128, 0, 0, 0)));
@@ -323,6 +326,27 @@ void MapFrame::setPartySelected(bool selected)
 {
     if(_partyIcon)
         _partyIcon->setSelected(selected);
+}
+
+void MapFrame::resizeGrid()
+{
+    if((!_scene) || (!_mapSource) || (_gridSizer))
+        return;
+
+    // Add a resizeable grid setter with a 5x5 grid to the battle frame
+    qreal currentScale = DMHelper::STARTING_GRID_SCALE;
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(gridLayer)
+        currentScale = gridLayer->getConfig().getGridScale();
+    else
+        currentScale = _mapSource->getLayerScene().getScale();
+
+    _gridSizer = new GridSizer(currentScale);
+    _gridSizer->setBackgroundColor(QColor(255,255,255,204));
+    _scene->addItem(_gridSizer);
+    _gridSizer->setPos(currentScale, currentScale);
+    connect(_gridSizer, &GridSizer::accepted, this, &MapFrame::gridSizerAccepted);
+    connect(_gridSizer, &GridSizer::rejected, this, &MapFrame::gridSizerRejected);
 }
 
 void MapFrame::setShowMarkers(bool show)
@@ -484,6 +508,7 @@ void MapFrame::centerWindow(const QPointF& position)
 
 void MapFrame::cancelSelect()
 {
+    gridSizerRejected();
     editModeToggled(DMHelper::EditMode_Move);
 }
 
@@ -657,8 +682,30 @@ void MapFrame::publishWindowMouseRelease(const QPointF& position)
 
 void MapFrame::layerSelected(int selected)
 {
-    if(_mapSource)
-        _mapSource->getLayerScene().setSelectedLayerIndex(selected);
+    if(!_mapSource)
+        return;
+
+    _mapSource->getLayerScene().setSelectedLayerIndex(selected);
+
+    if(_editMode == DMHelper::EditMode_FoW)
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
+    }
 }
 
 void MapFrame::publishClicked(bool checked)
@@ -927,15 +974,29 @@ void MapFrame::showEvent(QShowEvent *event)
 
 void MapFrame::keyPressEvent(QKeyEvent *event)
 {
-    if(event)
+    if(!event)
+        return;
+
+    if(event->key() == Qt::Key_Escape)
     {
-        if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
-        {
-            _spaceDown = true;
-            setMapCursor();
-            event->accept();
-            return;
-        }
+        cancelSelect();
+        return;
+    }
+
+    gridSizerAccepted();
+
+    if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
+    {
+        _spaceDown = true;
+        setMapCursor();
+        event->accept();
+        return;
+    }
+    else if(event->key() == Qt::Key_A)
+    {
+        editModeToggled(_editMode == DMHelper::EditMode_Pointer ? DMHelper::EditMode_Move : DMHelper::EditMode_Pointer);
+        event->accept();
+        return;
     }
 
     CampaignObjectFrame::keyPressEvent(event);
@@ -952,18 +1013,6 @@ void MapFrame::keyReleaseEvent(QKeyEvent *event)
             event->accept();
             return;
         }
-        else if(event->key() == Qt::Key_A)
-        {
-            editModeToggled(_editMode == DMHelper::EditMode_Pointer ? DMHelper::EditMode_Move : DMHelper::EditMode_Pointer);
-            event->accept();
-            return;
-        }
-        else if(event->key() == Qt::Key_Escape)
-        {
-            editModeToggled(DMHelper::EditMode_Move);
-            event->accept();
-            return;
-        }
     }
 
     CampaignObjectFrame::keyReleaseEvent(event);
@@ -973,6 +1022,17 @@ bool MapFrame::editModeToggled(int editMode)
 {
     if(_editMode == editMode)
         return false;
+
+    if((_mapSource) && (_editMode == DMHelper::EditMode_FoW))
+    {
+        QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+        foreach(Layer* l, allFows)
+        {
+            LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+            if(fowLayer)
+                fowLayer->resetOpacity();
+        }
+    }
 
     changeEditMode(_editMode, false);
     changeEditMode(editMode, true);
@@ -1000,6 +1060,26 @@ bool MapFrame::editModeToggled(int editMode)
             break;
         default:
             break;
+    }
+
+    if((_mapSource) && (_editMode == DMHelper::EditMode_FoW))
+    {
+        LayerFow* activeLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(activeLayer)
+        {
+            QList<Layer*> allFows = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+            foreach(Layer* l, allFows)
+            {
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(l ? l->getFinalLayer() : nullptr);
+                if(fowLayer)
+                {
+                    if(fowLayer == activeLayer)
+                        fowLayer->raiseOpacity();
+                    else
+                        fowLayer->dipOpacity();
+                }
+            }
+        }
     }
 
     setMapCursor();
@@ -1217,7 +1297,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
                 if(layer)
                 {
                     shapeRect.translate(-layer->getPosition());
@@ -1257,7 +1337,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
-            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
             if(layer)
             {
                 drawPoint -= layer->getPosition();
@@ -1364,12 +1444,13 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
         _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _distanceText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
 
         _mapItem = new MapDrawLine(QLine(scenePos.toPoint(), scenePos.toPoint()),
-                                false, true,
-                                _mapSource->getDistanceLineColor(),
-                                _mapSource->getDistanceLineWidth(),
-                                static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
+                                         false, true,
+                                         _mapSource->getDistanceLineColor(),
+                                         _mapSource->getDistanceLineWidth(),
+                                         static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
         _mapSource->addMapItem(_mapItem);
 
         mouseEvent->accept();
@@ -1430,6 +1511,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         _distanceText->setFont(textFont);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5, 5)));
         _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _distanceText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
 
         _mapItem = new MapDrawPath(1, DMHelper::BrushType_Circle,
                                    false, true,
@@ -1760,6 +1842,24 @@ void MapFrame::checkPartyUpdate()
 
         _partyIcon->setPixmap(partyPixmap);
     }
+}
+
+void MapFrame::gridSizerAccepted()
+{
+    if(!_gridSizer)
+        return;
+
+    setPartyScale(_gridSizer->getSize());
+    gridSizerRejected();
+}
+
+void MapFrame::gridSizerRejected()
+{
+    if(!_gridSizer)
+        return;
+
+    _gridSizer->deleteLater();
+    _gridSizer = nullptr;
 }
 
 void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)

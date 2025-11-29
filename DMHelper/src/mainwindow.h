@@ -82,12 +82,13 @@ public slots:
 
     void newCharacter();
     void importCharacter();
+    void importCharacter(const QString& importLinkName);
     void importItem();
     void newParty();
     void newTextEncounter();
     void newLinkedText();
     void newBattleEncounter();
-    void newMap(Layer* imageLayer = nullptr);
+    void newMap();
     void newMedia();
     void newAudioEntry();
     void newSyrinscapeEntry();
@@ -96,11 +97,13 @@ public slots:
     void removeCurrentItem();
     void showNotes();
     void addNote();
+    void showOverlays();
     void editCurrentItem();
     void setCurrentItemIcon();
     void clearCurrentItemIcon();
     void exportCurrentItem();
     void addNewObject(CampaignObjectBase* newObject);
+    void addNewObjectToTarget(CampaignObjectBase* newObject, CampaignObjectBase* targetObject);
 
     void clearDirty();
     void setDirty();
@@ -156,12 +159,13 @@ protected:
 
     void writeSpellbook();
 
-    CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
+    CampaignObjectBase* newEncounter(DMHelper::CampaignType encounterType, const QString& filename = QString(), CampaignObjectBase* targetObject = nullptr);
     void addNewAudioObject(const QString& audioFile);
     Layer* selectMapFile();
 
 protected slots:
     void openCampaign(const QString& filename);
+    void reloadCampaign();
     void handleCampaignLoaded(Campaign* campaign);
     void updateCampaignTree();
     void updateMapFiles();
@@ -173,6 +177,7 @@ protected slots:
     void handleTreeItemExpanded(const QModelIndex & index);
     void handleTreeItemCollapsed(const QModelIndex & index);
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
+    void handleTreeDrop(const QModelIndex & index, const QString& filename);
     void handleEditSettings();
 
     void handleOpenDMScreen();
@@ -186,6 +191,7 @@ protected slots:
     void handleAutoSaveChanged();
     void handleAnimationStarted();
 
+    void previewCurrentTextEntry();
     bool selectItemFromStack(const QUuid& itemId);
 
     // Bestiary
@@ -245,8 +251,6 @@ private:
     SpellbookDialog _spellDlg;
 
     BattleDialogManager* _battleDlgMgr;
-
-    //AudioPlayer* _audioPlayer;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;

@@ -51,6 +51,7 @@ public slots:
     void setCameraRect(const QRectF& cameraRect);
     void setInitiativeType(int initiativeType);
     void setInitiativeScale(qreal initiativeScale);
+    void combatantTokenTypeChanged();
 
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
@@ -124,6 +125,8 @@ protected:
     qreal _initiativeScale;
     qreal _initiativeTokenHeight;
     bool _movementVisible;
+    int _movementType;
+    QList<int> _movementRanges;
     BattleDialogModelCombatant* _movementCombatant;
     PublishGLImage* _movementToken;
     QString _tokenFrameFile;

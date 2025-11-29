@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="monster.xsd">
+
+    <dmh:attribute type="dmh:boolean" name="private"/>
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:string" name="tier" default="Tier 1"/>
+    <dmh:attribute type="dmh:string" name="monster_type" default="Bruiser"/>
+    <dmh:attribute type="dmh:string" name="description"/>
+    <dmh:attribute type="dmh:string" name="motives"/>
+    
+    <dmh:attribute type="dmh:integer" name="difficulty" default="10"/>
+    <dmh:attribute type="dmh:string" name="thresholds"/>
+    <dmh:attribute type="dmh:integer" name="hit_points"/>
+    <dmh:attribute type="dmh:integer" name="stress"/>
+    <dmh:attribute type="dmh:integer" name="attack"/>
+    <dmh:attribute type="dmh:string" name="standard_attack"/>
+    <dmh:attribute type="dmh:string" name="experience"/>
+
+    <dmh:element type="dmh:list" name="features">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:string" name="description"/>
+    </dmh:element>
+</dmh:template>

@@ -266,6 +266,20 @@
         <file>data/firststart.txt</file>
         <file>data/icon_clouds.png</file>
         <file>data/icon_help.png</file>
+        <file>data/icon_gridresize.png</file>
+        <file>data/icon_snaptogrid.png</file>
+        <file>data/icon_lockedratio.png</file>
+        <file>data/icon_check.png</file>
+        <file>data/hoodeyeless.png</file>
+        <file>data/hoodeyelessborder.png</file>
+        <file>data/icon_media.png</file>
+        <file>data/icon_minus.png</file>
+        <file>data/icon_overlaycounter.png</file>
+        <file>data/icon_overlaycounterbackground.png</file>
+        <file>data/icon_overlaytimer.png</file>
+        <file>data/icon_overlaytimerbackground.png</file>
+        <file>data/icon_overlay.png</file>
+        <file>data/img/glass-heart.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

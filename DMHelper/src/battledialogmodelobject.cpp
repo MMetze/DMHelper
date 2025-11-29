@@ -4,6 +4,7 @@
 
 BattleDialogModelObject::BattleDialogModelObject(const QPointF& position, qreal rotation, const QString& name, QObject *parent) :
     CampaignObjectBase{name, parent},
+    _tokensLayer(nullptr),
     _linkedObject(nullptr),
     _linkedId(),
     _position(position),
@@ -33,10 +34,21 @@ void BattleDialogModelObject::copyValues(const CampaignObjectBase* other)
     if(!otherObject)
         return;
 
+    _tokensLayer = otherObject->_tokensLayer;
     _position = otherObject->_position;
     _rotation = otherObject->_rotation;
 
     CampaignObjectBase::copyValues(other);
+}
+
+void BattleDialogModelObject::setLayer(LayerTokens* tokensLayer)
+{
+    _tokensLayer = tokensLayer;
+}
+
+LayerTokens* BattleDialogModelObject::getLayer() const
+{
+    return _tokensLayer;
 }
 
 BattleDialogModelObject* BattleDialogModelObject::getLinkedObject() const

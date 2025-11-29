@@ -135,7 +135,7 @@ bool Bestiary::writeBestiary(const QString& targetFilename)
     file.close();
     setDirty(false);
 
-    qDebug() << "[MainWindow] Bestiary file writing complete: " << targetFilename;
+    qDebug() << "[Bestiary] Bestiary file writing complete: " << targetFilename;
 
     return true;
 }
@@ -180,7 +180,7 @@ int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDire
     return monsterCount;
 }
 
-void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
+bool Bestiary::inputXML(const QDomElement &element, const QString& importFile)
 {
     qDebug() << "[Bestiary] Bestiary provided for input";
 
@@ -189,7 +189,7 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     {
         qDebug() << "[Bestiary]    ERROR: invalid bestiary file, unable to find base bestiary element";
         QMessageBox::critical(nullptr, QString("Invalid Bestiary File"), QString("The new bestiary file is invalid - it is missing a base bestiary element and can't be loaded."));
-        return;
+        return false;
     }
 
     _majorVersion = bestiaryElement.attribute("majorversion", QString::number(0)).toInt();
@@ -199,7 +199,7 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     {
         qDebug() << "[Bestiary]    ERROR: Bestiary version is not compatible with expected version: " << getExpectedVersion();
         QMessageBox::critical(nullptr, QString("Incompatible Bestiary File"), QString("The new bestiary file is incompatible with this version of DMHelper and can't be loaded."));
-        return;
+        return false;
     }
 
     if(!isVersionIdentical())
@@ -213,7 +213,7 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         {
             qDebug() << "[Bestiary]    ERROR: Importing an old bestiary version is not supported. Please convert the file to the new format before importing.";
             QMessageBox::critical(nullptr, QString("Importing old version"), QString("Importing an old bestiary version is not supported. Please convert the file to the new format before importing. You can do this by setting the file to import as the primary bestiary file in DMHelper and then saving it again."));
-            return;
+            return false;
         }
     }
     else
@@ -225,6 +225,7 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     }
 
     registerChange();
+    return true;
 }
 
 QString Bestiary::getVersion() const
@@ -339,19 +340,34 @@ MonsterClassv2* Bestiary::getPreviousMonsterClass(MonsterClassv2* monsterClass) 
     return i.value();
 }
 
-bool Bestiary::insertMonsterClass(MonsterClassv2* monsterClass)
+bool Bestiary::insertMonsterClass(MonsterClassv2* monsterClass, bool overwrite)
 {
     if(!monsterClass)
         return false;
 
     if(_bestiaryMap.contains(monsterClass->getStringValue("name")))
     {
-        qDebug() << "[Bestiary] Attempted to insert a monster class that already exists in the bestiary: " << monsterClass->getStringValue("name");
-        return false;
+        if(!overwrite)
+        {
+            qDebug() << "[Bestiary] Attempted to insert a monster class that already exists in the bestiary: " << monsterClass->getStringValue("name");
+            return false;
+        }
+
+        MonsterClassv2* currentValue = _bestiaryMap.value(monsterClass->getStringValue("name"));
+        if(!currentValue)
+        {
+            qDebug() << "[Bestiary] Unable to find the value of the targeted monster class to overwrite: " << monsterClass->getStringValue("name");
+            return false;
+        }
+
+        currentValue->copyValues(*monsterClass);
+    }
+    else
+    {
+        _bestiaryMap.insert(monsterClass->getStringValue("name"), monsterClass);
+        connect(monsterClass, &MonsterClassv2::dirty, this, &Bestiary::registerDirty);
     }
 
-    _bestiaryMap.insert(monsterClass->getStringValue("name"), monsterClass);
-    connect(monsterClass, &MonsterClassv2::dirty, this, &Bestiary::registerDirty);
     registerChange();
     setDirty();
     return true;
@@ -585,12 +601,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     startBatchChanges();
 
     // Remove the existing bestiary before resetting the directory and filename
-    if(_bestiaryMap.count() > 0)
-    {
-        qDebug() << "[Bestiary]    Unloading previous bestiary";
-        qDeleteAll(_bestiaryMap);
-        _bestiaryMap.clear();
-    }
+    closeBestiary();
 
     QFileInfo fileInfo(absoluteTargetFilename);
     setDirectory(fileInfo.absoluteDir());
@@ -598,11 +609,45 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     inputXML(root);
 
     finishBatchChanges();
+    setDirty(false);
 
     if(isVersionCompatible())
         emit bestiaryLoaded(_bestiaryFile, !isVersionIdentical());
 
     return true;
+}
+
+void Bestiary::reloadBestiary()
+{
+    if(_bestiaryFile.isEmpty())
+    {
+        qDebug() << "[Bestiary] ERROR! No bestiary file known, unable to reload bestiary.";
+        return;
+    }
+
+    QString bestiaryFile = _bestiaryFile;
+    closeBestiary();
+    readBestiary(bestiaryFile);
+}
+
+void Bestiary::closeBestiary()
+{
+    if(isDirty())
+        qDebug() << "[Bestiary] WARNING: closing the bestiary although it is still dirty! It should be saved first";
+
+    if(_bestiaryMap.count() > 0)
+    {
+        qDeleteAll(_bestiaryMap);
+        _bestiaryMap.clear();
+    }
+
+    _bestiaryDirectory = QDir();
+    _bestiaryFile = QString();
+    _majorVersion = 0;
+    _minorVersion = 0;
+    _licenseText.clear();
+
+    setDirty(false);
 }
 
 void Bestiary::startBatchProcessing()
@@ -744,8 +789,13 @@ void Bestiary::importBestiary(const QDomElement& bestiaryElement, const QString&
     while(!monsterElement.isNull())
     {
         bool importOK = true;
-        QString monsterName = monsterElement.firstChildElement(QString("name")).text();
-        if(Bestiary::Instance()->exists(monsterName))
+        QString monsterName = monsterElement.attribute(QString("name"));
+        if(monsterName.isEmpty())
+        {
+            qDebug() << "[Bestiary] ERROR: Imported monster with no name found, skipping entry: " << monsterElement.text();
+            importOK = false;
+        }
+        else if(Bestiary::Instance()->exists(monsterName))
         {
             if((challengeResult != QMessageBox::YesToAll) && (challengeResult != QMessageBox::NoToAll))
             {
@@ -767,13 +817,13 @@ void Bestiary::importBestiary(const QDomElement& bestiaryElement, const QString&
         {
             importMonsterImage(monsterElement, importFile);
             MonsterClassv2* monster = new MonsterClassv2(monsterElement, true);
-            if(insertMonsterClass(monster))
+            if(insertMonsterClass(monster, true))
             {
                 ++importCount;
             }
         }
 
-        monsterElement = monsterElement.nextSiblingElement(QString("element"));
+        monsterElement = monsterElement.nextSiblingElement(QString("monster"));
     }
 
     qDebug() << "[Bestiary] Importing bestiary completed. " << importCount << " creatures imported.";

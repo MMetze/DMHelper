@@ -10,8 +10,11 @@ PublishGLFrame::PublishGLFrame(QWidget *parent) :
     QOpenGLWidget(parent),
     _initialized(false),
     _targetSize(),
-    _renderer(nullptr)
+    _renderer(nullptr),
+    _overlayRenderer(new OverlayRenderer(nullptr, this)),
+    _showOverlays(true)
 {
+    connect(_overlayRenderer, &OverlayRenderer::updateWindow, this, &PublishGLFrame::updateWidget);
 }
 
 PublishGLFrame::~PublishGLFrame()
@@ -28,6 +31,11 @@ bool PublishGLFrame::isInitialized() const
 PublishGLRenderer* PublishGLFrame::getRenderer() const
 {
     return _renderer;
+}
+
+OverlayRenderer* PublishGLFrame::getOverlayRenderer() const
+{
+    return _overlayRenderer;
 }
 
 void PublishGLFrame::cleanup()
@@ -55,7 +63,11 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
     if(_renderer)
     {
         if(!renderer)
+        {
+            _showOverlays = false;
             renderer = new PublishGLImageRenderer(nullptr, grab().toImage(), _renderer->getBackgroundColor());
+            _showOverlays = true;
+        }
 
         makeCurrent();
         _renderer->cleanupGL();
@@ -158,6 +170,8 @@ void PublishGLFrame::initializeGL()
         qDebug() << "[PublishGLFrame]     Max Texture Size:" << maxTextureSize;
     }
 
+    _overlayRenderer->initializeGL();
+
     QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
 
     _initialized = true;
@@ -175,6 +189,8 @@ void PublishGLFrame::resizeGL(int w, int h)
     if(_renderer)
         _renderer->resizeGL(w, h);
 
+    _overlayRenderer->resizeGL(w, h);
+
     emit labelResized(_targetSize);
     emit frameResized(_targetSize);
 }
@@ -186,6 +202,9 @@ void PublishGLFrame::paintGL()
         DMH_DEBUG_OPENGL_FRAME_START();
         _renderer->paintGL();
     }
+
+    if((_overlayRenderer) && (_showOverlays))
+        _overlayRenderer->paintGL();
 }
 
 bool PublishGLFrame::convertMousePosition(QMouseEvent& event, const QRect& scissorRect, QPointF& result)

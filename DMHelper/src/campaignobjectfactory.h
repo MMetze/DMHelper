@@ -27,6 +27,9 @@ public:
     int factoryCount() const;
     ObjectFactory* getFactory(int index) const;
 
+signals:
+    void objectCreated(CampaignObjectBase* track);
+
 private:
     static CampaignObjectFactory* _instance;
 

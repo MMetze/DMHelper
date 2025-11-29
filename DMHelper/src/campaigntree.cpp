@@ -2,12 +2,18 @@
 #include "dmconstants.h"
 #include "campaigntreemodel.h"
 #include "campaignobjectbase.h"
-#include <QDropEvent>
 #include <QStandardItemModel>
+#include <QDropEvent>
+#include <QMimeDatabase>
+#include <QMimeData>
+#include <QDebug>
 
 CampaignTree::CampaignTree(QWidget *parent) :
     QTreeView(parent)
 {
+    setAcceptDrops(true);
+    setDropIndicatorShown(true);
+    setDragDropMode(QAbstractItemView::DragDrop);
 }
 
 CampaignObjectBase* CampaignTree::currentCampaignObject()
@@ -51,14 +57,73 @@ void CampaignTree::publishCurrent(bool publish)
         campaignModel->setPublishIndex(currentIndex(), publish);
 }
 
+void CampaignTree::dragEnterEvent(QDragEnterEvent *event)
+{
+    const QMimeData* data = event->mimeData();
+
+    if((data->hasUrls()) &&
+        (data->urls().count() == 1) &&
+        (data->urls().constFirst().isLocalFile()))
+    {
+        QString filename = data->urls().constFirst().toLocalFile();
+        QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+        if((mimeType.isValid()) &&
+            ((mimeType.name().startsWith("image/")) ||
+             (mimeType.name().startsWith("video/")) ||
+             (mimeType.name().startsWith("text/")) ||
+             (mimeType.suffixes().contains("xml"))))
+        {
+            event->acceptProposedAction();
+            return;
+        }
+    }
+
+    QTreeView::dragEnterEvent(event);
+}
+
 void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
 {
+    const QMimeData* data = event->mimeData();
+    if((data->hasUrls()) &&
+        (data->urls().count() == 1) &&
+        (data->urls().constFirst().isLocalFile()))
+    {
+        event->acceptProposedAction();
+        return;
+    }
+
     QTreeView::dragMoveEvent(event);
 
     if (!event->isAccepted())
         return;
 
     event->accept();
+}
+
+void CampaignTree::dropEvent(QDropEvent *event)
+{
+    QModelIndex index = indexAt(event->position().toPoint());
+    const QMimeData* data = event->mimeData();
+
+    if((data->hasUrls()) &&
+        (data->urls().count() == 1) &&
+        (data->urls().constFirst().isLocalFile()))
+    {
+        QString filename = data->urls().constFirst().toLocalFile();
+        QMimeType mimeType = QMimeDatabase().mimeTypeForFile(filename);
+        if((mimeType.isValid()) &&
+            ((mimeType.name().startsWith("image/")) ||
+             (mimeType.name().startsWith("video/")) ||
+             (mimeType.name().startsWith("text/")) ||
+             (mimeType.suffixes().contains("xml"))))
+        {
+            emit treeDrop(index, filename);
+            event->acceptProposedAction();
+            return;
+        }
+    }
+
+    QTreeView::dropEvent(event);
 }
 
 void CampaignTree::keyPressEvent(QKeyEvent *event)

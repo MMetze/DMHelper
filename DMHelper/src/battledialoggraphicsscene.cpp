@@ -240,6 +240,7 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
     if(mouseEvent->button() == Qt::LeftButton)
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
+
         if(item)
         {
             QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);

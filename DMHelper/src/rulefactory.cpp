@@ -16,16 +16,18 @@ const char* DEFAULT_MONSTER_DATA = "monster5e.xml";
 const char* DEFAULT_MONSTER_UI = "./ui/monster5e.ui";
 const char* DEFAULT_BESTIARY = "DMHelperBestiary.xml";
 bool DEFAULT_CHARACTER_DONE = true;
+const char* DEFAULT_MOVEMENT = "distance";
 
 RuleFactory* RuleFactory::_instance = nullptr;
 
-RuleFactory::RuleFactory(const QString& rulesetFile, QObject *parent) :
+RuleFactory::RuleFactory(const QString& defaultRulesetFile, const QString& userRulesetFile, QObject *parent) :
     QObject{parent},
-    _rulesetDir(),
     _defaultBestiary(),
     _rulesetTemplates()
-{
-    readRuleset(rulesetFile);
+{    
+    _rulesetTemplates.clear();
+    readRuleset(defaultRulesetFile);
+    readRuleset(userRulesetFile);
 }
 
 RuleFactory* RuleFactory::Instance()
@@ -33,13 +35,13 @@ RuleFactory* RuleFactory::Instance()
     return _instance;
 }
 
-void RuleFactory::Initialize(const QString& rulesetFile)
+void RuleFactory::Initialize(const QString& defaultRulesetFile, const QString& userRulesetFile)
 {
     if(_instance)
         return;
 
-    qDebug() << "[RuleFactory] Initializing RuleFactory";
-    _instance = new RuleFactory(rulesetFile);
+    qDebug() << "[RuleFactory] Initializing RuleFactory with default ruleset file: " << defaultRulesetFile << " and user ruleset file: " << userRulesetFile;
+    _instance = new RuleFactory(defaultRulesetFile, userRulesetFile);
 }
 
 void RuleFactory::Shutdown()
@@ -113,13 +115,10 @@ RuleFactory::RulesetTemplate RuleFactory::getRulesetTemplate(const QString& rule
                                DEFAULT_MONSTER_DATA,
                                DEFAULT_MONSTER_UI,
                                getDefaultBestiary(),
+                               QDir(),
+                               QString(),
                                DEFAULT_CHARACTER_DONE);
     }
-}
-
-QDir RuleFactory::getRulesetDir() const
-{
-    return _rulesetDir;
 }
 
 void RuleFactory::setDefaultBestiary(const QString& bestiaryFile)
@@ -146,6 +145,9 @@ QString RuleFactory::getDefaultBestiary() const
 
 void RuleFactory::readRuleset(const QString& rulesetFile)
 {
+    if(rulesetFile.isEmpty())
+        return;
+
     qDebug() << "[RuleFactory] Reading ruleset from " << rulesetFile;
 
     QDomDocument doc("DMHelperDataXML");
@@ -179,30 +181,35 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         return;
     }
 
-    _rulesetTemplates.clear();
-
     QDomElement rulesetElement = root.firstChildElement(QString("ruleset"));
     while(!rulesetElement.isNull())
     {
         RulesetTemplate newRuleset;
         newRuleset._name = rulesetElement.attribute(QString("name"));
-        newRuleset._initiative = rulesetElement.attribute(QString("initiative"));
-        newRuleset._characterData = rulesetElement.attribute(QString("characterdata"));
-        newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
-        newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
-        newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
-        newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
-        newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
+        if(!newRuleset._name.isEmpty())
+        {
+            newRuleset._initiative = rulesetElement.attribute(QString("initiative"));
+            newRuleset._characterData = rulesetElement.attribute(QString("characterdata"));
+            newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
+            newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
+            newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
+            newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
+            newRuleset._rulesetDir = QFileInfo(rulesetFile).absolutePath();
+            newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
+            newRuleset._hitPointsCountDown = rulesetElement.hasAttribute("hitPointsCountDown") ? static_cast<bool>(rulesetElement.attribute("hitPointsCountDown").toInt()) : true;
+            newRuleset._movement = rulesetElement.attribute(QString("movement"));
 
-        if((newRuleset._name == DEFAULT_RULESET_NAME) && (newRuleset._bestiary == DEFAULT_BESTIARY) && (!getDefaultBestiary().isEmpty()))
-            newRuleset._bestiary = getDefaultBestiary();
+            if((newRuleset._name == DEFAULT_RULESET_NAME) && (newRuleset._bestiary == DEFAULT_BESTIARY) && (!getDefaultBestiary().isEmpty()))
+                newRuleset._bestiary = getDefaultBestiary();
 
-        _rulesetTemplates.insert(newRuleset._name, newRuleset);
+            if(_rulesetTemplates.contains(newRuleset._name))
+                qDebug() << "[RuleFactory] WARNING: Duplicate ruleset name found: " << newRuleset._name << " in ruleset file: " << rulesetFile;
+            else
+                _rulesetTemplates.insert(newRuleset._name, newRuleset);
+        }
 
         rulesetElement = rulesetElement.nextSiblingElement(QString("ruleset"));
     }
-
-    _rulesetDir = QFileInfo(rulesetFile).absolutePath();
 
     qDebug() << "[RuleFactory] Completed reading ruleset. Read " << _rulesetTemplates.size() << " rulesets.";
 }

@@ -70,7 +70,7 @@ CharacterImporter::~CharacterImporter()
     delete _manager;
 }
 
-void CharacterImporter::importCharacter(Campaign* campaign, bool isCharacter)
+void CharacterImporter::importCharacter(Campaign* campaign, const QString& importLinkName, bool isCharacter)
 {
     if(!campaign)
     {
@@ -84,14 +84,18 @@ void CharacterImporter::importCharacter(Campaign* campaign, bool isCharacter)
         return;
     }
 
-    CharacterImportDialog dlg;
-    int result = dlg.exec();
-    QString characterId = dlg.getCharacterId();
-    if((result == QDialog::Rejected) || (characterId.isEmpty()))
+    QString characterId = importLinkName;
+    if(characterId.isEmpty())
     {
-        qDebug() << "[CharacterImporter] Character import cancelled by user.";
-        deleteLater();
-        return;
+        CharacterImportDialog dlg;
+        int result = dlg.exec();
+        characterId = dlg.getCharacterId();
+        if((result == QDialog::Rejected) || (characterId.isEmpty()))
+        {
+            qDebug() << "[CharacterImporter] Character import cancelled by user.";
+            deleteLater();
+            return;
+        }
     }
 
     _isCharacter = isCharacter;
