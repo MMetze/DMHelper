@@ -69,6 +69,7 @@ protected:
     Campaign* _campaign;
     bool _recreateContents;
     bool _updateContents;
+    bool _initialized;
 };
 
 #endif // OVERLAY_H

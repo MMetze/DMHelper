@@ -14,6 +14,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QOpenGLWidget>
+#include <QDebug>
 
 LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -254,11 +255,13 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
             {
-                _videoObject = new PublishGLBattleBackground(nullptr, *playerImage, GL_NEAREST);
+                QImage imageCopy = playerImage->copy();
+                _videoObject = new PublishGLBattleBackground(nullptr, imageCopy, GL_NEAREST);
                 QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
                 _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
                 _videoObject->setTargetSize(_size);
             }
+            _videoPlayer->clearNewImage();
             _videoPlayer->unlockMutex();
         }
     }
@@ -268,7 +271,11 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         {
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
-                _videoObject->updateImage(*playerImage);
+            {
+                QImage imageCopy = playerImage->copy();
+                _videoObject->updateImage(imageCopy);
+            }
+            _videoPlayer->clearNewImage();
             _videoPlayer->unlockMutex();
         }
     }
@@ -324,7 +331,7 @@ void LayerVideo::playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultM
 {
     Q_UNUSED(defaultModelMatrix);
 
-    if(!functions)
+    if((!functions) || (!_videoObject))
         return;
 
     DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
@@ -477,7 +484,7 @@ void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)
     _videoGLPlayer->restartPlayer();
 #else
     _videoPlayer = new VideoPlayer(_filename, QSize(), true, _playAudio);
-    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget, Qt::QueuedConnection);
     _videoPlayer->restartPlayer();
 #endif
 }

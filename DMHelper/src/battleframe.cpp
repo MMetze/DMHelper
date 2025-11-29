@@ -272,7 +272,7 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
     setBattle(battle);
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
-    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());
+    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle);
     if(_cameraRect)
         _cameraRect->setPublishing(_isPublishing);
 
@@ -577,23 +577,6 @@ void BattleFrame::next()
 
     setActiveCombatant(nextCombatant);
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
-}
-
-//make sure clear done button is hidden initially
-//make sure all init values are updated properly
-
-void BattleFrame::initiativeRuleChanged()
-{
-    if(!_battle)
-        return;
-
-    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
-    if(!campaign)
-        return;
-
-    ui->lblClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-    ui->btnClear->setVisible(campaign->getRuleset().getCombatantDoneCheckbox());
-    recreateCombatantWidgets();
 }
 
 void BattleFrame::setTargetSize(const QSize& targetSize)
@@ -2136,7 +2119,7 @@ void BattleFrame::layerSelected(int selected)
 
 void BattleFrame::publishClicked(bool checked)
 {
-    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _model)))
+    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _battle)))
         return;
 
     _isPublishing = checked;
@@ -3155,20 +3138,19 @@ void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* comba
     if((!_model) || (!combatant))
         return;
 
-    bool vis = ((combatant->getHitPoints() > 0) ||
-                (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+    bool visible = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
 
     LayerTokens* tokensLayer = combatant->getLayer();
     if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
-        vis = false;
+        visible = false;
 
     QWidget* widget = _combatantWidgets.value(combatant);
     if(widget)
-        widget->setVisible(vis);
+        widget->setVisible(visible);
 
     // Set the visibility of the active rect
     if((_activePixmap) && (combatant == _model->getActiveCombatant()))
-        _activePixmap->setVisible(vis);
+        _activePixmap->setVisible(visible);
 }
 
 void BattleFrame::setMapCursor()
@@ -3499,7 +3481,7 @@ void BattleFrame::clearDoneFlags()
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
-    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
+    if((!renderer) || (!_battle) || (renderer->getObject() != _battle))
         return;
 
     connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);

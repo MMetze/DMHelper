@@ -32,7 +32,18 @@ void OverlayRenderer::setCampaign(Campaign* campaign)
     if(_campaign == campaign)
         return;
 
+    if(_campaign)
+    {
+        disconnect(_campaign, &Campaign::overlaysChanged, this, &OverlayRenderer::updateWindow);
+    }
+
     _campaign = campaign;
+
+    if(_campaign)
+    {
+        connect(_campaign, &Campaign::overlaysChanged, this, &OverlayRenderer::updateWindow);
+    }
+
     emit updateWindow();
 }
 

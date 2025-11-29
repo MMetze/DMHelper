@@ -89,6 +89,11 @@ bool NewCampaignDialog::isCombatantDone() const
     return ui->chkCombatantDone->isChecked();
 }
 
+bool NewCampaignDialog::isHitPointsCountDown() const
+{
+    return ui->chkHitPointsCountDown->isChecked();
+}
+
 QString NewCampaignDialog::getRuleset() const
 {
     return ui->cmbRulesets->currentText();
@@ -133,6 +138,7 @@ void NewCampaignDialog::handleRulesetSelected()
         ui->edtBestiaryFile->setText(QDir::cleanPath(ruleset._rulesetDir.absoluteFilePath(ruleset._bestiary)));
 
     ui->chkCombatantDone->setChecked(ruleset._combatantDone);
+    ui->chkHitPointsCountDown->setChecked(ruleset._hitPointsCountDown);
 }
 
 void NewCampaignDialog::handleCharacterDataBrowse()

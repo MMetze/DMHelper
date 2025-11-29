@@ -15,7 +15,8 @@ Overlay::Overlay(const QString& name, QObject *parent) :
     _opacity(100),
     _campaign(nullptr),
     _recreateContents(false),
-    _updateContents(false)
+    _updateContents(false),
+    _initialized(false)
 {
     setObjectName(name);
 }
@@ -51,7 +52,7 @@ QDomElement Overlay::outputXML(QDomDocument &doc, QDomElement &parent, QDir& tar
 
 bool Overlay::isInitialized() const
 {
-    return _campaign != nullptr;
+    return _initialized;
 }
 
 bool Overlay::isVisible() const
@@ -83,8 +84,9 @@ void Overlay::setCampaign(Campaign* campaign)
 
 void Overlay::initializeGL()
 {
-    recreateContents();
     doInitializeGL();
+    _recreateContents = true;
+    _initialized = true;
 }
 
 void Overlay::resizeGL(int w, int h)
@@ -218,4 +220,3 @@ QImage Overlay::textToImage(const QString& text)
 
     return resultImage;
 }
-

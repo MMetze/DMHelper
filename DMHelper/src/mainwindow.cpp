@@ -829,7 +829,9 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMonsterUIFile(newCampaignDialog->getMonsterUIFile());
         _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
+        _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -838,6 +840,10 @@ void MainWindow::newCampaign()
 
         if(_campaign->getRuleset().objectName().contains(QString("daggerheart"), Qt::CaseInsensitive))
             _campaign->addOverlay(new OverlayFear());
+
+        _bestiaryDlg.setMonster(nullptr);
+        _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
+        Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -900,6 +906,10 @@ bool MainWindow::closeCampaign()
 
     writeBestiary();
     deleteCampaign();
+
+    if(Bestiary::Instance())
+        Bestiary::Instance()->closeBestiary();
+
     clearDirty();
 
     qDebug() << "[MainWindow] Campaign closed";
@@ -1400,36 +1410,36 @@ void MainWindow::showEvent(QShowEvent * event)
     {
         if((_options) && (!_recoveryMode))
         {
-            // Implement any one-time initialization here
+            // Implement any one-time application initialization here
             bool firstStart = !_options->doDataSettingsExist();
             if(firstStart)
             {
-                LegalDialog dlg;
-                dlg.exec();
-                _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
-                _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
-            }
-
-            checkForUpdates(true);
-
-            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
-                openCampaign(_options->getMRUHandler()->getMRUList().first());
-
-            QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
-                                                       .arg(DMHelper::DMHELPER_MINOR_VERSION)
-                                                       .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
-            if(_options->getLastAppVersion() != versionString)
-            {
-                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
-                whatsNewDlg->show();
-                whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
-            }
-
-            if(firstStart)
-            {
                 WhatsNewDialog* firstStartDlg = new WhatsNewDialog(QString(":/img/data/firststart.txt"), QString("Welcome to DMHelper!"), this);
-                firstStartDlg->show();
                 firstStartDlg->move((frameGeometry().center() - firstStartDlg->rect().center()) / 2);
+                firstStartDlg->exec(); // Note: delete's itself "later"
+
+                LegalDialog* legalDlg = new LegalDialog();
+                legalDlg->exec();
+                _options->setUpdatesEnabled(legalDlg->isUpdatesEnabled());
+                _options->setStatisticsAccepted(legalDlg->isStatisticsAccepted());
+                legalDlg->deleteLater();
+            }
+            else
+            {
+                QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                            .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                            .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+                if(_options->getLastAppVersion() != versionString)
+                {
+                    WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
+                    whatsNewDlg->show();
+                    whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
+                }
+
+                checkForUpdates(true);
+
+                if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
+                    openCampaign(_options->getMRUHandler()->getMRUList().first());
             }
         }
 
@@ -1463,18 +1473,18 @@ void MainWindow::closeEvent(QCloseEvent * event)
     // Save the Bestiary
     writeBestiary();
 
-    if(!closeCampaign())
-    {
-        event->ignore();
-        return;
-    }
-
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
         writeSpellbook();
 
     _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getStringValue("name") : "");
     _options->setLastSpell(_spellDlg.getSpell() ? _spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
+
+    if(!closeCampaign())
+    {
+        event->ignore();
+        return;
+    }
 
     qApp->quit();
 }
@@ -2047,7 +2057,8 @@ void MainWindow::openCampaign(const QString& filename)
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        QMessageBox::critical(this,
+                              QString("Campaign file open failed"),
                               QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Unable to open campaign file";
         return;
@@ -2162,6 +2173,27 @@ void MainWindow::openCampaign(const QString& filename)
     clearDirty();
 }
 
+void MainWindow::reloadCampaign()
+{
+    if((!_campaign) || (_campaignFileName.isEmpty()))
+        return;
+
+    QMessageBox::StandardButton result = QMessageBox::question(this,
+                                                               QString("Reload Campaign"),
+                                                               QString("You have changed the ruleset for this campaign. To reconfigure it safely, the campaign needs to be closed and reopened:") + QChar::LineFeed + QChar::LineFeed + _campaignFileName + QChar::LineFeed + QChar::LineFeed + QString("Would you like to continue?"),
+                                                               QMessageBox::Yes | QMessageBox::Cancel);
+    if(result == QMessageBox::Cancel)
+        return;
+
+    QString currentCampaignFile = _campaignFileName;
+    qDebug() << "[MainWindow] Reopening: " << currentCampaignFile;
+
+    if(!closeCampaign())
+        return;
+
+    openCampaign(currentCampaignFile);
+}
+
 void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
     qDebug() << "[MainWindow] Campaign Loaded: " << _campaignFileName;
@@ -2191,10 +2223,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(campaign, &Campaign::nameChanged, this, &MainWindow::setDirty);
 
         _characterFrame->loadCharacterUITemplate(campaign->getRuleset().getCharacterUIFile());
-        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
-        connect(&campaign->getRuleset(), &Ruleset::initiativeRuleChanged, _battleFrame, &BattleFrame::initiativeRuleChanged);
-        connect(&campaign->getRuleset(), &Ruleset::characterUIFileChanged, _characterFrame, &CharacterTemplateFrame::loadCharacterUITemplate);
-        connect(&campaign->getRuleset(), &Ruleset::monsterUIFileChanged, &_bestiaryDlg, &BestiaryTemplateDialog::loadMonsterUITemplate);
+        connect(&campaign->getRuleset(), &Ruleset::rulesetChanged, this, &MainWindow::reloadCampaign);
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);

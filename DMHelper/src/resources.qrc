@@ -279,6 +279,7 @@
         <file>data/icon_overlaytimer.png</file>
         <file>data/icon_overlaytimerbackground.png</file>
         <file>data/icon_overlay.png</file>
+        <file>data/img/glass-heart.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

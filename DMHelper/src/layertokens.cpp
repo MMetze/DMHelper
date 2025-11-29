@@ -457,12 +457,13 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     // Draw the combatants
     foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
-        if((combatant) && (combatant->getKnown()) && (combatant->getShown()) &&
-           ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
-           ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))
+        PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
+        if((combatant) && (combatantToken))
         {
-            PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
-            if(combatantToken)
+            if((combatantToken->isPC()) || ((combatant->getKnown()) &&
+                                            (combatant->getShown()) &&
+                                            ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
+                                            ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0))))
             {
                 localMatrix = combatantToken->getMatrix();
                 localMatrix.translate(_position.x(), _position.y());

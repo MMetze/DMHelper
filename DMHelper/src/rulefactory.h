@@ -59,12 +59,14 @@ public:
             _bestiary(),
             _rulesetDir(),
             _combatantDone(false),
+            _hitPointsCountDown(true),
             _movement()
         {}
 
         RulesetTemplate(const QString& name, const QString& initiative, const QString& characterData,
                         const QString& characterUI, const QString& monsterData, const QString& monsterUI,
-                        const QString& bestiary, QDir _rulesetDir, const QString& movement, bool combatantDone = false) :
+                        const QString& bestiary, QDir _rulesetDir, const QString& movement,
+                        bool combatantDone = false, bool hitPointsCountDown = true) :
             _name(name),
             _initiative(initiative),
             _characterData(characterData),
@@ -74,6 +76,7 @@ public:
             _bestiary(bestiary),
             _rulesetDir(_rulesetDir),
             _combatantDone(combatantDone),
+            _hitPointsCountDown(hitPointsCountDown),
             _movement(movement)
         {}
 
@@ -86,6 +89,7 @@ public:
         QString _bestiary;
         QDir _rulesetDir;
         bool _combatantDone;
+        bool _hitPointsCountDown;
         QString _movement;
 
     };

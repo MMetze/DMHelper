@@ -275,6 +275,17 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="chkHitPointsCountDown">
+        <property name="text">
+         <string>Hit Points count downwards as damage is done</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/img/glass-heart.png</normaloff>:/img/data/img/glass-heart.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

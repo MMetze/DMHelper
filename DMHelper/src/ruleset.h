@@ -22,6 +22,8 @@ public:
 
     // Local interface
     void setValues(const RuleFactory::RulesetTemplate& rulesetTemplate);
+    void startBatchProcessing();
+    void endBatchProcessing();
 
     // Local accessors
     bool isInitialized() const;
@@ -33,6 +35,7 @@ public:
     QString getMonsterDataFile() const;
     QString getMonsterUIFile() const;
     bool getCombatantDoneCheckbox() const;
+    bool getHitPointsCoundDown() const;
     QString getMovementString() const;
     DMHelper::MovementType getMovementType() const;
     QList<int> getMovementRanges() const;
@@ -41,12 +44,7 @@ public:
     static QString movementStringFromType(DMHelper::MovementType movementType, const QList<int>* movementRanges = nullptr);
 
 signals:
-    void initiativeRuleChanged();
-    void characterDataFileChanged(const QString& characterDataFile);
-    void characterUIFileChanged(const QString& characterUIFile);
-    void bestiaryFileChanged(const QString& bestiaryFile);
-    void monsterDataFileChanged(const QString& monsterDataFile);
-    void monsterUIFileChanged(const QString& monsterUIFile);
+    void rulesetChanged();
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
@@ -56,6 +54,7 @@ public slots:
     void setMonsterDataFile(const QString& monsterDataFile);
     void setMonsterUIFile(const QString& monsterUIFile);
     void setCombatantDoneCheckbox(bool checked);
+    void setHitPointsCountDown(bool countDown);
     void setMovementString(const QString& movement);
     void setMovementType(DMHelper::MovementType type);
     void setMovementRanges(QList<int> ranges);
@@ -69,6 +68,8 @@ protected:
 
     bool areSameFile(const QString& file1, const QString& file2) const;
 
+    void registerChange();
+
     RuleInitiative* _ruleInitiative;
     QString _characterDataFile;
     QString _characterUIFile;
@@ -76,8 +77,12 @@ protected:
     QString _monsterDataFile;
     QString _monsterUIFile;
     bool _combatantDoneCheckbox;
+    bool _hitPointsCountDown;
     DMHelper::MovementType _movementType;
     QList<int> _movementRanges;
+
+    bool _batchProcessing;
+    bool _changed;
 };
 
 #endif // RULESET_H

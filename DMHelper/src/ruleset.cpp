@@ -14,8 +14,11 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
     _monsterDataFile(),
     _monsterUIFile(),
     _combatantDoneCheckbox(),
+    _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
-    _movementRanges()
+    _movementRanges(),
+    _batchProcessing(false),
+    _changed(false)
 {
 }
 
@@ -28,8 +31,11 @@ Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *p
     _monsterDataFile(),
     _monsterUIFile(),
     _combatantDoneCheckbox(),
+    _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
-    _movementRanges()
+    _movementRanges(),
+    _batchProcessing(false),
+    _changed(false)
 {
     setValues(rulesetTemplate);
 }
@@ -84,6 +90,7 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
         _bestiaryFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
 
     _combatantDoneCheckbox = element.hasAttribute("combatantDone") ? static_cast<bool>(element.attribute("combatantDone").toInt()) : rulesetTemplate._combatantDone;
+    _hitPointsCountDown = element.hasAttribute("hitPointsCountDown") ? static_cast<bool>(element.attribute("hitPointsCountDown").toInt()) : rulesetTemplate._hitPointsCountDown;
 
     setMovementString(element.attribute("movementType"));
 }
@@ -118,8 +125,25 @@ void Ruleset::setValues(const RuleFactory::RulesetTemplate& rulesetTemplate)
     _monsterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._monsterUI);
 
     _combatantDoneCheckbox = rulesetTemplate._combatantDone;
+    _hitPointsCountDown = rulesetTemplate._hitPointsCountDown;
 
     qDebug() << "[Ruleset] Values for the ruleset set to the default values for the template: " << rulesetTemplate._name;
+}
+
+void Ruleset::startBatchProcessing()
+{
+    _batchProcessing = true;
+    _changed = false;
+}
+
+void Ruleset::endBatchProcessing()
+{
+    _batchProcessing = false;
+    if(_changed)
+    {
+        emit rulesetChanged();
+        _changed = false;
+    }
 }
 
 bool Ruleset::isInitialized() const
@@ -176,6 +200,11 @@ bool Ruleset::getCombatantDoneCheckbox() const
 QString Ruleset::getMovementString() const
 {
     return movementStringFromType(_movementType, &_movementRanges);
+}
+
+bool Ruleset::getHitPointsCoundDown() const
+{
+    return _hitPointsCountDown;
 }
 
 DMHelper::MovementType Ruleset::getMovementType() const
@@ -250,7 +279,7 @@ void Ruleset::setRuleInitiative(const QString& initiativeType)
 
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
     emit dirty();
-    emit initiativeRuleChanged();
+    registerChange();
 }
 
 void Ruleset::setCharacterDataFile(const QString& characterDataFile)
@@ -260,7 +289,7 @@ void Ruleset::setCharacterDataFile(const QString& characterDataFile)
 
     _characterDataFile = characterDataFile;
     emit dirty();
-    emit characterDataFileChanged(_characterDataFile);
+    registerChange();
 }
 
 void Ruleset::setCharacterUIFile(const QString& characterUIFile)
@@ -270,7 +299,7 @@ void Ruleset::setCharacterUIFile(const QString& characterUIFile)
 
     _characterUIFile = characterUIFile;
     emit dirty();
-    emit characterUIFileChanged(_characterUIFile);
+    registerChange();
 }
 
 void Ruleset::setBestiaryFile(const QString& bestiaryFile)
@@ -280,7 +309,7 @@ void Ruleset::setBestiaryFile(const QString& bestiaryFile)
 
     _bestiaryFile = bestiaryFile;
     emit dirty();
-    emit bestiaryFileChanged(_bestiaryFile);
+    registerChange();
 }
 
 void Ruleset::setMonsterDataFile(const QString& monsterDataFile)
@@ -290,7 +319,7 @@ void Ruleset::setMonsterDataFile(const QString& monsterDataFile)
 
     _monsterDataFile = monsterDataFile;
     emit dirty();
-    emit monsterDataFileChanged(_monsterDataFile);
+    registerChange();
 }
 
 void Ruleset::setMonsterUIFile(const QString& monsterUIFile)
@@ -300,7 +329,7 @@ void Ruleset::setMonsterUIFile(const QString& monsterUIFile)
 
     _monsterUIFile = monsterUIFile;
     emit dirty();
-    emit monsterUIFileChanged(_monsterUIFile);
+    registerChange();
 }
 
 void Ruleset::setCombatantDoneCheckbox(bool checked)
@@ -310,7 +339,17 @@ void Ruleset::setCombatantDoneCheckbox(bool checked)
 
     _combatantDoneCheckbox = checked;
     emit dirty();
-    emit initiativeRuleChanged();
+    registerChange();
+}
+
+void Ruleset::setHitPointsCountDown(bool countDown)
+{
+    if(_hitPointsCountDown == countDown)
+        return;
+
+    _hitPointsCountDown = countDown;
+    emit dirty();
+    registerChange();
 }
 
 void Ruleset::setMovementString(const QString& movement)
@@ -381,6 +420,9 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
     if(_combatantDoneCheckbox != rulesetTemplate._combatantDone)
         element.setAttribute("combatantDone", _combatantDoneCheckbox);
 
+    if(_hitPointsCountDown != rulesetTemplate._hitPointsCountDown)
+        element.setAttribute("hitPointsCountDown", _hitPointsCountDown);
+
     if(_movementType != DMHelper::MovementType_Distance)
         element.setAttribute("movementType", movementStringFromType(_movementType, &_movementRanges));
 }
@@ -394,4 +436,12 @@ bool Ruleset::areSameFile(const QString &file1, const QString &file2) const
     QString canonicalPath2 = fileInfo2.canonicalFilePath();
 
     return ((!canonicalPath1.isEmpty()) && (canonicalPath1 == canonicalPath2));
+}
+
+void Ruleset::registerChange()
+{
+    if(_batchProcessing)
+        _changed = true;
+    else
+        emit rulesetChanged();
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1146</width>
+    <width>1201</width>
     <height>67</height>
    </rect>
   </property>
@@ -174,7 +174,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a map to the campaign</string>
+        <string>Add a media file to the campaign</string>
        </property>
        <property name="text">
         <string/>

@@ -45,7 +45,8 @@ void PopupsPreviewFrame::setCampaign(Campaign* campaign)
 
     populatePopups();
 
-    connect(_campaign, &Campaign::overlaysChanged, this, &PopupsPreviewFrame::populatePopups);
+    if(campaign)
+        connect(_campaign, &Campaign::overlaysChanged, this, &PopupsPreviewFrame::populatePopups);
 }
 
 void PopupsPreviewFrame::trackAdded(CampaignObjectBase* trackObject)
@@ -187,7 +188,6 @@ void PopupsPreviewFrame::updateFrameVisibility()
                 if((item) && (item->widget()))
                 {
                     int widgetSize = item->widget()->sizeHint().height();
-                    qDebug() << "[PopupsPreviewFrame] widget: " << item->widget()->objectName() << " size: " << widgetSize;
                     overlayMaxSize += widgetSize + 3;
                 }
             }

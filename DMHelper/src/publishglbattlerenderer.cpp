@@ -92,7 +92,7 @@ PublishGLBattleRenderer::~PublishGLBattleRenderer()
 
 CampaignObjectBase* PublishGLBattleRenderer::getObject()
 {
-    return _model;
+    return _model ? _model->getParentByType(DMHelper::CampaignType_Battle) : nullptr;
 }
 
 QColor PublishGLBattleRenderer::getBackgroundColor()

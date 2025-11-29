@@ -11,7 +11,8 @@ PublishGLFrame::PublishGLFrame(QWidget *parent) :
     _initialized(false),
     _targetSize(),
     _renderer(nullptr),
-    _overlayRenderer(new OverlayRenderer(nullptr, this))
+    _overlayRenderer(new OverlayRenderer(nullptr, this)),
+    _showOverlays(true)
 {
     connect(_overlayRenderer, &OverlayRenderer::updateWindow, this, &PublishGLFrame::updateWidget);
 }
@@ -62,7 +63,11 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
     if(_renderer)
     {
         if(!renderer)
+        {
+            _showOverlays = false;
             renderer = new PublishGLImageRenderer(nullptr, grab().toImage(), _renderer->getBackgroundColor());
+            _showOverlays = true;
+        }
 
         makeCurrent();
         _renderer->cleanupGL();
@@ -198,7 +203,7 @@ void PublishGLFrame::paintGL()
         _renderer->paintGL();
     }
 
-    if(_overlayRenderer)
+    if((_overlayRenderer) && (_showOverlays))
         _overlayRenderer->paintGL();
 }
 

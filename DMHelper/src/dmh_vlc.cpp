@@ -59,7 +59,16 @@ DMH_VLC::DMH_VLC(QObject *parent) :
             _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
 
         #else
-            _vlcInstance = libvlc_new(0, nullptr);
+            // _vlcInstance = libvlc_new(0, nullptr);
+            // Normal run-time version
+            const char *args[] = {
+                "--no-reset-plugins-cache",
+                "--plugins-cache",
+                "--verbose=0",
+                ""
+            };
+
+            _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
         #endif
     #endif
 #else

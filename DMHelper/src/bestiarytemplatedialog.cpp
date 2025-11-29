@@ -275,13 +275,15 @@ void BestiaryTemplateDialog::nextMonster()
 void BestiaryTemplateDialog::dataChanged()
 {
     QString previousMonster = ui->cmbSearch->currentText();
+
     setMonster(nullptr);
+    disconnect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+    ui->cmbSearch->clear();
 
     QList<QString> monsterList = Bestiary::Instance()->getMonsterList();
+    if(monsterList.isEmpty())
+        return;
 
-    disconnect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
-
-    ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
 
     connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
@@ -290,7 +292,12 @@ void BestiaryTemplateDialog::dataChanged()
     {
         int index = ui->cmbSearch->findText(previousMonster);
         if(index >= 0)
-            ui->cmbSearch->setCurrentIndex(index);
+        {
+            if(ui->cmbSearch->currentIndex() == index)
+                setMonster(previousMonster);
+            else
+                ui->cmbSearch->setCurrentIndex(index);
+        }
     }
     else
     {
@@ -547,7 +554,6 @@ void BestiaryTemplateDialog::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
     qDebug() << "[BestiaryTemplateDialog] Bestiary Dialog shown";
-    connect(Bestiary::Instance(), &Bestiary::changed, this, &BestiaryTemplateDialog::dataChanged);
     setMonster(ui->cmbSearch->currentText());
     QDialog::showEvent(event);
 }
@@ -680,11 +686,9 @@ void BestiaryTemplateDialog::setTokenIndex(int index)
 
     _currentToken = index;
     loadMonsterImage();
-    ui->btnPreviousToken->setEnabled(_currentToken > 0);
-    ui->btnNextToken->setEnabled(_currentToken < _monster->getIconCount() - 1);
+    ui->btnPreviousToken->setEnabled((_monster->getIconCount() > 1) && (_currentToken > 0));
+    ui->btnNextToken->setEnabled((_monster->getIconCount() > 1) && (_currentToken < _monster->getIconCount() - 1));
     ui->btnClear->setEnabled(_monster->getIconCount() > 0);
-    ui->btnPreviousToken->setEnabled(_monster->getIconCount() > 1);
-    ui->btnNextToken->setEnabled(_monster->getIconCount() > 1);
 }
 
 QLineEdit* BestiaryTemplateDialog::getValueEdit(const QString& key)

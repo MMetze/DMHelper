@@ -20,14 +20,14 @@ Thank you very much for trying out DMHelper! We are very excited to welcome you 
 <p>
 To get started, here's a few ideas:
 <ol>
-<li> Dive in: click "New Campaign", then add a few PCs (or import them from D&D Beyond) and add a map or combat and off you go<p>
-<li> Join our Discord server, where you will find lots of friendly Helpers: <a href="https://discord.gg/Uzum3mCeDG">https://discord.gg/Uzum3mCeDG</a><p>
-<li> Register for our <a href="https://forum.dm-helper.com/">Community Forums</a> and grab the (free) <a href="https://forum.dm-helper.com/t/bestiary-almost-complete-bestiary/35">Fan Content Bestiary</a><p>
+<li> <b>Dive in:</b> click "New Campaign", then add a few PCs (or import them from D&D Beyond) and add a map or combat and off you go<p>
+<li> <b>Join our Discord server</b>, where you will find lots of friendly Helpers: <a href="https://discord.gg/Uzum3mCeDG">https://discord.gg/Uzum3mCeDG</a><p>
+<li> Register for our <a href="https://forum.dm-helper.com/">Community Forums</a> and grab the (free) <a href="https://forum.dm-helper.com/t/bestiary-almost-complete-bestiary/35"><b>Fan Content Bestiary</b></a><p>
 <li> Our single most Frequency Asked Question is how to make the Player's Window full-screen: <b>Just press <i>"F"</i>!</b><p>
 <li> Check out the <i>Getting Started Guide</i> (link in the app)<p>
+<li> Decide whether you want DMHelper to collect anonymous user data or check automatically for updates (coming up in the next popup...)<p>
 </ol>
 </p>
-<p>
 <br>
 <p>
 If you like the app, please consider supporting our Patreon here: <a href="https://www.patreon.com/dmhelper">www.patreon.com/dmhelper</a>
