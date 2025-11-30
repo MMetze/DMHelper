@@ -1,3 +1,14 @@
+v4.0
+- Map Manager
+- Soundboard reboot
+- Update overlays to be positionable, configurable, colorable, iconable, not auto-visible
+- Distance measurement in daggerheart/range version
+- Configurable / Daggerheart initiative entries
+- Move search terms into campaign
+- Separate Campaign settings from main options dialog
+- Retool and resize menus
+
+
 Next version
 =======
 

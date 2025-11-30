@@ -212,7 +212,8 @@ namespace DMHelper
         FileType_Markdown,
         FileType_Image,
         FileType_Video,
-        FileType_Audio
+        FileType_Audio,
+        FileType_Directory
     };
 
     enum TransparentType
