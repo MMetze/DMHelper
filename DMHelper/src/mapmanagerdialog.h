@@ -44,10 +44,14 @@ protected slots:
     void addTags();
     void addTagsToItem(QStandardItem& item);
     void browseTags();
+    void handleSearchTagsEdited();
     void handleTagsEdited();
 
     void readModel();
     void writeModel();
+
+protected:
+    virtual bool eventFilter(QObject* object, QEvent* event) override;
 
 private:
     void clearModel();
@@ -55,6 +59,14 @@ private:
     void setCurrentPath(const QString& path);
     void inputItemXML(QDomElement &element, QStandardItem& parent);
     void outputItemXML(QDomDocument &doc, QDomElement &parent, QStandardItem& item);
+
+    QStandardItem* getItemFromIndex(const QModelIndex &index);
+    MapFileMetadata getMetadataFromItem(QStandardItem* item);
+    MapFileMetadata getMetadataFromIndex(const QModelIndex &index);
+    void selectSingleEntry(QStandardItem* item);
+    void selectMultipleEntries(const QItemSelection &selection);
+    void changeSingleEntry(QStandardItem* item);
+    void changeMultipleEntries(const QItemSelection &selection);
 
     void registerTag(const QString& tag);
     void registerTags(const QStringList& tags);

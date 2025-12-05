@@ -13,12 +13,16 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QListWidget>
+#include <QKeyEvent>
 
 const int MAPMANAGERDIALOG_CACHE_IMAGE_SIZE = 256;
 const int MAPMANAGERDIALOG_METADATA = Qt::UserRole + 1;
 
 /*
  * Next Steps
+ *
+ * Include a generic search that matches the filename
+ *
  * store the directory list in the cache and read it at startup
  * create a mapping of image md5s to tags and read/store that as well
  * Enable tagging of each image or groups of images
@@ -48,7 +52,9 @@ MapManagerDialog::MapManagerDialog(OptionsContainer& options, QWidget *parent) :
     connect(ui->treeView, &QTreeView::doubleClicked, this, &MapManagerDialog::openPreviewDialog);
     connect(ui->btnAutoTag, &QPushButton::clicked, this, &MapManagerDialog::addTags);
     connect(ui->btnBrowseTags, &QPushButton::clicked, this, &MapManagerDialog::browseTags);
-    connect(ui->edtSearch, &QLineEdit::editingFinished, this, &MapManagerDialog::handleTagsEdited);
+    connect(ui->edtSearch, &QLineEdit::editingFinished, this, &MapManagerDialog::handleSearchTagsEdited);
+
+    ui->edtTags->installEventFilter(this);
 }
 
 MapManagerDialog::~MapManagerDialog()
@@ -69,71 +75,18 @@ void MapManagerDialog::selectItem(const QItemSelection &current, const QItemSele
 {
     Q_UNUSED(previous);
 
-    if(current.indexes().count() == 0)
+    if((!_model) || (!_proxy) || (current.indexes().count() == 0))
         return;
 
-    QStandardItem* currentItem = _model->itemFromIndex(_proxy->mapToSource(current.indexes().first()));
-    if(currentItem)
-    {
-        QVariant variantData = currentItem->data(MAPMANAGERDIALOG_METADATA);
-        if(variantData.isValid())
-        {
-            MapFileMetadata metaData = variantData.value<MapFileMetadata>();
-            ui->edtTags->setText(metaData._tags.join(QChar::Space));
-
-            if(metaData._type != DMHelper::FileType_Directory)
-            {
-                QPixmap itemPixmap;
-                QString cacheFile = DMHCache().getCacheFilePath(metaData._filePath, QString("png"), QString("maps"));
-                if((!cacheFile.isEmpty()) && (QFile::exists(cacheFile)))
-                    itemPixmap.load(cacheFile);
-
-                if(itemPixmap.isNull())
-                {
-                    QImageReader reader(metaData._filePath);
-                    QSize imageSize = reader.size();
-                    imageSize.scale(QSize(MAPMANAGERDIALOG_CACHE_IMAGE_SIZE, MAPMANAGERDIALOG_CACHE_IMAGE_SIZE), Qt::KeepAspectRatio);
-                    reader.setScaledSize(imageSize);
-                    QImage image = reader.read();
-                    if(!image.isNull())
-                    {
-                        itemPixmap = QPixmap::fromImage(image);
-                        image.save(cacheFile);
-                    }
-                }
-
-                if(!itemPixmap.isNull())
-                {
-                    ui->lblPreview->setText(QString());
-                    ui->lblPreview->setPixmap(itemPixmap.scaled(ui->lblPreview->contentsRect().size(), Qt::KeepAspectRatio));
-
-                    if(metaData._type == DMHelper::FileType_Unknown)
-                    {
-                        metaData._type = DMHelper::FileType_Image;
-                        currentItem->setData(QVariant::fromValue(metaData), MAPMANAGERDIALOG_METADATA);
-                    }
-
-                    return;
-                }
-            }
-        }
-    }
-
-    ui->lblPreview->setText(tr("No Preview Available"));
+    if(current.indexes().count() == 1)
+        selectSingleEntry(_model->itemFromIndex(_proxy->mapToSource(current.indexes().first())));
+    else
+        selectMultipleEntries(current);
 }
 
 void MapManagerDialog::openPreviewDialog(const QModelIndex &current)
 {
-    QStandardItem* item = _model->itemFromIndex(_proxy->mapToSource(current));
-
-    if(!item)
-        return;
-
-    QVariant variantData = item->data(MAPMANAGERDIALOG_METADATA);
-    if(!variantData.isValid())
-        return;
-
-    MapFileMetadata metaData = variantData.value<MapFileMetadata>();
+    MapFileMetadata metaData = getMetadataFromIndex(current);
     if(metaData._filePath.isEmpty())
         return;
 
@@ -242,18 +195,14 @@ void MapManagerDialog::addTags()
     }
 
     // Update the tags text for the currently selected item
-    if(!ui->treeView->selectionModel()->selection().isEmpty())
+    if(ui->treeView->selectionModel()->selection().indexes().count() == 1)
     {
-        QStandardItem* currentItem = _model->itemFromIndex(_proxy->mapToSource(ui->treeView->selectionModel()->selection().indexes().first()));
-        if(currentItem)
-        {
-            QVariant variantData = currentItem->data(MAPMANAGERDIALOG_METADATA);
-            if(variantData.isValid())
-            {
-                MapFileMetadata metaData = variantData.value<MapFileMetadata>();
-                ui->edtTags->setText(metaData._tags.join(QChar::Space));
-            }
-        }
+        MapFileMetadata metaData = getMetadataFromIndex(ui->treeView->selectionModel()->selection().indexes().first());
+        ui->edtTags->setText(metaData._tags.join(QChar::Space));
+    }
+    else if(ui->treeView->selectionModel()->selection().indexes().count() > 1)
+    {
+        selectMultipleEntries(ui->treeView->selectionModel()->selection());
     }
 
     QTimer::singleShot(0, this, &MapManagerDialog::writeModel);
@@ -261,11 +210,7 @@ void MapManagerDialog::addTags()
 
 void MapManagerDialog::addTagsToItem(QStandardItem& item)
 {
-    QVariant variantData = item.data(MAPMANAGERDIALOG_METADATA);
-    if(!variantData.isValid())
-        return;
-
-    MapFileMetadata metaData = variantData.value<MapFileMetadata>();
+    MapFileMetadata metaData = getMetadataFromItem(&item);
     if((metaData._type != DMHelper::FileType_Directory) && (!metaData._filePath.isEmpty()))
     {
         QFileInfo fileInfo(metaData._filePath);
@@ -311,7 +256,7 @@ void MapManagerDialog::browseTags()
     listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
     QStringList tags = _tagList.values();
     tags.sort(Qt::CaseInsensitive);
-    for(QString tag : tags)
+    for(const QString& tag : tags)
     {
         QListWidgetItem* newItem = new QListWidgetItem(tag);
         listWidget->addItem(newItem);
@@ -349,13 +294,24 @@ void MapManagerDialog::browseTags()
     dlgTags->deleteLater();
 }
 
-void MapManagerDialog::handleTagsEdited()
+void MapManagerDialog::handleSearchTagsEdited()
 {
     if((!_proxy) || (ui->edtSearch->text().isEmpty()))
         return;
 
     QStringList editTags = ui->edtSearch->text().split(QChar::Space, Qt::SkipEmptyParts);
     _proxy->setRequiredTags(editTags);
+}
+
+void MapManagerDialog::handleTagsEdited()
+{
+    if((!_model) || (!_proxy) || (ui->treeView->selectionModel()->selection().indexes().count() == 0))
+        return;
+
+    if(ui->treeView->selectionModel()->selection().indexes().count() == 1)
+        changeSingleEntry(_model->itemFromIndex(_proxy->mapToSource(ui->treeView->selectionModel()->selection().indexes().first())));
+    else
+        changeMultipleEntries(ui->treeView->selectionModel()->selection());
 }
 
 void MapManagerDialog::readModel()
@@ -439,6 +395,28 @@ void MapManagerDialog::writeModel()
     qDebug() << "[MapManagerDialog] Map manager cache file written: " << modelFile;
 }
 
+bool MapManagerDialog::eventFilter(QObject* object, QEvent* event)
+{
+    if((object) && (event) && (object == ui->edtTags))
+    {
+        if(event->type() == QEvent::KeyPress)
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+            if((keyEvent->key() == Qt::Key_Return) || (keyEvent->key() != Qt::Key_Enter))
+            {
+                handleTagsEdited();
+                return true;
+            }
+        }
+        else if(event->type() == QEvent::FocusOut)
+        {
+            handleTagsEdited();
+        }
+    }
+
+    return QDialog::eventFilter(object, event);
+}
+
 void MapManagerDialog::clearModel()
 {
     _searchList.clear();
@@ -448,20 +426,16 @@ void MapManagerDialog::clearModel()
 
 QStandardItem* MapManagerDialog::containsEntry(QStandardItem& item, const QString& fullPath)
 {
+    if(fullPath.isEmpty())
+        return nullptr;
+
     if(item.hasChildren())
     {
         for(int i = 0; i < item.rowCount(); ++i)
         {
-            if(item.child(i))
-            {
-                QVariant variantData = item.child(i)->data(MAPMANAGERDIALOG_METADATA);
-                if(variantData.isValid())
-                {
-                    MapFileMetadata metaData = variantData.value<MapFileMetadata>();
-                    if(metaData._filePath == fullPath)
-                        return item.child(i);
-                }
-            }
+            MapFileMetadata metaData = getMetadataFromItem(item.child(i));
+            if(metaData._filePath == fullPath)
+                return item.child(i);
         }
     }
 
@@ -511,11 +485,7 @@ void MapManagerDialog::inputItemXML(QDomElement &element, QStandardItem& parent)
 
 void MapManagerDialog::outputItemXML(QDomDocument &doc, QDomElement &parent, QStandardItem& item)
 {
-    QVariant variantData = item.data(MAPMANAGERDIALOG_METADATA);
-    if(!variantData.isValid())
-        return;
-
-    MapFileMetadata metaData = variantData.value<MapFileMetadata>();
+    MapFileMetadata metaData = getMetadataFromItem(&item);
     if(metaData._filePath.isEmpty())
         return;
 
@@ -536,6 +506,153 @@ void MapManagerDialog::outputItemXML(QDomDocument &doc, QDomElement &parent, QSt
     }
 
     parent.appendChild(element);
+}
+
+QStandardItem* MapManagerDialog::getItemFromIndex(const QModelIndex &index)
+{
+    if((!_model) || (!_proxy) || (!index.isValid()))
+        return nullptr;
+    else
+        return _model->itemFromIndex(_proxy->mapToSource(index));
+}
+
+MapManagerDialog::MapFileMetadata MapManagerDialog::getMetadataFromItem(QStandardItem* item)
+{
+    MapFileMetadata metaData;
+
+    if(item)
+    {
+        QVariant variantData = item->data(MAPMANAGERDIALOG_METADATA);
+        if(variantData.isValid())
+            metaData = variantData.value<MapFileMetadata>();
+    }
+
+    return metaData;
+}
+
+MapManagerDialog::MapFileMetadata MapManagerDialog::getMetadataFromIndex(const QModelIndex &index)
+{
+    MapFileMetadata metaData;
+
+    if(index.isValid())
+    {
+        QVariant variantData = index.data(MAPMANAGERDIALOG_METADATA);
+        if(variantData.isValid())
+            metaData = variantData.value<MapFileMetadata>();
+    }
+
+    return metaData;
+}
+
+void MapManagerDialog::selectSingleEntry(QStandardItem* item)
+{
+    if(!item)
+        return;
+
+    MapFileMetadata metaData = getMetadataFromItem(item);
+    ui->edtTags->setText(metaData._tags.join(QChar::Space));
+
+    if(metaData._type != DMHelper::FileType_Directory)
+    {
+        QPixmap itemPixmap;
+        QString cacheFile = DMHCache().getCacheFilePath(metaData._filePath, QString("png"), QString("maps"));
+        if((!cacheFile.isEmpty()) && (QFile::exists(cacheFile)))
+            itemPixmap.load(cacheFile);
+
+        if(itemPixmap.isNull())
+        {
+            QImageReader reader(metaData._filePath);
+            QSize imageSize = reader.size();
+            imageSize.scale(QSize(MAPMANAGERDIALOG_CACHE_IMAGE_SIZE, MAPMANAGERDIALOG_CACHE_IMAGE_SIZE), Qt::KeepAspectRatio);
+            reader.setScaledSize(imageSize);
+            QImage image = reader.read();
+            if(!image.isNull())
+            {
+                itemPixmap = QPixmap::fromImage(image);
+                image.save(cacheFile);
+            }
+        }
+
+        if(!itemPixmap.isNull())
+        {
+            ui->lblPreview->setText(QString());
+            ui->lblPreview->setPixmap(itemPixmap.scaled(ui->lblPreview->contentsRect().size(), Qt::KeepAspectRatio));
+
+            if(metaData._type == DMHelper::FileType_Unknown)
+            {
+                metaData._type = DMHelper::FileType_Image;
+                item->setData(QVariant::fromValue(metaData), MAPMANAGERDIALOG_METADATA);
+            }
+
+            return;
+        }
+    }
+
+    ui->lblPreview->setText(tr("No Preview Available"));
+    ui->lblPreview->setEnabled(true);
+}
+
+void MapManagerDialog::selectMultipleEntries(const QItemSelection &selection)
+{
+    if(selection.indexes().count() == 0)
+        return;
+
+    MapFileMetadata firstMetaData = getMetadataFromIndex(selection.indexes().first());
+    QStringList combinedTags = firstMetaData._tags;
+
+    for(const QModelIndex& index : selection.indexes())
+    {
+        MapFileMetadata metaData = getMetadataFromIndex(index);
+        for(const QString& tagString : combinedTags)
+        {
+            if(!metaData._tags.contains(tagString))
+                combinedTags.removeAll(tagString);
+        }
+    }
+
+    ui->edtTags->setText(combinedTags.join(QChar::Space));
+
+    ui->lblPreview->setText(tr("No Preview Available"));
+    ui->lblPreview->setEnabled(false);
+}
+
+void MapManagerDialog::changeSingleEntry(QStandardItem* item)
+{
+    if(!item)
+        return;
+
+    MapFileMetadata metaData = getMetadataFromItem(item);
+    metaData._tags = ui->edtTags->toPlainText().split(QChar::Space);
+    item->setData(QVariant::fromValue(metaData), MAPMANAGERDIALOG_METADATA);
+}
+
+void MapManagerDialog::changeMultipleEntries(const QItemSelection &selection)
+{
+    if(selection.indexes().count() == 0)
+        return;
+
+    QStringList combinedTags = ui->edtTags->toPlainText().split(QChar::Space);
+
+    for(const QModelIndex& index : selection.indexes())
+    {
+        QStandardItem* item = getItemFromIndex(index);
+        if(item)
+        {
+            bool changed = false;
+            MapFileMetadata metaData = getMetadataFromItem(item);
+            for(const QString& tagString : combinedTags)
+            {
+                if(!metaData._tags.contains(tagString))
+                {
+                    metaData._tags.append(tagString);
+                    changed = true;
+                }
+            }
+
+            if(changed)
+                item->setData(QVariant::fromValue(metaData), MAPMANAGERDIALOG_METADATA);
+        }
+    }
 }
 
 void MapManagerDialog::registerTag(const QString& tag)
