@@ -13,14 +13,16 @@ Default: incremental debug build (day-to-day development):
 cmake --build DMHelper/out/build/windows-debug
 ```
 
-Release build (only when preparing a release):
-```bash
-cmake -S DMHelper/src -B build-64_bit-release -DCMAKE_BUILD_TYPE=Release
-cmake --build build-64_bit-release --config Release
+**Windows environment:** The default VSCode terminal does **not** have MSVC
+compiler paths loaded. Running `cmake --build` in plain PowerShell will fail
+with `fatal error C1083: Cannot open include file: 'type_traits'`.
+
+Always wrap build commands in a `vcvarsall.bat` call:
+```powershell
+cmd /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"" x64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper && C:\Qt\Tools\CMake_64\bin\cmake.exe --build DMHelper/out/build/windows-debug 2>&1"
 ```
 
-**Windows environment:** `cmake` should be on PATH via
-`C:\Qt\Tools\CMake_64\bin`. If not, add it to the system PATH.
+`cmake` is at `C:\Qt\Tools\CMake_64\bin` — not on system PATH by default.
 
 **IntelliSense errors are unreliable.** The IDE's clangd/IntelliSense uses a
 different Qt configuration than the actual build. Errors like "no type named
@@ -34,6 +36,16 @@ Sources are listed **explicitly** in `CMakeLists.txt` — no globbing. If you
 create a `.cpp`/`.h` pair, you must add both to the source list manually.
 
 ## Conventions — follow existing code, but note these traps
+
+**No magic numbers.** Use named constants (`static constexpr` for scalars,
+`static const` for QColor etc.) at the top of the `.cpp` file for any
+non-trivial literal value. Default property values, timer intervals, buffer
+sizes, vertex layout parameters, preview sizes, gradient stops — all must be
+named. The only exceptions are:
+- Structural zeros/ones with obvious meaning (e.g. `0.0f` for a cleared
+  position, `1` for a boolean attribute default)
+- Values that are part of a well-known algorithm embedded in a string
+  literal (e.g. simplex noise constants inside GLSL shader strings)
 
 **Enums** use `TypeName_ValueName` (e.g. `LayerType_Fow`, `CampaignType_Battle`).
 This is non-obvious — don't drift to `LayerType::Fow` or plain `FOW`.

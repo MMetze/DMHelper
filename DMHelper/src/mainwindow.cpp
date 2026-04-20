@@ -569,6 +569,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), _battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), _battleFrame, SLOT(addEffectLine()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectSmokeClicked()), _battleFrame, SLOT(addEffectSmoke()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectFireClicked()), _battleFrame, SLOT(addEffectFire()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectSparksClicked()), _battleFrame, SLOT(addEffectSparks()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectLightClicked()), _battleFrame, SLOT(addEffectLight()));
     connect(_ribbonTabBattle, SIGNAL(duplicateClicked()), _battleFrame, SLOT(duplicateSelection()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);

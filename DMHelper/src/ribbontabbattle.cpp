@@ -1,5 +1,6 @@
 #include "ribbontabbattle.h"
 #include "ui_ribbontabbattle.h"
+#include <QMenu>
 
 RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     RibbonFrame(parent),
@@ -23,6 +24,38 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnShowMovement, SIGNAL(clicked(bool)), this, SIGNAL(showMovementClicked(bool)));
     connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked(bool)));
     connect(ui->btnStatistics, SIGNAL(clicked(bool)), this, SIGNAL(statisticsClicked()));
+
+    QMenu* effectMenu = new QMenu(this);
+    QAction* actionAddRadius = new QAction(QIcon(":/img/data/icon_neweffectradius.png"), QString("Add Radius" ));
+    effectMenu->addAction(actionAddRadius);
+    connect(actionAddRadius, &QAction::triggered, this, &RibbonTabBattle::addEffectRadiusClicked);
+    QAction* actionAddCube = new QAction(QIcon(":/img/data/icon_neweffectcube.png"), QString("Add Cube" ));
+    effectMenu->addAction(actionAddCube);
+    connect(actionAddCube, &QAction::triggered, this, &RibbonTabBattle::addEffectCubeClicked);
+    QAction* actionAddCone = new QAction(QIcon(":/img/data/icon_neweffectcone.png"), QString("Add Cone" ));
+    effectMenu->addAction(actionAddCone);
+    connect(actionAddCone, &QAction::triggered, this, &RibbonTabBattle::addEffectConeClicked);
+    QAction* actionAddLine = new QAction(QIcon(":/img/data/icon_neweffectline.png"), QString("Add Line" ));
+    effectMenu->addAction(actionAddLine);
+    connect(actionAddLine, &QAction::triggered, this, &RibbonTabBattle::addEffectLineClicked);
+    effectMenu->addSeparator();
+    QAction* actionAddSmoke = new QAction(QIcon(":/img/data/icon_castspell.png"), QString("Add Smoke" ));
+    effectMenu->addAction(actionAddSmoke);
+    connect(actionAddSmoke, &QAction::triggered, this, &RibbonTabBattle::addEffectSmokeClicked);
+    QAction* actionAddFire = new QAction(QIcon(":/img/data/icon_movement.png"), QString("Add Fire" ));
+    effectMenu->addAction(actionAddFire);
+    connect(actionAddFire, &QAction::triggered, this, &RibbonTabBattle::addEffectFireClicked);
+    QAction* actionAddSparks = new QAction(QIcon(":/img/data/icon_living.png"), QString("Add Sparks" ));
+    effectMenu->addAction(actionAddSparks);
+    connect(actionAddSparks, &QAction::triggered, this, &RibbonTabBattle::addEffectSparksClicked);
+    QAction* actionAddLight = new QAction(QIcon(":/img/data/icon_options.png"), QString("Add Light" ));
+    effectMenu->addAction(actionAddLight);
+    connect(actionAddLight, &QAction::triggered, this, &RibbonTabBattle::addEffectLightClicked);
+
+    connect(effectMenu, &QMenu::triggered, this, &RibbonTabBattle::selectEffectAction);
+    ui->btnEffects->setMenu(effectMenu);
+    
+    selectEffectAction(actionAddRadius);
 }
 
 RibbonTabBattle::~RibbonTabBattle()
@@ -86,4 +119,13 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblLairActions, *ui->btnLairActions, frameHeight);
     setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblStatistics, *ui->btnStatistics, frameHeight);
+}
+
+void RibbonTabBattle::selectEffectAction(QAction* action)
+{
+    if(!action)
+        return;
+
+    ui->btnEffects->setIcon(action->icon());
+    ui->btnEffects->setToolTip(action->text());
 }

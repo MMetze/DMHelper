@@ -147,6 +147,10 @@ public slots:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void addEffectSmoke();
+    void addEffectFire();
+    void addEffectSparks();
+    void addEffectLight();
     void registerEffect(BattleDialogModelEffect* effect);
 
     void duplicateSelection();

@@ -798,6 +798,22 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         connect(addLineItem, SIGNAL(triggered()), this, SIGNAL(addEffectLine()));
         menu.addAction(addLineItem);
 
+        QAction* addSmokeItem = new QAction(QString("Create Smoke Effect"), &menu);
+        connect(addSmokeItem, SIGNAL(triggered()), this, SIGNAL(addEffectSmoke()));
+        menu.addAction(addSmokeItem);
+
+        QAction* addFireItem = new QAction(QString("Create Fire Effect"), &menu);
+        connect(addFireItem, SIGNAL(triggered()), this, SIGNAL(addEffectFire()));
+        menu.addAction(addFireItem);
+
+        QAction* addSparksItem = new QAction(QString("Create Sparks Effect"), &menu);
+        connect(addSparksItem, SIGNAL(triggered()), this, SIGNAL(addEffectSparks()));
+        menu.addAction(addSparksItem);
+
+        QAction* addLightItem = new QAction(QString("Create Light Effect"), &menu);
+        connect(addLightItem, SIGNAL(triggered()), this, SIGNAL(addEffectLight()));
+        menu.addAction(addLightItem);
+
         menu.addSeparator();
 
         QAction* addPCItem = new QAction(QString("Add PC..."), &menu);

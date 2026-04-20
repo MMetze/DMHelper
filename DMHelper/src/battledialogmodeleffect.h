@@ -27,6 +27,10 @@ public:
         BattleDialogModelEffect_Line,
         BattleDialogModelEffect_Object,
         BattleDialogModelEffect_ObjectVideo,
+        BattleDialogModelEffect_Smoke,
+        BattleDialogModelEffect_Fire,
+        BattleDialogModelEffect_Sparks,
+        BattleDialogModelEffect_Light,
 
         BattleDialogModelEffect_Count
     };

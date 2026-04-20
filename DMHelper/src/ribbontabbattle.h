@@ -34,6 +34,10 @@ signals:
     void addEffectCubeClicked();
     void addEffectConeClicked();
     void addEffectLineClicked();
+    void addEffectSmokeClicked();
+    void addEffectFireClicked();
+    void addEffectSparksClicked();
+    void addEffectLightClicked();
     void duplicateClicked();
     void showLivingClicked(bool checked);
     void showDeadClicked(bool checked);
@@ -44,6 +48,9 @@ signals:
 
 protected:
     virtual void showEvent(QShowEvent *event) override;
+
+protected slots:
+    void selectEffectAction(QAction* action);
 
 private:
     Ui::RibbonTabBattle *ui;

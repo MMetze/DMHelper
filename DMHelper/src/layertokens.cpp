@@ -6,6 +6,14 @@
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
 #include "publishglbattleeffectvideo.h"
+#include "publishglbattleeffectsmoke.h"
+#include "publishglbattleeffectfire.h"
+#include "publishglbattleeffectsparks.h"
+#include "publishglbattleeffectlight.h"
+#include "battledialogmodeleffectsmoke.h"
+#include "battledialogmodeleffectfire.h"
+#include "battledialogmodeleffectsparks.h"
+#include "battledialogmodeleffectlight.h"
 #include "campaign.h"
 #include "characterv2.h"
 #include "bestiary.h"
@@ -384,11 +392,36 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
         if(effect)
         {
             PublishGLBattleEffect* effectToken;
-            if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)
+            int effectType = effect->getEffectType();
+            if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)
             {
                 PublishGLBattleEffectVideo* effectVideo = new PublishGLBattleEffectVideo(_glScene, dynamic_cast<BattleDialogModelEffectObjectVideo*>(effect));
                 connect(effectVideo, &PublishGLBattleEffectVideo::updateWidget, renderer, &PublishGLRenderer::updateWidget);
                 effectToken = effectVideo;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Smoke)
+            {
+                PublishGLBattleEffectSmoke* effectSmoke = new PublishGLBattleEffectSmoke(_glScene, dynamic_cast<BattleDialogModelEffectSmoke*>(effect));
+                connect(effectSmoke, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectSmoke;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Fire)
+            {
+                PublishGLBattleEffectFire* effectFire = new PublishGLBattleEffectFire(_glScene, dynamic_cast<BattleDialogModelEffectFire*>(effect));
+                connect(effectFire, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectFire;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Sparks)
+            {
+                PublishGLBattleEffectSparks* effectSparks = new PublishGLBattleEffectSparks(_glScene, dynamic_cast<BattleDialogModelEffectSparks*>(effect));
+                connect(effectSparks, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectSparks;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Light)
+            {
+                PublishGLBattleEffectLight* effectLight = new PublishGLBattleEffectLight(_glScene, dynamic_cast<BattleDialogModelEffectLight*>(effect));
+                connect(effectLight, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectLight;
             }
             else
             {

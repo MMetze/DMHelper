@@ -223,6 +223,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectCone, this, &BattleFrame::addEffectCone);
     connect(_scene, &BattleDialogGraphicsScene::addEffectCube, this, &BattleFrame::addEffectCube);
     connect(_scene, &BattleDialogGraphicsScene::addEffectLine, this, &BattleFrame::addEffectLine);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectSmoke, this, &BattleFrame::addEffectSmoke);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectFire, this, &BattleFrame::addEffectFire);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectSparks, this, &BattleFrame::addEffectSparks);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectLight, this, &BattleFrame::addEffectLight);
     connect(_scene, &BattleDialogGraphicsScene::duplicateSelection, this, &BattleFrame::duplicateSelection);
     connect(_scene, &BattleDialogGraphicsScene::addPC, this, &BattleFrame::addCharacter);
     connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
@@ -1454,6 +1458,38 @@ void BattleFrame::addEffectLine()
         return;
 
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115, 18, 0, 64), QString()));
+}
+
+void BattleFrame::addEffectSmoke()
+{
+    if(!validateTokenLayerExists())
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Smoke, 10, 0, QColor(80, 80, 80, 180), QString()));
+}
+
+void BattleFrame::addEffectFire()
+{
+    if(!validateTokenLayerExists())
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Fire, 5, 0, QColor(255, 100, 0, 220), QString()));
+}
+
+void BattleFrame::addEffectSparks()
+{
+    if(!validateTokenLayerExists())
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Sparks, 8, 0, QColor(255, 200, 50, 255), QString()));
+}
+
+void BattleFrame::addEffectLight()
+{
+    if(!validateTokenLayerExists())
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Light, 10, 0, QColor(255, 220, 100, 128), QString()));
 }
 
 void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
@@ -5211,6 +5247,18 @@ BattleDialogModelEffect* BattleFrame::createEffect(int type, int size, int width
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
             result = BattleDialogModelEffectFactory::createEffectObjectVideo(effectPosition, QSize(width, size), color, filename);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Smoke:
+            result = BattleDialogModelEffectFactory::createEffectSmoke(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Fire:
+            result = BattleDialogModelEffectFactory::createEffectFire(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Sparks:
+            result = BattleDialogModelEffectFactory::createEffectSparks(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Light:
+            result = BattleDialogModelEffectFactory::createEffectLight(effectPosition, size, color);
             break;
         default:
             break;

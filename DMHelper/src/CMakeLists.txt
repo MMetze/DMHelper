@@ -66,7 +66,11 @@ set(DMHELPER_SOURCES
     battlecombatantwidget.cpp
     battledialogeffectsettings.cpp
     battledialogeffectsettingsbase.cpp
+    battledialogeffectsettingsfire.cpp
+    battledialogeffectsettingslight.cpp
     battledialogeffectsettingsobjectvideo.cpp
+    battledialogeffectsettingssmoke.cpp
+    battledialogeffectsettingssparks.cpp
     battledialogevent.cpp
     battledialogeventdamage.cpp
     battledialogeventnewround.cpp
@@ -86,6 +90,10 @@ set(DMHELPER_SOURCES
     battledialogmodeleffectline.cpp
     battledialogmodeleffectobject.cpp
     battledialogmodeleffectobjectvideo.cpp
+    battledialogmodeleffectfire.cpp
+    battledialogmodeleffectlight.cpp
+    battledialogmodeleffectsmoke.cpp
+    battledialogmodeleffectsparks.cpp
     battledialogmodeleffectradius.cpp
     battledialogmodeleffectshape.cpp
     battledialogmodelmonsterbase.cpp
@@ -262,6 +270,11 @@ set(DMHELPER_SOURCES
     publishglbattlebackground.cpp
     publishglbattleeffect.cpp
     publishglbattleeffectvideo.cpp
+    publishglbattleeffectanimated.cpp
+    publishglbattleeffectsmoke.cpp
+    publishglbattleeffectfire.cpp
+    publishglbattleeffectsparks.cpp
+    publishglbattleeffectlight.cpp
     publishglbattlegrid.cpp
     publishglbattleimagerenderer.cpp
     publishglbattleobject.cpp
@@ -392,7 +405,11 @@ set(DMHELPER_HEADERS
     battlecombatantwidget.h
     battledialogeffectsettings.h
     battledialogeffectsettingsbase.h
+    battledialogeffectsettingsfire.h
+    battledialogeffectsettingslight.h
     battledialogeffectsettingsobjectvideo.h
+    battledialogeffectsettingssmoke.h
+    battledialogeffectsettingssparks.h
     battledialogevent.h
     battledialogeventdamage.h
     battledialogeventnewround.h
@@ -412,6 +429,10 @@ set(DMHELPER_HEADERS
     battledialogmodeleffectline.h
     battledialogmodeleffectobject.h
     battledialogmodeleffectobjectvideo.h
+    battledialogmodeleffectfire.h
+    battledialogmodeleffectlight.h
+    battledialogmodeleffectsmoke.h
+    battledialogmodeleffectsparks.h
     battledialogmodeleffectradius.h
     battledialogmodeleffectshape.h
     battledialogmodelmonsterbase.h
@@ -590,6 +611,11 @@ set(DMHELPER_HEADERS
     publishglbattlebackground.h
     publishglbattleeffect.h
     publishglbattleeffectvideo.h
+    publishglbattleeffectanimated.h
+    publishglbattleeffectsmoke.h
+    publishglbattleeffectfire.h
+    publishglbattleeffectsparks.h
+    publishglbattleeffectlight.h
     publishglbattlegrid.h
     publishglbattleimagerenderer.h
     publishglbattleobject.h
@@ -692,7 +718,11 @@ set(DMHELPER_FORMS
     battlecombatantframe.ui
     battlecombatantwidget.ui
     battledialogeffectsettings.ui
+    battledialogeffectsettingsfire.ui
+    battledialogeffectsettingslight.ui
     battledialogeffectsettingsobjectvideo.ui
+    battledialogeffectsettingssmoke.ui
+    battledialogeffectsettingssparks.ui
     battledialoglogview.ui
     battleframe.ui
     bestiaryexportdialog.ui
