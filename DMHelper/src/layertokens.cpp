@@ -888,10 +888,21 @@ void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
     if((!effect) || (!_model) || (!_layerScene))
         return;
 
-    // Changes to the player item will be directly handled through the signal
-    QGraphicsItem* graphicsItem = _effectIconHash.value(effect);
-    if(graphicsItem)
-        effect->applyEffectValues(*graphicsItem, _scale);
+    BattleDialogModelEffect* keyEffect = findEffectKey(effect);
+    if(keyEffect)
+    {
+        QGraphicsItem* graphicsItem = _effectIconHash.value(keyEffect);
+        if(graphicsItem)
+        {
+            if(graphicsItem->scene())
+                graphicsItem->scene()->removeItem(graphicsItem);
+            delete graphicsItem;
+            _effectIconHash.remove(keyEffect);
+        }
+
+        if(_layerScene->getDMScene())
+            createEffectIcon(_layerScene->getDMScene(), effect);
+    }
 
     // Remove current effect markers from all combatants
     QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);

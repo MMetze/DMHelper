@@ -13,10 +13,6 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnAddNPC, SIGNAL(clicked(bool)), this, SIGNAL(addNPCClicked()));
     connect(ui->btnAddObject, SIGNAL(clicked(bool)), this, SIGNAL(addObjectClicked()));
     connect(ui->btnCastSpell, SIGNAL(clicked(bool)), this, SIGNAL(castSpellClicked()));
-    connect(ui->btnAddRadius, SIGNAL(clicked(bool)), this, SIGNAL(addEffectRadiusClicked()));
-    connect(ui->btnAddCube, SIGNAL(clicked(bool)), this, SIGNAL(addEffectCubeClicked()));
-    connect(ui->btnAddCone, SIGNAL(clicked(bool)), this, SIGNAL(addEffectConeClicked()));
-    connect(ui->btnAddLine, SIGNAL(clicked(bool)), this, SIGNAL(addEffectLineClicked()));
     connect(ui->btnDuplicate, SIGNAL(clicked(bool)), this, SIGNAL(duplicateClicked()));
     connect(ui->btnShowLiving, SIGNAL(clicked(bool)), this, SIGNAL(showLivingClicked(bool)));
     connect(ui->btnShowDead, SIGNAL(clicked(bool)), this, SIGNAL(showDeadClicked(bool)));
@@ -53,6 +49,7 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(actionAddLight, &QAction::triggered, this, &RibbonTabBattle::addEffectLightClicked);
 
     connect(effectMenu, &QMenu::triggered, this, &RibbonTabBattle::selectEffectAction);
+    ui->btnEffects->setPopupMode(QToolButton::MenuButtonPopup);
     ui->btnEffects->setMenu(effectMenu);
     
     selectEffectAction(actionAddRadius);
@@ -98,6 +95,7 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     RibbonFrame::showEvent(event);
 
     int frameHeight = height();
+    int buttonSize = frameHeight - getLabelHeight(*ui->lblEffects, frameHeight);
 
     setStandardButtonSize(*ui->lblAddCharacter, *ui->btnAddCharacter, frameHeight);
     setStandardButtonSize(*ui->lblAddMonsters, *ui->btnAddMonsters, frameHeight);
@@ -106,10 +104,7 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_2, frameHeight);
     setStandardButtonSize(*ui->lblCastSpell, *ui->btnCastSpell, frameHeight);
     setLineHeight(*ui->line_5, frameHeight);
-    setStandardButtonSize(*ui->lblAddRadius, *ui->btnAddRadius, frameHeight);
-    setStandardButtonSize(*ui->lblAddCube, *ui->btnAddCube, frameHeight);
-    setStandardButtonSize(*ui->lblAddCone, *ui->btnAddCone, frameHeight);
-    setStandardButtonSize(*ui->lblAddLine, *ui->btnAddLine, frameHeight);
+    setWidgetSize(*ui->btnEffects, buttonSize * 10 / 8, buttonSize);
     setStandardButtonSize(*ui->lblDuplicate, *ui->btnDuplicate, frameHeight);
     setLineHeight(*ui->line_4, frameHeight);
     setStandardButtonSize(*ui->lblShowLiving, *ui->btnShowLiving, frameHeight);
@@ -126,6 +121,7 @@ void RibbonTabBattle::selectEffectAction(QAction* action)
     if(!action)
         return;
 
+    ui->btnEffects->setDefaultAction(action);
     ui->btnEffects->setIcon(action->icon());
     ui->btnEffects->setToolTip(action->text());
 }

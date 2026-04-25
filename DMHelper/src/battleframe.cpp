@@ -1465,7 +1465,7 @@ void BattleFrame::addEffectSmoke()
     if(!validateTokenLayerExists())
         return;
 
-    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Smoke, 10, 0, QColor(80, 80, 80, 180), QString()));
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Smoke, 10, 0, QColor(90, 90, 90, 255), QString()));
 }
 
 void BattleFrame::addEffectFire()
@@ -1473,7 +1473,7 @@ void BattleFrame::addEffectFire()
     if(!validateTokenLayerExists())
         return;
 
-    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Fire, 5, 0, QColor(255, 100, 0, 220), QString()));
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Fire, 5, 0, QColor(255, 140, 20, 255), QString()));
 }
 
 void BattleFrame::addEffectSparks()
@@ -1481,7 +1481,7 @@ void BattleFrame::addEffectSparks()
     if(!validateTokenLayerExists())
         return;
 
-    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Sparks, 8, 0, QColor(255, 200, 50, 255), QString()));
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Sparks, 12, 0, QColor(255, 220, 120, 255), QString()));
 }
 
 void BattleFrame::addEffectLight()

@@ -83,7 +83,8 @@ static const char *smokeFragmentShader = "#version 410 core\n"
     "void main() {\n"
     "    vec2 uv = TexCoord - 0.5;\n"
     "    float dist = length(uv) * 2.0;\n"
-    "    if(dist > 1.0) discard;\n"
+    "    // Hard cull only well past the active envelope; billows live outside the nominal radius.\n"
+    "    if(dist > 1.95) discard;\n"
     "\n"
     "    // Apply wind drift to noise coordinates\n"
     "    vec2 noiseUV = TexCoord * 3.0 + u_windVec * u_time;\n"
@@ -94,17 +95,30 @@ static const char *smokeFragmentShader = "#version 410 core\n"
     "    float n3 = snoise(vec3(noiseUV * 4.0, u_time * 0.7)) * 0.5 + 0.5;\n"
     "    float noise = mix(n1, n1 * 0.5 + n2 * 0.35 + n3 * 0.15, u_billowFactor);\n"
     "\n"
-    "    // Density threshold\n"
-    "    float smokeMask = smoothstep(1.0 - u_density, 1.0, noise);\n"
+    "    // Low-frequency turbulence deforms the silhouette so plume edges bulge irregularly past nominal radius.\n"
+    "    float silhouetteNoise = snoise(vec3(TexCoord * 1.8, u_time * 0.25)) * 0.5 + 0.5;\n"
+    "    float bulge = (silhouetteNoise - 0.45) * (0.55 + u_billowFactor * 0.55);\n"
+    "    // Effective radius the smoke fills: nominal core (~1.0) plus billow bulge that can reach ~1.7.\n"
+    "    float effectiveRadius = 1.0 + bulge + noise * 0.35;\n"
     "\n"
-    "    // Edge falloff\n"
-    "    float edgeFade = 1.0 - smoothstep(0.6, 1.0, dist);\n"
+    "    // Density threshold with a softer shoulder so smoke keeps a body outside the core.\n"
+    "    float denseMask = smoothstep(1.0 - u_density, 1.0, noise);\n"
+    "    float wispyMask = smoothstep(0.55 - u_density * 0.25, 0.98, noise);\n"
+    "    float smokeMask = mix(wispyMask, denseMask, 0.62);\n"
     "\n"
-    "    // Center-to-edge color interpolation\n"
-    "    vec4 smokeColor = mix(u_centerColor, u_edgeColor, dist);\n"
+    "    // Radial fade is relative to the perturbed envelope, so wisps clearly billow beyond the nominal bound.\n"
+    "    float radialT = dist / max(0.35, effectiveRadius);\n"
+    "    float coreFade = 1.0 - smoothstep(0.45, 0.95, radialT);\n"
+    "    float outerFade = 1.0 - smoothstep(0.85, 1.30, radialT);\n"
+    "    float edgeFade = max(coreFade, outerFade * 0.65);\n"
     "\n"
-    "    float finalAlpha = smokeMask * edgeFade * smokeColor.a * alpha;\n"
-    "    FragColor = vec4(smokeColor.rgb, finalAlpha);\n"
+    "    // Color mix references the perturbed envelope as well.\n"
+    "    float colorMix = clamp(radialT * 0.82, 0.0, 1.0);\n"
+    "    vec4 smokeColor = mix(u_centerColor, u_edgeColor, colorMix);\n"
+    "    vec3 smokeRgb = mix(smokeColor.rgb, min(vec3(1.0), smokeColor.rgb * 1.18 + vec3(0.04)), denseMask * 0.28);\n"
+    "\n"
+    "    float finalAlpha = clamp(smokeMask * edgeFade * smokeColor.a * u_color.a * alpha * 2.65, 0.0, 1.0);\n"
+    "    FragColor = vec4(smokeRgb, finalAlpha);\n"
     "}\n";
 
 PublishGLBattleEffectSmoke::PublishGLBattleEffectSmoke(PublishGLScene* scene, BattleDialogModelEffectSmoke* effect) :
@@ -119,6 +133,12 @@ PublishGLBattleEffectSmoke::PublishGLBattleEffectSmoke(PublishGLScene* scene, Ba
 
 PublishGLBattleEffectSmoke::~PublishGLBattleEffectSmoke()
 {
+}
+
+qreal PublishGLBattleEffectSmoke::getExtentMultiplier() const
+{
+    static constexpr qreal SMOKE_EXTENT_MULTIPLIER = 2.20;
+    return SMOKE_EXTENT_MULTIPLIER;
 }
 
 const char* PublishGLBattleEffectSmoke::getVertexShaderSource() const

@@ -4,10 +4,11 @@
 #include <QDomElement>
 #include <QPainter>
 #include <QRandomGenerator>
+#include <QtMath>
 
-static constexpr int DEFAULT_PARTICLE_COUNT = 50;
-static constexpr qreal DEFAULT_GLOW_RADIUS = 0.3;
-static constexpr qreal DEFAULT_GLOW_OPACITY = 0.6;
+static constexpr int DEFAULT_PARTICLE_COUNT = 120;
+static constexpr qreal DEFAULT_GLOW_RADIUS = 0.5;
+static constexpr qreal DEFAULT_GLOW_OPACITY = 0.9;
 static constexpr qreal DEFAULT_SPARK_SPEED = 0.5;
 static constexpr qreal DEFAULT_WIND_DIRECTION = 0.0;
 static constexpr qreal DEFAULT_WIND_STRENGTH = 0.0;
@@ -16,6 +17,7 @@ static constexpr int PREVIEW_PIXMAP_SIZE = 200;
 static constexpr int PREVIEW_MAX_DOTS = 100;
 static constexpr qreal PREVIEW_DOT_MIN_SIZE = 2.0;
 static constexpr qreal PREVIEW_DOT_SIZE_RANGE = 3.0;
+static constexpr qreal CHANGE_EPSILON = 0.0001;
 
 BattleDialogModelEffectSparks::BattleDialogModelEffectSparks(const QString& name, QObject *parent) :
     BattleDialogModelEffect(name, parent),
@@ -29,6 +31,7 @@ BattleDialogModelEffectSparks::BattleDialogModelEffectSparks(const QString& name
     _windStrength(DEFAULT_WIND_STRENGTH)
 {
     _color = DEFAULT_SPARK_COLOR;
+    _active = false;
 }
 
 BattleDialogModelEffectSparks::BattleDialogModelEffectSparks(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
@@ -42,6 +45,7 @@ BattleDialogModelEffectSparks::BattleDialogModelEffectSparks(int size, const QPo
     _windDirection(DEFAULT_WIND_DIRECTION),
     _windStrength(DEFAULT_WIND_STRENGTH)
 {
+    _active = false;
 }
 
 BattleDialogModelEffectSparks::~BattleDialogModelEffectSparks()
@@ -142,6 +146,7 @@ QGraphicsItem* BattleDialogModelEffectSparks::createEffectShape(qreal gridScale)
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
     applyEffectValues(*pixmapItem, gridScale);
+    pixmapItem->setOpacity(_color.alphaF());
 
     return pixmapItem;
 }
@@ -167,7 +172,7 @@ qreal BattleDialogModelEffectSparks::getGlowRadius() const
 
 void BattleDialogModelEffectSparks::setGlowRadius(qreal radius)
 {
-    if(!qFuzzyCompare(_glowRadius, radius))
+    if(qAbs(_glowRadius - radius) > CHANGE_EPSILON)
     {
         _glowRadius = radius;
         registerChange();
@@ -181,7 +186,7 @@ qreal BattleDialogModelEffectSparks::getGlowOpacity() const
 
 void BattleDialogModelEffectSparks::setGlowOpacity(qreal opacity)
 {
-    if(!qFuzzyCompare(_glowOpacity, opacity))
+    if(qAbs(_glowOpacity - opacity) > CHANGE_EPSILON)
     {
         _glowOpacity = opacity;
         registerChange();
@@ -223,7 +228,7 @@ qreal BattleDialogModelEffectSparks::getSparkSpeed() const
 
 void BattleDialogModelEffectSparks::setSparkSpeed(qreal speed)
 {
-    if(!qFuzzyCompare(_sparkSpeed, speed))
+    if(qAbs(_sparkSpeed - speed) > CHANGE_EPSILON)
     {
         _sparkSpeed = speed;
         registerChange();
@@ -237,7 +242,7 @@ qreal BattleDialogModelEffectSparks::getWindDirection() const
 
 void BattleDialogModelEffectSparks::setWindDirection(qreal windDirection)
 {
-    if(!qFuzzyCompare(_windDirection, windDirection))
+    if(qAbs(_windDirection - windDirection) > CHANGE_EPSILON)
     {
         _windDirection = windDirection;
         registerChange();
@@ -251,7 +256,7 @@ qreal BattleDialogModelEffectSparks::getWindStrength() const
 
 void BattleDialogModelEffectSparks::setWindStrength(qreal windStrength)
 {
-    if(!qFuzzyCompare(_windStrength, windStrength))
+    if(qAbs(_windStrength - windStrength) > CHANGE_EPSILON)
     {
         _windStrength = windStrength;
         registerChange();

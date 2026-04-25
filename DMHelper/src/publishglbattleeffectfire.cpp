@@ -81,7 +81,8 @@ static const char *fireFragmentShader = "#version 410 core\n"
     "void main() {\n"
     "    vec2 uv = TexCoord - 0.5;\n"
     "    float dist = length(uv) * 2.0;\n"
-    "    if(dist > 1.0) discard;\n"
+    "    // Hard cull only well past the active envelope; flickering tongues live beyond the nominal radius.\n"
+    "    if(dist > 1.95) discard;\n"
     "\n"
     "    // Frequency scales with intensity: higher = more turbulent/raging\n"
     "    float freq = 3.0 + u_intensity * 5.0;\n"
@@ -91,19 +92,34 @@ static const char *fireFragmentShader = "#version 410 core\n"
     "    float scrollSpeed = 1.0 + u_intensity * 2.0;\n"
     "    float n1 = snoise(vec3(noiseUV.x, noiseUV.y - u_time * scrollSpeed, u_time * 0.5)) * 0.5 + 0.5;\n"
     "    float n2 = snoise(vec3(noiseUV.x * 2.0, noiseUV.y * 2.0 - u_time * scrollSpeed * 1.5, u_time * 0.8)) * 0.5 + 0.5;\n"
-    "    float noise = n1 * 0.6 + n2 * 0.4;\n"
+    "    float n3 = snoise(vec3(noiseUV.x * 3.1, noiseUV.y * 2.8 - u_time * scrollSpeed * 2.3, u_time * 1.1)) * 0.5 + 0.5;\n"
+    "    float noise = n1 * 0.45 + n2 * 0.35 + n3 * 0.20;\n"
+    "\n"
+    "    // Flame-tongue silhouette: low-frequency angular noise that pushes the active radius outward.\n"
+    "    vec2 dir2 = (dist > 0.0001) ? uv / max(dist * 0.5, 0.0001) : vec2(0.0, 1.0);\n"
+    "    float angularNoise = snoise(vec3(dir2 * 1.6, u_time * (0.6 + u_intensity * 0.8))) * 0.5 + 0.5;\n"
+    "    float tongueNoise = snoise(vec3(dir2 * 3.2, u_time * (1.1 + u_intensity * 1.1))) * 0.5 + 0.5;\n"
+    "    float silhouette = mix(angularNoise, tongueNoise, 0.45);\n"
+    "    // Effective radius the fire reaches: nominal core + flicker-driven tongues out to ~1.7.\n"
+    "    float effectiveRadius = 0.95 + silhouette * (0.45 + u_intensity * 0.45) + noise * 0.20;\n"
+    "    float radialT = dist / max(0.35, effectiveRadius);\n"
     "\n"
     "    // Flicker modulation\n"
     "    float flicker = 1.0 - 0.15 * sin(u_time * u_flickerSpeed * 12.0) * sin(u_time * u_flickerSpeed * 7.3 + 1.5);\n"
+    "    float pulse = 0.88 + 0.22 * sin(u_time * u_flickerSpeed * 5.7 + noise * 2.4);\n"
     "\n"
-    "    // Fire shape: stronger at center, fading at edges\n"
-    "    float fireMask = (1.0 - smoothstep(0.3, 1.0, dist)) * noise * flicker;\n"
+    "    // Fire shape: dense core plus a softer outer tongue beyond the old radius, all relative to the perturbed envelope.\n"
+    "    float coreMask = (1.0 - smoothstep(0.20, 0.90, radialT)) * noise;\n"
+    "    float outerMask = (1.0 - smoothstep(0.65, 1.15, radialT)) * pow(noise, 1.10);\n"
+    "    float fireMask = max(coreMask, outerMask * (0.55 + u_intensity * 0.40)) * flicker * pulse;\n"
     "\n"
-    "    // Dark-to-light color: center is light (hot), edges are dark\n"
-    "    vec4 fireColor = mix(u_darkColor, u_lightColor, (1.0 - dist) * noise);\n"
+    "    // Dark-to-light color: hotter center and brighter tongues.\n"
+    "    float heat = clamp((1.0 - radialT * 0.78) * (0.55 + noise * 0.75), 0.0, 1.0);\n"
+    "    vec4 fireColor = mix(u_darkColor, u_lightColor, heat);\n"
+    "    vec3 fireRgb = min(vec3(1.0), fireColor.rgb * (1.10 + heat * 0.45));\n"
     "\n"
-    "    float finalAlpha = fireMask * fireColor.a * alpha;\n"
-    "    FragColor = vec4(fireColor.rgb, finalAlpha);\n"
+    "    float finalAlpha = clamp(fireMask * fireColor.a * u_color.a * alpha * (2.00 + u_intensity * 0.55), 0.0, 1.0);\n"
+    "    FragColor = vec4(fireRgb, finalAlpha);\n"
     "}\n";
 
 PublishGLBattleEffectFire::PublishGLBattleEffectFire(PublishGLScene* scene, BattleDialogModelEffectFire* effect) :
@@ -117,6 +133,12 @@ PublishGLBattleEffectFire::PublishGLBattleEffectFire(PublishGLScene* scene, Batt
 
 PublishGLBattleEffectFire::~PublishGLBattleEffectFire()
 {
+}
+
+qreal PublishGLBattleEffectFire::getExtentMultiplier() const
+{
+    static constexpr qreal FIRE_EXTENT_MULTIPLIER = 2.10;
+    return FIRE_EXTENT_MULTIPLIER;
 }
 
 const char* PublishGLBattleEffectFire::getVertexShaderSource() const

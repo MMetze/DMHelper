@@ -20,6 +20,7 @@ public:
 protected:
     virtual const char* getVertexShaderSource() const override;
     virtual const char* getFragmentShaderSource() const override;
+    virtual qreal getExtentMultiplier() const override;
     virtual void getEffectUniformLocations(QOpenGLFunctions* f) override;
     virtual void setEffectUniforms(QOpenGLFunctions* f) override;
 
@@ -31,6 +32,7 @@ protected:
     int _shaderFadeDistance;
     int _shaderSparkSpeed;
     int _shaderWindVec;
+    int _shaderParticleCount;
 
     int _particleCount;
     bool _objectsDirty;

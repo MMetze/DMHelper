@@ -16,6 +16,7 @@ public:
 protected:
     virtual const char* getVertexShaderSource() const override;
     virtual const char* getFragmentShaderSource() const override;
+    virtual qreal getExtentMultiplier() const override;
     virtual void getEffectUniformLocations(QOpenGLFunctions* f) override;
     virtual void setEffectUniforms(QOpenGLFunctions* f) override;
 

@@ -4,6 +4,7 @@
 #include <QDomElement>
 #include <QPainter>
 #include <QRadialGradient>
+#include <QtMath>
 
 static constexpr qreal DEFAULT_FLICKER_FREQUENCY = 2.0;
 static constexpr qreal DEFAULT_DIM_AMPLITUDE = 0.2;
@@ -15,6 +16,7 @@ static constexpr qreal QUADRATIC_STOP_OUTER = 0.7;
 static constexpr qreal QUADRATIC_ALPHA_INNER = 0.91;
 static constexpr qreal QUADRATIC_ALPHA_MID = 0.75;
 static constexpr qreal QUADRATIC_ALPHA_OUTER = 0.51;
+static constexpr qreal CHANGE_EPSILON = 0.0001;
 
 BattleDialogModelEffectLight::BattleDialogModelEffectLight(const QString& name, QObject *parent) :
     BattleDialogModelEffect(name, parent),
@@ -24,6 +26,7 @@ BattleDialogModelEffectLight::BattleDialogModelEffectLight(const QString& name, 
     _dimAmplitude(DEFAULT_DIM_AMPLITUDE)
 {
     _color = DEFAULT_LIGHT_COLOR;
+    _active = false;
 }
 
 BattleDialogModelEffectLight::BattleDialogModelEffectLight(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
@@ -33,6 +36,7 @@ BattleDialogModelEffectLight::BattleDialogModelEffectLight(int size, const QPoin
     _flickerFrequency(DEFAULT_FLICKER_FREQUENCY),
     _dimAmplitude(DEFAULT_DIM_AMPLITUDE)
 {
+    _active = false;
 }
 
 BattleDialogModelEffectLight::~BattleDialogModelEffectLight()
@@ -121,6 +125,7 @@ QGraphicsItem* BattleDialogModelEffectLight::createEffectShape(qreal gridScale)
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
     applyEffectValues(*pixmapItem, gridScale);
+    pixmapItem->setOpacity(_color.alphaF());
 
     return pixmapItem;
 }
@@ -160,7 +165,7 @@ qreal BattleDialogModelEffectLight::getFlickerFrequency() const
 
 void BattleDialogModelEffectLight::setFlickerFrequency(qreal frequency)
 {
-    if(!qFuzzyCompare(_flickerFrequency, frequency))
+    if(qAbs(_flickerFrequency - frequency) > CHANGE_EPSILON)
     {
         _flickerFrequency = frequency;
         registerChange();
@@ -174,7 +179,7 @@ qreal BattleDialogModelEffectLight::getDimAmplitude() const
 
 void BattleDialogModelEffectLight::setDimAmplitude(qreal amplitude)
 {
-    if(!qFuzzyCompare(_dimAmplitude, amplitude))
+    if(qAbs(_dimAmplitude - amplitude) > CHANGE_EPSILON)
     {
         _dimAmplitude = amplitude;
         registerChange();

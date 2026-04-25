@@ -4,6 +4,7 @@
 #include <QDomElement>
 #include <QPainter>
 #include <QRadialGradient>
+#include <QtMath>
 
 static constexpr qreal DEFAULT_DENSITY = 0.5;
 static const QColor DEFAULT_CENTER_COLOR(80, 80, 80, 180);
@@ -12,6 +13,7 @@ static constexpr qreal DEFAULT_BILLOW_FACTOR = 0.5;
 static constexpr qreal DEFAULT_WIND_DIRECTION = 0.0;
 static constexpr qreal DEFAULT_WIND_STRENGTH = 0.0;
 static constexpr int PREVIEW_PIXMAP_SIZE = 200;
+static constexpr qreal CHANGE_EPSILON = 0.0001;
 
 BattleDialogModelEffectSmoke::BattleDialogModelEffectSmoke(const QString& name, QObject *parent) :
     BattleDialogModelEffect(name, parent),
@@ -22,6 +24,7 @@ BattleDialogModelEffectSmoke::BattleDialogModelEffectSmoke(const QString& name, 
     _windDirection(DEFAULT_WIND_DIRECTION),
     _windStrength(DEFAULT_WIND_STRENGTH)
 {
+    _active = false;
 }
 
 BattleDialogModelEffectSmoke::BattleDialogModelEffectSmoke(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
@@ -33,6 +36,7 @@ BattleDialogModelEffectSmoke::BattleDialogModelEffectSmoke(int size, const QPoin
     _windDirection(DEFAULT_WIND_DIRECTION),
     _windStrength(DEFAULT_WIND_STRENGTH)
 {
+    _active = false;
 }
 
 BattleDialogModelEffectSmoke::~BattleDialogModelEffectSmoke()
@@ -119,6 +123,7 @@ QGraphicsItem* BattleDialogModelEffectSmoke::createEffectShape(qreal gridScale)
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
     applyEffectValues(*pixmapItem, gridScale);
+    pixmapItem->setOpacity(_color.alphaF());
 
     return pixmapItem;
 }
@@ -130,7 +135,7 @@ qreal BattleDialogModelEffectSmoke::getDensity() const
 
 void BattleDialogModelEffectSmoke::setDensity(qreal density)
 {
-    if(!qFuzzyCompare(_density, density))
+    if(qAbs(_density - density) > CHANGE_EPSILON)
     {
         _density = density;
         registerChange();
@@ -172,7 +177,7 @@ qreal BattleDialogModelEffectSmoke::getBillowFactor() const
 
 void BattleDialogModelEffectSmoke::setBillowFactor(qreal billowFactor)
 {
-    if(!qFuzzyCompare(_billowFactor, billowFactor))
+    if(qAbs(_billowFactor - billowFactor) > CHANGE_EPSILON)
     {
         _billowFactor = billowFactor;
         registerChange();
@@ -186,7 +191,7 @@ qreal BattleDialogModelEffectSmoke::getWindDirection() const
 
 void BattleDialogModelEffectSmoke::setWindDirection(qreal windDirection)
 {
-    if(!qFuzzyCompare(_windDirection, windDirection))
+    if(qAbs(_windDirection - windDirection) > CHANGE_EPSILON)
     {
         _windDirection = windDirection;
         registerChange();
@@ -200,7 +205,7 @@ qreal BattleDialogModelEffectSmoke::getWindStrength() const
 
 void BattleDialogModelEffectSmoke::setWindStrength(qreal windStrength)
 {
-    if(!qFuzzyCompare(_windStrength, windStrength))
+    if(qAbs(_windStrength - windStrength) > CHANGE_EPSILON)
     {
         _windStrength = windStrength;
         registerChange();

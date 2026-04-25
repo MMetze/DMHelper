@@ -1,87 +1,132 @@
 #include "publishglbattleeffectsparks.h"
 #include "battledialogmodeleffectsparks.h"
-#include "layertokens.h"
-#include "scaledpixmap.h"
 #include "dmh_opengl.h"
-#include <QOpenGLContext>
-#include <QRandomGenerator>
 #include <QtMath>
 
-static constexpr int ANIMATION_TIMER_INTERVAL_MS = 30;
-static constexpr float MS_TO_SECONDS = 1000.0f;
-static constexpr int EFFECT_GRID_SCALE_DIVISOR = 5;
-static constexpr int RADIUS_TO_DIAMETER = 2;
-static constexpr int PARTICLE_STRIDE_FLOATS = 7;  // position(3) + velocity(3) + speedVariation(1)
-static constexpr int PARTICLE_POSITION_COMPONENTS = 3;
-static constexpr int PARTICLE_VELOCITY_COMPONENTS = 3;
-static constexpr int PARTICLE_VELOCITY_OFFSET = 3;
-static constexpr int PARTICLE_SPEED_VAR_OFFSET = 6;
-static constexpr float PARTICLE_SPAWN_SPREAD = 5.0f;
-static constexpr float PARTICLE_MIN_SPEED = 0.3f;
-static constexpr float PARTICLE_SPEED_RANGE = 0.7f;
-
-// Vertex shader - particle system with gravity arcs
+// Vertex shader - standard textured quad
 static const char *sparksVertexShader = "#version 410 core\n"
     "layout (location = 0) in vec3 aPos;\n"
-    "layout (location = 1) in vec3 aVelocity;\n"
-    "layout (location = 2) in float aSpeedVar;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "layout (location = 2) in vec2 aTexCoord;\n"
     "uniform mat4 model;\n"
     "uniform mat4 view;\n"
     "uniform mat4 projection;\n"
-    "uniform float u_time;\n"
-    "uniform float u_sparkSpeed;\n"
-    "uniform float u_arcFalloff;\n"
-    "uniform float u_fadeDistance;\n"
-    "uniform vec2 u_windVec;\n"
-    "uniform float u_glowRadius;\n"
-    "out float vAlpha;\n"
+    "out vec2 TexCoord;\n"
     "void main()\n"
     "{\n"
-    "   float speed = u_sparkSpeed * (0.5 + aSpeedVar);\n"
-    "   float lifetime = 2.0;\n"
-    "   float t = mod(u_time * speed, lifetime);\n"
-    "   float phase = t / lifetime;\n"
-    "\n"
-    "   vec3 pos = aPos;\n"
-    "   pos.xy += aVelocity.xy * t * 200.0;\n"
-    "\n"
-    "   // Wind offset\n"
-    "   pos.xy += u_windVec * t * 200.0;\n"
-    "\n"
-    "   // Gravity arc (particles fall back down as seen from above: spread outward then slow)\n"
-    "   if(u_arcFalloff > 0.5) {\n"
-    "       float gravity = t * t * 50.0;\n"
-    "       pos.xy += aVelocity.xy * gravity * 0.5;\n"
-    "   }\n"
-    "\n"
-    "   gl_Position = projection * view * model * vec4(pos, 1.0);\n"
-    "   gl_PointSize = max(2.0, u_glowRadius * 20.0 * (1.0 - phase));\n"
-    "\n"
-    "   // Fade over distance/lifetime\n"
-    "   vAlpha = 1.0;\n"
-    "   if(u_fadeDistance > 0.5) {\n"
-    "       vAlpha = 1.0 - phase;\n"
-    "   }\n"
+    "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+    "   TexCoord = aTexCoord;\n"
     "}\0";
 
-// Fragment shader - glowing point
+// Fragment shader - procedural sparks on a quad (robust fallback vs point sprites)
 static const char *sparksFragmentShader = "#version 410 core\n"
     "out vec4 FragColor;\n"
-    "in float vAlpha;\n"
+    "in vec2 TexCoord;\n"
     "uniform float alpha;\n"
+    "uniform float u_time;\n"
     "uniform vec4 u_color;\n"
+    "uniform float u_size;\n"
+    "uniform float u_glowRadius;\n"
     "uniform float u_glowOpacity;\n"
+    "uniform float u_arcFalloff;\n"
+    "uniform float u_fadeDistance;\n"
+    "uniform float u_sparkSpeed;\n"
+    "uniform vec2 u_windVec;\n"
+    "uniform float u_particleCount;\n"
+    "\n"
+    "float hash11(float p) {\n"
+    "    return fract(sin(p * 127.1) * 43758.5453123);\n"
+    "}\n"
+    "\n"
     "void main() {\n"
-    "   vec2 coord = gl_PointCoord - vec2(0.5);\n"
-    "   float dist = length(coord) * 2.0;\n"
-    "   if(dist > 1.0) discard;\n"
+    "    vec2 uv = (TexCoord - 0.5) * 2.0;\n"
+    "    float distFromCenter = length(uv);\n"
+    "    // Loose cull so individual sparks can clearly travel past the nominal radius.\n"
+    "    if(distFromCenter > 1.45) discard;\n"
     "\n"
-    "   // Radial glow falloff\n"
-    "   float glow = 1.0 - dist;\n"
-    "   glow = pow(glow, 2.0);\n"
+    "    const int MAX_SPARKS = 64;\n"
+    "    float sparkCount = clamp(u_particleCount, 8.0, float(MAX_SPARKS));\n"
+    "    float speed = max(u_sparkSpeed, 0.05);\n"
+    "    float sparkSize = 0.012 + u_glowRadius * 0.085;\n"
+    "    // Forge preset uses arcFalloff; lift the cap so sparks fling outside the nominal radius.\n"
+    "    float radialCap = (u_arcFalloff > 0.5) ? 1.10 : 0.90;\n"
     "\n"
-    "   float finalAlpha = glow * vAlpha * u_glowOpacity * alpha;\n"
-    "   FragColor = vec4(u_color.rgb, finalAlpha);\n"
+    "    float accum = 0.0;\n"
+    "\n"
+    "    for(int i = 0; i < MAX_SPARKS; ++i) {\n"
+    "        if(float(i) >= sparkCount)\n"
+    "            break;\n"
+    "\n"
+    "        float fi = float(i) + 1.0;\n"
+    "        float seedA = hash11(fi * 3.17);\n"
+    "        float seedB = hash11(fi * 7.13);\n"
+    "        float seedC = hash11(fi * 11.91);\n"
+    "\n"
+    "        float phase = fract(seedC + u_time * (0.20 + speed * (0.55 + seedA)));\n"
+    "        float angle = seedA * 6.2831853;\n"
+    "        vec2 dir = vec2(cos(angle), sin(angle));\n"
+    "        float spawnRadius = 0.015 + seedB * 0.04;\n"
+    "        float radial = phase;\n"
+    "\n"
+    "        if(u_arcFalloff > 0.5)\n"
+    "            radial = radial * radial;\n"
+    "\n"
+    "        float ejectPhase = radial;\n"
+    "        float skidPhase = smoothstep(0.42, 1.0, radial);\n"
+    "        if(u_arcFalloff > 0.5)\n"
+    "            ejectPhase = radial * radial;\n"
+    "\n"
+    "        float burstTravel = mix(spawnRadius, radialCap * 0.95, ejectPhase);\n"
+    "        float skidTravel = skidPhase * skidPhase * (0.10 + speed * 0.30) * (0.55 + seedC * 0.85);\n"
+    "        vec2 sparkPos = dir * (burstTravel + skidTravel);\n"
+    "\n"
+    "        // Wind bends particle motion without moving the emitter itself.\n"
+    "        float windAmount = radial * (0.35 + seedB * 0.55);\n"
+    "        sparkPos += u_windVec * windAmount;\n"
+    "\n"
+    "        // In top-down view, forge-style sparks should skid on the ground plane, not fall toward screen-bottom.\n"
+    "        vec2 tangent = vec2(-dir.y, dir.x);\n"
+    "        float scatter = (seedB - 0.5) * (0.02 + speed * 0.05);\n"
+    "        sparkPos += tangent * scatter * (1.0 - skidPhase * 0.65);\n"
+    "\n"
+    "        // Pseudo-perspective arc: forge sparks fly off a tilted anvil. Squash Y to imply a low camera tilt,\n"
+    "        // then add a parabolic hop along the spark's flight direction so each particle traces an arc.\n"
+    "        if(u_arcFalloff > 0.5) {\n"
+    "            // Foreshorten Y to fake a ~30 degree pitch.\n"
+    "            sparkPos.y *= 0.62;\n"
+    "            // Parabolic hop: peaks mid-flight, lands at end. Sign biases sparks 'upward' on screen (toward -Y).\n"
+    "            float hop = 4.0 * radial * (1.0 - radial); // 0..1, peaks at radial=0.5\n"
+    "            float hopHeight = (0.18 + speed * 0.30) * (0.65 + seedA * 0.70);\n"
+    "            // Apex offset is screen-up plus a touch along the launch direction so the arc reads visually.\n"
+    "            sparkPos += vec2(dir.x * hop * hopHeight * 0.25, -hop * hopHeight);\n"
+    "        }\n"
+    "\n"
+    "        float d = length(uv - sparkPos);\n"
+    "        float core = exp(-d * d / max(0.0005, sparkSize * sparkSize));\n"
+    "\n"
+    "        float life = 1.0 - radial;\n"
+    "        life *= 1.0 - skidPhase * 0.25;\n"
+    "        if(u_fadeDistance <= 0.5)\n"
+    "            life = 0.6 + 0.4 * life;\n"
+    "\n"
+    "        // Forge sparks dim slightly as they descend past the arc apex.\n"
+    "        if(u_arcFalloff > 0.5) {\n"
+    "            float arcDescend = 1.0 - smoothstep(0.55, 1.0, radial) * 0.35;\n"
+    "            life *= arcDescend;\n"
+    "        }\n"
+    "\n"
+    "        accum += core * life;\n"
+    "    }\n"
+    "\n"
+    "    // Keep center subtly hotter to read as a spark cluster at distance\n"
+    "    accum += exp(-distFromCenter * distFromCenter / 0.2) * 0.2;\n"
+    "\n"
+    "    float edgeFade = 1.0 - smoothstep(1.10, 1.45, distFromCenter);\n"
+    "    float finalAlpha = clamp(accum * edgeFade * u_glowOpacity * u_color.a * alpha, 0.0, 1.0);\n"
+    "    if(finalAlpha < 0.01) discard;\n"
+    "\n"
+    "    vec3 finalColor = u_color.rgb * (0.7 + clamp(accum, 0.0, 1.0) * 0.9);\n"
+    "    FragColor = vec4(finalColor, finalAlpha);\n"
     "}\n";
 
 PublishGLBattleEffectSparks::PublishGLBattleEffectSparks(PublishGLScene* scene, BattleDialogModelEffectSparks* effect) :
@@ -92,6 +137,7 @@ PublishGLBattleEffectSparks::PublishGLBattleEffectSparks(PublishGLScene* scene, 
     _shaderFadeDistance(0),
     _shaderSparkSpeed(0),
     _shaderWindVec(0),
+    _shaderParticleCount(0),
     _particleCount(0),
     _objectsDirty(false)
 {
@@ -101,6 +147,12 @@ PublishGLBattleEffectSparks::~PublishGLBattleEffectSparks()
 {
 }
 
+qreal PublishGLBattleEffectSparks::getExtentMultiplier() const
+{
+    static constexpr qreal SPARKS_EXTENT_MULTIPLIER = 2.10;
+    return SPARKS_EXTENT_MULTIPLIER;
+}
+
 void PublishGLBattleEffectSparks::cleanup()
 {
     PublishGLBattleEffectAnimated::cleanup();
@@ -108,72 +160,20 @@ void PublishGLBattleEffectSparks::cleanup()
 
 void PublishGLBattleEffectSparks::prepareObjectsGL()
 {
-    if((!QOpenGLContext::currentContext()) || (!_effect))
-        return;
-
-    createShadersGL();
-    createParticleGeometry();
-
-    PublishGLBattleEffect::effectMoved();
-
-    _animationTimer.start(ANIMATION_TIMER_INTERVAL_MS, this);
+    PublishGLBattleEffectAnimated::prepareObjectsGL();
 }
 
 void PublishGLBattleEffectSparks::paintGL(QOpenGLFunctions* functions, const GLfloat* projectionMatrix)
 {
-    Q_UNUSED(projectionMatrix);
-
-    if((!QOpenGLContext::currentContext()) || (!functions) || (!_effect))
+    if(!functions)
         return;
 
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if(!e)
-        return;
+    functions->glEnable(GL_BLEND);
+    functions->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    LayerTokens* tokensLayer = dynamic_cast<LayerTokens*>(_effect->getLayer());
-    if(!tokensLayer)
-        return;
+    PublishGLBattleEffectAnimated::paintGL(functions, projectionMatrix);
 
-    BattleDialogModelEffectSparks* sparksEffect = dynamic_cast<BattleDialogModelEffectSparks*>(_effect);
-    if(!sparksEffect)
-        return;
-
-    if(_recreateEffect || _objectsDirty || (sparksEffect->getParticleCount() != _particleCount))
-    {
-        _recreateEffect = false;
-        _objectsDirty = false;
-        cleanup();
-        prepareObjectsGL();
-    }
-    else if((!_VAO) || (!_shaderProgram))
-    {
-        prepareObjectsGL();
-    }
-
-    DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
-    functions->glUseProgram(_shaderProgram);
-    DMH_DEBUG_OPENGL_glUniformMatrix4fv4(_shaderProjectionMatrix, 1, GL_FALSE, projectionMatrix);
-    functions->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, projectionMatrix);
-
-    QMatrix4x4 localMatrix = getMatrix();
-    localMatrix.translate(tokensLayer->getPosition().x(), tokensLayer->getPosition().y());
-    DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, localMatrix.constData(), localMatrix);
-    functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, localMatrix.constData());
-    DMH_DEBUG_OPENGL_glUniform1f(_shaderAlpha, getEffectAlpha() * tokensLayer->getOpacity());
-    functions->glUniform1f(_shaderAlpha, getEffectAlpha() * tokensLayer->getOpacity());
-
-    float timeSeconds = static_cast<float>(_milliseconds) / MS_TO_SECONDS;
-    functions->glUniform1f(_shaderTime, timeSeconds);
-
-    QColor c = _effect->getColor();
-    functions->glUniform4f(_shaderColor, c.redF(), c.greenF(), c.blueF(), c.alphaF());
-
-    setEffectUniforms(functions);
-
-    functions->glEnable(GL_PROGRAM_POINT_SIZE);
-    e->glBindVertexArray(_VAO);
-    functions->glDrawArrays(GL_POINTS, 0, _particleCount);
-    functions->glDisable(GL_PROGRAM_POINT_SIZE);
+    functions->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 const char* PublishGLBattleEffectSparks::getVertexShaderSource() const
@@ -194,6 +194,7 @@ void PublishGLBattleEffectSparks::getEffectUniformLocations(QOpenGLFunctions* f)
     _shaderFadeDistance = f->glGetUniformLocation(_shaderProgram, "u_fadeDistance");
     _shaderSparkSpeed = f->glGetUniformLocation(_shaderProgram, "u_sparkSpeed");
     _shaderWindVec = f->glGetUniformLocation(_shaderProgram, "u_windVec");
+    _shaderParticleCount = f->glGetUniformLocation(_shaderProgram, "u_particleCount");
 }
 
 void PublishGLBattleEffectSparks::setEffectUniforms(QOpenGLFunctions* f)
@@ -207,6 +208,7 @@ void PublishGLBattleEffectSparks::setEffectUniforms(QOpenGLFunctions* f)
     f->glUniform1f(_shaderArcFalloff, sparksEffect->getArcFalloff() ? 1.0f : 0.0f);
     f->glUniform1f(_shaderFadeDistance, sparksEffect->getFadeDistance() ? 1.0f : 0.0f);
     f->glUniform1f(_shaderSparkSpeed, static_cast<float>(sparksEffect->getSparkSpeed()));
+    f->glUniform1f(_shaderParticleCount, static_cast<float>(sparksEffect->getParticleCount()));
 
     qreal dir = qDegreesToRadians(sparksEffect->getWindDirection());
     qreal str = sparksEffect->getWindStrength();
@@ -215,57 +217,5 @@ void PublishGLBattleEffectSparks::setEffectUniforms(QOpenGLFunctions* f)
 
 void PublishGLBattleEffectSparks::createParticleGeometry()
 {
-    BattleDialogModelEffectSparks* sparksEffect = dynamic_cast<BattleDialogModelEffectSparks*>(_effect);
-    if(!sparksEffect)
-        return;
-
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
-        return;
-
-    _particleCount = sparksEffect->getParticleCount();
-    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / EFFECT_GRID_SCALE_DIVISOR;
-    _textureSize = QSizeF(effectSize * RADIUS_TO_DIAMETER, effectSize * RADIUS_TO_DIAMETER);
-
-    // Per-particle data: position(3) + velocity(3) + speedVariation(1)
-    QVector<float> vertexData;
-    vertexData.resize(_particleCount * PARTICLE_STRIDE_FLOATS);
-
-    QRandomGenerator* rng = QRandomGenerator::global();
-    for(int i = 0; i < _particleCount; ++i)
-    {
-        int offset = i * PARTICLE_STRIDE_FLOATS;
-        // Start position: near center with small random offset
-        vertexData[offset + 0] = (rng->bounded(2.0) - 1.0) * PARTICLE_SPAWN_SPREAD;  // x
-        vertexData[offset + 1] = (rng->bounded(2.0) - 1.0) * PARTICLE_SPAWN_SPREAD;  // y
-        vertexData[offset + 2] = 0.0f;                                // z
-
-        // Random velocity direction (radial outward)
-        float angle = rng->bounded(static_cast<float>(2.0 * M_PI));
-        float speed = PARTICLE_MIN_SPEED + rng->bounded(PARTICLE_SPEED_RANGE);
-        vertexData[offset + 3] = qCos(angle) * speed;  // vx
-        vertexData[offset + 4] = qSin(angle) * speed;  // vy
-        vertexData[offset + 5] = 0.0f;                  // vz
-
-        // Speed variation
-        vertexData[offset + 6] = rng->bounded(1.0f);
-    }
-
-    e->glGenVertexArrays(1, &_VAO);
-    f->glGenBuffers(1, &_VBO);
-
-    e->glBindVertexArray(_VAO);
-    f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.constData(), GL_STATIC_DRAW);
-
-    // position attribute (location 0)
-    f->glVertexAttribPointer(0, PARTICLE_POSITION_COMPONENTS, GL_FLOAT, GL_FALSE, PARTICLE_STRIDE_FLOATS * sizeof(float), (void*)0);
-    f->glEnableVertexAttribArray(0);
-    // velocity attribute (location 1)
-    f->glVertexAttribPointer(1, PARTICLE_VELOCITY_COMPONENTS, GL_FLOAT, GL_FALSE, PARTICLE_STRIDE_FLOATS * sizeof(float), (void*)(PARTICLE_VELOCITY_OFFSET * sizeof(float)));
-    f->glEnableVertexAttribArray(1);
-    // speed variation attribute (location 2)
-    f->glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, PARTICLE_STRIDE_FLOATS * sizeof(float), (void*)(PARTICLE_SPEED_VAR_OFFSET * sizeof(float)));
-    f->glEnableVertexAttribArray(2);
+    // Retained for compatibility; sparks now render procedurally on a quad.
 }

@@ -246,6 +246,7 @@ void PublishGLBattleEffectAnimated::createQuadGL()
 
     int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / EFFECT_GRID_SCALE_DIVISOR;
     effectSize *= RADIUS_TO_DIAMETER; // These effects use radius → diameter like radius effects
+    effectSize = qMax(1, static_cast<int>(effectSize * getExtentMultiplier()));
 
     _textureSize = QSizeF(effectSize, effectSize);
 
@@ -290,4 +291,9 @@ void PublishGLBattleEffectAnimated::createQuadGL()
 void PublishGLBattleEffectAnimated::getEffectUniformLocations(QOpenGLFunctions* f)
 {
     Q_UNUSED(f);
+}
+
+qreal PublishGLBattleEffectAnimated::getExtentMultiplier() const
+{
+    return 1.0;
 }

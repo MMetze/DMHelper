@@ -33,6 +33,7 @@ protected:
 
     virtual const char* getVertexShaderSource() const = 0;
     virtual const char* getFragmentShaderSource() const = 0;
+    virtual qreal getExtentMultiplier() const;
     virtual void getEffectUniformLocations(QOpenGLFunctions* f);
     virtual void setEffectUniforms(QOpenGLFunctions* f) = 0;
 

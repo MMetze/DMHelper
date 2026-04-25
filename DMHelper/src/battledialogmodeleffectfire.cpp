@@ -4,6 +4,7 @@
 #include <QDomElement>
 #include <QPainter>
 #include <QLinearGradient>
+#include <QtMath>
 
 static constexpr qreal DEFAULT_INTENSITY = 0.5;
 static const QColor DEFAULT_DARK_COLOR(180, 30, 0, 220);
@@ -11,6 +12,7 @@ static const QColor DEFAULT_LIGHT_COLOR(255, 200, 50, 200);
 static constexpr qreal DEFAULT_FLICKER_SPEED = 0.5;
 static constexpr int PREVIEW_PIXMAP_SIZE = 200;
 static constexpr qreal GRADIENT_DARK_STOP = 0.6;
+static constexpr qreal CHANGE_EPSILON = 0.0001;
 
 BattleDialogModelEffectFire::BattleDialogModelEffectFire(const QString& name, QObject *parent) :
     BattleDialogModelEffect(name, parent),
@@ -19,6 +21,7 @@ BattleDialogModelEffectFire::BattleDialogModelEffectFire(const QString& name, QO
     _lightColor(DEFAULT_LIGHT_COLOR),
     _flickerSpeed(DEFAULT_FLICKER_SPEED)
 {
+    _active = false;
 }
 
 BattleDialogModelEffectFire::BattleDialogModelEffectFire(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
@@ -28,6 +31,7 @@ BattleDialogModelEffectFire::BattleDialogModelEffectFire(int size, const QPointF
     _lightColor(DEFAULT_LIGHT_COLOR),
     _flickerSpeed(DEFAULT_FLICKER_SPEED)
 {
+    _active = false;
 }
 
 BattleDialogModelEffectFire::~BattleDialogModelEffectFire()
@@ -111,6 +115,7 @@ QGraphicsItem* BattleDialogModelEffectFire::createEffectShape(qreal gridScale)
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
     applyEffectValues(*pixmapItem, gridScale);
+    pixmapItem->setOpacity(_color.alphaF());
 
     return pixmapItem;
 }
@@ -122,7 +127,7 @@ qreal BattleDialogModelEffectFire::getIntensity() const
 
 void BattleDialogModelEffectFire::setIntensity(qreal intensity)
 {
-    if(!qFuzzyCompare(_intensity, intensity))
+    if(qAbs(_intensity - intensity) > CHANGE_EPSILON)
     {
         _intensity = intensity;
         registerChange();
@@ -164,7 +169,7 @@ qreal BattleDialogModelEffectFire::getFlickerSpeed() const
 
 void BattleDialogModelEffectFire::setFlickerSpeed(qreal flickerSpeed)
 {
-    if(!qFuzzyCompare(_flickerSpeed, flickerSpeed))
+    if(qAbs(_flickerSpeed - flickerSpeed) > CHANGE_EPSILON)
     {
         _flickerSpeed = flickerSpeed;
         registerChange();
