@@ -90,7 +90,6 @@ public:
     bool getShowDead() const;
     bool getShowEffects() const;
     bool getShowMovement() const;
-    bool getShowLairActions() const;
     int getCombatantTokenType() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
@@ -108,7 +107,6 @@ public slots:
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
     void setShowMovement(bool showMovement);
-    void setShowLairActions(bool showLairActions);
     void setCombatantTokenType(int combatantTokenType);
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setBackgroundImage(QImage backgroundImage);
@@ -124,7 +122,6 @@ signals:
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
     void showMovementChanged(bool showMovement);
-    void showLairActionsChanged(bool showLairActions);
     void combatantListChanged();
     void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
@@ -180,7 +177,6 @@ private:
     bool _showDead;
     bool _showEffects;
     bool _showMovement;
-    bool _showLairActions;
     int _combatantTokenType;
 
     BattleDialogModelCombatant* _activeCombatant;

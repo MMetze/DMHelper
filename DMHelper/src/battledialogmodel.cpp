@@ -30,7 +30,6 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _showDead(false),
     _showEffects(true),
     _showMovement(true),
-    _showLairActions(false),
     _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _activeCombatant(nullptr),
     _logger(),
@@ -70,7 +69,10 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showDead = static_cast<bool>(element.attribute("showDead", QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects", QString::number(1)).toInt());
     _showMovement = static_cast<bool>(element.attribute("showMovement", QString::number(1)).toInt());
-    _showLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
+
+    // Backwards compatibility: legacy battles persisted a showLairActions flag.
+    // Convert it to a synthetic "Lair Actions" initiative event at init 20.
+    const bool legacyShowLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 
@@ -105,6 +107,23 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             appendInitiativeEvent(event);
             eventElement = eventElement.nextSiblingElement("initiativeevent");
         }
+    }
+
+    // Migrate legacy showLairActions flag → synthetic "Lair Actions" event at
+    // initiative 20. Skip if such an event was already loaded above.
+    if(legacyShowLairActions)
+    {
+        bool alreadyHasLairActions = false;
+        for(BattleDialogModelInitiativeEvent* event : std::as_const(_initiativeEvents))
+        {
+            if((event) && (event->getName() == QStringLiteral("Lair Actions")))
+            {
+                alreadyHasLairActions = true;
+                break;
+            }
+        }
+        if(!alreadyHasLairActions)
+            appendInitiativeEvent(new BattleDialogModelInitiativeEvent(QStringLiteral("Lair Actions"), 20, this));
     }
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
@@ -245,7 +264,6 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
     _showDead = otherModel->_showDead;
     _showEffects = otherModel->_showEffects;
     _showMovement = otherModel->_showMovement;
-    _showLairActions = otherModel->_showLairActions;
 
     _logger = otherModel->_logger;
 
@@ -794,11 +812,6 @@ bool BattleDialogModel::getShowMovement() const
     return _showMovement;
 }
 
-bool BattleDialogModel::getShowLairActions() const
-{
-    return _showLairActions;
-}
-
 int BattleDialogModel::getCombatantTokenType() const
 {
     return _combatantTokenType;
@@ -928,16 +941,6 @@ void BattleDialogModel::setShowMovement(bool showMovement)
     {
         _showMovement = showMovement;
         emit showMovementChanged(_showMovement);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setShowLairActions(bool showLairActions)
-{
-    if(_showLairActions != showLairActions)
-    {
-        _showLairActions = showLairActions;
-        emit showLairActionsChanged(_showLairActions);
         emit dirty();
     }
 }
@@ -1139,7 +1142,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);
     element.setAttribute("showMovement", _showMovement);
-    element.setAttribute("showLairActions", _showLairActions);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
