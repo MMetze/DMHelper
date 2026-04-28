@@ -62,7 +62,6 @@ set(DMHELPER_SOURCES
     audiotrackyoutube.cpp
     basicdate.cpp
     basicdateserver.cpp
-    battlecombatantframe.cpp
     battlecombatantwidget.cpp
     battledialogeffectsettings.cpp
     battledialogeffectsettingsbase.cpp
@@ -84,6 +83,7 @@ set(DMHELPER_SOURCES
     battledialogmodelcharacter.cpp
     battledialogmodelcombatant.cpp
     battledialogmodelcombatantgroup.cpp
+    battledialogmodelinitiativeevent.cpp
     battledialogmodeleffect.cpp
     battledialogmodeleffectcone.cpp
     battledialogmodeleffectcube.cpp
@@ -185,6 +185,7 @@ set(DMHELPER_SOURCES
     helpdialog.cpp
     initiativelistcombatantwidget.cpp
     initiativelistdialog.cpp
+    initiativeeventwidget.cpp
     itemselectdialog.cpp
     layer.cpp
     layerblank.cpp
@@ -405,7 +406,6 @@ set(DMHELPER_HEADERS
     audiotrackyoutube.h
     basicdate.h
     basicdateserver.h
-    battlecombatantframe.h
     battlecombatantwidget.h
     battledialogeffectsettings.h
     battledialogeffectsettingsbase.h
@@ -427,6 +427,7 @@ set(DMHELPER_HEADERS
     battledialogmodelcharacter.h
     battledialogmodelcombatant.h
     battledialogmodelcombatantgroup.h
+    battledialogmodelinitiativeevent.h
     battledialogmodeleffect.h
     battledialogmodeleffectcone.h
     battledialogmodeleffectcube.h
@@ -530,6 +531,7 @@ set(DMHELPER_HEADERS
     helpdialog.h
     initiativelistcombatantwidget.h
     initiativelistdialog.h
+    initiativeeventwidget.h
     itemselectdialog.h
     layer.h
     layerblank.h
@@ -723,7 +725,6 @@ set(DMHELPER_FORMS
     aboutdialog.ui
     audioplaybackframe.ui
     audiotrackedit.ui
-    battlecombatantframe.ui
     battlecombatantwidget.ui
     battledialogeffectsettings.ui
     battledialogeffectsettingsfire.ui
@@ -764,6 +765,7 @@ set(DMHELPER_FORMS
     helpdialog.ui
     initiativelistcombatantwidget.ui
     initiativelistdialog.ui
+    initiativeeventwidget.ui
     itemselectdialog.ui
     layerdrawtooldialog.ui
     layereffectsettings.ui

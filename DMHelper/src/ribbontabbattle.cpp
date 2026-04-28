@@ -18,7 +18,8 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnShowDead, SIGNAL(clicked(bool)), this, SIGNAL(showDeadClicked(bool)));
     connect(ui->btnShowEffects, SIGNAL(clicked(bool)), this, SIGNAL(showEffectsClicked(bool)));
     connect(ui->btnShowMovement, SIGNAL(clicked(bool)), this, SIGNAL(showMovementClicked(bool)));
-    connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked(bool)));
+    connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked()));
+    connect(ui->btnAddEvent, SIGNAL(clicked(bool)), this, SIGNAL(addEventClicked()));
     connect(ui->btnStatistics, SIGNAL(clicked(bool)), this, SIGNAL(statisticsClicked()));
 
     QMenu* effectMenu = new QMenu(this);
@@ -85,11 +86,6 @@ void RibbonTabBattle::setShowMovement(bool checked)
     ui->btnShowMovement->setChecked(checked);
 }
 
-void RibbonTabBattle::setLairActions(bool checked)
-{
-    ui->btnLairActions->setChecked(checked);
-}
-
 void RibbonTabBattle::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
@@ -112,6 +108,7 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblShowEffects, *ui->btnShowEffects, frameHeight);
     setStandardButtonSize(*ui->lblShowMovement, *ui->btnShowMovement, frameHeight);
     setStandardButtonSize(*ui->lblLairActions, *ui->btnLairActions, frameHeight);
+    setStandardButtonSize(*ui->lblAddEvent, *ui->btnAddEvent, frameHeight);
     setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblStatistics, *ui->btnStatistics, frameHeight);
 }

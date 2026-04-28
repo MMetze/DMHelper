@@ -577,6 +577,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addEffectSparksClicked()), _battleFrame, SLOT(addEffectSparks()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLightClicked()), _battleFrame, SLOT(addEffectLight()));
     connect(_ribbonTabBattle, SIGNAL(duplicateClicked()), _battleFrame, SLOT(duplicateSelection()));
+    connect(_ribbonTabBattle, SIGNAL(lairActionsClicked()), _battleFrame, SLOT(addLairActionsEvent()));
+    connect(_ribbonTabBattle, SIGNAL(addEventClicked()), _battleFrame, SLOT(addInitiativeEvent()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "New Entry")), this);
@@ -3037,12 +3039,10 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
-        _ribbonTabBattle->setLairActions(model->getShowLairActions());
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
-        connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
         Layer* selectedLayer = model->getLayerScene().getSelectedLayer();
         LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));

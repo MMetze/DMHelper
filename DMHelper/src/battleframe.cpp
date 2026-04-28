@@ -1,6 +1,8 @@
 #include "battleframe.h"
 #include "ui_battleframe.h"
 #include "combatanttemplateframe.h"
+#include "initiativeeventwidget.h"
+#include "battledialogmodelinitiativeevent.h"
 #include "monsterclassv2.h"
 #include "dmconstants.h"
 #include "spellbook.h"
@@ -22,7 +24,6 @@
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogeffectsettingsbase.h"
 #include "battledialoggraphicsscene.h"
-#include "battlecombatantframe.h"
 #include "combatantgroupwidget.h"
 #include "battledialogmodelcombatantgroup.h"
 #include "itemselectdialog.h"
@@ -262,9 +263,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     setEditMode();
 
-    // CombatantFrame
-    connect(ui->frameCombatant, &BattleCombatantFrame::conditionsChanged, this, &BattleFrame::updateCombatantWidget);
-    connect(ui->frameCombatant, &BattleCombatantFrame::conditionsChanged, this, &BattleFrame::updateCombatantIcon);
+    // CombatantFrame side panel removed — conditions now editable inline via
+    // CombatantTemplateFrame's right-click context menu.
 
     // State Machine
     connect(&_stateMachine, SIGNAL(enterState(BattleFrameState*)), this, SLOT(stateUpdated()));
@@ -335,7 +335,6 @@ void BattleFrame::deactivateObject()
     rendererDeactivated();
     cancelSelect();
 
-    ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
 }
 
@@ -604,22 +603,18 @@ void BattleFrame::next()
         return;
     }
 
-    if(_model->getShowLairActions())
-    {
-        int activeInitiative = activeCombatant->getInitiative();
-        int nextInitiative = nextCombatant->getInitiative();
-
-        if((activeInitiative >= 20) && (nextInitiative < 20))
-        {
-            qDebug() << "[Battle Frame] Triggering Lair Action request.";
-            QMessageBox::information(this, QString("Lair Action"), QString("The legendary creature(s) can now use one of their lair action options. It cannot do so while incapacitated, surprised or otherwise unable to take actions."));
-        }
-    }
-
     if(_model->getCombatantIndex(nextCombatant) <= _model->getCombatantIndex(activeCombatant))
         newRound();
 
     setActiveCombatant(nextCombatant);
+
+    // If the new active combatant is an initiative event, announce it.
+    if(BattleDialogModelInitiativeEvent* event = dynamic_cast<BattleDialogModelInitiativeEvent*>(nextCombatant))
+    {
+        const QString eventName = event->getName().isEmpty() ? QStringLiteral("Event") : event->getName();
+        QMessageBox::information(this, eventName, QString("%1 triggers!").arg(eventName));
+    }
+
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
 
@@ -1271,6 +1266,48 @@ void BattleFrame::addNPC()
     }
 
     selectAddCharacter(characterList, QString("Select an NPC"), QString("Select NPC:"));
+}
+
+void BattleFrame::addInitiativeEvent()
+{
+    if(!_model)
+        return;
+
+    bool nameOk = false;
+    const QString name = QInputDialog::getText(this,
+                                               QString("Add Initiative Event"),
+                                               QString("Event name:"),
+                                               QLineEdit::Normal,
+                                               QString(),
+                                               &nameOk);
+    if((!nameOk) || (name.trimmed().isEmpty()))
+        return;
+
+    bool initOk = false;
+    const int initiative = QInputDialog::getInt(this,
+                                                QString("Add Initiative Event"),
+                                                QString("Initiative:"),
+                                                20,
+                                                -99,
+                                                99,
+                                                1,
+                                                &initOk);
+    if(!initOk)
+        return;
+
+    BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(name.trimmed(), initiative, _model);
+    _model->appendInitiativeEvent(event);
+    _model->sortCombatants();
+}
+
+void BattleFrame::addLairActionsEvent()
+{
+    if(!_model)
+        return;
+
+    BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString("Lair Actions"), 20, _model);
+    _model->appendInitiativeEvent(event);
+    _model->sortCombatants();
 }
 
 void BattleFrame::addEffectObject()
@@ -2999,8 +3036,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item, bool showMoveme
                         startMovement(combatant, item, combatant->getSpeed());
 
                     _selectedCombatant = combatant;
-                    ui->frameCombatant->setCombatant(combatant);
-                    
+
                     CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
                     if(widget)
                         ui->scrollArea->ensureWidgetVisible(widget);
@@ -3359,8 +3395,6 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
 
         if(selectedItem)
             selectedItem->setSelected(!isSelected);
-
-        ui->frameCombatant->setCombatant(selected);
     }
 }
 
@@ -3383,8 +3417,6 @@ void BattleFrame::setUniqueSelection(BattleDialogModelCombatant* selected)
             }
         }
     }
-
-    ui->frameCombatant->setCombatant(selected);
 }
 
 void BattleFrame::updateCombatantWidget(BattleDialogModelCombatant* combatant)
@@ -3397,8 +3429,6 @@ void BattleFrame::updateCombatantWidget(BattleDialogModelCombatant* combatant)
         return;
 
     widget->updateData();
-    if(ui->frameCombatant->getCombatant() == combatant)
-        ui->frameCombatant->setCombatant(combatant);
 }
 
 void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
@@ -4258,6 +4288,13 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             connect(templateFrame, &CombatantTemplateFrame::imageChanged,      this, &BattleFrame::updateCombatantIcon);
             break;
         }
+        case DMHelper::CombatantType_InitiativeEvent:
+        {
+            BattleDialogModelInitiativeEvent* event = dynamic_cast<BattleDialogModelInitiativeEvent*>(combatant);
+            if(event)
+                newWidget = new InitiativeEventWidget(event, ui->scrollAreaWidgetContents);
+            break;
+        }
         default:
             qDebug() << "[Battle Frame] Unknown combatant type found in battle! Type: " << combatant->getCombatantType() << " Name: " << combatant->getName();
             break;
@@ -4529,7 +4566,6 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
     if(active)
     {
-        ui->frameCombatant->setCombatant(active);
         active->resetMoved();
     }
 
@@ -4762,10 +4798,6 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
             _model->setActiveCombatant(nullptr);
         else
             next();
-    }
-    else if(combatant == ui->frameCombatant->getCombatant())
-    {
-        ui->frameCombatant->setCombatant(nullptr);
     }
 
     // Find the index of the removed item

@@ -136,6 +136,8 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
+    void addInitiativeEvent();
+    void addLairActionsEvent();
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
     void addEffectObjectVideo();

@@ -10,6 +10,7 @@
 #include <QPen>
 
 class BattleDialogModelCombatantGroup;
+class BattleDialogModelInitiativeEvent;
 class EncounterBattle;
 class Map;
 class LayerGrid;
@@ -47,6 +48,13 @@ public:
     void appendCombatantToList(BattleDialogModelCombatant* combatant);
     void removeCombatantFromList(BattleDialogModelCombatant* combatant);
     bool isCombatantInList(Combatant* combatant) const;
+
+    // Initiative events: synthetic combatants (e.g. lair actions) with no
+    // map presence. Owned directly by the model and merged into the
+    // combatant initiative list.
+    QList<BattleDialogModelInitiativeEvent*> getInitiativeEvents() const;
+    void appendInitiativeEvent(BattleDialogModelInitiativeEvent* event);
+    void removeInitiativeEvent(BattleDialogModelInitiativeEvent* event);
 
     // Group management
     QList<BattleDialogModelCombatantGroup*> getGroups() const;
@@ -155,6 +163,7 @@ private:
     QList<BattleDialogModelCombatant*> _combatants;
     QList<BattleDialogModelEffect*> _effects;
     QList<BattleDialogModelCombatantGroup*> _groups;
+    QList<BattleDialogModelInitiativeEvent*> _initiativeEvents;
 
     // Visualization values
     LayerScene _layerScene;

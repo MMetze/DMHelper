@@ -1,6 +1,7 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
 #include "battledialogmodelcombatantgroup.h"
+#include "battledialogmodelinitiativeevent.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "map.h"
@@ -17,6 +18,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _combatants(),
     _effects(),
     _groups(),
+    _initiativeEvents(),
     _layerScene(this),
     _map(nullptr),
     _mapRect(),
@@ -45,6 +47,7 @@ BattleDialogModel::~BattleDialogModel()
 {
     qDeleteAll(_effects);
     qDeleteAll(_groups);
+    qDeleteAll(_initiativeEvents);
     _layerScene.clearLayers();
 }
 
@@ -85,6 +88,22 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             _groups.append(group);
             connect(group, &BattleDialogModelCombatantGroup::dirty, this, &BattleDialogModel::dirty);
             groupElement = groupElement.nextSiblingElement("combatantgroup");
+        }
+    }
+
+    // Read initiative events (synthetic combatants with no map presence)
+    qDeleteAll(_initiativeEvents);
+    _initiativeEvents.clear();
+    QDomElement eventsElement = element.firstChildElement("initiativeevents");
+    if(!eventsElement.isNull())
+    {
+        QDomElement eventElement = eventsElement.firstChildElement("initiativeevent");
+        while(!eventElement.isNull())
+        {
+            BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString(), 0, this);
+            event->inputXML(eventElement, isImport);
+            appendInitiativeEvent(event);
+            eventElement = eventElement.nextSiblingElement("initiativeevent");
         }
     }
 
@@ -470,6 +489,33 @@ bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
     }
 
     return false;
+}
+
+QList<BattleDialogModelInitiativeEvent*> BattleDialogModel::getInitiativeEvents() const
+{
+    return _initiativeEvents;
+}
+
+void BattleDialogModel::appendInitiativeEvent(BattleDialogModelInitiativeEvent* event)
+{
+    if(!event)
+        return;
+
+    _initiativeEvents.append(event);
+    appendCombatantToList(event);
+}
+
+void BattleDialogModel::removeInitiativeEvent(BattleDialogModelInitiativeEvent* event)
+{
+    if(!event)
+        return;
+
+    if(_activeCombatant == event)
+        setActiveCombatant(nullptr);
+
+    _initiativeEvents.removeOne(event);
+    removeCombatantFromList(event);
+    delete event;
 }
 
 QList<BattleDialogModelCombatantGroup*> BattleDialogModel::getGroups() const
@@ -1107,6 +1153,17 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
                 groupsElement.appendChild(group->createOutputXML(doc));
         }
         element.appendChild(groupsElement);
+    }
+
+    if(!_initiativeEvents.isEmpty())
+    {
+        QDomElement eventsElement = doc.createElement("initiativeevents");
+        for(BattleDialogModelInitiativeEvent* event : _initiativeEvents)
+        {
+            if(event)
+                event->outputXML(doc, eventsElement, targetDirectory, isExport);
+        }
+        element.appendChild(eventsElement);
     }
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);

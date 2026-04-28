@@ -74,6 +74,8 @@ namespace DMHelper
         CombatantType_Character,
         CombatantType_Monster,
         CombatantType_Reference     // In-battle reference to an NPC/Character
+        ,
+        CombatantType_InitiativeEvent // Synthetic placeholder triggered at a fixed initiative count
     };
 
     enum CombatantSize
