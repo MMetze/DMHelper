@@ -16,6 +16,10 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMouseEvent>
+#include <QContextMenuEvent>
+#include <QMenu>
+#include <QAction>
+#include <QIcon>
 #include <QPixmap>
 #include <QSignalBlocker>
 #include <QDebug>
@@ -143,9 +147,95 @@ QObject* CombatantTemplateFrame::getFrameObject()
     return this;
 }
 
+bool CombatantTemplateFrame::eventFilter(QObject* watched, QEvent* event)
+{
+    if(localEventFilter(watched, event))
+        return true;
+    return CombatantWidget::eventFilter(watched, event);
+}
+
 bool CombatantTemplateFrame::localEventFilter(QObject* object, QEvent* event)
 {
+    if(event && (event->type() == QEvent::ContextMenu) && _combatant)
+    {
+        QContextMenuEvent* menuEvent = static_cast<QContextMenuEvent*>(event);
+
+        // Right-click directly on a condition icon frame
+        if(QFrame* frame = qobject_cast<QFrame*>(object))
+        {
+            const QString conditionId = frame->property(CONDITION_PROPERTY_KEY).toString();
+            if(!conditionId.isEmpty())
+            {
+                showConditionContextMenu(conditionId, menuEvent->globalPos());
+                return true;
+            }
+        }
+
+        // Right-click on the conditions scroll-area background → "Add condition"
+        if(_conditionStrip && (object == _conditionStrip->viewport()))
+        {
+            showAddConditionMenu(menuEvent->globalPos());
+            return true;
+        }
+    }
+
     return TemplateFrame::localEventFilter(object, event);
+}
+
+void CombatantTemplateFrame::showConditionContextMenu(const QString& conditionId, const QPoint& globalPos)
+{
+    if((!_combatant) || conditionId.isEmpty())
+        return;
+
+    Conditions* conditions = Conditions::activeConditions();
+    const QString title = (conditions ? conditions->getConditionTitle(conditionId) : conditionId);
+
+    QMenu menu;
+    QAction* removeAction = menu.addAction(tr("Remove %1").arg(title));
+    menu.addSeparator();
+    QAction* clearAction = menu.addAction(tr("Clear all conditions"));
+    QAction* addAction = menu.addAction(tr("Add condition..."));
+
+    QAction* chosen = menu.exec(globalPos);
+    if(chosen == removeAction)
+        _combatant->removeConditionId(conditionId);
+    else if(chosen == clearAction)
+        _combatant->clearConditions();
+    else if(chosen == addAction)
+        showAddConditionMenu(globalPos);
+}
+
+void CombatantTemplateFrame::showAddConditionMenu(const QPoint& globalPos)
+{
+    if(!_combatant)
+        return;
+
+    Conditions* conditions = Conditions::activeConditions();
+    if(!conditions)
+        return;
+
+    const QList<ConditionDefinition> definitions = conditions->getConditions();
+    if(definitions.isEmpty())
+        return;
+
+    QMenu menu;
+    QHash<QAction*, QString> actionToId;
+    for(const ConditionDefinition& def : definitions)
+    {
+        if(_combatant->hasConditionId(def.id))
+            continue;
+        const QPixmap icon = conditions->getConditionPixmap(def.id, CONDITION_ICON_SIZE);
+        QAction* action = menu.addAction(QIcon(icon), def.title.isEmpty() ? def.id : def.title);
+        action->setToolTip(def.description);
+        actionToId.insert(action, def.id);
+    }
+
+    if(actionToId.isEmpty())
+        return;
+
+    QAction* chosen = menu.exec(globalPos);
+    if(chosen && actionToId.contains(chosen))
+        _combatant->addConditionId(actionToId.value(chosen));
 }
 
 void CombatantTemplateFrame::handleResourceCountChanged(BattleDialogModelMonsterBase* monster, const QString& name, int value)
@@ -251,6 +341,12 @@ void CombatantTemplateFrame::applyConditionDecorations()
     if((!scrollArea) || (!scrollArea->widget()))
         return;
 
+    if(_conditionStrip != scrollArea)
+    {
+        _conditionStrip = scrollArea;
+        scrollArea->viewport()->installEventFilter(this);
+    }
+
     QList<QFrame*> conditionFrames = scrollArea->widget()->findChildren<QFrame*>(QString(), Qt::FindDirectChildrenOnly);
     Conditions* conditions = Conditions::activeConditions();
     for(QFrame* frame : conditionFrames)
@@ -275,6 +371,9 @@ void CombatantTemplateFrame::applyConditionDecorations()
         const QPixmap iconPixmap = conditions->getConditionPixmap(conditionId, CONDITION_ICON_SIZE);
         iconLabel->setPixmap(iconPixmap);
         iconLabel->setToolTip(conditions->getConditionTitle(conditionId) + QStringLiteral("\n") + conditions->getConditionDescription(conditionId));
+
+        frame->setContextMenuPolicy(Qt::DefaultContextMenu);
+        frame->installEventFilter(this);
     }
 }
 

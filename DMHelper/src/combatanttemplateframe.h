@@ -48,6 +48,9 @@ protected:
     // From QWidget
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
 
+    // From QObject
+    virtual bool eventFilter(QObject* watched, QEvent* event) override;
+
     // From TemplateFrame
     virtual QObject* getFrameObject() override;
     virtual bool localEventFilter(QObject* object, QEvent* event) override;
@@ -69,6 +72,10 @@ private:
     QScrollArea* findScrollArea(const QString& dmhValueKey) const;
     void connectModelSignals();
     void emitDoubleClickSignal();
+    void showConditionContextMenu(const QString& conditionId, const QPoint& globalPos);
+    void showAddConditionMenu(const QPoint& globalPos);
+
+    QPointer<QScrollArea> _conditionStrip;
 
     BattleDialogModelCombatant* _combatant;
     CombatantTemplateAdapter* _adapter;
