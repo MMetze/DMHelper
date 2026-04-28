@@ -3,7 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "bestiarytemplatedialog.h"
-#include "spellbookdialog.h"
+#include "spellbooktemplatedialog.h"
 #include "dmconstants.h"
 #include "optionscontainer.h"
 #include "campaigntreeactivestack.h"
@@ -250,7 +250,7 @@ private:
     OptionsContainer* _options;
 
     BestiaryTemplateDialog _bestiaryDlg;
-    SpellbookDialog _spellDlg;
+    SpellbookTemplateDialog _spellDlg;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;

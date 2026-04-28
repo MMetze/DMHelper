@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="spell.xsd">
+
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:integer" name="level" default="0"/>
+    <dmh:attribute type="dmh:string" name="school"/>
+    <dmh:attribute type="dmh:string" name="time" default="1 action"/>
+    <dmh:attribute type="dmh:string" name="range"/>
+    <dmh:attribute type="dmh:string" name="components"/>
+    <dmh:attribute type="dmh:string" name="duration"/>
+    <dmh:attribute type="dmh:string" name="classes"/>
+    <dmh:attribute type="dmh:boolean" name="ritual"/>
+
+    <dmh:element type="dmh:html" name="description"/>
+
+    <dmh:attribute type="dmh:string" name="rolls"/>
+
+    <dmh:attribute type="dmh:integer" name="effect_type" default="0"/>
+    <dmh:attribute type="dmh:boolean" name="effect_shape_active" default="1"/>
+    <dmh:attribute type="dmh:integer" name="effect_size_w" default="20"/>
+    <dmh:attribute type="dmh:integer" name="effect_size_h" default="20"/>
+    <dmh:attribute type="dmh:string" name="effect_color" default="#40731200"/>
+    <dmh:attribute type="dmh:string" name="effect_token"/>
+    <dmh:attribute type="dmh:integer" name="effect_token_rotation" default="0"/>
+    <dmh:attribute type="dmh:string" name="effect_conditions"/>
+
+</dmh:template>

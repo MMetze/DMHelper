@@ -74,6 +74,7 @@ set(DMHELPER_SOURCES
     battledialogevent.cpp
     battledialogeventdamage.cpp
     battledialogeventnewround.cpp
+    battledialogeventresetresources.cpp
     battledialoggraphicsscene.cpp
     battledialoggraphicsscenemousehandler.cpp
     battledialoggraphicsview.cpp
@@ -258,6 +259,7 @@ set(DMHELPER_SOURCES
     partycharactergridframe.cpp
     partyframe.cpp
     partyframecharacter.cpp
+    perroundresource.cpp
     placeholder.cpp
     popup.cpp
     popupaudio.cpp
@@ -331,12 +333,17 @@ set(DMHELPER_SOURCES
     soundboardtrackframe.cpp
     spell.cpp
     spellbook.cpp
-    spellbookdialog.cpp
+    spellbooktemplatedialog.cpp
+    spellbookfactory.cpp
     spellslotlevelbutton.cpp
     spellslotradiobutton.cpp
+    spellv2.cpp
+    spellv2converter.cpp
     templatefactory.cpp
     templateframe.cpp
     templateobject.cpp
+    templateobjectnotifier.cpp
+    templatefieldformat.cpp
     templateresourcelayout.cpp
     textbrowsermargins.cpp
     texteditformatterframe.cpp
@@ -413,6 +420,7 @@ set(DMHELPER_HEADERS
     battledialogevent.h
     battledialogeventdamage.h
     battledialogeventnewround.h
+    battledialogeventresetresources.h
     battledialoggraphicsscene.h
     battledialoggraphicsscenemousehandler.h
     battledialoggraphicsview.h
@@ -599,6 +607,7 @@ set(DMHELPER_HEADERS
     partycharactergridframe.h
     partyframe.h
     partyframecharacter.h
+    perroundresource.h
     placeholder.h
     popup.h
     popupaudio.h
@@ -672,12 +681,17 @@ set(DMHELPER_HEADERS
     soundboardtrackframe.h
     spell.h
     spellbook.h
-    spellbookdialog.h
+    spellbooktemplatedialog.h
+    spellbookfactory.h
     spellslotlevelbutton.h
     spellslotradiobutton.h
+    spellv2.h
+    spellv2converter.h
     templatefactory.h
     templateframe.h
     templateobject.h
+    templateobjectnotifier.h
+    templatefieldformat.h
     templateresourcelayout.h
     textbrowsermargins.h
     texteditformatterframe.h
@@ -810,7 +824,7 @@ set(DMHELPER_FORMS
     soundboardframe.ui
     soundboardgroupframe.ui
     soundboardtrackframe.ui
-    spellbookdialog.ui
+    spellbooktemplatedialog.ui
     textpublishdialog.ui
     texttranslatedialog.ui
     timeanddateframe.ui

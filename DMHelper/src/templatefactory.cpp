@@ -1,5 +1,7 @@
 #include "templatefactory.h"
 #include "templateobject.h"
+#include "templateobjectnotifier.h"
+#include "templatefieldformat.h"
 #include "templateframe.h"
 #include "templateresourcelayout.h"
 #include "dice.h"
@@ -12,6 +14,10 @@
 #include <QUiLoader>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QCheckBox>
+#include <QValidator>
 #include <QScrollArea>
 #include <QLayout>
 #include <QLabel>
@@ -20,6 +26,8 @@
 
 const char* TemplateFactory::TEMPLATE_PROPERTY = "dmhValue";
 const char* TemplateFactory::TEMPLATE_WIDGET = "dmhWidget";
+const char* TemplateFactory::TEMPLATE_FORMAT = "dmhFormat";
+const char* TemplateFactory::TEMPLATE_COMPUTE = "dmhCompute";
 
 const char* TemplateFactory::TEMPLATEVALUES[TEMPLATETYPE_COUNT] =
     {
@@ -41,7 +49,9 @@ TemplateFactory::TemplateFactory(QObject *parent) :
     _elements(),
     _elementLists(),
     _lineConnections(),
-    _textConnections()
+    _textConnections(),
+    _otherConnections(),
+    _computeConnections()
 {
 }
 
@@ -260,6 +270,44 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
             continue;
 
         QString keyString = lineEdit->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        const QString computeSpec = lineEdit->property(TemplateFactory::TEMPLATE_COMPUTE).toString();
+        const QString formatSpec = lineEdit->property(TemplateFactory::TEMPLATE_FORMAT).toString();
+        const FormatSpec parsedFormat = TemplateFieldFormat::parseFormat(formatSpec);
+
+        // Computed (read-only) fields are independent of dmhValue: they evaluate
+        // an expression against the source TemplateObject and live-update via the
+        // notifier. They must not write back to the model.
+        if(!computeSpec.isEmpty())
+        {
+            ComputeExpr expr = ComputeExpr::parse(computeSpec);
+            if(expr.isValid())
+            {
+                lineEdit->setReadOnly(true);
+                const int initialValue = expr.evaluate(*source);
+                lineEdit->setText(TemplateFieldFormat::applyFormatInt(initialValue, parsedFormat));
+                lineEdit->setCursorPosition(0);
+
+                if(_computeConnections.contains(lineEdit))
+                    disconnect(_computeConnections[lineEdit]);
+
+                const QSet<QString> refs = expr.references();
+                auto computeConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
+                    [lineEdit, expr, parsedFormat, refs, source](const QString& changedKey) {
+                        if((!refs.isEmpty()) && (!refs.contains(changedKey)))
+                            return;
+                        const int v = expr.evaluate(*source);
+                        lineEdit->setText(TemplateFieldFormat::applyFormatInt(v, parsedFormat));
+                        lineEdit->setCursorPosition(0);
+                    });
+                _computeConnections[lineEdit] = computeConn;
+                continue;
+            }
+            else
+            {
+                qDebug() << "[TemplateFactory] WARNING: Invalid dmhCompute expression on widget" << lineEdit->objectName() << ":" << computeSpec;
+            }
+        }
+
         if(!keyString.isEmpty())
         {
             QString valueString;
@@ -275,15 +323,127 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 valueString = source->getValueAsString(keyString);
             }
 
-            lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
+            if(valueString.isEmpty())
+                valueString = getDefaultValue(keyString);
+
+            lineEdit->setText(TemplateFieldFormat::applyFormat(valueString, parsedFormat));
             lineEdit->setCursorPosition(0);
 
-            if(_lineConnections.contains(lineEdit))
-                disconnect(_textConnections[lineEdit]);
+            if(QValidator* validator = TemplateFieldFormat::makeValidator(parsedFormat, lineEdit))
+                lineEdit->setValidator(validator);
 
-            auto connection = connect(lineEdit, &QLineEdit::editingFinished, lineEdit, [=]() { templateFrame->handleEditBoxChange(lineEdit, source, lineEdit->text()); });
+            if(_lineConnections.contains(lineEdit))
+                disconnect(_lineConnections[lineEdit]);
+
+            auto connection = connect(lineEdit, &QLineEdit::editingFinished, lineEdit,
+                [lineEdit, templateFrame, source, parsedFormat]() {
+                    const QString stripped = TemplateFieldFormat::stripFormat(lineEdit->text(), parsedFormat);
+                    templateFrame->handleEditBoxChange(lineEdit, source, stripped);
+                });
             _lineConnections[lineEdit] = connection;
         }
+    }
+
+    // QComboBox: store currentText (string) on change
+    QList<QComboBox*> comboBoxes = widget->findChildren<QComboBox*>();
+    for(auto comboBox : comboBoxes)
+    {
+        if(!comboBox)
+            continue;
+
+        const QString keyString = comboBox->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        QString valueString;
+        if(hash)
+        {
+            if(hashAttributes)
+                valueString = convertVariantToString(hash->value(keyString), hashAttributes->value(keyString)._type);
+            else
+                valueString = hash->value(keyString).toString();
+        }
+        else
+        {
+            valueString = source->getValueAsString(keyString);
+        }
+        if(valueString.isEmpty())
+            valueString = getDefaultValue(keyString);
+
+        const int existingIndex = comboBox->findText(valueString);
+        if(existingIndex >= 0)
+            comboBox->setCurrentIndex(existingIndex);
+        else if(comboBox->isEditable())
+            comboBox->setCurrentText(valueString);
+
+        if(_otherConnections.contains(comboBox))
+            disconnect(_otherConnections[comboBox]);
+
+        auto conn = connect(comboBox, &QComboBox::currentTextChanged, comboBox,
+            [comboBox, templateFrame, source](const QString& text) {
+                templateFrame->handleEditBoxChange(comboBox, source, text);
+            });
+        _otherConnections[comboBox] = conn;
+    }
+
+    // QSpinBox: integer-valued; write back as the integer's string form
+    QList<QSpinBox*> spinBoxes = widget->findChildren<QSpinBox*>();
+    for(auto spinBox : spinBoxes)
+    {
+        if(!spinBox)
+            continue;
+
+        const QString keyString = spinBox->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        int intValue = 0;
+        if(hash)
+            intValue = hash->value(keyString).toInt();
+        else
+            intValue = source->getIntValue(keyString);
+
+        spinBox->setValue(intValue);
+
+        if(_otherConnections.contains(spinBox))
+            disconnect(_otherConnections[spinBox]);
+
+        auto conn = connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), spinBox,
+            [spinBox, templateFrame, source](int v) {
+                templateFrame->handleEditBoxChange(spinBox, source, QString::number(v));
+            });
+        _otherConnections[spinBox] = conn;
+    }
+
+    // QCheckBox: boolean (1 or 0); skip checkboxes embedded inside resource frames
+    QList<QCheckBox*> checkBoxes = widget->findChildren<QCheckBox*>();
+    for(auto checkBox : checkBoxes)
+    {
+        if(!checkBox)
+            continue;
+
+        const QString keyString = checkBox->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        bool boolValue = false;
+        if(hash)
+            boolValue = hash->value(keyString).toBool();
+        else
+            boolValue = source->getBoolValue(keyString);
+
+        QSignalBlocker blocker(checkBox);
+        checkBox->setChecked(boolValue);
+        blocker.unblock();
+
+        if(_otherConnections.contains(checkBox))
+            disconnect(_otherConnections[checkBox]);
+
+        auto conn = connect(checkBox, &QCheckBox::toggled, checkBox,
+            [checkBox, templateFrame, source](bool checked) {
+                templateFrame->handleEditBoxChange(checkBox, source, checked ? QStringLiteral("1") : QStringLiteral("0"));
+            });
+        _otherConnections[checkBox] = conn;
     }
 
     QList<QTextEdit*> textEdits = widget->findChildren<QTextEdit*>();
@@ -392,10 +552,17 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
     QList<QLineEdit*> lineEdits = widget->findChildren<QLineEdit*>();
     for(auto lineEdit : lineEdits)
     {
-        if((lineEdit) && (_lineConnections.contains(lineEdit)))
+        if(!lineEdit)
+            continue;
+        if(_lineConnections.contains(lineEdit))
         {
             disconnect(_lineConnections[lineEdit]);
             _lineConnections.remove(lineEdit);
+        }
+        if(_computeConnections.contains(lineEdit))
+        {
+            disconnect(_computeConnections[lineEdit]);
+            _computeConnections.remove(lineEdit);
         }
     }
 
@@ -406,6 +573,16 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
         {
             disconnect(_textConnections[textEdit]);
             _textConnections.remove(textEdit);
+        }
+    }
+
+    const QList<QWidget*> others = widget->findChildren<QWidget*>();
+    for(auto other : others)
+    {
+        if((other) && (_otherConnections.contains(other)))
+        {
+            disconnect(_otherConnections[other]);
+            _otherConnections.remove(other);
         }
     }
 }

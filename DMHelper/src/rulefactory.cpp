@@ -191,6 +191,13 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
             newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
             newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
             newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
+            newRuleset._spellbook = rulesetElement.attribute(QString("spellbook"));
+            newRuleset._spellData = rulesetElement.attribute(QString("spelldata"));
+            newRuleset._spellUI = rulesetElement.attribute(QString("spellui"));
+            newRuleset._combatantUI = rulesetElement.attribute(QString("combatantui"));
+            newRuleset._combatantFrameUI = rulesetElement.attribute(QString("combatantframeui"));
+            newRuleset._combatantFrameData = rulesetElement.attribute(QString("combatantframedata"));
+            newRuleset._lairActionUI = rulesetElement.attribute(QString("lairactionui"));
             newRuleset._conditionsFile = rulesetElement.attribute(QString("conditions"));
             newRuleset._rulesetDir = QFileInfo(rulesetFile).absolutePath();
             newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());

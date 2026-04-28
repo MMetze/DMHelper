@@ -7,8 +7,8 @@
 #include <QtMath>
 
 static constexpr qreal DEFAULT_DENSITY = 0.5;
-static const QColor DEFAULT_CENTER_COLOR(80, 80, 80, 180);
-static const QColor DEFAULT_EDGE_COLOR(200, 200, 200, 60);
+static const QColor DEFAULT_CENTER_COLOR(210, 210, 210, 220);
+static const QColor DEFAULT_EDGE_COLOR(70, 70, 70, 60);
 static constexpr qreal DEFAULT_BILLOW_FACTOR = 0.5;
 static constexpr qreal DEFAULT_WIND_DIRECTION = 0.0;
 static constexpr qreal DEFAULT_WIND_STRENGTH = 0.0;

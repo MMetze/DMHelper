@@ -40,7 +40,8 @@ namespace DMHelper
     {
         BattleEvent_Blank = 0,
         BattleEvent_NewRound,
-        BattleEvent_Damage
+        BattleEvent_Damage,
+        BattleEvent_ResetResources
     };
 
     enum ActionType

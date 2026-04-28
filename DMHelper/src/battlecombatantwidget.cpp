@@ -20,7 +20,7 @@ BattleCombatantWidget::BattleCombatantWidget(BattleDialogModelCombatant* combata
     parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
     ui->edtResult->setPalette(parchPal);
 
-    QValidator* valHitPoints = new QIntValidator(-10, 9999, this);
+    QValidator* valHitPoints = new QIntValidator(-999999, 999999, this);
     ui->edtHP->setValidator(valHitPoints);
     setCombatantValues();
 

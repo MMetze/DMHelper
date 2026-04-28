@@ -2,6 +2,7 @@
 #define MONSTERCLASSV2_H
 
 #include "templateobject.h"
+#include "perroundresource.h"
 #include <QObject>
 
 class QDomElement;
@@ -29,6 +30,14 @@ public:
     QColor getBackgroundColor();
 
     void cloneMonster(MonsterClassv2& other);
+
+    // Per-round resources (legendary actions, recharge abilities, etc.) — definition only.
+    // Per-instance current values live on BattleDialogModelMonsterBase.
+    static const char* PER_ROUND_RESOURCES_KEY;
+    QList<PerRoundResource> getPerRoundResources() const;
+    PerRoundResource getPerRoundResource(const QString& name) const;
+    void setPerRoundResources(const QList<PerRoundResource>& resources);
+    void appendPerRoundResource(const PerRoundResource& resource);
 
     static int convertSizeToCategory(const QString& monsterSize);
     static QString convertCategoryToSize(int category);

@@ -7,7 +7,7 @@
 #include "monsterclassv2.h"
 #include "dmconstants.h"
 #include "spellbook.h"
-#include "spell.h"
+#include "spellv2.h"
 #include "encounterbattle.h"
 #include "battledialoglogger.h"
 #include "battledialoglogview.h"
@@ -1359,7 +1359,7 @@ void BattleFrame::castSpell()
 
     qDebug() << "[BattleFrame] Casting spell: " << selectedSpell;
 
-    Spell* spell = Spellbook::Instance()->getSpell(selectedSpell);
+    Spellv2* spell = Spellbook::Instance()->getSpell(selectedSpell);
     if(!spell)
     {
         qDebug() << "[BattleFrame] Spell cast aborted: not able to find selected spell in the Spellbook.";
@@ -1465,7 +1465,7 @@ void BattleFrame::addEffectSmoke()
     if(!validateTokenLayerExists())
         return;
 
-    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Smoke, 10, 0, QColor(90, 90, 90, 255), QString()));
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Smoke, 10, 0, QColor(210, 210, 210, 220), QString()));
 }
 
 void BattleFrame::addEffectFire()
@@ -2837,7 +2837,7 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 
     if((finalEffect) && (Spellbook::Instance()) && (Spellbook::Instance()->exists(finalEffect->objectName())))
     {
-        Spell* spell = Spellbook::Instance()->getSpell(finalEffect->objectName());
+        Spellv2* spell = Spellbook::Instance()->getSpell(finalEffect->objectName());
         if(spell)
         {
             dlg->setConditions(spell->getEffectConditionList());

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CombatantTemplate</class>
+ <widget class="QFrame" name="CombatantTemplate">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>340</width>
+    <height>140</height>
+   </rect>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" rowspan="3">
+    <widget class="QLabel" name="combatantIcon">
+     <property name="minimumSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>96</width>
+       <height>96</height>
+      </size>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>icon</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="3">
+    <widget class="QLineEdit" name="combatantName">
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>name</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="lblHP">
+     <property name="text">
+      <string>HP</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QLineEdit" name="combatantHP">
+     <property name="dmhValue" stdset="0">
+      <string>hp</string>
+     </property>
+     <property name="dmhFormat" stdset="0">
+      <string>int</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLabel" name="lblAC">
+     <property name="text">
+      <string>AC</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QLineEdit" name="combatantAC">
+     <property name="dmhValue" stdset="0">
+      <string>ac</string>
+     </property>
+     <property name="dmhFormat" stdset="0">
+      <string>int</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="lblInit">
+     <property name="text">
+      <string>Init</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLineEdit" name="combatantInitiative">
+     <property name="dmhValue" stdset="0">
+      <string>initiative</string>
+     </property>
+     <property name="dmhFormat" stdset="0">
+      <string>signed</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QLabel" name="lblMoved">
+     <property name="text">
+      <string>Moved</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QLineEdit" name="combatantMoved">
+     <property name="dmhValue" stdset="0">
+      <string>moved</string>
+     </property>
+     <property name="dmhFormat" stdset="0">
+      <string>int</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="5">
+    <layout class="QHBoxLayout" name="checkboxLayout">
+     <item>
+      <widget class="QCheckBox" name="combatantIsShown">
+       <property name="text">
+        <string>Shown</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>isShown</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="combatantIsKnown">
+       <property name="text">
+        <string>Known</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>isKnown</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="combatantIsDone">
+       <property name="text">
+        <string>Done</string>
+       </property>
+       <property name="dmhValue" stdset="0">
+        <string>isDone</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0" colspan="5">
+    <widget class="QScrollArea" name="conditionStrip">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>conditions</string>
+     </property>
+     <property name="dmhWidget" stdset="0">
+      <string>condition.ui</string>
+     </property>
+     <widget class="QWidget" name="conditionStripContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>320</width>
+        <height>32</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="5">
+    <widget class="QScrollArea" name="resourceStrip">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>perRoundResources</string>
+     </property>
+     <property name="dmhWidget" stdset="0">
+      <string>resource.ui</string>
+     </property>
+     <widget class="QWidget" name="resourceStripContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>320</width>
+        <height>40</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

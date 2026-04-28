@@ -57,6 +57,13 @@ public:
             _monsterData(),
             _monsterUI(),
             _bestiary(),
+            _spellbook(),
+            _spellData(),
+            _spellUI(),
+            _combatantUI(),
+            _combatantFrameUI(),
+            _combatantFrameData(),
+            _lairActionUI(),
             _conditionsFile(),
             _rulesetDir(),
             _combatantDone(false),
@@ -90,6 +97,13 @@ public:
         QString _monsterData;
         QString _monsterUI;
         QString _bestiary;
+        QString _spellbook;
+        QString _spellData;
+        QString _spellUI;
+        QString _combatantUI;
+        QString _combatantFrameUI;
+        QString _combatantFrameData;
+        QString _lairActionUI;
         QString _conditionsFile;
         QDir _rulesetDir;
         bool _combatantDone;

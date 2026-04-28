@@ -21,6 +21,8 @@
 #include "mruhandler.h"
 #include "encounterfactory.h"
 #include "monsterfactory.h"
+#include "spellbookfactory.h"
+#include "spellv2.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encounterbattle.h"
@@ -434,6 +436,7 @@ MainWindow::MainWindow(QWidget *parent) :
     RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
     qDebug() << "[MainWindow] Loading default Bestiary UI frame: " << defaultRuleset._monsterUI;
     MonsterFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+    SpellbookFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
     //_bestiaryDlg.loadMonsterUITemplate(defaultRuleset._monsterUI);
     connect(Bestiary::Instance(), &Bestiary::changed, &_bestiaryDlg, &BestiaryTemplateDialog::dataChanged);
     connect(Bestiary::Instance(), &Bestiary::bestiaryLoaded, this, &MainWindow::handleBestiaryRead);
@@ -461,7 +464,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Spellbook Loaded";
 
-    connect(&_spellDlg, &SpellbookDialog::dialogClosed, this, &MainWindow::writeSpellbook);
+    connect(&_spellDlg, &SpellbookTemplateDialog::dialogClosed, this, &MainWindow::writeSpellbook);
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
@@ -831,6 +834,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
         MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -843,6 +847,9 @@ void MainWindow::newCampaign()
         _bestiaryDlg.setMonster(nullptr);
         _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
         Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
+        _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
+        _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -2127,9 +2134,15 @@ void MainWindow::openCampaign(const QString& filename)
     MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                   campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                   campaignElement.attribute("minorVersion", QString::number(0)).toInt());
     _bestiaryDlg.setMonster(nullptr);
     _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
     Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
+    _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
+    _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
 
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
@@ -2225,6 +2238,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        SpellbookFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
