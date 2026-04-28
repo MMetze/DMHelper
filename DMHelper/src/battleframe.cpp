@@ -1,9 +1,6 @@
 #include "battleframe.h"
 #include "ui_battleframe.h"
-#include "combatantwidgetmonster.h"
-#include "combatantwidgetinternalsmonster.h"
-#include "combatantwidgetcharacter.h"
-#include "combatantwidgetinternalscharacter.h"
+#include "combatanttemplateframe.h"
 #include "monsterclassv2.h"
 #include "dmconstants.h"
 #include "spellbook.h"
@@ -4243,40 +4240,22 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
     switch(combatant->getCombatantType())
     {
         case DMHelper::CombatantType_Character:
-        {
-            BattleDialogModelCharacter* character = dynamic_cast<BattleDialogModelCharacter*>(combatant);
-            if(character)
-            {
-                newWidget = new CombatantWidgetCharacter(((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox())), ui->scrollAreaWidgetContents);
-                CombatantWidgetCharacter* combatantWidget = dynamic_cast<CombatantWidgetCharacter*>(newWidget);
-                CombatantWidgetInternalsCharacter* widgetInternals = new CombatantWidgetInternalsCharacter(character, combatantWidget);
-                connect(widgetInternals, SIGNAL(clicked(QUuid)), this, SIGNAL(characterSelected(QUuid)));
-                connect(widgetInternals, SIGNAL(contextMenu(BattleDialogModelCombatant*, QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*, QPoint)));
-                connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
-                connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
-                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
-                connect(character, &BattleDialogModelCharacter::imageChanged, this, [this](BattleDialogModelCharacter* c){this->updateCombatantIcon(c);});
-                connect(character, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
-                connect(character, &BattleDialogModelCharacter::initiativeChanged, newWidget, &CombatantWidget::updateData);
-            }
-            break;
-        }
         case DMHelper::CombatantType_Monster:
         {
-            BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-            if(monster)
-            {
-                newWidget = new CombatantWidgetMonster(((campaign) && (campaign->getRuleset().getCombatantDoneCheckbox())), ui->scrollAreaWidgetContents);
-                CombatantWidgetMonster* combatantWidget = dynamic_cast<CombatantWidgetMonster*>(newWidget);
-                CombatantWidgetInternalsMonster* widgetInternals = new CombatantWidgetInternalsMonster(monster, combatantWidget);
-                connect(widgetInternals, SIGNAL(clicked(const QString&)), this, SIGNAL(monsterSelected(const QString&)));
-                connect(widgetInternals, SIGNAL(contextMenu(BattleDialogModelCombatant*, QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*, QPoint)));
-                connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(updateCombatantVisibility()));
-                connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
-                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
-                connect(monster, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
-                connect(monster, &BattleDialogModelMonsterBase::initiativeChanged, newWidget, &CombatantWidget::updateData);
-            }
+            const bool doneCheckbox = (campaign) && (campaign->getRuleset().getCombatantDoneCheckbox());
+            QString uiFile = (campaign) ? campaign->getRuleset().getCombatantUIFile() : QString();
+            if(uiFile.isEmpty())
+                uiFile = QStringLiteral("./ui/combatant5e.ui");
+
+            CombatantTemplateFrame* templateFrame = new CombatantTemplateFrame(combatant, doneCheckbox, uiFile, ui->scrollAreaWidgetContents);
+            newWidget = templateFrame;
+
+            connect(templateFrame, &CombatantTemplateFrame::clicked,           this, &BattleFrame::monsterSelected);
+            connect(templateFrame, &CombatantTemplateFrame::clickedCharacter,  this, &BattleFrame::characterSelected);
+            connect(templateFrame, &CombatantTemplateFrame::contextMenu,       this, &BattleFrame::handleContextMenu);
+            connect(templateFrame, &CombatantTemplateFrame::hitPointsChanged,  this, [this](BattleDialogModelCombatant*, int){ this->updateCombatantVisibility(); });
+            connect(templateFrame, &CombatantTemplateFrame::hitPointsChanged,  this, &BattleFrame::registerCombatantDamage);
+            connect(templateFrame, &CombatantTemplateFrame::imageChanged,      this, &BattleFrame::updateCombatantIcon);
             break;
         }
         default:

@@ -141,12 +141,9 @@ set(DMHELPER_SOURCES
     combatantrolloverframe.cpp
     combatantselectdialog.cpp
     combatantgroupwidget.cpp
+    combatanttemplateadapter.cpp
+    combatanttemplateframe.cpp
     combatantwidget.cpp
-    combatantwidgetcharacter.cpp
-    combatantwidgetinternals.cpp
-    combatantwidgetinternalscharacter.cpp
-    combatantwidgetinternalsmonster.cpp
-    combatantwidgetmonster.cpp
     complicationdata.cpp
     conditions.cpp
     conditionseditdialog.cpp
@@ -487,12 +484,9 @@ set(DMHELPER_HEADERS
     combatantrolloverframe.h
     combatantselectdialog.h
     combatantgroupwidget.h
+    combatanttemplateadapter.h
+    combatanttemplateframe.h
     combatantwidget.h
-    combatantwidgetcharacter.h
-    combatantwidgetinternals.h
-    combatantwidgetinternalscharacter.h
-    combatantwidgetinternalsmonster.h
-    combatantwidgetmonster.h
     complicationdata.h
     conditions.h
     conditionseditdialog.h
@@ -752,8 +746,6 @@ set(DMHELPER_FORMS
     combatantrolloverframe.ui
     combatantselectdialog.ui
     combatantgroupwidget.ui
-    combatantwidgetcharacter.ui
-    combatantwidgetmonster.ui
     configurelockedgriddialog.ui
     countdownframe.ui
     countdownsubframe.ui
