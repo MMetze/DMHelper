@@ -10,6 +10,7 @@ class BattleDialogModelCombatant;
 class BattleDialogModelMonsterBase;
 class BattleDialogModelCharacter;
 class CombatantTemplateAdapter;
+class CombatantWidgetBase;
 class QWidget;
 class QScrollArea;
 class QFrame;
@@ -79,6 +80,7 @@ private:
 
     BattleDialogModelCombatant* _combatant;
     CombatantTemplateAdapter* _adapter;
+    CombatantWidgetBase* _base;
     QPointer<QWidget> _uiWidget;
     bool _showDone;
     int _previousHitPoints;

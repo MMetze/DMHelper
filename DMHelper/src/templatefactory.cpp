@@ -28,6 +28,7 @@ const char* TemplateFactory::TEMPLATE_PROPERTY = "dmhValue";
 const char* TemplateFactory::TEMPLATE_WIDGET = "dmhWidget";
 const char* TemplateFactory::TEMPLATE_FORMAT = "dmhFormat";
 const char* TemplateFactory::TEMPLATE_COMPUTE = "dmhCompute";
+const char* TemplateFactory::TEMPLATE_CONDITION = "dmhCondition";
 
 const char* TemplateFactory::TEMPLATEVALUES[TEMPLATETYPE_COUNT] =
     {
@@ -51,7 +52,8 @@ TemplateFactory::TemplateFactory(QObject *parent) :
     _lineConnections(),
     _textConnections(),
     _otherConnections(),
-    _computeConnections()
+    _computeConnections(),
+    _conditionConnections()
 {
 }
 
@@ -517,6 +519,124 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         frame->installEventFilter(layout);
         frame->setLayout(layout);
     }
+
+    // dmhCondition pass: drive widget visibility from sibling field values.
+    // Syntax: "field op value" with op in ==, !=, >=, <=, >, < ; AND-join
+    // multiple clauses with ';'. Numeric compare when both sides parse as
+    // integers, else lexical compare. Hides widget when any clause fails.
+    QList<QWidget*> condWidgets = widget->findChildren<QWidget*>();
+    condWidgets.append(widget);
+    for(QWidget* condWidget : condWidgets)
+    {
+        if(!condWidget)
+            continue;
+        const QString condSpec = condWidget->property(TemplateFactory::TEMPLATE_CONDITION).toString();
+        if(condSpec.isEmpty())
+            continue;
+
+        struct Clause { QString field; QString op; QString value; };
+        QList<Clause> clauses;
+        QSet<QString> refs;
+        const QStringList rawClauses = condSpec.split(QChar(';'), Qt::SkipEmptyParts);
+        for(const QString& raw : rawClauses)
+        {
+            const QString clauseStr = raw.trimmed();
+            if(clauseStr.isEmpty())
+                continue;
+            static const QStringList ops = { QStringLiteral("=="), QStringLiteral("!="),
+                                             QStringLiteral(">="), QStringLiteral("<="),
+                                             QStringLiteral(">"),  QStringLiteral("<") };
+            int opIdx = -1;
+            QString opStr;
+            for(const QString& op : ops)
+            {
+                const int idx = clauseStr.indexOf(op);
+                if(idx > 0)
+                {
+                    opIdx = idx;
+                    opStr = op;
+                    break;
+                }
+            }
+            if(opIdx < 0)
+            {
+                qDebug() << "[TemplateFactory] WARNING: Invalid dmhCondition clause on widget" << condWidget->objectName() << ":" << clauseStr;
+                continue;
+            }
+            Clause c;
+            c.field = clauseStr.left(opIdx).trimmed();
+            c.op = opStr;
+            c.value = clauseStr.mid(opIdx + opStr.length()).trimmed();
+            if(c.field.isEmpty())
+                continue;
+            clauses.append(c);
+            refs.insert(c.field);
+        }
+        if(clauses.isEmpty())
+            continue;
+
+        auto evaluate = [clauses, source, hash, hashAttributes]() -> bool {
+            for(const Clause& c : clauses)
+            {
+                QString lhs;
+                if(hash)
+                {
+                    if(hashAttributes)
+                        lhs = convertVariantToString(hash->value(c.field), hashAttributes->value(c.field)._type);
+                    else
+                        lhs = hash->value(c.field).toString();
+                }
+                else
+                {
+                    lhs = source->getValueAsString(c.field);
+                }
+
+                bool lhsOk = false, rhsOk = false;
+                const int lhsInt = lhs.toInt(&lhsOk);
+                const int rhsInt = c.value.toInt(&rhsOk);
+                bool result = false;
+                if(lhsOk && rhsOk)
+                {
+                    if(c.op == QLatin1String("==")) result = (lhsInt == rhsInt);
+                    else if(c.op == QLatin1String("!=")) result = (lhsInt != rhsInt);
+                    else if(c.op == QLatin1String(">"))  result = (lhsInt >  rhsInt);
+                    else if(c.op == QLatin1String("<"))  result = (lhsInt <  rhsInt);
+                    else if(c.op == QLatin1String(">=")) result = (lhsInt >= rhsInt);
+                    else if(c.op == QLatin1String("<=")) result = (lhsInt <= rhsInt);
+                }
+                else
+                {
+                    const int cmp = QString::compare(lhs, c.value);
+                    if(c.op == QLatin1String("==")) result = (cmp == 0);
+                    else if(c.op == QLatin1String("!=")) result = (cmp != 0);
+                    else if(c.op == QLatin1String(">"))  result = (cmp >  0);
+                    else if(c.op == QLatin1String("<"))  result = (cmp <  0);
+                    else if(c.op == QLatin1String(">=")) result = (cmp >= 0);
+                    else if(c.op == QLatin1String("<=")) result = (cmp <= 0);
+                }
+                if(!result)
+                    return false;
+            }
+            return true;
+        };
+
+        condWidget->setVisible(evaluate());
+
+        if(_conditionConnections.contains(condWidget))
+            disconnect(_conditionConnections[condWidget]);
+
+        // Live updates only available against the model notifier (not list hashes).
+        if(!hash)
+        {
+            auto conn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, condWidget,
+                [condWidget, refs, evaluate](const QString& changedKey) {
+                    if((!refs.isEmpty()) && (!refs.contains(changedKey)))
+                        return;
+                    condWidget->setVisible(evaluate());
+                });
+            _conditionConnections[condWidget] = conn;
+        }
+    }
 }
 
 QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const QString& widgetString, const QString& templateFile)
@@ -584,6 +704,16 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
             disconnect(_otherConnections[other]);
             _otherConnections.remove(other);
         }
+        if((other) && (_conditionConnections.contains(other)))
+        {
+            disconnect(_conditionConnections[other]);
+            _conditionConnections.remove(other);
+        }
+    }
+    if(_conditionConnections.contains(widget))
+    {
+        disconnect(_conditionConnections[widget]);
+        _conditionConnections.remove(widget);
     }
 }
 

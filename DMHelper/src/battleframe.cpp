@@ -133,6 +133,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _mouseDown(false),
     _mouseDownPos(),
     _hoverFrame(nullptr),
+    _hoverFrameOwner(nullptr),
+    _dragInProgress(false),
+    _dragLastTarget(nullptr),
     _publishMouseDown(false),
     _publishMouseDownPos(),
     _publishEffectItem(nullptr),
@@ -1298,6 +1301,7 @@ void BattleFrame::addInitiativeEvent()
     BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(name.trimmed(), initiative, _model);
     _model->appendInitiativeEvent(event);
     _model->sortCombatants();
+    recreateCombatantWidgets();
 }
 
 void BattleFrame::addLairActionsEvent()
@@ -1308,6 +1312,7 @@ void BattleFrame::addLairActionsEvent()
     BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString("Lair Actions"), 20, _model);
     _model->appendInitiativeEvent(event);
     _model->sortCombatants();
+    recreateCombatantWidgets();
 }
 
 void BattleFrame::addEffectObject()
@@ -1855,7 +1860,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 _mouseDownPos = mouseEvent->globalPosition().toPoint();
                 _mouseDown = true;
-                qDebug() << "[Battle Frame] combatant widget mouse down " << _mouseDownPos.x() << ", " << _mouseDownPos.y();
             }
             else if(event->type() == QEvent::MouseMove)
             {
@@ -1871,7 +1875,9 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                             int index = _model->getCombatantList().indexOf(combatant);
                             if(index >= 0)
                             {
-                                qDebug() << "[Battle Frame] starting combatant widget drag: index " << index << ": " << combatant->getName() << ", (" << reinterpret_cast<quint64>(widget) << ") " << mouseEvent->pos().x() << ", " << mouseEvent->pos().y();
+                                if(_hoverFrame)
+                                    removeRollover();
+
                                 QDrag *drag = new QDrag(this);
                                 QMimeData *mimeData = new QMimeData;
 
@@ -1884,7 +1890,10 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                                 mimeData->setData(QString("application/vnd.dmhelper.combatant"), encodedData);
                                 drag->setMimeData(mimeData);
                                 drag->setPixmap(px);
+                                _dragInProgress = true;
                                 drag->exec(Qt::CopyAction | Qt::MoveAction);
+                                _dragInProgress = false;
+                                _mouseDown = false;
                             }
                         }
                     }
@@ -1892,7 +1901,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::MouseButtonRelease)
             {
-                qDebug() << "[Battle Frame] combatant widget mouse released: " << _combatantWidgets.key(widget, nullptr);
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 if(mouseEvent->button() == Qt::LeftButton)
                 {
@@ -1903,37 +1911,35 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         setSelectedCombatant(selected);
                     else
                         setUniqueSelection(selected);
+
+                    // Toggle rollover on single-click (only when not finishing a drag)
+                    if((!_dragInProgress) && (_combatantLayout) && (widget->getCombatant()))
+                    {
+                        const bool sameWidget = (_hoverFrame && (_hoverFrameOwner == widget));
+                        if(_hoverFrame)
+                            removeRollover();
+
+                        if(!sameWidget)
+                        {
+                            CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
+                            if(newFrame->isEmpty())
+                            {
+                                delete newFrame;
+                            }
+                            else
+                            {
+                                _hoverFrame = newFrame;
+                                _hoverFrameOwner = widget;
+                                connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
+                                QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
+                                                ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
+                                _hoverFrame->move(framePos);
+                                _hoverFrame->show();
+                            }
+                        }
+                    }
                 }
                 _mouseDown = false;
-            }
-            else if(event->type() == QEvent::HoverEnter)
-            {
-                if((!_mouseDown) && (_combatantLayout) && (widget->getCombatant()))
-                {
-                    if(_hoverFrame)
-                        removeRollover();
-
-                    // Mouse moved without button down on a combatant widget --> roll-over popup for this widget
-                    CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
-                    if(newFrame->isEmpty())
-                    {
-                        delete newFrame;
-                    }
-                    else
-                    {
-                        _hoverFrame = newFrame;
-                        connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
-                        QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
-                                        ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
-                        _hoverFrame->move(framePos);
-                        _hoverFrame->show();
-                    }
-                }
-            }
-            else if(event->type() == QEvent::HoverLeave)
-            {
-                if(_hoverFrame)
-                    _hoverFrame->triggerClose();
             }
         }
         else
@@ -1943,6 +1949,8 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 _mouseDownPos = mouseEvent->pos();
                 _mouseDown = true;
+                if(_hoverFrame)
+                    removeRollover();
             }
             else if(event->type() == QEvent::MouseButtonRelease)
             {
@@ -1960,13 +1968,12 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         const QMimeData* mimeData = dragEnterEvent->mimeData();
                         if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
-                            qDebug() << "[Battle Frame] combatant widget drag enter accepted";
                             dragEnterEvent->accept();
+                            _dragLastTarget = nullptr;
                             return true;
                         }
                         else
                         {
-                            qDebug() << "[Battle Frame] unknown drag enter ignored";
                             dragEnterEvent->ignore();
                         }
                     }
@@ -1979,6 +1986,21 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         const QMimeData* mimeData = dragMoveEvent->mimeData();
                         if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
+                            // Convert position from scrollArea coords to scrollAreaWidgetContents coords
+                            const QPoint posInScrollArea = dragMoveEvent->position().toPoint();
+                            const QPoint globalPos = ui->scrollArea->mapToGlobal(posInScrollArea);
+                            const QPoint posInContents = ui->scrollAreaWidgetContents->mapFromGlobal(globalPos);
+
+                            QWidget* targetWidget = findCombatantWidgetFromPosition(posInContents);
+
+                            // Skip work when the cursor is still over the same target as last time
+                            if(targetWidget == _dragLastTarget)
+                            {
+                                dragMoveEvent->accept();
+                                return true;
+                            }
+                            _dragLastTarget = targetWidget;
+
                             QByteArray encodedData = mimeData->data(QString("application/vnd.dmhelper.combatant"));
                             QDataStream stream(&encodedData, QIODevice::ReadOnly);
                             int index;
@@ -1986,8 +2008,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 
                             QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
                             int currentIndex = _combatantLayout->indexOf(draggedWidget);
-
-                            QWidget* targetWidget = findCombatantWidgetFromPosition(dragMoveEvent->position().toPoint());
 
                             // Only reorder widgets that are directly in the main layout (not inside groups)
                             if((currentIndex >= 0)&&(draggedWidget)&&(targetWidget)&&(draggedWidget != targetWidget))
@@ -2004,7 +2024,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                 }
                 else if(event->type() == QEvent::DragLeave)
                 {
-                    qDebug() << "[Battle Frame] combatant drag left";
+                    _dragLastTarget = nullptr;
                     reorderCombatantWidgets();
                 }
                 else if(event->type() == QEvent::Drop)
@@ -2012,8 +2032,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     QDropEvent* dropEvent = dynamic_cast<QDropEvent*>(event);
                     if(dropEvent)
                     {
-                        qDebug() << "[Battle Frame] combatant widget drag dropped (" << dropEvent->position().x() << ", " << dropEvent->position().y() << ")";
-
                         const QMimeData* mimeData = dropEvent->mimeData();
                         if((mimeData) && (mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                         {
@@ -2028,12 +2046,11 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                             // Only reorder ungrouped combatants in the main layout
                             if(currentIndex >= 0 && currentIndex != index)
                             {
-                                BattleDialogModelCombatant* combatant = _model->getCombatant(index);
                                 _model->moveCombatant(index, currentIndex);
-                                qDebug() << "[Battle Frame] combatant widget drag dropped: index " << index << ": " << combatant->getName() << " (" << reinterpret_cast<quint64>(draggedWidget) << "), from pos " << index << " to pos " << currentIndex;
                             }
                         }
                     }
+                    _dragLastTarget = nullptr;
                     reorderCombatantWidgets();
                 }
             }
@@ -4173,6 +4190,7 @@ void BattleFrame::removeRollover()
     _hoverFrame->cancelClose();
     _hoverFrame->deleteLater();
     _hoverFrame = nullptr;
+    _hoverFrameOwner = nullptr;
 }
 
 void BattleFrame::clearDoneFlags()
@@ -4632,22 +4650,16 @@ void BattleFrame::newRound()
 
 QWidget* BattleFrame::findCombatantWidgetFromPosition(const QPoint& position) const
 {
-    qDebug() << "[Battle Frame] searching for widget from position " << position.x() << "x" << position.y() << "...";
     QWidget* widget = ui->scrollAreaWidgetContents->childAt(position);
+    if(!widget)
+        return nullptr;
 
-    if(widget)
-    {
-        while((widget->parentWidget() != ui->scrollAreaWidgetContents) && (widget->parentWidget() != nullptr))
-            widget = widget->parentWidget();
+    while((widget->parentWidget() != ui->scrollAreaWidgetContents) && (widget->parentWidget() != nullptr))
+        widget = widget->parentWidget();
 
-        if(widget->parentWidget() == nullptr)
-        {
-            qDebug() << "[Battle Frame] ...widget not found";
-            return nullptr;
-        }
-    }
+    if(widget->parentWidget() == nullptr)
+        return nullptr;
 
-    qDebug() << "[Battle Frame] ...widget found: " << reinterpret_cast<quint64>(widget);
     return widget;
 }
 

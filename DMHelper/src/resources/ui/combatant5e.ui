@@ -1,221 +1,405 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CombatantTemplate</class>
- <widget class="QFrame" name="CombatantTemplate">
+ <class>CombatantWidgetCharacter</class>
+ <widget class="CombatantWidget" name="CombatantWidgetCharacter">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>340</width>
-    <height>140</height>
+    <width>285</width>
+    <height>55</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
   <property name="frameShape">
-   <enum>QFrame::StyledPanel</enum>
+   <enum>QFrame::Shape::Panel</enum>
   </property>
   <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
+   <enum>QFrame::Shadow::Raised</enum>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="3">
-    <widget class="QLabel" name="combatantIcon">
-     <property name="minimumSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
+  <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
+    <number>2</number>
+   </property>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>0</number>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>96</width>
-       <height>96</height>
-      </size>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>icon</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="3">
-    <widget class="QLineEdit" name="combatantName">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>name</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QLabel" name="lblHP">
-     <property name="text">
-      <string>HP</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QLineEdit" name="combatantHP">
-     <property name="dmhValue" stdset="0">
-      <string>hp</string>
-     </property>
-     <property name="dmhFormat" stdset="0">
-      <string>int</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <widget class="QLabel" name="lblAC">
-     <property name="text">
-      <string>AC</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="4">
-    <widget class="QLineEdit" name="combatantAC">
-     <property name="dmhValue" stdset="0">
-      <string>ac</string>
-     </property>
-     <property name="dmhFormat" stdset="0">
-      <string>int</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="lblInit">
-     <property name="text">
-      <string>Init</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
-    <widget class="QLineEdit" name="combatantInitiative">
-     <property name="dmhValue" stdset="0">
-      <string>initiative</string>
-     </property>
-     <property name="dmhFormat" stdset="0">
-      <string>signed</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="3">
-    <widget class="QLabel" name="lblMoved">
-     <property name="text">
-      <string>Moved</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
-    <widget class="QLineEdit" name="combatantMoved">
-     <property name="dmhValue" stdset="0">
-      <string>moved</string>
-     </property>
-     <property name="dmhFormat" stdset="0">
-      <string>int</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="5">
-    <layout class="QHBoxLayout" name="checkboxLayout">
      <item>
-      <widget class="QCheckBox" name="combatantIsShown">
-       <property name="text">
-        <string>Shown</string>
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,1,1">
+       <property name="spacing">
+        <number>2</number>
        </property>
-       <property name="dmhValue" stdset="0">
-        <string>isShown</string>
-       </property>
-      </widget>
+       <item>
+        <widget class="QLineEdit" name="edtName">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The character's name</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>name</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The character's armor class</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>AC:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtAC">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The character's armor class</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>armorClass</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>int</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QCheckBox" name="combatantIsKnown">
-       <property name="text">
-        <string>Known</string>
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,2,1,2">
+       <property name="spacing">
+        <number>0</number>
        </property>
-       <property name="dmhValue" stdset="0">
-        <string>isKnown</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="combatantIsDone">
-       <property name="text">
-        <string>Done</string>
-       </property>
-       <property name="dmhValue" stdset="0">
-        <string>isDone</string>
-       </property>
-      </widget>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>Init:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtInit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>initiative</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>int</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::MinimumExpanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>5</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>Mv:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtMove">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>dmh:moved</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>int</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::MinimumExpanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>5</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's current hit points</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>HP:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtHP">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's current hit points</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>hitPoints</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>int</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
-   <item row="4" column="0" colspan="5">
-    <widget class="QScrollArea" name="conditionStrip">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>conditions</string>
-     </property>
-     <property name="dmhWidget" stdset="0">
-      <string>condition.ui</string>
-     </property>
-     <widget class="QWidget" name="conditionStripContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>320</width>
-        <height>32</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-   </item>
-   <item row="5" column="0" colspan="5">
-    <widget class="QScrollArea" name="resourceStrip">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>40</height>
-      </size>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>perRoundResources</string>
-     </property>
-     <property name="dmhWidget" stdset="0">
-      <string>resource.ui</string>
-     </property>
-     <widget class="QWidget" name="resourceStripContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>320</width>
-        <height>40</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CombatantWidget</class>
+   <extends>QFrame</extends>
+   <header>combatantwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

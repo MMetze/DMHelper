@@ -10,12 +10,16 @@
 
 const char* CombatantTemplateAdapter::KEY_NAME                = "name";
 const char* CombatantTemplateAdapter::KEY_INITIATIVE          = "initiative";
-const char* CombatantTemplateAdapter::KEY_MOVED               = "moved";
+// "moved" is an internal per-round movement counter computed by BattleFrame as
+// tokens are dragged on the scene; it is not an XML attribute. The dmh: prefix
+// guarantees it cannot collide with a ruleset-defined attribute name (XML
+// attribute NCNames cannot contain ':' outside namespace declarations).
+const char* CombatantTemplateAdapter::KEY_MOVED               = "dmh:moved";
 const char* CombatantTemplateAdapter::KEY_IS_SHOWN            = "isShown";
 const char* CombatantTemplateAdapter::KEY_IS_KNOWN            = "isKnown";
 const char* CombatantTemplateAdapter::KEY_IS_DONE             = "isDone";
-const char* CombatantTemplateAdapter::KEY_HP                  = "hp";
-const char* CombatantTemplateAdapter::KEY_AC                  = "ac";
+const char* CombatantTemplateAdapter::KEY_HP                  = "hitPoints";
+const char* CombatantTemplateAdapter::KEY_AC                  = "armorClass";
 const char* CombatantTemplateAdapter::KEY_CONDITIONS          = "conditions";
 const char* CombatantTemplateAdapter::KEY_PER_ROUND_RESOURCES = "perRoundResources";
 

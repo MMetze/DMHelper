@@ -144,6 +144,7 @@ set(DMHELPER_SOURCES
     combatanttemplateadapter.cpp
     combatanttemplateframe.cpp
     combatantwidget.cpp
+    combatantwidgetbase.cpp
     complicationdata.cpp
     conditions.cpp
     conditionseditdialog.cpp
@@ -488,6 +489,7 @@ set(DMHELPER_HEADERS
     combatanttemplateadapter.h
     combatanttemplateframe.h
     combatantwidget.h
+    combatantwidgetbase.h
     complicationdata.h
     conditions.h
     conditionseditdialog.h
@@ -747,6 +749,7 @@ set(DMHELPER_FORMS
     combatantrolloverframe.ui
     combatantselectdialog.ui
     combatantgroupwidget.ui
+    combatantwidgetbase.ui
     configurelockedgriddialog.ui
     countdownframe.ui
     countdownsubframe.ui

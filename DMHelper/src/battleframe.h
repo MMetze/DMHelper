@@ -430,6 +430,9 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
     CombatantRolloverFrame* _hoverFrame;
+    QWidget* _hoverFrameOwner;
+    bool _dragInProgress;
+    QWidget* _dragLastTarget;
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;

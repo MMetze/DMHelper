@@ -1,5 +1,6 @@
 #include "combatanttemplateframe.h"
 #include "combatanttemplateadapter.h"
+#include "combatantwidgetbase.h"
 #include "templatefactory.h"
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodelmonsterbase.h"
@@ -12,6 +13,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollArea>
+#include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -40,6 +42,7 @@ CombatantTemplateFrame::CombatantTemplateFrame(BattleDialogModelCombatant* comba
     TemplateFrame(),
     _combatant(combatant),
     _adapter(nullptr),
+    _base(nullptr),
     _uiWidget(nullptr),
     _showDone(showDone),
     _previousHitPoints(combatant ? combatant->getHitPoints() : 0)
@@ -49,6 +52,35 @@ CombatantTemplateFrame::CombatantTemplateFrame(BattleDialogModelCombatant* comba
     QVBoxLayout* outerLayout = new QVBoxLayout(this);
     outerLayout->setContentsMargins(0, 0, 0, 0);
     outerLayout->setSpacing(0);
+
+    _base = new CombatantWidgetBase(this);
+    outerLayout->addWidget(_base);
+
+    if(QFrame* host = _base->contentFrame())
+    {
+        QVBoxLayout* hostLayout = new QVBoxLayout(host);
+        hostLayout->setContentsMargins(0, 0, 0, 0);
+        hostLayout->setSpacing(0);
+    }
+
+    if(_combatant)
+    {
+        if(QCheckBox* chk = _base->visibleCheckbox())
+        {
+            chk->setChecked(_combatant->getShown());
+            connect(chk, &QCheckBox::toggled, _combatant, &BattleDialogModelCombatant::setShown);
+        }
+        if(QCheckBox* chk = _base->knownCheckbox())
+        {
+            chk->setChecked(_combatant->getKnown());
+            connect(chk, &QCheckBox::toggled, _combatant, &BattleDialogModelCombatant::setKnown);
+        }
+        if(QCheckBox* chk = _base->doneCheckbox())
+        {
+            chk->setChecked(_combatant->getDone());
+            connect(chk, &QCheckBox::toggled, _combatant, &BattleDialogModelCombatant::setDone);
+        }
+    }
 
     if(!loadTemplate(templateFile))
         qDebug() << "[CombatantTemplateFrame] WARNING: Could not load template " << templateFile << " for combatant " << (combatant ? combatant->getName() : QStringLiteral("<null>"));
@@ -84,18 +116,12 @@ bool CombatantTemplateFrame::isKnown()
 void CombatantTemplateFrame::setShowDone(bool showDone)
 {
     _showDone = showDone;
-    if(!_uiWidget)
-        return;
-
-    // Hide the isDone checkbox when the ruleset opts out of "done" tracking.
-    QList<QWidget*> children = _uiWidget->findChildren<QWidget*>();
-    for(QWidget* child : children)
+    if(_base)
     {
-        if(!child)
-            continue;
-        const QString key = child->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
-        if(key == QLatin1String(CombatantTemplateAdapter::KEY_IS_DONE))
-            child->setVisible(_showDone);
+        if(QCheckBox* chk = _base->doneCheckbox())
+            chk->setVisible(_showDone);
+        if(QLabel* lbl = _base->doneIconLabel())
+            lbl->setVisible(_showDone);
     }
 }
 
@@ -177,6 +203,11 @@ bool CombatantTemplateFrame::localEventFilter(QObject* object, QEvent* event)
             showAddConditionMenu(menuEvent->globalPos());
             return true;
         }
+
+        // Any other right-click on the combatant widget → emit context menu signal
+        // so the BattleFrame can show the standard combatant menu.
+        emit contextMenu(_combatant, menuEvent->globalPos());
+        return true;
     }
 
     return TemplateFrame::localEventFilter(object, event);
@@ -289,9 +320,12 @@ bool CombatantTemplateFrame::loadTemplate(const QString& templateFile)
 
     postLoadConfiguration(this, _uiWidget);
 
-    QLayout* outer = layout();
-    if(outer)
-        outer->addWidget(_uiWidget);
+    QFrame* host = _base ? _base->contentFrame() : nullptr;
+    QLayout* hostLayout = host ? host->layout() : nullptr;
+    if(hostLayout)
+        hostLayout->addWidget(_uiWidget);
+    else if(host)
+        _uiWidget->setParent(host);
     else
         _uiWidget->setParent(this);
 
@@ -320,16 +354,28 @@ void CombatantTemplateFrame::rebuildBindings()
 
 void CombatantTemplateFrame::applyIcon()
 {
-    if((!_uiWidget) || (!_combatant))
+    if(!_combatant)
         return;
 
-    QLabel* iconLabel = _uiWidget->findChild<QLabel*>(QString::fromLatin1(COMBATANT_ICON_LABEL));
+    QLabel* iconLabel = _base ? _base->iconLabel() : nullptr;
+    if((!iconLabel) && _uiWidget)
+        iconLabel = _uiWidget->findChild<QLabel*>(QString::fromLatin1(COMBATANT_ICON_LABEL));
     if(!iconLabel)
         return;
 
-    const QPixmap pixmap = _combatant->getIconPixmap(DMHelper::PixmapSize_Thumb);
-    if(!pixmap.isNull())
-        iconLabel->setPixmap(pixmap.scaled(COMBATANT_ICON_SIZE, COMBATANT_ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    const QPixmap pixmap = _combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
+    if(pixmap.isNull())
+        return;
+
+    const qreal dpr = iconLabel->devicePixelRatioF();
+    const QSize labelSize = iconLabel->size();
+    if((labelSize.width() <= 0) || (labelSize.height() <= 0))
+        return;
+
+    const QSize targetPixelSize = labelSize * dpr;
+    QPixmap scaled = pixmap.scaled(targetPixelSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    scaled.setDevicePixelRatio(dpr);
+    iconLabel->setPixmap(scaled);
 }
 
 void CombatantTemplateFrame::applyConditionDecorations()
@@ -480,6 +526,32 @@ void CombatantTemplateFrame::connectModelSignals()
     connect(_combatant, &BattleDialogModelCombatant::conditionsChanged,    this, &CombatantTemplateFrame::handleConditionsChanged);
     connect(_combatant, &BattleDialogModelCombatant::moveUpdated,          this, &CombatantTemplateFrame::updateMove);
     connect(_combatant, &BattleDialogModelCombatant::combatantDoneChanged, this, &CombatantTemplateFrame::updateData);
+
+    // Sync the base shell's checkboxes back from the model when the model
+    // changes via another path (e.g. context menu, scripting).
+    connect(_combatant, &BattleDialogModelCombatant::visibilityChanged, this, [this]() {
+        if(!_base)
+            return;
+        if(QCheckBox* chk = _base->visibleCheckbox())
+        {
+            QSignalBlocker block(chk);
+            chk->setChecked(_combatant->getShown());
+        }
+        if(QCheckBox* chk = _base->knownCheckbox())
+        {
+            QSignalBlocker block(chk);
+            chk->setChecked(_combatant->getKnown());
+        }
+    });
+    connect(_combatant, &BattleDialogModelCombatant::combatantDoneChanged, this, [this]() {
+        if(!_base)
+            return;
+        if(QCheckBox* chk = _base->doneCheckbox())
+        {
+            QSignalBlocker block(chk);
+            chk->setChecked(_combatant->getDone());
+        }
+    });
 
     if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant))
     {

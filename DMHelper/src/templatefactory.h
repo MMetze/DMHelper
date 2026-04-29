@@ -34,6 +34,7 @@ public:
     static const char* TEMPLATE_WIDGET;
     static const char* TEMPLATE_FORMAT;
     static const char* TEMPLATE_COMPUTE;
+    static const char* TEMPLATE_CONDITION;
 
     static const char* TEMPLATEVALUES[TEMPLATETYPE_COUNT];
 
@@ -85,6 +86,7 @@ protected:
     QHash<QWidget*, QMetaObject::Connection> _textConnections;
     QHash<QWidget*, QMetaObject::Connection> _otherConnections;
     QHash<QWidget*, QMetaObject::Connection> _computeConnections;
+    QHash<QWidget*, QMetaObject::Connection> _conditionConnections;
 };
 
 class DMHAttribute
