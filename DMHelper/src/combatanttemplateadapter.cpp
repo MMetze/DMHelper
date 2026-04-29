@@ -98,7 +98,7 @@ QString CombatantTemplateAdapter::getStringValue(const QString& key) const
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
         return QString::number(_combatant->getInitiative());
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED))
-        return QString::number(_combatant->getMoved(), 'g', -1);
+        return QString::number(qRound(_combatant->getMoved()));
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN))
         return _combatant->getShown() ? QStringLiteral("1") : QStringLiteral("0");
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
