@@ -7,27 +7,42 @@
 #include "perroundresource.h"
 #include "dmconstants.h"
 #include <QStringList>
-
-const char* CombatantTemplateAdapter::KEY_NAME                = "name";
-const char* CombatantTemplateAdapter::KEY_INITIATIVE          = "initiative";
-// "moved" is an internal per-round movement counter computed by BattleFrame as
-// tokens are dragged on the scene; it is not an XML attribute. The dmh: prefix
-// guarantees it cannot collide with a ruleset-defined attribute name (XML
-// attribute NCNames cannot contain ':' outside namespace declarations).
-const char* CombatantTemplateAdapter::KEY_MOVED               = "dmh:moved";
-const char* CombatantTemplateAdapter::KEY_IS_SHOWN            = "isShown";
-const char* CombatantTemplateAdapter::KEY_IS_KNOWN            = "isKnown";
-const char* CombatantTemplateAdapter::KEY_IS_DONE             = "isDone";
-const char* CombatantTemplateAdapter::KEY_HP                  = "hitPoints";
-const char* CombatantTemplateAdapter::KEY_AC                  = "armorClass";
-const char* CombatantTemplateAdapter::KEY_CONDITIONS          = "conditions";
-const char* CombatantTemplateAdapter::KEY_PER_ROUND_RESOURCES = "perRoundResources";
+#include <QHash>
 
 const char* CombatantTemplateAdapter::CONDITION_KEY_ID        = "conditionId";
 const char* CombatantTemplateAdapter::RESOURCE_KEY_NAME       = "name";
 const char* CombatantTemplateAdapter::RESOURCE_KEY_MAX        = "max";
 const char* CombatantTemplateAdapter::RESOURCE_KEY_CURRENT    = "current";
 const char* CombatantTemplateAdapter::RESOURCE_KEY_RECHARGE   = "recharge";
+
+// Legacy alias table. The pre-v3 (unprefixed) attribute names map to their
+// canonical dmh:-prefixed equivalents. This table is reserved for
+// XML-level compatibility conversion when reading old campaign/bestiary
+// files; it MUST NOT be applied to runtime adapter lookups. The whole
+// purpose of the dmh: prefix is to keep combatant model state in a separate
+// namespace from arbitrary template attributes, and aliasing at lookup time
+// would defeat that. Runtime callers (.ui dmhValue bindings, signal
+// payloads, etc.) must use the canonical dmh:* key directly.
+const QHash<QString, QString>& CombatantTemplateAdapter::legacyAliasTable()
+{
+    static const QHash<QString, QString> table = {
+        { QStringLiteral("initiative"),        QStringLiteral("dmh:initiative") },
+        { QStringLiteral("isShown"),           QStringLiteral("dmh:isShown") },
+        { QStringLiteral("isKnown"),           QStringLiteral("dmh:isKnown") },
+        { QStringLiteral("isDone"),            QStringLiteral("dmh:isDone") },
+        { QStringLiteral("hitPoints"),         QStringLiteral("dmh:health") },
+        { QStringLiteral("conditions"),        QStringLiteral("dmh:conditions") },
+        { QStringLiteral("perRoundResources"), QStringLiteral("dmh:perRoundResources") }
+    };
+    return table;
+}
+
+QString CombatantTemplateAdapter::canonicalKey(const QString& key)
+{
+    // Identity. Aliasing is reserved for XML compatibility-mode conversion
+    // (see legacyAliasTable). Runtime keys must already be canonical.
+    return key;
+}
 
 CombatantTemplateAdapter::CombatantTemplateAdapter(BattleDialogModelCombatant* combatant, QObject* parent) :
     QObject(parent),
@@ -59,10 +74,11 @@ TemplateObject* CombatantTemplateAdapter::getInner() const
 
 bool CombatantTemplateAdapter::hasValue(const QString& key) const
 {
-    if(isModelKey(key))
+    const QString k = canonicalKey(key);
+    if(isModelKey(k))
         return _combatant != nullptr;
     if(TemplateObject* inner = getInner())
-        return inner->hasValue(key);
+        return inner->hasValue(k);
     return false;
 }
 
@@ -76,25 +92,28 @@ QString CombatantTemplateAdapter::getStringValue(const QString& key) const
     if(!_combatant)
         return QString();
 
-    if(key == QLatin1String(KEY_NAME))
+    const QString k = canonicalKey(key);
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_NAME))
         return _combatant->getName();
-    if(key == QLatin1String(KEY_INITIATIVE))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
         return QString::number(_combatant->getInitiative());
-    if(key == QLatin1String(KEY_MOVED))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED))
         return QString::number(_combatant->getMoved(), 'g', -1);
-    if(key == QLatin1String(KEY_IS_SHOWN))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN))
         return _combatant->getShown() ? QStringLiteral("1") : QStringLiteral("0");
-    if(key == QLatin1String(KEY_IS_KNOWN))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
         return _combatant->getKnown() ? QStringLiteral("1") : QStringLiteral("0");
-    if(key == QLatin1String(KEY_IS_DONE))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_DONE))
         return _combatant->getDone() ? QStringLiteral("1") : QStringLiteral("0");
-    if(key == QLatin1String(KEY_HP))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
         return QString::number(_combatant->getHitPoints());
-    if(key == QLatin1String(KEY_AC))
+    // Armor class is read-only and lives entirely on the underlying class /
+    // character sheet; there is no canonical dmh: key for it.
+    if(key == QLatin1String("armorClass"))
         return QString::number(_combatant->getArmorClass());
 
     if(TemplateObject* inner = getInner())
-        return inner->getStringValue(key);
+        return inner->getStringValue(k);
     return QString();
 }
 
@@ -103,19 +122,20 @@ int CombatantTemplateAdapter::getIntValue(const QString& key) const
     if(!_combatant)
         return 0;
 
-    if(key == QLatin1String(KEY_INITIATIVE))
+    const QString k = canonicalKey(key);
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
         return _combatant->getInitiative();
-    if(key == QLatin1String(KEY_MOVED))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED))
         return static_cast<int>(_combatant->getMoved());
-    if(key == QLatin1String(KEY_HP))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
         return _combatant->getHitPoints();
-    if(key == QLatin1String(KEY_AC))
+    if(key == QLatin1String("armorClass"))
         return _combatant->getArmorClass();
-    if(isModelKey(key))
-        return getStringValue(key).toInt();
+    if(isModelKey(k))
+        return getStringValue(k).toInt();
 
     if(TemplateObject* inner = getInner())
-        return inner->getIntValue(key);
+        return inner->getIntValue(k);
     return 0;
 }
 
@@ -124,15 +144,16 @@ bool CombatantTemplateAdapter::getBoolValue(const QString& key) const
     if(!_combatant)
         return false;
 
-    if(key == QLatin1String(KEY_IS_SHOWN))
+    const QString k = canonicalKey(key);
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN))
         return _combatant->getShown();
-    if(key == QLatin1String(KEY_IS_KNOWN))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
         return _combatant->getKnown();
-    if(key == QLatin1String(KEY_IS_DONE))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_DONE))
         return _combatant->getDone();
 
     if(TemplateObject* inner = getInner())
-        return inner->getBoolValue(key);
+        return inner->getBoolValue(k);
     return false;
 }
 
@@ -141,7 +162,8 @@ QList<QVariant> CombatantTemplateAdapter::getListValue(const QString& key) const
     if(!_combatant)
         return QList<QVariant>();
 
-    if(key == QLatin1String(KEY_CONDITIONS))
+    const QString k = canonicalKey(key);
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CONDITIONS))
     {
         QList<QVariant> result;
         const QStringList conditions = _combatant->getConditionList();
@@ -154,7 +176,7 @@ QList<QVariant> CombatantTemplateAdapter::getListValue(const QString& key) const
         return result;
     }
 
-    if(key == QLatin1String(KEY_PER_ROUND_RESOURCES))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES))
     {
         QList<QVariant> result;
         MonsterClassv2* mc = monsterClass();
@@ -177,7 +199,7 @@ QList<QVariant> CombatantTemplateAdapter::getListValue(const QString& key) const
     }
 
     if(TemplateObject* inner = getInner())
-        return inner->getListValue(key);
+        return inner->getListValue(k);
     return QList<QVariant>();
 }
 
@@ -191,44 +213,45 @@ void CombatantTemplateAdapter::setValue(const QString& key, const QString& value
     if(!_combatant)
         return;
 
-    if(key == QLatin1String(KEY_NAME))
+    const QString k = canonicalKey(key);
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_NAME))
     {
         _combatant->setName(value);
         return;
     }
-    if(key == QLatin1String(KEY_INITIATIVE))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
     {
         _combatant->setInitiative(value.toInt());
         return;
     }
-    if(key == QLatin1String(KEY_MOVED))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED))
     {
         _combatant->setMoved(value.toDouble());
         return;
     }
-    if(key == QLatin1String(KEY_IS_SHOWN))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN))
     {
         _combatant->setShown((value == QLatin1String("1")) || (value.toLower() == QLatin1String("true")));
         return;
     }
-    if(key == QLatin1String(KEY_IS_KNOWN))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
     {
         _combatant->setKnown((value == QLatin1String("1")) || (value.toLower() == QLatin1String("true")));
         return;
     }
-    if(key == QLatin1String(KEY_IS_DONE))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_DONE))
     {
         _combatant->setDone((value == QLatin1String("1")) || (value.toLower() == QLatin1String("true")));
         return;
     }
-    if(key == QLatin1String(KEY_HP))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
     {
         _combatant->setHitPoints(value.toInt());
         return;
     }
 
     if(TemplateObject* inner = getInner())
-        inner->setValue(key, value);
+        inner->setValue(k, value);
 }
 
 void CombatantTemplateAdapter::setListValue(const QString& key, int index, const QString& listEntryKey, const QVariant& listEntryValue)
@@ -236,7 +259,8 @@ void CombatantTemplateAdapter::setListValue(const QString& key, int index, const
     if(!_combatant)
         return;
 
-    if(key == QLatin1String(KEY_PER_ROUND_RESOURCES))
+    const QString k = canonicalKey(key);
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES))
     {
         BattleDialogModelMonsterBase* mb = monsterBase();
         MonsterClassv2* mc = monsterClass();
@@ -255,14 +279,14 @@ void CombatantTemplateAdapter::setListValue(const QString& key, int index, const
         return;
     }
 
-    if(key == QLatin1String(KEY_CONDITIONS))
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CONDITIONS))
     {
         // Conditions are managed via add/remove on the model, not in-place edits.
         return;
     }
 
     if(TemplateObject* inner = getInner())
-        inner->setListValue(key, index, listEntryKey, listEntryValue);
+        inner->setListValue(k, index, listEntryKey, listEntryValue);
 }
 
 void CombatantTemplateAdapter::setListValue(const QString& key, int index, const QString& listEntryKey, const QString& listEntryValue)
@@ -288,16 +312,19 @@ void CombatantTemplateAdapter::declareDirty()
 
 bool CombatantTemplateAdapter::isModelKey(const QString& key) const
 {
-    return (key == QLatin1String(KEY_NAME))
-        || (key == QLatin1String(KEY_INITIATIVE))
-        || (key == QLatin1String(KEY_MOVED))
-        || (key == QLatin1String(KEY_IS_SHOWN))
-        || (key == QLatin1String(KEY_IS_KNOWN))
-        || (key == QLatin1String(KEY_IS_DONE))
-        || (key == QLatin1String(KEY_HP))
-        || (key == QLatin1String(KEY_AC))
-        || (key == QLatin1String(KEY_CONDITIONS))
-        || (key == QLatin1String(KEY_PER_ROUND_RESOURCES));
+    // Recognises only canonical (dmh:-prefixed) keys plus the unprefixed
+    // "armorClass" carve-out. Unprefixed legacy names should be converted at
+    // XML compatibility-mode read sites via legacyAliasTable() — never here.
+    return (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_NAME))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_DONE))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CONDITIONS))
+        || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES))
+        || (key == QLatin1String("armorClass"));
 }
 
 BattleDialogModelMonsterBase* CombatantTemplateAdapter::monsterBase() const

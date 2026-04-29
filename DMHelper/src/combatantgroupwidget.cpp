@@ -100,6 +100,15 @@ bool CombatantGroupWidget::isCollapsed() const
     return _group ? _group->isCollapsed() : false;
 }
 
+void CombatantGroupWidget::setActive(bool active)
+{
+    if(_active == active)
+        return;
+
+    _active = active;
+    update();
+}
+
 void CombatantGroupWidget::updateMasterCheckboxes()
 {
     if(_memberWidgets.isEmpty())
@@ -145,6 +154,31 @@ void CombatantGroupWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void CombatantGroupWidget::paintEvent(QPaintEvent* event)
 {
+    // Header highlight when this group holds initiative. Painted before the
+    // base QFrame::paintEvent so the standard frame border still draws on top.
+    // Colour matches the per-combatant active highlight (see CombatantWidget)
+    // so the visual cue is consistent whether a group or a single combatant
+    // is active.
+    static const QColor ACTIVE_HEADER_COLOR(220, 60, 60, 80);   // soft red wash
+    static const QColor ACTIVE_LINE_COLOR(200, 40, 40);         // bold red for connectors
+    static const QColor INACTIVE_LINE_COLOR(140, 140, 140);     // existing grey
+    static const int    ACTIVE_LINE_WIDTH = 2;
+    static const int    INACTIVE_LINE_WIDTH = 1;
+    static const int    HEADER_HIGHLIGHT_INSET = 1;             // keep frame border visible
+
+    if(_active)
+    {
+        QPainter headerPainter(this);
+        const int headerBottom = ui->contentWidget->isVisible()
+                                 ? ui->contentWidget->y()
+                                 : height();
+        QRect headerRect(HEADER_HIGHLIGHT_INSET,
+                         HEADER_HIGHLIGHT_INSET,
+                         width() - 2 * HEADER_HIGHLIGHT_INSET,
+                         headerBottom - 2 * HEADER_HIGHLIGHT_INSET);
+        headerPainter.fillRect(headerRect, ACTIVE_HEADER_COLOR);
+    }
+
     QFrame::paintEvent(event);
 
     // Only draw the connector when expanded and there are members
@@ -152,8 +186,8 @@ void CombatantGroupWidget::paintEvent(QPaintEvent* event)
         return;
 
     QPainter painter(this);
-    QPen pen(QColor(140, 140, 140));
-    pen.setWidth(1);
+    QPen pen(_active ? ACTIVE_LINE_COLOR : INACTIVE_LINE_COLOR);
+    pen.setWidth(_active ? ACTIVE_LINE_WIDTH : INACTIVE_LINE_WIDTH);
     pen.setStyle(Qt::SolidLine);
     painter.setPen(pen);
 

@@ -1813,6 +1813,18 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
             return false;
     }
 
+    // One-time pre-v3 backup: if the loaded campaign was a pre-v3 file, copy
+    // the on-disk version aside before we overwrite it with the new format. The
+    // canonical "dmh:" key migration is read-only via CombatantTemplateAdapter
+    // alias, but the version stamp itself bumps and older DMHelper builds will
+    // refuse to load the result — the backup gives the user a safety net.
+    if((_campaign->getLoadedMajorVersion() > 0) && (_campaign->getLoadedMajorVersion() < DMHelper::CAMPAIGN_MAJOR_VERSION))
+    {
+        qDebug() << "[MainWindow] Loaded campaign is pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " (was v" << _campaign->getLoadedMajorVersion() << "), writing pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " backup before save.";
+        _options->backupFile(_campaignFileName, QString("pre-v%1").arg(DMHelper::CAMPAIGN_MAJOR_VERSION));
+        _campaign->clearLoadedMajorVersion();
+    }
+
     qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
 
     QDomDocument doc("DMHelperXML");
@@ -2121,6 +2133,31 @@ void MainWindow::openCampaign(const QString& filename)
         if(result == QMessageBox::No)
         {
             qDebug() << "[Campaign] INFO: User chose not to open campaign file due to version incompatibility: " << majorVersion << "." << minorVersion << ", " << filename;
+            return;
+        }
+    }
+    else if((majorVersion > 0) && (majorVersion < DMHelper::CAMPAIGN_MAJOR_VERSION))
+    {
+        // v2 -> v3 transition: combatant attribute keys are now namespaced
+        // ("dmh:health", "dmh:initiative", etc.). Older campaign files using
+        // the unprefixed pre-v3 names will be upgraded via XML
+        // compatibility-mode conversion (see
+        // CombatantTemplateAdapter::legacyAliasTable). On save the file's
+        // majorVersion attribute will be rewritten to the current value
+        // and older DMHelper builds will no longer open it. doSaveCampaign
+        // takes a pre-v3 backup automatically; warn the user up front so they
+        // know what to expect.
+        qDebug() << "[Campaign] INFO: Loading pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " campaign (v" << majorVersion << "." << minorVersion << "); user notified of one-way upgrade.";
+        QMessageBox::StandardButton result = QMessageBox::warning(this,
+                                                                  QString("Campaign file version check"),
+                                                                  QString("This campaign file is from an older version of DM Helper (v%1.%2). It can be opened, but saving will rewrite it in the new v%3 format and older versions of DM Helper will no longer be able to open it.")
+                                                                          .arg(majorVersion).arg(minorVersion).arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
+                                                                      QString("DM Helper will automatically write a pre-v%1 backup of the original file the first time you save, but it is still strongly recommended that you back up your campaign and bestiary files yourself before continuing.").arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
+                                                                      QString("Do you want to continue opening this campaign file?"),
+                                                                  QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[Campaign] INFO: User declined v" << majorVersion << " → v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " upgrade for: " << filename;
             return;
         }
     }

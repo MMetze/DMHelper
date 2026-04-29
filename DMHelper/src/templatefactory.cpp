@@ -4,6 +4,7 @@
 #include "templatefieldformat.h"
 #include "templateframe.h"
 #include "templateresourcelayout.h"
+#include "intfieldkeyhandler.h"
 #include "dice.h"
 #include "combatant.h"
 #include "rulefactory.h"
@@ -333,6 +334,13 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
 
             if(QValidator* validator = TemplateFieldFormat::makeValidator(parsedFormat, lineEdit))
                 lineEdit->setValidator(validator);
+
+            // Integer fields get arrow-key / +/- nudge support so the user can
+            // bump values up and down by one without retyping or reaching for
+            // the mouse. The handler is parented to the line edit so its
+            // lifetime tracks the widget; only attach once per widget.
+            if((parsedFormat.isInt) && (!lineEdit->findChild<IntFieldKeyHandler*>(QString(), Qt::FindDirectChildrenOnly)))
+                new IntFieldKeyHandler(lineEdit, parsedFormat);
 
             if(_lineConnections.contains(lineEdit))
                 disconnect(_lineConnections[lineEdit]);

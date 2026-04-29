@@ -2,6 +2,7 @@
 #include "battledialogmodelcombatant.h"
 #include "initiativelistcombatantwidget.h"
 #include "initiativelistdialog.h"
+#include "dice.h"
 
 QString RuleInitiative5e::InitiativeType = QString("5e");
 QString RuleInitiative5e::InitiativeDescription = QString("D&D 5e Standard Initiative");
@@ -18,6 +19,15 @@ QString RuleInitiative5e::getInitiativeType()
 bool RuleInitiative5e::compareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
 {
     return RuleInitiative5e::CompareCombatants(a, b);
+}
+
+int RuleInitiative5e::rollInitiativeFor(const BattleDialogModelCombatant* combatant) const
+{
+    // D&D 5e initiative: d20 + initiative modifier. The modifier comes from
+    // the underlying template via the shared lookup chain (dmh:initiativeMod
+    // first, then 5e's dex score), so non-D&D rulesets that reuse this style
+    // of initiative do not need to expose a "dexterity" attribute.
+    return Dice::d20() + initiativeModFor(combatant);
 }
 
 bool RuleInitiative5e::internalRollInitiative(QList<BattleDialogModelCombatant*>& combatants, bool previousResult)
@@ -86,9 +96,9 @@ bool RuleInitiative5e::CompareCombatants(const BattleDialogModelCombatant* a, co
     if((!a)||(!b))
         return false;
 
-    // Sort by initiative first, then dexterity
+    // Sort by initiative first, then initiative modifier (system-defined)
     if(a->getInitiative() == b->getInitiative())
-        return a->getDexterity() > b->getDexterity();
+        return RuleInitiative::initiativeModFor(a) > RuleInitiative::initiativeModFor(b);
     else
         return a->getInitiative() > b->getInitiative();
 }

@@ -87,6 +87,17 @@
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
 
+// Fallback combatant-row UI used when the active ruleset does not specify one
+// via Ruleset::getCombatantUIFile() (i.e. the ruleset.xml has no
+// "combatantui" attribute). The 5e layout is the historical default and
+// matches the bundled ruleset.xml. This fallback intentionally lives here
+// rather than in RuleFactory: RuleFactory's DEFAULT_*_UI constants are for
+// constructing a complete RulesetTemplate when an unknown ruleset is
+// requested, whereas this string is the last-resort default specifically
+// for the in-battle combatant row that BattleFrame is responsible for
+// rendering.
+static const char* const DEFAULT_COMBATANT_UI_FILE = "./ui/combatant5e.ui";
+
 static void applyCombatantVisualState(QGraphicsItem* item, BattleDialogModelCombatant* combatant)
 {
     if((!item) || (!combatant))
@@ -3534,7 +3545,16 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
                 BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
                 monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
                 monster->setHitPoints(combatantDlg->getCombatantHitPoints());
-                monster->setInitiative(combatantDlg->isRandomInitiative() ? Dice::d20() + monsterClass->getIntValue("dexterityMod") : localInitiative);
+                if(combatantDlg->isRandomInitiative())
+                {
+                    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+                    RuleInitiative* ruleInitiative = (campaign) ? campaign->getRuleset().getRuleInitiative() : nullptr;
+                    monster->setInitiative((ruleInitiative) ? ruleInitiative->rollInitiativeFor(monster) : Dice::d20());
+                }
+                else
+                {
+                    monster->setInitiative(localInitiative);
+                }
                 monster->setKnown(combatantDlg->isKnown());
                 monster->setShown(combatantDlg->isShown());
                 monster->setSizeFactor(sizeFactor);
@@ -4293,7 +4313,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             const bool doneCheckbox = (campaign) && (campaign->getRuleset().getCombatantDoneCheckbox());
             QString uiFile = (campaign) ? campaign->getRuleset().getCombatantUIFile() : QString();
             if(uiFile.isEmpty())
-                uiFile = QStringLiteral("./ui/combatant5e.ui");
+                uiFile = QString::fromLatin1(DEFAULT_COMBATANT_UI_FILE);
 
             CombatantTemplateFrame* templateFrame = new CombatantTemplateFrame(combatant, doneCheckbox, uiFile, ui->scrollAreaWidgetContents);
             newWidget = templateFrame;
@@ -4563,6 +4583,13 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
             qDebug() << "[Battle Frame] removing active flag from widget " << reinterpret_cast<quint64>(previousWidget);
             previousWidget->setActive(false);
         }
+
+        if(!previousActive->getGroupId().isNull())
+        {
+            CombatantGroupWidget* prevGroupWidget = _groupWidgets.value(previousActive->getGroupId());
+            if(prevGroupWidget)
+                prevGroupWidget->setActive(false);
+        }
     }
     
     CombatantWidget* combatantWidget = getWidgetFromCombatant(active);
@@ -4575,8 +4602,12 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         if(active && !active->getGroupId().isNull())
         {
             CombatantGroupWidget* groupWidget = _groupWidgets.value(active->getGroupId());
-            if(groupWidget && groupWidget->isCollapsed())
-                groupWidget->setCollapsed(false);
+            if(groupWidget)
+            {
+                if(groupWidget->isCollapsed())
+                    groupWidget->setCollapsed(false);
+                groupWidget->setActive(true);
+            }
         }
 
         ui->scrollArea->ensureWidgetVisible(combatantWidget);

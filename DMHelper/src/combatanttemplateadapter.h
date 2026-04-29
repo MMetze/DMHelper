@@ -30,24 +30,24 @@ public:
     BattleDialogModelCombatant* getCombatant() const;
     TemplateObject* getInner() const;
 
-    // Model-side keys exposed by the adapter.
-    static const char* KEY_NAME;
-    static const char* KEY_INITIATIVE;
-    static const char* KEY_MOVED;
-    static const char* KEY_IS_SHOWN;
-    static const char* KEY_IS_KNOWN;
-    static const char* KEY_IS_DONE;
-    static const char* KEY_HP;
-    static const char* KEY_AC;
-    static const char* KEY_CONDITIONS;
-    static const char* KEY_PER_ROUND_RESOURCES;
-
     // Per-list-entry keys for conditions / perRoundResources.
     static const char* CONDITION_KEY_ID;
     static const char* RESOURCE_KEY_NAME;
     static const char* RESOURCE_KEY_MAX;
     static const char* RESOURCE_KEY_CURRENT;
     static const char* RESOURCE_KEY_RECHARGE;
+
+    // Translate a legacy key (e.g. "hitPoints", "armorClass", "initiative") to
+    // its canonical dmh:-prefixed form. Returns the input unchanged if no
+    // alias is registered. Exposed for tests and for callers that want to
+    // pre-normalize keys before storing them.
+    static QString canonicalKey(const QString& key);
+
+    // Legacy alias table for XML-level compatibility conversion only.
+    // Maps pre-v3 unprefixed attribute names ("hitPoints", "initiative",
+    // etc.) to their canonical dmh:-prefixed equivalents. NOT used at
+    // runtime — see canonicalKey() comment in the .cpp.
+    static const QHash<QString, QString>& legacyAliasTable();
 
     // From TemplateObject
     virtual bool hasValue(const QString& key) const override;

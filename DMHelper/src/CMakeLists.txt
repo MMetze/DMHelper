@@ -343,6 +343,7 @@ set(DMHELPER_SOURCES
     templateobject.cpp
     templateobjectnotifier.cpp
     templatefieldformat.cpp
+    intfieldkeyhandler.cpp
     templateresourcelayout.cpp
     textbrowsermargins.cpp
     texteditformatterframe.cpp
@@ -690,6 +691,7 @@ set(DMHELPER_HEADERS
     templateobject.h
     templateobjectnotifier.h
     templatefieldformat.h
+    intfieldkeyhandler.h
     templateresourcelayout.h
     textbrowsermargins.h
     texteditformatterframe.h

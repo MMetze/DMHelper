@@ -224,6 +224,7 @@ void BattleDialogModelMonsterClass::setHitPoints(int hitPoints)
     if(_monsterHP != hitPoints)
     {
         _monsterHP = hitPoints;
+        setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
         emit dataChanged(this);
     }
 }
@@ -275,6 +276,7 @@ void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
     if(_monsterName != monsterName)
     {
         _monsterName = monsterName;
+        setOverride(QString::fromLatin1(DMH_KEY_NAME), monsterName);
         emit dataChanged(this);
     }
 }

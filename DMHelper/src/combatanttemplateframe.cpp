@@ -383,7 +383,7 @@ void CombatantTemplateFrame::applyConditionDecorations()
     if(!_uiWidget)
         return;
 
-    QScrollArea* scrollArea = findScrollArea(QString::fromLatin1(CombatantTemplateAdapter::KEY_CONDITIONS));
+    QScrollArea* scrollArea = findScrollArea(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_CONDITIONS));
     if((!scrollArea) || (!scrollArea->widget()))
         return;
 
@@ -428,7 +428,7 @@ void CombatantTemplateFrame::applyResourceDecorations()
     if(!_uiWidget)
         return;
 
-    QScrollArea* scrollArea = findScrollArea(QString::fromLatin1(CombatantTemplateAdapter::KEY_PER_ROUND_RESOURCES));
+    QScrollArea* scrollArea = findScrollArea(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES));
     if((!scrollArea) || (!scrollArea->widget()))
         return;
 

@@ -105,6 +105,11 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         return;
     }
 
+    // Remember the on-disk version so MainWindow can take a one-time pre-v3
+    // backup before rewriting the file under the new format. Cleared after the
+    // first successful save to avoid stacking duplicate backups.
+    _loadedMajorVersion = majorVersion;
+
     // Load the ruleset; without this we can't load the rest of the campaign
     if(!_ruleset.isInitialized())
         preloadRulesetXML(element, isImport);

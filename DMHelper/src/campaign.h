@@ -69,6 +69,13 @@ public:
     bool isValid() const;
     void cleanupCampaign(bool deleteAll);
 
+    // Major version of the campaign file that was last loaded into this object
+    // (zero if this campaign was created from scratch and has never been read
+    // from disk). MainWindow uses this to decide whether to write a one-time
+    // pre-v3 backup before the first save under the new format.
+    int getLoadedMajorVersion() const { return _loadedMajorVersion; }
+    void clearLoadedMajorVersion() { _loadedMajorVersion = 0; }
+
 signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
@@ -115,6 +122,9 @@ protected:
 
     QList<SoundboardGroup*> _soundboardGroups;
     QList<Overlay*> _overlays;
+
+    // See getLoadedMajorVersion(). Set during inputXML(); not serialised.
+    int _loadedMajorVersion = 0;
 };
 
 #endif // CAMPAIGN_H

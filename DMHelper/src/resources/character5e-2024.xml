@@ -8,7 +8,6 @@
     <dmh:attribute type="dmh:integer" name="row"/>
     <dmh:attribute type="dmh:string" name="dndBeyondID" default="-1"/>
     <dmh:attribute type="dmh:string" name="icon"/>
-    <dmh:attribute type="dmh:integer" name="initiative"/>
     <dmh:attribute type="dmh:string" name="size" default="medium"/>
     <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
     <dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>

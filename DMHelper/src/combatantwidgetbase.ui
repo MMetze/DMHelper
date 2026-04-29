@@ -64,9 +64,6 @@
        <height>50</height>
       </size>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url();</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::Shape::Panel</enum>
      </property>
@@ -129,9 +126,6 @@
          <property name="toolTip">
           <string>Is this character visible?</string>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-image: url();</string>
-         </property>
          <property name="text">
           <string/>
          </property>
@@ -156,10 +150,6 @@
          </property>
          <property name="toolTip">
           <string>Is this character visible?</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-image: url();
-background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string/>
@@ -208,9 +198,6 @@ background-color: rgba(0, 0, 0, 0);</string>
          <property name="toolTip">
           <string>Is this character known?</string>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-image: url();</string>
-         </property>
          <property name="text">
           <string/>
          </property>
@@ -235,10 +222,6 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="toolTip">
           <string>Is this character known?</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-image: url();
-background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string/>
@@ -291,9 +274,6 @@ background-color: rgba(0, 0, 0, 0);</string>
      <property name="toolTip">
       <string>Did this character go yet?</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url();</string>
-     </property>
      <property name="text">
       <string/>
      </property>
@@ -312,10 +292,6 @@ background-color: rgba(0, 0, 0, 0);</string>
     <widget class="QCheckBox" name="chkDone">
      <property name="toolTip">
       <string>Did this character go yet?</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url();
-background-color: rgba(0, 0, 0, 0);</string>
      </property>
      <property name="text">
       <string/>

@@ -1,7 +1,13 @@
 #include "ruleinitiative2e.h"
 #include "battledialogmodelcombatant.h"
+#include "battledialogmodelmonsterbase.h"
+#include "battledialogmodelcharacter.h"
+#include "monsterclassv2.h"
+#include "characterv2.h"
+#include "templateobject.h"
 #include "initiativelistcombatantwidget.h"
 #include "initiativelistdialog.h"
+#include "dice.h"
 
 QString RuleInitiative2e::InitiativeType = QString("2e");
 QString RuleInitiative2e::InitiativeDescription = QString("D&D 2e Standard Initiative");
@@ -84,6 +90,36 @@ void RuleInitiative2e::internalSortInitiative(QList<BattleDialogModelCombatant*>
 void RuleInitiative2e::internalNewRound(QList<BattleDialogModelCombatant*>& combatants)
 {
     rollInitiative(combatants);
+}
+
+int RuleInitiative2e::rollInitiativeFor(const BattleDialogModelCombatant* combatant) const
+{
+    // AD&D 2e initiative: 1d10 + weapon speed factor; LOWER total goes first
+    // (see CompareCombatants). Weapon speed factor lives on the underlying
+    // character / monster sheet under "weaponSpeed" \u2014 unarmed / unequipped
+    // entries default to 0 (no slow-down). Per RAW the Dexterity Reaction
+    // Adjustment does NOT modify the initiative roll — it only affects
+    // surprise checks and missile-attack accuracy — so it is intentionally
+    // not applied here. (Optional 2e rules add casting time to spells, which
+    // also requires per-attack context the rules engine does not yet expose.)
+    if(!combatant)
+        return Dice::d10();
+
+    TemplateObject* tmpl = nullptr;
+    if(const BattleDialogModelMonsterBase* mb = dynamic_cast<const BattleDialogModelMonsterBase*>(combatant))
+        tmpl = mb->getMonsterClass();
+    else if(const BattleDialogModelCharacter* cm = dynamic_cast<const BattleDialogModelCharacter*>(combatant))
+        tmpl = cm->getCharacter();
+
+    int weaponSpeed = 0;
+    if(tmpl)
+    {
+        static const QString KEY_WEAPON_SPEED = QStringLiteral("weaponSpeed");
+        if(tmpl->hasValue(KEY_WEAPON_SPEED))
+            weaponSpeed = tmpl->getIntValue(KEY_WEAPON_SPEED);
+    }
+
+    return Dice::d10() + weaponSpeed;
 }
 
 bool RuleInitiative2e::CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)
