@@ -76,6 +76,7 @@
 #include <QImageReader>
 #include <QMimeDatabase>
 #include <QMimeType>
+#include <qforeach.h>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
@@ -4777,12 +4778,28 @@ CombatantWidget* BattleFrame::getWidgetFromCombatant(BattleDialogModelCombatant*
     if(!combatant)
         return nullptr;
 
-    int pos = _model->getCombatantList().indexOf(combatant);
-    qDebug() << "[Battle Frame] finding widget for combatant " << combatant << " at " << pos;
-    if((pos >= 0) && (pos < _combatantLayout->count()))
-        return dynamic_cast<CombatantWidget*>(_combatantLayout->itemAt(pos)->widget());
-    else
-        return nullptr;
+    // Look up directly via the combatant -> widget map. The previous
+    // implementation indexed `_combatantLayout` by the combatant's position
+    // in `_model->getCombatantList()`, but those two index spaces don't
+    // line up when groups are present: `_combatantLayout` only holds the
+    // top-level rows (ungrouped combatants + one CombatantGroupWidget per
+    // group), while the combatant list contains every group member as a
+    // separate entry. Stepping with "next" would therefore return the wrong
+    // widget once the iterator passed a group, causing the active highlight
+    // to land on the wrong row and the group widget itself to appear active
+    // when no member was actually current.
+    return _combatantWidgets.value(combatant, nullptr);
+    // Look up directly via the combatant -> widget map. The previous
+    // implementation indexed `_combatantLayout` by the combatant's position
+    // in `_model->getCombatantList()`, but those two index spaces don't
+    // line up when groups are present: `_combatantLayout` only holds the
+    // top-level rows (ungrouped combatants + one CombatantGroupWidget per
+    // group), while the combatant list contains every group member as a
+    // separate entry. Stepping with "next" would therefore return the wrong
+    // widget once the iterator passed a group, causing the active highlight
+    // to land on the wrong row and the group widget itself to appear active
+    // when no member was actually current.
+    return _combatantWidgets.value(combatant, nullptr);
 }
 
 void BattleFrame::moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem)
@@ -4810,6 +4827,18 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
 
     if(_combatantLayout->count() <= 1)
         return nullptr;
+
+
+
+// DEBUG
+    QList<BattleDialogModelCombatant*> debug_combatants = _model->getCombatantList();
+    BattleDialogModelCombatant* c;
+    for(int i = 0; i < debug_combatants.count(); ++i)
+        qDebug() << "[DEBUG BATTLEDIALOGMODEL] Combatant " << i << ": " << (debug_combatants.at(i) ? debug_combatants.at(i)->getName() : QString("no name"));
+// DEBUG
+
+
+
 
     BattleDialogModelCombatant* nextCombatant = nullptr;
     do

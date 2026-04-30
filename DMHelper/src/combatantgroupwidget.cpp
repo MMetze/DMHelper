@@ -106,6 +106,15 @@ void CombatantGroupWidget::setActive(bool active)
         return;
 
     _active = active;
+
+    // Active state is currently a no-op visually — BattleFrame still calls
+    // this on turn changes, but we leave the per-row red bar to the
+    // individual CombatantWidget that BattleFrame::setActiveCombatant marks
+    // and don't paint anything group-wide. Painting a group-level highlight
+    // alongside the per-member highlight produced too many red elements; if
+    // a group-active cue is needed in the future, add it here without
+    // touching member CombatantWidget state (see history for an earlier
+    // attempt that introduced an activation-order race).
     update();
 }
 
@@ -178,6 +187,8 @@ void CombatantGroupWidget::paintEvent(QPaintEvent* event)
                          headerBottom - 2 * HEADER_HIGHLIGHT_INSET);
         headerPainter.fillRect(headerRect, ACTIVE_HEADER_COLOR);
     }
+//    static const QColor CONNECTOR_COLOR(140, 140, 140);
+//    static const int    CONNECTOR_WIDTH = 1;
 
     QFrame::paintEvent(event);
 
@@ -188,6 +199,8 @@ void CombatantGroupWidget::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     QPen pen(_active ? ACTIVE_LINE_COLOR : INACTIVE_LINE_COLOR);
     pen.setWidth(_active ? ACTIVE_LINE_WIDTH : INACTIVE_LINE_WIDTH);
+//    QPen pen(CONNECTOR_COLOR);
+//    pen.setWidth(CONNECTOR_WIDTH);
     pen.setStyle(Qt::SolidLine);
     painter.setPen(pen);
 

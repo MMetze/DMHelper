@@ -980,81 +980,51 @@ void BattleDialogModel::sortCombatants()
     if(!ruleInitiative)
         return;
 
-    // First, sort all combatants by individual initiative
-    ruleInitiative->sortInitiative(_combatants);
-
-    // If there are groups, post-process to make grouped combatants contiguous
-    if(!_groups.isEmpty())
-    {
-        // Separate into ungrouped and per-group buckets
-        QList<BattleDialogModelCombatant*> ungrouped;
-        QMap<QUuid, QList<BattleDialogModelCombatant*>> groupBuckets;
-
-        for(BattleDialogModelCombatant* combatant : _combatants)
+    // Sort the flat combatant list with a single comparator. Two rules:
+    //   1. A combatant in a group is placed using the group's own initiative,
+    //      not its individual initiative. Members of the same group always
+    //      end up adjacent because they share the same placement key.
+    //   2. Comparisons within the same group, and tie-breaks between any two
+    //      combatants whose effective initiatives are equal, are delegated to
+    //      RuleInitiative::compareCombatants so each ruleset stays in charge
+    //      of its own ordering rules (5e dex tiebreak, 2e weapon-speed, etc.).
+    auto effectiveInitiative = [this](const BattleDialogModelCombatant* c) -> int {
+        if(!c)
+            return 0;
+        const QUuid gid = c->getGroupId();
+        if(!gid.isNull())
         {
-            if(!combatant)
-                continue;
-
-            QUuid gid = combatant->getGroupId();
-            if(gid.isNull())
-                ungrouped.append(combatant);
-            else
-                groupBuckets[gid].append(combatant);
+            if(BattleDialogModelCombatantGroup* group = getGroup(gid))
+                return group->getInitiative();
         }
+        return c->getInitiative();
+    };
 
-        // Each group bucket is already in initiative-sorted order (from initial sort)
-        // Sort intra-group by individual initiative (already done by the sort above)
+    std::sort(_combatants.begin(), _combatants.end(),
+              [&effectiveInitiative, ruleInitiative]
+              (const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b) {
+        if((!a) || (!b))
+            return false;
 
-        // Build a list of "entries" with their effective initiative for merging
-        // Each entry is either a single ungrouped combatant or an entire group bucket
-        struct SortEntry {
-            int initiative;
-            int dexterity;
-            QList<BattleDialogModelCombatant*> combatants;
-        };
+        const QUuid ga = a->getGroupId();
+        const QUuid gb = b->getGroupId();
 
-        QList<SortEntry> entries;
+        // Same group: ruleset decides intra-group order.
+        if((!ga.isNull()) && (ga == gb))
+            return ruleInitiative->compareCombatants(a, b);
 
-        for(BattleDialogModelCombatant* c : ungrouped)
-        {
-            SortEntry entry;
-            entry.initiative = c->getInitiative();
-            entry.dexterity = c->getDexterity();
-            entry.combatants.append(c);
-            entries.append(entry);
-        }
+        const int ia = effectiveInitiative(a);
+        const int ib = effectiveInitiative(b);
+        if(ia != ib)
+            return ia > ib;
 
-        for(auto it = groupBuckets.begin(); it != groupBuckets.end(); ++it)
-        {
-            BattleDialogModelCombatantGroup* group = getGroup(it.key());
-            if(!group || it.value().isEmpty())
-                continue;
+        // Same effective initiative across different groups (or one
+        // ungrouped): fall through to the ruleset comparator for a
+        // deterministic tiebreak.
+        return ruleInitiative->compareCombatants(a, b);
+    });
 
-            SortEntry entry;
-            entry.initiative = group->getInitiative();
-            // Use the highest dexterity in the group for tiebreaking
-            entry.dexterity = 0;
-            for(BattleDialogModelCombatant* c : it.value())
-            {
-                if(c->getDexterity() > entry.dexterity)
-                    entry.dexterity = c->getDexterity();
-            }
-            entry.combatants = it.value();
-            entries.append(entry);
-        }
-
-        // Sort entries by initiative (descending), then dexterity (descending)
-        std::sort(entries.begin(), entries.end(), [](const SortEntry& a, const SortEntry& b) {
-            if(a.initiative == b.initiative)
-                return a.dexterity > b.dexterity;
-            return a.initiative > b.initiative;
-        });
-
-        // Rebuild the flat list
-        _combatants.clear();
-        for(const SortEntry& entry : entries)
-            _combatants.append(entry.combatants);
-    }
+    resetCombatantSortValues();
 
     emit initiativeOrderChanged();
     emit dirty();
