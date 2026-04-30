@@ -1,63 +1,17 @@
 #include "spellbook.h"
-#include "spell.h"
 #include "spellv2.h"
 #include "spellv2converter.h"
 #include "dmversion.h"
+#include <QDomDocument>
+#include <QDomElement>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QStringConverter>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QDebug>
 
-/*
- *         <spell
-                <name
-                <level
-                <school
-                <time
-                <range
-                <components
-                <duration
-                <classes
-                <text
-                <text /
-                <roll
-                <effect
-                    <token
-        </spell
-                <ritual
-*/
-/*
-
-<root>
-    <element>
-          <casting_time/>
-          <classes>
-                <element/>
-          </classees>
-          <components>
-                <raw/>
-                <verbal/>
-                <somatic/>
-                <material/>
-                <materials_needed>
-                      <element/>
-                </materials_needed>
-          </components>
-          <description/>
-          <duration/>
-          <higher_levels/>
-          <level/>
-          <name/>
-          <range/>
-          <ritual/>
-          <school/>
-          <tags>
-                <element/>
-          </tages>
-          <type/>
-    </element>
-</root>
-
- */
 Spellbook* Spellbook::_instance = nullptr;
 
 Spellbook::Spellbook(QObject *parent) :
@@ -270,9 +224,19 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
     qDebug() << "[Spellbook]    Spellbook version: " << getVersion();
     if(!isVersionCompatible())
     {
-        qDebug() << "[Spellbook]    ERROR: Spellbook version is not compatible with expected version: " << getExpectedVersion();
-        if(_majorVersion == 9999)
-            input_START_CONVERSION(spellbookElement);
+        qDebug() << "[Spellbook]    Spellbook version is not compatible with expected version: " << getExpectedVersion();
+        if((_majorVersion > 0) && (_majorVersion < DMHelper::SPELLBOOK_MAJOR_VERSION))
+        {
+            // Older major version: run each <spell> through the legacy parser
+            // via Spellv2Converter so the in-memory representation matches the
+            // current Spellv2 schema. Mirrors Bestiary::loadAndConvertBestiary.
+            loadAndConvertSpellbook(spellbookElement);
+            emit changed();
+        }
+        else
+        {
+            qDebug() << "[Spellbook]    ERROR: Spellbook version is newer than this build supports - aborting load.";
+        }
         return;
     }
 
@@ -356,12 +320,9 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
     emit changed();
 }
 
-void Spellbook::input_START_CONVERSION(const QDomElement &element)
+void Spellbook::loadAndConvertSpellbook(const QDomElement &spellbookElement)
 {
-    if(element.isNull())
-        return;
-
-    qDebug() << "[Spellbook] CONVERTING spellbook...";
+    qDebug() << "[Spellbook] Loading and converting spellbook from version " << getVersion();
 
     if(_spellbookMap.count() > 0)
     {
@@ -370,37 +331,28 @@ void Spellbook::input_START_CONVERSION(const QDomElement &element)
         _spellbookMap.clear();
     }
 
-    QDomElement spellElement = element.firstChildElement(QString("element"));
+    QDomElement spellElement = spellbookElement.firstChildElement(QString("spell"));
     while(!spellElement.isNull())
     {
-        // Build a temporary legacy Spell that runs the converter parser, then
-        // copy its fields into a fresh Spellv2 via Spellv2Converter (which uses
-        // the legacy Spell parser internally on a synthetic element).
-        Spell* legacy = new Spell(QString());
-        legacy->inputXML_CONVERT(spellElement);
-
-        Spellv2* spell = new Spellv2(legacy->getName());
-        spell->beginBatchChanges();
-        spell->setLevel(legacy->getLevel());
-        spell->setSchool(legacy->getSchool());
-        spell->setTime(legacy->getTime());
-        spell->setRange(legacy->getRange());
-        spell->setComponents(legacy->getComponents());
-        spell->setDuration(legacy->getDuration());
-        spell->setClasses(legacy->getClasses());
-        spell->setDescription(legacy->getDescription());
-        spell->setRitual(legacy->isRitual());
-        spell->setRolls(legacy->getRolls());
-        spell->endBatchChanges();
-        delete legacy;
-
+        Spellv2* spell = new Spellv2Converter(spellElement);
         insertSpell(spell);
-        spellElement = spellElement.nextSiblingElement(QString("element"));
+        spellElement = spellElement.nextSiblingElement(QString("spell"));
     }
 
-    qDebug() << "[Spellbook] ... spellbook CONVERTED";
+    QDomElement licenseElement = spellbookElement.firstChildElement(QString("license"));
+    if(!licenseElement.isNull())
+    {
+        QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
+        while(!licenseText.isNull())
+        {
+            if(!_licenseText.contains(licenseText.text()))
+                _licenseText.append(licenseText.text());
+            licenseText = licenseText.nextSiblingElement(QString("element"));
+        }
+    }
 
-    emit changed();
+    qDebug() << "[Spellbook] Loading and converting spellbook completed. " << _spellbookMap.count() << " spells loaded.";
+    setDirty(false);
 }
 
 QString Spellbook::getVersion() const
