@@ -48,6 +48,7 @@ public slots:
 protected:
     // From QWidget
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
+    virtual void contextMenuEvent(QContextMenuEvent* event) override;
 
     // From QObject
     virtual bool eventFilter(QObject* watched, QEvent* event) override;

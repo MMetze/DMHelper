@@ -7,6 +7,10 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPen>
+#include <QStyle>
+#include <QStyleOption>
+#include <QToolButton>
+#include <QCoreApplication>
 
 CombatantGroupWidget::CombatantGroupWidget(BattleDialogModelCombatantGroup* group, QWidget *parent) :
     QFrame(parent),
@@ -29,6 +33,12 @@ CombatantGroupWidget::CombatantGroupWidget(BattleDialogModelCombatantGroup* grou
     connect(ui->edtGroupInit, &QLineEdit::textChanged, this, &CombatantGroupWidget::handleInitiativeChanged);
     connect(ui->chkVisible, &QCheckBox::clicked, this, &CombatantGroupWidget::handleVisibleClicked);
     connect(ui->chkKnown, &QCheckBox::clicked, this, &CombatantGroupWidget::handleKnownClicked);
+
+    // Active-group cue is painted by overpainting btnCollapse via eventFilter
+    // (see eventFilter / setActive). Stylesheets on a child of the parchment
+    // parent flip the chrome to QStyleSheetStyle and bleed defaults; palette
+    // tweaks are ignored by styles that draw their own button frames.
+    ui->btnCollapse->installEventFilter(this);
 }
 
 CombatantGroupWidget::~CombatantGroupWidget()
@@ -107,14 +117,9 @@ void CombatantGroupWidget::setActive(bool active)
 
     _active = active;
 
-    // Active state is currently a no-op visually — BattleFrame still calls
-    // this on turn changes, but we leave the per-row red bar to the
-    // individual CombatantWidget that BattleFrame::setActiveCombatant marks
-    // and don't paint anything group-wide. Painting a group-level highlight
-    // alongside the per-member highlight produced too many red elements; if
-    // a group-active cue is needed in the future, add it here without
-    // touching member CombatantWidget state (see history for an earlier
-    // attempt that introduced an activation-order race).
+    if(ui && ui->btnCollapse)
+        ui->btnCollapse->update();
+
     update();
 }
 
@@ -149,6 +154,52 @@ void CombatantGroupWidget::contextMenuEvent(QContextMenuEvent* event)
         emit contextMenu(_group, event->globalPos());
 }
 
+bool CombatantGroupWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    // When this group is the active initiative holder, overpaint btnCollapse
+    // with a solid red rect and a white arrow AFTER the style has finished
+    // drawing the button. Doing this in the parent's paintEvent doesn't work
+    // (children paint after the parent) and stylesheet/palette approaches are
+    // either bled by the parchment theme or ignored by the active style.
+    if((_active) && (ui) && (watched == ui->btnCollapse) && (event) && (event->type() == QEvent::Paint))
+    {
+        // Let the button paint itself first so any focus/press feedback is
+        // preserved underneath, then overpaint our active cue on top.
+        ui->btnCollapse->removeEventFilter(this);
+        QCoreApplication::sendEvent(ui->btnCollapse, event);
+        ui->btnCollapse->installEventFilter(this);
+
+        static const QColor ACTIVE_BUTTON_COLOR(200, 40, 40);
+        QPainter painter(ui->btnCollapse);
+        painter.fillRect(ui->btnCollapse->rect(), ACTIVE_BUTTON_COLOR);
+
+        // Re-render the style's own arrow primitive on top, but with a palette
+        // forced to white text so the existing arrow shape matches what the
+        // user is used to seeing — just tinted for the active state.
+        QStyleOption arrowOpt;
+        arrowOpt.initFrom(ui->btnCollapse);
+        arrowOpt.rect = ui->btnCollapse->rect();
+        arrowOpt.palette.setColor(QPalette::ButtonText, Qt::white);
+        arrowOpt.palette.setColor(QPalette::WindowText, Qt::white);
+        arrowOpt.palette.setColor(QPalette::Text, Qt::white);
+
+        QStyle::PrimitiveElement pe = QStyle::PE_IndicatorArrowRight;
+        switch(ui->btnCollapse->arrowType())
+        {
+            case Qt::DownArrow:  pe = QStyle::PE_IndicatorArrowDown;  break;
+            case Qt::UpArrow:    pe = QStyle::PE_IndicatorArrowUp;    break;
+            case Qt::LeftArrow:  pe = QStyle::PE_IndicatorArrowLeft;  break;
+            case Qt::RightArrow:
+            case Qt::NoArrow:
+            default:             pe = QStyle::PE_IndicatorArrowRight; break;
+        }
+        ui->btnCollapse->style()->drawPrimitive(pe, &arrowOpt, &painter, ui->btnCollapse);
+        return true;
+    }
+
+    return QFrame::eventFilter(watched, event);
+}
+
 void CombatantGroupWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     if(event && event->button() == Qt::LeftButton)
@@ -163,32 +214,10 @@ void CombatantGroupWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void CombatantGroupWidget::paintEvent(QPaintEvent* event)
 {
-    // Header highlight when this group holds initiative. Painted before the
-    // base QFrame::paintEvent so the standard frame border still draws on top.
-    // Colour matches the per-combatant active highlight (see CombatantWidget)
-    // so the visual cue is consistent whether a group or a single combatant
-    // is active.
-    static const QColor ACTIVE_HEADER_COLOR(220, 60, 60, 80);   // soft red wash
     static const QColor ACTIVE_LINE_COLOR(200, 40, 40);         // bold red for connectors
     static const QColor INACTIVE_LINE_COLOR(140, 140, 140);     // existing grey
     static const int    ACTIVE_LINE_WIDTH = 2;
     static const int    INACTIVE_LINE_WIDTH = 1;
-    static const int    HEADER_HIGHLIGHT_INSET = 1;             // keep frame border visible
-
-    if(_active)
-    {
-        QPainter headerPainter(this);
-        const int headerBottom = ui->contentWidget->isVisible()
-                                 ? ui->contentWidget->y()
-                                 : height();
-        QRect headerRect(HEADER_HIGHLIGHT_INSET,
-                         HEADER_HIGHLIGHT_INSET,
-                         width() - 2 * HEADER_HIGHLIGHT_INSET,
-                         headerBottom - 2 * HEADER_HIGHLIGHT_INSET);
-        headerPainter.fillRect(headerRect, ACTIVE_HEADER_COLOR);
-    }
-//    static const QColor CONNECTOR_COLOR(140, 140, 140);
-//    static const int    CONNECTOR_WIDTH = 1;
 
     QFrame::paintEvent(event);
 
@@ -199,8 +228,6 @@ void CombatantGroupWidget::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     QPen pen(_active ? ACTIVE_LINE_COLOR : INACTIVE_LINE_COLOR);
     pen.setWidth(_active ? ACTIVE_LINE_WIDTH : INACTIVE_LINE_WIDTH);
-//    QPen pen(CONNECTOR_COLOR);
-//    pen.setWidth(CONNECTOR_WIDTH);
     pen.setStyle(Qt::SolidLine);
     painter.setPen(pen);
 

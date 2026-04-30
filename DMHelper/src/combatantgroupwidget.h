@@ -47,6 +47,7 @@ protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private slots:
     void handleCollapseToggled(bool checked);

@@ -168,6 +168,21 @@ void CombatantTemplateFrame::mouseDoubleClickEvent(QMouseEvent* event)
     emitDoubleClickSignal();
 }
 
+void CombatantTemplateFrame::contextMenuEvent(QContextMenuEvent* event)
+{
+    // Right-click on the widget body (anywhere not handled by an installed
+    // child event filter) opens the standard combatant context menu in
+    // BattleFrame.
+    if((event) && (_combatant))
+    {
+        emit contextMenu(_combatant, event->globalPos());
+        event->accept();
+        return;
+    }
+
+    CombatantWidget::contextMenuEvent(event);
+}
+
 QObject* CombatantTemplateFrame::getFrameObject()
 {
     return this;

@@ -4828,18 +4828,6 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     if(_combatantLayout->count() <= 1)
         return nullptr;
 
-
-
-// DEBUG
-    QList<BattleDialogModelCombatant*> debug_combatants = _model->getCombatantList();
-    BattleDialogModelCombatant* c;
-    for(int i = 0; i < debug_combatants.count(); ++i)
-        qDebug() << "[DEBUG BATTLEDIALOGMODEL] Combatant " << i << ": " << (debug_combatants.at(i) ? debug_combatants.at(i)->getName() : QString("no name"));
-// DEBUG
-
-
-
-
     BattleDialogModelCombatant* nextCombatant = nullptr;
     do
     {

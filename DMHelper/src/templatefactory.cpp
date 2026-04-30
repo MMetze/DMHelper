@@ -380,14 +380,24 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         if(valueString.isEmpty())
             valueString = getDefaultValue(keyString);
 
-        const int existingIndex = comboBox->findText(valueString);
-        if(existingIndex >= 0)
-            comboBox->setCurrentIndex(existingIndex);
-        else if(comboBox->isEditable())
-            comboBox->setCurrentText(valueString);
-
+        // Disconnect any prior write-back connection BEFORE updating the widget
+        // value, otherwise programmatic setCurrentIndex / setCurrentText will fire
+        // the previous lambda (still wired to a stale source) and falsely mark
+        // that source dirty.
         if(_otherConnections.contains(comboBox))
+        {
             disconnect(_otherConnections[comboBox]);
+            _otherConnections.remove(comboBox);
+        }
+
+        {
+            QSignalBlocker blocker(comboBox);
+            const int existingIndex = comboBox->findText(valueString);
+            if(existingIndex >= 0)
+                comboBox->setCurrentIndex(existingIndex);
+            else if(comboBox->isEditable())
+                comboBox->setCurrentText(valueString);
+        }
 
         auto conn = connect(comboBox, &QComboBox::currentTextChanged, comboBox,
             [comboBox, templateFrame, source](const QString& text) {
@@ -413,10 +423,19 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         else
             intValue = source->getIntValue(keyString);
 
-        spinBox->setValue(intValue);
-
+        // Disconnect any prior write-back connection BEFORE setValue, otherwise
+        // the previous lambda (still bound to a stale source) fires and falsely
+        // marks that source dirty.
         if(_otherConnections.contains(spinBox))
+        {
             disconnect(_otherConnections[spinBox]);
+            _otherConnections.remove(spinBox);
+        }
+
+        {
+            QSignalBlocker blocker(spinBox);
+            spinBox->setValue(intValue);
+        }
 
         auto conn = connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), spinBox,
             [spinBox, templateFrame, source](int v) {
@@ -478,11 +497,21 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 valueString = source->getValueAsString(keyString);
             }
 
-            textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
-            textEdit->moveCursor(QTextCursor::Start);
-
+            // Disconnect any prior write-back connection BEFORE setHtml, otherwise
+            // the textChanged signal from the programmatic update will fire the
+            // previous lambda (still bound to a stale source) and falsely mark
+            // that source dirty.
             if(_textConnections.contains(textEdit))
+            {
                 disconnect(_textConnections[textEdit]);
+                _textConnections.remove(textEdit);
+            }
+
+            {
+                QSignalBlocker blocker(textEdit);
+                textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
+                textEdit->moveCursor(QTextCursor::Start);
+            }
 
             auto connection = connect(textEdit, &QTextEdit::textChanged, textEdit, [=]() { templateFrame->handleEditBoxChange(textEdit, source, textEdit->toPlainText().isEmpty() ? QString() : textEdit->toHtml()); });
             _textConnections[textEdit] = connection;
