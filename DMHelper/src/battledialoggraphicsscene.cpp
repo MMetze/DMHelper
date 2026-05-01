@@ -542,7 +542,18 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(edtItem, SIGNAL(triggered()), this, SLOT(editItem()));
                 menu.addAction(edtItem);
 
-                QAction* deleteItem = new QAction(QString("Delete Effect..."), &menu);
+                int selectedEffectCount = 0;
+                const QList<QGraphicsItem*> selectedForMenu = selectedItems();
+                if(selectedForMenu.contains(item))
+                {
+                    foreach(QGraphicsItem* selItem, selectedForMenu)
+                    {
+                        if((selItem) && (!BattleDialogModelEffect::getEffectIdFromItem(selItem).isNull()))
+                            ++selectedEffectCount;
+                    }
+                }
+                const QString deleteLabel = (selectedEffectCount > 1) ? QString("Delete Effects...") : QString("Delete Effect...");
+                QAction* deleteItem = new QAction(deleteLabel, &menu);
                 connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
 
@@ -1017,46 +1028,84 @@ void BattleDialogGraphicsScene::deleteItem()
         return;
     }
 
-    if(!_contextMenuItem)
+    // Build the candidate item list. A right-click on an item that is NOT part of the
+    // current selection acts on just that item (standard Qt convention); otherwise
+    // operate on all currently selected items. Falls back to the context-menu item if
+    // there is no selection at all (e.g. menu invocation on a non-selectable container).
+    QList<QGraphicsItem*> candidates;
+    const QList<QGraphicsItem*> selected = selectedItems();
+    if((_contextMenuItem) && (!selected.contains(_contextMenuItem)))
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no context menu item known!";
-        return;
+        candidates.append(_contextMenuItem);
+    }
+    else if(!selected.isEmpty())
+    {
+        candidates = selected;
+    }
+    else if(_contextMenuItem)
+    {
+        candidates.append(_contextMenuItem);
     }
 
-    QGraphicsItem* deleteItem = _contextMenuItem;
-    const QList<QGraphicsItem*> deleteChildItems = deleteItem->childItems();
-    for(QGraphicsItem* childItem : deleteChildItems)
+    // Resolve each candidate to its effect, descending into the area child item when
+    // present (matches the legacy single-delete behaviour). Skip non-effect items so a
+    // mixed selection cannot accidentally remove combatants. De-duplicate so a parent
+    // and its area child are not deleted twice.
+    QList<BattleDialogModelEffect*> effectsToDelete;
+    QList<QGraphicsItem*> resolvedItems;
+    foreach(QGraphicsItem* candidate, candidates)
     {
-        if(childItem->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
-            deleteItem = childItem;
-    }
+        if(!candidate)
+            continue;
 
-    if(!deleteItem)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, unexpected error finding the right item to delete!";
-        return;
-    }
-
-    BattleDialogModelEffect* deleteEffect = BattleDialogModelEffect::getEffectFromItem(deleteItem);
-    if(!deleteEffect)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << deleteItem;
-        return;
-    }
-
-    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("Confirm Delete Effect"), QString("Are you sure you wish to delete this effect?"), QMessageBox::Yes | QMessageBox::No);
-    if(result == QMessageBox::Yes)
-    {
-#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
-        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
-#endif
-        if(_mouseDownItem == _contextMenuItem)
+        QGraphicsItem* resolved = candidate;
+        const QList<QGraphicsItem*> childItems = resolved->childItems();
+        for(QGraphicsItem* childItem : childItems)
         {
-            _mouseDown = false;
-            _mouseDownItem = nullptr;
+            if(childItem->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
+                resolved = childItem;
         }
-        _model->removeEffect(deleteEffect);
+
+        BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(resolved);
+        if((effect) && (!effectsToDelete.contains(effect)))
+        {
+            effectsToDelete.append(effect);
+            resolvedItems.append(resolved);
+            if(resolved != candidate)
+                resolvedItems.append(candidate);
+        }
     }
+
+    if(effectsToDelete.isEmpty())
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete effect, no effect items found in selection!";
+        return;
+    }
+
+    const QString prompt = (effectsToDelete.size() == 1)
+        ? QString("Are you sure you wish to delete this effect?")
+        : QString("Are you sure you wish to delete these %1 effects?").arg(effectsToDelete.size());
+    const QString title = (effectsToDelete.size() == 1) ? QString("Confirm Delete Effect") : QString("Confirm Delete Effects");
+    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, title, prompt, QMessageBox::Yes | QMessageBox::No);
+    if(result != QMessageBox::Yes)
+        return;
+
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
+    qDebug() << "[Battle Dialog Scene] confirmed deleting " << effectsToDelete.size() << " effect(s)";
+#endif
+
+    if((_mouseDownItem) && (resolvedItems.contains(_mouseDownItem)))
+    {
+        _mouseDown = false;
+        _mouseDownItem = nullptr;
+    }
+
+    foreach(BattleDialogModelEffect* effect, effectsToDelete)
+    {
+        _model->removeEffect(effect);
+    }
+
+    _contextMenuItem = nullptr;
 }
 
 void BattleDialogGraphicsScene::linkItem()
@@ -1341,6 +1390,31 @@ void BattleDialogGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
     {
         _spaceDown = true;
         emit mapMoveToggled();
+    }
+
+    if((keyEvent) && (!keyEvent->isAutoRepeat()) &&
+       ((keyEvent->key() == Qt::Key_Delete) || (keyEvent->key() == Qt::Key_Backspace)))
+    {
+        // Only swallow the event if at least one selected item is an effect; this keeps
+        // combatants and other non-effect items unaffected by the Delete shortcut.
+        bool hasEffectSelected = false;
+        const QList<QGraphicsItem*> selected = selectedItems();
+        foreach(QGraphicsItem* item, selected)
+        {
+            if((item) && (!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
+            {
+                hasEffectSelected = true;
+                break;
+            }
+        }
+
+        if(hasEffectSelected)
+        {
+            _contextMenuItem = nullptr;
+            keyEvent->accept();
+            deleteItem();
+            return;
+        }
     }
 
     QGraphicsScene::keyPressEvent(keyEvent);

@@ -125,16 +125,16 @@ void PublishFrame::resizeEvent(QResizeEvent * event)
 
 void PublishFrame::mousePressEvent(QMouseEvent *event)
 {
-    QPointF position((event->localPos().x() - _label->x()) / _label->width(),
-                     (event->localPos().y() - _label->y()) / _label->height());
+    QPointF position((event->position().x() - _label->x()) / _label->width(),
+                     (event->position().y() - _label->y()) / _label->height());
 
     emit publishMouseDown(position);
 }
 
 void PublishFrame::mouseMoveEvent(QMouseEvent * event)
 {
-    _arrowPosition.setX((event->localPos().x() - _label->x()) / _label->width());
-    _arrowPosition.setY((event->localPos().y() - _label->y()) / _label->height());
+    _arrowPosition.setX((event->position().x() - _label->x()) / _label->width());
+    _arrowPosition.setY((event->position().y() - _label->y()) / _label->height());
 
     if(_arrowVisible)
         emit positionChanged(_arrowPosition);
@@ -146,8 +146,8 @@ void PublishFrame::mouseMoveEvent(QMouseEvent * event)
 
 void PublishFrame::mouseReleaseEvent(QMouseEvent * event)
 {
-    QPointF position((event->localPos().x() - _label->x()) / _label->width(),
-                     (event->localPos().y() - _label->y()) / _label->height());
+    QPointF position((event->position().x() - _label->x()) / _label->width(),
+                     (event->position().y() - _label->y()) / _label->height());
 
     emit publishMouseRelease(position);
 }

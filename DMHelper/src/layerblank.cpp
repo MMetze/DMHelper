@@ -31,7 +31,7 @@ LayerBlank::~LayerBlank()
 
 void LayerBlank::inputXML(const QDomElement &element, bool isImport)
 {
-    _color.setNamedColor(element.attribute("color", QString("#000000")));
+    _color = QColor::fromString(element.attribute("color", QString("#000000")));
     Layer::inputXML(element, isImport);
 }
 
