@@ -6,322 +6,448 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>660</width>
-    <height>720</height>
+    <width>670</width>
+    <height>446</height>
    </rect>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="lblName">
-     <property name="text">
-      <string>Name:</string>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <widget class="QLineEdit" name="name">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QLineEdit" name="edtName">
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+       <pointsize>18</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>name</string>
+     </property>
      <property name="dmhValue" stdset="0">
       <string>name</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="lblLevel">
-     <property name="text">
-      <string>Level:</string>
+   <item>
+    <widget class="Line" name="line">
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QSpinBox" name="spnLevel">
-     <property name="minimum">
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>-1</number>
+     </property>
+     <property name="midLineWidth">
       <number>0</number>
      </property>
-     <property name="maximum">
-      <number>9</number>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>level</string>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="lblSchool">
-     <property name="text">
-      <string>School:</string>
-     </property>
-    </widget>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblLevel">
+         <property name="text">
+          <string>Level:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="spnLevel">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>9</number>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>level</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblSchool">
+         <property name="text">
+          <string>School:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="edtSchool">
+         <property name="dmhValue" stdset="0">
+          <string>school</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblTime">
+         <property name="text">
+          <string>Casting Time:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="edtTime">
+         <property name="dmhValue" stdset="0">
+          <string>time</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblRange">
+         <property name="text">
+          <string>Range:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="edtRange">
+         <property name="dmhValue" stdset="0">
+          <string>range</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblComponents">
+         <property name="text">
+          <string>Components:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="edtComponents">
+         <property name="dmhValue" stdset="0">
+          <string>components</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblDuration">
+         <property name="text">
+          <string>Duration:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="edtDuration">
+         <property name="dmhValue" stdset="0">
+          <string>duration</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblClasses">
+         <property name="text">
+          <string>Classes:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="edtClasses">
+         <property name="dmhValue" stdset="0">
+          <string>classes</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblRitual">
+         <property name="text">
+          <string>Ritual:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="chkRitual">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>ritual</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblRolls">
+         <property name="text">
+          <string>Rolls:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="edtRolls">
+         <property name="toolTip">
+          <string>Comma-separated dice expressions, e.g. 8d6,2d10</string>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>rolls</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
-   <item row="2" column="1">
-    <widget class="QLineEdit" name="edtSchool">
-     <property name="dmhValue" stdset="0">
-      <string>school</string>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="lblTime">
-     <property name="text">
-      <string>Casting Time:</string>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QLineEdit" name="edtTime">
-     <property name="dmhValue" stdset="0">
-      <string>time</string>
+     <property name="lineWidth">
+      <number>-1</number>
      </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="lblRange">
-     <property name="text">
-      <string>Range:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QLineEdit" name="edtRange">
-     <property name="dmhValue" stdset="0">
-      <string>range</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="lblComponents">
-     <property name="text">
-      <string>Components:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QLineEdit" name="edtComponents">
-     <property name="dmhValue" stdset="0">
-      <string>components</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QLabel" name="lblDuration">
-     <property name="text">
-      <string>Duration:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="QLineEdit" name="edtDuration">
-     <property name="dmhValue" stdset="0">
-      <string>duration</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
-    <widget class="QLabel" name="lblClasses">
-     <property name="text">
-      <string>Classes:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="1">
-    <widget class="QLineEdit" name="edtClasses">
-     <property name="dmhValue" stdset="0">
-      <string>classes</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0">
-    <widget class="QLabel" name="lblRitual">
-     <property name="text">
-      <string>Ritual:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="1">
-    <widget class="QCheckBox" name="chkRitual">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>ritual</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="lblRolls">
-     <property name="text">
-      <string>Rolls:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="1">
-    <widget class="QLineEdit" name="edtRolls">
-     <property name="toolTip">
-      <string>Comma-separated dice expressions, e.g. 8d6,2d10</string>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>rolls</string>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="0">
-    <widget class="QLabel" name="lblDescription">
-     <property name="text">
-      <string>Description:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="1">
-    <widget class="QTextEdit" name="txtDescription">
-     <property name="dmhValue" stdset="0">
-      <string>description</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0" colspan="2">
-    <widget class="QLabel" name="lblEffectHeader">
-     <property name="text">
-      <string>--- Effect ---</string>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="0">
-    <widget class="QLabel" name="lblEffectType">
-     <property name="text">
-      <string>Effect Type:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="1">
-    <widget class="QSpinBox" name="spnEffectType">
-     <property name="minimum">
+     <property name="midLineWidth">
       <number>0</number>
      </property>
-     <property name="maximum">
-      <number>16</number>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>effect_type</string>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="13" column="0">
-    <widget class="QLabel" name="lblEffectShape">
-     <property name="text">
-      <string>Effect Shape Active:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="13" column="1">
-    <widget class="QCheckBox" name="chkEffectShape">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>effect_shape_active</string>
-     </property>
-    </widget>
-   </item>
-   <item row="14" column="0">
-    <widget class="QLabel" name="lblEffectSizeW">
-     <property name="text">
-      <string>Effect Size (W):</string>
-     </property>
-    </widget>
-   </item>
-   <item row="14" column="1">
-    <widget class="QSpinBox" name="spnEffectSizeW">
-     <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>1000</number>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>effect_size_w</string>
-     </property>
-    </widget>
-   </item>
-   <item row="15" column="0">
-    <widget class="QLabel" name="lblEffectSizeH">
-     <property name="text">
-      <string>Effect Size (H):</string>
-     </property>
-    </widget>
-   </item>
-   <item row="15" column="1">
-    <widget class="QSpinBox" name="spnEffectSizeH">
-     <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>1000</number>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>effect_size_h</string>
-     </property>
-    </widget>
-   </item>
-   <item row="16" column="0">
-    <widget class="QLabel" name="lblEffectColor">
-     <property name="text">
-      <string>Effect Color (#AARRGGBB):</string>
-     </property>
-    </widget>
-   </item>
-   <item row="16" column="1">
-    <widget class="QLineEdit" name="edtEffectColor">
-     <property name="dmhValue" stdset="0">
-      <string>effect_color</string>
-     </property>
-    </widget>
-   </item>
-   <item row="17" column="0">
-    <widget class="QLabel" name="lblEffectToken">
-     <property name="text">
-      <string>Effect Token:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="17" column="1">
-    <widget class="QLineEdit" name="edtEffectToken">
-     <property name="dmhValue" stdset="0">
-      <string>effect_token</string>
-     </property>
-    </widget>
-   </item>
-   <item row="18" column="0">
-    <widget class="QLabel" name="lblEffectTokenRot">
-     <property name="text">
-      <string>Effect Token Rotation:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="18" column="1">
-    <widget class="QSpinBox" name="spnEffectTokenRot">
-     <property name="minimum">
-      <number>-360</number>
-     </property>
-     <property name="maximum">
-      <number>360</number>
-     </property>
-     <property name="dmhValue" stdset="0">
-      <string>effect_token_rotation</string>
-     </property>
-    </widget>
-   </item>
-   <item row="19" column="0">
-    <widget class="QLabel" name="lblEffectConditions">
-     <property name="text">
-      <string>Effect Conditions (CSV):</string>
-     </property>
-    </widget>
-   </item>
-   <item row="19" column="1">
-    <widget class="QLineEdit" name="edtEffectConditions">
-     <property name="dmhValue" stdset="0">
-      <string>effect_conditions</string>
-     </property>
-    </widget>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="lblDescription">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Description</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="txtDescription">
+         <property name="markdown">
+          <string/>
+         </property>
+         <property name="dmhValue" stdset="0">
+          <string>description</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="styleSheet">
+        <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>-1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Orientation::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="lblEffectHeader">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Effect</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblEffectType">
+           <property name="text">
+            <string>Effect Type:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="spnEffectType">
+           <property name="styleSheet">
+            <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>16</number>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>effect_type</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lblEffectShape">
+           <property name="text">
+            <string>Effect Shape Active:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="chkEffectShape">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>effect_shape_active</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="lblEffectSizeW">
+           <property name="text">
+            <string>Effect Size (W):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QSpinBox" name="spnEffectSizeW">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1000</number>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>effect_size_w</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="lblEffectSizeH">
+           <property name="text">
+            <string>Effect Size (H):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSpinBox" name="spnEffectSizeH">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1000</number>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>effect_size_h</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="lblEffectColor">
+           <property name="text">
+            <string>Effect Color (#AARRGGBB):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLineEdit" name="edtEffectColor">
+           <property name="dmhValue" stdset="0">
+            <string>effect_color</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="lblEffectToken">
+           <property name="text">
+            <string>Effect Token:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="edtEffectToken">
+           <property name="dmhValue" stdset="0">
+            <string>effect_token</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="lblEffectTokenRot">
+           <property name="text">
+            <string>Effect Token Rotation:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QSpinBox" name="spnEffectTokenRot">
+           <property name="minimum">
+            <number>-360</number>
+           </property>
+           <property name="maximum">
+            <number>360</number>
+           </property>
+           <property name="dmhValue" stdset="0">
+            <string>effect_token_rotation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="lblEffectConditions">
+           <property name="text">
+            <string>Effect Conditions (CSV):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QLineEdit" name="edtEffectConditions">
+           <property name="dmhValue" stdset="0">
+            <string>effect_conditions</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
