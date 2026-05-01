@@ -201,6 +201,8 @@ signals:
     void registerRenderer(PublishGLRenderer* renderer);
     void setLayers(QList<Layer*> layers, int selected);
 
+    void initiativeActiveChanged(bool initiativeActive);
+
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
 

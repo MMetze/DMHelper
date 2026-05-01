@@ -390,6 +390,27 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                     templateFrame->handleEditBoxChange(lineEdit, source, stripped);
                 });
             _lineConnections[lineEdit] = connection;
+
+            // Reverse binding: refresh on model change. Only meaningful when
+            // the widget is bound directly to the source (not a list entry).
+            if(!hash)
+            {
+                if(_reverseConnections.contains(lineEdit))
+                    disconnect(_reverseConnections[lineEdit]);
+                auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
+                    [lineEdit, source, keyString, parsedFormat](const QString& changedKey) {
+                        if(changedKey != keyString)
+                            return;
+                        const QString fresh = source->getValueAsString(keyString);
+                        const QString formatted = TemplateFieldFormat::applyFormat(fresh, parsedFormat);
+                        if(lineEdit->text() == formatted)
+                            return;
+                        QSignalBlocker block(lineEdit);
+                        lineEdit->setText(formatted);
+                        lineEdit->setCursorPosition(0);
+                    });
+                _reverseConnections[lineEdit] = reverseConn;
+            }
         }
     }
 
@@ -443,6 +464,27 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 templateFrame->handleEditBoxChange(comboBox, source, text);
             });
         _otherConnections[comboBox] = conn;
+
+        if(!hash)
+        {
+            if(_reverseConnections.contains(comboBox))
+                disconnect(_reverseConnections[comboBox]);
+            auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, comboBox,
+                [comboBox, source, keyString](const QString& changedKey) {
+                    if(changedKey != keyString)
+                        return;
+                    const QString fresh = source->getValueAsString(keyString);
+                    if(comboBox->currentText() == fresh)
+                        return;
+                    QSignalBlocker block(comboBox);
+                    const int idx = comboBox->findText(fresh);
+                    if(idx >= 0)
+                        comboBox->setCurrentIndex(idx);
+                    else if(comboBox->isEditable())
+                        comboBox->setCurrentText(fresh);
+                });
+            _reverseConnections[comboBox] = reverseConn;
+        }
     }
 
     // QSpinBox: integer-valued; write back as the integer's string form
@@ -481,6 +523,23 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 templateFrame->handleEditBoxChange(spinBox, source, QString::number(v));
             });
         _otherConnections[spinBox] = conn;
+
+        if(!hash)
+        {
+            if(_reverseConnections.contains(spinBox))
+                disconnect(_reverseConnections[spinBox]);
+            auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, spinBox,
+                [spinBox, source, keyString](const QString& changedKey) {
+                    if(changedKey != keyString)
+                        return;
+                    const int fresh = source->getIntValue(keyString);
+                    if(spinBox->value() == fresh)
+                        return;
+                    QSignalBlocker block(spinBox);
+                    spinBox->setValue(fresh);
+                });
+            _reverseConnections[spinBox] = reverseConn;
+        }
     }
 
     // QCheckBox: boolean (1 or 0); skip checkboxes embedded inside resource frames
@@ -512,6 +571,23 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 templateFrame->handleEditBoxChange(checkBox, source, checked ? QStringLiteral("1") : QStringLiteral("0"));
             });
         _otherConnections[checkBox] = conn;
+
+        if(!hash)
+        {
+            if(_reverseConnections.contains(checkBox))
+                disconnect(_reverseConnections[checkBox]);
+            auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, checkBox,
+                [checkBox, source, keyString](const QString& changedKey) {
+                    if(changedKey != keyString)
+                        return;
+                    const bool fresh = source->getBoolValue(keyString);
+                    if(checkBox->isChecked() == fresh)
+                        return;
+                    QSignalBlocker block(checkBox);
+                    checkBox->setChecked(fresh);
+                });
+            _reverseConnections[checkBox] = reverseConn;
+        }
     }
 
     QList<QTextEdit*> textEdits = widget->findChildren<QTextEdit*>();
@@ -554,6 +630,24 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
 
             auto connection = connect(textEdit, &QTextEdit::textChanged, textEdit, [=]() { templateFrame->handleEditBoxChange(textEdit, source, textEdit->toPlainText().isEmpty() ? QString() : textEdit->toHtml()); });
             _textConnections[textEdit] = connection;
+
+            if(!hash)
+            {
+                if(_reverseConnections.contains(textEdit))
+                    disconnect(_reverseConnections[textEdit]);
+                auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, textEdit,
+                    [textEdit, source, keyString](const QString& changedKey) {
+                        if(changedKey != keyString)
+                            return;
+                        const QString fresh = source->getValueAsString(keyString);
+                        if(textEdit->toHtml() == fresh)
+                            return;
+                        QSignalBlocker block(textEdit);
+                        textEdit->setHtml(fresh);
+                        textEdit->moveCursor(QTextCursor::Start);
+                    });
+                _reverseConnections[textEdit] = reverseConn;
+            }
         }
     }
 
@@ -784,6 +878,11 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
         {
             disconnect(_conditionConnections[other]);
             _conditionConnections.remove(other);
+        }
+        if((other) && (_reverseConnections.contains(other)))
+        {
+            disconnect(_reverseConnections[other]);
+            _reverseConnections.remove(other);
         }
     }
     if(_conditionConnections.contains(widget))

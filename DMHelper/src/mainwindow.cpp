@@ -563,6 +563,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
     connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
     connect(_battleFrame, &BattleFrame::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
+    connect(_battleFrame, &BattleFrame::initiativeActiveChanged, _ribbonTabBattle, &RibbonTabBattle::setLairActionsVisible);
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));

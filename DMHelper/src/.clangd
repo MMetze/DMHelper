@@ -28,3 +28,6 @@ CompileFlags:
     - "/Ob0"
     - "/MDd"
   Compiler: clang++
+
+Diagnostics:
+  Suppress: "*"

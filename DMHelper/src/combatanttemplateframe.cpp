@@ -138,8 +138,10 @@ void CombatantTemplateFrame::disconnectInternals()
 
 void CombatantTemplateFrame::updateData()
 {
-    rebuildBindings();
-
+    // Reverse-binding (set up in TemplateFactory::populateWidget) keeps
+    // bound widgets in sync with the model via the adapter notifier, so we
+    // no longer need to rebuild every binding on every change. Just emit
+    // the HP delta so BattleFrame can update damage tracking.
     if(_combatant)
     {
         const int currentHp = _combatant->getHitPoints();
@@ -154,7 +156,8 @@ void CombatantTemplateFrame::updateData()
 
 void CombatantTemplateFrame::updateMove()
 {
-    rebuildBindings();
+    // Move display is bound through the adapter notifier (dmh:moved). No
+    // explicit work needed here.
 }
 
 void CombatantTemplateFrame::selectCombatant()
@@ -289,12 +292,16 @@ void CombatantTemplateFrame::handleResourceCountChanged(BattleDialogModelMonster
     Q_UNUSED(monster);
     Q_UNUSED(name);
     Q_UNUSED(value);
-    rebuildBindings();
+    // Resource count widgets are list-based and not currently driven by the
+    // notifier reverse binding. Refresh just the resource decorations.
+    applyResourceDecorations();
 }
 
 void CombatantTemplateFrame::handleConditionsChanged(BattleDialogModelCombatant* combatant)
 {
     Q_UNUSED(combatant);
+    // Conditions are list-cardinality changes, so rebuild the conditions
+    // strip via readObjectData (it owns the dynamic scroll-area children).
     rebuildBindings();
 }
 
@@ -540,7 +547,8 @@ void CombatantTemplateFrame::connectModelSignals()
     connect(_combatant, &BattleDialogModelCombatant::initiativeChanged,    this, &CombatantTemplateFrame::updateData);
     connect(_combatant, &BattleDialogModelCombatant::conditionsChanged,    this, &CombatantTemplateFrame::handleConditionsChanged);
     connect(_combatant, &BattleDialogModelCombatant::moveUpdated,          this, &CombatantTemplateFrame::updateMove);
-    connect(_combatant, &BattleDialogModelCombatant::combatantDoneChanged, this, &CombatantTemplateFrame::updateData);
+    // combatantDoneChanged is wired below as a single connection that updates
+    // both the done checkbox sync and (via updateData) the HP delta tracking.
 
     // Sync the base shell's checkboxes back from the model when the model
     // changes via another path (e.g. context menu, scripting).
@@ -566,6 +574,9 @@ void CombatantTemplateFrame::connectModelSignals()
             QSignalBlocker block(chk);
             chk->setChecked(_combatant->getDone());
         }
+        // The HP delta path lives in updateData; piggyback so the done-state
+        // change still triggers any pending damage-tracking emission.
+        updateData();
     });
 
     if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant))

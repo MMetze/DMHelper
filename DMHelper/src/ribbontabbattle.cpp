@@ -86,6 +86,12 @@ void RibbonTabBattle::setShowMovement(bool checked)
     ui->btnShowMovement->setChecked(checked);
 }
 
+void RibbonTabBattle::setLairActionsVisible(bool visible)
+{
+    ui->btnLairActions->setVisible(visible);
+    ui->lblLairActions->setVisible(visible);
+}
+
 void RibbonTabBattle::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);

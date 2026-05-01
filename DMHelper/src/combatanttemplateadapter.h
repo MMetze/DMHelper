@@ -67,7 +67,21 @@ protected:
     virtual const QHash<QString, QVariant>* valueHash() const override;
     virtual void declareDirty() override;
 
+private slots:
+    // Forwarders that publish model-side change signals through this
+    // adapter's notifier so the template-binding pipeline can update bound
+    // widgets incrementally instead of rebuilding the whole binding tree.
+    void onCombatantInitiativeChanged();
+    void onCombatantConditionsChanged();
+    void onCombatantMoveUpdated();
+    void onCombatantVisibilityChanged();
+    void onCombatantDoneChanged();
+    void onMonsterDataChanged();
+    void onMonsterResourceCountChanged(BattleDialogModelMonsterBase* monster, const QString& resourceName, int newValue);
+    void onInnerValueChanged(const QString& innerKey);
+
 private:
+    void wireModelToNotifier();
     bool isModelKey(const QString& key) const;
     BattleDialogModelMonsterBase* monsterBase() const;
     BattleDialogModelCharacter* characterModel() const;

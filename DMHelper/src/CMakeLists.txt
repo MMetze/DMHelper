@@ -321,6 +321,7 @@ set(DMHELPER_SOURCES
     ruleinitiative5e.cpp
     ruleinitiativegroup.cpp
     ruleinitiativegroupmonsters.cpp
+    ruleinitiativenone.cpp
     ruleset.cpp
     scaledpixmap.cpp
     selectcombatantdialog.cpp
@@ -672,6 +673,7 @@ set(DMHELPER_HEADERS
     ruleinitiative5e.h
     ruleinitiativegroup.h
     ruleinitiativegroupmonsters.h
+    ruleinitiativenone.h
     ruleset.h
     scaledpixmap.h
     selectcombatantdialog.h

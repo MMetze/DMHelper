@@ -6,6 +6,7 @@
 #include "characterv2.h"
 #include "perroundresource.h"
 #include "dmconstants.h"
+#include "templateobjectnotifier.h"
 #include <QStringList>
 #include <QHash>
 
@@ -52,6 +53,8 @@ CombatantTemplateAdapter::CombatantTemplateAdapter(BattleDialogModelCombatant* c
 {
     if(TemplateObject* inner = getInner())
         setFactory(inner->getFactory());
+
+    wireModelToNotifier();
 }
 
 CombatantTemplateAdapter::~CombatantTemplateAdapter()
@@ -308,6 +311,88 @@ void CombatantTemplateAdapter::declareDirty()
 {
     // No-op. Underlying model objects mark themselves dirty via their own
     // setters when the adapter forwards a write.
+}
+
+void CombatantTemplateAdapter::wireModelToNotifier()
+{
+    if(_combatant)
+    {
+        connect(_combatant, &BattleDialogModelCombatant::initiativeChanged,    this, &CombatantTemplateAdapter::onCombatantInitiativeChanged);
+        connect(_combatant, &BattleDialogModelCombatant::conditionsChanged,    this, &CombatantTemplateAdapter::onCombatantConditionsChanged);
+        connect(_combatant, &BattleDialogModelCombatant::moveUpdated,          this, &CombatantTemplateAdapter::onCombatantMoveUpdated);
+        connect(_combatant, &BattleDialogModelCombatant::visibilityChanged,    this, &CombatantTemplateAdapter::onCombatantVisibilityChanged);
+        connect(_combatant, &BattleDialogModelCombatant::combatantDoneChanged, this, &CombatantTemplateAdapter::onCombatantDoneChanged);
+    }
+
+    if(BattleDialogModelMonsterBase* mb = monsterBase())
+    {
+        connect(mb, &BattleDialogModelMonsterBase::dataChanged,          this, &CombatantTemplateAdapter::onMonsterDataChanged);
+        connect(mb, &BattleDialogModelMonsterBase::resourceCountChanged, this, &CombatantTemplateAdapter::onMonsterResourceCountChanged);
+    }
+
+    // Forward inner template-object value changes (e.g. monster class
+    // attributes edited via another widget) through this adapter's notifier
+    // so widgets bound through the adapter pick them up.
+    if(TemplateObject* inner = getInner())
+    {
+        if(TemplateObjectNotifier* innerNotifier = inner->notifier())
+            connect(innerNotifier, &TemplateObjectNotifier::valueChanged, this, &CombatantTemplateAdapter::onInnerValueChanged);
+    }
+}
+
+void CombatantTemplateAdapter::onCombatantInitiativeChanged()
+{
+    emit notifier()->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_INITIATIVE));
+}
+
+void CombatantTemplateAdapter::onCombatantConditionsChanged()
+{
+    emit notifier()->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_CONDITIONS));
+}
+
+void CombatantTemplateAdapter::onCombatantMoveUpdated()
+{
+    emit notifier()->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_MOVED));
+}
+
+void CombatantTemplateAdapter::onCombatantVisibilityChanged()
+{
+    TemplateObjectNotifier* n = notifier();
+    emit n->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN));
+    emit n->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN));
+}
+
+void CombatantTemplateAdapter::onCombatantDoneChanged()
+{
+    emit notifier()->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_IS_DONE));
+}
+
+void CombatantTemplateAdapter::onMonsterDataChanged()
+{
+    // dataChanged is a coarse "something on the model changed" signal. Emit
+    // the model-side keys most likely to be reflected in templates so any
+    // bound widgets refresh. Fields that have their own dedicated signals
+    // (initiative / done / shown / known / move / conditions) are NOT
+    // re-emitted here to avoid double-updates.
+    TemplateObjectNotifier* n = notifier();
+    emit n->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_HEALTH));
+    emit n->valueChanged(QStringLiteral("armorClass"));
+    emit n->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_NAME));
+}
+
+void CombatantTemplateAdapter::onMonsterResourceCountChanged(BattleDialogModelMonsterBase* monster, const QString& resourceName, int newValue)
+{
+    Q_UNUSED(monster);
+    Q_UNUSED(resourceName);
+    Q_UNUSED(newValue);
+    emit notifier()->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES));
+}
+
+void CombatantTemplateAdapter::onInnerValueChanged(const QString& innerKey)
+{
+    // Pass through unchanged. Inner keys are non-model (no dmh: prefix), so
+    // they cannot collide with the adapter's own model-key namespace.
+    emit notifier()->valueChanged(innerKey);
 }
 
 bool CombatantTemplateAdapter::isModelKey(const QString& key) const

@@ -89,6 +89,9 @@ protected:
     QHash<QWidget*, QMetaObject::Connection> _otherConnections;
     QHash<QWidget*, QMetaObject::Connection> _computeConnections;
     QHash<QWidget*, QMetaObject::Connection> _conditionConnections;
+    // Reverse (model -> widget) bindings, separate so they can be torn down
+    // alongside the forward (widget -> model) bindings on rebind.
+    QHash<QWidget*, QMetaObject::Connection> _reverseConnections;
 };
 
 class DMHAttribute

@@ -22,6 +22,7 @@ public slots:
     void setShowDead(bool checked);
     void setShowEffects(bool checked);
     void setShowMovement(bool checked);
+    void setLairActionsVisible(bool visible);
 
 signals:
     void addCharacterClicked();

@@ -3,6 +3,7 @@
 #include "ruleinitiative5e.h"
 #include "ruleinitiativegroup.h"
 #include "ruleinitiativegroupmonsters.h"
+#include "ruleinitiativenone.h"
 #include "rulehealth5e.h"
 #include "rulehealthdaggerheart.h"
 #include <QDomDocument>
@@ -66,6 +67,9 @@ RuleInitiative* RuleFactory::createRuleInitiative(const QString& ruleInitiativeT
     if(ruleInitiativeType == RuleInitiative2e::InitiativeType)
         return new RuleInitiative2e(parent);
 
+    if(ruleInitiativeType == RuleInitiativeNone::InitiativeType)
+        return new RuleInitiativeNone(parent);
+
     return nullptr;
 }
 
@@ -81,7 +85,8 @@ QStringList RuleFactory::getRuleInitiativeNames()
     result << RuleInitiative5e::InitiativeType << RuleInitiative5e::InitiativeDescription
            << RuleInitiative2e::InitiativeType << RuleInitiative2e::InitiativeDescription
            << RuleInitiativeGroup::InitiativeType << RuleInitiativeGroup::InitiativeDescription
-           << RuleInitiativeGroupMonsters::InitiativeType << RuleInitiativeGroupMonsters::InitiativeDescription;
+           << RuleInitiativeGroupMonsters::InitiativeType << RuleInitiativeGroupMonsters::InitiativeDescription
+           << RuleInitiativeNone::InitiativeType << RuleInitiativeNone::InitiativeDescription;
 
     return result;
 }

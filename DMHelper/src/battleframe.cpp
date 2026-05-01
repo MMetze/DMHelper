@@ -45,6 +45,7 @@
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
+#include "ruleinitiativenone.h"
 #include "rulehealth.h"
 #include "spellbook.h"
 #include "gridsizer.h"
@@ -3914,6 +3915,23 @@ void BattleFrame::setModel(BattleDialogModel* model)
     ui->edtCountdown->setEnabled(_model != nullptr);
     updatePublishEnable();
     ui->graphicsView->setEnabled(_model != nullptr);
+
+    bool initiativeActive = true;
+    if(_battle)
+    {
+        Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+        if(campaign)
+        {
+            RuleInitiative* ruleInitiative = campaign->getRuleset().getRuleInitiative();
+            if(ruleInitiative)
+                initiativeActive = (ruleInitiative->getInitiativeType() != RuleInitiativeNone::InitiativeType);
+        }
+    }
+    ui->btnRoll->setVisible(initiativeActive);
+    ui->lblRoll->setVisible(initiativeActive);
+    ui->btnSort->setVisible(initiativeActive);
+    ui->lblSort->setVisible(initiativeActive);
+    emit initiativeActiveChanged(initiativeActive);
 
     if(_model)
     {
