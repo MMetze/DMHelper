@@ -313,6 +313,9 @@ set(DMHELPER_SOURCES
     ribbontabtools.cpp
     ribbontabworldmap.cpp
     rulefactory.cpp
+    rulehealth.cpp
+    rulehealth5e.cpp
+    rulehealthdaggerheart.cpp
     ruleinitiative.cpp
     ruleinitiative2e.cpp
     ruleinitiative5e.cpp
@@ -661,6 +664,9 @@ set(DMHELPER_HEADERS
     ribbontabtools.h
     ribbontabworldmap.h
     rulefactory.h
+    rulehealth.h
+    rulehealth5e.h
+    rulehealthdaggerheart.h
     ruleinitiative.h
     ruleinitiative2e.h
     ruleinitiative5e.h

@@ -2,6 +2,7 @@
 #include "conditions.h"
 #include "dmconstants.h"
 #include "ruleinitiative.h"
+#include "rulehealth.h"
 #include "rulefactory.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -9,6 +10,7 @@
 Ruleset::Ruleset(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
     _ruleInitiative(nullptr),
+    _ruleHealth(nullptr),
     _conditions(nullptr),
     _rulesetDefaultConditions(nullptr),
     _conditionsFile(),
@@ -36,6 +38,7 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
 Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *parent) :
     CampaignObjectBase(rulesetTemplate._name, parent),
     _ruleInitiative(nullptr),
+    _ruleHealth(nullptr),
     _conditions(nullptr),
     _rulesetDefaultConditions(nullptr),
     _conditionsFile(),
@@ -91,6 +94,9 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
 
     QString initiativeType = element.attribute("initiative", rulesetTemplate._initiative);
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
+
+    QString healthType = element.attribute("health", rulesetTemplate._health);
+    _ruleHealth = RuleFactory::createRuleHealth(healthType, this);
 
     _characterDataFile = element.attribute("characterData");
     if(_characterDataFile.isEmpty())
@@ -192,6 +198,9 @@ void Ruleset::setValues(const RuleFactory::RulesetTemplate& rulesetTemplate)
     delete _ruleInitiative;
     _ruleInitiative = RuleFactory::createRuleInitiative(rulesetTemplate._initiative, this);
 
+    delete _ruleHealth;
+    _ruleHealth = RuleFactory::createRuleHealth(rulesetTemplate._health, this);
+
     _characterDataFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterData);
     _characterUIFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._characterUI);
     _bestiaryFile = rulesetTemplate._rulesetDir.absoluteFilePath(rulesetTemplate._bestiary);
@@ -260,6 +269,22 @@ QString Ruleset::getRuleInitiativeType()
         _ruleInitiative = RuleFactory::createRuleInitiative(RuleFactory::getRuleInitiativeDefault(), this);
 
     return _ruleInitiative ? _ruleInitiative->getInitiativeType() : QString();
+}
+
+RuleHealth* Ruleset::getRuleHealth()
+{
+    if(!_ruleHealth)
+        _ruleHealth = RuleFactory::createRuleHealth(RuleFactory::getRuleHealthDefault(), this);
+
+    return _ruleHealth;
+}
+
+QString Ruleset::getRuleHealthType()
+{
+    if(!_ruleHealth)
+        _ruleHealth = RuleFactory::createRuleHealth(RuleFactory::getRuleHealthDefault(), this);
+
+    return _ruleHealth ? _ruleHealth->getHealthType() : QString();
 }
 
 Conditions* Ruleset::getConditions()
@@ -427,6 +452,18 @@ void Ruleset::setRuleInitiative(const QString& initiativeType)
     delete _ruleInitiative;
 
     _ruleInitiative = RuleFactory::createRuleInitiative(initiativeType, this);
+    emit dirty();
+    registerChange();
+}
+
+void Ruleset::setRuleHealth(const QString& healthType)
+{
+    if((_ruleHealth) && (_ruleHealth->getHealthType() == healthType))
+        return;
+
+    delete _ruleHealth;
+
+    _ruleHealth = RuleFactory::createRuleHealth(healthType, this);
     emit dirty();
     registerChange();
 }

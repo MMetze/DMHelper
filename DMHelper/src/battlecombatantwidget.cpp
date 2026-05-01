@@ -1,5 +1,6 @@
 #include "battlecombatantwidget.h"
 #include "ui_battlecombatantwidget.h"
+#include "rulehealth.h"
 #include "battledialogmodel.h"
 #include <QIntValidator>
 #include <QMouseEvent>
@@ -65,10 +66,19 @@ void BattleCombatantWidget::applyDamage(int damage)
     if(!_combatant)
         return;
 
-    if(_combatant->getHitPoints() > damage)
-        _combatant->setHitPoints(_combatant->getHitPoints() - damage);
+    if(RuleHealth* health = RuleHealth::forCombatant(_combatant))
+    {
+        health->applyDamage(_combatant, damage);
+    }
     else
-        _combatant->setHitPoints(0);
+    {
+        // Fallback when the combatant is not attached to a campaign: preserve
+        // the legacy 5e subtractive behaviour with a zero floor.
+        if(_combatant->getHitPoints() > damage)
+            _combatant->setHitPoints(_combatant->getHitPoints() - damage);
+        else
+            _combatant->setHitPoints(0);
+    }
 
     emit combatantChanged(_combatant);
     setCombatantValues();

@@ -6,6 +6,7 @@
 #include <QDir>
 
 class RuleInitiative;
+class RuleHealth;
 
 class RuleFactory : public QObject
 {
@@ -20,6 +21,10 @@ public:
     static RuleInitiative* createRuleInitiative(const QString& ruleInitiativeType, QObject *parent = nullptr);
     static QString getRuleInitiativeDefault();
     static QStringList getRuleInitiativeNames();
+
+    static RuleHealth* createRuleHealth(const QString& ruleHealthType, QObject *parent = nullptr);
+    static QString getRuleHealthDefault();
+    static QStringList getRuleHealthNames();
 
     static const char* DEFAULT_RULESET_NAME;
 
@@ -52,6 +57,7 @@ public:
         RulesetTemplate() :
             _name(),
             _initiative(),
+            _health(),
             _characterData(),
             _characterUI(),
             _monsterData(),
@@ -92,6 +98,7 @@ public:
 
         QString _name;
         QString _initiative;
+        QString _health;
         QString _characterData;
         QString _characterUI;
         QString _monsterData;

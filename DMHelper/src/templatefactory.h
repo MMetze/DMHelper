@@ -35,6 +35,8 @@ public:
     static const char* TEMPLATE_FORMAT;
     static const char* TEMPLATE_COMPUTE;
     static const char* TEMPLATE_CONDITION;
+    static const char* TEMPLATE_DICE_MAXIMUM;
+    static const char* TEMPLATE_DICE_AVERAGE;
 
     static const char* TEMPLATEVALUES[TEMPLATETYPE_COUNT];
 

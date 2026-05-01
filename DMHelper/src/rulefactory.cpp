@@ -3,6 +3,8 @@
 #include "ruleinitiative5e.h"
 #include "ruleinitiativegroup.h"
 #include "ruleinitiativegroupmonsters.h"
+#include "rulehealth5e.h"
+#include "rulehealthdaggerheart.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QFile>
@@ -80,6 +82,32 @@ QStringList RuleFactory::getRuleInitiativeNames()
            << RuleInitiative2e::InitiativeType << RuleInitiative2e::InitiativeDescription
            << RuleInitiativeGroup::InitiativeType << RuleInitiativeGroup::InitiativeDescription
            << RuleInitiativeGroupMonsters::InitiativeType << RuleInitiativeGroupMonsters::InitiativeDescription;
+
+    return result;
+}
+
+RuleHealth* RuleFactory::createRuleHealth(const QString& ruleHealthType, QObject* parent)
+{
+    if(ruleHealthType == RuleHealth5e::HealthType)
+        return new RuleHealth5e(parent);
+
+    if(ruleHealthType == RuleHealthDaggerheart::HealthType)
+        return new RuleHealthDaggerheart(parent);
+
+    return nullptr;
+}
+
+QString RuleFactory::getRuleHealthDefault()
+{
+    return RuleHealth5e::HealthType;
+}
+
+QStringList RuleFactory::getRuleHealthNames()
+{
+    QStringList result;
+
+    result << RuleHealth5e::HealthType << RuleHealth5e::HealthDescription
+           << RuleHealthDaggerheart::HealthType << RuleHealthDaggerheart::HealthDescription;
 
     return result;
 }
@@ -186,6 +214,7 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         if(!newRuleset._name.isEmpty())
         {
             newRuleset._initiative = rulesetElement.attribute(QString("initiative"));
+            newRuleset._health = rulesetElement.attribute(QString("health"));
             newRuleset._characterData = rulesetElement.attribute(QString("characterdata"));
             newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
             newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));

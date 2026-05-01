@@ -45,6 +45,7 @@
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
 #include "ruleinitiative.h"
+#include "rulehealth.h"
 #include "spellbook.h"
 #include "gridsizer.h"
 #include "layerdrawengine.h"
@@ -435,7 +436,7 @@ QList<BattleDialogModelCombatant*> BattleFrame::getLivingCombatants() const
     QList<BattleDialogModelCombatant*> result;
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getHitPoints() > 0))
+        if((_model->getCombatant(i)) && (!isCombatantDead(_model->getCombatant(i))))
         {
             result.append(_model->getCombatant(i));
         }
@@ -456,7 +457,7 @@ BattleDialogModelCombatant* BattleFrame::getFirstLivingCombatant() const
 
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getHitPoints() > 0))
+        if((_model->getCombatant(i)) && (!isCombatantDead(_model->getCombatant(i))))
         {
             qDebug() << "[Battle Frame] first living combatants found: " << _model->getCombatant(i)->getName();
             return _model->getCombatant(i);
@@ -501,7 +502,7 @@ QList<BattleDialogModelCombatant*> BattleFrame::getLivingMonsters() const
     QList<BattleDialogModelCombatant*> result;
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getCombatantType() == DMHelper::CombatantType_Monster) && (_model->getCombatant(i)->getHitPoints() > 0))
+        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getCombatantType() == DMHelper::CombatantType_Monster) && (!isCombatantDead(_model->getCombatant(i))))
         {
             result.append(_model->getCombatant(i));
         }
@@ -3390,7 +3391,13 @@ void BattleFrame::applyCombatantHPChange(BattleDialogModelCombatant* combatant, 
     if(!combatant)
         return;
 
-    combatant->setHitPoints(combatant->getHitPoints() + hpChange);
+    // hpChange is signed in the legacy convention: positive = healing, negative = damage.
+    // RuleHealth::applyDamage uses the opposite convention: positive = damage. Invert.
+    if(RuleHealth* health = currentRuleHealth())
+        health->applyDamage(combatant, -hpChange);
+    else
+        combatant->setHitPoints(combatant->getHitPoints() + hpChange);
+
     updateCombatantWidget(combatant);
     updateCombatantVisibility();
 
@@ -3500,12 +3507,14 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
     if((!combatant) || (!_model->getActiveCombatant()))
         return;
 
-    if((combatant->getHitPoints() <= 0) && (!combatant->hasConditionId(QStringLiteral("unconscious"))))
+    const bool incapacitated = isCombatantDead(combatant);
+    const bool wasUnconscious = combatant->hasConditionId(QStringLiteral("unconscious"));
+    if((incapacitated) && (!wasUnconscious))
     {
         combatant->addConditionId(QStringLiteral("unconscious"));
         updateCombatantIcon(combatant);
     }
-    else if((combatant->getHitPoints() > 0) && (combatant->hasConditionId(QStringLiteral("unconscious"))))
+    else if((!incapacitated) && (wasUnconscious))
     {
         combatant->removeConditionId(QStringLiteral("unconscious"));
         updateCombatantIcon(combatant);
@@ -3791,7 +3800,7 @@ void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* comba
     if((!_model) || (!combatant))
         return;
 
-    bool visible = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+    bool visible = ((!isCombatantDead(combatant)) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
 
     LayerTokens* tokensLayer = combatant->getLayer();
     if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
@@ -4837,7 +4846,7 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
         nextCombatant = _model->getCombatant(nextCombatantIndex);
         if((!nextCombatant) || (nextCombatant == _model->getActiveCombatant()))
             return nextCombatant;
-    } while((nextCombatant->getHitPoints() <= 0) || // skip dead combatants
+    } while((isCombatantDead(nextCombatant)) ||  // skip dead combatants
             (!nextCombatant->getKnown()) ||         // skip unknown combatants
              ((nextCombatant->getLayer()) && (!nextCombatant->getLayer()->getLayerVisibleDM()))); // skip hidden combatants
 
@@ -5580,4 +5589,28 @@ instead move the player view
     _stateMachine.addState(mapMoveState);
 
     _stateMachine.reset();
+}
+
+RuleHealth* BattleFrame::currentRuleHealth() const
+{
+    if(!_battle)
+        return nullptr;
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return nullptr;
+
+    return campaign->getRuleset().getRuleHealth();
+}
+
+bool BattleFrame::isCombatantDead(const BattleDialogModelCombatant* combatant) const
+{
+    if(!combatant)
+        return false;
+
+    if(RuleHealth* health = currentRuleHealth())
+        return health->isDead(combatant);
+
+    // Pre-RuleHealth fallback: behaviour matches the original 5e-only check.
+    return combatant->getHitPoints() <= 0;
 }

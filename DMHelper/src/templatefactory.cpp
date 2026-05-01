@@ -30,6 +30,8 @@ const char* TemplateFactory::TEMPLATE_WIDGET = "dmhWidget";
 const char* TemplateFactory::TEMPLATE_FORMAT = "dmhFormat";
 const char* TemplateFactory::TEMPLATE_COMPUTE = "dmhCompute";
 const char* TemplateFactory::TEMPLATE_CONDITION = "dmhCondition";
+const char* TemplateFactory::TEMPLATE_DICE_MAXIMUM = "dmhDiceMaximum";
+const char* TemplateFactory::TEMPLATE_DICE_AVERAGE = "dmhDiceAverage";
 
 const char* TemplateFactory::TEMPLATEVALUES[TEMPLATETYPE_COUNT] =
     {
@@ -274,8 +276,45 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
 
         QString keyString = lineEdit->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
         const QString computeSpec = lineEdit->property(TemplateFactory::TEMPLATE_COMPUTE).toString();
+        const QString diceMaxKey = lineEdit->property(TemplateFactory::TEMPLATE_DICE_MAXIMUM).toString();
+        const QString diceAvgKey = lineEdit->property(TemplateFactory::TEMPLATE_DICE_AVERAGE).toString();
         const QString formatSpec = lineEdit->property(TemplateFactory::TEMPLATE_FORMAT).toString();
         const FormatSpec parsedFormat = TemplateFieldFormat::parseFormat(formatSpec);
+
+        // Dice-derived read-only fields: format the maximum or average of a dice
+        // expression stored under another key on the source. Mutually exclusive
+        // with dmhCompute and the writable dmhValue path; neither writes back.
+        // Live-updates whenever the referenced key changes on the source.
+        if((!diceMaxKey.isEmpty()) || (!diceAvgKey.isEmpty()))
+        {
+            const bool useMax = !diceMaxKey.isEmpty();
+            const QString sourceKey = useMax ? diceMaxKey : diceAvgKey;
+            lineEdit->setReadOnly(true);
+
+            auto evaluate = [useMax, sourceKey, source]() -> int {
+                const QString expr = source->getValueAsString(sourceKey);
+                if(expr.isEmpty())
+                    return 0;
+                return useMax ? Dice::maximum(expr) : Dice::average(expr);
+            };
+
+            const int initialValue = evaluate();
+            lineEdit->setText(TemplateFieldFormat::applyFormatInt(initialValue, parsedFormat));
+            lineEdit->setCursorPosition(0);
+
+            if(_computeConnections.contains(lineEdit))
+                disconnect(_computeConnections[lineEdit]);
+
+            auto diceConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
+                [lineEdit, parsedFormat, sourceKey, evaluate](const QString& changedKey) {
+                    if(changedKey != sourceKey)
+                        return;
+                    lineEdit->setText(TemplateFieldFormat::applyFormatInt(evaluate(), parsedFormat));
+                    lineEdit->setCursorPosition(0);
+                });
+            _computeConnections[lineEdit] = diceConn;
+            continue;
+        }
 
         // Computed (read-only) fields are independent of dmhValue: they evaluate
         // an expression against the source TemplateObject and live-update via the

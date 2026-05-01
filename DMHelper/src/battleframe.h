@@ -23,6 +23,7 @@ class GridSizer;
 class Characterv2;
 class Map;
 class QTimer;
+class RuleHealth;
 class CameraRect;
 class BattleCombatantFrame;
 class QGraphicsPolygonItem;
@@ -360,6 +361,13 @@ private:
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
     void newRound();
+
+    // Resolve the active ruleset's RuleHealth, or nullptr when no campaign /
+    // ruleset is reachable (e.g. detached unit-test paths). Callers should
+    // fall back to the legacy getHitPoints() <= 0 predicate when this returns
+    // nullptr so behaviour matches the pre-refactor code.
+    RuleHealth* currentRuleHealth() const;
+    bool isCombatantDead(const BattleDialogModelCombatant* combatant) const;
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;

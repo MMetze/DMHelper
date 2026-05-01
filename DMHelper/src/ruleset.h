@@ -7,6 +7,7 @@
 
 class Conditions;
 class RuleInitiative;
+class RuleHealth;
 
 class Ruleset : public CampaignObjectBase
 {
@@ -30,6 +31,8 @@ public:
     bool isInitialized() const;
     RuleInitiative* getRuleInitiative();
     QString getRuleInitiativeType();
+    RuleHealth* getRuleHealth();
+    QString getRuleHealthType();
     Conditions* getConditions();
     Conditions* getRulesetDefaultConditions() const;
     QString getConditionsFile() const;
@@ -59,6 +62,7 @@ signals:
 
 public slots:
     void setRuleInitiative(const QString& initiativeType);
+    void setRuleHealth(const QString& healthType);
     void setConditionsFile(const QString& conditionsFile);
     void setCharacterDataFile(const QString& characterDataFile);
     void setCharacterUIFile(const QString& characterUIFile);
@@ -90,6 +94,7 @@ protected:
     void registerChange();
 
     RuleInitiative* _ruleInitiative;
+    RuleHealth* _ruleHealth;
     Conditions* _conditions;
     Conditions* _rulesetDefaultConditions;
     QString _conditionsFile;

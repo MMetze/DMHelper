@@ -14,9 +14,6 @@ CompileFlags:
     - -IC:/Qt/6.10.1/msvc2022_64/include/QtUiTools
     - -IC:/Qt/6.10.1/msvc2022_64/mkspecs/win32-msvc
   Remove:
-    - "-external:I*"
-    - "/external:*"  Remove:
-    - "-external:I*"
     - "/external:*"
     - "-Zc:__cplusplus"
     - "/TP"
