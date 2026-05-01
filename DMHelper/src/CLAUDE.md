@@ -137,3 +137,4 @@ dynamic lists).
 - Commit after each logical file/unit: `agent: <what changed>`
 - After non-trivial changes, run the build command above to verify
 - Keep tasks to one subsystem at a time
+- Before asking permission to run a script or external command, summarize what the command does and why it is needed

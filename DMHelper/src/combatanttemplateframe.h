@@ -4,6 +4,8 @@
 #include "combatantwidget.h"
 #include "templateframe.h"
 #include <QPointer>
+#include <QPixmap>
+#include <QSize>
 #include <QUuid>
 
 class BattleDialogModelCombatant;
@@ -78,6 +80,7 @@ private:
     void showAddConditionMenu(const QPoint& globalPos);
 
     QPointer<QScrollArea> _conditionStrip;
+    QPointer<QScrollArea> _resourceStrip;
 
     BattleDialogModelCombatant* _combatant;
     CombatantTemplateAdapter* _adapter;
@@ -85,6 +88,12 @@ private:
     QPointer<QWidget> _uiWidget;
     bool _showDone;
     int _previousHitPoints;
+
+    // Cache for scaled icon pixmap to avoid expensive Qt::SmoothTransformation rescaling on every rebuild.
+    QPixmap _cachedScaledIcon;
+    qint64 _cachedIconSourceKey;
+    QSize _cachedIconTargetSize;
+    qreal _cachedIconDpr;
 };
 
 #endif // COMBATANTTEMPLATEFRAME_H

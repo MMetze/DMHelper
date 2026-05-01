@@ -45,7 +45,11 @@ CombatantTemplateFrame::CombatantTemplateFrame(BattleDialogModelCombatant* comba
     _base(nullptr),
     _uiWidget(nullptr),
     _showDone(showDone),
-    _previousHitPoints(combatant ? combatant->getHitPoints() : 0)
+    _previousHitPoints(combatant ? combatant->getHitPoints() : 0),
+    _cachedScaledIcon(),
+    _cachedIconSourceKey(0),
+    _cachedIconTargetSize(),
+    _cachedIconDpr(0.0)
 {
     _adapter = new CombatantTemplateAdapter(_combatant, this);
 
@@ -339,6 +343,8 @@ bool CombatantTemplateFrame::loadTemplate(const QString& templateFile)
     delete _uiWidget;
     _uiWidget = newWidget;
     _uiFilename = absoluteTemplateFile;
+    _conditionStrip.clear();
+    _resourceStrip.clear();
 
     postLoadConfiguration(this, _uiWidget);
 
@@ -395,8 +401,19 @@ void CombatantTemplateFrame::applyIcon()
         return;
 
     const QSize targetPixelSize = labelSize * dpr;
+    const qint64 sourceKey = pixmap.cacheKey();
+    if((!_cachedScaledIcon.isNull()) && (_cachedIconSourceKey == sourceKey) && (_cachedIconTargetSize == targetPixelSize) && (qFuzzyCompare(_cachedIconDpr, dpr)))
+    {
+        iconLabel->setPixmap(_cachedScaledIcon);
+        return;
+    }
+
     QPixmap scaled = pixmap.scaled(targetPixelSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     scaled.setDevicePixelRatio(dpr);
+    _cachedScaledIcon = scaled;
+    _cachedIconSourceKey = sourceKey;
+    _cachedIconTargetSize = targetPixelSize;
+    _cachedIconDpr = dpr;
     iconLabel->setPixmap(scaled);
 }
 
@@ -405,15 +422,18 @@ void CombatantTemplateFrame::applyConditionDecorations()
     if(!_uiWidget)
         return;
 
-    QScrollArea* scrollArea = findScrollArea(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_CONDITIONS));
+    QScrollArea* scrollArea = _conditionStrip;
+    if(!scrollArea)
+    {
+        scrollArea = findScrollArea(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_CONDITIONS));
+        if(scrollArea)
+        {
+            _conditionStrip = scrollArea;
+            scrollArea->viewport()->installEventFilter(this);
+        }
+    }
     if((!scrollArea) || (!scrollArea->widget()))
         return;
-
-    if(_conditionStrip != scrollArea)
-    {
-        _conditionStrip = scrollArea;
-        scrollArea->viewport()->installEventFilter(this);
-    }
 
     QList<QFrame*> conditionFrames = scrollArea->widget()->findChildren<QFrame*>(QString(), Qt::FindDirectChildrenOnly);
     Conditions* conditions = Conditions::activeConditions();
@@ -450,7 +470,12 @@ void CombatantTemplateFrame::applyResourceDecorations()
     if(!_uiWidget)
         return;
 
-    QScrollArea* scrollArea = findScrollArea(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES));
+    QScrollArea* scrollArea = _resourceStrip;
+    if(!scrollArea)
+    {
+        scrollArea = findScrollArea(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES));
+        _resourceStrip = scrollArea;
+    }
     if((!scrollArea) || (!scrollArea->widget()))
         return;
 

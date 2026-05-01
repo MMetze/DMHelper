@@ -1,0 +1,4 @@
+[1/4] Building CXX object CMakeFiles\DMHelper.dir\mapselectdialog.cpp.obj
+[2/4] Building CXX object CMakeFiles\DMHelper.dir\mainwindow.cpp.obj
+[3/4] Building CXX object CMakeFiles\DMHelper.dir\DMHelper_autogen\mocs_compilation.cpp.obj
+[4/4] Linking CXX executable DMHelper.exe

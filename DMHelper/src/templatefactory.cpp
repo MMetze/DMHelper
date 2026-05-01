@@ -23,6 +23,11 @@
 #include <QLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QBuffer>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QDebug>
 
 const char* TemplateFactory::TEMPLATE_PROPERTY = "dmhValue";
@@ -140,16 +145,45 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
         return result;
     }
 
-    QUiLoader loader;
-    QFile file(templateFile);
-    if(!file.open(QFile::ReadOnly))
+    // Cache the .ui file contents in memory keyed by absolute path + last
+    // modification time. Each combatant in an encounter loads from the same
+    // .ui file, so reading + parsing it from disk every time is wasteful.
+    // Invalidating on mtime keeps live edits in Qt Designer working.
+    struct CacheEntry { QByteArray data; qint64 mtime; };
+    static QHash<QString, CacheEntry> cache;
+    static QMutex cacheMutex;
+
+    const QFileInfo info(templateFile);
+    const QString cacheKey = info.absoluteFilePath();
+    const qint64 currentMtime = info.lastModified().toMSecsSinceEpoch();
+
+    QByteArray cachedData;
     {
-        qDebug() << "[RuleFactory::loadUITemplate] ERROR: Unable to read UI Template file: " << templateFile << ", error: " << file.error() << ", " << file.errorString();
-        return result;
+        QMutexLocker locker(&cacheMutex);
+        auto it = cache.constFind(cacheKey);
+        if((it != cache.constEnd()) && (it->mtime == currentMtime))
+            cachedData = it->data;
     }
 
-    result = loader.load(&file);
-    file.close();
+    if(cachedData.isEmpty())
+    {
+        QFile file(templateFile);
+        if(!file.open(QFile::ReadOnly))
+        {
+            qDebug() << "[RuleFactory::loadUITemplate] ERROR: Unable to read UI Template file: " << templateFile << ", error: " << file.error() << ", " << file.errorString();
+            return result;
+        }
+        cachedData = file.readAll();
+        file.close();
+
+        QMutexLocker locker(&cacheMutex);
+        cache.insert(cacheKey, { cachedData, currentMtime });
+    }
+
+    QUiLoader loader;
+    QBuffer buffer(&cachedData);
+    buffer.open(QIODevice::ReadOnly);
+    result = loader.load(&buffer);
 
     if(!result)
     {

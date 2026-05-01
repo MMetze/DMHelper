@@ -5,6 +5,20 @@
 #include <QMouseEvent>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QStyle>
+
+namespace
+{
+    // One-shot stylesheet driven by the dynamic "state" property. Set on each
+    // CombatantWidget at construction time so subsequent state changes only
+    // need to repolish the widget rather than re-parse and re-apply a fresh
+    // style string. The empty-state selector keeps the default appearance.
+    static const char* COMBATANT_STATE_STYLESHEET =
+        "CombatantWidget { background-color: none; border-left: 4px solid transparent; padding-left: 4px; border-bottom: 1px solid rgba(0, 0, 0, 40); }"
+        "CombatantWidget[state=\"hover\"] { background-color: rgb(64, 64, 64); border-left: 4px solid rgb(100, 100, 100); }"
+        "CombatantWidget[state=\"active\"] { background-color: rgb(115, 18, 0); border-left: 4px solid rgb(200, 40, 0); }"
+        "CombatantWidget[state=\"selected\"] { background-image: url(); background-color: rgb(196, 196, 196); border-left: 4px solid rgb(80, 80, 80); }";
+}
 
 CombatantWidget::CombatantWidget(QWidget *parent) :
     QFrame(parent),
@@ -18,6 +32,35 @@ CombatantWidget::CombatantWidget(QWidget *parent) :
 {
     setAttribute(Qt::WA_Hover);
     setAutoFillBackground(true);
+    // Install the state-aware stylesheet once. State changes flip a dynamic
+    // property and re-polish the widget, which is dramatically cheaper than
+    // setStyleSheet() (the latter triggers a full unpolish/polish across all
+    // descendants every call).
+    setStyleSheet(QString::fromLatin1(COMBATANT_STATE_STYLESHEET));
+    refreshStateStyle();
+}
+
+void CombatantWidget::refreshStateStyle()
+{
+    QString state;
+    if(_selected)
+        state = QStringLiteral("selected");
+    else if(_active)
+        state = QStringLiteral("active");
+    else if(_hover)
+        state = QStringLiteral("hover");
+
+    const QVariant existing = property("state");
+    if(existing.toString() == state)
+        return;
+
+    setProperty("state", state);
+    if(QStyle* s = style())
+    {
+        s->unpolish(this);
+        s->polish(this);
+    }
+    update();
 }
 
 void CombatantWidget::installEventFilterRecursive(QObject* filterObj)
@@ -103,7 +146,7 @@ void CombatantWidget::setActive(bool active)
     if(_active != active)
     {
         _active = active;
-        setStyleSheet(getStyleString());
+        refreshStateStyle();
     }
 }
 
@@ -112,7 +155,7 @@ void CombatantWidget::setSelected(bool selected)
     if(_selected != selected)
     {
         _selected = selected;
-        setStyleSheet(getStyleString());
+        refreshStateStyle();
     }
 }
 
@@ -121,13 +164,13 @@ void CombatantWidget::setHover(bool hover)
     if(_hover != hover)
     {
         _hover = hover;
-        setStyleSheet(getStyleString());
+        refreshStateStyle();
     }
 }
 
 void CombatantWidget::showEvent(QShowEvent* event)
 {
-    setStyleSheet(getStyleString());
+    refreshStateStyle();
     QFrame::showEvent(event);
 }
 
@@ -136,7 +179,7 @@ void CombatantWidget::enterEvent(QEnterEvent* event)
     Q_UNUSED(event);
 
     _hover = true;
-    setStyleSheet(getStyleString());
+    refreshStateStyle();
 }
 
 void CombatantWidget::leaveEvent(QEvent* event)
@@ -145,7 +188,7 @@ void CombatantWidget::leaveEvent(QEvent* event)
 
     _mouseDown = Qt::NoButton;
     _hover = false;
-    setStyleSheet(getStyleString());
+    refreshStateStyle();
 }
 
 void CombatantWidget::mousePressEvent(QMouseEvent* event)
