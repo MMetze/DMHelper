@@ -35,9 +35,22 @@ checkpoints or on escalation.
 
 ## Inputs (from human, at session start)
 
-1. A **feature slug** (kebab-case identifier).
-2. Confirmation that `DMHelper/dev/specs/<feature-slug>.md` exists and
-   is approved.
+The human starts the session in one of two ways:
+
+**Mode A — spec file already written.** The human says "the spec for
+`<feature-slug>` is ready" (or equivalent). You verify the file
+exists and proceed.
+
+**Mode B — description in chat.** The human gives you a feature
+description in natural language, with or without a suggested slug.
+You are responsible for drafting the spec file from that description
+and getting human approval before dispatching Design.
+
+A **feature slug** is a short kebab-case identifier (e.g.
+`map-marker-overlay`) used as the joining key across the spec, plan,
+worktrees, and branches. If the human does not supply one, derive it
+from the feature title and confirm with the human before writing any
+file.
 
 ## Outputs
 
@@ -92,13 +105,51 @@ You compute these values from the plan:
 
 ### Stage 0 — Spec Acceptance
 
-The human gives you a feature slug. You:
+Determine the entry mode. The human will tell you whether they have
+written a spec file (Mode A) or are providing the description in
+chat (Mode B). If unclear, ask once.
 
-1. Verify `DMHelper/dev/specs/<feature-slug>.md` exists. If not, ask
-   the human to create it. Stop.
-2. Verify `DMHelper/dev/plans/<feature-slug>.md` does **not** exist,
-   or confirm with the human that this is an intentional replan. If
-   replan, the existing plan is left in place — Design will overwrite.
+**Mode A — spec file already written:**
+
+1. Confirm the slug with the human.
+2. Verify `DMHelper/src/dev/specs/<feature-slug>.md` exists. If not,
+   ask the human whether they meant Mode B or whether the path is
+   wrong. Do not draft a spec on their behalf in Mode A.
+3. Verify `DMHelper/src/dev/plans/<feature-slug>.md` does **not**
+   exist, or confirm with the human that this is an intentional
+   replan. If replan, the existing plan is left in place — Design
+   will overwrite.
+
+**Mode B — description in chat:**
+
+1. Confirm or derive the slug, then propose it back to the human and
+   wait for approval. Slug must be kebab-case, lowercase, no spaces.
+2. Verify no spec or plan with that slug already exists. If either
+   does, ask the human whether to pick a new slug, supersede, or
+   abort.
+3. Draft `DMHelper/src/dev/specs/<feature-slug>.md` from the
+   description. The drafted spec must include, at minimum:
+   - **Title** (one line)
+   - **Summary** (one paragraph: what and why)
+   - **User-visible behavior** (concrete, specific)
+   - **Subsystems** (which of: battle, audio, campaign, UI shell,
+     other — your best guess from the description)
+   - **Done conditions** (how the human will know it works)
+   - **Open questions** (any ambiguities you noticed; empty if none)
+   Do not include implementation guidance — the spec is *what*, not
+   *how*. The plan is *how*.
+4. Present the drafted spec to the human verbatim and ask for
+   approval. Apply edits requested by the human. Do not proceed
+   without explicit approval ("approve", "go", or equivalent).
+5. Once approved, the spec file is committed by you to the current
+   branch with message `agent: spec for <feature-slug>`. The plan
+   path must not yet exist.
+
+In either mode, after Stage 0 completes you have a known-good spec
+path at `DMHelper/src/dev/specs/<feature-slug>.md` and a
+guaranteed-empty plan path at
+`DMHelper/src/dev/plans/<feature-slug>.md` (or a known prior plan to
+be superseded).
 
 ### Stage 1 — Design Dispatch
 
@@ -107,7 +158,7 @@ Spawn the Design Agent (Opus) with:
 - The spec path.
 - The plan path (where it should write).
 - The path to `DMHelper/src/dev/PLAN_SCHEMA.md` and
-  `DMHelper/src/agents/design.agent.md`.
+  `DMHelper/src/.github/agents/design.agent.md`.
 - If replanning: the path of the existing plan as context.
 
 Wait for return. Possible returns:
@@ -177,7 +228,7 @@ constraint below):
    - Chunk id.
    - Worktree path.
    - Cycle number (1).
-   - Path to `DMHelper/src/agents/execution.agent.md`.
+   - Path to `DMHelper/src/.github/agents/execution.agent.md`.
 4. **Wait for handoff note**.
 5. **Transcribe** the handoff fields into the cycle's `Cycle Log`
    entry (`executor_commit_range`, `executor_build_status`,
@@ -189,7 +240,7 @@ constraint below):
    - Commit range from handoff.
    - Full execution handoff note.
    - Cycle number.
-   - Path to `DMHelper/src/agents/review.agent.md`.
+   - Path to `DMHelper/src/.github/agents/review.agent.md`.
 7. **Wait for verdict**. Transcribe `review_verdict`,
    `review_findings`, `next_action` into the same cycle entry. Flush.
 8. **Route** by `next_action`:

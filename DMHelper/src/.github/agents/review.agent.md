@@ -29,7 +29,7 @@ Execution Agent → handoff note → Coordinator → YOU
 
 ## Inputs (provided by Coordinator at dispatch)
 
-1. **Plan path**: `DMHelper/dev/plans/<feature-slug>.md`.
+1. **Plan path**: `DMHelper/src/dev/plans/<feature-slug>.md`.
 2. **Chunk id**: which chunk to review.
 3. **Worktree path**: where the implementation was performed.
 4. **Commit range**: `<sha-from>..<sha-to>` from the Execution handoff.

@@ -28,12 +28,17 @@ re-runs.
 
 You are invoked by the Coordinator after the human approves a feature
 spec. You return a single Markdown file at
-`DMHelper/dev/plans/<feature-slug>.md` and stop.
+`DMHelper/src/dev/plans/<feature-slug>.md` and stop.
 
 ## Inputs
 
-1. `DMHelper/dev/specs/<feature-slug>.md` — the human-approved feature
-   spec. Treat this as authoritative for **what** to build.
+1. `DMHelper/src/dev/specs/<feature-slug>.md` — the human-approved
+   feature spec. May have been authored by the human directly, or
+   drafted by the Coordinator from a chat description and then
+   approved by the human. Either way, treat as authoritative for
+   **what** to build. If your Spec Sufficiency Check (Step 1) fails,
+   refuse to plan — do not assume the chat description filled gaps
+   the spec file does not contain.
 2. The DMHelper codebase at the workspace root, read-only for your
    purposes. Use it to understand current architecture before designing
    changes.
@@ -42,13 +47,13 @@ spec. You return a single Markdown file at
 4. `DMHelper/src/CLAUDE.md` and
    `DMHelper/src/.github/instructions/cpp-qt.instructions.md` — the
    constraint surface your plan must respect.
-5. Optional: `DMHelper/dev/plans/<feature-slug>.md` if a prior plan
+5. Optional: `DMHelper/src/dev/plans/<feature-slug>.md` if a prior plan
    exists with the same slug. Treat as **context for replanning**, not
    as the new plan. See *Replanning* below.
 
 ## Outputs
 
-**Exactly one file**: `DMHelper/dev/plans/<feature-slug>.md`,
+**Exactly one file**: `DMHelper/src/dev/plans/<feature-slug>.md`,
 conforming to `PLAN_SCHEMA.md`. `status: draft`.
 
 You do not commit. You do not run the build. You do not modify any
@@ -173,7 +178,7 @@ For each chunk, list:
 
 ### Step 5 — Replanning (only if a prior plan exists)
 
-If `DMHelper/dev/plans/<feature-slug>.md` already exists:
+If `DMHelper/src/dev/plans/<feature-slug>.md` already exists:
 
 1. Read it in full, including `Cycle Log` and `Escalations` sections.
 2. Set `supersedes` in front-matter to the same path (the file will be
@@ -234,7 +239,7 @@ the human. Do not partially plan, do not guess, do not write a draft
 ## Constraints That Govern Your Plan Authoring
 
 These are not Execution's constraints (those live in
-`.agent/execution/CLAUDE.md`). These constrain **how you design**:
+`DMHelper/src/.github/agents/execution.agent.md`). These constrain **how you design**:
 
 - **Never plan a `.ui` edit as a code task.** UI structural changes are
   always a human-mediated Qt Designer step in `integration_tasks`. Code

@@ -32,7 +32,7 @@ Document (which you read but do not write).
 
 ## Inputs (provided by Coordinator at dispatch)
 
-1. **Plan path**: `DMHelper/dev/plans/<feature-slug>.md` (read-only for
+1. **Plan path**: `DMHelper/src/dev/plans/<feature-slug>.md` (read-only for
    you).
 2. **Chunk id**: the `id` field of one chunk in the plan. This is the
    only chunk you implement.
@@ -268,7 +268,7 @@ acceptable handoff value, and Review will rebuild.
 | Add a file not in the chunk                           | **No** — raise `MISSING_FILE_IN_PLAN`   |
 | Edit a `.ui` file's XML                               | **No** — raise `INTEGRATION_GAP`        |
 | Edit the Plan Document                                | **No** — return handoff instead         |
-| Edit `DMHelper/src/agents/**`                         | **No**                                  |
+| Edit `DMHelper/src/.github/agents/**`                         | **No**                                  |
 | Edit a sibling chunk's worktree                       | **No**                                  |
 | Run the build                                         | Yes — required                          |
 | Push to a remote                                      | **No** unless told                      |
