@@ -8,7 +8,7 @@ arch_review_model: opus
 arch_review_reason: "Touches GL render path on the player screen, modifies the LayerTokens layer subclass on the DM side, and changes serialization shape on Campaign/Ruleset/BattleDialogModelMonsterCombatant."
 pre_impl_arch_review_requested: true
 supersedes: null
-status: approved
+status: in-progress
 ---
 
 # Summary
@@ -257,6 +257,14 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
   - Animated transitions, numeric labels, configurable colours.
 
 # Cycle Log
+
+## Chunk: ruleset-hp-keys
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:00:00Z
+- branch: chunk/ruleset-hp-keys
 
 # Architecture Review
 
