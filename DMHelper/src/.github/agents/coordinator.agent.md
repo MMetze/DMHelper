@@ -167,8 +167,23 @@ so failures surface fast.
 ### Stage 0 — Spec Acceptance
 
 Determine the entry mode. The human will tell you whether they have
-written a spec file (Mode A) or are providing the description in
-chat (Mode B). If unclear, ask once.
+written a spec file (Mode A), are providing the description in chat
+(Mode B), or are resuming after a Design handoff (Mode C — typically
+triggered by Design dispatching you, or by the human pasting a
+`READY FOR COORDINATOR` block). If unclear, ask once.
+
+**Mode C — resume after Design:**
+
+The message you receive looks like "Resume mode — design just
+completed" with a feature slug, spec path, and plan path. Procedure:
+
+1. Verify the plan file exists at the stated path and parses as
+   YAML+Markdown with `status: draft`. If missing or malformed:
+   ask the human one clarifying question, then escalate as
+   `ambiguity` if unresolved.
+2. Verify the spec exists at the stated path.
+3. Skip Stages 0–1 entirely and proceed directly to Stage 2 (Human
+   Checkpoint 1).
 
 **Mode A — spec file already written:**
 
@@ -225,6 +240,11 @@ manual handoff procedure from *Dispatch Modes*.
      `DMHelper/src/.github/agents/design.agent.md`.
    - If replanning: the path to the existing plan as context.
    - Expected output paths: the plan file at the path above.
+   - A note that Design's Step 7 will either auto-dispatch a Sonnet
+     Coordinator (in which case you, the original Coordinator, are
+     superseded and the human will work with the dispatched
+     instance) or print a `READY FOR COORDINATOR` block for the
+     human to paste into a fresh chat.
 2. Stop. Wait for the human's reply.
 3. On `done`: verify the plan file exists at the expected path and is
    well-formed YAML+Markdown. If yes, proceed to checkpoint 1. If no

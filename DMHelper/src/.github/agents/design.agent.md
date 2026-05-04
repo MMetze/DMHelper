@@ -1,7 +1,7 @@
 ---
 description: "Use when designing feature specifications into executable plan documents for the DMHelper multi-agent pipeline. Creates chunks, integration tasks, and architectural risk assessments. Invoked manually by the human when the Coordinator hands off a Design stage — must be run on Claude Opus."
 name: "Design Agent"
-tools: [read, search]
+tools: [read, edit, search]
 user-invocable: true
 ---
 
@@ -217,6 +217,62 @@ Before writing the file, verify:
 If any check fails, fix it before writing. If a check cannot be fixed
 without missing information, refuse to plan.
 
+### Step 7 — Hand Back to the Coordinator
+
+After writing the plan file, your job is done as a designer — but the
+pipeline must continue. There are two ways to hand back; **try them in
+this order**.
+
+**Preferred: auto-dispatch a Sonnet Coordinator.**
+Call `runSubagent` with these arguments:
+- `agentName`: `"Coordinator Agent"`
+- `model`: `"Claude Sonnet 4.6 (copilot)"`
+- `description`: `"Resume pipeline after design"`
+- `prompt`: the exact text in the *Resume Prompt* template below.
+
+If the call succeeds, the dispatched Coordinator runs Stage 2
+(checkpoint 1) and returns. Forward its output verbatim as your final
+reply to the human, prefixed with one line:
+`Plan written. Coordinator dispatched on Sonnet — see below.`
+
+**Fallback: print the resume block for the human to paste.**
+If `runSubagent` is unavailable to you, errors, or the dispatched
+Coordinator does not return cleanly, print the *Resume Block* template
+below as your final message and stop. The human will paste it into a
+fresh Coordinator chat.
+
+#### Resume Prompt (for `runSubagent`)
+
+```
+Resume mode — design just completed.
+
+Feature slug: <feature-slug>
+Spec path: DMHelper/src/dev/specs/<feature-slug>.md
+Plan path: DMHelper/src/dev/plans/<feature-slug>.md (status: draft)
+
+Proceed from Stage 2 (Human Checkpoint 1). Read the plan, present the
+checkpoint summary, and wait for the human's approval.
+```
+
+#### Resume Block (for human to paste)
+
+```
+READY FOR COORDINATOR — <feature-slug>
+
+Switch the chat model picker to "Claude Sonnet 4.6", open a new chat,
+invoke @Coordinator Agent, and paste this:
+
+---
+Resume mode — design just completed.
+
+Feature slug: <feature-slug>
+Spec path: DMHelper/src/dev/specs/<feature-slug>.md
+Plan path: DMHelper/src/dev/plans/<feature-slug>.md (status: draft)
+
+Proceed from Stage 2 (Human Checkpoint 1).
+---
+```
+
 ## Refusing to Plan
 
 If the spec is insufficient or the codebase reveals an unresolvable
@@ -239,9 +295,11 @@ Recommended spec amendments:
 - <amendment>
 ```
 
-Send this back to the Coordinator. The Coordinator will return it to
-the human. Do not partially plan, do not guess, do not write a draft
-"to be revised."
+Print this as your final reply and stop. Do **not** auto-dispatch the
+Coordinator (Step 7 is skipped on refusal) — the human will switch the
+model picker back to Sonnet and reply to the paused Coordinator chat
+with this refusal text. Do not partially plan, do not guess, do not
+write a draft "to be revised."
 
 ## Constraints That Govern Your Plan Authoring
 
