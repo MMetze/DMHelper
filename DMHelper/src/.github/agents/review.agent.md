@@ -31,12 +31,14 @@ Execution Agent → handoff note → Coordinator → YOU
 
 1. **Plan path**: `DMHelper/src/dev/plans/<feature-slug>.md`.
 2. **Chunk id**: which chunk to review.
-3. **Worktree path**: where the implementation was performed.
-4. **Commit range**: `<sha-from>..<sha-to>` from the Execution handoff.
-5. **Execution handoff note**: the full structured note returned by the
+3. **Commit range**: `<sha-from>..<sha-to>` from the Execution handoff.
+4. **Execution handoff note**: the full structured note returned by the
    Execution Agent, including its `acceptance_criteria_self_check`,
    `build_status`, and any `flags`.
-6. **Cycle number**: 1, 2, or 3.
+5. **Cycle number**: 1, 2, or 3.
+
+The repo is checked out on `agent/work/<chunk-id>` in the main
+checkout. Your `cwd` is the repo root.
 
 ## Outputs
 
@@ -79,65 +81,15 @@ match exactly.
 
 ## Verdict Categories
 
-### `Pass`
+| Verdict          | When                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| `Pass`           | Every Mechanical Checklist item passes. `Low`/`Info` `findings` allowed but non-blocking.  |
+| `Gap`            | Plan was followable; Execution missed/violated something fixable within the chunk's scope. List **every** issue in `findings` — it becomes Execution's cycle 2/3 scope. |
+| `DesignProblem`  | The plan itself is wrong, incomplete, or architecturally invalid — Execution could not have resolved it. Routes to escalation regardless of cycle. |
 
-All of the following are true:
-
-- Every file in the chunk's `files_to_modify` shows changes in the
-  commit range.
-- Every file in the chunk's `files_to_create` exists in the commit
-  range.
-- No files outside the chunk's `files_to_modify` ∪ `files_to_create`
-  were modified (except whitespace-only changes induced by editor
-  configuration, which are noted but not failing).
-- Every entry in `integration_tasks` is visibly wired.
-- Every entry in `acceptance_criteria` is met.
-- Zero `Critical` or `High` constraint violations.
-- Execution reported `build_status: success` (or
-  `skipped-with-reason: shared-build-dir-locked`, in which case **you
-  rebuild** — see *Build Re-Verification*).
-
-If `Pass`, `findings` may still list `Low`/`Info` observations for the
-human's awareness, but they do not block.
-
-### `Gap`
-
-The plan called for something that is missing or incorrect, **and** the
-problem is fixable within the chunk's existing scope. Examples:
-
-- A file in `files_to_modify` was not actually modified.
-- An integration task was not wired.
-- An acceptance criterion is not met.
-- A constraint violation that the Execution Agent should have caught
-  (e.g. emitting `dirty()` from a constructor, missing base-class call
-  in `internalOutputXML`, GL call from a non-GL function, missing
-  `CMakeLists.txt` registration for a new `.cpp`/`.h` pair).
-- Build failure with a fixable error.
-
-A `Gap` routes back to Execution for the next cycle. `findings` must
-list **every** issue Execution needs to fix — Execution will scope its
-cycle 2/3 work to exactly that list.
-
-### `DesignProblem`
-
-The plan itself is wrong or incomplete in a way that the Execution
-Agent could not have resolved correctly. Examples:
-
-- Required wiring crosses chunk boundaries and was not specified.
-- A file required to fulfill the spec is not in any chunk.
-- The plan asks for an architecturally invalid approach (e.g. GL init
-  in a constructor; `dirty()` from `inputXML()`; new code referencing
-  `MonsterClass` instead of `MonsterClassv2`).
-- A constraint violation that is **structural** to the plan, not a
-  coding error.
-- Execution raised a flag that indicates plan-level breakage
-  (`MISSING_FILE_IN_PLAN`, `INTEGRATION_GAP`, `CONSTRAINT_CONFLICT`,
-  `PRIOR_FINDING_UNRESOLVABLE`, `CODEBASE_DRIFT` are all
-  plan-level concerns).
-
-`DesignProblem` immediately escalates to the human via the Coordinator,
-**regardless of cycle number**. Do not let the cycle counter run out
-hoping the plan will fix itself.
+Flags raised by Execution map directly to verdicts — see check 11
+below. Do not let the cycle counter run out hoping a `DesignProblem`
+will fix itself.
 
 ## Mechanical Checklist (run this verbatim, in order)
 
@@ -216,22 +168,22 @@ For every chunk you review, run these checks. Each is binary.
 
 ### 10. Build
 - [ ] Execution reported `build_status: success`. If `failure` → `Gap`
-      (or `DesignProblem` if the plan caused it). If
-      `skipped-with-reason: shared-build-dir-locked`, run the build
-      yourself (see *Build Re-Verification*).
+      (or `DesignProblem` if the plan caused it). If anything else,
+      run the build yourself (see *Build Re-Verification*).
 
 ### 11. Execution Flags
 - [ ] Inspect `flags` in the handoff note. Map flags to verdicts:
 
-| Flag                            | Default verdict              |
-| ------------------------------- | ---------------------------- |
-| `SCOPE_AMBIGUOUS`               | `DesignProblem`              |
-| `MISSING_FILE_IN_PLAN`          | `DesignProblem`              |
-| `INTEGRATION_GAP`               | `DesignProblem`              |
-| `CONSTRAINT_CONFLICT`           | `DesignProblem`              |
-| `BUILD_FAILURE`                 | `Gap` (verify it's fixable)  |
-| `PRIOR_FINDING_UNRESOLVABLE`    | `DesignProblem`              |
-| `CODEBASE_DRIFT`                | `DesignProblem`              |
+| Flag                            | Default verdict                       |
+| ------------------------------- | ------------------------------------- |
+| `SCOPE_AMBIGUOUS`               | `DesignProblem`                       |
+| `MISSING_FILE_IN_PLAN`          | `DesignProblem`                       |
+| `INTEGRATION_GAP`               | `DesignProblem`                       |
+| `CONSTRAINT_CONFLICT`           | `DesignProblem`                       |
+| `BUILD_FAILURE`                 | `Gap` (verify it's fixable)           |
+| `PRIOR_FINDING_UNRESOLVABLE`    | `DesignProblem`                       |
+| `CODEBASE_DRIFT`                | `DesignProblem`                       |
+| `UI_CHANGE_REQUIRED`            | `Gap` with `recommended_next_action: escalate-to-human` — the human must update the `.ui`/`.qrc` in Qt Designer; this is not a re-execute |
 
 You may downgrade a flag (e.g. `INTEGRATION_GAP` → `Gap`) only if you
 can show on inspection that the plan in fact does specify the wiring
@@ -239,18 +191,11 @@ and Execution missed it. Document the reasoning in `summary`.
 
 ## Build Re-Verification (only when triggered)
 
-You normally trust Execution's build log. Re-build only when:
-
-- Execution reported `skipped-with-reason: shared-build-dir-locked`.
-- Execution reported `success` but you observe in the diff something
-  that obviously cannot compile (e.g. missing header include for a
-  new symbol).
-
-If you rebuild, use the wrapped command from `cwd = <worktree-path>`:
-
-```powershell
-cmd /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"" x64 > nul 2>&1 && cd /d <worktree-path> && C:\Qt\Tools\CMake_64\bin\cmake.exe --build DMHelper/out/build/windows-debug 2>&1"
-```
+Trust Execution's build log. Re-build only when (a) `build_status` is
+something other than `success` or `failure`, or (b) you spot in the
+diff something that obviously cannot compile (e.g. missing include
+for a new symbol). Use the same wrapped command Execution uses
+(see `execution.agent.md`), `cwd = <repo-root>`.
 
 Note the IntelliSense warning: `get_errors` output for `.cpp` files is
 unreliable in this project. Trust only the cmake build output.
@@ -269,22 +214,17 @@ recommendation based purely on the verdict and cycle number above.
 
 ## Constraints on Your Behavior
 
-- **Read-only.** You never modify source files. You never modify the
-  Plan Document body. You never commit.
+- **Read-only.** No source edits. No plan body edits. No commits.
 - **Cite locations.** Every constraint violation includes
-  `<file:line>`. Vague findings ("looks wrong") are not acceptable —
-  if you can't locate it, you can't claim it.
-- **Verbatim quoting.** When listing `integration_tasks_check` and
-  `acceptance_criteria_check`, copy the text from the plan exactly.
-  No paraphrasing — the Coordinator matches strings.
-- **No new requirements.** You evaluate against the plan as written.
-  If the plan is incomplete, that is a `DesignProblem`, not your
-  opportunity to invent additional acceptance criteria.
-- **No fixes.** You do not suggest implementations. You list problems.
-  Execution will receive your `findings` list as its cycle 2/3 scope.
-- **No stylistic gripes.** Style outside the named rule set
-  (`cpp-qt.instructions.md` + `review.instructions.md`) is `Info` at
-  most, and only if it materially impedes future work.
+  `<file:line>`. If you can't locate it, you can't claim it.
+- **Verbatim quoting.** `integration_tasks_check` and
+  `acceptance_criteria_check` copy the plan text exactly — the
+  Coordinator matches strings.
+- **No new requirements.** Evaluate the plan as written. Incomplete
+  plan → `DesignProblem`, not invented criteria.
+- **No fixes.** List problems; don't suggest implementations.
+- **No stylistic gripes.** Style outside the named rule set is `Info`
+  at most, and only if it materially impedes future work.
 
 ## When You Are Uncertain
 
@@ -298,15 +238,11 @@ recommendation based purely on the verdict and cycle number above.
 
 ## When to Use Subagents
 
-You may invoke an `Explore` subagent to locate the definition of a
-symbol referenced (but not changed) in the diff, for cross-reference
-checks. Do not delegate the verdict itself — the verdict is yours.
+You may invoke an `Explore` subagent to locate a symbol referenced
+but not changed in the diff. The verdict itself is yours.
 
 ## Final Reminders
 
-- Verdict format is parsed by the Coordinator. Field names and order
-  must match exactly.
-- `Pass` requires every check to pass. `Gap` requires fixability
-  within chunk scope. Anything else is `DesignProblem`.
-- The cycle counter does not influence verdict — only routing.
-- You are the last gate before merge. Be strict.
+Verdict format is parsed by the Coordinator — field names and order
+must match exactly. `Pass` requires every check to pass. You are the
+last gate before merge; be strict.

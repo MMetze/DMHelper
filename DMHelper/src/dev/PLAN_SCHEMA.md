@@ -14,8 +14,8 @@ fixed order. All field names are case-sensitive.
 
 ## File Locations
 
-- Plan path: `DMHelper/dev/plans/<feature-slug>.md` (committed, public).
-- Spec path: `DMHelper/dev/specs/<feature-slug>.md` (committed, public).
+- Plan path: `DMHelper/src/dev/plans/<feature-slug>.md` (committed, public).
+- Spec path: `DMHelper/src/dev/specs/<feature-slug>.md` (committed, public).
 - The slug must match between spec and plan filenames.
 - If a plan with the same slug already exists, the new plan **supersedes**
   it. The old plan is not deleted; the new plan sets the `supersedes` field
@@ -114,12 +114,10 @@ same or next line. Lists use `-` bullets.
 ```
 ## Chunk <id>: <short title>
 
-- **id**: <stable-kebab-case-identifier>          # used for worktree, branch, log keys
+- **id**: <stable-kebab-case-identifier>          # used for branch and log keys
 - **summary**: <one-sentence purpose>
 - **dependencies**: [<chunk-id>, ...]             # other chunks that must pass before this starts; [] if none
-- **parallelizable**: <true|false>                # true only if `dependencies` is [] or all listed deps are already complete
-- **worktree_path**: ../DMHelper-wt-<id>/         # set by Design; Coordinator creates the directory
-- **branch**: agent/work/<id>                     # set by Design
+- **branch**: agent/work/<id>                     # set by Design; Coordinator checks it out in the main repo
 - **files_to_modify**:
   - <repo-relative path> — <reason>
   - ...
@@ -149,6 +147,10 @@ same or next line. Lists use `-` bullets.
   in `files_to_modify` for source registration.
 - Cross-chunk wiring is **always** an `integration_tasks` entry on the
   later chunk, never an implicit assumption.
+- Chunks execute **sequentially** — there is one repo checkout and one
+  build directory, so only one Execution Agent runs at a time. Order
+  chunks by `dependencies`; among ready chunks, pick whichever has the
+  smallest expected diff to fail-fast.
 - `acceptance_criteria` must be testable by reading diffs and the build
   log — no "looks reasonable" criteria.
 - A chunk that requires a `.ui` change must call out the change as a
@@ -216,18 +218,18 @@ Written only by the Coordinator.
 
 ```
 ## <ISO-8601 timestamp> — <chunk-id or "pipeline">
-- **reason**: <cycle-cap-reached|design-problem|arch-block|tool-failure|ambiguity>
+- **reason**: <cycle-cap-reached|design-problem|arch-block|tool-failure|ambiguity|ui-change-required>
 - **detail**: <one paragraph>
 - **state_at_escalation**:
-  - worktrees_left_in_place: [<path>, ...]
+  - branch_checked_out: <branch name currently checked out in the main repo>
   - branches_left_in_place: [<branch>, ...]
   - last_cycle: <chunk-id>:<n>
 - **handoff_to**: human
 ```
 
 Escalations halt the pipeline for that chunk. The Coordinator does not
-clean up worktrees or branches on escalation — they are left for human
-inspection.
+delete branches on escalation — they are left in place for human
+inspection. The repo is left checked out on the chunk's branch.
 
 ## Write-Scope Discipline
 

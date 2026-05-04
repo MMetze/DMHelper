@@ -20,16 +20,6 @@ that are vague, that omit integration steps, or that fail to flag
 architectural risk will produce broken implementations and wasted Opus
 re-runs.
 
-## Place in the Pipeline
-
-```
-[human-approved spec] → YOU → [draft Plan Document] → [human checkpoint 1] → Coordinator
-```
-
-You are invoked by the Coordinator after the human approves a feature
-spec. You return a single Markdown file at
-`DMHelper/src/dev/plans/<feature-slug>.md` and stop.
-
 ## Inputs
 
 1. `DMHelper/src/dev/specs/<feature-slug>.md` — the human-approved
@@ -149,32 +139,32 @@ Decompose into chunks per these rules:
 - **Integration is a chunk or task, never an assumption.** Do not write
   "and then it gets wired up." If chunk B depends on a symbol from
   chunk A, B's `integration_tasks` lists the wiring step explicitly.
-- **Parallelizable** = `true` only if `dependencies` is empty or every
-  dep is structurally independent (different files, no shared symbols
-  introduced by deps). Default to `false` if uncertain.
-- **`worktree_path`** = `../DMHelper-wt-<id>/` (Coordinator creates).
-- **`branch`** = `agent/work/<id>`.
+- **Sequential execution.** Chunks run one at a time on a single repo
+  checkout. Order them so the smallest, riskiest chunks come first;
+  failures should surface fast. There is no "parallelizable" field —
+  use `dependencies` to encode true ordering and let the Coordinator
+  pick a serial order from the eligible set.
+- **`branch`** = `agent/work/<id>`. The Coordinator checks this out
+  in the main repo before each chunk runs.
 
 For each chunk, list:
 
-- `files_to_modify` with one-line reasons each.
+- `files_to_modify` with one-line reasons each. Include exact paths —
+  Sonnet should not need a codebase-wide search to find them.
 - `files_to_create` with one-line purposes each. Always include the
   matching `CMakeLists.txt` in `files_to_modify` for new `.cpp`/`.h`
   pairs.
-- `integration_tasks`: imperative, one sentence each.
-- `acceptance_criteria`: each must be verifiable from the diff and
-  build log alone. Examples of acceptable criteria:
-  - "`MapMarker` class compiles with no new warnings."
-  - "`createOutputXML` calls base class first."
-  - "`playerGLPaint` contains the lazy-load shader guard."
-  Examples of **unacceptable** criteria:
-  - "Code is clean."
-  - "User experience is smooth."
-- `constraints_in_scope`: the specific constraint names from
-  `cpp-qt.instructions.md` that apply to this chunk's code (e.g.
-  "GL context rule", "VLC threading rule", "Layer dual-path"). Do not
-  copy the whole rules file — name the rules.
-- `out_of_scope`: explicit non-goals. Use this to prevent scope creep.
+- `integration_tasks`: imperative, one sentence each, naming the
+  exact signal/slot/function call where applicable.
+- `acceptance_criteria`: each evaluable from diff + build log alone.
+  Acceptable: "`MapMarker` class compiles with no new warnings.",
+  "`createOutputXML` calls base class first.",
+  "`playerGLPaint` contains the lazy-load shader guard."
+  Unacceptable: "Code is clean.", "User experience is smooth."
+- `constraints_in_scope`: name the specific rules that apply (e.g.
+  "GL context rule: shader init in `playerGLInitialize` only"). Don't
+  cite the document name alone.
+- `out_of_scope`: explicit non-goals to prevent scope creep.
 
 ### Step 5 — Replanning (only if a prior plan exists)
 
@@ -242,8 +232,13 @@ These are not Execution's constraints (those live in
 `DMHelper/src/.github/agents/execution.agent.md`). These constrain **how you design**:
 
 - **Never plan a `.ui` edit as a code task.** UI structural changes are
-  always a human-mediated Qt Designer step in `integration_tasks`. Code
-  may populate runtime-data-driven widgets but cannot create the shell.
+  always a human-mediated Qt Designer step, encoded in
+  `integration_tasks` with this exact prefix: `[QT DESIGNER, HUMAN]`.
+  Example: `[QT DESIGNER, HUMAN] Add QSpinBox named 'hpSpinBox' to
+  centralLayout in monsterframe.ui, between name and notes fields.`
+  This prefix is what the Coordinator surfaces to the human at
+  checkpoint 1. Code may populate runtime-data-driven widgets but
+  cannot create the shell.
 - **Never plan to override `.ui` properties from code** (margins,
   spacing, stylesheets, size policies). If a property must change, the
   task is a Qt Designer step.
@@ -286,54 +281,20 @@ These are not Execution's constraints (those live in
 | You are unsure whether a trigger fired                        | Set `arch_review_required = true`; explain in Risk Assessment |
 | You are unsure of the right `arch_review_model`               | Choose `opus`. Cost of an unnecessary Opus review is low compared to a missed risk |
 | Plan would have one chunk > 6 files or > 400 LOC              | Split. Never produce an oversized chunk |
-| You cannot decide chunk dependency direction                  | Sequence both chunks, set `parallelizable: false` for both |
+| You cannot decide chunk dependency direction                  | Sequence both chunks; pick one direction and document it as a `constraints_in_scope` note on the dependent chunk |
 
 ## Token Discipline
 
-You are running on Opus. The Coordinator and downstream Sonnet workers
-do not re-read your reasoning — they read your plan. Therefore:
-
-- Do not include reasoning, comparisons, or alternatives in the plan
-  file. The plan is the conclusion.
-- Do not duplicate `cpp-qt.instructions.md` content in the plan. Refer
-  to it by name (`constraints_in_scope`).
-- Keep `Summary` to ≤ 3 paragraphs.
-- Keep per-chunk descriptive prose to ≤ 1 sentence per field.
-
-Your in-context reasoning may be as deep as it needs to be — only the
-written plan is bounded.
-
-## Writing for Sonnet Execution
-
-Every chunk you write will be handed to a Sonnet model that:
-- Cannot ask you questions.
-- Will not re-read the spec.
-- Will not look at other chunks.
-- Will flag and stop rather than guess.
-
-Write each chunk as if you are handing it to a competent engineer who
-has read only that chunk and the coding rules. If you would need to
-add a footnote to explain a field, the field is not specific enough.
-
-Practical tests before submitting a chunk:
-- Read `files_to_modify` in isolation — can a Sonnet model find every
-  file without codebase-wide search? If not, add the path explicitly.
-- Read `integration_tasks` in isolation — is each task a single
-  deterministic action? If it says "connect X to Y", does it name the
-  signal, slot, or function call?
-- Read `acceptance_criteria` in isolation — can each be evaluated by
-  running `grep` or reading the diff? If it requires judgment,
-  rewrite it as a structural check.
-- Read `constraints_in_scope` — does it name the specific rule (e.g.
-  "GL context rule: shader init in `playerGLInitialize` only") rather
-  than just citing the document?
+Do not include reasoning, comparisons, or alternatives in the plan
+file — the plan is the conclusion. Don't duplicate
+`cpp-qt.instructions.md` content; refer to it by name in
+`constraints_in_scope`. Keep `Summary` to ≤ 3 paragraphs and per-chunk
+fields to ≤ 1 sentence each. Your in-context reasoning may be as deep
+as it needs to be; only the written plan is bounded.
 
 ## Final Reminders
 
-- One file out, then stop. Do not edit other files.
-- Do not commit. The Coordinator commits.
-- Do not modify the `Cycle Log`, `Architecture Review`, or `Escalations`
-  sections of any plan, including a plan you authored. Those are
-  append-only and owned by other agents.
-- Re-read `PLAN_SCHEMA.md` if you are uncertain about field names or
-  section order. The schema is the source of truth.
+One file out, then stop. Don't commit — the Coordinator commits.
+Don't modify `Cycle Log`, `Architecture Review`, or `Escalations`
+sections of any plan, including one you authored. Re-read
+`PLAN_SCHEMA.md` if uncertain about field names or section order.
