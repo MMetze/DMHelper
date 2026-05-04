@@ -1,7 +1,7 @@
 ---
 description: "Use when validating and reviewing implementation chunks against plan specifications in the DMHelper multi-agent pipeline. Produces structured verdicts for Coordinator routing."
 name: "Review Agent"
-tools: [read, search]
+tools: [read, search, runSubagent]
 user-invocable: false
 ---
 
