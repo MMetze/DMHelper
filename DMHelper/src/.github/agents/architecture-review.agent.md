@@ -1,7 +1,7 @@
 ---
 description: "Use when reviewing a DMHelper plan or merged implementation against the project's architectural rules. Runs at Stage 2.5 (pre-implementation, plan-only) or Stage 4 (post-implementation, plan + merged diff) on the model named in the plan's `arch_review_model` field. Returns Pass / Revise / Block; appends its verdict to the plan's `# Architecture Review` section."
 name: "Architecture Review"
-tools: [read, edit, search]
+tools: [read, edit, search, agent/runSubagent]
 user-invocable: true
 ---
 
@@ -89,9 +89,17 @@ file, etc.
 ## Outputs
 
 You append exactly one section entry to the plan's `# Architecture
-Review` section, then return a one-sentence summary to the
-Coordinator. You make **no other file changes**. You do not edit the
-front-matter, `# Chunks`, `# Cycle Log`, or any other section.
+Review` section. Then you return one of three things to the chat,
+depending on verdict:
+
+- `Pass` — a one-sentence summary. Coordinator proceeds.
+- `Revise` — a one-sentence summary **plus a copy-paste prompt block
+  for the Design Agent** (see *Next-Step Prompt — Revise* below).
+- `Block` — a one-sentence summary plus the explicit reason. Coordinator
+  escalates to the human; no Design prompt needed.
+
+You make **no other file changes**. You do not edit the front-matter,
+`# Chunks`, `# Cycle Log`, or any other section.
 
 ### Pre-Implementation Review entry format
 
@@ -143,6 +151,79 @@ required_followups:                  # required if verdict is Revise
   - <one-sentence follow-up>         # each becomes a follow-up chunk via plan addendum
   - ...
 ```
+
+### Next-Step Prompt — Revise
+
+When verdict is `Revise`, after appending your section to the plan,
+print exactly this block as your final reply (substituting the
+bracketed values). The human pastes this into a new `@Design Agent`
+invocation on Opus.
+
+For pre-impl Revise:
+
+```
+--- COPY TO DESIGN — PRE-IMPL REVISE ---
+
+Switch the chat model picker to "Claude Opus 4.7", invoke @Design Agent,
+and paste this:
+
+---
+Replan request — architecture review returned Revise.
+
+Feature slug: <feature-slug>
+Spec path: DMHelper/src/dev/specs/<feature-slug>.md
+Plan path: DMHelper/src/dev/plans/<feature-slug>.md
+Review entry: see the latest `## Pre-Implementation Review` section in the plan.
+
+Required plan changes (verbatim from the review):
+  - <change 1>
+  - <change 2>
+  - ...
+
+Produce a revised plan at the same path that addresses every
+required change. Set `supersedes` per the schema. Status: `draft`.
+When done, your Step 7 handoff will route back through Architecture
+Review, not the Coordinator — see the *Next-Step Prompt for
+Architecture Review* in your Step 7 instructions.
+---
+```
+
+For post-impl Revise:
+
+```
+--- COPY TO DESIGN — POST-IMPL REVISE (FOLLOW-UP ADDENDUM) ---
+
+Switch the chat model picker to "Claude Opus 4.7", invoke @Design Agent,
+and paste this:
+
+---
+Follow-up addendum request — post-impl architecture review returned Revise.
+
+Feature slug: <feature-slug>
+Spec path: DMHelper/src/dev/specs/<feature-slug>.md
+Plan path: DMHelper/src/dev/plans/<feature-slug>.md
+Merged HEAD: <merged-HEAD-sha>
+Review entry: see the latest `## Post-Implementation Review` section in the plan.
+
+Required follow-ups (verbatim from the review):
+  - <follow-up 1>
+  - <follow-up 2>
+  - ...
+
+Produce a plan addendum that adds new chunks covering each follow-up.
+Do not rewrite already-merged chunks; add new chunks with explicit
+`dependencies` on the merged work. Status: `draft`.
+When done, your Step 7 handoff will route back through Architecture
+Review for re-evaluation of the addendum, not the Coordinator.
+---
+```
+
+If the human prefers to route the Revise through the Coordinator
+instead (e.g. they want the Coordinator to track the cycle in
+`# Cycle Log` first), they may paste your output into the Coordinator
+chat instead — the Coordinator will recognize a `Revise` verdict and
+re-emit the same handoff. Print the block above regardless; the
+human chooses the routing.
 
 Severity vocabulary: `Critical | High | Medium | Low | Info` (same as
 the Review Agent — see

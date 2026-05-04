@@ -217,11 +217,16 @@ Before writing the file, verify:
 If any check fails, fix it before writing. If a check cannot be fixed
 without missing information, refuse to plan.
 
-### Step 7 — Hand Back to the Coordinator
+### Step 7 — Hand Back
 
 After writing the plan file, your job is done as a designer — but the
-pipeline must continue. There are two ways to hand back; **try them in
-this order**.
+pipeline must continue. **Where you hand back depends on what
+triggered this Design run.**
+
+#### Case A — First-time plan, or replan from a Coordinator/human request
+
+This is the default. Hand back to the Coordinator. Try the two
+methods below in this order.
 
 **Preferred: auto-dispatch a Sonnet Coordinator.**
 Call `runSubagent` with these arguments:
@@ -238,10 +243,23 @@ reply to the human, prefixed with one line:
 **Fallback: print the resume block for the human to paste.**
 If `runSubagent` is unavailable to you, errors, or the dispatched
 Coordinator does not return cleanly, print the *Resume Block* template
-below as your final message and stop. The human will paste it into a
-fresh Coordinator chat.
+below as your final message and stop.
 
-#### Resume Prompt (for `runSubagent`)
+#### Case B — Replan or addendum in response to an Architecture Review `Revise`
+
+You were invoked with a prompt of the form `Replan request —
+architecture review returned Revise` or `Follow-up addendum request —
+post-impl architecture review returned Revise`. After writing the
+revised plan (or addendum), the next step is **Architecture Review
+re-evaluation**, not the Coordinator. Do **not** call `runSubagent`
+for a Coordinator dispatch. Instead, print the *Next-Step Prompt for
+Architecture Review* block below as your final message and stop.
+
+The re-review uses the same `arch_review_model` from the plan's
+front-matter. The human will switch the model picker accordingly
+before invoking `@Architecture Review`.
+
+#### Resume Prompt (for `runSubagent`, Case A only)
 
 ```
 Resume mode — design just completed.
@@ -254,7 +272,7 @@ Proceed from Stage 2 (Human Checkpoint 1). Read the plan, present the
 checkpoint summary, and wait for the human's approval.
 ```
 
-#### Resume Block (for human to paste)
+#### Resume Block (for human to paste, Case A only)
 
 ```
 READY FOR COORDINATOR — <feature-slug>
@@ -270,6 +288,54 @@ Spec path: DMHelper/src/dev/specs/<feature-slug>.md
 Plan path: DMHelper/src/dev/plans/<feature-slug>.md (status: draft)
 
 Proceed from Stage 2 (Human Checkpoint 1).
+---
+```
+
+#### Next-Step Prompt for Architecture Review (Case B only)
+
+For a pre-impl revise re-review:
+
+```
+--- COPY TO ARCHITECTURE REVIEW — PRE-IMPL RE-REVIEW ---
+
+Switch the chat model picker to "<Claude Opus 4.7 | Claude Sonnet 4.6>"
+(match the plan's `arch_review_model`), invoke @Architecture Review,
+and paste this:
+
+---
+Mode: pre-impl (re-review after Revise)
+
+Feature slug: <feature-slug>
+Plan path: DMHelper/src/dev/plans/<feature-slug>.md
+Prior review entry: latest `## Pre-Implementation Review` in the plan.
+
+The plan has been revised to address every `required_plan_changes`
+entry from the prior review. Re-evaluate the plan as written; do not
+look at any code yet. Append a new `## Pre-Implementation Review`
+entry with your verdict.
+---
+```
+
+For a post-impl revise re-review (after the addendum is also implemented):
+
+```
+--- COPY TO COORDINATOR — ADDENDUM READY ---
+
+The plan addendum has been written. The follow-up chunks must be
+implemented before Architecture Review can re-evaluate.
+
+Switch the chat model picker to "Claude Sonnet 4.6", open the
+Coordinator chat, and paste this:
+
+---
+Resume mode — plan addendum complete.
+
+Feature slug: <feature-slug>
+Plan path: DMHelper/src/dev/plans/<feature-slug>.md
+New chunks: <chunk-id>, <chunk-id>, ...
+
+Proceed from Stage 3 with the new chunks. After they merge, re-run
+Stage 4 Architecture Review on the cumulative diff.
 ---
 ```
 
