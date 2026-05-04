@@ -1,7 +1,7 @@
 ---
 description: "Use when implementing exactly one chunk from a plan document on its dedicated branch in the main repo. Executes code changes, builds, and provides handoff notes for Coordinator routing."
 name: "Execution Agent"
-tools: [read, edit, search, execute, runSubagent]
+tools: [read, edit, search, execute, agent/runSubagent]
 user-invocable: true
 ---
 

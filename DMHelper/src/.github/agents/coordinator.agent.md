@@ -1,7 +1,7 @@
 ---
 description: "Use when orchestrating the full DMHelper multi-agent pipeline. Dispatches Design, Execution, Review, and Architecture Review agents; manages branches, checkpoints, and escalations."
 name: "Coordinator Agent"
-tools: [read, edit, search, execute, runSubagent]
+tools: [read, edit, search, execute, agent/runSubagent]
 user-invocable: true
 ---
 

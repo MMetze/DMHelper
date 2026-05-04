@@ -1,7 +1,7 @@
 ---
 description: "Use when designing feature specifications into executable plan documents for the DMHelper multi-agent pipeline. Creates chunks, integration tasks, and architectural risk assessments. Invoked manually by the human when the Coordinator hands off a Design stage — must be run on Claude Opus."
 name: "Design Agent"
-tools: [read, edit, search]
+tools: [read, edit, search, agent/runSubagent]
 user-invocable: true
 ---
 
