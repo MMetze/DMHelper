@@ -79,6 +79,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _notes(),
     _lastMonster(),
     _fearCount(0),
+    _showTokenHealthBars(false),
     _ruleset(),
     _batchChanges(false),
     _changesMade(false),
@@ -131,6 +132,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
+    _showTokenHealthBars = element.attribute("showTokenHealthBars", QString::number(0)).toInt() != 0;
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -429,6 +431,11 @@ int Campaign::getFearCount() const
     return _fearCount;
 }
 
+bool Campaign::getShowTokenHealthBars() const
+{
+    return _showTokenHealthBars;
+}
+
 Ruleset& Campaign::getRuleset()
 {
     return _ruleset;
@@ -523,6 +530,16 @@ void Campaign::setFearCount(int fearCount)
     emit dirty();
 }
 
+void Campaign::setShowTokenHealthBars(bool show)
+{
+    if(show == _showTokenHealthBars)
+        return;
+
+    _showTokenHealthBars = show;
+    emit showTokenHealthBarsChanged(_showTokenHealthBars);
+    emit dirty();
+}
+
 bool Campaign::validateCampaignIds()
 {
     QList<QUuid> knownIds;
@@ -581,6 +598,9 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 
     if(_fearCount > 0)
         element.setAttribute("fear", _fearCount);
+
+    if(_showTokenHealthBars)
+        element.setAttribute("showTokenHealthBars", 1);
 
     if(_notes.count() > 0)
     {

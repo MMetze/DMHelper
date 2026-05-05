@@ -105,6 +105,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
 
             ui->edtMovement->setText(_campaign->getRuleset().getMovementString());
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
+            ui->chkShowTokenHealthBars->setChecked(_campaign->getShowTokenHealthBars());
             ui->chkHitPointsCoundDown->setChecked(_campaign->getRuleset().getHitPointsCoundDown());
             ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
             ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
@@ -223,6 +224,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->getRuleset().startBatchProcessing();
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
     _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
+    _campaign->setShowTokenHealthBars(ui->chkShowTokenHealthBars->isChecked());
     _campaign->getRuleset().setHitPointsCountDown(ui->chkHitPointsCoundDown ->isChecked());
     _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
     _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());

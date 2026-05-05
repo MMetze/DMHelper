@@ -333,6 +333,10 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:04:00Z
 - branch: chunk/campaign-show-health-bars
+- executor_commit_range: n/a
+- executor_build_status: failure (UI_CHANGE_REQUIRED — chkShowTokenHealthBars not yet in optionsdialog.ui)
+- executor_handoff_summary: All C++ changes implemented in campaign.h, campaign.cpp, optionsdialog.cpp. Build fails only because chkShowTokenHealthBars does not yet exist in optionsdialog.ui. Once the human adds the checkbox in Qt Designer the build will succeed without further code changes.
+- ui_change_required: true
 
 # Architecture Review
 
