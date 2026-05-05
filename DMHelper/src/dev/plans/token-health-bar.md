@@ -364,6 +364,27 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:06:00Z
 - branch: chunk/player-gl-token-healthbar
+- executor_commit_range: n/a
+- executor_build_status: success (117/117)
+- executor_handoff_summary: New files publishgltokenhighlighthealthbar.h/.cpp created. publishglbattletoken.h/.cpp, layertokens.h/.cpp, CMakeLists.txt modified. Base class paintGL signature is (QOpenGLFunctions*, int shaderModelMatrix); setPositionScale is (const QVector3D&, float) — actual codebase signatures followed. Health bars always created in createTokenObjects; the _recreateToken path will re-add a bar even when previously disabled.
+- review_verdict: Fail
+- review_findings:
+  - High: createTokenObjects unconditionally allocates a new health bar regardless of campaign setting. The _recreateToken path (cleanup() + createTokenObjects()) re-adds the bar after any conditionsChanged event even when setHealthBarEnabled(false) was called. Fix: add bool _healthBarEnabled (default false) to PublishGLBattleToken; set it in setHealthBarEnabled; check it in createTokenObjects before allocating.
+  - Low: Literal 0.5f in setPositionScale is a non-trivial constant; must be a named static constexpr.
+- next_action: re-execute
+
+### Cycle 2
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:07:00Z
+- branch: chunk/player-gl-token-healthbar
+- executor_commit_range: n/a
+- executor_build_status: success (111/111)
+- executor_handoff_summary: Added bool _healthBarEnabled (default false) to PublishGLBattleToken header and constructor; setHealthBarEnabled now sets _healthBarEnabled before add/remove logic; createTokenObjects wraps health bar allocation in if(_healthBarEnabled). Replaced literal 0.5f in setPositionScale with named constant HEALTH_BAR_Y_BIAS.
+- review_verdict: Pass
+- review_findings:
+  - Info: Build log not included in handoff; reviewer found no compilation hazards and recommends a cmake run to confirm before merge.
+- next_action: merge
 
 # Architecture Review
 

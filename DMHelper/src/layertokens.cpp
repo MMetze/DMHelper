@@ -459,11 +459,28 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
 
     _playerInitialized = true;
 
+    resolveCampaign();
+    if(_campaign)
+    {
+        bool showHealthBars = _campaign->getShowTokenHealthBars();
+        QHashIterator<BattleDialogModelCombatant*, PublishGLBattleToken*> i(_combatantTokenHash);
+        while(i.hasNext())
+        {
+            i.next();
+            if(i.value())
+                i.value()->setHealthBarEnabled(showHealthBars);
+        }
+        connect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::glHealthBarVisibilityChanged, Qt::QueuedConnection);
+    }
+
     Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerTokens::playerGLUninitialize()
 {
+    if(_campaign)
+        disconnect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::glHealthBarVisibilityChanged);
+
     _playerInitialized = false;
     cleanupPlayer();
 }
@@ -1552,5 +1569,16 @@ void LayerTokens::healthBarVisibilityChanged(bool visible)
         i.next();
         if(i.value())
             i.value()->setVisible(visible);
+    }
+}
+
+void LayerTokens::glHealthBarVisibilityChanged(bool show)
+{
+    QHashIterator<BattleDialogModelCombatant*, PublishGLBattleToken*> i(_combatantTokenHash);
+    while(i.hasNext())
+    {
+        i.next();
+        if(i.value())
+            i.value()->setHealthBarEnabled(show);
     }
 }

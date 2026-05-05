@@ -294,6 +294,7 @@ set(DMHELPER_SOURCES
     publishgltextrenderer.cpp
     publishgltokenhighlight.cpp
     publishgltokenhighlighteffect.cpp
+    publishgltokenhighlighthealthbar.cpp
     publishgltokenhighlightref.cpp
     publishwindow.cpp
     quickref.cpp
@@ -647,6 +648,7 @@ set(DMHELPER_HEADERS
     publishgltextrenderer.h
     publishgltokenhighlight.h
     publishgltokenhighlighteffect.h
+    publishgltokenhighlighthealthbar.h
     publishgltokenhighlightref.h
     publishwindow.h
     quickref.h
