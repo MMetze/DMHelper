@@ -265,6 +265,14 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:00:00Z
 - branch: chunk/ruleset-hp-keys
+- executor_commit_range: 44160a32..d31588df
+- executor_build_status: succeeded
+- executor_handoff_summary: Added four HP-key string members to `Ruleset` with getters, setters (calling `registerChange()`), defaults, and conditional XML round-trip. The pre-existing `Ruleset::internalOutputXML` did not call the base class; the plan constraint required adding that call, which causes `CampaignObjectBase::internalOutputXML` to additionally write `expanded`, `row`, and `base-icon` attributes to the `<ruleset>` element (previously omitted). The existing `inputXML` does not call the base class so those extra attributes are silently ignored on read — no regression. The `name` attribute is now written twice (by base and by existing code); the second write is a no-op. Review should confirm the new base-class attributes in the XML output are acceptable.
+- review_verdict: Pass
+- review_findings:
+  - Info: CampaignObjectBase::internalOutputXML now writes `expanded`, `row`, and `name` onto every `<ruleset>` element; `inputXML` does not call base so all three are silently ignored on read. Harmless dead data.
+  - Low: `name` is written twice (by base + pre-existing `element.setAttribute`). Idempotent, no regression; redundant line is a future cleanup candidate.
+- next_action: merge
 
 # Architecture Review
 
