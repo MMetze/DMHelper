@@ -387,7 +387,7 @@ int PublishGLTextRenderer::getRotatedWidth()
     if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
         return (_rotation % 180 == 0) ? _scene.getSceneRect().width() : _scene.getSceneRect().height();
     else
-        return _scene.getSceneRect().width();
+        return (_rotation % 180 == 0) ? _encounter->getLayerScene().sceneSize().width() : _encounter->getLayerScene().sceneSize().height();
 }
 
 int PublishGLTextRenderer::getRotatedHeight()
@@ -395,7 +395,7 @@ int PublishGLTextRenderer::getRotatedHeight()
     if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
         return (_rotation % 180 == 0) ? _scene.getSceneRect().height() : _scene.getSceneRect().width();
     else
-        return _scene.getSceneRect().height();
+        return (_rotation % 180 == 0) ? _encounter->getLayerScene().sceneSize().height() : _encounter->getLayerScene().sceneSize().width();
 }
 
 void PublishGLTextRenderer::recreateContent()
@@ -429,7 +429,7 @@ void PublishGLTextRenderer::updateSceneRect()
     {
         _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
         qDebug() << "[PublishGLTextRenderer] scene rect updated from layer scene to " << _scene.getSceneRect();
-        emit sceneSizeChanged(_encounter->getLayerScene().sceneSize().toSize());
+        emit sceneSizeChanged(_targetSize);
     }
 }
 

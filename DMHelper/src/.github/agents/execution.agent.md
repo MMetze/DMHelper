@@ -182,10 +182,43 @@ cycles' commits. Message format:
 agent: <chunk-id> cycle <n> — <one-line summary>
 ```
 
-Group every file you touched in this cycle (including
-`CMakeLists.txt` registration) into that one commit. Never commit to
-`main` or any branch other than `agent/work`. Never run `git
-checkout`, `git branch`, `git merge`, or `git push`. Never
+### Staging Rules
+
+Stage **only files you actually modified or created this cycle**.
+Do not stage files just because they appear in the chunk's
+`files_to_modify` list — that list is the *upper bound* on your scope,
+not a checklist to add. Do not run `git add .` or `git add -A`; they
+sweep in untracked noise (build artefacts, editor temp files, other
+people's WIP).
+
+Recommended commands:
+
+```powershell
+# stage exactly the files you edited (idempotent if already tracked):
+git add path/to/file.cpp path/to/file.h DMHelper/src/CMakeLists.txt
+
+# verify only the intended changes are staged before committing:
+git status --short
+git diff --cached --stat
+
+# commit:
+git commit -m "agent: <chunk-id> cycle <n> — <one-line summary>"
+```
+
+If `git status --short` shows files staged that you did not touch this
+cycle, unstage them with `git reset HEAD <path>` before committing.
+If `git status --short` shows files modified that you intended to
+modify but forgot to stage, stage them, then commit.
+
+`git add` on a file with no changes is a silent no-op — not an error
+— but it indicates you misread your own work. Treat any "nothing to
+commit, working tree clean" surprise as a bug to investigate, not a
+prompt to scoop more files in.
+
+### Forbidden git operations
+
+Never commit to `main` or any branch other than `agent/work`. Never
+run `git checkout`, `git branch`, `git merge`, or `git push`. Never
 force-push. Never rebase. Never amend.
 
 ## Boundaries — What Is and Is Not Yours

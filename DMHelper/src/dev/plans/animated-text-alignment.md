@@ -8,7 +8,7 @@ arch_review_model: opus
 arch_review_reason: Touches the OpenGL context boundary in PublishGLTextRenderer (recreateContent / setTextImage / updateProjectionMatrix interplay) and the rasterisation hand-off between a non-GL caller (EncounterTextEdit) and the GL paint path.
 pre_impl_arch_review_requested: false
 supersedes: null
-status: draft
+status: in-progress
 ---
 
 # Summary
@@ -198,6 +198,28 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
   - Changes to scroll-speed, animated toggle, or `textWidth` slider wiring (those already have their own paths).
 
 # Cycle Log
+
+## Chunk: renderer-rotated-size-fix
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:10:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: Fixed getRotatedWidth() and getRotatedHeight() layer-scene branch to use _encounter->getLayerScene().sceneSize() with rotation-transpose mirroring the no-layer branch. Bug was that the else branch still referenced _scene.getSceneRect() making both branches identical. No new files, no CMakeLists.txt changes.
+- review_verdict: Pass
+- review_findings:
+  - Info: const qualifier absent from both function declarations in the header — pre-existing, outside this chunk's scope.
+- next_action: merge
+
+## Chunk: renderer-scene-size-emit-fix
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:11:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
 
 # Architecture Review
 
