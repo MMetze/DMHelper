@@ -321,6 +321,18 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
 - executor_commit_range: n/a (changes left unstaged per pipeline rules)
 - executor_build_status: succeeded (114/114, DMHelper.exe linked cleanly, no new warnings)
 - executor_handoff_summary: Added `_monsterMaxHP` (default -1) to `BattleDialogModelMonsterCombatant` with getter, setter emitting `dataChanged`, conditional XML round-trip (writes only when > 0), and `copyValues` update. `RuleHealth::getMaxHealth` now checks for a stored monster max via `dynamic_cast` before falling back to the template-key path. `RuleHealth5e::rollInitial` writes the rolled value via `setMonsterMaxHP` for monster combatants. Note: the pre-existing `internalOutputXML` called base class LAST; this was corrected to base-first per the plan constraint. Review should confirm no attribute name overlap between base and subclass levels.
+- review_verdict: Pass
+- review_findings:
+  - Info: `-1` sentinel for `_monsterMaxHP` consistent with pre-existing `_monsterHP` pattern; no named constant needed.
+- next_action: merge
+
+## Chunk: campaign-show-health-bars
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:04:00Z
+- branch: chunk/campaign-show-health-bars
 
 # Architecture Review
 
