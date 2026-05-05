@@ -451,4 +451,22 @@ triggers_evaluated:
 
 findings: []
 
+## Post-Implementation Review -- 2026-05-05
+
+reviewer_model: opus
+verdict: Pass
+summary: The merged implementation respects every architectural constraint that mattered across chunk boundaries. Each per-chunk Review-Agent verdict already cleared the in-chunk concerns; the cross-chunk view confirms threading and GL-context boundaries hold (player highlight defers all GL work to `paintGL` via the `_dirty || !_image` lazy-load guard, queued connections are intact, no GL call appears in any non-`*GL*` function or signal slot), the DM/player layer paths remain independent (each calls `resolveCampaign()` independently and stores its own bar collection), serialization shape is sound (Campaign/Ruleset/MonsterCombatant `internalOutputXML` overrides each call the base class, no `dirty()` emission in any `inputXML` or constructor, no cross-references requiring `postProcessXML`), subsystem boundaries match the risk assessment, and no disabled feature flag was enabled. Two Info-level cross-chunk observations are recorded but do not warrant follow-up.
+reviewed_range: 44160a32..52f31729
+
+triggers_evaluated:
+  - threading: addressed (`PublishGLTokenHighlightHealthBar` constructor connects combatant signals with `Qt::QueuedConnection`; `onCombatantChanged` only sets `_dirty = true`; `paintGL` consumes the flag and calls `rebuildPixmap` while a GL context is current; `LayerTokens::glHealthBarVisibilityChanged` is wired with `Qt::QueuedConnection`; `BattleTokenHealthBar::paint` is `QPainter`-only).
+  - layer_interface: addressed (DM path: `dmInitialize` creates `BattleTokenHealthBar` instances parented to the pixmap items; player path: `playerGLInitialize` toggles `PublishGLBattleToken::setHealthBarEnabled`; the shared `_campaign` member is non-owning data populated independently on each path via the idempotent `resolveCampaign()`; `playerGLPaint` is unchanged and iterates `_highlightList` polymorphically as before).
+  - serialization_shape: addressed (`Campaign::internalOutputXML` writes `showTokenHealthBars` only when true and calls the base class; `Ruleset::internalOutputXML` writes the four HP-key attributes (now correctly defaulting to `hit_points`/`maximumHp`/`hp`/`hp` after the chunk-2 monster-key fix to `hit_points`/`hit_points`); `BattleDialogModelMonsterCombatant::internalOutputXML` calls the base class first and writes `monsterMaxHP` only when `> 0`; no `dirty()` emission anywhere in any new constructor or `inputXML` override).
+  - subsystem_boundary: addressed (battle / campaign / UI shell coupling matches the risk assessment; the `[QT DESIGNER, HUMAN]` step delivered `chkShowTokenHealthBars`; no new circular includes; no `INCLUDE_NETWORK_SUPPORT`-gated leakage).
+  - new_subsystem_or_flag: not-applicable (no new `dmconstants.h` flag; no new top-level subsystem; `INCLUDE_NETWORK_SUPPORT` and `LAYERVIDEO_USE_OPENGL` untouched).
+
+findings:
+  - Info: layertokens.cpp:1136 -- `cleanupDM` nulls `_campaign` while the player path may still hold an active `Campaign::showTokenHealthBarsChanged` -> `glHealthBarVisibilityChanged` connection. If `cleanupDM` precedes `playerGLUninitialize`, the `if(_campaign) disconnect(...)` guard at layertokens.cpp:482 is skipped; the connection then survives until the `LayerTokens` destructor lets Qt auto-disconnect it. No crash, no undefined behaviour, but the DM/player paths share a single `_campaign` member with asymmetric teardown responsibility -- a future refactor should let each path own its own resolved-Campaign reference, or limit `_campaign = nullptr` to the moment both paths have torn down.
+  - Info: publishglbattletoken.cpp:336 -- `setHealthBarEnabled(false)` may be invoked from the queued `glHealthBarVisibilityChanged` slot in the GUI thread, where it `delete`s a `PublishGLTokenHighlightHealthBar` whose owned `PublishGLImage::cleanup()` then runs without a current GL context and silently skips the GL handle deletes. This matches the codebase-wide pattern (`PublishGLBattleToken::cleanup`, `PublishGLImage::cleanup` both guard with `QOpenGLContext::currentContext()` and accept the leak when absent), so it is not a regression introduced by this feature; flagged only so a future GL-resource-lifetime cleanup pass picks it up.
+
 # Escalations
