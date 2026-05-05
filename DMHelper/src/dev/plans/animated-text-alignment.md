@@ -246,6 +246,19 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:13:00Z
 - sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: recreateContent() X offset now uses publish-window pixel width (rotated). setScaleX/setScaleY called when layer scene dimensions differ from window. updateProjectionMatrix() unchanged. Build clean.
+- review_verdict: Fail
+- review_findings:
+  - Medium: Bare 2.0 literal in new X-offset code; named static constexpr required per plan integration task.
+  - Low: Missing inline comment in recreateContent() documenting GL-context provenance.
+- next_action: re-execute
+
+### Cycle 2
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:14:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
 
 ## Chunk: renderer-settextimage-preserve-pos
 
@@ -254,6 +267,11 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:13:00Z
 - sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: setTextImage() now captures oldHeight before assignment and scales _textPos proportionally by (newHeight/oldHeight) when oldHeight > 0 and heights differ. No GL calls, no dirty() emission, no constant reset of _textPos. Structural guard (oldHeight > 0) prevents division-by-zero on first load.
+- review_verdict: Pass
+- review_findings: []
+- next_action: merge
 
 # Architecture Review
 

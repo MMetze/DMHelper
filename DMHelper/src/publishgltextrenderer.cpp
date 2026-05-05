@@ -9,6 +9,8 @@
 #include <QTextDocument>
 #include <QPainter>
 
+static constexpr qreal TEXT_HALF_DIVISOR = 2.0;
+
 PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
@@ -403,6 +405,7 @@ int PublishGLTextRenderer::getRotatedHeight()
 
 void PublishGLTextRenderer::recreateContent()
 {
+    // Called from paintGL — GL context is active; matrix and texture operations are safe here.
     if(!_encounter)
         return;
 
@@ -410,12 +413,26 @@ void PublishGLTextRenderer::recreateContent()
 
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
 
-    _textObject->setX(-(getRotatedWidth() * _encounter->getTextWidth() / 100) / 2.0);
+    qreal windowWidth = (_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height();
+    qreal windowHeight = (_rotation % 180 == 0) ? _targetSize.height() : _targetSize.width();
+
+    _textObject->setX(-windowWidth / TEXT_HALF_DIVISOR);
 
     if(_encounter->getAnimated())
         _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos);
     else
-        _textObject->setY((getRotatedHeight() / 2.0) - _textObject->getImageSize().height());
+        _textObject->setY((getRotatedHeight() / TEXT_HALF_DIVISOR) - _textObject->getImageSize().height());
+
+    if(!_encounter->getLayerScene().sceneSize().isEmpty())
+    {
+        qreal sceneWidth = getRotatedWidth();
+        qreal sceneHeight = getRotatedHeight();
+        if(sceneWidth != windowWidth || sceneHeight != windowHeight)
+        {
+            _textObject->setScaleX(static_cast<float>(sceneWidth / windowWidth));
+            _textObject->setScaleY(static_cast<float>(sceneHeight / windowHeight));
+        }
+    }
 
     _recreateContent = false;
 }
