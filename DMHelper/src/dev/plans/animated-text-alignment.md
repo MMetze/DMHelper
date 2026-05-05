@@ -259,6 +259,20 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:14:00Z
 - sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: Added static constexpr TEXT_HALF_DIVISOR=2.0 at file scope; replaced bare 2.0 in new X-offset code with it; added GL-context provenance comment at top of recreateContent().
+- review_verdict: Pass
+- review_findings:
+  - Low: Pre-existing inconsistency between animated Y (bare /2) and non-animated Y (TEXT_HALF_DIVISOR); not new code, not flagged.
+- next_action: merge
+
+## Chunk: live-edit-formatter-wiring
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:15:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
 
 ## Chunk: renderer-settextimage-preserve-pos
 

@@ -119,6 +119,9 @@ protected slots:
 
     void sceneRectUpdated(const QSize& size);
 
+private slots:
+    void onFormatterChanged();
+
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;

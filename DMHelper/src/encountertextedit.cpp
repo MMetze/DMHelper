@@ -67,6 +67,14 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(takeFocus()));
 
+    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(onFormatterChanged()));
+
     ui->textBrowser->installEventFilter(this);
     ui->textFormatter->hide();
     _formatter->setTextEdit(ui->textBrowser);
@@ -789,6 +797,14 @@ void EncounterTextEdit::scaleBackgroundImage()
 {
     if(!_backgroundImage.isNull())
         _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
+}
+
+void EncounterTextEdit::onFormatterChanged()
+{
+    if(!_isPublishing || !_renderer)
+        return;
+    prepareImages();
+    _renderer->setTextImage(_textImage);
 }
 
 void EncounterTextEdit::prepareImages()
