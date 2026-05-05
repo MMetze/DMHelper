@@ -273,6 +273,11 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:15:00Z
 - sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (108/108, DMHelper.exe linked cleanly)
+- executor_handoff_summary: Declared onFormatterChanged() in private slots section of encountertextedit.h. Implemented in encountertextedit.cpp — guards on !_isPublishing || !_renderer, then prepareImages() + setTextImage(). Connected all 7 formatter signals (fontFamilyChanged, fontSizeChanged, fontBoldChanged, fontItalicsChanged, fontUnderlineChanged, alignmentChanged, colorChanged) immediately after existing takeFocus connections. No existing connections modified.
+- review_verdict: Pass
+- review_findings: []
+- next_action: merge
 
 ## Chunk: renderer-settextimage-preserve-pos
 
