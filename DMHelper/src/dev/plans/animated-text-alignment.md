@@ -220,6 +220,40 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:11:00Z
 - sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: Single-line change in updateSceneRect() — layer-scene branch now emits sceneSizeChanged(_targetSize) instead of the layer scene size. _scene.deriveSceneRectFromSize() call and all other logic unchanged. Consumers receive window-pixel dimensions in all cases; projection/scissor geometry unaffected.
+- review_verdict: Pass
+- review_findings: []
+- next_action: merge
+
+## Chunk: rasteriser-full-window-with-margins
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:12:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: getDocumentTextImage() now rasterises at full renderWidth with textWidth% applied as left/right QTextFrameFormat root-frame margins. Added #include <QTextFrame>, static constexpr FULL_PERCENT=100 and HALF_PERCENT_DIVISOR=200.0, removed unused absoluteWidth. Root frame format saved/restored in all code paths. No header changes.
+- review_verdict: Pass
+- review_findings: []
+- next_action: merge
+
+## Chunk: renderer-recreatecontent-window-pixels
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:13:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
+
+## Chunk: renderer-settextimage-preserve-pos
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:13:00Z
+- sha_from: cf1083928ec76f4a5b563add242925300089fb0c
 
 # Architecture Review
 

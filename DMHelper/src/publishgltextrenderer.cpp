@@ -244,7 +244,10 @@ void PublishGLTextRenderer::setTextImage(QImage textImage)
     if(textImage.isNull())
         return;
 
+    int oldHeight = _textImage.height();
     _textImage = textImage;
+    if(oldHeight > 0 && _textImage.height() != oldHeight)
+        _textPos = _textPos * (static_cast<qreal>(_textImage.height()) / static_cast<qreal>(oldHeight));
     _recreateContent = true;
     updateSceneRect();
 

@@ -16,10 +16,13 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QScrollBar>
+#include <QTextFrame>
 #include <QDebug>
 
 const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
 const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
+static constexpr int FULL_PERCENT = 100;
+static constexpr qreal HALF_PERCENT_DIVISOR = 200.0;
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -826,18 +829,26 @@ QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
     if(doc)
     {
         int oldTextWidth = doc->textWidth();
-        int textPercentage = _encounter ? _encounter->getTextWidth() : 100;
-        int absoluteWidth = renderWidth * textPercentage / 100;
+        int textPercentage = _encounter ? _encounter->getTextWidth() : FULL_PERCENT;
+        qreal margin = renderWidth * (FULL_PERCENT - textPercentage) / HALF_PERCENT_DIVISOR;
 
-        doc->setTextWidth(absoluteWidth);
+        QTextFrame* rootFrame = doc->rootFrame();
+        QTextFrameFormat frameFormat = rootFrame->frameFormat();
+        QTextFrameFormat modifiedFormat = frameFormat;
+        modifiedFormat.setLeftMargin(margin);
+        modifiedFormat.setRightMargin(margin);
+        rootFrame->setFrameFormat(modifiedFormat);
 
-        result = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        doc->setTextWidth(renderWidth);
+
+        result = QImage(renderWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
         result.fill(Qt::transparent);
         QPainter painter;
         painter.begin(&result);
             doc->drawContents(&painter);
         painter.end();
 
+        rootFrame->setFrameFormat(frameFormat);
         doc->setTextWidth(oldTextWidth);
     }
 
