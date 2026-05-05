@@ -105,6 +105,7 @@ set(DMHELPER_SOURCES
     battleframemapdrawer.cpp
     battleframestate.cpp
     battleframestatemachine.cpp
+    battletokenhealthbar.cpp
     bestiary.cpp
     bestiaryexportdialog.cpp
     bestiaryfindtokendialog.cpp
@@ -455,6 +456,7 @@ set(DMHELPER_HEADERS
     battleframemapdrawer.h
     battleframestate.h
     battleframestatemachine.h
+    battletokenhealthbar.h
     bestiary.h
     bestiaryexportdialog.h
     bestiaryfindtokendialog.h

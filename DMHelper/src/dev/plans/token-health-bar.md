@@ -347,6 +347,23 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-05T00:05:00Z
 - branch: chunk/dm-token-healthbar
+- executor_commit_range: n/a
+- executor_build_status: success (no new warnings; ninja: no work to do on re-run confirming all files compiled cleanly)
+- executor_handoff_summary: New files battletokenhealthbar.h and battletokenhealthbar.cpp created. layertokens.h and layertokens.cpp modified with Campaign* _campaign member, resolveCampaign(), healthBarVisibilityChanged, refreshHealthBar, and _healthBarHash. CMakeLists.txt updated with both new entries. Virtual destructor added to BattleTokenHealthBar (conventional for QGraphicsObject, not in plan spec). Health bars deleted before parent pixmap items in cleanupDM and removeCombatant.
+- review_verdict: Pass
+- review_findings:
+  - Info: At exactly 0 HP, greenRect is empty and the green fillRect is skipped — only one fill executes instead of two. Visually correct; minor prose deviation at the 0-HP boundary only.
+  - Info: Virtual destructor added to BattleTokenHealthBar — standard C++ practice, no risk.
+  - Info: Health bars for combatants loaded from XML are created in the post-dmInitialize loop in dmInitialize, not inside addCombatant; HP-change signal connections established in addCombatant regardless. No functional gap.
+- next_action: merge
+
+## Chunk: player-gl-token-healthbar
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:06:00Z
+- branch: chunk/player-gl-token-healthbar
 
 # Architecture Review
 
