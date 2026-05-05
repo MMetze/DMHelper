@@ -708,8 +708,8 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
     else
     {
         BattleDialogModelCharacter* charCombatant = qobject_cast<BattleDialogModelCharacter*>(combatant);
-        if(charCombatant && charCombatant->getCharacter())
-            disconnect(charCombatant->getCharacter(), &CampaignObjectBase::dirty, this, nullptr);
+        if(charCombatant && charCombatant->getCombatant())
+            disconnect(charCombatant->getCombatant(), &CampaignObjectBase::dirty, this, nullptr);
     }
 
     // Remove health bar (delete before the pixmap parent item to avoid double-free)
