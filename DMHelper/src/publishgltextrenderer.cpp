@@ -413,25 +413,36 @@ void PublishGLTextRenderer::recreateContent()
 
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
 
-    qreal windowWidth = (_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height();
+    qreal windowWidth  = (_rotation % 180 == 0) ? _targetSize.width()  : _targetSize.height();
     qreal windowHeight = (_rotation % 180 == 0) ? _targetSize.height() : _targetSize.width();
 
-    _textObject->setX(-windowWidth / TEXT_HALF_DIVISOR);
-
-    if(_encounter->getAnimated())
-        _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos);
-    else
-        _textObject->setY((getRotatedHeight() / TEXT_HALF_DIVISOR) - _textObject->getImageSize().height());
-
+    // Compute scale factors up-front: PublishGLImage model matrix is T*S so position must be
+    // in scene/world units; when a layer scene is present, scale the texture to cover scene area.
+    qreal scaleX = 1.0;
+    qreal scaleY = 1.0;
     if(!_encounter->getLayerScene().sceneSize().isEmpty())
     {
-        qreal sceneWidth = getRotatedWidth();
-        qreal sceneHeight = getRotatedHeight();
-        if(sceneWidth != windowWidth || sceneHeight != windowHeight)
+        qreal sceneW = getRotatedWidth();
+        qreal sceneH = getRotatedHeight();
+        if(!qFuzzyCompare(sceneW, windowWidth) || !qFuzzyCompare(sceneH, windowHeight))
         {
-            _textObject->setScaleX(static_cast<float>(sceneWidth / windowWidth));
-            _textObject->setScaleY(static_cast<float>(sceneHeight / windowHeight));
+            scaleX = sceneW / windowWidth;
+            scaleY = sceneH / windowHeight;
         }
+    }
+
+    // Position in scene/world units (T*S model matrix: translation is applied before scale).
+    _textObject->setX(-getRotatedWidth() / TEXT_HALF_DIVISOR);
+
+    if(_encounter->getAnimated())
+        _textObject->setY((-getRotatedHeight() / TEXT_HALF_DIVISOR) - (_textObject->getImageSize().height() * scaleY) + _textPos);
+    else
+        _textObject->setY((getRotatedHeight() / TEXT_HALF_DIVISOR) - (_textObject->getImageSize().height() * scaleY));
+
+    if(!qFuzzyCompare(scaleX, 1.0) || !qFuzzyCompare(scaleY, 1.0))
+    {
+        _textObject->setScaleX(static_cast<float>(scaleX));
+        _textObject->setScaleY(static_cast<float>(scaleY));
     }
 
     _recreateContent = false;

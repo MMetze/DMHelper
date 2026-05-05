@@ -8,7 +8,7 @@ arch_review_model: opus
 arch_review_reason: Touches the OpenGL context boundary in PublishGLTextRenderer (recreateContent / setTextImage / updateProjectionMatrix interplay) and the rasterisation hand-off between a non-GL caller (EncounterTextEdit) and the GL paint path.
 pre_impl_arch_review_requested: false
 supersedes: null
-status: in-progress
+status: complete
 ---
 
 # Summary
@@ -197,6 +197,37 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
   - Changes to `TextEditFormatterFrame` itself (signals already exist).
   - Changes to scroll-speed, animated toggle, or `textWidth` slider wiring (those already have their own paths).
 
+## Chunk 7: recreateContent centring fix when scene size differs from window
+
+- **id**: renderer-recreatecontent-center-fix
+- **summary**: Fix the off-centre text band in `PublishGLTextRenderer::recreateContent()` when a layer scene is present and its rotated size differs from the rotated window size — `PublishGLImage` builds its model matrix as `translate(_x,_y) * scale(scaleX,scaleY)`, so position must be expressed in world (scene) units, not window units, whenever a non-unit scale is applied. Also replace the bare `/ 2` in the animated Y line with the existing `TEXT_HALF_DIVISOR` constant.
+- **dependencies**: [renderer-recreatecontent-window-pixels, renderer-rotated-size-fix]
+- **branch**: agent/work/renderer-recreatecontent-center-fix
+- **files_to_modify**:
+  - DMHelper/src/publishgltextrenderer.cpp — in `recreateContent()` (~L451-L478): when a layer scene is present and its rotated size differs from the rotated window size, build the X and Y position terms in scene units so that after the `T * S` model matrix is applied the texture remains centred horizontally on the origin and edge-aligned vertically with the scene-sized ortho viewport. Concretely, the X offset must equal `-sceneWidth / TEXT_HALF_DIVISOR` (so post-scale the texture spans `[-sceneWidth/2, +sceneWidth/2]`); the animated and non-animated Y formulas must use the **scaled** image height (`imageHeight * scaleY`) when scaling is in effect, so the post-scale top/bottom of the texture lands at `±sceneHeight/2`. The no-layer / no-scale path (`scaleX = scaleY = 1`) must produce **identical** position values to the current merged code. Also replace the bare `/ 2` literal in the animated branch's Y formula (`(-getRotatedHeight() / 2) - ...`) with `TEXT_HALF_DIVISOR` for consistency with the rest of the function.
+- **files_to_create**: []
+- **integration_tasks**:
+  - Compute `scaleX` and `scaleY` once at the top of the layer-scene branch (or hoist them to function scope) so both the position formulas and the `setScaleX/setScaleY` calls consume the same values.
+  - Add a brief inline comment at the position-setting lines noting that `PublishGLImage`'s model matrix is `T * S`, so position must be in post-scale world units.
+  - Do not introduce any new bare numeric literals; if a new scalar is needed beyond `TEXT_HALF_DIVISOR`, declare a named `static constexpr` at file scope.
+- **acceptance_criteria**:
+  - In `recreateContent()`, every `/ 2` (or `* 0.5`) literal inside the function body is replaced by `TEXT_HALF_DIVISOR` (no bare half-divisor literals remain in the function).
+  - The X-offset formula yields `-windowWidth / TEXT_HALF_DIVISOR` when no layer scene is present (or scene size equals window size), and `-sceneWidth / TEXT_HALF_DIVISOR` when a layer scene is present with a differing size.
+  - The animated Y-offset formula yields `(-windowHeight / TEXT_HALF_DIVISOR) - imageHeight + _textPos` in the no-scale case and `(-sceneHeight / TEXT_HALF_DIVISOR) - (imageHeight * scaleY) + _textPos` (or an algebraically equivalent form using a single `scaleY`) when scaling is in effect.
+  - The non-animated Y-offset formula yields `(windowHeight / TEXT_HALF_DIVISOR) - imageHeight` in the no-scale case and `(sceneHeight / TEXT_HALF_DIVISOR) - (imageHeight * scaleY)` when scaling is in effect.
+  - The `setScaleX`/`setScaleY` calls are still made with the same `sceneWidth/windowWidth` and `sceneHeight/windowHeight` ratios as the merged chunk-4 code; only the position formulas change.
+  - `recreateContent()` performs no calls outside the GL paint path's allowed surface; no new GL function calls beyond what chunk 4 already added.
+  - The function does not emit `dirty()`.
+  - Build succeeds with no new warnings.
+- **constraints_in_scope**:
+  - GL context rule: `recreateContent()` is invoked from `paintGL()`; matrix and texture work remains permitted only because the GL context is current there. Do not move any of this work out of `recreateContent()`.
+  - No magic numbers — reuse `TEXT_HALF_DIVISOR`; declare a new `static constexpr` for any other new scalar.
+  - The visible behaviour in the no-layer case must be byte-identical to the merged chunk-4 code (regression guard).
+- **out_of_scope**:
+  - Changes to `setTextImage()`, `updateProjectionMatrix()`, `updateSceneRect()`, `getRotatedWidth()/getRotatedHeight()`, or any rasterisation code in `EncounterTextEdit`.
+  - Changes to `PublishGLImage`'s model matrix construction (`T * S` order is fixed and is the contract this chunk works against).
+  - Any new public API on `PublishGLTextRenderer`.
+
 # Cycle Log
 
 ## Chunk: renderer-rotated-size-fix
@@ -293,5 +324,76 @@ Subsystems touched: **UI shell** (`EncounterTextEdit`,
 - next_action: merge
 
 # Architecture Review
+
+## Post-Implementation Review — 2026-05-05
+
+reviewer_model: opus
+verdict: Revise
+summary: Cross-chunk centering bug in `recreateContent()` — translation is applied in world units after scale, so when a layer scene size differs from the window size the text texture is off-centre, defeating the spec's "alignment unchanged with background layer" done condition; everything else passes.
+reviewed_range: cf1083928ec76f4a5b563add242925300089fb0c..HEAD
+
+triggers_evaluated:
+  - threading: addressed — `setTextImage()` (called from `onFormatterChanged()` and `sceneRectUpdated()`) performs no GL calls; it mutates `_textImage`/`_textPos`, sets the `_recreateContent` flag, calls the non-GL `updateSceneRect()` (signal emit only), and emits `updateWidget()`. GL state work is correctly deferred to the next `paintGL()` via the flag. `recreateContent()` is invoked only from `paintGL()` (`publishgltextrenderer.cpp:205-209`) so its `PublishGLImage` construction (which generates VAO/VBO/EBO/textures) has a current GL context.
+  - layer_interface: not-applicable — no `Layer` subclass added or modified.
+  - serialization_shape: not-applicable — no `createOutputXML` / `internalOutputXML` / `inputXML` / `postProcessXML` changes.
+  - subsystem_boundary: addressed — work spans UI shell (`encountertextedit.{cpp,h}`) and publish/GL (`publishgltextrenderer.cpp`) only; no cross-subsystem coupling beyond the existing renderer/editor relationship; no new circular includes; no `INCLUDE_NETWORK_SUPPORT` or `LAYERVIDEO_USE_OPENGL` touched.
+  - new_subsystem_or_flag: not-applicable — no new top-level subsystem and no new flag in `dmconstants.h`.
+
+findings:
+  - High: `publishgltextrenderer.cpp` `recreateContent()` (~L468-L478) — `PublishGLImage`'s model matrix is built as `translate(_x,_y) * scale(scaleX,scaleY)` (`publishglimage.cpp:328-330`), so translation is in world units **after** the scale. Setting `setX(-windowWidth / TEXT_HALF_DIVISOR)` then `setScaleX(sceneWidth/windowWidth)` makes the text texture span `[-windowWidth/2, -windowWidth/2 + sceneWidth]` in world units instead of `[-sceneWidth/2, +sceneWidth/2]`. Under `updateProjectionMatrix()`'s `KeepAspectRatioByExpanding` ortho the visible world is centred on origin and sized by the scene, so the text band is off-centre whenever sceneWidth ≠ windowWidth. The same defect applies to the animated Y term and the non-animated Y term. This is the exact scenario chunk 4 was added to fix and it breaks the spec's done condition "Same encounter with a background image layer: font size and alignment unchanged". (No-layer case is unaffected because scaleX=scaleY=1.)
+  - Low: `publishgltextrenderer.cpp` `recreateContent()` animated branch (~L463) still uses a bare `/ 2` (`(-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos`) inside a function that chunk 4 modified, while the surrounding code uses the `TEXT_HALF_DIVISOR` constant introduced by the same chunk. The Cycle 2 review note flagged this as "pre-existing"; the animated Y line is in the diff hunks of chunk 4, so it should use the named constant for consistency.
+  - Info: `publishgltextrenderer.cpp` `setTextImage()` (~L244-L257) — the `_textPos` height-rescaling uses bare `/` and unnamed ratio with no magic-number constants, but the formula has no literal scalars (only the captured heights), so no constant is required. No action.
+  - Info: `encountertextedit.cpp` `getDocumentTextImage()` (~L837-L878) — root frame format save/restore covers all return paths reachable from the function (single early-return guards `renderWidth <= 0` before mutation; the mutation path always reaches the restore lines). Behaviour is correct; restore is not protected by RAII so a future code path that throws or returns mid-block would leak the mutation, but Qt's `drawContents` does not throw and no early-return is plausible to add inside the block. No action.
+
+## Chunk: renderer-recreatecontent-center-fix
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:20:00Z
+- sha_from: 5ec0558bef0902e496fd642b8bf286a30ca16ca5
+- executor_build_status: succeeded (107/107, DMHelper.exe linked cleanly)
+- executor_handoff_summary: X offset changed to -getRotatedWidth()/TEXT_HALF_DIVISOR (scene units) in all paths. scaleX/scaleY hoisted using qFuzzyCompare. Y animated (scaled): (-sceneH/TEXT_HALF_DIVISOR)-(imageH*scaleY)+_textPos. Y non-animated (scaled): (sceneH/TEXT_HALF_DIVISOR)-(imageH*scaleY). No-scale paths collapse to scaleY=1 giving identical formulas. All bare /2 in recreateContent() replaced with TEXT_HALF_DIVISOR. T*S world-unit comment added.
+- review_verdict: Pass
+- review_findings:
+  - Info: Comment wording "translation applied before scale" slightly misleading; intent correct.
+  - Info: rewind() and timerEvent() still use bare /2 and don't scale imageHeight — pre-existing, out of scope.
+- next_action: merge
+
+## Post-Implementation Review — 2026-05-05 (re-review after chunk 7)
+
+reviewer_model: opus
+verdict: Pass
+summary: Chunk 7 resolves the prior High centring finding; with `_x = -getRotatedWidth()/2` and `scaleX = sceneW/windowW` over a non-centered `T*S` model matrix the text texture spans `[-sceneW/2, +sceneW/2]` in world units, the no-scale path is byte-equivalent to the chunk-4 merged code, and every bare half-divisor literal in `recreateContent()` is now `TEXT_HALF_DIVISOR`.
+reviewed_range: cf1083928ec76f4a5b563add242925300089fb0c..HEAD
+
+triggers_evaluated:
+  - threading: addressed — `setTextImage()` is unchanged from chunk 5 (no GL calls; defers GL work via `_recreateContent` flag and `updateWidget()`). `recreateContent()` is invoked only from `paintGL()` (`publishgltextrenderer.cpp:205-208`); chunk 7 added only scalar arithmetic and `qFuzzyCompare` calls — no new GL calls and no thread-affinity concerns.
+  - layer_interface: not-applicable — no `Layer` subclass added or modified.
+  - serialization_shape: not-applicable — no XML pipeline changes.
+  - subsystem_boundary: addressed — chunk 7 confined to `publishgltextrenderer.cpp::recreateContent()`; no new cross-subsystem coupling.
+  - new_subsystem_or_flag: not-applicable — no new subsystem and no new flag in `dmconstants.h`.
+
+findings:
+  - Info: `recreateContent()` (`publishgltextrenderer.cpp:416`) reads `_targetSize.width()/height()` without an `isValid()` guard. In practice `paintGL()` early-returns when prerequisites are missing and `_recreateContent` is only set after a non-null image is supplied, so `windowWidth`/`windowHeight` are non-zero in every reachable code path. Defensive only — no action.
+  - Info: `getRotatedWidth()`/`getRotatedHeight()` are evaluated twice each inside the layer-scene branch (once into `sceneW`/`sceneH`, once again in the position formulas). Values are identical within a single call; cosmetic only — no action.
+  - Info: Pre-existing bare `/2` and unscaled `getImageSize().height()` references remain in `rewind()` (`publishgltextrenderer.cpp:307-318`) and `timerEvent()` (`publishgltextrenderer.cpp:373-374`); these were flagged by the chunk-7 reviewer as out-of-scope. They will visually mis-position the scrolling text on the first frame after `rewind()`/`play()` whenever a layer scene size differs from the window — same `T*S` math, same scene-units requirement. Not a regression introduced by this feature (the formulas predate it), but worth tracking for a future fix. No follow-up required for this plan.
+
+required_followups: []
+
+Centring verification (per spec done condition "Same encounter with a background image layer: font size and alignment unchanged"):
+  - `PublishGLImage` non-centered model matrix is `T(_x,_y) * S(scaleX, scaleY)` over vertices `[0, imageW] × [0, imageH]` (`publishglimage.cpp:280-285, 328-330`).
+  - `imageW = windowWidth` (rasterised at full rotated window width by `EncounterTextEdit::getDocumentTextImage()`).
+  - With `_x = -getRotatedWidth() / TEXT_HALF_DIVISOR` and `scaleX = sceneW / windowWidth` (when scaling is active), world X span = `[-sceneW/2, -sceneW/2 + sceneW] = [-sceneW/2, +sceneW/2]` — centred under the scene-sized ortho.
+  - Non-animated Y: `_y = sceneH/2 - scaleY·imageH`; world Y span top edge = `sceneH/2`. ✓
+  - Animated Y: `_y = -sceneH/2 - scaleY·imageH + _textPos`; image starts off-screen below and scrolls up. ✓
+  - No-scale case (`scaleX = scaleY = 1`, `getRotatedWidth() == windowWidth` because `_scene` is derived from `_targetSize` in `updateSceneRect()` when no layer scene is present): formulas reduce to the chunk-4 merged values exactly.
+  - Half-divisor scan of `recreateContent()` body: every divide-by-two is `/ TEXT_HALF_DIVISOR`; no bare `/ 2` or `* 0.5` remains.
+
+Other re-verified items (unchanged since prior review):
+  - `getDocumentTextImage()` (`encountertextedit.cpp:837`) saves and restores the root `QTextFrameFormat` on every reachable code path.
+  - `updateSceneRect()` emits `sceneSizeChanged(_targetSize)` in both branches.
+  - `getRotatedWidth()`/`getRotatedHeight()` transpose correctly in the layer-scene branch for 90°/270°.
+  - `onFormatterChanged()` short-circuits on `!_isPublishing || !_renderer`; all 7 formatter signals connected; no `dirty()` emission anywhere in new code.
 
 # Escalations
