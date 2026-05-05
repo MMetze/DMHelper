@@ -20,6 +20,18 @@ QString RuleHealthDaggerheart::getHealthType() const
     return RuleHealthDaggerheart::HealthType;
 }
 
+qreal RuleHealthDaggerheart::getHealthFraction(const BattleDialogModelCombatant* combatant) const
+{
+    const int max = getMaxHealth(combatant);
+    if(max <= 0)
+        return 0.0;
+
+    // Count-up semantics: 0 = fully healthy (green), max = dead (red).
+    // Fraction represents remaining health: (max - current) / max.
+    const qreal fraction = static_cast<qreal>(max - getHealth(combatant)) / static_cast<qreal>(max);
+    return qBound(static_cast<qreal>(0.0), fraction, static_cast<qreal>(1.0));
+}
+
 int RuleHealthDaggerheart::applyDamage(BattleDialogModelCombatant* combatant, int amount)
 {
     if(!combatant)

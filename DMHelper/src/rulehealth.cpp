@@ -9,7 +9,9 @@
 #include "ruleset.h"
 #include "dmconstants.h"
 
-static const QString KEY_HIT_POINTS = QStringLiteral("hit_points");
+// Fallback keys used when no campaign/ruleset is available (e.g. unit-test combatants).
+static const QString FALLBACK_CHARACTER_MAX_HP_KEY = QStringLiteral("maximumHp");
+static const QString FALLBACK_MONSTER_HP_KEY       = QStringLiteral("hit_points");
 
 RuleHealth::RuleHealth(QObject* parent) :
     QObject{parent}
@@ -44,10 +46,21 @@ int RuleHealth::getMaxHealth(const BattleDialogModelCombatant* combatant) const
     if(!tmpl)
         return 0;
 
-    if(tmpl->hasValue(KEY_HIT_POINTS))
-        return tmpl->getIntValue(KEY_HIT_POINTS);
+    const QString key = maxHpKeyFor(combatant);
+    if(tmpl->hasValue(key))
+        return tmpl->getIntValue(key);
 
     return 0;
+}
+
+qreal RuleHealth::getHealthFraction(const BattleDialogModelCombatant* combatant) const
+{
+    const int max = getMaxHealth(combatant);
+    if(max <= 0)
+        return 0.0;
+
+    const qreal fraction = static_cast<qreal>(getHealth(combatant)) / static_cast<qreal>(max);
+    return qBound(static_cast<qreal>(0.0), fraction, static_cast<qreal>(1.0));
 }
 
 bool RuleHealth::hasDeathSaves() const
@@ -80,4 +93,22 @@ RuleHealth* RuleHealth::forCombatant(const BattleDialogModelCombatant* combatant
         return nullptr;
 
     return campaign->getRuleset().getRuleHealth();
+}
+
+QString RuleHealth::maxHpKeyFor(const BattleDialogModelCombatant* combatant) const
+{
+    if(!combatant)
+        return FALLBACK_CHARACTER_MAX_HP_KEY;
+
+    const bool isMonster = (dynamic_cast<const BattleDialogModelMonsterBase*>(combatant) != nullptr);
+
+    CampaignObjectBase* parent = const_cast<BattleDialogModelCombatant*>(combatant)->getParentByType(DMHelper::CampaignType_Campaign);
+    Campaign* campaign = dynamic_cast<Campaign*>(parent);
+    if(campaign)
+    {
+        const Ruleset& ruleset = campaign->getRuleset();
+        return isMonster ? ruleset.getMonsterMaxHpKey() : ruleset.getCharacterMaxHpKey();
+    }
+
+    return isMonster ? FALLBACK_MONSTER_HP_KEY : FALLBACK_CHARACTER_MAX_HP_KEY;
 }

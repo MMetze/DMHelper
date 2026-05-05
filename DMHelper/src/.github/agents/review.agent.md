@@ -37,8 +37,9 @@ Execution Agent → handoff note → Coordinator → YOU
    `build_status`, and any `flags`.
 5. **Cycle number**: 1, 2, or 3.
 
-The repo is checked out on `agent/work/<chunk-id>` in the main
-checkout. Your `cwd` is the repo root.
+The repo is checked out on `agent/work` in the main checkout. Your
+`cwd` is the repo root. The chunk's commits are the latest ones on
+the branch (identified by `<sha-from>..<sha-to>` from the handoff).
 
 ## Outputs
 

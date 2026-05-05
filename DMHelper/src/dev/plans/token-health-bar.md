@@ -274,6 +274,51 @@ Designer change). All `.ui` and `.qrc` work is delegated to the human via
   - Low: `name` is written twice (by base + pre-existing `element.setAttribute`). Idempotent, no regression; redundant line is a future cleanup candidate.
 - next_action: merge
 
+## Chunk: rulehealth-fraction
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:01:00Z
+- branch: chunk/rulehealth-fraction
+- executor_commit_range: bbd31da6..11edf0ac
+- executor_build_status: succeeded (112/112 targets, DMHelper.exe linked cleanly)
+- executor_handoff_summary: Added `getHealthFraction` virtual to `RuleHealth` base (base implementation: `clamp(getHealth/getMaxHealth, 0, 1)`, divide-by-zero guarded); added protected `currentHpKeyFor`/`maxHpKeyFor` helpers that walk the combatant's parent chain to find the campaign's ruleset and fall back to hard-coded defaults when no campaign is present; rewrote `getMaxHealth` to use `maxHpKeyFor`; overrode `getHealthFraction` in `RuleHealth5e` (count-down semantics) and `RuleHealthDaggerheart` (count-up semantics); updated `RuleHealth5e::rollInitial` to use `maxHpKeyFor` instead of the literal `"hit_points"` string. Note: commit `59de36d5` between the plan-state commit and the implementation commit contains only agent meta-file edits (made by the human); reviewers should scope their diff to the rulehealth files only.
+- review_verdict: Fail
+- review_findings:
+  - High: `FALLBACK_MONSTER_HP_KEY` in `rulehealth.cpp` is `"hp"` but all monster XML templates store HP as `"hit_points"`. `getMaxHealth` therefore returns 0 for every monster combatant, breaking `applyDamage`/`isDead`/`isIncapacitated` for both 5e and Daggerheart. Fix: `FALLBACK_MONSTER_HP_KEY` must be `"hit_points"`. The chunk-1 ruleset defaults `RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY`/`RULESET_DEFAULT_MONSTER_MAX_HP_KEY` in `ruleset.cpp` are also `"hp"` and must be corrected to `"hit_points"` as a companion fix.
+  - Medium: `RuleHealth5e::getHealthFraction` is byte-for-byte identical to the base implementation — no-op override, maintenance trap. Remove it and rely on the base.
+  - Medium: `currentHpKeyFor` is declared and implemented but has zero call sites in the codebase — dead protected helper. Remove it.
+  - Low: `isMonster` is evaluated via `dynamic_cast` before the `if(combatant)` nullptr guard in `currentHpKeyFor`/`maxHpKeyFor`. Safe but misleading; reorder.
+  - Low: `const_cast` in both key helpers to call `getParentByType` — pre-existing pattern, acceptable for now.
+  - Info: No new source files, no CMakeLists change needed. ✓
+  - Info: No `dirty()` emissions anywhere in the diff. ✓
+  - Info: `MonsterClassv2`/`Characterv2` used correctly. ✓
+  - Info: Division-by-zero guard present in all three implementations. ✓
+- next_action: re-execute
+
+### Cycle 2
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:02:00Z
+- branch: chunk/rulehealth-fraction
+- executor_commit_range: n/a (changes left unstaged per pipeline rules)
+- executor_build_status: succeeded (112/112, DMHelper.exe linked cleanly, no new warnings)
+- executor_handoff_summary: Fixed all cycle-1 review findings. `FALLBACK_MONSTER_HP_KEY` in `rulehealth.cpp` corrected from `"hp"` to `"hit_points"`; monster HP key defaults in `ruleset.cpp` likewise corrected. No-op `RuleHealth5e::getHealthFraction` override removed from header and .cpp. Unused `currentHpKeyFor` helper and its associated `FALLBACK_CHARACTER_CURRENT_HP_KEY` constant removed. `maxHpKeyFor` reordered so `if(!combatant)` null guard fires before `dynamic_cast`.
+- review_verdict: Pass
+- review_findings:
+  - Info: Plan summary prose still says monster HP defaults are `"hp"/"hp"`; code correctly uses `"hit_points"/"hit_points"` after the fix. Stale prose, no code action needed.
+  - Info: `const_cast` in `maxHpKeyFor` pre-existing pattern, Info-only.
+- next_action: merge
+
+## Chunk: monster-max-hp
+
+### Cycle 1
+
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-05T00:03:00Z
+- branch: chunk/monster-max-hp
+
 # Architecture Review
 
 ## Pre-Implementation Review -- 2026-05-04

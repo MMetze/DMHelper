@@ -14,6 +14,8 @@ public:
 
     virtual QString getHealthType() const override;
 
+    virtual qreal getHealthFraction(const BattleDialogModelCombatant* combatant) const override;
+
     virtual int  applyDamage(BattleDialogModelCombatant* combatant, int amount) override;
     virtual bool isDead(const BattleDialogModelCombatant* combatant) const override;
     virtual bool isIncapacitated(const BattleDialogModelCombatant* combatant) const override;

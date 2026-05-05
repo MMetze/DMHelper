@@ -56,6 +56,12 @@ public:
     // cues and keypad direction hints.
     virtual bool healthCountsUp() const = 0;
 
+    // Returns a health fraction in [0, 1] where 1.0 means fully healthy and
+    // 0.0 means dead/at-limit. Interpretation depends on the ruleset:
+    // count-down (5e) uses current/max; count-up (Daggerheart) inverts it.
+    // Returns 0.0 when max <= 0 (guard against division by zero).
+    virtual qreal getHealthFraction(const BattleDialogModelCombatant* combatant) const;
+
     // Initialise the combatant's primary-track health when it is first spawned
     // (e.g. from a bestiary entry). Stores the result via setOverride on the
     // combatant. Implementations consult the source MonsterClassv2 / Characterv2
@@ -74,6 +80,11 @@ protected:
     // Characterv2 for PCs) or nullptr. Mirrors the RuleInitiative::initiativeModFor
     // lookup pattern.
     static TemplateObject* templateFor(const BattleDialogModelCombatant* combatant);
+
+    // Helper: return the ruleset-configured template key for max HP for the
+    // given combatant (character or monster). Falls back to hard-coded
+    // defaults when the combatant is not attached to a campaign.
+    QString maxHpKeyFor(const BattleDialogModelCombatant* combatant) const;
 };
 
 #endif // RULEHEALTH_H

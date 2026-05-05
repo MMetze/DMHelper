@@ -10,7 +10,6 @@
 // the pre-refactor behaviour in BattleFrame).
 static const int HEALTH_FLOOR_5E = 0;
 static const QString KEY_HIT_DICE_5E = QStringLiteral("hit_dice");
-static const QString KEY_HIT_POINTS_5E = QStringLiteral("hit_points");
 
 QString RuleHealth5e::HealthType = QString("5e");
 QString RuleHealth5e::HealthDescription = QString("D&D 5e Hit Points (count down, dead at 0)");
@@ -83,8 +82,9 @@ void RuleHealth5e::rollInitial(BattleDialogModelCombatant* combatant)
         rolled = hitDice.roll();
     }
 
-    if((rolled == 0) && (tmpl->hasValue(KEY_HIT_POINTS_5E)))
-        rolled = tmpl->getIntValue(KEY_HIT_POINTS_5E);
+    const QString hpKey = maxHpKeyFor(combatant);
+    if((rolled == 0) && (tmpl->hasValue(hpKey)))
+        rolled = tmpl->getIntValue(hpKey);
 
     combatant->setHitPoints(rolled);
 }

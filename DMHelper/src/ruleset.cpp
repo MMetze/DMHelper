@@ -9,8 +9,8 @@
 
 static const char* const RULESET_DEFAULT_CHARACTER_CURRENT_HP_KEY = "hit_points";
 static const char* const RULESET_DEFAULT_CHARACTER_MAX_HP_KEY = "maximumHp";
-static const char* const RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY = "hp";
-static const char* const RULESET_DEFAULT_MONSTER_MAX_HP_KEY = "hp";
+static const char* const RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY = "hit_points";
+static const char* const RULESET_DEFAULT_MONSTER_MAX_HP_KEY = "hit_points";
 
 Ruleset::Ruleset(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
