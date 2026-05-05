@@ -7,6 +7,11 @@
 #include <QDomDocument>
 #include <QDomElement>
 
+static const char* const RULESET_DEFAULT_CHARACTER_CURRENT_HP_KEY = "hit_points";
+static const char* const RULESET_DEFAULT_CHARACTER_MAX_HP_KEY = "maximumHp";
+static const char* const RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY = "hp";
+static const char* const RULESET_DEFAULT_MONSTER_MAX_HP_KEY = "hp";
+
 Ruleset::Ruleset(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
     _ruleInitiative(nullptr),
@@ -30,6 +35,10 @@ Ruleset::Ruleset(const QString& name, QObject *parent) :
     _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
     _movementRanges(),
+    _characterCurrentHpKey(QLatin1String(RULESET_DEFAULT_CHARACTER_CURRENT_HP_KEY)),
+    _characterMaxHpKey(QLatin1String(RULESET_DEFAULT_CHARACTER_MAX_HP_KEY)),
+    _monsterCurrentHpKey(QLatin1String(RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY)),
+    _monsterMaxHpKey(QLatin1String(RULESET_DEFAULT_MONSTER_MAX_HP_KEY)),
     _batchProcessing(false),
     _changed(false)
 {
@@ -58,6 +67,10 @@ Ruleset::Ruleset(const RuleFactory::RulesetTemplate& rulesetTemplate, QObject *p
     _hitPointsCountDown(true),
     _movementType(DMHelper::MovementType_Distance),
     _movementRanges(),
+    _characterCurrentHpKey(QLatin1String(RULESET_DEFAULT_CHARACTER_CURRENT_HP_KEY)),
+    _characterMaxHpKey(QLatin1String(RULESET_DEFAULT_CHARACTER_MAX_HP_KEY)),
+    _monsterCurrentHpKey(QLatin1String(RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY)),
+    _monsterMaxHpKey(QLatin1String(RULESET_DEFAULT_MONSTER_MAX_HP_KEY)),
     _batchProcessing(false),
     _changed(false)
 {
@@ -150,6 +163,11 @@ void Ruleset::inputXML(const QDomElement &element, bool isImport)
     _hitPointsCountDown = element.hasAttribute("hitPointsCountDown") ? static_cast<bool>(element.attribute("hitPointsCountDown").toInt()) : rulesetTemplate._hitPointsCountDown;
 
     setMovementString(element.attribute("movementType"));
+
+    _characterCurrentHpKey = element.attribute("characterCurrentHpKey", QLatin1String(RULESET_DEFAULT_CHARACTER_CURRENT_HP_KEY));
+    _characterMaxHpKey = element.attribute("characterMaxHpKey", QLatin1String(RULESET_DEFAULT_CHARACTER_MAX_HP_KEY));
+    _monsterCurrentHpKey = element.attribute("monsterCurrentHpKey", QLatin1String(RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY));
+    _monsterMaxHpKey = element.attribute("monsterMaxHpKey", QLatin1String(RULESET_DEFAULT_MONSTER_MAX_HP_KEY));
 
     // Load conditions from ruleset template
     delete _conditions;
@@ -389,6 +407,26 @@ DMHelper::MovementType Ruleset::getMovementType() const
 QList<int> Ruleset::getMovementRanges() const
 {
     return _movementRanges;
+}
+
+QString Ruleset::getCharacterCurrentHpKey() const
+{
+    return _characterCurrentHpKey;
+}
+
+QString Ruleset::getCharacterMaxHpKey() const
+{
+    return _characterMaxHpKey;
+}
+
+QString Ruleset::getMonsterCurrentHpKey() const
+{
+    return _monsterCurrentHpKey;
+}
+
+QString Ruleset::getMonsterMaxHpKey() const
+{
+    return _monsterMaxHpKey;
 }
 
 DMHelper::MovementType Ruleset::movementTypeFromString(const QString& movementStr, QList<int>* movementRanges)
@@ -654,6 +692,46 @@ void Ruleset::setMovementRanges(QList<int> ranges)
     emit dirty();
 }
 
+void Ruleset::setCharacterCurrentHpKey(const QString& key)
+{
+    if(_characterCurrentHpKey == key)
+        return;
+
+    _characterCurrentHpKey = key;
+    emit dirty();
+    registerChange();
+}
+
+void Ruleset::setCharacterMaxHpKey(const QString& key)
+{
+    if(_characterMaxHpKey == key)
+        return;
+
+    _characterMaxHpKey = key;
+    emit dirty();
+    registerChange();
+}
+
+void Ruleset::setMonsterCurrentHpKey(const QString& key)
+{
+    if(_monsterCurrentHpKey == key)
+        return;
+
+    _monsterCurrentHpKey = key;
+    emit dirty();
+    registerChange();
+}
+
+void Ruleset::setMonsterMaxHpKey(const QString& key)
+{
+    if(_monsterMaxHpKey == key)
+        return;
+
+    _monsterMaxHpKey = key;
+    emit dirty();
+    registerChange();
+}
+
 QDomElement Ruleset::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("ruleset");
@@ -661,8 +739,7 @@ QDomElement Ruleset::createOutputXML(QDomDocument &doc)
 
 void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(isExport);
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 
     if(!RuleFactory::Instance())
     {
@@ -746,6 +823,15 @@ void Ruleset::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& t
 
     if(_movementType != DMHelper::MovementType_Distance)
         element.setAttribute("movementType", movementStringFromType(_movementType, &_movementRanges));
+
+    if(_characterCurrentHpKey != QLatin1String(RULESET_DEFAULT_CHARACTER_CURRENT_HP_KEY))
+        element.setAttribute("characterCurrentHpKey", _characterCurrentHpKey);
+    if(_characterMaxHpKey != QLatin1String(RULESET_DEFAULT_CHARACTER_MAX_HP_KEY))
+        element.setAttribute("characterMaxHpKey", _characterMaxHpKey);
+    if(_monsterCurrentHpKey != QLatin1String(RULESET_DEFAULT_MONSTER_CURRENT_HP_KEY))
+        element.setAttribute("monsterCurrentHpKey", _monsterCurrentHpKey);
+    if(_monsterMaxHpKey != QLatin1String(RULESET_DEFAULT_MONSTER_MAX_HP_KEY))
+        element.setAttribute("monsterMaxHpKey", _monsterMaxHpKey);
 
     // Output condition deltas (only differences from ruleset defaults)
     if(_conditions && _rulesetDefaultConditions && _conditions->hasDeltasFrom(*_rulesetDefaultConditions))

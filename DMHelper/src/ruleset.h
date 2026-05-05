@@ -53,6 +53,10 @@ public:
     QString getMovementString() const;
     DMHelper::MovementType getMovementType() const;
     QList<int> getMovementRanges() const;
+    QString getCharacterCurrentHpKey() const;
+    QString getCharacterMaxHpKey() const;
+    QString getMonsterCurrentHpKey() const;
+    QString getMonsterMaxHpKey() const;
 
     static DMHelper::MovementType movementTypeFromString(const QString& movementStr, QList<int>* movementRanges = nullptr);
     static QString movementStringFromType(DMHelper::MovementType movementType, const QList<int>* movementRanges = nullptr);
@@ -81,6 +85,10 @@ public slots:
     void setMovementString(const QString& movement);
     void setMovementType(DMHelper::MovementType type);
     void setMovementRanges(QList<int> ranges);
+    void setCharacterCurrentHpKey(const QString& key);
+    void setCharacterMaxHpKey(const QString& key);
+    void setMonsterCurrentHpKey(const QString& key);
+    void setMonsterMaxHpKey(const QString& key);
 
 protected slots:
 
@@ -114,6 +122,10 @@ protected:
     bool _hitPointsCountDown;
     DMHelper::MovementType _movementType;
     QList<int> _movementRanges;
+    QString _characterCurrentHpKey;
+    QString _characterMaxHpKey;
+    QString _monsterCurrentHpKey;
+    QString _monsterMaxHpKey;
 
     bool _batchProcessing;
     bool _changed;
