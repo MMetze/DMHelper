@@ -1,6 +1,7 @@
 #include "rulehealth5e.h"
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodelmonsterbase.h"
+#include "battledialogmodelmonstercombatant.h"
 #include "monsterclassv2.h"
 #include "templateobject.h"
 #include "dice.h"
@@ -87,4 +88,8 @@ void RuleHealth5e::rollInitial(BattleDialogModelCombatant* combatant)
         rolled = tmpl->getIntValue(hpKey);
 
     combatant->setHitPoints(rolled);
+
+    BattleDialogModelMonsterCombatant* monsterCombatant = dynamic_cast<BattleDialogModelMonsterCombatant*>(combatant);
+    if(monsterCombatant)
+        monsterCombatant->setMonsterMaxHP(rolled);
 }
