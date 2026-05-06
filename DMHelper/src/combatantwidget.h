@@ -63,6 +63,11 @@ protected:
     virtual void updatePairData(QHBoxLayout* pair, const QString& pairValue);
     virtual QString getStyleString();
 
+    // Update the dynamic "state" property and re-polish so the one-shot
+    // stylesheet picks up the new active/selected/hover state. Cheap; safe
+    // to call frequently.
+    void refreshStateStyle();
+
     // Data
     Qt::MouseButton _mouseDown;
     bool _active;

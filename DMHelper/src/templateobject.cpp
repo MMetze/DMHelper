@@ -1,15 +1,26 @@
 #include "templateobject.h"
 #include "templatefactory.h"
+#include "templateobjectnotifier.h"
 #include "globalsearch.h"
 #include <QDomElement>
 
 TemplateObject::TemplateObject(TemplateFactory* factory) :
-    _factory(factory)
+    _factory(factory),
+    _notifier(nullptr)
 {
 }
 
 TemplateObject::~TemplateObject()
 {
+    delete _notifier;
+    _notifier = nullptr;
+}
+
+TemplateObjectNotifier* TemplateObject::notifier() const
+{
+    if(!_notifier)
+        _notifier = new TemplateObjectNotifier();
+    return _notifier;
 }
 
 TemplateFactory* TemplateObject::getFactory() const
@@ -194,6 +205,8 @@ void TemplateObject::setValue(const QString& key, const QVariant& value)
 
     valueHash()->insert(key, value);
     declareDirty();
+    if(_notifier)
+        emit _notifier->valueChanged(key);
 }
 
 void TemplateObject::setValue(const QString& key, const QString& value)

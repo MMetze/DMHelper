@@ -8,6 +8,7 @@ class BattleDialogModelCombatant;
 class BattleDialogModelEffect;
 class PublishGLImage;
 class PublishGLTokenHighlight;
+class PublishGLTokenHighlightHealthBar;
 
 class PublishGLBattleToken : public PublishGLBattleObject
 {
@@ -39,6 +40,7 @@ public slots:
     void combatantSelected();
     void setPC(bool isPC);
     void recreateToken();
+    void setHealthBarEnabled(bool enabled);
 
 protected:
     void createTokenObjects();
@@ -52,7 +54,9 @@ protected:
     bool _isPC;
 
     QList<PublishGLTokenHighlight*> _highlightList;
+    PublishGLTokenHighlightHealthBar* _healthBar;
 
+    bool _healthBarEnabled;
     bool _recreateToken;
 };
 

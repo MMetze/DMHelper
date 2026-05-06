@@ -1,6 +1,7 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
 #include "battledialogmodelcombatantgroup.h"
+#include "battledialogmodelinitiativeevent.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "map.h"
@@ -17,6 +18,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _combatants(),
     _effects(),
     _groups(),
+    _initiativeEvents(),
     _layerScene(this),
     _map(nullptr),
     _mapRect(),
@@ -28,7 +30,6 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _showDead(false),
     _showEffects(true),
     _showMovement(true),
-    _showLairActions(false),
     _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _activeCombatant(nullptr),
     _logger(),
@@ -45,6 +46,7 @@ BattleDialogModel::~BattleDialogModel()
 {
     qDeleteAll(_effects);
     qDeleteAll(_groups);
+    qDeleteAll(_initiativeEvents);
     _layerScene.clearLayers();
 }
 
@@ -67,7 +69,10 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showDead = static_cast<bool>(element.attribute("showDead", QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects", QString::number(1)).toInt());
     _showMovement = static_cast<bool>(element.attribute("showMovement", QString::number(1)).toInt());
-    _showLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
+
+    // Backwards compatibility: legacy battles persisted a showLairActions flag.
+    // Convert it to a synthetic "Lair Actions" initiative event at init 20.
+    const bool legacyShowLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 
@@ -86,6 +91,39 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             connect(group, &BattleDialogModelCombatantGroup::dirty, this, &BattleDialogModel::dirty);
             groupElement = groupElement.nextSiblingElement("combatantgroup");
         }
+    }
+
+    // Read initiative events (synthetic combatants with no map presence)
+    qDeleteAll(_initiativeEvents);
+    _initiativeEvents.clear();
+    QDomElement eventsElement = element.firstChildElement("initiativeevents");
+    if(!eventsElement.isNull())
+    {
+        QDomElement eventElement = eventsElement.firstChildElement("initiativeevent");
+        while(!eventElement.isNull())
+        {
+            BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString(), 0, this);
+            event->inputXML(eventElement, isImport);
+            appendInitiativeEvent(event);
+            eventElement = eventElement.nextSiblingElement("initiativeevent");
+        }
+    }
+
+    // Migrate legacy showLairActions flag → synthetic "Lair Actions" event at
+    // initiative 20. Skip if such an event was already loaded above.
+    if(legacyShowLairActions)
+    {
+        bool alreadyHasLairActions = false;
+        for(BattleDialogModelInitiativeEvent* event : std::as_const(_initiativeEvents))
+        {
+            if((event) && (event->getName() == QStringLiteral("Lair Actions")))
+            {
+                alreadyHasLairActions = true;
+                break;
+            }
+        }
+        if(!alreadyHasLairActions)
+            appendInitiativeEvent(new BattleDialogModelInitiativeEvent(QStringLiteral("Lair Actions"), 20, this));
     }
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
@@ -226,7 +264,6 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
     _showDead = otherModel->_showDead;
     _showEffects = otherModel->_showEffects;
     _showMovement = otherModel->_showMovement;
-    _showLairActions = otherModel->_showLairActions;
 
     _logger = otherModel->_logger;
 
@@ -470,6 +507,33 @@ bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
     }
 
     return false;
+}
+
+QList<BattleDialogModelInitiativeEvent*> BattleDialogModel::getInitiativeEvents() const
+{
+    return _initiativeEvents;
+}
+
+void BattleDialogModel::appendInitiativeEvent(BattleDialogModelInitiativeEvent* event)
+{
+    if(!event)
+        return;
+
+    _initiativeEvents.append(event);
+    appendCombatantToList(event);
+}
+
+void BattleDialogModel::removeInitiativeEvent(BattleDialogModelInitiativeEvent* event)
+{
+    if(!event)
+        return;
+
+    if(_activeCombatant == event)
+        setActiveCombatant(nullptr);
+
+    _initiativeEvents.removeOne(event);
+    removeCombatantFromList(event);
+    delete event;
 }
 
 QList<BattleDialogModelCombatantGroup*> BattleDialogModel::getGroups() const
@@ -748,11 +812,6 @@ bool BattleDialogModel::getShowMovement() const
     return _showMovement;
 }
 
-bool BattleDialogModel::getShowLairActions() const
-{
-    return _showLairActions;
-}
-
 int BattleDialogModel::getCombatantTokenType() const
 {
     return _combatantTokenType;
@@ -886,16 +945,6 @@ void BattleDialogModel::setShowMovement(bool showMovement)
     }
 }
 
-void BattleDialogModel::setShowLairActions(bool showLairActions)
-{
-    if(_showLairActions != showLairActions)
-    {
-        _showLairActions = showLairActions;
-        emit showLairActionsChanged(_showLairActions);
-        emit dirty();
-    }
-}
-
 void BattleDialogModel::setCombatantTokenType(int combatantTokenType)
 {
     _combatantTokenType = combatantTokenType;
@@ -931,81 +980,51 @@ void BattleDialogModel::sortCombatants()
     if(!ruleInitiative)
         return;
 
-    // First, sort all combatants by individual initiative
-    ruleInitiative->sortInitiative(_combatants);
-
-    // If there are groups, post-process to make grouped combatants contiguous
-    if(!_groups.isEmpty())
-    {
-        // Separate into ungrouped and per-group buckets
-        QList<BattleDialogModelCombatant*> ungrouped;
-        QMap<QUuid, QList<BattleDialogModelCombatant*>> groupBuckets;
-
-        for(BattleDialogModelCombatant* combatant : _combatants)
+    // Sort the flat combatant list with a single comparator. Two rules:
+    //   1. A combatant in a group is placed using the group's own initiative,
+    //      not its individual initiative. Members of the same group always
+    //      end up adjacent because they share the same placement key.
+    //   2. Comparisons within the same group, and tie-breaks between any two
+    //      combatants whose effective initiatives are equal, are delegated to
+    //      RuleInitiative::compareCombatants so each ruleset stays in charge
+    //      of its own ordering rules (5e dex tiebreak, 2e weapon-speed, etc.).
+    auto effectiveInitiative = [this](const BattleDialogModelCombatant* c) -> int {
+        if(!c)
+            return 0;
+        const QUuid gid = c->getGroupId();
+        if(!gid.isNull())
         {
-            if(!combatant)
-                continue;
-
-            QUuid gid = combatant->getGroupId();
-            if(gid.isNull())
-                ungrouped.append(combatant);
-            else
-                groupBuckets[gid].append(combatant);
+            if(BattleDialogModelCombatantGroup* group = getGroup(gid))
+                return group->getInitiative();
         }
+        return c->getInitiative();
+    };
 
-        // Each group bucket is already in initiative-sorted order (from initial sort)
-        // Sort intra-group by individual initiative (already done by the sort above)
+    std::sort(_combatants.begin(), _combatants.end(),
+              [&effectiveInitiative, ruleInitiative]
+              (const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b) {
+        if((!a) || (!b))
+            return false;
 
-        // Build a list of "entries" with their effective initiative for merging
-        // Each entry is either a single ungrouped combatant or an entire group bucket
-        struct SortEntry {
-            int initiative;
-            int dexterity;
-            QList<BattleDialogModelCombatant*> combatants;
-        };
+        const QUuid ga = a->getGroupId();
+        const QUuid gb = b->getGroupId();
 
-        QList<SortEntry> entries;
+        // Same group: ruleset decides intra-group order.
+        if((!ga.isNull()) && (ga == gb))
+            return ruleInitiative->compareCombatants(a, b);
 
-        for(BattleDialogModelCombatant* c : ungrouped)
-        {
-            SortEntry entry;
-            entry.initiative = c->getInitiative();
-            entry.dexterity = c->getDexterity();
-            entry.combatants.append(c);
-            entries.append(entry);
-        }
+        const int ia = effectiveInitiative(a);
+        const int ib = effectiveInitiative(b);
+        if(ia != ib)
+            return ia > ib;
 
-        for(auto it = groupBuckets.begin(); it != groupBuckets.end(); ++it)
-        {
-            BattleDialogModelCombatantGroup* group = getGroup(it.key());
-            if(!group || it.value().isEmpty())
-                continue;
+        // Same effective initiative across different groups (or one
+        // ungrouped): fall through to the ruleset comparator for a
+        // deterministic tiebreak.
+        return ruleInitiative->compareCombatants(a, b);
+    });
 
-            SortEntry entry;
-            entry.initiative = group->getInitiative();
-            // Use the highest dexterity in the group for tiebreaking
-            entry.dexterity = 0;
-            for(BattleDialogModelCombatant* c : it.value())
-            {
-                if(c->getDexterity() > entry.dexterity)
-                    entry.dexterity = c->getDexterity();
-            }
-            entry.combatants = it.value();
-            entries.append(entry);
-        }
-
-        // Sort entries by initiative (descending), then dexterity (descending)
-        std::sort(entries.begin(), entries.end(), [](const SortEntry& a, const SortEntry& b) {
-            if(a.initiative == b.initiative)
-                return a.dexterity > b.dexterity;
-            return a.initiative > b.initiative;
-        });
-
-        // Rebuild the flat list
-        _combatants.clear();
-        for(const SortEntry& entry : entries)
-            _combatants.append(entry.combatants);
-    }
+    resetCombatantSortValues();
 
     emit initiativeOrderChanged();
     emit dirty();
@@ -1093,7 +1112,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);
     element.setAttribute("showMovement", _showMovement);
-    element.setAttribute("showLairActions", _showLairActions);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
@@ -1107,6 +1125,17 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
                 groupsElement.appendChild(group->createOutputXML(doc));
         }
         element.appendChild(groupsElement);
+    }
+
+    if(!_initiativeEvents.isEmpty())
+    {
+        QDomElement eventsElement = doc.createElement("initiativeevents");
+        for(BattleDialogModelInitiativeEvent* event : _initiativeEvents)
+        {
+            if(event)
+                event->outputXML(doc, eventsElement, targetDirectory, isExport);
+        }
+        element.appendChild(eventsElement);
     }
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);

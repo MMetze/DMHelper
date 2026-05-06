@@ -6,6 +6,9 @@
 #include "combatant.h"
 #include <QPoint>
 #include <QUuid>
+#include <QHash>
+#include <QStringList>
+#include <QVariant>
 
 
 class BattleDialogModelCombatant : public BattleDialogModelObject
@@ -68,6 +71,27 @@ public:
     void incrementMoved(qreal moved);
     void resetMoved();
 
+    // Generic per-encounter override bag. Stores values for canonical "dmh:"-prefixed
+    // keys (and any ruleset-defined overrides) without imposing a type or XML schema.
+    // Phase 1: storage and access only; existing typed accessors are not yet wired in.
+    QVariant    getOverride(const QString& key) const;
+    bool        hasOverride(const QString& key) const;
+    void        setOverride(const QString& key, const QVariant& value);
+    void        clearOverride(const QString& key);
+    QStringList overrideKeys() const;
+
+    // Canonical key names. The dmh: prefix is reserved for engine-owned
+    // attributes so they can never collide with a ruleset-defined key.
+    static const char* DMH_KEY_NAME;
+    static const char* DMH_KEY_INITIATIVE;
+    static const char* DMH_KEY_MOVED;
+    static const char* DMH_KEY_IS_SHOWN;
+    static const char* DMH_KEY_IS_KNOWN;
+    static const char* DMH_KEY_IS_DONE;
+    static const char* DMH_KEY_HEALTH;
+    static const char* DMH_KEY_CONDITIONS;
+    static const char* DMH_KEY_PER_ROUND_RESOURCES;
+
 public slots:
     virtual void setShown(bool isShown);
     virtual void setKnown(bool isKnown);
@@ -85,6 +109,7 @@ signals:
     void moveUpdated();
     void visibilityChanged();
     void combatantDoneChanged(BattleDialogModelCombatant* combatant);
+    void overrideChanged(BattleDialogModelCombatant* combatant, const QString& key);
 
 protected:
     // From CampaignObjectBase
@@ -104,6 +129,7 @@ protected:
     bool _isKnown;
     bool _isSelected;
     bool _isDone;
+    QHash<QString, QVariant> _overrides;
 };
 
 #endif // BATTLEDIALOGMODELCOMBATANT_H

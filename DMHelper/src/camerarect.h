@@ -38,6 +38,8 @@ protected:
 
 private:
     void setCameraRectColor();
+    void layoutHandles();
+    qreal currentViewScale() const;
 
     bool _draw;
     bool _mouseDown;
@@ -52,6 +54,8 @@ private:
     QGraphicsRectItem* _cameraIconRect;
     QGraphicsPixmapItem* _cameraIcon;
 
+    QGraphicsRectItem* _handles[8];
+    bool _editing;
 
     bool _publishing;
     bool _ratioLocked;

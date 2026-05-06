@@ -142,7 +142,7 @@ void TemplateResourceLayout::createCheckboxes()
         QCheckBox* checkBox = new QCheckBox();
         checkBox->setChecked(i < _value.first);
         addWidget(checkBox);
-        connect(checkBox, &QCheckBox::stateChanged, this, &TemplateResourceLayout::handleResourceChanged);
+        connect(checkBox, &QCheckBox::checkStateChanged, this, &TemplateResourceLayout::handleResourceChanged);
     }
 }
 

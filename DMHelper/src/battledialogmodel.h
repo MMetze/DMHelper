@@ -10,6 +10,7 @@
 #include <QPen>
 
 class BattleDialogModelCombatantGroup;
+class BattleDialogModelInitiativeEvent;
 class EncounterBattle;
 #include "map.h"
 #include "layer.h"
@@ -49,6 +50,13 @@ public:
     void removeCombatantFromList(BattleDialogModelCombatant* combatant);
     bool isCombatantInList(Combatant* combatant) const;
 
+    // Initiative events: synthetic combatants (e.g. lair actions) with no
+    // map presence. Owned directly by the model and merged into the
+    // combatant initiative list.
+    QList<BattleDialogModelInitiativeEvent*> getInitiativeEvents() const;
+    void appendInitiativeEvent(BattleDialogModelInitiativeEvent* event);
+    void removeInitiativeEvent(BattleDialogModelInitiativeEvent* event);
+
     // Group management
     QList<BattleDialogModelCombatantGroup*> getGroups() const;
     BattleDialogModelCombatantGroup* getGroup(const QUuid& groupId) const;
@@ -83,7 +91,6 @@ public:
     bool getShowDead() const;
     bool getShowEffects() const;
     bool getShowMovement() const;
-    bool getShowLairActions() const;
     int getCombatantTokenType() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
@@ -101,7 +108,6 @@ public slots:
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
     void setShowMovement(bool showMovement);
-    void setShowLairActions(bool showLairActions);
     void setCombatantTokenType(int combatantTokenType);
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setBackgroundImage(QImage backgroundImage);
@@ -117,7 +123,6 @@ signals:
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
     void showMovementChanged(bool showMovement);
-    void showLairActionsChanged(bool showLairActions);
     void combatantListChanged();
     void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
@@ -156,6 +161,7 @@ private:
     QList<BattleDialogModelCombatant*> _combatants;
     QList<BattleDialogModelEffect*> _effects;
     QList<BattleDialogModelCombatantGroup*> _groups;
+    QList<BattleDialogModelInitiativeEvent*> _initiativeEvents;
 
     // Visualization values
     LayerScene _layerScene;
@@ -172,7 +178,6 @@ private:
     bool _showDead;
     bool _showEffects;
     bool _showMovement;
-    bool _showLairActions;
     int _combatantTokenType;
 
     BattleDialogModelCombatant* _activeCombatant;

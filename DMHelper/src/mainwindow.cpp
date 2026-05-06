@@ -21,6 +21,8 @@
 #include "mruhandler.h"
 #include "encounterfactory.h"
 #include "monsterfactory.h"
+#include "spellbookfactory.h"
+#include "spellv2.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encounterbattle.h"
@@ -436,6 +438,7 @@ MainWindow::MainWindow(QWidget *parent) :
     RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
     qDebug() << "[MainWindow] Loading default Bestiary UI frame: " << defaultRuleset._monsterUI;
     MonsterFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+    SpellbookFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
     //_bestiaryDlg.loadMonsterUITemplate(defaultRuleset._monsterUI);
     connect(Bestiary::Instance(), &Bestiary::changed, &_bestiaryDlg, &BestiaryTemplateDialog::dataChanged);
     connect(Bestiary::Instance(), &Bestiary::bestiaryLoaded, this, &MainWindow::handleBestiaryRead);
@@ -463,7 +466,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Spellbook Loaded";
 
-    connect(&_spellDlg, &SpellbookDialog::dialogClosed, this, &MainWindow::writeSpellbook);
+    connect(&_spellDlg, &SpellbookTemplateDialog::dialogClosed, this, &MainWindow::writeSpellbook);
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
@@ -562,6 +565,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
     connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
     connect(_battleFrame, &BattleFrame::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
+    connect(_battleFrame, &BattleFrame::initiativeActiveChanged, _ribbonTabBattle, &RibbonTabBattle::setLairActionsVisible);
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
@@ -571,7 +575,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), _battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), _battleFrame, SLOT(addEffectLine()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectSmokeClicked()), _battleFrame, SLOT(addEffectSmoke()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectFireClicked()), _battleFrame, SLOT(addEffectFire()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectSparksClicked()), _battleFrame, SLOT(addEffectSparks()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectLightClicked()), _battleFrame, SLOT(addEffectLight()));
     connect(_ribbonTabBattle, SIGNAL(duplicateClicked()), _battleFrame, SLOT(duplicateSelection()));
+    connect(_ribbonTabBattle, SIGNAL(lairActionsClicked()), _battleFrame, SLOT(addLairActionsEvent()));
+    connect(_ribbonTabBattle, SIGNAL(addEventClicked()), _battleFrame, SLOT(addInitiativeEvent()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "New Entry")), this);
@@ -829,6 +839,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
         MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -841,6 +852,9 @@ void MainWindow::newCampaign()
         _bestiaryDlg.setMonster(nullptr);
         _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
         Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
+        _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
+        _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -1802,6 +1816,18 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
             return false;
     }
 
+    // One-time pre-v3 backup: if the loaded campaign was a pre-v3 file, copy
+    // the on-disk version aside before we overwrite it with the new format. The
+    // canonical "dmh:" key migration is read-only via CombatantTemplateAdapter
+    // alias, but the version stamp itself bumps and older DMHelper builds will
+    // refuse to load the result — the backup gives the user a safety net.
+    if((_campaign->getLoadedMajorVersion() > 0) && (_campaign->getLoadedMajorVersion() < DMHelper::CAMPAIGN_MAJOR_VERSION))
+    {
+        qDebug() << "[MainWindow] Loaded campaign is pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " (was v" << _campaign->getLoadedMajorVersion() << "), writing pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " backup before save.";
+        _options->backupFile(_campaignFileName, QString("pre-v%1").arg(DMHelper::CAMPAIGN_MAJOR_VERSION));
+        _campaign->clearLoadedMajorVersion();
+    }
+
     qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
 
     QDomDocument doc("DMHelperXML");
@@ -2113,6 +2139,31 @@ void MainWindow::openCampaign(const QString& filename)
             return;
         }
     }
+    else if((majorVersion > 0) && (majorVersion < DMHelper::CAMPAIGN_MAJOR_VERSION))
+    {
+        // v2 -> v3 transition: combatant attribute keys are now namespaced
+        // ("dmh:health", "dmh:initiative", etc.). Older campaign files using
+        // the unprefixed pre-v3 names will be upgraded via XML
+        // compatibility-mode conversion (see
+        // CombatantTemplateAdapter::legacyAliasTable). On save the file's
+        // majorVersion attribute will be rewritten to the current value
+        // and older DMHelper builds will no longer open it. doSaveCampaign
+        // takes a pre-v3 backup automatically; warn the user up front so they
+        // know what to expect.
+        qDebug() << "[Campaign] INFO: Loading pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " campaign (v" << majorVersion << "." << minorVersion << "); user notified of one-way upgrade.";
+        QMessageBox::StandardButton result = QMessageBox::warning(this,
+                                                                  QString("Campaign file version check"),
+                                                                  QString("This campaign file is from an older version of DM Helper (v%1.%2). It can be opened, but saving will rewrite it in the new v%3 format and older versions of DM Helper will no longer be able to open it.")
+                                                                          .arg(majorVersion).arg(minorVersion).arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
+                                                                      QString("DM Helper will automatically write a pre-v%1 backup of the original file the first time you save, but it is still strongly recommended that you back up your campaign and bestiary files yourself before continuing.").arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
+                                                                      QString("Do you want to continue opening this campaign file?"),
+                                                                  QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[Campaign] INFO: User declined v" << majorVersion << " → v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " upgrade for: " << filename;
+            return;
+        }
+    }
 
     QUuid lastElementId = QUuid(campaignElement.attribute(QString("lastElement")));
 
@@ -2125,9 +2176,15 @@ void MainWindow::openCampaign(const QString& filename)
     MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                   campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                   campaignElement.attribute("minorVersion", QString::number(0)).toInt());
     _bestiaryDlg.setMonster(nullptr);
     _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
     Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
+    _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
+    _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
 
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
@@ -2223,6 +2280,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        SpellbookFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
@@ -3021,12 +3079,10 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
-        _ribbonTabBattle->setLairActions(model->getShowLairActions());
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
-        connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
         Layer* selectedLayer = model->getLayerScene().getSelectedLayer();
         LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));

@@ -39,6 +39,14 @@ public:
     static int d100();
     static int dX(int X);
 
+    // Convenience parsers for dice expressions provided as strings (e.g.
+    // "2d8+4"). Each constructs a temporary Dice from the expression and
+    // returns the corresponding value. They return 0 for unparseable input,
+    // matching the behaviour of Dice::Dice(const QString&) on failure.
+    static int roll(const QString& expression);
+    static int maximum(const QString& expression);
+    static int average(const QString& expression);
+
 private:
     void readString(const QString& diceString);
 

@@ -1,19 +1,30 @@
 #include "layertokens.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelcombatant.h"
+#include "battledialogmodelcharacter.h"
+#include "battledialogmodelmonsterbase.h"
+#include "battledialogmodelmonsterclass.h"
+#include "battledialogmodelmonstercombatant.h"
+#include "battletokenhealthbar.h"
+#include "campaign.h"
+#include "characterv2.h"
+#include "campaignobjectbase.h"
 #include "unselectedpixmap.h"
 #include "publishglrenderer.h"
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
 #include "publishglbattleeffectvideo.h"
-#include "campaign.h"
-#include "characterv2.h"
+#include "publishglbattleeffectsmoke.h"
+#include "publishglbattleeffectfire.h"
+#include "publishglbattleeffectsparks.h"
+#include "publishglbattleeffectlight.h"
+#include "battledialogmodeleffectsmoke.h"
+#include "battledialogmodeleffectfire.h"
+#include "battledialogmodeleffectsparks.h"
+#include "battledialogmodeleffectlight.h"
 #include "bestiary.h"
 #include "monster.h"
 #include "monsterclassv2.h"
-#include "battledialogmodelcharacter.h"
-#include "battledialogmodelmonsterclass.h"
-#include "battledialogmodelmonstercombatant.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectobjectvideo.h"
@@ -37,7 +48,9 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _effects(),
     _effectIconHash(),
     _effectTokenHash(),
-    _scale(DMHelper::STARTING_GRID_SCALE)
+    _scale(DMHelper::STARTING_GRID_SCALE),
+    _campaign(nullptr),
+    _healthBarHash()
 {
     setModel(model);
 }
@@ -344,6 +357,26 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
         createEffectIcon(scene, _effects.at(i));
     }
 
+    resolveCampaign();
+    if(_campaign)
+    {
+        connect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::healthBarVisibilityChanged);
+
+        // Create health bars for combatants loaded from XML (whose pixmap items were just created above)
+        for(int i = 0; i < _combatants.count(); ++i)
+        {
+            BattleDialogModelCombatant* combatant = _combatants.at(i);
+            QGraphicsPixmapItem* pixmapItem = _combatantIconHash.value(combatant);
+            if(pixmapItem && !_healthBarHash.contains(combatant))
+            {
+                BattleTokenHealthBar* healthBar = new BattleTokenHealthBar(combatant, pixmapItem);
+                _healthBarHash.insert(combatant, healthBar);
+                healthBar->setVisible(_campaign->getShowTokenHealthBars());
+                refreshHealthBar(combatant);
+            }
+        }
+    }
+
     Layer::dmInitialize(scene);
 }
 
@@ -384,11 +417,36 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
         if(effect)
         {
             PublishGLBattleEffect* effectToken;
-            if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)
+            int effectType = effect->getEffectType();
+            if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo)
             {
                 PublishGLBattleEffectVideo* effectVideo = new PublishGLBattleEffectVideo(_glScene, dynamic_cast<BattleDialogModelEffectObjectVideo*>(effect));
                 connect(effectVideo, &PublishGLBattleEffectVideo::updateWidget, renderer, &PublishGLRenderer::updateWidget);
                 effectToken = effectVideo;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Smoke)
+            {
+                PublishGLBattleEffectSmoke* effectSmoke = new PublishGLBattleEffectSmoke(_glScene, dynamic_cast<BattleDialogModelEffectSmoke*>(effect));
+                connect(effectSmoke, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectSmoke;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Fire)
+            {
+                PublishGLBattleEffectFire* effectFire = new PublishGLBattleEffectFire(_glScene, dynamic_cast<BattleDialogModelEffectFire*>(effect));
+                connect(effectFire, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectFire;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Sparks)
+            {
+                PublishGLBattleEffectSparks* effectSparks = new PublishGLBattleEffectSparks(_glScene, dynamic_cast<BattleDialogModelEffectSparks*>(effect));
+                connect(effectSparks, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectSparks;
+            }
+            else if(effectType == BattleDialogModelEffect::BattleDialogModelEffect_Light)
+            {
+                PublishGLBattleEffectLight* effectLight = new PublishGLBattleEffectLight(_glScene, dynamic_cast<BattleDialogModelEffectLight*>(effect));
+                connect(effectLight, &PublishGLBattleEffectAnimated::updateWidget, renderer, &PublishGLRenderer::updateWidget);
+                effectToken = effectLight;
             }
             else
             {
@@ -401,11 +459,28 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
 
     _playerInitialized = true;
 
+    resolveCampaign();
+    if(_campaign)
+    {
+        bool showHealthBars = _campaign->getShowTokenHealthBars();
+        QHashIterator<BattleDialogModelCombatant*, PublishGLBattleToken*> i(_combatantTokenHash);
+        while(i.hasNext())
+        {
+            i.next();
+            if(i.value())
+                i.value()->setHealthBarEnabled(showHealthBars);
+        }
+        connect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::glHealthBarVisibilityChanged, Qt::QueuedConnection);
+    }
+
     Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerTokens::playerGLUninitialize()
 {
+    if(_campaign)
+        disconnect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::glHealthBarVisibilityChanged);
+
     _playerInitialized = false;
     cleanupPlayer();
 }
@@ -576,6 +651,25 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     connect(combatant, &BattleDialogModelCombatant::conditionsChanged, this, &LayerTokens::combatantConditionChanged);
     connect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
 
+    // Wire HP-change signal for health bar refresh
+    BattleDialogModelMonsterBase* monsterBase = qobject_cast<BattleDialogModelMonsterBase*>(combatant);
+    if(monsterBase)
+    {
+        connect(monsterBase, &BattleDialogModelMonsterBase::dataChanged, this, [this](BattleDialogModelMonsterBase* mb) {
+            refreshHealthBar(mb);
+        });
+    }
+    else
+    {
+        BattleDialogModelCharacter* charCombatant = qobject_cast<BattleDialogModelCharacter*>(combatant);
+        if(charCombatant && charCombatant->getCharacter())
+        {
+            connect(charCombatant->getCharacter(), &CampaignObjectBase::dirty, this, [this, combatant]() {
+                refreshHealthBar(combatant);
+            });
+        }
+    }
+
     if((getLayerScene()) && (getLayerScene()->getDMScene()))
     {
         QGraphicsPixmapItem* combatantItem = createCombatantIcon(getLayerScene()->getDMScene(), combatant);
@@ -585,6 +679,12 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
         combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, getOrder()));
         combatantItem->setVisible(getLayerVisibleDM());
         combatantItem->setOpacity(combatant->getShown() ? _opacityReference : _opacityReference * 0.5);
+
+        // Create health bar for this combatant
+        BattleTokenHealthBar* healthBar = new BattleTokenHealthBar(combatant, combatantItem);
+        _healthBarHash.insert(combatant, healthBar);
+        healthBar->setVisible(_campaign ? _campaign->getShowTokenHealthBars() : false);
+        refreshHealthBar(combatant);
     }
 }
 
@@ -598,6 +698,23 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
     disconnect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
     disconnect(combatant, &BattleDialogModelCombatant::conditionsChanged, this, &LayerTokens::combatantConditionChanged);
     disconnect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
+
+    // Disconnect HP-change signal
+    BattleDialogModelMonsterBase* monsterBase = qobject_cast<BattleDialogModelMonsterBase*>(combatant);
+    if(monsterBase)
+    {
+        disconnect(monsterBase, &BattleDialogModelMonsterBase::dataChanged, this, nullptr);
+    }
+    else
+    {
+        BattleDialogModelCharacter* charCombatant = qobject_cast<BattleDialogModelCharacter*>(combatant);
+        if(charCombatant && charCombatant->getCombatant())
+            disconnect(charCombatant->getCombatant(), &CampaignObjectBase::dirty, this, nullptr);
+    }
+
+    // Remove health bar (delete before the pixmap parent item to avoid double-free)
+    BattleTokenHealthBar* healthBar = _healthBarHash.take(combatant);
+    delete healthBar;
 
     if(!_combatants.removeOne(combatant))
         return;
@@ -855,10 +972,21 @@ void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
     if((!effect) || (!_model) || (!_layerScene))
         return;
 
-    // Changes to the player item will be directly handled through the signal
-    QGraphicsItem* graphicsItem = _effectIconHash.value(effect);
-    if(graphicsItem)
-        effect->applyEffectValues(*graphicsItem, _scale);
+    BattleDialogModelEffect* keyEffect = findEffectKey(effect);
+    if(keyEffect)
+    {
+        QGraphicsItem* graphicsItem = _effectIconHash.value(keyEffect);
+        if(graphicsItem)
+        {
+            if(graphicsItem->scene())
+                graphicsItem->scene()->removeItem(graphicsItem);
+            delete graphicsItem;
+            _effectIconHash.remove(keyEffect);
+        }
+
+        if(_layerScene->getDMScene())
+            createEffectIcon(_layerScene->getDMScene(), effect);
+    }
 
     // Remove current effect markers from all combatants
     QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
@@ -999,6 +1127,16 @@ void LayerTokens::internalOutputXML(QDomDocument &doc, QDomElement &element, QDi
 
 void LayerTokens::cleanupDM()
 {
+    // Delete health bars before their pixmap parents to avoid double-free
+    qDeleteAll(_healthBarHash);
+    _healthBarHash.clear();
+
+    if(_campaign)
+    {
+        disconnect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::healthBarVisibilityChanged);
+        _campaign = nullptr;
+    }
+
     QList<QGraphicsPixmapItem*> combatantItems = _combatantIconHash.values();
     for(QGraphicsPixmapItem* pixmapItem : std::as_const(combatantItems))
     {
@@ -1399,4 +1537,48 @@ void LayerTokens::cleanupPlayer()
 qreal LayerTokens::getIconOrder(int iconType, qreal order)
 {
     return (iconType == DMHelper::CampaignType_BattleContentEffect) ? order - 0.5 : order;
+}
+
+void LayerTokens::resolveCampaign()
+{
+    if(_campaign)
+        return;
+
+    QObject* obj = getLayerScene();
+    while(obj)
+    {
+        _campaign = qobject_cast<Campaign*>(obj);
+        if(_campaign)
+            return;
+        obj = obj->parent();
+    }
+}
+
+void LayerTokens::refreshHealthBar(BattleDialogModelCombatant* combatant)
+{
+    BattleTokenHealthBar* bar = _healthBarHash.value(combatant, nullptr);
+    if(bar)
+        bar->update();
+}
+
+void LayerTokens::healthBarVisibilityChanged(bool visible)
+{
+    QHashIterator<BattleDialogModelCombatant*, BattleTokenHealthBar*> i(_healthBarHash);
+    while(i.hasNext())
+    {
+        i.next();
+        if(i.value())
+            i.value()->setVisible(visible);
+    }
+}
+
+void LayerTokens::glHealthBarVisibilityChanged(bool show)
+{
+    QHashIterator<BattleDialogModelCombatant*, PublishGLBattleToken*> i(_combatantTokenHash);
+    while(i.hasNext())
+    {
+        i.next();
+        if(i.value())
+            i.value()->setHealthBarEnabled(show);
+    }
 }

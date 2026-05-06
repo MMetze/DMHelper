@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ResourceTemplate</class>
+ <widget class="QFrame" name="ResourceTemplate">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>240</width>
+    <height>32</height>
+   </rect>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Sunken</enum>
+  </property>
+  <layout class="QHBoxLayout" name="resourceLayout">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>1</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>1</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="resourceName">
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>name</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="resourceCurrent">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>current</string>
+     </property>
+     <property name="dmhFormat" stdset="0">
+      <string>int</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="resourceSeparator">
+     <property name="text">
+      <string>/</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="resourceMax">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>max</string>
+     </property>
+     <property name="dmhFormat" stdset="0">
+      <string>int</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="resourceDecrement">
+     <property name="maximumSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>-</string>
+     </property>
+     <property name="toolTip">
+      <string>Spend one</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="resourceReset">
+     <property name="maximumSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>R</string>
+     </property>
+     <property name="toolTip">
+      <string>Reset to max</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="resourceRecharge">
+     <property name="font">
+      <font>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="dmhValue" stdset="0">
+      <string>recharge</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

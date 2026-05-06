@@ -169,6 +169,25 @@ int Dice::dX(int X)
     return 1 + QRandomGenerator::global()->bounded(X);
 }
 
+int Dice::roll(const QString& expression)
+{
+    Dice d(expression);
+    return d.roll();
+}
+
+int Dice::maximum(const QString& expression)
+{
+    Dice d(expression);
+    // Maximum value: every die rolls its top face, plus the modifier.
+    return (d.getCount() * d.getType()) + d.getBonus();
+}
+
+int Dice::average(const QString& expression)
+{
+    Dice d(expression);
+    return d.average();
+}
+
 void Dice::readString(const QString& diceString)
 {
     QString expression("(\\d*)d(\\d+)(\\+|-)*(\\d*)");

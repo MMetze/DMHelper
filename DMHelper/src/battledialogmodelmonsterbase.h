@@ -5,6 +5,7 @@
 #include "combatant.h"
 #include <QString>
 #include <QStringList>
+#include <QHash>
 
 class MonsterClassv2;
 
@@ -41,9 +42,17 @@ public:
 
     virtual int getLegendaryCount() const;
 
+    // Per-instance per-round resource counters (legendary actions + recharge abilities, etc.).
+    // The current value is stored here; the resource definition (max, recharge schedule)
+    // lives on the MonsterClassv2 via getPerRoundResources().
+    int  getResourceCount(const QString& resourceName) const;
+    bool hasResourceCounter(const QString& resourceName) const;
+    QStringList getResourceCounterNames() const;
+
 signals:
     void dataChanged(BattleDialogModelMonsterBase* monsterBase);
     void imageChanged(BattleDialogModelMonsterBase* monsterBase);
+    void resourceCountChanged(BattleDialogModelMonsterBase* monsterBase, const QString& resourceName, int newValue);
 
 public slots:
     virtual void setConditionList(const QStringList& conditions) override;
@@ -51,6 +60,8 @@ public slots:
     virtual void removeConditionId(const QString& conditionId) override;
     virtual void clearConditions() override;
     virtual void setLegendaryCount(int legendaryCount);
+    void setResourceCount(const QString& resourceName, int count);
+    void resetResources(const QString& scope);
 
 protected:
     // From BattleDialogModelCombatant
@@ -58,6 +69,7 @@ protected:
 
     int _legendaryCount;
     QStringList _conditionList;
+    QHash<QString, int> _resourceCounters;
 };
 
 #endif // BATTLEDIALOGMODELMONSTERBASE_H

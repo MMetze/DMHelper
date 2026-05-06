@@ -79,6 +79,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _notes(),
     _lastMonster(),
     _fearCount(0),
+    _showTokenHealthBars(false),
     _ruleset(),
     _batchChanges(false),
     _changesMade(false),
@@ -105,6 +106,11 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         return;
     }
 
+    // Remember the on-disk version so MainWindow can take a one-time pre-v3
+    // backup before rewriting the file under the new format. Cleared after the
+    // first successful save to avoid stacking duplicate backups.
+    _loadedMajorVersion = majorVersion;
+
     // Load the ruleset; without this we can't load the rest of the campaign
     if(!_ruleset.isInitialized())
         preloadRulesetXML(element, isImport);
@@ -126,6 +132,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
+    _showTokenHealthBars = element.attribute("showTokenHealthBars", QString::number(0)).toInt() != 0;
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -424,6 +431,11 @@ int Campaign::getFearCount() const
     return _fearCount;
 }
 
+bool Campaign::getShowTokenHealthBars() const
+{
+    return _showTokenHealthBars;
+}
+
 Ruleset& Campaign::getRuleset()
 {
     return _ruleset;
@@ -518,6 +530,16 @@ void Campaign::setFearCount(int fearCount)
     emit dirty();
 }
 
+void Campaign::setShowTokenHealthBars(bool show)
+{
+    if(show == _showTokenHealthBars)
+        return;
+
+    _showTokenHealthBars = show;
+    emit showTokenHealthBarsChanged(_showTokenHealthBars);
+    emit dirty();
+}
+
 bool Campaign::validateCampaignIds()
 {
     QList<QUuid> knownIds;
@@ -576,6 +598,9 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 
     if(_fearCount > 0)
         element.setAttribute("fear", _fearCount);
+
+    if(_showTokenHealthBars)
+        element.setAttribute("showTokenHealthBars", 1);
 
     if(_notes.count() > 0)
     {

@@ -13,7 +13,7 @@
 #include "bestiary.h"
 #include "monsterclassv2.h"
 #include "spellbook.h"
-#include "spell.h"
+#include "spellv2.h"
 #include "selectstringdialog.h"
 #include <QUuid>
 #include <QFileDialog>
@@ -418,7 +418,7 @@ void ExportDialog::addMonster(MonsterClassv2* monsterClass)
     _monsters.append(monsterClass->getStringValue("name"));
 }
 
-void ExportDialog::addSpell(Spell* spell)
+void ExportDialog::addSpell(Spellv2* spell)
 {
     if((!spell) || (_spells.contains(spell->getName())))
         return;

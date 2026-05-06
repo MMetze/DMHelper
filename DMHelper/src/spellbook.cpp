@@ -1,61 +1,17 @@
 #include "spellbook.h"
-#include "spell.h"
+#include "spellv2.h"
+#include "spellv2converter.h"
 #include "dmversion.h"
+#include <QDomDocument>
+#include <QDomElement>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QStringConverter>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QDebug>
 
-/*
- *         <spell
-                <name
-                <level
-                <school
-                <time
-                <range
-                <components
-                <duration
-                <classes
-                <text
-                <text /
-                <roll
-                <effect
-                    <token
-        </spell
-                <ritual
-*/
-/*
-
-<root>
-    <element>
-          <casting_time/>
-          <classes>
-                <element/>
-          </classees>
-          <components>
-                <raw/>
-                <verbal/>
-                <somatic/>
-                <material/>
-                <materials_needed>
-                      <element/>
-                </materials_needed>
-          </components>
-          <description/>
-          <duration/>
-          <higher_levels/>
-          <level/>
-          <name/>
-          <range/>
-          <ritual/>
-          <school/>
-          <tags>
-                <element/>
-          </tages>
-          <type/>
-    </element>
-</root>
-
- */
 Spellbook* Spellbook::_instance = nullptr;
 
 Spellbook::Spellbook(QObject *parent) :
@@ -112,7 +68,7 @@ QStringList Spellbook::search(const QString& searchString)
         }
         else
         {
-            Spell* spell = it.value();
+            Spellv2* spell = it.value();
             QString matchString = searchSpell(spell, searchString);
             if(!matchString.isEmpty())
                 results << key << matchString;
@@ -226,7 +182,7 @@ int Spellbook::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
     SpellbookMap::const_iterator i = _spellbookMap.constBegin();
     while (i != _spellbookMap.constEnd())
     {
-        Spell* spell = i.value();
+        Spellv2* spell = i.value();
         if(spell)
         {
             QDomElement spellElement = doc.createElement("spell");
@@ -268,9 +224,19 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
     qDebug() << "[Spellbook]    Spellbook version: " << getVersion();
     if(!isVersionCompatible())
     {
-        qDebug() << "[Spellbook]    ERROR: Spellbook version is not compatible with expected version: " << getExpectedVersion();
-        if(_majorVersion == 9999)
-            input_START_CONVERSION(spellbookElement);
+        qDebug() << "[Spellbook]    Spellbook version is not compatible with expected version: " << getExpectedVersion();
+        if((_majorVersion > 0) && (_majorVersion < DMHelper::SPELLBOOK_MAJOR_VERSION))
+        {
+            // Older major version: run each <spell> through the legacy parser
+            // via Spellv2Converter so the in-memory representation matches the
+            // current Spellv2 schema. Mirrors Bestiary::loadAndConvertBestiary.
+            loadAndConvertSpellbook(spellbookElement);
+            emit changed();
+        }
+        else
+        {
+            qDebug() << "[Spellbook]    ERROR: Spellbook version is newer than this build supports - aborting load.";
+        }
         return;
     }
 
@@ -307,7 +273,7 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
 
             if(importOK)
             {
-                Spell* spell = new Spell(spellElement, isImport);
+                Spellv2* spell = new Spellv2(spellElement, isImport);
                 if(insertSpell(spell))
                     ++importCount;
             }
@@ -330,7 +296,7 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
         QDomElement spellElement = spellbookElement.firstChildElement(QString("spell"));
         while(!spellElement.isNull())
         {
-            Spell* spell = new Spell(spellElement, isImport);
+            Spellv2* spell = new Spellv2(spellElement, isImport);
             insertSpell(spell);
             spellElement = spellElement.nextSiblingElement(QString("spell"));
         }
@@ -354,12 +320,9 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
     emit changed();
 }
 
-void Spellbook::input_START_CONVERSION(const QDomElement &element)
+void Spellbook::loadAndConvertSpellbook(const QDomElement &spellbookElement)
 {
-    if(element.isNull())
-        return;
-
-    qDebug() << "[Spellbook] CONVERTING spellbook...";
+    qDebug() << "[Spellbook] Loading and converting spellbook from version " << getVersion();
 
     if(_spellbookMap.count() > 0)
     {
@@ -368,18 +331,28 @@ void Spellbook::input_START_CONVERSION(const QDomElement &element)
         _spellbookMap.clear();
     }
 
-    QDomElement spellElement = element.firstChildElement(QString("element"));
+    QDomElement spellElement = spellbookElement.firstChildElement(QString("spell"));
     while(!spellElement.isNull())
     {
-        Spell* spell = new Spell(QString());
-        spell->inputXML_CONVERT(spellElement);
+        Spellv2* spell = new Spellv2Converter(spellElement);
         insertSpell(spell);
-        spellElement = spellElement.nextSiblingElement(QString("element"));
+        spellElement = spellElement.nextSiblingElement(QString("spell"));
     }
 
-    qDebug() << "[Spellbook] ... spellbook CONVERTED";
+    QDomElement licenseElement = spellbookElement.firstChildElement(QString("license"));
+    if(!licenseElement.isNull())
+    {
+        QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
+        while(!licenseText.isNull())
+        {
+            if(!_licenseText.contains(licenseText.text()))
+                _licenseText.append(licenseText.text());
+            licenseText = licenseText.nextSiblingElement(QString("element"));
+        }
+    }
 
-    emit changed();
+    qDebug() << "[Spellbook] Loading and converting spellbook completed. " << _spellbookMap.count() << " spells loaded.";
+    setDirty(false);
 }
 
 QString Spellbook::getVersion() const
@@ -437,7 +410,7 @@ bool Spellbook::isDirty()
     return _dirty;
 }
 
-Spell* Spellbook::getSpell(const QString& name)
+Spellv2* Spellbook::getSpell(const QString& name)
 {
     if(name.isEmpty())
         return nullptr;
@@ -448,7 +421,7 @@ Spell* Spellbook::getSpell(const QString& name)
     return _spellbookMap.value(name, nullptr);
 }
 
-Spell* Spellbook::getFirstSpell() const
+Spellv2* Spellbook::getFirstSpell() const
 {
     if(_spellbookMap.count() == 0)
         return nullptr;
@@ -456,7 +429,7 @@ Spell* Spellbook::getFirstSpell() const
     return _spellbookMap.first();
 }
 
-Spell* Spellbook::getLastSpell() const
+Spellv2* Spellbook::getLastSpell() const
 {
     if(_spellbookMap.count() == 0)
         return nullptr;
@@ -464,7 +437,7 @@ Spell* Spellbook::getLastSpell() const
     return _spellbookMap.last();
 }
 
-Spell* Spellbook::getNextSpell(Spell* spell) const
+Spellv2* Spellbook::getNextSpell(Spellv2* spell) const
 {
     if(!spell)
         return nullptr;
@@ -481,7 +454,7 @@ Spell* Spellbook::getNextSpell(Spell* spell) const
     return i.value();
 }
 
-Spell* Spellbook::getPreviousSpell(Spell* spell) const
+Spellv2* Spellbook::getPreviousSpell(Spellv2* spell) const
 {
     if(!spell)
         return nullptr;
@@ -494,7 +467,7 @@ Spell* Spellbook::getPreviousSpell(Spell* spell) const
     return i.value();
 }
 
-bool Spellbook::insertSpell(Spell* spell)
+bool Spellbook::insertSpell(Spellv2* spell)
 {
     if(!spell)
         return false;
@@ -503,13 +476,13 @@ bool Spellbook::insertSpell(Spell* spell)
         return false;
 
     _spellbookMap.insert(spell->getName(), spell);
-    connect(spell, &Spell::dirty, this, &Spellbook::registerDirty);
+    connect(spell, &Spellv2::dirty, this, &Spellbook::registerDirty);
     emit changed();
     setDirty();
     return true;
 }
 
-void Spellbook::removeSpell(Spell* spell)
+void Spellbook::removeSpell(Spellv2* spell)
 {
     if(!spell)
         return;
@@ -517,14 +490,14 @@ void Spellbook::removeSpell(Spell* spell)
     if(!_spellbookMap.contains(spell->getName()))
         return;
 
-    disconnect(spell, &Spell::dirty, this, &Spellbook::registerDirty);
+    disconnect(spell, &Spellv2::dirty, this, &Spellbook::registerDirty);
     _spellbookMap.remove(spell->getName());
     delete spell;
     setDirty();
     emit changed();
 }
 
-void Spellbook::renameSpell(Spell* spell, const QString& newName)
+void Spellbook::renameSpell(Spellv2* spell, const QString& newName)
 {
     if(!spell)
         return;
@@ -628,7 +601,7 @@ void Spellbook::showSpellWarning(const QString& spell)
     }
 }
 
-QString Spellbook::searchSpell(const Spell* spell, const QString& searchString) const
+QString Spellbook::searchSpell(const Spellv2* spell, const QString& searchString) const
 {
     QString result;
 

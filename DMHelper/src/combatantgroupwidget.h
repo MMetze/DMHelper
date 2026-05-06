@@ -30,6 +30,13 @@ public:
     void setCollapsed(bool collapsed);
     bool isCollapsed() const;
 
+    // Visually mark this group as the active initiative holder. The header
+    // row is tinted and (when expanded) the connector lines drawn between the
+    // header and member widgets are switched to the highlight colour. Calling
+    // with the same value is a no-op; toggling triggers a repaint.
+    void setActive(bool active);
+    bool isActive() const { return _active; }
+
     void updateMasterCheckboxes();
 
 signals:
@@ -40,6 +47,7 @@ protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private slots:
     void handleCollapseToggled(bool checked);
@@ -54,6 +62,7 @@ private:
     BattleDialogModelCombatantGroup* _group;
     QList<CombatantWidget*> _memberWidgets;
     bool _updatingCheckboxes;
+    bool _active = false;
 };
 
 #endif // COMBATANTGROUPWIDGET_H

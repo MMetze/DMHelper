@@ -72,4 +72,10 @@
         <dmh:element type="dmh:integer" name="attack_bonus"/>
         <dmh:element type="dmh:dice" name="damage"/>
     </dmh:element>
+
+    <dmh:element type="dmh:list" name="perRoundResources">
+        <dmh:element type="dmh:string" name="name"/>
+        <dmh:element type="dmh:integer" name="max"/>
+        <dmh:element type="dmh:string" name="recharge" default="round"/>
+    </dmh:element>
 </dmh:template>

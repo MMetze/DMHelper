@@ -8,7 +8,8 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(const QStri
     BattleDialogModelMonsterBase(name, parent),
     _monsterSize(DMHelper::CombatantSize_Unknown),
     _monsterName(),
-    _monsterHP(-1)
+    _monsterHP(-1),
+    _monsterMaxHP(-1)
 {
 }
 
@@ -16,7 +17,8 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(Monster* mo
     BattleDialogModelMonsterBase(monster),
     _monsterSize(DMHelper::CombatantSize_Unknown),
     _monsterName(),
-    _monsterHP(-1)
+    _monsterHP(-1),
+    _monsterMaxHP(-1)
 {
 }
 
@@ -24,7 +26,8 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(Monster* mo
     BattleDialogModelMonsterBase(monster),
     _monsterSize(monsterSize),
     _monsterName(monsterName),
-    _monsterHP(monsterHP)
+    _monsterHP(monsterHP),
+    _monsterMaxHP(-1)
 {
 }
 
@@ -32,7 +35,8 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(Monster* mo
     BattleDialogModelMonsterBase(monster, initiative, position),
     _monsterSize(monsterSize),
     _monsterName(monsterName),
-    _monsterHP(monsterHP)
+    _monsterHP(monsterHP),
+    _monsterMaxHP(-1)
 {
 }
 
@@ -47,6 +51,7 @@ void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element, boo
     _monsterSize = element.attribute("monsterSize", QString::number(DMHelper::CombatantSize_Medium)).toInt();
     _monsterName = element.attribute("monsterName");
     _monsterHP = element.attribute("monsterHP", QString::number(0)).toInt();
+    _monsterMaxHP = element.attribute("monsterMaxHP", QString::number(-1)).toInt();
 }
 
 void BattleDialogModelMonsterCombatant::copyValues(const CampaignObjectBase* other)
@@ -58,6 +63,7 @@ void BattleDialogModelMonsterCombatant::copyValues(const CampaignObjectBase* oth
     _monsterSize = otherMonsterCombatant->_monsterSize;
     _monsterName = otherMonsterCombatant->_monsterName;
     _monsterHP = otherMonsterCombatant->_monsterHP;
+    _monsterMaxHP = otherMonsterCombatant->_monsterMaxHP;
 
     BattleDialogModelMonsterBase::copyValues(other);
 }
@@ -210,6 +216,7 @@ void BattleDialogModelMonsterCombatant::setHitPoints(int hitPoints)
     if(_monsterHP != hitPoints)
     {
         _monsterHP = hitPoints;
+        setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
         emit dataChanged(this);
     }
 }
@@ -256,6 +263,7 @@ void BattleDialogModelMonsterCombatant::setMonsterName(const QString& monsterNam
     if(_monsterName != monsterName)
     {
         _monsterName = monsterName;
+        setOverride(QString::fromLatin1(DMH_KEY_NAME), monsterName);
         emit dataChanged(this);
     }
 }
@@ -270,11 +278,27 @@ void BattleDialogModelMonsterCombatant::setMonster(Monster* monster)
     setCombatant(monster);
 }
 
+int BattleDialogModelMonsterCombatant::getMonsterMaxHP() const
+{
+    return _monsterMaxHP;
+}
+
+void BattleDialogModelMonsterCombatant::setMonsterMaxHP(int monsterMaxHP)
+{
+    if(_monsterMaxHP != monsterMaxHP)
+    {
+        _monsterMaxHP = monsterMaxHP;
+        emit dataChanged(this);
+    }
+}
+
 void BattleDialogModelMonsterCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
+    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
+
     element.setAttribute("monsterSize", _monsterSize);
     element.setAttribute("monsterName", _monsterName);
     element.setAttribute("monsterHP", _monsterHP);
-
-    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
+    if(_monsterMaxHP > 0)
+        element.setAttribute("monsterMaxHP", _monsterMaxHP);
 }

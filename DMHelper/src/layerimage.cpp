@@ -54,7 +54,7 @@ void LayerImage::inputXML(const QDomElement &element, bool isImport)
         _filter._sb = filterElement.attribute("sb", QString::number(1.0)).toDouble();
 
         _filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay", QString::number(1)).toInt());
-        _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor", QString("#000000")));
+        _filter._overlayColor = QColor::fromString(filterElement.attribute("overlayColor", QString("#000000")));
         _filter._overlayAlpha = filterElement.attribute("overlayAlpha", QString::number(128)).toInt();
     }
 

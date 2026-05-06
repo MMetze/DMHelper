@@ -203,7 +203,7 @@ void PublishGLBattleBackground::loadTexture(const QImage& image)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
 
     // load and generate the background texture
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 }

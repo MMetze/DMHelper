@@ -24,6 +24,11 @@ public:
 
     static BattleDialogModelEffect* createEffectShape(int effectType, const QPointF& position, int size, const QColor& color);
 
+    static BattleDialogModelEffect* createEffectSmoke(const QPointF& position, int size, const QColor& color);
+    static BattleDialogModelEffect* createEffectFire(const QPointF& position, int size, const QColor& color);
+    static BattleDialogModelEffect* createEffectSparks(const QPointF& position, int size, const QColor& color);
+    static BattleDialogModelEffect* createEffectLight(const QPointF& position, int size, const QColor& color);
+
 signals:
 
 public slots:

@@ -65,6 +65,10 @@ signals:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void addEffectSmoke();
+    void addEffectFire();
+    void addEffectSparks();
+    void addEffectLight();
     void duplicateSelection();
     void addPC();
     void addMonsters();

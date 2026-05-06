@@ -26,6 +26,7 @@ class GridConfig;
 class GridSizer;
 class Map;
 class QTimer;
+class RuleHealth;
 class CameraRect;
 class BattleCombatantFrame;
 class QGraphicsPolygonItem;
@@ -137,6 +138,8 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
+    void addInitiativeEvent();
+    void addLairActionsEvent();
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
     void addEffectObjectVideo();
@@ -148,6 +151,10 @@ public slots:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void addEffectSmoke();
+    void addEffectFire();
+    void addEffectSparks();
+    void addEffectLight();
     void registerEffect(BattleDialogModelEffect* effect);
 
     void duplicateSelection();
@@ -194,6 +201,8 @@ signals:
 
     void registerRenderer(PublishGLRenderer* renderer);
     void setLayers(QList<Layer*> layers, int selected);
+
+    void initiativeActiveChanged(bool initiativeActive);
 
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
@@ -356,6 +365,13 @@ private:
 
     void newRound();
 
+    // Resolve the active ruleset's RuleHealth, or nullptr when no campaign /
+    // ruleset is reachable (e.g. detached unit-test paths). Callers should
+    // fall back to the legacy getHitPoints() <= 0 predicate when this returns
+    // nullptr so behaviour matches the pre-refactor code.
+    RuleHealth* currentRuleHealth() const;
+    bool isCombatantDead(const BattleDialogModelCombatant* combatant) const;
+
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
     BattleDialogModelObject* getObjectFromItem(QGraphicsItem* item) const;
@@ -425,6 +441,9 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
     CombatantRolloverFrame* _hoverFrame;
+    QWidget* _hoverFrameOwner;
+    bool _dragInProgress;
+    QWidget* _dragLastTarget;
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;

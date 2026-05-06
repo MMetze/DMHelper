@@ -32,6 +32,11 @@ public:
 
     static const char* TEMPLATE_PROPERTY;
     static const char* TEMPLATE_WIDGET;
+    static const char* TEMPLATE_FORMAT;
+    static const char* TEMPLATE_COMPUTE;
+    static const char* TEMPLATE_CONDITION;
+    static const char* TEMPLATE_DICE_MAXIMUM;
+    static const char* TEMPLATE_DICE_AVERAGE;
 
     static const char* TEMPLATEVALUES[TEMPLATETYPE_COUNT];
 
@@ -81,6 +86,12 @@ protected:
 
     QHash<QWidget*, QMetaObject::Connection> _lineConnections;
     QHash<QWidget*, QMetaObject::Connection> _textConnections;
+    QHash<QWidget*, QMetaObject::Connection> _otherConnections;
+    QHash<QWidget*, QMetaObject::Connection> _computeConnections;
+    QHash<QWidget*, QMetaObject::Connection> _conditionConnections;
+    // Reverse (model -> widget) bindings, separate so they can be torn down
+    // alongside the forward (widget -> model) bindings on rebind.
+    QHash<QWidget*, QMetaObject::Connection> _reverseConnections;
 };
 
 class DMHAttribute
