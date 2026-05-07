@@ -110,9 +110,15 @@ void PublishGLBattleEffect::prepareObjectsGL()
         {
             if((_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
                 (_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
                 itemImage = itemImage.flipped(Qt::Horizontal); // mirror horizontally
             else
                 itemImage = itemImage.flipped(Qt::Vertical); // mirror vertically
+#else
+                itemImage = itemImage.mirrored(true, false); // mirror horizontally
+            else
+                itemImage = itemImage.mirrored(false, true); // mirror vertically
+#endif
 
             if(_childEffect->getImageRotation() != 0)
                 itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));
@@ -314,7 +320,11 @@ void PublishGLBattleEffect::drawObject(QPainter& painter, BattleDialogModelEffec
     if(itemImage.isNull())
         return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     itemImage = itemImage.flipped(Qt::Vertical); // mirror vertically
+#else
+    itemImage = itemImage.mirrored(false, true); // mirror vertically
+#endif
     if(effectObject->getImageRotation() != 0)
         itemImage = itemImage.transformed(QTransform().rotate(effectObject->getImageRotation()));
 
