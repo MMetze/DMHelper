@@ -1544,14 +1544,10 @@ void LayerTokens::resolveCampaign()
     if(_campaign)
         return;
 
-    QObject* obj = getLayerScene();
-    while(obj)
-    {
-        _campaign = qobject_cast<Campaign*>(obj);
-        if(_campaign)
-            return;
-        obj = obj->parent();
-    }
+    if(!getLayerScene())
+        return;
+
+    _campaign = dynamic_cast<Campaign*>(getLayerScene()->getParentByType(DMHelper::CampaignType_Campaign));
 }
 
 void LayerTokens::refreshHealthBar(BattleDialogModelCombatant* combatant)
