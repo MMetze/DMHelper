@@ -13,6 +13,7 @@ static const char* LEGACY_LEGENDARY_RESOURCE_NAME = "Legendary Actions";
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, QObject *parent) :
     BattleDialogModelCombatant(name, parent),
     _legendaryCount(-1),
+    _monsterMaxHP(-1),
     _conditionList(),
     _resourceCounters()
 {
@@ -23,6 +24,7 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant) :
     BattleDialogModelCombatant(combatant),
     _legendaryCount(-1),
+    _monsterMaxHP(-1),
     _conditionList(),
     _resourceCounters()
 {
@@ -33,6 +35,7 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant)
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant, int initiative, const QPointF& position) :
     BattleDialogModelCombatant(combatant, initiative, position),
     _legendaryCount(-1),
+    _monsterMaxHP(-1),
     _conditionList(),
     _resourceCounters()
 {
@@ -49,6 +52,7 @@ void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isI
     BattleDialogModelCombatant::inputXML(element, isImport);
 
     _legendaryCount = element.attribute("legendaryCount", QString::number(-1)).toInt();
+    _monsterMaxHP = element.attribute("monsterMaxHP", QString::number(-1)).toInt();
 
     // Read per-instance resource counters from <resourceCounter> child elements.
     _resourceCounters.clear();
@@ -89,6 +93,7 @@ void BattleDialogModelMonsterBase::copyValues(const CampaignObjectBase* other)
         return;
 
     _legendaryCount = otherMonsterBase->_legendaryCount;
+    _monsterMaxHP = otherMonsterBase->_monsterMaxHP;
     _conditionList = otherMonsterBase->_conditionList;
     _resourceCounters = otherMonsterBase->_resourceCounters;
 
@@ -175,6 +180,20 @@ bool BattleDialogModelMonsterBase::hasConditionId(const QString& conditionId) co
 int BattleDialogModelMonsterBase::getLegendaryCount() const
 {
     return _legendaryCount;
+}
+
+int BattleDialogModelMonsterBase::getMonsterMaxHP() const
+{
+    return _monsterMaxHP;
+}
+
+void BattleDialogModelMonsterBase::setMonsterMaxHP(int monsterMaxHP)
+{
+    if(_monsterMaxHP != monsterMaxHP)
+    {
+        _monsterMaxHP = monsterMaxHP;
+        emit dataChanged(this);
+    }
 }
 
 void BattleDialogModelMonsterBase::setConditionList(const QStringList& conditions)
@@ -273,6 +292,8 @@ void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElem
 {
     element.setAttribute("monsterType", getMonsterType());
     element.setAttribute("legendaryCount", _legendaryCount);
+    if(_monsterMaxHP > 0)
+        element.setAttribute("monsterMaxHP", _monsterMaxHP);
     element.setAttribute("conditions", _conditionList.join(QStringLiteral(",")));
 
     // Persist per-instance resource counters as <resourceCounter> child elements.

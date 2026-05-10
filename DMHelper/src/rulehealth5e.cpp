@@ -89,7 +89,7 @@ void RuleHealth5e::rollInitial(BattleDialogModelCombatant* combatant)
 
     combatant->setHitPoints(rolled);
 
-    BattleDialogModelMonsterCombatant* monsterCombatant = dynamic_cast<BattleDialogModelMonsterCombatant*>(combatant);
-    if(monsterCombatant)
-        monsterCombatant->setMonsterMaxHP(rolled);
+    BattleDialogModelMonsterBase* monsterBase = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+    if(monsterBase)
+        monsterBase->setMonsterMaxHP(rolled);
 }

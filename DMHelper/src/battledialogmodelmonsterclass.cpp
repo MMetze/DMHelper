@@ -34,6 +34,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
             _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
         else
             _monsterHP = _monsterClass->getIntValue("hit_points");
+        if(_monsterHP > 0)
+            _monsterMaxHP = _monsterHP;
     }
 }
 
@@ -51,6 +53,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
         _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
     else
         _monsterHP = _monsterClass->getIntValue("hit_points");
+    if(_monsterHP > 0)
+        _monsterMaxHP = _monsterHP;
 }
 
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
@@ -225,6 +229,8 @@ void BattleDialogModelMonsterClass::setHitPoints(int hitPoints)
     {
         _monsterHP = hitPoints;
         setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
+        if((getMonsterMaxHP() <= 0) && (hitPoints > 0))
+            setMonsterMaxHP(hitPoints);
         emit dataChanged(this);
     }
 }

@@ -52,9 +52,6 @@ public:
     Monster* getMonster() const;
     void setMonster(Monster* monster);
 
-    int getMonsterMaxHP() const;
-    void setMonsterMaxHP(int monsterMaxHP);
-
 protected:
     // From BattleDialogModelCombatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
@@ -62,7 +59,6 @@ protected:
     int _monsterSize;
     QString _monsterName;
     int _monsterHP;
-    int _monsterMaxHP;
 };
 
 #endif // BATTLEDIALOGMODELMONSTERCOMBATANT_H

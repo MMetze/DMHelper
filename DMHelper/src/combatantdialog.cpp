@@ -180,25 +180,6 @@ QString CombatantDialog::getIconFile() const
     return _iconFile;
 }
 
-void CombatantDialog::writeCombatant(Combatant* combatant)
-{
-    if((!combatant) || (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
-        return;
-
-    Monster* monster = dynamic_cast<Monster*>(combatant);
-    if(!monster)
-        return;
-
-    MonsterClassv2* monsterClass = getMonsterClass();
-    if(monsterClass == nullptr)
-        return;
-
-    monster->setMonsterClass(monsterClass);
-
-    combatant->setName(ui->edtNameLocal->text());
-    combatant->setHitPoints(ui->edtHitPointsLocal->text().toInt());
-}
-
 void CombatantDialog::accept()
 {
     s_lastMonsterClass = ui->cmbMonsterClass->currentText();

@@ -42,6 +42,9 @@ public:
 
     virtual int getLegendaryCount() const;
 
+    int getMonsterMaxHP() const;
+    void setMonsterMaxHP(int monsterMaxHP);
+
     // Per-instance per-round resource counters (legendary actions + recharge abilities, etc.).
     // The current value is stored here; the resource definition (max, recharge schedule)
     // lives on the MonsterClassv2 via getPerRoundResources().
@@ -68,6 +71,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     int _legendaryCount;
+    int _monsterMaxHP;
     QStringList _conditionList;
     QHash<QString, int> _resourceCounters;
 };

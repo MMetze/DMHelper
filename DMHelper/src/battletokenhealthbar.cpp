@@ -2,9 +2,20 @@
 #include "battledialogmodelcombatant.h"
 #include "rulehealth.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <QStyleOptionGraphicsItem>
 
-static constexpr qreal BAR_HEIGHT_FRACTION = 0.08;
+static constexpr qreal BAR_HEIGHT_FRACTION = 0.10;        // bar height as fraction of token height
+static constexpr qreal BAR_OVERHANG_FRACTION = 0.10;      // horizontal overhang past each token edge (fraction of token width)
+static constexpr qreal BAR_GAP_FRACTION = 0.02;           // gap between token bottom and bar top (fraction of token height)
+static constexpr qreal BAR_CORNER_FRACTION = 0.45;        // corner radius as fraction of bar height
+static constexpr qreal BAR_SHADOW_OFFSET_FRACTION = 0.25; // shadow offset as fraction of bar height
+static constexpr qreal BAR_BORDER_WIDTH_FRACTION = 0.12;  // border pen width as fraction of bar height
+
+static const QColor BAR_BACKGROUND_COLOR(180, 30, 30);
+static const QColor BAR_FOREGROUND_COLOR(40, 200, 60);
+static const QColor BAR_BORDER_COLOR(20, 20, 20);
+static const QColor BAR_SHADOW_COLOR(0, 0, 0, 120);
 
 BattleTokenHealthBar::BattleTokenHealthBar(BattleDialogModelCombatant* combatant, QGraphicsItem* parent) :
     QGraphicsObject(parent),
@@ -24,7 +35,14 @@ QRectF BattleTokenHealthBar::boundingRect() const
 
     const QRectF parentBounds = p->boundingRect();
     const qreal barHeight = parentBounds.height() * BAR_HEIGHT_FRACTION;
-    return QRectF(parentBounds.left(), parentBounds.top() - barHeight, parentBounds.width(), barHeight);
+    const qreal overhang = parentBounds.width() * BAR_OVERHANG_FRACTION;
+    const qreal gap = parentBounds.height() * BAR_GAP_FRACTION;
+    const qreal shadowOffset = barHeight * BAR_SHADOW_OFFSET_FRACTION;
+
+    return QRectF(parentBounds.left() - overhang,
+                  parentBounds.bottom() + gap,
+                  parentBounds.width() + (2.0 * overhang) + shadowOffset,
+                  barHeight + shadowOffset);
 }
 
 void BattleTokenHealthBar::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -32,21 +50,64 @@ void BattleTokenHealthBar::paint(QPainter* painter, const QStyleOptionGraphicsIt
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
-    const QRectF bounds = boundingRect();
-    if(bounds.isEmpty())
+    const QGraphicsItem* p = parentItem();
+    if(!p)
         return;
 
-    // Red background
-    painter->fillRect(bounds, Qt::red);
+    const QRectF parentBounds = p->boundingRect();
+    const qreal barHeight = parentBounds.height() * BAR_HEIGHT_FRACTION;
+    if(barHeight <= 0.0)
+        return;
 
-    // Green foreground sized by health fraction
+    const qreal overhang = parentBounds.width() * BAR_OVERHANG_FRACTION;
+    const qreal gap = parentBounds.height() * BAR_GAP_FRACTION;
+    const qreal shadowOffset = barHeight * BAR_SHADOW_OFFSET_FRACTION;
+    const qreal corner = barHeight * BAR_CORNER_FRACTION;
+    const qreal borderWidth = barHeight * BAR_BORDER_WIDTH_FRACTION;
+
+    const QRectF barRect(parentBounds.left() - overhang,
+                         parentBounds.bottom() + gap,
+                         parentBounds.width() + (2.0 * overhang),
+                         barHeight);
+
     qreal fraction = 0.0;
     RuleHealth* ruleHealth = RuleHealth::forCombatant(_combatant);
     if(ruleHealth)
         fraction = ruleHealth->getHealthFraction(_combatant);
 
-    QRectF greenRect = bounds;
-    greenRect.setWidth(bounds.width() * fraction);
-    if(!greenRect.isEmpty())
-        painter->fillRect(greenRect, Qt::green);
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    // Shadow
+    const QRectF shadowRect = barRect.translated(shadowOffset, shadowOffset);
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(BAR_SHADOW_COLOR);
+    painter->drawRoundedRect(shadowRect, corner, corner);
+
+    // Background fill (red)
+    painter->setBrush(BAR_BACKGROUND_COLOR);
+    painter->drawRoundedRect(barRect, corner, corner);
+
+    // Green foreground, clipped to the rounded bar shape
+    if(fraction > 0.0)
+    {
+        QPainterPath clipPath;
+        clipPath.addRoundedRect(barRect, corner, corner);
+        painter->save();
+        painter->setClipPath(clipPath);
+        QRectF greenRect = barRect;
+        greenRect.setWidth(barRect.width() * fraction);
+        painter->setBrush(BAR_FOREGROUND_COLOR);
+        painter->drawRect(greenRect);
+        painter->restore();
+    }
+
+    // Border
+    QPen borderPen(BAR_BORDER_COLOR, borderWidth);
+    borderPen.setJoinStyle(Qt::RoundJoin);
+    painter->setPen(borderPen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRoundedRect(barRect, corner, corner);
+
+    painter->restore();
 }

@@ -45,9 +45,9 @@ int RuleHealth::getHealth(const BattleDialogModelCombatant* combatant) const
 
 int RuleHealth::getMaxHealth(const BattleDialogModelCombatant* combatant) const
 {
-    const BattleDialogModelMonsterCombatant* monsterCombatant = dynamic_cast<const BattleDialogModelMonsterCombatant*>(combatant);
-    if(monsterCombatant && monsterCombatant->getMonsterMaxHP() > 0)
-        return monsterCombatant->getMonsterMaxHP();
+    const BattleDialogModelMonsterBase* monsterBase = dynamic_cast<const BattleDialogModelMonsterBase*>(combatant);
+    if(monsterBase && monsterBase->getMonsterMaxHP() > 0)
+        return monsterBase->getMonsterMaxHP();
 
     const TemplateObject* tmpl = templateFor(combatant);
     if(!tmpl)
