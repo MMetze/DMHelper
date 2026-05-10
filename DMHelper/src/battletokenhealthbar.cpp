@@ -6,9 +6,9 @@
 
 static constexpr qreal BAR_HEIGHT_FRACTION = 0.08;
 
-BattleTokenHealthBar::BattleTokenHealthBar(BattleDialogModelCombatant* combatant, QGraphicsItem* parent)
-    : QGraphicsObject(parent),
-      _combatant(combatant)
+BattleTokenHealthBar::BattleTokenHealthBar(BattleDialogModelCombatant* combatant, QGraphicsItem* parent) :
+    QGraphicsObject(parent),
+    _combatant(combatant)
 {
 }
 

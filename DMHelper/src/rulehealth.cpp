@@ -9,6 +9,8 @@
 #include "campaign.h"
 #include "ruleset.h"
 #include "dmconstants.h"
+#include "layertokens.h"
+#include "layerscene.h"
 
 // Fallback keys used when no campaign/ruleset is available (e.g. unit-test combatants).
 static const QString FALLBACK_CHARACTER_MAX_HP_KEY = QStringLiteral("maximumHp");
@@ -92,12 +94,19 @@ RuleHealth* RuleHealth::forCombatant(const BattleDialogModelCombatant* combatant
     if(!combatant)
         return nullptr;
 
-    CampaignObjectBase* parent = const_cast<BattleDialogModelCombatant*>(combatant)->getParentByType(DMHelper::CampaignType_Campaign);
-    Campaign* campaign = dynamic_cast<Campaign*>(parent);
+    LayerTokens* tokenLayer = combatant->getLayer();
+    if(!tokenLayer)
+        return nullptr;
+
+    LayerScene* scene = tokenLayer->getLayerScene();
+    if(!scene)
+        return nullptr;
+
+    const Campaign* campaign = dynamic_cast<const Campaign*>(scene->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return nullptr;
 
-    return campaign->getRuleset().getRuleHealth();
+    return const_cast<Campaign*>(campaign)->getRuleset().getRuleHealth();
 }
 
 QString RuleHealth::maxHpKeyFor(const BattleDialogModelCombatant* combatant) const
@@ -107,13 +116,18 @@ QString RuleHealth::maxHpKeyFor(const BattleDialogModelCombatant* combatant) con
 
     const bool isMonster = (dynamic_cast<const BattleDialogModelMonsterBase*>(combatant) != nullptr);
 
-    CampaignObjectBase* parent = const_cast<BattleDialogModelCombatant*>(combatant)->getParentByType(DMHelper::CampaignType_Campaign);
-    Campaign* campaign = dynamic_cast<Campaign*>(parent);
+    const Combatant* baseCombatant = combatant->getCombatant();
+    if(!baseCombatant)
+        return isMonster ? FALLBACK_MONSTER_HP_KEY : FALLBACK_CHARACTER_MAX_HP_KEY;
+
+    const Campaign* campaign = dynamic_cast<const Campaign*>(baseCombatant->getParentByType(DMHelper::CampaignType_Campaign));
     if(campaign)
     {
-        const Ruleset& ruleset = campaign->getRuleset();
+        const Ruleset& ruleset = const_cast<Campaign*>(campaign)->getRuleset();
         return isMonster ? ruleset.getMonsterMaxHpKey() : ruleset.getCharacterMaxHpKey();
     }
-
-    return isMonster ? FALLBACK_MONSTER_HP_KEY : FALLBACK_CHARACTER_MAX_HP_KEY;
+    else 
+    {
+        return isMonster ? FALLBACK_MONSTER_HP_KEY : FALLBACK_CHARACTER_MAX_HP_KEY;
+    }
 }
