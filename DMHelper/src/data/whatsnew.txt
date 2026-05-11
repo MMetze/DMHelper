@@ -11,38 +11,37 @@
 <div class="myDiv">
 <h2>What's New: Version 3.9</h2>
 
+It's a lot of hot new toys to play with this time!
+
 <h3>New v3.9 Features:</h3>
 <ul>
-<li> <b>Polygon FoW Drawing</b> ...
-<li> <b>Individual effects</b> Fire, Smoke, Glowing Lights and Sparks
-<li> <b>Multiple tokens for PCs</b> ...
-<li> <b>Grouping of initiative monsters</b> ...
-<li> <b>Visualization of known/unknown and visible/invisible status for DMs</b>...
-<li> <b>Improved Camera rectangle sizing</b> ...
-<li> <b>Custom Initiative events</b> ...
-<li> <b>Customizable Conditions</b> ...
-<li> <b>Customizable Spellbooks</b> ...
-<li> <b>Customizable Health and Initiative rules</b> ...
-<li> <b>Customizable Initiative entries</b> ...
-<li> <b>Delete multiple effects at once</b> ...
-<li> <b>Show/hide and know/unknow multiple combatants at once</b> ...
+<li> <b>Polygon FoW Drawing</b> to erase/fill in any manner of crazy shapes
+<li> <b>Anmiated Effects</b> <i>Fire</i>, <i>Smoke</i>, <i>Glowing Lights</i> and <i>Sparks</i>
+<li> <b>Multiple tokens for PCs</b> to support portraits, were-beasts, druid transformations or cool character evolutions
+<li> <b>Grouping of initiative monsters</b> - hide them, show them, all with a single click!
+<li> <b>Visualization of known/unknown and visible/invisible status for DMs</b> so you don't forget to show your beasties
+<li> <b>Improved Camera rectangle sizing</b> saves a lot of time with easier boxes to grab and resize
+<li> <b>Health Bars</b> on all your tokens (if you want them) 
+<li> <b>Custom Initiative events</b> to support lair events, or anything else that may happen in combat
+<li> <b>Customizable Conditions</b> in case you don't like the usual ones
+<li> <b>Customizable Spellbooks</b> for any system you want to play...
+<li> <b>Customizable Health and Initiative rules</b> ...even if they're really different 
+<li> <b>Delete multiple effects at once</b> because this should have always been possible
+<li> <b>Show/hide and know/unknown multiple combatants at once</b> because ditto
+</ul>
+...... and, by popular demand....
+<ul>
+<li> Linux support!
 </ul>
 
 <p>
 
-<h3>Fixes:</h3>
+<h3>Fixes and Other Improvements:</h3>
 <ul>
 <li> Expanded limits on min/max HP
 <li> Fixed bug on audio settings for repeating videos
-</ul>
-
-<!-- Commenting this section out for now
-<p>
-<h3>Other Improvements:</h3>
-<ul>
 <li> Videos loop by default, and this can now be toggled in the layer settings
 </ul>
--->
 
 <p>
 <h3>And don't forget</h3>
