@@ -201,6 +201,10 @@
         <file>data/icon_neweffectcube.png</file>
         <file>data/icon_neweffectline.png</file>
         <file>data/icon_neweffectradius.png</file>
+        <file>data/icon_neweffectfire.png</file>
+        <file>data/icon_neweffectlight.png</file>
+        <file>data/icon_neweffectsmoke.png</file>
+        <file>data/icon_neweffectsparks.png</file>
         <file>data/icon_newobject.png</file>
         <file>data/icon_volumeoff.png</file>
         <file>data/icon_volumeon.png</file>

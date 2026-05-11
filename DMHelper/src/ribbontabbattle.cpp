@@ -36,16 +36,16 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     effectMenu->addAction(actionAddLine);
     connect(actionAddLine, &QAction::triggered, this, &RibbonTabBattle::addEffectLineClicked);
     effectMenu->addSeparator();
-    QAction* actionAddSmoke = new QAction(QIcon(":/img/data/icon_castspell.png"), QString("Add Smoke" ));
+    QAction* actionAddSmoke = new QAction(QIcon(":/img/data/icon_neweffectsmoke.png"), QString("Add Smoke" ));
     effectMenu->addAction(actionAddSmoke);
     connect(actionAddSmoke, &QAction::triggered, this, &RibbonTabBattle::addEffectSmokeClicked);
-    QAction* actionAddFire = new QAction(QIcon(":/img/data/icon_movement.png"), QString("Add Fire" ));
+    QAction* actionAddFire = new QAction(QIcon(":/img/data/icon_neweffectfire.png"), QString("Add Fire" ));
     effectMenu->addAction(actionAddFire);
     connect(actionAddFire, &QAction::triggered, this, &RibbonTabBattle::addEffectFireClicked);
-    QAction* actionAddSparks = new QAction(QIcon(":/img/data/icon_living.png"), QString("Add Sparks" ));
+    QAction* actionAddSparks = new QAction(QIcon(":/img/data/icon_neweffectsparks.png"), QString("Add Sparks" ));
     effectMenu->addAction(actionAddSparks);
     connect(actionAddSparks, &QAction::triggered, this, &RibbonTabBattle::addEffectSparksClicked);
-    QAction* actionAddLight = new QAction(QIcon(":/img/data/icon_options.png"), QString("Add Light" ));
+    QAction* actionAddLight = new QAction(QIcon(":/img/data/icon_neweffectlight.png"), QString("Add Light" ));
     effectMenu->addAction(actionAddLight);
     connect(actionAddLight, &QAction::triggered, this, &RibbonTabBattle::addEffectLightClicked);
 

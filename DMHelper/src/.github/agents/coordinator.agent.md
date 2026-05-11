@@ -149,20 +149,21 @@ You compute these values from the plan:
   that chunk in the `Cycle Log` section.
 - **Chunk status** = derived from the most recent cycle's
   `next_action`:
-  - `merge` — chunk is `done`. (Despite the field name, no merge
-    step is performed; commits already live on `agent/work`. The
-    name is preserved for backward compatibility with Review Agent
-    output.)
+  - `merge` — chunk is `done` once the human confirms they have
+    committed the working-tree changes. (The `merge` field name is
+    preserved for backward compatibility with Review Agent output;
+    no actual merge step is performed.)
   - `re-execute` — chunk is `in-cycle`.
   - `escalate-to-human` — chunk is `escalated`; pipeline halts.
 - **Eligible-to-dispatch chunks** = chunks where every entry in
   `dependencies` is `done`, and which are not themselves `done`,
   `in-cycle`, or `escalated`.
 
-Execution is **strictly sequential**. The repository has one checkout,
-one working branch (`agent/work`), and one build directory; only one
-chunk runs at a time. Among eligible chunks, pick whichever has the
-smallest expected diff first so failures surface fast.
+Execution is **strictly sequential**. The repository has one checkout
+and one build directory; only one chunk runs at a time, and the
+working tree must be clean before each chunk is dispatched. Among
+eligible chunks, pick whichever has the smallest expected diff first
+so failures surface fast.
 
 ## The Pipeline (canonical sequence)
 
@@ -311,58 +312,65 @@ route by verdict:
 
 ### Stage 3 — Per-Chunk Execution Loop
 
-Set `status: in-progress`. The human is expected to have `agent/work`
-checked out before invoking the pipeline; you do **not** run `git
-checkout` yourself. If you suspect the wrong branch is active, ask
-the human to verify rather than fixing it.
+Set `status: in-progress`. The human is expected to have the right
+branch checked out (typically `agent/work`) before invoking the
+pipeline; you do **not** run `git` yourself for any reason. If you
+suspect the wrong branch is active, ask the human to verify rather
+than fixing it.
 
-All chunks commit to `agent/work` via the Execution Agent. There are
-**no per-chunk branches** and **no per-chunk merges** — commits
-accumulate on `agent/work` in the order chunks complete.
+All code changes happen as **uncommitted edits in the working tree**
+made by the Execution Agent. The human commits at the end of each
+chunk (typically after Review verdict `Pass`/`merge`). There are no
+per-chunk branches and no merges.
 
 Process eligible-to-dispatch chunks **one at a time**, in dependency
 order. For each chunk:
 
-1. **Append a Cycle Log entry** for cycle 1, with `dispatched_by:
-   coordinator`, the dispatch timestamp, and the current
-   `agent/work` HEAD sha (this becomes the executor's `sha-from`
-   baseline). Flush.
-2. **Dispatch Execution Agent** (Sonnet) with:
+1. **Verify the working tree is clean.** Ask the human to confirm
+   `git status --short` is empty before you dispatch Execution. If
+   they report uncommitted changes, pause and ask whether to commit
+   or stash them — do not proceed with a dirty tree (Review will not
+   be able to attribute changes to the chunk).
+2. **Append a Cycle Log entry** for cycle 1, with `dispatched_by:
+   coordinator` and the dispatch timestamp. Flush.
+3. **Dispatch Execution Agent** (Sonnet) with:
    - Plan path (read-only).
    - Chunk id.
    - Cycle number (1).
    - Path to `DMHelper/src/.github/agents/execution.agent.md`.
-   - Reminder: "the repo is checked out on `agent/work` in the main
-     checkout; cwd is the repo root. Commit directly to
-     `agent/work`."
-3. **Wait for handoff note**.
-4. **Transcribe** the handoff fields into the cycle's `Cycle Log`
-   entry (`executor_commit_range`, `executor_build_status`,
+   - Reminder: "the working tree is clean; cwd is the repo root.
+     Edit files in place; do not run `git` for any reason."
+4. **Wait for handoff note**.
+5. **Transcribe** the handoff fields into the cycle's `Cycle Log`
+   entry (`executor_files_touched`, `executor_build_status`,
    `executor_handoff_summary`). Flush.
-5. **Dispatch Review Agent** (Sonnet) with:
+6. **Dispatch Review Agent** (Sonnet) with:
    - Plan path.
    - Chunk id.
-   - Commit range from handoff.
-   - Full execution handoff note.
+   - The full execution handoff note (especially `files_touched`).
    - Cycle number.
    - Path to `DMHelper/src/.github/agents/review.agent.md`.
-6. **Wait for verdict**. Transcribe `review_verdict`,
+   - Reminder: "changes are uncommitted in the working tree; review
+     them via `git diff` (read-only — do not modify or commit)."
+7. **Wait for verdict**. Transcribe `review_verdict`,
    `review_findings`, `next_action` into the same cycle entry. Flush.
-7. **Route** by `next_action`:
-   - `merge` → chunk is `done`. Commits are already on `agent/work`.
-     Re-evaluate eligible-to-dispatch chunks (a newly-completed
-     dependency may unblock new chunks) and proceed to the next.
+8. **Route** by `next_action`:
+   - `merge` → chunk is `done`. Tell the human: "Chunk `<chunk-id>`
+     passed Review. Please commit the working-tree changes (suggested
+     message: `agent: <chunk-id> — <one-line summary>`) and reply
+     `committed` to continue." Wait. On `committed`, re-evaluate
+     eligible-to-dispatch chunks and proceed to the next.
    - `re-execute` → if cycle < 3, increment cycle, dispatch Execution
      again with the prior cycle's `review_findings` as additional
-     input. Loop to step 3.
+     input. The working tree still contains the prior cycle's edits
+     — do not ask the human to commit between cycles. Loop to step 4.
    - `escalate-to-human` → see *Escalation*.
 
-If a Review verdict is `Pass`/`merge` but the executor's commits
-cannot stand on their own (e.g. they reference symbols introduced by
-a later chunk), that is a Design problem caught in Review — not a
-Coordinator merge concern. The Coordinator does not need to verify
-cross-chunk consistency; that is the Architecture Reviewer's job at
-Stage 4.
+If a Review verdict is `Pass`/`merge` but the changes cannot stand
+on their own (e.g. they reference symbols introduced by a later
+chunk), that is a Design problem caught in Review — not a
+Coordinator concern. The Coordinator does not verify cross-chunk
+consistency; that is the Architecture Reviewer's job at Stage 4.
 
 If the build later breaks because of accumulated chunk commits and
 the failure cannot be attributed to the most recent chunk: stop,
@@ -399,7 +407,7 @@ Present:
 IMPLEMENTATION READY FOR FINAL REVIEW — <feature-slug>
 
 Plan: <plan-path>
-Branch: agent/work (last commit: <sha>)
+Branch: <whatever the human has checked out> (last commit: as of last `committed` reply)
 
 Chunks completed: <n>
 Cycles consumed: <total across all chunks>
@@ -529,11 +537,12 @@ a verdict.
 ## Things You Never Do
 
 - **Never** run `git` for any purpose. You do not commit, branch,
-  checkout, stage, merge, or inspect status. The Execution Agent is
-  the only agent that touches git, and only to commit its own work.
-  Branch management is the human's responsibility.
+  checkout, stage, merge, or inspect status. **No agent in this
+  pipeline runs `git`** — the human owns all git state. Branch
+  management, staging, and commits are entirely the human's
+  responsibility.
 - **Never** modify code in `DMHelper/src/` directly. Code changes
-  come from the Execution Agent committing to `agent/work`.
+  come from the Execution Agent editing files in the working tree.
 - **Never** edit the `Summary`, `Replanning Rationale`,
   `Architectural Risk Assessment`, or `Chunks` sections of the plan.
   Those are Design's. You only set `status` in front-matter and append

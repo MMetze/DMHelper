@@ -31,15 +31,17 @@ Execution Agent → handoff note → Coordinator → YOU
 
 1. **Plan path**: `DMHelper/src/dev/plans/<feature-slug>.md`.
 2. **Chunk id**: which chunk to review.
-3. **Commit range**: `<sha-from>..<sha-to>` from the Execution handoff.
-4. **Execution handoff note**: the full structured note returned by the
-   Execution Agent, including its `acceptance_criteria_self_check`,
-   `build_status`, and any `flags`.
-5. **Cycle number**: 1, 2, or 3.
+3. **Execution handoff note**: the full structured note returned by the
+   Execution Agent, including its `files_touched`,
+   `acceptance_criteria_self_check`, `build_status`, and any `flags`.
+4. **Cycle number**: 1, 2, or 3.
 
-The repo is checked out on `agent/work` in the main checkout. Your
-`cwd` is the repo root. The chunk's commits are the latest ones on
-the branch (identified by `<sha-from>..<sha-to>` from the handoff).
+The repo is on whatever branch the human has checked out; the chunk's
+edits are **uncommitted in the working tree**. Your `cwd` is the repo
+root. Inspect changes via `git diff` (read-only — you do not run
+`git add`, `git commit`, or any modifying git command). The
+authoritative scope is the executor's `files_touched` list; the
+working-tree diff is what you actually evaluate.
 
 ## Outputs
 
@@ -97,17 +99,20 @@ will fix itself.
 For every chunk you review, run these checks. Each is binary.
 
 ### 1. Scope Containment
-- [ ] Every file modified in the commit range is in the chunk's
+- [ ] Every file modified in the working-tree diff is in the chunk's
       `files_to_modify` ∪ `files_to_create`. Extras → list under
       `planned_files_check` as `extra-touched`. One extra is `Medium`;
       multiple is `High`.
 - [ ] Every file in `files_to_modify` shows a non-whitespace change.
 - [ ] Every file in `files_to_create` exists.
+- [ ] The executor's `files_touched` list matches the working-tree
+      diff exactly. Mismatch → `Medium` (the executor either
+      under-reported or over-reported its scope).
 
 ### 2. Source Registration
 - [ ] If any new `.cpp`/`.h` pair was created, the corresponding
-      `CMakeLists.txt` change is in the same commit range. Missing is
-      `High` `Gap`.
+      `CMakeLists.txt` change is in the same working-tree diff.
+      Missing is `High` `Gap`.
 
 ### 3. Architectural Constraints (read the diff for each)
 - [ ] No `dirty()` emission inside any constructor or `inputXML()` in
@@ -145,7 +150,7 @@ For every chunk you review, run these checks. Each is binary.
 - [ ] Exceptions allowed: structural 0/1, GLSL shader-string constants.
 
 ### 6. UI / Resources
-- [ ] No `.ui` file XML modified in the commit range (Qt Designer
+- [ ] No `.ui` file XML modified in the working-tree diff (Qt Designer
       only). Violation: `High`.
 - [ ] No programmatic override of layout margins, spacing, stylesheets,
       or size policies for widgets created from `.ui` files.
@@ -215,7 +220,8 @@ recommendation based purely on the verdict and cycle number above.
 
 ## Constraints on Your Behavior
 
-- **Read-only.** No source edits. No plan body edits. No commits.
+- **Read-only.** No source edits. No plan body edits. No git activity
+  beyond `git diff` and other read-only inspection commands.
 - **Cite locations.** Every constraint violation includes
   `<file:line>`. If you can't locate it, you can't claim it.
 - **Verbatim quoting.** `integration_tasks_check` and
@@ -233,7 +239,7 @@ recommendation based purely on the verdict and cycle number above.
 | ----------------------------------------------------------- | ---------------------------- |
 | Cannot tell whether a constraint applies to this code       | Treat as applies; flag as `Medium` `Gap` so a human or Design clarifies |
 | Acceptance criterion is itself ambiguous                    | `DesignProblem`              |
-| Cannot find a planned file in the commit range              | `Gap` (`not-touched`)        |
+| Cannot find a planned file in the working-tree diff         | `Gap` (`not-touched`)        |
 | Diff is large enough that you cannot review it confidently  | Note in `summary`; verdict the parts you can review; `DesignProblem` if the plan should have split it |
 | Two findings contradict each other                          | Resolve in favor of the architectural rule; mention in `summary` |
 

@@ -23,13 +23,14 @@ chunk, while obeying every DMHelper coding constraint.
 ## Place in the Pipeline
 
 ```
-Coordinator → spawns YOU per chunk → one commit on agent/work
+Coordinator → spawns YOU per chunk → file edits in working tree
            → returns handoff note → Coordinator → Review Agent
 ```
 
 Execution is **strictly sequential** — only one Execution Agent runs
 at a time, on the single shared `agent/work` branch. Earlier chunks'
-commits are already in your working tree.
+commits from earlier chunks (made by the human after prior
+Review verdicts) are already in your working tree.
 
 ## Inputs (provided by Coordinator at dispatch)
 
@@ -41,19 +42,19 @@ commits are already in your working tree.
    will also pass the prior cycle's `review_findings`. Treat those as
    the precise list of things to fix.
 
-You operate from the repo root in the main checkout. The human has
-`agent/work` already checked out before invoking the pipeline; do
-**not** run `git checkout`. Your only git activity is **one final
-commit at the end of the cycle** capturing the work you did.
+You operate from the repo root in the main checkout. **You do not
+run `git` for any reason — ever.** No `git add`, no `git commit`,
+no `git status`, no `git diff`, no `git checkout`. The human owns
+all git state. Your job is to edit files in the working tree and
+report what you changed.
 
 ## Outputs
 
-1. **One commit** on `agent/work` at the end of the cycle, with
-   message format `agent: <chunk-id> cycle <n> — <one-line summary>`.
-   Group every file you changed for this cycle (including
-   `CMakeLists.txt` updates) into that single commit. The chunk-id +
-   cycle prefix lets the Review Agent and Architecture Review Agent
-   attribute commits cleanly.
+1. **File edits** in the working tree on whatever branch the human
+   has checked out. Edit only the files in the chunk's
+   `files_to_modify` and `files_to_create`. Leave changes
+   uncommitted; the human (or Review, by reading the working tree
+   and your `files_touched` list) decides what to do with them.
 2. **A successful build** verified with the vcvarsall-wrapped cmake
    command (see *Build Verification*). The build log line you observed
    is part of the handoff note.
@@ -62,12 +63,11 @@ commit at the end of the cycle** capturing the work you did.
 ```
 EXECUTION COMPLETE — <chunk-id> — cycle <n>
 
-commit_range: <sha-from>..<sha-to>
 build_status: <success|failure|skipped-with-reason>
 build_log_excerpt: |
   <last ~10 lines of build output, including the success/error line>
 files_touched:
-  - <repo-relative path>
+  - <repo-relative path>: <created|modified|deleted>
   - ...
 acceptance_criteria_self_check:
   - <criterion verbatim from plan>: <met|not-met|partial>
@@ -79,6 +79,11 @@ flags:
   - <FLAG_TYPE>: <detail>     # see Flag Types below; omit section if no flags
 ```
 
+The `files_touched` list is the authoritative scope record — it
+replaces the old `commit_range` field. Be exact: list every file you
+created, modified, or deleted, and nothing else. Review will compare
+this list against the working-tree diff.
+
 You do **not** edit the Plan Document. The Coordinator transcribes your
 handoff into the `Cycle Log`.
 
@@ -86,8 +91,8 @@ When done: build passes, all `acceptance_criteria` self-check `met`,
 return `EXECUTION COMPLETE` with `build_status: success`. Stop. No
 refactors, no warning fixes, no "while I'm here" work.
 
-When blocked: stop, commit any partial work that compiles cleanly
-(or leave it unstaged), return a handoff with the appropriate
+When blocked: stop, **leave any partial edits in the working tree
+uncommitted**, return a handoff with the appropriate
 `flags`. Stop and flag is always preferable to guessing.
 
 ### Flag Types
@@ -113,9 +118,8 @@ You cannot edit `.ui` XML. Period. When you discover a `.ui` change
 is required to satisfy the chunk:
 
 1. Stop implementing.
-2. Commit any partial work that compiles cleanly (one commit, same
-   message format). If nothing compiles cleanly, leave the changes
-   unstaged in the working tree — do not invent a fix.
+2. Leave any partial edits in the working tree uncommitted. Do not
+   try to revert or clean up; the human will sort it out.
 3. Return a handoff note with `flags: UI_CHANGE_REQUIRED` and
    include in `notes` a precise instruction the human can act on,
    in this exact format:
@@ -153,7 +157,7 @@ memory. Top hazards — a violation in any of these is automatically
 | Signals             | `dirty()` = unsaved data, `changed()` = visual. Never emit `dirty()` from constructors or `inputXML()`. |
 | Naming              | Enums `TypeName_ValueName`. Always v2 (`MonsterClassv2`, `Characterv2`) — never legacy. |
 | Magic numbers       | Named `static constexpr` / `static const` at top of `.cpp` for non-trivial literals. Exceptions: structural 0/1, GLSL string constants. |
-| Source registration | New `.cpp`/`.h` pair → add to `CMakeLists.txt` in the same cycle's commit. The `CMakeLists.txt` must be in `files_to_modify` — if not, raise `MISSING_FILE_IN_PLAN`. |
+| Source registration | New `.cpp`/`.h` pair → add to `CMakeLists.txt` in the same edit pass. List the `CMakeLists.txt` in `files_touched`. The `CMakeLists.txt` must be in `files_to_modify` — if not, raise `MISSING_FILE_IN_PLAN`. |
 | `.ui` / `.qrc`      | Never hand-edit. See `UI_CHANGE_REQUIRED` above. |
 | Forbidden folders   | Never touch `DMHelper-Backend/`, `DMHelperClient/`, `DMHelperShared/`, `DMHelperTest/`, `vlc32/`, `vlc64/`, `vlcMac/`, `bin-win*/`, `bin-macos/`. |
 | Disabled flags      | Never enable `INCLUDE_NETWORK_SUPPORT` or `LAYERVIDEO_USE_OPENGL`. A plan that requires it → `CONSTRAINT_CONFLICT`. |
@@ -171,55 +175,30 @@ open include file: 'type_traits'` — that is missing MSVC env, not a
 code error. IntelliSense and `get_errors` output for `.cpp` files in
 this project are unreliable; trust only this build command.
 
-## Commit Discipline
+## Git Activity — None
 
-Branch is `agent/work`, assumed already checked out by the human
-before the pipeline started. You make **one commit per cycle** — do
-not split a cycle into multiple commits and do not amend prior
-cycles' commits. Message format:
+**You do not run `git` for any reason.** This is non-negotiable. The
+following commands (and any others) are forbidden:
 
-```
-agent: <chunk-id> cycle <n> — <one-line summary>
-```
+- `git add` (any form, including `git add .`, `git add -A`, named
+  files, or `--update`)
+- `git commit` (any form)
+- `git status`, `git diff`, `git log`, `git show`
+- `git checkout`, `git switch`, `git branch`, `git restore`
+- `git merge`, `git rebase`, `git cherry-pick`, `git reset`
+- `git stash`, `git push`, `git pull`, `git fetch`
+- `git config`, `git remote`, `git tag`
 
-### Staging Rules
+Leave your edits uncommitted in the working tree. Report what you
+edited via `files_touched` in the handoff note. Reviewing the
+working-tree diff and deciding what to commit is the human's job
+— the Review Agent reads the unstaged diff directly. If you are
+tempted to run `git` to "verify" or "check" something, stop and
+include what you wanted to verify in the handoff `notes` instead.
 
-Stage **only files you actually modified or created this cycle**.
-Do not stage files just because they appear in the chunk's
-`files_to_modify` list — that list is the *upper bound* on your scope,
-not a checklist to add. Do not run `git add .` or `git add -A`; they
-sweep in untracked noise (build artefacts, editor temp files, other
-people's WIP).
-
-Recommended commands:
-
-```powershell
-# stage exactly the files you edited (idempotent if already tracked):
-git add path/to/file.cpp path/to/file.h DMHelper/src/CMakeLists.txt
-
-# verify only the intended changes are staged before committing:
-git status --short
-git diff --cached --stat
-
-# commit:
-git commit -m "agent: <chunk-id> cycle <n> — <one-line summary>"
-```
-
-If `git status --short` shows files staged that you did not touch this
-cycle, unstage them with `git reset HEAD <path>` before committing.
-If `git status --short` shows files modified that you intended to
-modify but forgot to stage, stage them, then commit.
-
-`git add` on a file with no changes is a silent no-op — not an error
-— but it indicates you misread your own work. Treat any "nothing to
-commit, working tree clean" surprise as a bug to investigate, not a
-prompt to scoop more files in.
-
-### Forbidden git operations
-
-Never commit to `main` or any branch other than `agent/work`. Never
-run `git checkout`, `git branch`, `git merge`, or `git push`. Never
-force-push. Never rebase. Never amend.
+If you are mid-task and the working tree appears unexpectedly dirty
+(files modified that you did not edit), do **not** try to fix it.
+Raise `CODEBASE_DRIFT` in your handoff and stop.
 
 ## Boundaries — What Is and Is Not Yours
 

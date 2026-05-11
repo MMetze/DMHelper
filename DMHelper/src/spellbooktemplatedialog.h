@@ -44,6 +44,14 @@ public slots:
 protected slots:
     void spellRenamed();
 
+    // Effect-panel slots
+    void handleEffectTypeChanged(int index);
+    void handleEffectWidthChanged();
+    void handleEffectHeightChanged();
+    void handleTokenRotateCW();
+    void handleTokenRotateCCW();
+    void selectEffectToken();
+
 protected:
     // From QWidget
     virtual void showEvent(QShowEvent* event) override;
@@ -55,6 +63,11 @@ protected:
     virtual void postLoadConfiguration(QWidget* owner, QWidget* uiWidget) override;
 
 private:
+    // Effect-panel helpers
+    void loadEffectUI();
+    void storeEffectData();
+    void updateEffectImage();
+
     QLineEdit* getValueEdit(const QString& key);
 
     Ui::SpellbookTemplateDialog *ui;
@@ -62,6 +75,9 @@ private:
 
     Spellv2* _spell;
     bool _edit;
+
+    int _tokenRotation;
+    bool _loadingEffectUI;
 };
 
 #endif // SPELLBOOKTEMPLATEDIALOG_H

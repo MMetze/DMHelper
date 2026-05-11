@@ -3557,7 +3557,7 @@ void BattleFrame::addMonsterFinished(CombatantDialog* combatantDlg, int result)
                 monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
                 int hitPoints = combatantDlg->getCombatantHitPoints();
                 monster->setHitPoints(hitPoints);
-                monster->setMaxHitPoints(hitPoints);
+                monster->setMonsterMaxHP(hitPoints);
                 if(combatantDlg->isRandomInitiative())
                 {
                     Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
