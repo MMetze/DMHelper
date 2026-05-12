@@ -287,20 +287,5 @@
         <file>data/icon_overlay.png</file>
         <file>data/img/glass-heart.png</file>
     </qresource>
-    <qresource prefix="/maps">
-        <file>resources/maps/desert_forward_base.webp</file>
-        <file>resources/maps/eternal_asylum_of_the_vampire_king.webp</file>
-        <file>resources/maps/forest_rest.webp</file>
-        <file>resources/maps/gloomlake_hill.webp</file>
-        <file>resources/maps/wolfhill.webp</file>
-    </qresource>
-    <qresource prefix="/tokens">
-        <file>resources/tokens/demonborn_1.png</file>
-        <file>resources/tokens/demonborn_2.png</file>
-        <file>resources/tokens/dwarf.webp</file>
-        <file>resources/tokens/elf.png</file>
-        <file>resources/tokens/halfling.png</file>
-        <file>resources/tokens/knight.png</file>
-    </qresource>
     <qresource prefix="/"/>
 </RCC>
