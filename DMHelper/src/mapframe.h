@@ -16,13 +16,13 @@ class MapFrame;
 
 class MapFrameScene;
 class Map;
-class PublishGLRenderer;
+#include "publishglrenderer.h"
+#include "layer.h"
+#include "party.h"
 class PublishGLMapRenderer;
-class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
-class Layer;
 class GridSizer;
 class QGraphicsPolygonItem;
 

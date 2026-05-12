@@ -328,10 +328,17 @@ void AudioTrackYoutube::playDirectUrl()
     if(isPlaying())
         return;
 
+    // NOTE: YouTube has a known issue on Windows / macOS and is being
+    // addressed on its own branch. This code was reverted to the v3.8.1
+    // form during the Linux-port merge; the #if WIN/MAC guards below are
+    // preserved from that form so the YouTube branch can resolve them in
+    // context. The Linux port bundles VLC 4 on every platform, so both
+    // branches now use the same VLC 4 signatures - the guards exist only
+    // to be revisited by the YouTube branch.
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #else
-    libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
+    libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #endif
 
     libvlc_media_add_option(vlcMedia, ":network-caching=500");
@@ -340,7 +347,7 @@ void AudioTrackYoutube::playDirectUrl()
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
 #else
-    _vlcPlayer = libvlc_media_player_new_from_media(vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
 #endif
     if(!_vlcPlayer)
         return;

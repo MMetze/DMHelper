@@ -28,7 +28,6 @@ DMH_VLC::DMH_VLC(QObject *parent) :
             "--plugins-cache",
             "--plugins-scan",
             "--verbose=0",
-            "--avcodec-hw=any",
             "--file-caching=100",
             "--clock-jitter=0"
         };
@@ -44,7 +43,6 @@ DMH_VLC::DMH_VLC(QObject *parent) :
             "--plugins-cache",
             "--no-plugins-scan",
             "--verbose=0",
-            "--avcodec-hw=any",
             "--file-caching=100",
             "--clock-jitter=0"
         };

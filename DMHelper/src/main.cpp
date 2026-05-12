@@ -22,9 +22,11 @@ int main(int argc, char *argv[]) {
     // this important so we can call makeCurrent from our rendering thread
     QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     QStyleHints* styleHints = QGuiApplication::styleHints();
     if(styleHints)
         styleHints->setColorScheme(Qt::ColorScheme::Light);
+#endif
 
     int result = 0;
     try {

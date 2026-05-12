@@ -1,6 +1,10 @@
 name: DMHelper CI macOS Workflow
 
 on:
+  push:
+    branches: [ master, feature/linux-port ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:

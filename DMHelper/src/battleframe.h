@@ -8,19 +8,22 @@
 #include "battleframemapdrawer.h"
 #include "battleframestatemachine.h"
 
-class BattleDialogModelCombatant;
+#include "characterv2.h"
+#include "battledialogmodelcombatant.h"
+#include "battledialogmodel.h"
+#include "layer.h"
+#include "publishglrenderer.h"
+
 class BattleDialogModelCombatantGroup;
 class CombatantWidget;
 class CombatantGroupWidget;
 class CombatantDialog;
 class QVBoxLayout;
 class EncounterBattle;
-class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
 class GridConfig;
 class GridSizer;
-class Characterv2;
 class Map;
 class QTimer;
 class RuleHealth;
@@ -30,9 +33,7 @@ class QGraphicsPolygonItem;
 class QGraphicsRectItem;
 class UnselectedPixmap;
 class CombatantRolloverFrame;
-class PublishGLRenderer;
 class PublishGLBattleRenderer;
-class Layer;
 class LayerTokens;
 class LayerDrawEngine;
 

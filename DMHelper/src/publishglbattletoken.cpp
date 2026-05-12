@@ -263,7 +263,11 @@ void PublishGLBattleToken::createTokenObjects()
     }
     if(Conditions::activeConditions())
         Conditions::activeConditions()->drawConditions(&pix, _combatant->getConditionList());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     QImage textureImage = pix.toImage().convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
+#else
+    QImage textureImage = pix.toImage().convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+#endif
     _textureSize = textureImage.size();
 
     float vertices[] = {

@@ -111,7 +111,11 @@ void PublishGLImage::updateImage(const QImage& image)
         return;
 
     // update and generate the background texture
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
+#else
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+#endif
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
     f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, glBackgroundImage.width(), glBackgroundImage.height(), GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
@@ -316,7 +320,11 @@ void PublishGLImage::createImageObjects(const QImage& image)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
 
     // load and generate the background texture
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
+#else
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+#endif
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 

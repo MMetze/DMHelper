@@ -1294,16 +1294,26 @@ QStringList MapManagerDialog::TagFilterProxyModel::getRequiredTags()
 
 void MapManagerDialog::TagFilterProxyModel::setRequiredTags(const QStringList& tags)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
     _requiredTags = tags;
     endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
+    _requiredTags = tags;
+    invalidateFilter();
+#endif
 }
 
 void MapManagerDialog::TagFilterProxyModel::clearRequiredTags()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
     _requiredTags.clear();
     endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
+    _requiredTags.clear();
+    invalidateFilter();
+#endif
 }
 
 QString MapManagerDialog::TagFilterProxyModel::getSearchText() const
@@ -1316,9 +1326,14 @@ void MapManagerDialog::TagFilterProxyModel::setSearchText(const QString& text)
     if(_searchText == text)
         return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
     _searchText = text;
     endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
+    _searchText = text;
+    invalidateFilter();
+#endif
 }
 
 void MapManagerDialog::TagFilterProxyModel::clearSearch()
@@ -1326,9 +1341,14 @@ void MapManagerDialog::TagFilterProxyModel::clearSearch()
     if(_searchText.isEmpty())
         return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
     _searchText.clear();
     endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
+    _searchText.clear();
+    invalidateFilter();
+#endif
 }
 
 bool MapManagerDialog::TagFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const

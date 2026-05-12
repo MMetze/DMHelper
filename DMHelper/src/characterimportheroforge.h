@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class CharacterImportHeroForgeData;
+#include "characterimportheroforgedata.h"
 class QNetworkReply;
 class QNetworkAccessManager;
 class QDomElement;

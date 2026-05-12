@@ -183,6 +183,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
 #ifdef Q_OS_MAC
     qDebug() << "[MainWindow]     OS: MacOS";
+#elif defined(Q_OS_LINUX)
+    qDebug() << "[MainWindow]     OS: Linux";
 #else
     qDebug() << "[MainWindow]     OS: Windows";
 #endif

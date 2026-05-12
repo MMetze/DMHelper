@@ -1,4 +1,5 @@
 #include "videoplayerglvideo.h"
+#include <vlc/libvlc_version.h>
 #include "videoplayerglplayer.h"
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
@@ -178,7 +179,6 @@ bool VideoPlayerGLVideo::setup(void** data,
     that->_height = 0;
     return true;
 }
-
 
 // This callback is called to release the texture and FBO created in resize
 void VideoPlayerGLVideo::cleanup(void* data)
