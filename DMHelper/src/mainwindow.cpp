@@ -240,7 +240,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Recovery Mode: " << _recoveryMode;
     _options->setLoading(true);
 
-    connect(_options, SIGNAL(spellbookFileNameChanged()), this, SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
 
     // Set the global font
@@ -455,14 +454,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, &BestiaryTemplateDialog::publishMonsterImage, this, QOverload<QImage, const QColor&>::of(&MainWindow::dispatchPublishImage));
     connect(&_bestiaryDlg, &BestiaryTemplateDialog::dialogClosed, this, &MainWindow::writeBestiary);
 
-    qDebug() << "[MainWindow] Loading Spellbook";
-#ifndef Q_OS_MAC
-    splash.showMessage(QString("Initializing Spellbook...\n"), Qt::AlignBottom | Qt::AlignHCenter);
-#endif
-    qApp->processEvents();
-    readSpellbook();
     _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
-    qDebug() << "[MainWindow] Spellbook Loaded";
 
     connect(&_spellDlg, &SpellbookTemplateDialog::dialogClosed, this, &MainWindow::writeSpellbook);
 
@@ -853,6 +845,8 @@ void MainWindow::newCampaign()
 
         _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
         _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
+        Spellbook::Instance()->readSpellbook(_campaign->getRuleset().getSpellbookFile());
+        handleSpellbookRead(_campaign->getRuleset().getSpellbookFile());
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -916,6 +910,7 @@ bool MainWindow::closeCampaign()
     _campaign->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getStringValue("name") : QString());
 
     writeBestiary();
+    writeSpellbook();
     deleteCampaign();
 
     if(Bestiary::Instance())
@@ -1351,45 +1346,25 @@ void MainWindow::linkActivated(const QUrl & link)
 
 void MainWindow::readSpellbook()
 {
-    qDebug() << "[MainWindow] Requested to read Spellbook";
+    // Retained as a no-op stub; spellbook loading now happens per-campaign
+    // via handleSpellbookRead, mirroring the bestiary pattern.
+}
 
-    if(!Spellbook::Instance())
+void MainWindow::handleSpellbookRead(const QString& spellbookFileName)
+{
+    qDebug() << "[MainWindow] Spellbook reading completed";
+
+    if(spellbookFileName.isEmpty())
     {
-        qDebug() << "[MainWindow] Spellbook instance not found, reading stopped";
-        return;
-    }
-
-    if(Spellbook::Instance()->isDirty())
-    {
-        qDebug() << "[MainWindow] Existing spellbook is unsaved!";
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
-                                                                   QString("Unsaved Spellbook"),
-                                                                   QString("The current spellbook has not been saved. Would you like to save it before loading a new spellbook? If you don't. you may lose spell data!"),
-                                                                   QMessageBox::Yes | QMessageBox::No);
-        if(result == QMessageBox::Yes)
-        {
-            QString spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
-            if(!spellbookFileName.isEmpty())
-            {
-                if(Spellbook::Instance()->writeSpellbook(spellbookFileName))
-                    qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
-                else
-                    qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
-            }
-        }
-    }
-
-    disconnect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
-
-    QString spellbookFileName = _options->getSpellbookFileName();
-    if(!Spellbook::Instance()->readSpellbook(spellbookFileName))
-    {
-        qDebug() << "[MainWindow] ERROR: Spellbook reading failed: " << spellbookFileName;
+        qDebug() << "[MainWindow] No spellbook file, resetting spellbook dialog";
+        _spellDlg.dataChanged();
         return;
     }
 
     // Spellbook file seems ok, make a backup
     _options->backupFile(spellbookFileName);
+
+    disconnect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
     _spellDlg.dataChanged();
     if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
@@ -1399,7 +1374,7 @@ void MainWindow::readSpellbook()
 
     connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
-    qDebug() << "[MainWindow] Spellbook reading complete.";
+    qDebug() << "[MainWindow] Spellbook setup complete.";
 }
 
 void MainWindow::readQuickRef()
@@ -1964,6 +1939,12 @@ void MainWindow::writeSpellbook()
         return;
     }
 
+    if(!_campaign)
+    {
+        qDebug() << "[MainWindow] No campaign loaded, no reason to write the Spellbook";
+        return;
+    }
+
     if(Spellbook::Instance()->count() <= 0)
     {
         qDebug() << "[MainWindow] Spellbook is empty, no file will be written";
@@ -1976,20 +1957,7 @@ void MainWindow::writeSpellbook()
         return;
     }
 
-    QString spellbookFileName = _options->getSpellbookFileName();
-    if(spellbookFileName.isEmpty())
-    {
-        spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
-        if(spellbookFileName.isEmpty())
-            return;
-
-        _options->setSpellbookFileName(spellbookFileName);
-    }
-
-    if(Spellbook::Instance()->writeSpellbook(spellbookFileName))
-        qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
-    else
-        qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
+    Spellbook::Instance()->writeSpellbook(_campaign->getRuleset().getSpellbookFile());
 }
 
 CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterType, const QString& filename, CampaignObjectBase* targetObject)
@@ -2183,6 +2151,8 @@ void MainWindow::openCampaign(const QString& filename)
 
     _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
     _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
+    Spellbook::Instance()->readSpellbook(_campaign->getRuleset().getSpellbookFile());
+    handleSpellbookRead(_campaign->getRuleset().getSpellbookFile());
 
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
@@ -2898,6 +2868,12 @@ void MainWindow::handleBestiaryRead(const QString& bestiaryFileName, bool conver
 void MainWindow::openSpellbook()
 {
     qDebug() << "[MainWindow] Opening Spellbook";
+    if(!_campaign)
+    {
+        qDebug() << "[MainWindow] No campaign loaded, ignoring Spellbook button";
+        return;
+    }
+
     if(!Spellbook::Instance())
         return;
 

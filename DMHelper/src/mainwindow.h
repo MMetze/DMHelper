@@ -114,6 +114,7 @@ public slots:
     void linkActivated(const QUrl & link);
 
     void readSpellbook();
+    void handleSpellbookRead(const QString& spellbookFileName);
     void readQuickRef();
 
 signals:

@@ -1,6 +1,7 @@
 #include "spellbook.h"
 #include "spellv2.h"
 #include "spellv2converter.h"
+#include "templatefactory.h"
 #include "dmversion.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -130,14 +131,21 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
         return false;
     }
 
-    qDebug() << "[Spellbook] Reading spellbook: " << targetFilename;
+    QString absoluteTargetFilename = TemplateFactory::getAbsoluteTemplateFile(targetFilename);
+    if(absoluteTargetFilename.isEmpty())
+    {
+        qDebug() << "[Spellbook] ERROR! Spellbook not found based on relative file path: " << targetFilename;
+        return false;
+    }
+
+    qDebug() << "[Spellbook] Reading spellbook: " << absoluteTargetFilename;
 
     QDomDocument doc("DMHelperSpellbookXML");
-    QFile file(targetFilename);
+    QFile file(absoluteTargetFilename);
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[Spellbook] Reading spellbook file open failed.";
-        QMessageBox::critical(nullptr, QString("Spellbook file open failed"), QString("Unable to open the spellbook file: ") + targetFilename);
+        QMessageBox::critical(nullptr, QString("Spellbook file open failed"), QString("Unable to open the spellbook file: ") + absoluteTargetFilename);
         return false;
     }
 
@@ -162,7 +170,7 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
         return false;
     }
 
-    QFileInfo fileInfo(targetFilename);
+    QFileInfo fileInfo(absoluteTargetFilename);
     setDirectory(fileInfo.absoluteDir());
     inputXML(root, false);
 
