@@ -17,9 +17,8 @@ EncounterTextLinked::EncounterTextLinked(const QString& encounterName, QObject *
 
 void EncounterTextLinked::inputXML(const QDomElement &element, bool isImport)
 {
-    // TODO: markdown - read the linked file
-    //extractTextNode(element, isImport);
     _linkedFile = element.attribute("linkedFile");
+    extractTextNode(element, isImport);
 
     EncounterText::inputXML(element, isImport);
 }
@@ -57,9 +56,11 @@ QString EncounterTextLinked::getMetadata() const
 
 void EncounterTextLinked::setText(const QString& newText)
 {
-    Q_UNUSED(newText);
-    qDebug() << "[EncounterTextLinked] ERROR: Attempting to directly set the text of a linked entry!";
-    return;
+    EncounterText::setText(newText);
+
+    // TODO (filesdir-watcher): bracket with CampaignFilesManager::suspendWatch/_resumeWatch
+    // once CampaignFilesManager exists (chunk filesdir-manager / filesdir-watcher).
+    createTextNode(QDomDocument(), QDomElement(), QDir(), false);
 }
 
 void EncounterTextLinked::setLinkedFile(const QString& filename)

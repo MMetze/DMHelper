@@ -378,6 +378,30 @@ plan.
 
 # Cycle Log
 
+## textlinked-readwrite
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: (pending)
+- executor_build_status: (pending)
+- executor_handoff_summary: (pending)
+- review_verdict: (pending)
+- review_findings: (pending)
+- next_action: (pending)
+
+## textlinked-readwrite
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: (pending)
+- executor_build_status: (pending)
+- executor_handoff_summary: (pending)
+- review_verdict: (pending)
+- review_findings: (pending)
+- next_action: (pending)
+
 ## filesdir-data
 
 ### Cycle 1

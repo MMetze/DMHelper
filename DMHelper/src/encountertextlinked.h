@@ -25,6 +25,7 @@ public:
 
 public slots:
     // Text
+    // Writes through to the linked file immediately; dirty() is emitted by the base-class call.
     virtual void setText(const QString& newText) override;
 
     // Linked File
