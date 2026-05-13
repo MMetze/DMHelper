@@ -60,6 +60,7 @@ public:
     QTime getTime() const;
     QStringList getNotes() const;
     QString getLastMonster() const;
+    QString getFilesDirectory() const;
 
     int getFearCount() const;
     bool getShowTokenHealthBars() const;
@@ -92,6 +93,7 @@ public slots:
     void setLastMonster(const QString& monsterName);
     void setFearCount(int fearCount);
     void setShowTokenHealthBars(bool show);
+    void setFilesDirectory(const QString& filesDirectory);
     bool validateCampaignIds();
     bool correctDuplicateIds();
 
@@ -129,6 +131,10 @@ protected:
 
     // See getLoadedMajorVersion(). Set during inputXML(); not serialised.
     int _loadedMajorVersion = 0;
+
+    // Relative path to the campaign's files directory (relative to the campaign
+    // XML file's parent directory). Empty means no directory has been set.
+    QString _filesDirectory;
 };
 
 #endif // CAMPAIGN_H

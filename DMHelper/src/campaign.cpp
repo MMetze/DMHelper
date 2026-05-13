@@ -85,7 +85,8 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _changesMade(false),
     _dirtyMade(false),
     _isValid(true),
-    _soundboardGroups()
+    _soundboardGroups(),
+    _filesDirectory()
 {
     connect(&_ruleset, &Ruleset::dirty, this, &Campaign::dirty);
 }
@@ -133,6 +134,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
     _showTokenHealthBars = element.attribute("showTokenHealthBars", QString::number(0)).toInt() != 0;
+    _filesDirectory = element.attribute("filesDirectory");
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -426,6 +428,11 @@ QString Campaign::getLastMonster() const
     return _lastMonster;
 }
 
+QString Campaign::getFilesDirectory() const
+{
+    return _filesDirectory;
+}
+
 int Campaign::getFearCount() const
 {
     return _fearCount;
@@ -520,6 +527,15 @@ void Campaign::setLastMonster(const QString& monsterName)
     _lastMonster = monsterName;
 }
 
+void Campaign::setFilesDirectory(const QString& filesDirectory)
+{
+    if(filesDirectory == _filesDirectory)
+        return;
+
+    _filesDirectory = filesDirectory;
+    emit dirty();
+}
+
 void Campaign::setFearCount(int fearCount)
 {
     if((fearCount < 0) || (fearCount == _fearCount))
@@ -601,6 +617,9 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 
     if(_showTokenHealthBars)
         element.setAttribute("showTokenHealthBars", 1);
+
+    if(!_filesDirectory.isEmpty())
+        element.setAttribute("filesDirectory", _filesDirectory);
 
     if(_notes.count() > 0)
     {

@@ -7,8 +7,8 @@ arch_review_required: true
 arch_review_model: opus
 arch_review_reason: Introduces a new top-level subsystem (CampaignFilesManager owning a recursive QFileSystemWatcher and the on-disk mirror), changes the serialization shape of `Campaign` (new `filesDirectory` attribute) and `EncounterTextLinked` (inputXML now reads through to disk; setText now writes through), and touches both the campaign and UI-shell subsystems.
 pre_impl_arch_review_requested: true
-supersedes: DMHelper/src/dev/plans/campaign-file-structure.md
-status: draft
+supersedes: campaign-file-structure-rev1
+status: in-progress
 ---
 
 # Summary
@@ -38,45 +38,6 @@ EncounterTextLinked (read/write completion), Campaign tree
 (rename propagation, auto-discovery, mirror verification), Media
 handling (copy-on-add, video prompt), Import/Export (files directory
 packaging), UI shell (new-campaign dialog, new-entry dialog).
-
-# Replanning Rationale
-
-This revision addresses the 10 `required_plan_changes` from the
-pre-implementation Architecture Review (verdict: `Revise`). The chunk
-structure and dependency graph are unchanged. Concrete edits:
-
-- **Chunk 1**: Pin the storage convention for `filesDirectory` to
-  *relative to the campaign XML's parent directory*, and require
-  callers (chunks 6, 7, 11) to resolve to absolute paths via
-  `QFileInfo(campaignXmlPath).absoluteDir().absoluteFilePath(...)`
-  before passing into `CampaignFilesManager`.
-- **Chunk 2**: Expand the `CampaignFilesManager` API surface with
-  three additions consumed by downstream chunks: write-suppression
-  (`suspendWatch` / `resumeWatch`), expected-paths registration
-  (`registerExpectedPath` / `clearExpectedPaths`), and a static
-  `findOwningCampaign(const CampaignObjectBase*)` helper. Add a
-  no-I/O-in-constructor constraint.
-- **Chunk 3**: Bracket the `EncounterTextLinked::setText` write with
-  `suspendWatch` / `resumeWatch` so the central watcher does not
-  re-read the file we just wrote.
-- **Chunk 4**: Add a `qWarning` when `QFileSystemWatcher::addPath`
-  returns false; reference the new `findOwningCampaign` helper.
-- **Chunk 5**: Pin the class mapping for fabricated entries
-  (unknown subdirectory → `EncounterText` container; `_contents.md`
-  → child `EncounterTextLinked` body entry) and align Chunk 10 to
-  hide the `_contents.md` body-entry type from the UI.
-- **Chunk 9**: Add explicit early-return guards (`oldName.isEmpty()`,
-  no Campaign ancestor) covering both `inputXML` and `copyValues`;
-  use `findOwningCampaign` instead of an ad-hoc parent walk.
-- **Chunk 11**: Replace the prose QUuid-preserving step with a
-  numbered six-step recipe; require `migrateToFilesDirectory` to be
-  a method on `Campaign` (so it has friend access to the protected
-  `setID`); bracket the migration with `suspendWatch` / `resumeWatch`.
-- **Chunk 12**: Use `registerExpectedPath` for each file placed by
-  the importer so `scanForNewEntries` does not double-insert them.
-
-No prior cycle-log entries exist (this is the first revision after
-the pre-impl review; no chunk has been dispatched).
 
 # Architectural Risk Assessment
 
@@ -125,12 +86,10 @@ plan.
   - Build succeeds with no new warnings.
 - **constraints_in_scope**:
   - Serialization rules from CLAUDE.md: override `internalOutputXML`, always call base; never emit `dirty()` from constructor or `inputXML`.
-  - **Storage convention (pinned)**: `_filesDirectory` is stored as a path *relative to the campaign XML file's parent directory*. `inputXML` and `internalOutputXML` read/write the raw relative string. Resolution to an absolute path is the caller's responsibility (chunks 6, 7, 11) via `QFileInfo(campaignXmlPath).absoluteDir().absoluteFilePath(_filesDirectory)`. `Campaign::setFilesDirectory` therefore accepts and stores the relative form only.
 - **out_of_scope**:
   - Creating the directory on disk.
   - Migration of older campaigns.
   - Any UI changes.
-  - Any path resolution — callers resolve.
 
 ## Chunk 2: filesdir-manager
 
@@ -143,10 +102,7 @@ plan.
   - DMHelper/src/campaign.h — add a `CampaignFilesManager*` member and `filesManager()` accessor.
   - DMHelper/src/campaign.cpp — construct/destruct the manager; rebind it whenever `_filesDirectory` changes.
 - **files_to_create**:
-  - DMHelper/src/campaignfilesmanager.h — public API: `setRootDirectory(const QString& absolutePath)`, `rootDirectory()`, `pathForEntry(CampaignObjectBase*) const`, `relativePathForEntry(CampaignObjectBase*) const`, `allocateUniqueMarkdownPath(const QDir&, const QString& baseName)`, `allocateUniqueSubdirPath(const QDir&, const QString& baseName)`, `verifyMirror(Campaign*, QStringList& missingDirs)`, `renameEntryFile(CampaignObjectBase*, const QString& oldName, const QString& newName)`, `copyMediaInto(const QString& sourcePath, CampaignObjectBase* owner, bool isVideo, QString& outRelativePath)` (the video path simply takes a pre-resolved user choice; the prompt itself lives in `media-copy`). Additionally:
-    - `void suspendWatch(const QString& absolutePath)` and `void resumeWatch(const QString& absolutePath)` — reference-counted per-path suppression of the next `linkedFileChanged` emission for that path. While suspended, file-modified events for that path are swallowed; resume decrements the count and re-arms emission when it reaches zero. A parameterless overload (`suspendWatch()` / `resumeWatch()`) suspends/resumes the entire watcher (used by chunk 11 during migration).
-    - `void registerExpectedPath(const QString& absolutePath)` and `void clearExpectedPaths()` — maintain a set of paths that `scanForNewEntries` (chunk 5) must skip. Used by chunk 11 (migration writes) and chunk 12 (importer-placed files) to prevent double-insertion when those files appear via watcher events.
-    - `static Campaign* findOwningCampaign(const CampaignObjectBase* entry)` — walks `parent()` until a `Campaign*` is found; returns `nullptr` if the entry is not yet attached to a tree. Consumed by chunks 4 and 9.
+  - DMHelper/src/campaignfilesmanager.h — public API: `setRootDirectory(const QString&)`, `rootDirectory()`, `pathForEntry(CampaignObjectBase*) const`, `relativePathForEntry(CampaignObjectBase*) const`, `allocateUniqueMarkdownPath(const QDir&, const QString& baseName)`, `allocateUniqueSubdirPath(const QDir&, const QString& baseName)`, `verifyMirror(Campaign*, QStringList& missingDirs)`, `renameEntryFile(CampaignObjectBase*, const QString& oldName, const QString& newName)`, `copyMediaInto(const QString& sourcePath, CampaignObjectBase* owner, bool isVideo, QString& outRelativePath)` (the video path simply takes a pre-resolved user choice; the prompt itself lives in `media-copy`).
   - DMHelper/src/campaignfilesmanager.cpp — implement the above. Naming policy: kebab-case from entry name; collision strategy appends `-2`, `-3`, … until free. `_contents.md` is reserved and never produced as a normal entry filename.
 - **integration_tasks**:
   - Header must `Q_OBJECT` and inherit `QObject` so future signal additions in `filesdir-watcher` and `filesdir-autodiscovery` do not require a class shape change.
@@ -156,14 +112,10 @@ plan.
   - `pathForEntry` walks parent chain to the campaign root and returns a path under the manager's root directory.
   - `allocateUniqueMarkdownPath` and `allocateUniqueSubdirPath` return paths that do not collide with any existing filesystem entry (verified by checking `QFileInfo::exists` on the returned path).
   - `verifyMirror` populates `missingDirs` with relative paths of entries that have children but no on-disk subdirectory.
-  - `suspendWatch` / `resumeWatch` (both overloads), `registerExpectedPath` / `clearExpectedPaths`, and the static `findOwningCampaign` are all declared in the header.
-  - `setRootDirectory` accepts an *absolute* path (callers resolve before invoking).
   - Build succeeds with no new warnings.
 - **constraints_in_scope**:
   - Sources are listed explicitly in CMakeLists.txt — both `.cpp` and `.h` must be added in the same change.
   - No GL calls (none expected here; called out so Execution does not introduce any).
-  - **No I/O in constructor**: `CampaignFilesManager`'s constructor performs no I/O and emits no signals; all I/O and signal connections begin at `setRootDirectory`.
-  - `findOwningCampaign` must tolerate `nullptr` input and any non-attached entry (return `nullptr`).
 - **out_of_scope**:
   - QFileSystemWatcher (chunk `filesdir-watcher`).
   - Auto-discovery scanning (chunk `filesdir-autodiscovery`).
@@ -181,8 +133,7 @@ plan.
 - **files_to_create**: []
 - **integration_tasks**:
   - The write path must reuse the existing `createTextNode(...)` helper rather than duplicating file-write code; pass a default-constructed `QDir` and `false` for `isExport` since those parameters are unused inside that helper today.
-  - **Bracket the file write with watcher suppression**: before calling `createTextNode`, call `CampaignFilesManager::suspendWatch(_linkedFile)` on the owning campaign's manager (looked up via `CampaignFilesManager::findOwningCampaign(this)->filesManager()`); after the write, call `resumeWatch(_linkedFile)`. Use a small RAII guard or paired calls in a single function. If the manager is `nullptr` (entry not yet attached, or legacy-mode campaign), skip the suspend/resume but still perform the write — the watcher is not active in that case.
-  - Persistence to disk is *not* additionally debounced by `MainWindow::_autoSaveTimer`; `EncounterTextLinked::setText` writes immediately and additionally emits `dirty()` so the campaign XML save also gets queued. No new timer is introduced.
+  - Persistence to disk is debounced by the existing `MainWindow::_autoSaveTimer` (driven by `dirty()`); `EncounterTextLinked::setText` writes immediately and additionally emits `dirty()` so the campaign XML save also gets queued. No new timer is introduced.
 - **acceptance_criteria**:
   - `EncounterTextLinked::inputXML` no longer contains the `// TODO: markdown - read the linked file` comment, and calls `extractTextNode(element, isImport)` (directly or by leaving the existing commented-out call uncommented).
   - `EncounterTextLinked::setText` writes the new text to `_linkedFile` (verified by reading the diff: the function body is no longer the `Q_UNUSED(newText); qDebug … return;` stub, and ends in either an explicit file write or a call to `createTextNode`).
@@ -209,11 +160,8 @@ plan.
 - **files_to_create**: []
 - **integration_tasks**:
   - `CampaignFilesManager::setRootDirectory` must enumerate the existing tree and add every directory (and every existing `.md` file) to the watcher in one pass; use `QDirIterator` with `Subdirectories`.
-  - On every `QFileSystemWatcher::addPath(path)` call (initial enumeration and incremental adds for new subdirectories), check the return value; if it returns `false`, emit `qWarning() << "[CampaignFilesManager] addPath failed for:" << path` so platform path-budget exhaustion is observable rather than silent.
   - On `directoryChanged`, the manager must diff the directory contents against a cached snapshot to detect adds vs deletes (`QFileSystemWatcher` does not give per-event detail).
-  - On `fileChanged`, consult the suspend-count for that path (chunk 2's `suspendWatch`) before emitting `linkedFileChanged`; swallow the event if suspended.
   - `EncounterTextLinked` connects via `Qt::QueuedConnection` is **not** required here (the watcher delivers on the GUI thread); use the default `Qt::AutoConnection`.
-  - `EncounterTextLinked::setLinkedFile` looks up the owning manager via `CampaignFilesManager::findOwningCampaign(this)`; do not duplicate the parent-walk inline.
 - **acceptance_criteria**:
   - `CampaignFilesManager` declares the four signals listed above.
   - `setRootDirectory` opens a `QDirIterator` with `QDirIterator::Subdirectories` and adds entries to a `QFileSystemWatcher`.
@@ -234,17 +182,13 @@ plan.
 - **branch**: agent/work/filesdir-autodiscovery
 - **files_to_modify**:
   - DMHelper/src/campaignfilesmanager.h — add `void scanForNewEntries(Campaign* campaign, QList<CampaignObjectBase*>& discovered)`.
-  - DMHelper/src/campaignfilesmanager.cpp — implement the scan: walk the files-dir tree via `QDirIterator`, build the set of expected paths from `verifyMirror`'s reverse direction *plus* the registered-expected-paths set (chunk 2's `registerExpectedPath`), and:
-    - For each unknown subdirectory, fabricate an `EncounterText` *container* entry (object type `CampaignType_Text`, no `linkedFile`, empty body) named after the subdirectory — this is the project's existing folder/text dual-purpose type. If the subdirectory contains a `_contents.md`, additionally fabricate an `EncounterTextLinked` *child* of that container with `setLinkedFile` pointing at `_contents.md`; this child is the directory's "body entry". The body-entry's name is the reserved literal `_contents` and its presence is what promotes the parent container to a text-bearing entry.
-    - For each unknown `.md` file at the root or under a known subdirectory (but **not** named `_contents.md`), fabricate a stand-alone `EncounterTextLinked`.
-    - Skip every path present in the registered-expected-paths set.
+  - DMHelper/src/campaignfilesmanager.cpp — implement the scan: walk the files-dir tree via `QDirIterator`, build the set of expected paths from `verifyMirror`'s reverse direction, create `EncounterTextLinked` for each new `.md` (skipping `_contents.md`, which is treated as the parent entry's body) and a directory-style `EncounterText` parent for each unknown subdirectory.
   - DMHelper/src/mainwindow.cpp — call `scanForNewEntries` at the end of `openCampaign` (after `postProcessXML`) and again in response to the watcher signals; show a non-blocking `QMessageBox::information` (or a status-bar message) listing the new entries.
 - **files_to_create**: []
 - **integration_tasks**:
   - The campaign passed to `scanForNewEntries` must already have its files manager root set; chunk `newcampaign-dialog` and chunk `migration-dialog` are responsible for ensuring this happens before this scan runs.
   - When a new directory entry is fabricated, attach it to the parent via `Campaign`'s existing tree-mutation methods (`addObject` / `insertObject` — use whichever the surrounding code uses) so the `dirty()` plumbing fires correctly.
   - Newly discovered linked entries call `setLinkedFile()` to populate `_text` from disk; do not call `setText` (that would write back).
-  - Class mapping (pinned): unknown subdirectory → `EncounterText` container; `_contents.md` inside that subdirectory → child `EncounterTextLinked` with reserved name `_contents`. Stand-alone `.md` (anywhere except `_contents.md`) → `EncounterTextLinked`.
 - **acceptance_criteria**:
   - `scanForNewEntries` exists with the signature above and is called from both `MainWindow::openCampaign` and from a slot connected to `CampaignFilesManager::markdownFileAdded` / `subdirectoryAdded`.
   - `_contents.md` filenames are filtered out of the standalone-entry creation path (verified by a literal `_contents.md` string check in the diff).
@@ -269,7 +213,7 @@ plan.
 - **files_to_create**: []
 - **integration_tasks**:
   - **[QT DESIGNER, HUMAN]** In `newcampaigndialog.ui`, add a `QLineEdit` named `edtFilesDirectory` (and a label "Files directory:") to the dialog form, positioned near `edtCampaignName`. Do not set a default value in Designer — the .cpp populates it.
-  - The dialog stores and returns the value as a *relative* directory name. Resolution to an absolute path happens in `MainWindow` after the user picks the campaign save location: `QString absFilesDir = QFileInfo(_campaignFileName).absoluteDir().absoluteFilePath(dialog.getFilesDirectory());` — then `QDir::mkpath(absFilesDir)` and `_campaign->setFilesDirectory(dialog.getFilesDirectory())` (relative form). The manager is then bound via `_campaign->filesManager()->setRootDirectory(absFilesDir)`.
+  - The directory must be created relative to the *campaign save path* (chosen later in `doSaveCampaign` via `QFileDialog::getSaveFileName`); coordinate by passing the user's chosen folder name into `Campaign` as a relative string and resolving it against the save target inside `doSaveCampaign`.
 - **acceptance_criteria**:
   - `NewCampaignDialog::getFilesDirectory()` declared and implemented; reads from `ui->edtFilesDirectory`.
   - `MainWindow` calls `_campaign->setFilesDirectory(...)` somewhere on the new-campaign code path.
@@ -293,7 +237,6 @@ plan.
 - **files_to_create**: []
 - **integration_tasks**:
   - The mirror check is a no-op when `_campaign->getFilesDirectory().isEmpty()` (legacy-mode campaign) — early-return.
-  - Resolve the relative `getFilesDirectory()` to an absolute path before invoking the manager: `QString absFilesDir = QFileInfo(_campaignFileName).absoluteDir().absoluteFilePath(_campaign->getFilesDirectory());`. Pass `absFilesDir` (or paths derived from it via `pathForEntry`) to `QDir::mkpath`.
   - Directory creation uses `QDir::mkpath` against absolute paths returned by `pathForEntry`.
 - **acceptance_criteria**:
   - `doSaveCampaign` references `filesManager()->verifyMirror` (verified by diff string match).
@@ -341,12 +284,7 @@ plan.
   - DMHelper/src/campaignobjectbase.h — no API change.
 - **files_to_create**: []
 - **integration_tasks**:
-  - Use `CampaignFilesManager::findOwningCampaign(this)` (chunk 2's static helper) to look up the owning campaign and its manager. Do not duplicate the parent-walk inline.
-  - **Early-return guards** (in this exact order, all in `renameEntryFile`):
-    1. If `oldName.isEmpty()`, return immediately. Newly-created entries that have not yet been named on disk have no file to rename.
-    2. If `oldName == newName`, return immediately.
-    3. If `findOwningCampaign(entry) == nullptr`, return immediately. This case naturally covers both `inputXML` and `copyValues`: in both code paths the entry is constructed but not yet attached to the campaign tree, so the parent-walk does not reach a `Campaign*`. This single guard is the chosen mechanism for suppressing rename I/O during XML load and value-copy.
-    4. If the manager's root directory is empty (legacy-mode campaign), return immediately.
+  - The owning campaign lookup walks `parent()` chain until a `Campaign*` is found; if not found (entry not yet attached), skip the rename — that case is handled by chunk `merge-add-entry` at attach time.
   - Collision: if `QFile::rename` returns false because the target exists, allocate a fresh unique path and retry once. Beyond one retry, log a warning and abandon — the next save will surface it via `verifyMirror`.
 - **acceptance_criteria**:
   - `CampaignObjectBase::setName` (or whichever existing setter triggers the rename) calls into `CampaignFilesManager::renameEntryFile`.
@@ -354,8 +292,7 @@ plan.
   - `EncounterTextLinked::_linkedFile` is updated when its file is renamed (via `setLinkedFile`).
   - Build succeeds with no new warnings.
 - **constraints_in_scope**:
-  - `setName` may be called during `inputXML` (legacy code path) and during `copyValues`; the rename helper guards against both cases by checking `findOwningCampaign(this) == nullptr` (entry not yet attached to a tree). Never trigger filesystem I/O during XML load or value-copy.
-  - All references to legacy `MonsterClass` / `Character` would be planning errors; this chunk only touches text/encounter classes so the v2 rule is informational.
+  - `setName` may be called during `inputXML` (legacy code path); the rename helper must early-return if `oldName == newName`. Never trigger filesystem I/O during XML load.
 - **out_of_scope**:
   - Renaming media files inside the entry directory when the *parent* entry is renamed — only the entry's own `.md` / directory moves; child media keeps its name relative to the new directory because the directory rename is recursive.
 
@@ -372,7 +309,6 @@ plan.
 - **integration_tasks**:
   - **[QT DESIGNER, HUMAN]** In `newentrydialog.ui`, hide or remove the `btnTypeLinked` button so users see only one "Add Entry" action. The `pageLinkedEntry` page may stay in the stacked widget if removing it would shift other widget IDs — describe the simpler change to the human (set `btnTypeLinked->visible = false`) and let them pick.
   - In `setEntryType`, route `CampaignType_LinkedText` to the same page as `CampaignType_Text` so the unified dialog behaves identically when invoked with either type.
-  - The body-entry `EncounterTextLinked` named `_contents` (fabricated by chunk 5's auto-discovery for directories that have a `_contents.md`) is **never** offered as an addable entry type in this dialog. The reserved name `_contents` is also rejected by the entry-name validation (`validateNewEntry`) to prevent the user from manually creating a name that collides with the body-entry convention.
 - **acceptance_criteria**:
   - `createTextEntry` branches on `_campaign->getFilesDirectory().isEmpty()` and constructs `EncounterTextLinked` in the non-empty branch.
   - The diff removes the explicit `btnTypeLinked->click()` chain inside `setEntryType` (or routes `CampaignType_LinkedText` to the same case as `CampaignType_Text`).
@@ -396,20 +332,21 @@ plan.
   - DMHelper/src/campaign.h / campaign.cpp — add `bool isLegacyMode() const` and `void setLegacyMode(bool)`; in-memory only, not serialized.
 - **files_to_create**:
   - DMHelper/src/campaignmigrationdialog.h — `QDialog` subclass exposing the chosen directory name and the user's choice (Migrate / Legacy / Cancel). Header-only structure for the class declaration; the `.ui` file is created by the human (see integration task).
-  - DMHelper/src/campaignmigrationdialog.cpp — minimal logic; the dialog itself just collects the answer. The migration *work* lives on `Campaign` itself as `Campaign::migrateToFilesDirectory(const QString& dirAbsolutePath)` (it **must** be a method on `Campaign`, not a free function, because it calls the protected `CampaignObjectBase::setID` and only `Campaign` is friend).
+  - DMHelper/src/campaignmigrationdialog.cpp — minimal logic; the dialog itself just collects the answer. The migration *work* lives in a free function or a helper method on `Campaign` (`Campaign::migrateToFilesDirectory(const QString& dirAbsolutePath)`).
 - **integration_tasks**:
   - **[QT DESIGNER, HUMAN]** Create `DMHelper/src/campaignmigrationdialog.ui` in Qt Designer with: a label explaining the migration, a `QLineEdit` named `edtFilesDirectory` pre-filled by code, two `QPushButton`s named `btnMigrate` and `btnLegacy`, and a `QDialogButtonBox` with Cancel.
   - **[QT DESIGNER, HUMAN]** Add `campaignmigrationdialog.ui` to the Qt resource compilation by listing it in `CMakeLists.txt` alongside the other `.ui` files (the source-list update itself is a Qt-Designer-adjacent step the human performs in the same checkpoint).
-  - **Resolution**: `MainWindow::openCampaign` resolves the user's chosen relative directory to an absolute path via `QFileInfo(_campaignFileName).absoluteDir().absoluteFilePath(dialog.getFilesDirectory())` before calling `Campaign::migrateToFilesDirectory(absPath)`. After migration succeeds, call `_campaign->setFilesDirectory(dialog.getFilesDirectory())` (relative form) and `_campaign->filesManager()->setRootDirectory(absPath)`.
-  - **Watcher interleave**: bracket the entire migration call with `_campaign->filesManager()->suspendWatch()` (parameterless overload from chunk 2) before `migrateToFilesDirectory` and `resumeWatch()` after. This blanket suspension is correct because the campaign is mid-migration and not yet user-active. As a defence-in-depth measure, the migration code also calls `manager->registerExpectedPath(absMdPath)` for every `.md` file it writes, so any watcher event that *does* sneak through (or fires later when the watcher resumes) is filtered out by `scanForNewEntries`.
-  - **Numbered QUuid-preserving swap recipe** — for each inline `EncounterText` whose `getObjectType() == CampaignType_Text` that is being converted to a linked entry, perform these steps in order:
-    1. Construct the new `EncounterTextLinked` with the same parent (`auto* newEntry = new EncounterTextLinked(oldEntry->getName(), oldEntry->parent());`).
-    2. Call `newEntry->setID(oldEntry->getID())` — `setID` is protected on `CampaignObjectBase`; only `Campaign` is friend, which is why this helper lives on `Campaign`.
-    3. Copy any other relevant state from `oldEntry` to `newEntry` via `newEntry->copyValues(oldEntry)` (preserves name, icon, layer scene, text width, etc.). After `copyValues`, write the in-memory `_text` to the freshly allocated `.md` path via `newEntry->setLinkedFile(absMdPath)` followed by direct file write of the old text (do not call `setText` here — that would emit `dirty()` and re-trigger writes during migration; instead, write the file directly through `createTextNode` or equivalent, then assign `_text` so subsequent reads match disk).
-    4. Determine the old entry's row in its parent (`int oldRow = parent->getChildRow(oldEntry);` or the equivalent existing API), then call `parent->removeChildObject(oldEntry)` followed by `parent->insertChildObject(newEntry, oldRow)` to preserve tree order.
-    5. Call `oldEntry->deleteLater()` — never `delete` directly, because signal connections may still be in flight from the just-completed `inputXML`/`postProcessXML` cycle.
-    6. Emit `campaign->changed()` (visual refresh, *not* `dirty()` until after the whole migration completes) at the end of the migration, once, so the tree model refreshes a single time.
+  - The migration helper iterates the campaign tree, and for each `EncounterText` whose `getObjectType() == CampaignType_Text`, allocates a `.md` path via the manager, writes `_text` to disk, and replaces the in-tree object with an `EncounterTextLinked` (preserving `QUuid` for cross-references — this is the riskiest sub-step; the helper documents the swap explicitly).
   - For each external media path encountered during migration, route through `CampaignFilesManager::copyMediaInto`, prompting for video.
+- **acceptance_criteria**:
+  - `MainWindow::openCampaign` checks `_campaign->getFilesDirectory().isEmpty()` and conditionally instantiates `CampaignMigrationDialog`.
+  - `Campaign::isLegacyMode()` / `setLegacyMode()` declared and used to gate further migration prompts.
+  - `Campaign::migrateToFilesDirectory(const QString&)` declared and implemented; iterates `getChildObjects()` (recursively or via the existing tree-walk helper).
+  - Build succeeds with no new warnings.
+- **constraints_in_scope**:
+  - The `.ui` file must come from Qt Designer — never hand-written by Execution.
+  - The QUuid-preserving swap means: the new `EncounterTextLinked` must call `setID(oldUuid)` (or whatever the existing setter is) before being inserted; otherwise cross-references break.
+  - No `dirty()` emission inside `inputXML` paths; migration runs *after* `inputXML` returns.
 - **out_of_scope**:
   - One-way migration of `CampaignType_LinkedText` entries that already have a `linkedFile` attribute pointing outside the new directory — those keep their current absolute path. Re-homing such entries is a future feature.
   - Auto-saving immediately after migration — the user explicitly initiates a Save.
@@ -427,14 +364,11 @@ plan.
 - **files_to_create**: []
 - **integration_tasks**:
   - The exporter does not currently know about the source files directory; pass it in via a setter from `MainWindow`'s export action.
-  - On import, after files are placed on disk and **before** they appear via the watcher, call `CampaignFilesManager::registerExpectedPath(absPath)` (chunk 2 API) for every file the importer placed. The watcher is *not* suspended during import (the campaign may be open and active and other unrelated paths must continue to be tracked); per-path registration is the correct mechanism here. The complementary blanket-suspension approach used in chunk 11 is not appropriate here.
-  - After XML import completes, call `CampaignFilesManager::scanForNewEntries`. Files that were placed by the importer **and** also added via the imported XML will be skipped by the registered-expected-paths set; files placed by the importer that are **not** in the imported XML will be picked up by the scan as auto-discovered entries (the spec's intended behaviour).
-  - When the import operation completes (success or failure), call `CampaignFilesManager::clearExpectedPaths()` to reset the set for the next operation.
+  - On import, after files are placed on disk, call `CampaignFilesManager::scanForNewEntries` (from chunk `filesdir-autodiscovery`) so the imported objects are picked up as expected — but only if the importer did not already insert them via XML. To avoid double-insertion, the importer marks the just-placed paths and `scanForNewEntries` skips paths already covered by inputXML-created entries.
 - **acceptance_criteria**:
   - `CampaignExporter` has a setter for the source files directory and uses it in `populateExport` / `addObjectTree`.
   - Recursive copy uses `QFile::copy` (or a helper that wraps `QDirIterator` + `QFile::copy`) — diff contains literal `QFile::copy`.
   - `objectimportdialog.cpp` handles the directory-collision prompt with a `QMessageBox`.
-  - The diff shows calls to `registerExpectedPath` for each placed file and a matching `clearExpectedPaths` at end-of-operation.
   - Build succeeds with no new warnings.
 - **constraints_in_scope**:
   - Use `Qt`'s file APIs only — no `std::filesystem` (project consistency).
@@ -443,6 +377,18 @@ plan.
   - Per-entry export of just a single `.md` (the spec talks about subtree export, which is what `addObjectTree` already does).
 
 # Cycle Log
+
+## filesdir-data
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: [DMHelper/src/campaign.h, DMHelper/src/campaign.cpp]
+- executor_build_status: pass — clean build, all 300 targets linked
+- executor_handoff_summary: Added _filesDirectory (QString) member to Campaign with getFilesDirectory()/setFilesDirectory() getter/setter. setFilesDirectory emits dirty() only on value change. inputXML reads element.attribute("filesDirectory") (empty on absence). internalOutputXML writes attribute only when non-empty, after calling base. No new files created, no CMakeLists.txt change needed.
+- review_verdict: Pass
+- review_findings: [Info — inputXML calls setDate()/setTime() which can emit dirty(); pre-existing behaviour, out of scope]
+- next_action: merge
 
 # Architecture Review
 
@@ -469,34 +415,5 @@ plan.
   - Medium: filesDirectory relative-vs-absolute convention inconsistent across chunks.
   - Low: QFileSystemWatcher::addPath failures are silent.
   - Low: parent-chain walk repeated across chunks without shared helper.
-
-## Pre-Implementation Review — 2026-05-11 (Revision 2)
-
-reviewer_model: opus
-verdict: Pass
-summary: All 10 `required_plan_changes` from the prior review are addressed substantively. The watcher self-write loop is broken via reference-counted `suspendWatch`/`resumeWatch` declared in Chunk 2 and used in Chunk 3. Chunk 9 has a clean four-step early-return guard ladder that correctly leans on `findOwningCampaign(this) == nullptr` to cover both `inputXML` and `copyValues`. The Chunk 11 QUuid-preserving swap is now a numbered six-step recipe and is explicitly bound to `Campaign` (the only `friend` of `DMHObjectBase` that can call protected `setID`). The migration / autodiscovery race is closed by both the blanket watcher suspension and the defence-in-depth `registerExpectedPath` calls. The relative-vs-absolute convention is pinned in Chunk 1 and consistently resolved in Chunks 6, 7, 11. Chunk 5's class mapping is concrete (unknown subdir → `EncounterText` container, `_contents.md` → child `EncounterTextLinked` named `_contents`) and Chunk 10 enforces the reserved name. `findOwningCampaign` is the shared helper, the constructor-no-I/O constraint is stated, and `addPath` failures will surface via `qWarning`. Architecture is sound; remaining concerns are localized and non-blocking.
-
-triggers_evaluated:
-  - threading: addressed
-  - layer_interface: not-applicable
-  - serialization_shape: addressed
-  - subsystem_boundary: addressed
-  - new_subsystem_or_flag: addressed
-
-findings:
-  - Low: Chunk 11 step 3 vs Chunk 3 — Step 3 instructs the migration to write `.md` files "directly through `createTextNode` or equivalent, then assign `_text` so subsequent reads match disk", explicitly avoiding `newEntry->setText(...)` to "not emit `dirty()` and re-trigger writes". But Chunk 3 has already wrapped `setText` in `suspendWatch`/`resumeWatch` precisely so this kind of write-through is safe and idempotent; using `setText` would also avoid the `_text` protected-member access concern (the migration code lives on `Campaign`, which is `friend` of `DMHObjectBase` but not of `EncounterText`, so it cannot directly assign `_text`). Recommend Design either (a) clarify that step 3 calls `setText` (which is now safe under suspension and which the manager has already suspended for this path via the bracketing `suspendWatch()` call) and emits a single batched `dirty()` at the end of migration, or (b) add an explicit `EncounterText`-level protected-friend or internal helper for the `_text` assignment so the recipe as written is actually compilable. Either is fine architecturally; the current wording is internally inconsistent with Chunk 3's design.
-  - Info: Chunk 11 — In the revision the `acceptance_criteria` and `constraints_in_scope` blocks present in the prior version were dropped. This is a schema/process concern (the Review Agent verifies against `acceptance_criteria` per chunk); it is not an architectural defect, but Design should restore the section before Execution dispatches Chunk 11 so the Review Agent has a verification target.
-  - Info: Front-matter — `supersedes` is set to the same path as the current plan, which makes the link self-referential. Per `PLAN_SCHEMA.md` this should point to the prior plan revision (typically an archived copy) or be `null`. Non-architectural; flag for Design to correct alongside the Chunk 11 acceptance_criteria restoration.
-  - Info: Chunk 11 step 6 instructs the migration to emit `changed()` (visual refresh) but defer `dirty()` until "after the whole migration completes". The plan should briefly state where that single end-of-migration `dirty()` is emitted (in `migrateToFilesDirectory` itself, or by `MainWindow` after the call returns). The `copyValues` call inside step 3 will also reach `setName` → `handleInternalChange` → propagated `dirty()` for each migrated entry; the design intent is that these are tolerated (or suppressed for the duration of migration via a transient flag on `Campaign`). Worth one sentence of clarification, but not blocking — the migration runs after `inputXML` returns, so `dirty()` emissions are technically legal at that point.
-  - Info: Chunk 5 — The chosen "fabricated `_contents` child entry" mapping is defensible and aligns with Chunk 10's reserved-name enforcement. One small consequence worth naming explicitly: when a user creates a *new* directory entry in DMHelper (chunk 10) and then adds a text body to it, the body needs to materialize as the child `_contents` entry to keep the on-disk shape symmetric with the autodiscovery shape. Chunk 10 does not currently describe how that happens. This is a design consistency point Design may want to fold into Chunk 10 as a follow-up integration task, not a blocker for the architecture.
-
-required_plan_changes: []
-
-risk_notes:
-  - Low: Internal inconsistency between Chunk 3 (setText safe under suspension) and Chunk 11 step 3 (avoid setText, write `_text` directly). Pick one mechanism.
-  - Low: Chunk 11 lost its `acceptance_criteria` / `constraints_in_scope` sections in the revision; Review Agent will need them.
-  - Low: Migration's batched `dirty()` emission point is not specified.
-  - Low: Symmetric on-disk shape when a user adds a body to a directory entry created via the new-entry dialog (chunk 10) is not described.
-  - Info: `supersedes` self-reference in front-matter.
 
 # Escalations
