@@ -481,6 +481,7 @@ void OptionsContainer::readSettings()
     copyCoreData(QString("monster"));
     copyCoreData(QString("character"));
     copyCoreData(QString("conditions"));
+    copyCoreData(QString("spell"));
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
@@ -1037,6 +1038,7 @@ void OptionsContainer::resetFileSettings()
     copyCoreData(QString("monster"), true);
     copyCoreData(QString("character"), true);
     copyCoreData(QString("conditions"), true);
+    copyCoreData(QString("spell"), true);
 }
 
 void OptionsContainer::setLastSpell(const QString& lastSpell)

@@ -894,8 +894,8 @@ if (WIN32)
         $<$<CONFIG:Release>:/O2>
     )
 
-    # Windows icon
-    target_sources(DMHelper PRIVATE dmhelper.ico)
+    # Windows icon — dmhelper.rc is compiled by rc.exe and embeds dmhelper.ico
+    target_sources(DMHelper PRIVATE dmhelper.rc)
     set_target_properties(DMHelper PROPERTIES WIN32_EXECUTABLE TRUE)
 
     # VLC
