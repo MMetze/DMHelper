@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conditions>
+  <condition id="blinded" title="Blinded" icon="one-eyed" description="Blinded"/>
+  <condition id="charmed" title="Charmed" icon="smitten" description="Charmed"/>
+  <condition id="deafened" title="Deafened" icon="elf-ear" description="Deafened"/>
+  <condition id="exhaustion1" title="Exhaustion" icon="crawl" description="Exhaustion - Level 1" group="exhaustion"/>
+  <condition id="exhaustion2" title="Exhaustion" icon="crawl" description="Exhaustion - Level 2" group="exhaustion"/>
+  <condition id="exhaustion3" title="Exhaustion" icon="crawl" description="Exhaustion - Level 3" group="exhaustion"/>
+  <condition id="exhaustion4" title="Exhaustion" icon="crawl" description="Exhaustion - Level 4" group="exhaustion"/>
+  <condition id="exhaustion5" title="Exhaustion" icon="crawl" description="Exhaustion - Level 5" group="exhaustion"/>
+  <condition id="frightened" title="Frightened" icon="sharp-smile" description="Frightened"/>
+  <condition id="grappled" title="Grappled" icon="grab" description="Grappled"/>
+  <condition id="incapacitated" title="Incapacitated" icon="internal-injury" description="Incapacitated"/>
+  <condition id="invisible" title="Invisible" icon="invisible" description="Invisible"/>
+  <condition id="paralyzed" title="Paralyzed" icon="aura" description="Paralyzed"/>
+  <condition id="petrified" title="Petrified" icon="stone-pile" description="Petrified"/>
+  <condition id="poisoned" title="Poisoned" icon="deathcab" description="Poisoned"/>
+  <condition id="prone" title="Prone" icon="falling" description="Prone"/>
+  <condition id="restrained" title="Restrained" icon="imprisoned" description="Restrained"/>
+  <condition id="stunned" title="Stunned" icon="embrassed-energy" description="Stunned"/>
+  <condition id="unconscious" title="Unconscious" icon="coma" description="Unconscious"/>
+</conditions>

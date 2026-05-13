@@ -4,6 +4,7 @@
 #include "campaignobjectframe.h"
 #include <QGraphicsScene>
 #include <QImage>
+#include <QPolygon>
 #include <QRubberBand>
 #include "undofowpath.h"
 #include "videoplayer.h"
@@ -15,14 +16,15 @@ class MapFrame;
 
 class MapFrameScene;
 class Map;
-class PublishGLRenderer;
+#include "publishglrenderer.h"
+#include "layer.h"
+#include "party.h"
 class PublishGLMapRenderer;
-class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
-class Layer;
 class GridSizer;
+class QGraphicsPolygonItem;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -239,6 +241,10 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
     UndoFowPath* _undoPath;
+
+    QPolygon _polygonPoints;
+    QGraphicsPolygonItem* _polygonPreview;
+    QGraphicsLineItem* _polygonPendingLine;
 
     QGraphicsLineItem* _distanceLine;
     MapDraw* _mapItem;

@@ -40,7 +40,8 @@ namespace DMHelper
     {
         BattleEvent_Blank = 0,
         BattleEvent_NewRound,
-        BattleEvent_Damage
+        BattleEvent_Damage,
+        BattleEvent_ResetResources
     };
 
     enum ActionType
@@ -73,6 +74,8 @@ namespace DMHelper
         CombatantType_Character,
         CombatantType_Monster,
         CombatantType_Reference     // In-battle reference to an NPC/Character
+        ,
+        CombatantType_InitiativeEvent // Synthetic placeholder triggered at a fixed initiative count
     };
 
     enum CombatantSize
@@ -134,6 +137,7 @@ namespace DMHelper
         BrushType_Circle = 0,
         BrushType_Square,
         BrushType_Select,
+        BrushType_Polygon,
 
         BrushType_Count
     };

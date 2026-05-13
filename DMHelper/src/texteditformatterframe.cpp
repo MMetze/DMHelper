@@ -1,6 +1,7 @@
 #include "texteditformatterframe.h"
 #include <QFontDatabase>
 #include <QTextEdit>
+#include <QTextBlock>
 #include <QDebug>
 
 TextEditFormatterFrame::TextEditFormatterFrame(QWidget *parent) :
@@ -149,5 +150,53 @@ void TextEditFormatterFrame::setAlignment(Qt::Alignment alignment)
         _textEdit->setAlignment(alignment);
         emit alignmentChanged(alignment);
     }
+}
+
+void TextEditFormatterFrame::toggleCheckbox()
+{
+    if(!_textEdit)
+        return;
+
+    static const QChar checkboxUnchecked(0x2610); // ☐
+    static const QChar checkboxChecked(0x2611);   // ☑
+
+    QTextCursor cursor = _textEdit->textCursor();
+    int originalPos = cursor.position();
+
+    cursor.movePosition(QTextCursor::StartOfBlock);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+    QString firstChar = cursor.selectedText();
+
+    if(!firstChar.isEmpty() && (firstChar[0] == checkboxUnchecked || firstChar[0] == checkboxChecked))
+    {
+        // Remove checkbox and trailing space
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+        // Check for trailing space
+        QTextCursor spaceCheck = cursor;
+        spaceCheck.movePosition(QTextCursor::StartOfBlock);
+        spaceCheck.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+        QString twoChars = spaceCheck.selectedText();
+        if(twoChars.length() == 2 && twoChars[1] == QChar(' '))
+            cursor = spaceCheck;
+
+        cursor.removeSelectedText();
+
+        // Adjust cursor position
+        int removed = cursor.position() - (originalPos - twoChars.length());
+        int newPos = qMax(cursor.position(), originalPos - twoChars.length());
+        cursor.setPosition(newPos);
+    }
+    else
+    {
+        // Insert checkbox at block start
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.insertText(QString(checkboxUnchecked) + QChar(' '));
+
+        // Restore cursor position (shifted by 2 inserted chars)
+        cursor.setPosition(originalPos + 2);
+    }
+
+    _textEdit->setTextCursor(cursor);
 }
 

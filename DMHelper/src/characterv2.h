@@ -3,8 +3,10 @@
 
 #include "combatant.h"
 #include "templateobject.h"
+#include "scaledpixmap.h"
 #include <QHash>
 #include <QVariant>
+#include <QStringList>
 
 class DMHAttribute;
 class MonsterClassv2;
@@ -49,11 +51,25 @@ public:
 
     virtual void copyMonsterValues(MonsterClassv2& monster);
 
+    // Multi-icon support
+    int getIconCount() const;
+    QStringList getIconList() const;
+    QString getIcon(int index = 0) const;
+    QPixmap getIconPixmap(DMHelper::PixmapSize iconSize, int index);
+    virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) override;
+    virtual QString getIconFile() const override;
+
 signals:
     void iconChanged(CampaignObjectBase* character);
 
 public slots:
     virtual void setIcon(const QString &newIcon) override;
+    void addIcon(const QString& iconFile);
+    void setIcon(int index, const QString& iconFile);
+    void removeIcon(int index);
+    void removeIcon(const QString& iconFile);
+    void clearIcon();
+    void refreshIconPixmaps();
 
 protected:
     // From Combatant
@@ -70,12 +86,18 @@ protected:
     virtual QString getAttributeSpecialAsString(const QString& attribute) const override;
     virtual void setAttributeSpecial(const QString& key, const QString& value) override;
 
+    void readIcons(const QDomElement& element, bool isImport);
+    void writeIcons(QDomDocument &doc, QDomElement& element, QDir& targetDirectory, bool isExport) const;
+
 private:
 
     int _dndBeyondID;
     bool _iconChanged;
 
     QHash<QString, QVariant> _allValues;
+
+    QStringList _icons;
+    QList<ScaledPixmap> _scaledPixmaps;
 
 };
 

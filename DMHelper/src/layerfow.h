@@ -40,7 +40,9 @@ public:
     void applyPaintTo(int index, int startIndex = 0);
 
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw);
+    void paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDraw);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape);
+    void paintFoWPolygon(const MapEditPolygon& mapEditPolygon);
     void fillFoW(const QColor& color);
 
     QRect getFoWVisibleRect() const;
@@ -65,6 +67,7 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
+    virtual void aboutToDelete() override;
     virtual void editSettings() override;
 
 protected slots:
@@ -101,6 +104,7 @@ protected:
     int _fowTextureScale;
     QUndoStack* _undoStack;
     QList<UndoFowBase*> _undoItems;
+    bool _batchProcessing;
 
 };
 

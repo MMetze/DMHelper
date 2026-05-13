@@ -294,6 +294,17 @@ void PublishGLBattleGrid::cleanupGridGL()
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
         QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+
+        if(_shaderProgram > 0)
+        {
+            if(f)
+            {
+                DMH_DEBUG_OPENGL_glDeleteProgram(_shaderProgram);
+                f->glDeleteProgram(_shaderProgram);
+            }
+            _shaderProgram = 0;
+        }
+
         if(_VAO > 0)
         {
             if(e)

@@ -1,7 +1,10 @@
 #include "templatefactory.h"
 #include "templateobject.h"
+#include "templateobjectnotifier.h"
+#include "templatefieldformat.h"
 #include "templateframe.h"
 #include "templateresourcelayout.h"
+#include "intfieldkeyhandler.h"
 #include "dice.h"
 #include "combatant.h"
 #include "rulefactory.h"
@@ -12,14 +15,28 @@
 #include <QUiLoader>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QCheckBox>
+#include <QValidator>
 #include <QScrollArea>
 #include <QLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QBuffer>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QDebug>
 
 const char* TemplateFactory::TEMPLATE_PROPERTY = "dmhValue";
 const char* TemplateFactory::TEMPLATE_WIDGET = "dmhWidget";
+const char* TemplateFactory::TEMPLATE_FORMAT = "dmhFormat";
+const char* TemplateFactory::TEMPLATE_COMPUTE = "dmhCompute";
+const char* TemplateFactory::TEMPLATE_CONDITION = "dmhCondition";
+const char* TemplateFactory::TEMPLATE_DICE_MAXIMUM = "dmhDiceMaximum";
+const char* TemplateFactory::TEMPLATE_DICE_AVERAGE = "dmhDiceAverage";
 
 const char* TemplateFactory::TEMPLATEVALUES[TEMPLATETYPE_COUNT] =
     {
@@ -41,7 +58,10 @@ TemplateFactory::TemplateFactory(QObject *parent) :
     _elements(),
     _elementLists(),
     _lineConnections(),
-    _textConnections()
+    _textConnections(),
+    _otherConnections(),
+    _computeConnections(),
+    _conditionConnections()
 {
 }
 
@@ -125,16 +145,45 @@ QWidget* TemplateFactory::loadUITemplate(const QString& templateFile)
         return result;
     }
 
-    QUiLoader loader;
-    QFile file(templateFile);
-    if(!file.open(QFile::ReadOnly))
+    // Cache the .ui file contents in memory keyed by absolute path + last
+    // modification time. Each combatant in an encounter loads from the same
+    // .ui file, so reading + parsing it from disk every time is wasteful.
+    // Invalidating on mtime keeps live edits in Qt Designer working.
+    struct CacheEntry { QByteArray data; qint64 mtime; };
+    static QHash<QString, CacheEntry> cache;
+    static QMutex cacheMutex;
+
+    const QFileInfo info(templateFile);
+    const QString cacheKey = info.absoluteFilePath();
+    const qint64 currentMtime = info.lastModified().toMSecsSinceEpoch();
+
+    QByteArray cachedData;
     {
-        qDebug() << "[RuleFactory::loadUITemplate] ERROR: Unable to read UI Template file: " << templateFile << ", error: " << file.error() << ", " << file.errorString();
-        return result;
+        QMutexLocker locker(&cacheMutex);
+        auto it = cache.constFind(cacheKey);
+        if((it != cache.constEnd()) && (it->mtime == currentMtime))
+            cachedData = it->data;
     }
 
-    result = loader.load(&file);
-    file.close();
+    if(cachedData.isEmpty())
+    {
+        QFile file(templateFile);
+        if(!file.open(QFile::ReadOnly))
+        {
+            qDebug() << "[RuleFactory::loadUITemplate] ERROR: Unable to read UI Template file: " << templateFile << ", error: " << file.error() << ", " << file.errorString();
+            return result;
+        }
+        cachedData = file.readAll();
+        file.close();
+
+        QMutexLocker locker(&cacheMutex);
+        cache.insert(cacheKey, { cachedData, currentMtime });
+    }
+
+    QUiLoader loader;
+    QBuffer buffer(&cachedData);
+    buffer.open(QIODevice::ReadOnly);
+    result = loader.load(&buffer);
 
     if(!result)
     {
@@ -209,6 +258,7 @@ void TemplateFactory::readObjectData(QWidget* widget, TemplateObject* source, Te
         if((!keyString.isEmpty()) && (!widgetString.isEmpty()))
         {
             scrollArea->setWidgetResizable(true);
+            scrollArea->setStyleSheet(QStringLiteral("QScrollArea { background: transparent; } QScrollArea > QWidget > QWidget { background: transparent; }"));
             QFrame* scrollWidget = new QFrame;
             QVBoxLayout* scrollLayout = new QVBoxLayout;
             scrollLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -259,6 +309,81 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
             continue;
 
         QString keyString = lineEdit->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        const QString computeSpec = lineEdit->property(TemplateFactory::TEMPLATE_COMPUTE).toString();
+        const QString diceMaxKey = lineEdit->property(TemplateFactory::TEMPLATE_DICE_MAXIMUM).toString();
+        const QString diceAvgKey = lineEdit->property(TemplateFactory::TEMPLATE_DICE_AVERAGE).toString();
+        const QString formatSpec = lineEdit->property(TemplateFactory::TEMPLATE_FORMAT).toString();
+        const FormatSpec parsedFormat = TemplateFieldFormat::parseFormat(formatSpec);
+
+        // Dice-derived read-only fields: format the maximum or average of a dice
+        // expression stored under another key on the source. Mutually exclusive
+        // with dmhCompute and the writable dmhValue path; neither writes back.
+        // Live-updates whenever the referenced key changes on the source.
+        if((!diceMaxKey.isEmpty()) || (!diceAvgKey.isEmpty()))
+        {
+            const bool useMax = !diceMaxKey.isEmpty();
+            const QString sourceKey = useMax ? diceMaxKey : diceAvgKey;
+            lineEdit->setReadOnly(true);
+
+            auto evaluate = [useMax, sourceKey, source]() -> int {
+                const QString expr = source->getValueAsString(sourceKey);
+                if(expr.isEmpty())
+                    return 0;
+                return useMax ? Dice::maximum(expr) : Dice::average(expr);
+            };
+
+            const int initialValue = evaluate();
+            lineEdit->setText(TemplateFieldFormat::applyFormatInt(initialValue, parsedFormat));
+            lineEdit->setCursorPosition(0);
+
+            if(_computeConnections.contains(lineEdit))
+                disconnect(_computeConnections[lineEdit]);
+
+            auto diceConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
+                [lineEdit, parsedFormat, sourceKey, evaluate](const QString& changedKey) {
+                    if(changedKey != sourceKey)
+                        return;
+                    lineEdit->setText(TemplateFieldFormat::applyFormatInt(evaluate(), parsedFormat));
+                    lineEdit->setCursorPosition(0);
+                });
+            _computeConnections[lineEdit] = diceConn;
+            continue;
+        }
+
+        // Computed (read-only) fields are independent of dmhValue: they evaluate
+        // an expression against the source TemplateObject and live-update via the
+        // notifier. They must not write back to the model.
+        if(!computeSpec.isEmpty())
+        {
+            ComputeExpr expr = ComputeExpr::parse(computeSpec);
+            if(expr.isValid())
+            {
+                lineEdit->setReadOnly(true);
+                const int initialValue = expr.evaluate(*source);
+                lineEdit->setText(TemplateFieldFormat::applyFormatInt(initialValue, parsedFormat));
+                lineEdit->setCursorPosition(0);
+
+                if(_computeConnections.contains(lineEdit))
+                    disconnect(_computeConnections[lineEdit]);
+
+                const QSet<QString> refs = expr.references();
+                auto computeConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
+                    [lineEdit, expr, parsedFormat, refs, source](const QString& changedKey) {
+                        if((!refs.isEmpty()) && (!refs.contains(changedKey)))
+                            return;
+                        const int v = expr.evaluate(*source);
+                        lineEdit->setText(TemplateFieldFormat::applyFormatInt(v, parsedFormat));
+                        lineEdit->setCursorPosition(0);
+                    });
+                _computeConnections[lineEdit] = computeConn;
+                continue;
+            }
+            else
+            {
+                qDebug() << "[TemplateFactory] WARNING: Invalid dmhCompute expression on widget" << lineEdit->objectName() << ":" << computeSpec;
+            }
+        }
+
         if(!keyString.isEmpty())
         {
             QString valueString;
@@ -274,14 +399,228 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 valueString = source->getValueAsString(keyString);
             }
 
-            lineEdit->setText(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
+            if(valueString.isEmpty())
+                valueString = getDefaultValue(keyString);
+
+            lineEdit->setText(TemplateFieldFormat::applyFormat(valueString, parsedFormat));
             lineEdit->setCursorPosition(0);
 
-            if(_lineConnections.contains(lineEdit))
-                disconnect(_textConnections[lineEdit]);
+            if(QValidator* validator = TemplateFieldFormat::makeValidator(parsedFormat, lineEdit))
+                lineEdit->setValidator(validator);
 
-            auto connection = connect(lineEdit, &QLineEdit::editingFinished, lineEdit, [=]() { templateFrame->handleEditBoxChange(lineEdit, source, lineEdit->text()); });
+            // Integer fields get arrow-key / +/- nudge support so the user can
+            // bump values up and down by one without retyping or reaching for
+            // the mouse. The handler is parented to the line edit so its
+            // lifetime tracks the widget; only attach once per widget.
+            if((parsedFormat.isInt) && (!lineEdit->findChild<IntFieldKeyHandler*>(QString(), Qt::FindDirectChildrenOnly)))
+                new IntFieldKeyHandler(lineEdit, parsedFormat);
+
+            if(_lineConnections.contains(lineEdit))
+                disconnect(_lineConnections[lineEdit]);
+
+            auto connection = connect(lineEdit, &QLineEdit::editingFinished, lineEdit,
+                [lineEdit, templateFrame, source, parsedFormat]() {
+                    const QString stripped = TemplateFieldFormat::stripFormat(lineEdit->text(), parsedFormat);
+                    templateFrame->handleEditBoxChange(lineEdit, source, stripped);
+                });
             _lineConnections[lineEdit] = connection;
+
+            // Reverse binding: refresh on model change. Only meaningful when
+            // the widget is bound directly to the source (not a list entry).
+            if(!hash)
+            {
+                if(_reverseConnections.contains(lineEdit))
+                    disconnect(_reverseConnections[lineEdit]);
+                auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
+                    [lineEdit, source, keyString, parsedFormat](const QString& changedKey) {
+                        if(changedKey != keyString)
+                            return;
+                        const QString fresh = source->getValueAsString(keyString);
+                        const QString formatted = TemplateFieldFormat::applyFormat(fresh, parsedFormat);
+                        if(lineEdit->text() == formatted)
+                            return;
+                        QSignalBlocker block(lineEdit);
+                        lineEdit->setText(formatted);
+                        lineEdit->setCursorPosition(0);
+                    });
+                _reverseConnections[lineEdit] = reverseConn;
+            }
+        }
+    }
+
+    // QComboBox: store currentText (string) on change
+    QList<QComboBox*> comboBoxes = widget->findChildren<QComboBox*>();
+    for(auto comboBox : comboBoxes)
+    {
+        if(!comboBox)
+            continue;
+
+        const QString keyString = comboBox->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        QString valueString;
+        if(hash)
+        {
+            if(hashAttributes)
+                valueString = convertVariantToString(hash->value(keyString), hashAttributes->value(keyString)._type);
+            else
+                valueString = hash->value(keyString).toString();
+        }
+        else
+        {
+            valueString = source->getValueAsString(keyString);
+        }
+        if(valueString.isEmpty())
+            valueString = getDefaultValue(keyString);
+
+        // Disconnect any prior write-back connection BEFORE updating the widget
+        // value, otherwise programmatic setCurrentIndex / setCurrentText will fire
+        // the previous lambda (still wired to a stale source) and falsely mark
+        // that source dirty.
+        if(_otherConnections.contains(comboBox))
+        {
+            disconnect(_otherConnections[comboBox]);
+            _otherConnections.remove(comboBox);
+        }
+
+        {
+            QSignalBlocker blocker(comboBox);
+            const int existingIndex = comboBox->findText(valueString);
+            if(existingIndex >= 0)
+                comboBox->setCurrentIndex(existingIndex);
+            else if(comboBox->isEditable())
+                comboBox->setCurrentText(valueString);
+        }
+
+        auto conn = connect(comboBox, &QComboBox::currentTextChanged, comboBox,
+            [comboBox, templateFrame, source](const QString& text) {
+                templateFrame->handleEditBoxChange(comboBox, source, text);
+            });
+        _otherConnections[comboBox] = conn;
+
+        if(!hash)
+        {
+            if(_reverseConnections.contains(comboBox))
+                disconnect(_reverseConnections[comboBox]);
+            auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, comboBox,
+                [comboBox, source, keyString](const QString& changedKey) {
+                    if(changedKey != keyString)
+                        return;
+                    const QString fresh = source->getValueAsString(keyString);
+                    if(comboBox->currentText() == fresh)
+                        return;
+                    QSignalBlocker block(comboBox);
+                    const int idx = comboBox->findText(fresh);
+                    if(idx >= 0)
+                        comboBox->setCurrentIndex(idx);
+                    else if(comboBox->isEditable())
+                        comboBox->setCurrentText(fresh);
+                });
+            _reverseConnections[comboBox] = reverseConn;
+        }
+    }
+
+    // QSpinBox: integer-valued; write back as the integer's string form
+    QList<QSpinBox*> spinBoxes = widget->findChildren<QSpinBox*>();
+    for(auto spinBox : spinBoxes)
+    {
+        if(!spinBox)
+            continue;
+
+        const QString keyString = spinBox->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        int intValue = 0;
+        if(hash)
+            intValue = hash->value(keyString).toInt();
+        else
+            intValue = source->getIntValue(keyString);
+
+        // Disconnect any prior write-back connection BEFORE setValue, otherwise
+        // the previous lambda (still bound to a stale source) fires and falsely
+        // marks that source dirty.
+        if(_otherConnections.contains(spinBox))
+        {
+            disconnect(_otherConnections[spinBox]);
+            _otherConnections.remove(spinBox);
+        }
+
+        {
+            QSignalBlocker blocker(spinBox);
+            spinBox->setValue(intValue);
+        }
+
+        auto conn = connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), spinBox,
+            [spinBox, templateFrame, source](int v) {
+                templateFrame->handleEditBoxChange(spinBox, source, QString::number(v));
+            });
+        _otherConnections[spinBox] = conn;
+
+        if(!hash)
+        {
+            if(_reverseConnections.contains(spinBox))
+                disconnect(_reverseConnections[spinBox]);
+            auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, spinBox,
+                [spinBox, source, keyString](const QString& changedKey) {
+                    if(changedKey != keyString)
+                        return;
+                    const int fresh = source->getIntValue(keyString);
+                    if(spinBox->value() == fresh)
+                        return;
+                    QSignalBlocker block(spinBox);
+                    spinBox->setValue(fresh);
+                });
+            _reverseConnections[spinBox] = reverseConn;
+        }
+    }
+
+    // QCheckBox: boolean (1 or 0); skip checkboxes embedded inside resource frames
+    QList<QCheckBox*> checkBoxes = widget->findChildren<QCheckBox*>();
+    for(auto checkBox : checkBoxes)
+    {
+        if(!checkBox)
+            continue;
+
+        const QString keyString = checkBox->property(TemplateFactory::TEMPLATE_PROPERTY).toString();
+        if(keyString.isEmpty())
+            continue;
+
+        bool boolValue = false;
+        if(hash)
+            boolValue = hash->value(keyString).toBool();
+        else
+            boolValue = source->getBoolValue(keyString);
+
+        QSignalBlocker blocker(checkBox);
+        checkBox->setChecked(boolValue);
+        blocker.unblock();
+
+        if(_otherConnections.contains(checkBox))
+            disconnect(_otherConnections[checkBox]);
+
+        auto conn = connect(checkBox, &QCheckBox::toggled, checkBox,
+            [checkBox, templateFrame, source](bool checked) {
+                templateFrame->handleEditBoxChange(checkBox, source, checked ? QStringLiteral("1") : QStringLiteral("0"));
+            });
+        _otherConnections[checkBox] = conn;
+
+        if(!hash)
+        {
+            if(_reverseConnections.contains(checkBox))
+                disconnect(_reverseConnections[checkBox]);
+            auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, checkBox,
+                [checkBox, source, keyString](const QString& changedKey) {
+                    if(changedKey != keyString)
+                        return;
+                    const bool fresh = source->getBoolValue(keyString);
+                    if(checkBox->isChecked() == fresh)
+                        return;
+                    QSignalBlocker block(checkBox);
+                    checkBox->setChecked(fresh);
+                });
+            _reverseConnections[checkBox] = reverseConn;
         }
     }
 
@@ -307,14 +646,42 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 valueString = source->getValueAsString(keyString);
             }
 
-            textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
-            textEdit->moveCursor(QTextCursor::Start);
-
+            // Disconnect any prior write-back connection BEFORE setHtml, otherwise
+            // the textChanged signal from the programmatic update will fire the
+            // previous lambda (still bound to a stale source) and falsely mark
+            // that source dirty.
             if(_textConnections.contains(textEdit))
+            {
                 disconnect(_textConnections[textEdit]);
+                _textConnections.remove(textEdit);
+            }
+
+            {
+                QSignalBlocker blocker(textEdit);
+                textEdit->setHtml(valueString.isEmpty() ? getDefaultValue(keyString) : valueString);
+                textEdit->moveCursor(QTextCursor::Start);
+            }
 
             auto connection = connect(textEdit, &QTextEdit::textChanged, textEdit, [=]() { templateFrame->handleEditBoxChange(textEdit, source, textEdit->toPlainText().isEmpty() ? QString() : textEdit->toHtml()); });
             _textConnections[textEdit] = connection;
+
+            if(!hash)
+            {
+                if(_reverseConnections.contains(textEdit))
+                    disconnect(_reverseConnections[textEdit]);
+                auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, textEdit,
+                    [textEdit, source, keyString](const QString& changedKey) {
+                        if(changedKey != keyString)
+                            return;
+                        const QString fresh = source->getValueAsString(keyString);
+                        if(textEdit->toHtml() == fresh)
+                            return;
+                        QSignalBlocker block(textEdit);
+                        textEdit->setHtml(fresh);
+                        textEdit->moveCursor(QTextCursor::Start);
+                    });
+                _reverseConnections[textEdit] = reverseConn;
+            }
         }
     }
 
@@ -356,6 +723,124 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
         frame->installEventFilter(layout);
         frame->setLayout(layout);
     }
+
+    // dmhCondition pass: drive widget visibility from sibling field values.
+    // Syntax: "field op value" with op in ==, !=, >=, <=, >, < ; AND-join
+    // multiple clauses with ';'. Numeric compare when both sides parse as
+    // integers, else lexical compare. Hides widget when any clause fails.
+    QList<QWidget*> condWidgets = widget->findChildren<QWidget*>();
+    condWidgets.append(widget);
+    for(QWidget* condWidget : condWidgets)
+    {
+        if(!condWidget)
+            continue;
+        const QString condSpec = condWidget->property(TemplateFactory::TEMPLATE_CONDITION).toString();
+        if(condSpec.isEmpty())
+            continue;
+
+        struct Clause { QString field; QString op; QString value; };
+        QList<Clause> clauses;
+        QSet<QString> refs;
+        const QStringList rawClauses = condSpec.split(QChar(';'), Qt::SkipEmptyParts);
+        for(const QString& raw : rawClauses)
+        {
+            const QString clauseStr = raw.trimmed();
+            if(clauseStr.isEmpty())
+                continue;
+            static const QStringList ops = { QStringLiteral("=="), QStringLiteral("!="),
+                                             QStringLiteral(">="), QStringLiteral("<="),
+                                             QStringLiteral(">"),  QStringLiteral("<") };
+            int opIdx = -1;
+            QString opStr;
+            for(const QString& op : ops)
+            {
+                const int idx = clauseStr.indexOf(op);
+                if(idx > 0)
+                {
+                    opIdx = idx;
+                    opStr = op;
+                    break;
+                }
+            }
+            if(opIdx < 0)
+            {
+                qDebug() << "[TemplateFactory] WARNING: Invalid dmhCondition clause on widget" << condWidget->objectName() << ":" << clauseStr;
+                continue;
+            }
+            Clause c;
+            c.field = clauseStr.left(opIdx).trimmed();
+            c.op = opStr;
+            c.value = clauseStr.mid(opIdx + opStr.length()).trimmed();
+            if(c.field.isEmpty())
+                continue;
+            clauses.append(c);
+            refs.insert(c.field);
+        }
+        if(clauses.isEmpty())
+            continue;
+
+        auto evaluate = [clauses, source, hash, hashAttributes]() -> bool {
+            for(const Clause& c : clauses)
+            {
+                QString lhs;
+                if(hash)
+                {
+                    if(hashAttributes)
+                        lhs = convertVariantToString(hash->value(c.field), hashAttributes->value(c.field)._type);
+                    else
+                        lhs = hash->value(c.field).toString();
+                }
+                else
+                {
+                    lhs = source->getValueAsString(c.field);
+                }
+
+                bool lhsOk = false, rhsOk = false;
+                const int lhsInt = lhs.toInt(&lhsOk);
+                const int rhsInt = c.value.toInt(&rhsOk);
+                bool result = false;
+                if(lhsOk && rhsOk)
+                {
+                    if(c.op == QLatin1String("==")) result = (lhsInt == rhsInt);
+                    else if(c.op == QLatin1String("!=")) result = (lhsInt != rhsInt);
+                    else if(c.op == QLatin1String(">"))  result = (lhsInt >  rhsInt);
+                    else if(c.op == QLatin1String("<"))  result = (lhsInt <  rhsInt);
+                    else if(c.op == QLatin1String(">=")) result = (lhsInt >= rhsInt);
+                    else if(c.op == QLatin1String("<=")) result = (lhsInt <= rhsInt);
+                }
+                else
+                {
+                    const int cmp = QString::compare(lhs, c.value);
+                    if(c.op == QLatin1String("==")) result = (cmp == 0);
+                    else if(c.op == QLatin1String("!=")) result = (cmp != 0);
+                    else if(c.op == QLatin1String(">"))  result = (cmp >  0);
+                    else if(c.op == QLatin1String("<"))  result = (cmp <  0);
+                    else if(c.op == QLatin1String(">=")) result = (cmp >= 0);
+                    else if(c.op == QLatin1String("<=")) result = (cmp <= 0);
+                }
+                if(!result)
+                    return false;
+            }
+            return true;
+        };
+
+        condWidget->setVisible(evaluate());
+
+        if(_conditionConnections.contains(condWidget))
+            disconnect(_conditionConnections[condWidget]);
+
+        // Live updates only available against the model notifier (not list hashes).
+        if(!hash)
+        {
+            auto conn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, condWidget,
+                [condWidget, refs, evaluate](const QString& changedKey) {
+                    if((!refs.isEmpty()) && (!refs.contains(changedKey)))
+                        return;
+                    condWidget->setVisible(evaluate());
+                });
+            _conditionConnections[condWidget] = conn;
+        }
+    }
 }
 
 QWidget* TemplateFactory::createResourceWidget(const QString& keyString, const QString& widgetString, const QString& templateFile)
@@ -391,10 +876,17 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
     QList<QLineEdit*> lineEdits = widget->findChildren<QLineEdit*>();
     for(auto lineEdit : lineEdits)
     {
-        if((lineEdit) && (_lineConnections.contains(lineEdit)))
+        if(!lineEdit)
+            continue;
+        if(_lineConnections.contains(lineEdit))
         {
             disconnect(_lineConnections[lineEdit]);
             _lineConnections.remove(lineEdit);
+        }
+        if(_computeConnections.contains(lineEdit))
+        {
+            disconnect(_computeConnections[lineEdit]);
+            _computeConnections.remove(lineEdit);
         }
     }
 
@@ -406,6 +898,31 @@ void TemplateFactory::disconnectWidget(QWidget* widget)
             disconnect(_textConnections[textEdit]);
             _textConnections.remove(textEdit);
         }
+    }
+
+    const QList<QWidget*> others = widget->findChildren<QWidget*>();
+    for(auto other : others)
+    {
+        if((other) && (_otherConnections.contains(other)))
+        {
+            disconnect(_otherConnections[other]);
+            _otherConnections.remove(other);
+        }
+        if((other) && (_conditionConnections.contains(other)))
+        {
+            disconnect(_conditionConnections[other]);
+            _conditionConnections.remove(other);
+        }
+        if((other) && (_reverseConnections.contains(other)))
+        {
+            disconnect(_reverseConnections[other]);
+            _reverseConnections.remove(other);
+        }
+    }
+    if(_conditionConnections.contains(widget))
+    {
+        disconnect(_conditionConnections[widget]);
+        _conditionConnections.remove(widget);
     }
 }
 

@@ -1,35 +1,27 @@
 #include "conditionseditdialog.h"
 #include "ui_conditionseditdialog.h"
+#include "conditions.h"
 #include "ribbonframe.h"
-#include "combatant.h"
 #include "quickref.h"
-#include <QPainter>
+#include <QPushButton>
+#include <QLabel>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QFrame>
+#include <QDebug>
+
+const int CONDITION_GRID_COLUMNS = 5;
 
 ConditionsEditDialog::ConditionsEditDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ConditionsEditDialog)
+    ui(new Ui::ConditionsEditDialog),
+    _entries(),
+    _groupButtons(),
+    _groupFrames()
 {
     ui->setupUi(this);
-    setAttribute(Qt::WA_StyledBackground, true);
-    ui->frame->setEnabled(false);
-
-    setConditionTooltip(*ui->btnBlinded, Combatant::Condition_Blinded);
-    setConditionTooltip(*ui->btnCharmed, Combatant::Condition_Charmed);
-    setConditionTooltip(*ui->btnDeafened, Combatant::Condition_Deafened);
-    setConditionTooltip(*ui->btnFrightened, Combatant::Condition_Frightened);
-    setConditionTooltip(*ui->btnGrappled, Combatant::Condition_Grappled);
-    setConditionTooltip(*ui->btnIncapacitated, Combatant::Condition_Incapacitated);
-    setConditionTooltip(*ui->btnInvisible, Combatant::Condition_Invisible);
-    setConditionTooltip(*ui->btnParalyzed, Combatant::Condition_Paralyzed);
-    setConditionTooltip(*ui->btnPetrified, Combatant::Condition_Petrified);
-    setConditionTooltip(*ui->btnPoisoned, Combatant::Condition_Poisoned);
-    setConditionTooltip(*ui->btnProne, Combatant::Condition_Prone);
-    setConditionTooltip(*ui->btnRestrained, Combatant::Condition_Restrained);
-    setConditionTooltip(*ui->btnStunned, Combatant::Condition_Stunned);
-    setConditionTooltip(*ui->btnUnconscious, Combatant::Condition_Unconscious);
-    setConditionTooltip(*ui->btnExhaustion, Combatant::Condition_Exhaustion_1);
-
-    connect(ui->btnExhaustion, &QAbstractButton::toggled, this, &ConditionsEditDialog::setExhausted);
+    populateConditions();
 }
 
 ConditionsEditDialog::~ConditionsEditDialog()
@@ -37,120 +29,291 @@ ConditionsEditDialog::~ConditionsEditDialog()
     delete ui;
 }
 
-void ConditionsEditDialog::setConditions(int conditions)
+void ConditionsEditDialog::populateConditions()
 {
-    ui->btnBlinded->setChecked(conditions & Combatant::Condition_Blinded);
-    ui->btnCharmed->setChecked(conditions & Combatant::Condition_Charmed);
-    ui->btnDeafened->setChecked(conditions & Combatant::Condition_Deafened);
-    ui->btnFrightened->setChecked(conditions & Combatant::Condition_Frightened);
-    ui->btnGrappled->setChecked(conditions & Combatant::Condition_Grappled);
-    ui->btnIncapacitated->setChecked(conditions & Combatant::Condition_Incapacitated);
-    ui->btnInvisible->setChecked(conditions & Combatant::Condition_Invisible);
-    ui->btnParalyzed->setChecked(conditions & Combatant::Condition_Paralyzed);
-    ui->btnPetrified->setChecked(conditions & Combatant::Condition_Petrified);
-    ui->btnPoisoned->setChecked(conditions & Combatant::Condition_Poisoned);
-    ui->btnProne->setChecked(conditions & Combatant::Condition_Prone);
-    ui->btnRestrained->setChecked(conditions & Combatant::Condition_Restrained);
-    ui->btnStunned->setChecked(conditions & Combatant::Condition_Stunned);
-    ui->btnUnconscious->setChecked(conditions & Combatant::Condition_Unconscious);
-
-    bool exhausted = conditions & (Combatant::Condition_Exhaustion_1 |
-                                   Combatant::Condition_Exhaustion_2 |
-                                   Combatant::Condition_Exhaustion_3 |
-                                   Combatant::Condition_Exhaustion_4 |
-                                   Combatant::Condition_Exhaustion_5);
-    ui->btnExhaustion->setChecked(exhausted);
-    if(exhausted)
+    Conditions* conditions = Conditions::activeConditions();
+    if(!conditions)
     {
-        ui->btnExhaustion1->setChecked(conditions & Combatant::Condition_Exhaustion_1);
-        ui->btnExhaustion2->setChecked(conditions & Combatant::Condition_Exhaustion_2);
-        ui->btnExhaustion3->setChecked(conditions & Combatant::Condition_Exhaustion_3);
-        ui->btnExhaustion4->setChecked(conditions & Combatant::Condition_Exhaustion_4);
-        ui->btnExhaustion5->setChecked(conditions & Combatant::Condition_Exhaustion_5);
+        qDebug() << "[ConditionsEditDialog] ERROR: No active conditions available, dialog will be blank";
+        return;
+    }
+
+    QList<ConditionDefinition> condDefs = conditions->getConditions();
+    qDebug() << "[ConditionsEditDialog] Building UI with" << condDefs.count() << "condition definitions";
+
+    // Separate non-grouped and grouped definitions
+    QList<ConditionDefinition> ungrouped;
+    QMap<QString, QList<ConditionDefinition>> groups; // ordered by first appearance
+    for(const ConditionDefinition& def : condDefs)
+    {
+        if(def.group.isEmpty())
+            ungrouped.append(def);
+        else
+            groups[def.group].append(def);
+    }
+
+    // Pass 1: lay out non-grouped conditions in the grid
+    int row = 0;
+    int col = 0;
+    for(const ConditionDefinition& def : ungrouped)
+    {
+        QPushButton* btn = new QPushButton(ui->scrollAreaWidgetContents);
+        btn->setCheckable(true);
+        btn->setChecked(false);
+        btn->setFlat(true);
+        btn->setAutoDefault(false);
+
+        QString iconPath = conditions->getConditionIconPath(def.id);
+        if(!iconPath.isEmpty())
+            btn->setIcon(QIcon(iconPath));
+
+        setConditionTooltip(*btn, def.id);
+
+        QLabel* label = new QLabel(def.title, ui->scrollAreaWidgetContents);
+        label->setAlignment(Qt::AlignHCenter);
+
+        ui->conditionGrid->addWidget(btn, row, col);
+        ui->conditionGrid->addWidget(label, row + 1, col);
+
+        ConditionEntry entry;
+        entry.id = def.id;
+        entry.group = QString();
+        entry.button = btn;
+        entry.label = label;
+        _entries.append(entry);
+
+        col++;
+        if(col >= CONDITION_GRID_COLUMNS)
+        {
+            col = 0;
+            row += 2;
+        }
+    }
+
+    // Advance past the last non-grouped row
+    if(col != 0)
+        row += 2;
+
+    // Pass 2: lay out each group as a framed section below the grid
+    for(auto it = groups.begin(); it != groups.end(); ++it)
+    {
+        const QString& groupName = it.key();
+        const QList<ConditionDefinition>& defs = it.value();
+        if(defs.isEmpty())
+            continue;
+
+        // Group frame with a visible border
+        QFrame* groupFrame = new QFrame(ui->scrollAreaWidgetContents);
+        groupFrame->setFrameShape(QFrame::StyledPanel);
+        groupFrame->setFrameShadow(QFrame::Raised);
+        groupFrame->setStyleSheet(QStringLiteral("background: transparent;"));
+        QHBoxLayout* frameLayout = new QHBoxLayout(groupFrame);
+        frameLayout->setContentsMargins(4, 4, 4, 4);
+        frameLayout->setSpacing(6);
+        _groupFrames[groupName] = groupFrame;
+
+        // Master toggle: icon button + label stacked vertically
+        QWidget* masterWidget = new QWidget(groupFrame);
+        QVBoxLayout* masterLayout = new QVBoxLayout(masterWidget);
+        masterLayout->setContentsMargins(0, 0, 0, 0);
+        masterLayout->setSpacing(2);
+
+        QPushButton* groupBtn = new QPushButton(masterWidget);
+        groupBtn->setCheckable(true);
+        groupBtn->setChecked(false);
+        groupBtn->setFlat(true);
+        groupBtn->setAutoDefault(false);
+        groupBtn->setStyleSheet(QStringLiteral(
+            "QPushButton { border: 1px solid transparent; background: transparent; }"
+            "QPushButton:checked { border: 2px solid rgb(115, 18, 0); background-color: rgba(50, 50, 50, 50); border-radius: 4px; }"
+        ));
+        QString iconPath = conditions->getConditionIconPath(defs.first().id);
+        if(!iconPath.isEmpty())
+            groupBtn->setIcon(QIcon(iconPath));
+
+        _groupButtons[groupName] = groupBtn;
+        masterLayout->addWidget(groupBtn, 0, Qt::AlignHCenter);
+
+        QString displayName = groupName.at(0).toUpper() + groupName.mid(1);
+        QLabel* groupLabel = new QLabel(displayName, masterWidget);
+        groupLabel->setAlignment(Qt::AlignHCenter);
+        masterLayout->addWidget(groupLabel);
+
+        frameLayout->addWidget(masterWidget, 0, Qt::AlignVCenter);
+
+        // Sub-buttons for each level
+        for(const ConditionDefinition& def : defs)
+        {
+            // Derive a short label: strip the group prefix ("Exhaustion - Level 1" -> "Level 1")
+            QString shortLabel = def.description;
+            QString prefix = displayName + QStringLiteral(" - ");
+            if(shortLabel.startsWith(prefix, Qt::CaseInsensitive))
+                shortLabel = shortLabel.mid(prefix.length());
+
+            QPushButton* btn = new QPushButton(shortLabel, groupFrame);
+            btn->setCheckable(true);
+            btn->setChecked(false);
+            btn->setAutoDefault(false);
+            btn->setEnabled(false);
+            btn->setStyleSheet(QStringLiteral(
+                "QPushButton { border: 1px solid transparent; background: transparent; }"
+                "QPushButton:checked { border: 1px solid rgb(115, 18, 0); background-color: rgba(50, 50, 50, 50); border-radius: 2px; }"
+                ));
+
+            setConditionTooltip(*btn, def.id);
+            frameLayout->addWidget(btn);
+
+            ConditionEntry entry;
+            entry.id = def.id;
+            entry.group = groupName;
+            entry.button = btn;
+            entry.label = nullptr;
+            _entries.append(entry);
+        }
+
+        frameLayout->addStretch();
+
+        // Enable/disable sub-buttons when master is toggled
+        connect(groupBtn, &QPushButton::toggled, this, [this, groupName](bool checked) {
+            for(ConditionEntry& entry : _entries)
+            {
+                if(entry.group == groupName)
+                    entry.button->setEnabled(checked);
+            }
+        });
+
+        ui->conditionGrid->addWidget(groupFrame, row, 0, 1, CONDITION_GRID_COLUMNS);
+        row++;
     }
 }
 
-int ConditionsEditDialog::getConditions() const
+void ConditionsEditDialog::setConditionList(const QStringList& conditions)
 {
-    int conditions = 0;
+    // Uncheck everything
+    for(ConditionEntry& entry : _entries)
+        entry.button->setChecked(false);
+    for(auto it = _groupButtons.begin(); it != _groupButtons.end(); ++it)
+        it.value()->setChecked(false);
 
-    conditions |= ui->btnBlinded->isChecked() ? Combatant::Condition_Blinded : 0;
-    conditions |= ui->btnCharmed->isChecked() ? Combatant::Condition_Charmed : 0;
-    conditions |= ui->btnDeafened->isChecked() ? Combatant::Condition_Deafened : 0;
-    conditions |= ui->btnFrightened->isChecked() ? Combatant::Condition_Frightened : 0;
-    conditions |= ui->btnGrappled->isChecked() ? Combatant::Condition_Grappled : 0;
-    conditions |= ui->btnIncapacitated->isChecked() ? Combatant::Condition_Incapacitated : 0;
-    conditions |= ui->btnInvisible->isChecked() ? Combatant::Condition_Invisible : 0;
-    conditions |= ui->btnParalyzed->isChecked() ? Combatant::Condition_Paralyzed : 0;
-    conditions |= ui->btnPetrified->isChecked() ? Combatant::Condition_Petrified : 0;
-    conditions |= ui->btnPoisoned->isChecked() ? Combatant::Condition_Poisoned : 0;
-    conditions |= ui->btnProne->isChecked() ? Combatant::Condition_Prone : 0;
-    conditions |= ui->btnRestrained->isChecked() ? Combatant::Condition_Restrained : 0;
-    conditions |= ui->btnStunned->isChecked() ? Combatant::Condition_Stunned : 0;
-    conditions |= ui->btnUnconscious->isChecked() ? Combatant::Condition_Unconscious : 0;
-
-    if(ui->btnExhaustion->isChecked())
+    // Determine which groups need enabling, then enable them first
+    QSet<QString> activeGroups;
+    for(const QString& id : conditions)
     {
-        conditions |= ui->btnExhaustion1->isChecked() ? Combatant::Condition_Exhaustion_1 : 0;
-        conditions |= ui->btnExhaustion2->isChecked() ? Combatant::Condition_Exhaustion_2 : 0;
-        conditions |= ui->btnExhaustion3->isChecked() ? Combatant::Condition_Exhaustion_3 : 0;
-        conditions |= ui->btnExhaustion4->isChecked() ? Combatant::Condition_Exhaustion_4 : 0;
-        conditions |= ui->btnExhaustion5->isChecked() ? Combatant::Condition_Exhaustion_5 : 0;
+        for(const ConditionEntry& entry : _entries)
+        {
+            if(entry.id == id && !entry.group.isEmpty())
+            {
+                activeGroups.insert(entry.group);
+                break;
+            }
+        }
     }
 
-    return conditions;
+    // Enable group masters (this triggers the toggled signal, which enables sub-buttons)
+    for(const QString& group : activeGroups)
+    {
+        if(_groupButtons.contains(group))
+            _groupButtons[group]->setChecked(true);
+    }
+
+    // Now check the individual condition buttons
+    for(const QString& id : conditions)
+    {
+        for(ConditionEntry& entry : _entries)
+        {
+            if(entry.id == id)
+            {
+                entry.button->setChecked(true);
+                break;
+            }
+        }
+    }
 }
 
-void ConditionsEditDialog::setExhausted(bool exhausted)
+QStringList ConditionsEditDialog::getConditionList() const
 {
-    ui->frame->setEnabled(exhausted);
+    QStringList result;
+
+    for(const ConditionEntry& entry : _entries)
+    {
+        if(!entry.button->isChecked())
+            continue;
+
+        if(!entry.group.isEmpty())
+        {
+            if(_groupButtons.contains(entry.group) && _groupButtons[entry.group]->isChecked())
+                result.append(entry.id);
+        }
+        else
+        {
+            result.append(entry.id);
+        }
+    }
+
+    return result;
 }
 
 void ConditionsEditDialog::showEvent(QShowEvent *event)
 {
-    Q_UNUSED(event);
+    QDialog::showEvent(event);
 
     int ribbonHeight = RibbonFrame::getRibbonHeight();
-    QFontMetrics metrics = ui->lblIncapacitated->fontMetrics();
-    int buttonWidth = metrics.horizontalAdvance(ui->lblIncapacitated->text());
+    if(ribbonHeight <= 0)
+        return;
 
-    setButtonSize(*ui->lblBlinded, *ui->btnBlinded, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblCharmed, *ui->btnCharmed, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblDeafened, *ui->btnDeafened, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblFrightened, *ui->btnFrightened, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblExhaustion, *ui->btnExhaustion, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblGrappled, *ui->btnGrappled, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblIncapacitated, *ui->btnIncapacitated, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblInvisible, *ui->btnInvisible, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblParalyzed, *ui->btnParalyzed, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblPetrified, *ui->btnPetrified, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblPoisoned, *ui->btnPoisoned, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblProne, *ui->btnProne, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblRestrained, *ui->btnRestrained, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblStunned, *ui->btnStunned, ribbonHeight, buttonWidth);
-    setButtonSize(*ui->lblUnconscious, *ui->btnUnconscious, ribbonHeight, buttonWidth);
+    // Find the widest label text to use as the uniform width for all buttons and labels
+    int maxLabelWidth = 0;
+    QFontMetrics metrics = fontMetrics();
+    for(const ConditionEntry& entry : _entries)
+    {
+        if(entry.label)
+        {
+            int w = metrics.horizontalAdvance(entry.label->text());
+            if(w > maxLabelWidth)
+                maxLabelWidth = w;
+        }
+    }
+
+    int labelHeight = RibbonFrame::getLabelHeight(metrics, ribbonHeight);
+    int iconDim = ribbonHeight - labelHeight;
+
+    // Use the wider of the icon dimension and the widest label
+    int cellWidth = qMax(iconDim, maxLabelWidth);
+
+    // Apply uniform sizing to all non-grouped condition buttons and labels
+    for(ConditionEntry& entry : _entries)
+    {
+        if(entry.label && entry.group.isEmpty())
+        {
+            RibbonFrame::setButtonSize(*entry.button, cellWidth, iconDim);
+            entry.button->setIconSize(QSize(iconDim * 2 / 3, iconDim * 2 / 3));
+            RibbonFrame::setWidgetSize(*entry.label, cellWidth, labelHeight);
+        }
+    }
+
+    // Size group master buttons the same way
+    for(auto it = _groupButtons.begin(); it != _groupButtons.end(); ++it)
+    {
+        RibbonFrame::setButtonSize(*it.value(), iconDim, iconDim);
+        it.value()->setIconSize(QSize(iconDim * 2 / 3, iconDim * 2 / 3));
+    }
 }
 
-void ConditionsEditDialog::setButtonSize(QLabel& label, QPushButton& button, int frameHeight, int buttonWidth)
+void ConditionsEditDialog::setConditionTooltip(QPushButton& button, const QString& conditionId)
 {
-    QFontMetrics metrics = label.fontMetrics();
-    int labelHeight = RibbonFrame::getLabelHeight(metrics, frameHeight);
-    int iconDim = frameHeight - labelHeight;
+    Conditions* conditions = Conditions::activeConditions();
+    if(!conditions)
+        return;
 
-    RibbonFrame::setWidgetSize(label, buttonWidth, labelHeight);
-    RibbonFrame::setButtonSize(button, buttonWidth, iconDim);
-}
+    QString title = conditions->getConditionTitle(conditionId);
+    QString conditionText = QString("<b>") + title + QString("</b>");
 
-void ConditionsEditDialog::setConditionTooltip(QPushButton& button, Combatant::Condition condition)
-{
-    QString conditionText = QString("<b>") + Combatant::getConditionTitle(condition) + QString("</b>");
     if(QuickRef::Instance())
     {
-        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, title);
         if(conditionData)
             conditionText += QString("<p>") + conditionData->getOverview();
     }
 
     button.setToolTip(conditionText);
 }
-

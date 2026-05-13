@@ -54,6 +54,8 @@ public slots:
     void hyperlinkClicked();
     void setTextWidth(int textWidth);
 
+    void toggleCheckbox();
+
     void setAnimated(bool animated);
     void setScrollSpeed(int scrollSpeed);
     void rewind();
@@ -116,6 +118,9 @@ protected slots:
     void triggerUpdateAnchor();
 
     void sceneRectUpdated(const QSize& size);
+
+private slots:
+    void onFormatterChanged();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;

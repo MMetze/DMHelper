@@ -62,6 +62,7 @@ public:
     QString getLastMonster() const;
 
     int getFearCount() const;
+    bool getShowTokenHealthBars() const;
 
     Ruleset& getRuleset();
     const Ruleset& getRuleset() const;
@@ -69,11 +70,19 @@ public:
     bool isValid() const;
     void cleanupCampaign(bool deleteAll);
 
+    // Major version of the campaign file that was last loaded into this object
+    // (zero if this campaign was created from scratch and has never been read
+    // from disk). MainWindow uses this to decide whether to write a one-time
+    // pre-v3 backup before the first save under the new format.
+    int getLoadedMajorVersion() const { return _loadedMajorVersion; }
+    void clearLoadedMajorVersion() { _loadedMajorVersion = 0; }
+
 signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
     void fearChanged(int fearCount);
     void overlaysChanged();
+    void showTokenHealthBarsChanged(bool show);
 
 public slots:
     void setDate(const BasicDate& date);
@@ -82,6 +91,7 @@ public slots:
     void addNote(const QString& note);
     void setLastMonster(const QString& monsterName);
     void setFearCount(int fearCount);
+    void setShowTokenHealthBars(bool show);
     bool validateCampaignIds();
     bool correctDuplicateIds();
 
@@ -104,6 +114,7 @@ protected:
     QStringList _notes;
     QString _lastMonster;
     int _fearCount; // Todo: add ruleset-specific data storage
+    bool _showTokenHealthBars;
 
     Ruleset _ruleset;
 
@@ -115,6 +126,9 @@ protected:
 
     QList<SoundboardGroup*> _soundboardGroups;
     QList<Overlay*> _overlays;
+
+    // See getLoadedMajorVersion(). Set during inputXML(); not serialised.
+    int _loadedMajorVersion = 0;
 };
 
 #endif // CAMPAIGN_H

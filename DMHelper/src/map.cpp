@@ -643,15 +643,7 @@ void Map::uninitialize()
 
 void Map::undoPaint()
 {
-    //emit executeUndo();
 }
-
-/*
-void Map::updateFoW()
-{
-    //emit requestFoWUpdate();
-}
-*/
 
 void Map::setParty(Party* party)
 {

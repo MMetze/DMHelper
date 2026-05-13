@@ -134,7 +134,6 @@ void WelcomeFrame::setMRUTexts()
     if(!_mruHandler)
         return;
 
-    // Clear the MRU list
     QLayoutItem *child;
     while((child = ui->groupMRUList->layout()->takeAt(0)) != nullptr)
     {
@@ -142,7 +141,6 @@ void WelcomeFrame::setMRUTexts()
         delete child;
     }
 
-    // Add the MRU list
     if(_mruHandler->getMRUList().isEmpty())
     {
         QLabel* newMRU = new QLabel();

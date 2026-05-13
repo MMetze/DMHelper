@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QColor>
+#include <QChar>
 
 class QTextEdit;
 class QTextCharFormat;
@@ -27,6 +28,7 @@ public slots:
     void setUnterline(bool underline);
     void setColor(const QColor& color);
     void setAlignment(Qt::Alignment alignment);
+    void toggleCheckbox();
 
 signals:
     void fontFamilyChanged(const QString& fontFamily);

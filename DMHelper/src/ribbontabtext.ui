@@ -52,7 +52,7 @@
      <item>
       <spacer name="verticalSpacer_2">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -83,14 +83,14 @@
         <number>100</number>
        </property>
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -106,7 +106,7 @@
         <string>Text Width </string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -127,7 +127,7 @@
       </size>
      </property>
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
     </widget>
    </item>
@@ -140,10 +140,10 @@
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
     </widget>
    </item>
@@ -208,7 +208,7 @@
         <string>Paste Rich</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -272,7 +272,71 @@
         <string>Hyperlink</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_8">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnCheckbox">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Add a checkbox</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_check.png</normaloff>:/img/data/icon_check.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblCheckbox">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Checkbox</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -293,7 +357,7 @@
       </size>
      </property>
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
     </widget>
    </item>
@@ -317,7 +381,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a hyperlink</string>
+        <string>Toggle animation</string>
        </property>
        <property name="text">
         <string/>
@@ -358,7 +422,7 @@
         <string>Animation</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -372,7 +436,7 @@
      <item>
       <spacer name="verticalSpacer_4">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -401,7 +465,7 @@
      <item>
       <spacer name="verticalSpacer_3">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -417,7 +481,7 @@
         <string>Speed</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -443,7 +507,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Set the background image</string>
+          <string>Play or pause the animation</string>
        </property>
        <property name="text">
         <string/>
@@ -472,7 +536,7 @@
         <string>Play</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -498,7 +562,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Set the background image</string>
+          <string>Restart the animation</string>
        </property>
        <property name="text">
         <string/>
@@ -527,7 +591,7 @@
         <string>Rewind</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -548,7 +612,7 @@
       </size>
      </property>
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
     </widget>
    </item>
@@ -601,7 +665,7 @@
         <string>Translate</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -656,7 +720,7 @@
         <string>Code</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+        <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
        </property>
       </widget>
      </item>
@@ -677,14 +741,14 @@
       </size>
      </property>
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
     </widget>
    </item>
    <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -703,10 +767,10 @@
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
     </widget>
    </item>

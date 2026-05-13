@@ -1,6 +1,9 @@
 #include "dmh_vlc.h"
 #include "videoplayergl.h"
 #include "videoplayerglvideo.h"
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
 #include <QTimerEvent>
 #include <QDebug>
 
@@ -15,79 +18,38 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     _currentVideo(nullptr)
 {
 #ifndef Q_OS_MAC
-    #ifdef VIDEO_CREATE_CACHE
-        // Special case version to create a new cache file - only needed for a new version of VLC
+    bool needsReset = isCacheStale();
+
+    if(needsReset)
+    {
+        qInfo() << "[DMH_VLC] VLC plugins cache is stale or missing, regenerating...";
         const char *args[] = {
             "--reset-plugins-cache",
             "--plugins-cache",
             "--plugins-scan",
-            "-vvv",
-            ""
+            "--verbose=0",
+            "--file-caching=100",
+            "--clock-jitter=0"
         };
-
         _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
 
-    #else
-        #ifdef VIDEO_DEBUG_MESSAGES
-        //    const char *verbose_args = "-vvv";
-        //    _vlcInstance = libvlc_new(1, &verbose_args);
-
-            /*
-            // Special case version to create a new cache file - only needed for a new version of VLC
-            const char *args[] = {
-                "--reset-plugins-cache",
-                "--plugins-cache",
-                "--plugins-scan",
-        #ifdef QT_DEBUG
-                "-vvv",
-        #endif
-                ""
-            };
-            */
-
-            // Normal run-time version
-            const char *args[] = {
-                "--no-reset-plugins-cache",
-                "--plugins-cache",
-                "--no-plugins-scan",
-        #ifdef QT_DEBUG
-                "-vvv",
-        #endif
-                ""
-            };
-
-            _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-
-        #else
-            // _vlcInstance = libvlc_new(0, nullptr);
-            // Normal run-time version
-            const char *args[] = {
-                "--no-reset-plugins-cache",
-                "--plugins-cache",
-                "--verbose=0",
-                ""
-            };
-
-            _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-        #endif
-    #endif
-#else
-    #ifdef VIDEO_DEBUG_MESSAGES
-        // Normal run-time version
+        if(_vlcInstance)
+            writeCacheSentinel();
+    }
+    else
+    {
         const char *args[] = {
             "--no-reset-plugins-cache",
             "--plugins-cache",
             "--no-plugins-scan",
-        #ifdef QT_DEBUG
-                "-vvv",
-        #endif
-            ""
+            "--verbose=0",
+            "--file-caching=100",
+            "--clock-jitter=0"
         };
-
         _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-    #else
-        _vlcInstance = libvlc_new(0, nullptr);
-    #endif
+    }
+#else
+    _vlcInstance = libvlc_new(0, nullptr);
 #endif
 }
 
@@ -97,6 +59,38 @@ DMH_VLC::~DMH_VLC()
     {
         libvlc_release(_vlcInstance);
         _vlcInstance = nullptr;
+    }
+}
+
+bool DMH_VLC::isCacheStale()
+{
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString sentinelPath = appDir + QString("/plugins/.vlc_cache_sentinel");
+
+    QFile sentinel(sentinelPath);
+    if(!sentinel.exists())
+        return true;
+
+    if(!sentinel.open(QIODevice::ReadOnly | QIODevice::Text))
+        return true;
+
+    QString storedDir = QString::fromUtf8(sentinel.readAll()).trimmed();
+    sentinel.close();
+
+    return (storedDir != appDir);
+}
+
+void DMH_VLC::writeCacheSentinel()
+{
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString sentinelPath = appDir + QString("/plugins/.vlc_cache_sentinel");
+
+    QFile sentinel(sentinelPath);
+    if(sentinel.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+    {
+        sentinel.write(appDir.toUtf8());
+        sentinel.close();
+        qInfo() << "[DMH_VLC] VLC plugins cache regenerated for:" << appDir;
     }
 }
 

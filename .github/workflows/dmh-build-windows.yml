@@ -1,6 +1,10 @@
 name: DMHelper CI Windows Workflow
 
 on:
+  push:
+    branches: [ master, feature/linux-port ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -70,6 +74,22 @@ jobs:
         working-directory: ${{ runner.workspace }}
         run: |
           Get-ChildItem -Recurse -File
+
+      # -------------------------
+      # Smoke-test the built application
+      # -------------------------
+      - name: Smoke-test built application
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          $exe = "bin64\packages\com.dmhelper.app\data\DMHelper.exe"
+          if (-not (Test-Path $exe)) { throw "DMHelper.exe not found at $exe" }
+          $output = & $exe --smoke-test --skip-opengl 2>&1 | Out-String
+          $exitCode = $LASTEXITCODE
+          Write-Host $output
+          if ($null -ne $exitCode -and $exitCode -ne 0) { throw "Smoke test failed with exit code $exitCode" }
+          if ($output -match '"passed"\s*:\s*false') { throw "Smoke test reported failures" }
+        env:
+          QT_QPA_PLATFORM: offscreen
 
       # -------------------------
       # Upload artifacts

@@ -1,16 +1,28 @@
 #include "battledialogmodelcombatant.h"
 #include <QDomElement>
 
+const char* BattleDialogModelCombatant::DMH_KEY_NAME                = "name";
+const char* BattleDialogModelCombatant::DMH_KEY_INITIATIVE          = "dmh:initiative";
+const char* BattleDialogModelCombatant::DMH_KEY_MOVED               = "dmh:moved";
+const char* BattleDialogModelCombatant::DMH_KEY_IS_SHOWN            = "dmh:isShown";
+const char* BattleDialogModelCombatant::DMH_KEY_IS_KNOWN            = "dmh:isKnown";
+const char* BattleDialogModelCombatant::DMH_KEY_IS_DONE             = "dmh:isDone";
+const char* BattleDialogModelCombatant::DMH_KEY_HEALTH              = "dmh:health";
+const char* BattleDialogModelCombatant::DMH_KEY_CONDITIONS          = "dmh:conditions";
+const char* BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES = "dmh:perRoundResources";
+
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
     BattleDialogModelObject(QPointF(), 0.0, name, parent),
     _combatant(nullptr),
     _initiative(0),
     _sortPosition(-1),
+    _groupId(),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
     _isSelected(false),
-    _isDone(false)
+    _isDone(false),
+    _overrides()
 {
 }
 
@@ -19,11 +31,13 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     _combatant(combatant),
     _initiative(0),
     _sortPosition(-1),
+    _groupId(),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
     _isSelected(false),
-    _isDone(false)
+    _isDone(false),
+    _overrides()
 {
 }
 
@@ -32,11 +46,13 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
     _combatant(combatant),
     _initiative(initiative),
     _sortPosition(-1),
+    _groupId(),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
     _isSelected(false),
-    _isDone(false)
+    _isDone(false),
+    _overrides()
 {
 }
 
@@ -53,6 +69,9 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
     _isShown = static_cast<bool>(element.attribute("isShown", QString::number(1)).toInt());
     _isKnown = static_cast<bool>(element.attribute("isKnown", QString::number(1)).toInt());
     _isDone = static_cast<bool>(element.attribute("done", QString::number(0)).toInt());
+
+    QString groupIdStr = element.attribute("groupId");
+    _groupId = groupIdStr.isEmpty() ? QUuid() : QUuid(groupIdStr);
 }
 
 void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
@@ -64,10 +83,12 @@ void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
     _combatant = otherCombatant->_combatant;
     _initiative = otherCombatant->_initiative;
     _moved = otherCombatant->_moved;
+    _groupId = otherCombatant->_groupId;
     _isShown = otherCombatant->_isShown;
     _isKnown = otherCombatant->_isKnown;
     _isSelected = otherCombatant->_isSelected;
     _isDone = otherCombatant->_isDone;
+    _overrides = otherCombatant->_overrides;
 
     BattleDialogModelObject::copyValues(other);
 }
@@ -107,7 +128,9 @@ void BattleDialogModelCombatant::setInitiative(int initiative)
     if(_initiative != initiative)
     {
         _initiative = initiative;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_INITIATIVE), initiative);
         emit initiativeChanged(this);
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_INITIATIVE));
     }
 }
 
@@ -119,6 +142,19 @@ int BattleDialogModelCombatant::getSortPosition() const
 void BattleDialogModelCombatant::setSortPosition(int sortPosition)
 {
     _sortPosition = sortPosition;
+}
+
+QUuid BattleDialogModelCombatant::getGroupId() const
+{
+    return _groupId;
+}
+
+void BattleDialogModelCombatant::setGroupId(const QUuid& groupId)
+{
+    if(_groupId != groupId)
+    {
+        _groupId = groupId;
+    }
 }
 
 Combatant* BattleDialogModelCombatant::getCombatant() const
@@ -157,7 +193,9 @@ void BattleDialogModelCombatant::setMoved(qreal moved)
     if(_moved != moved)
     {
         _moved = moved;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_MOVED), moved);
         emit moveUpdated();
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_MOVED));
     }
 }
 
@@ -166,7 +204,9 @@ void BattleDialogModelCombatant::incrementMoved(qreal moved)
     if(moved != 0.0)
     {
         _moved += moved;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_MOVED), _moved);
         emit moveUpdated();
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_MOVED));
     }
 }
 
@@ -175,8 +215,44 @@ void BattleDialogModelCombatant::resetMoved()
     if(_moved != 0)
     {
         _moved = 0;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_MOVED), _moved);
         emit moveUpdated();
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_MOVED));
     }
+}
+
+QVariant BattleDialogModelCombatant::getOverride(const QString& key) const
+{
+    return _overrides.value(key);
+}
+
+bool BattleDialogModelCombatant::hasOverride(const QString& key) const
+{
+    return _overrides.contains(key);
+}
+
+void BattleDialogModelCombatant::setOverride(const QString& key, const QVariant& value)
+{
+    if(key.isEmpty())
+        return;
+
+    const QVariant existing = _overrides.value(key);
+    if(existing == value)
+        return;
+
+    _overrides.insert(key, value);
+    emit overrideChanged(this, key);
+}
+
+void BattleDialogModelCombatant::clearOverride(const QString& key)
+{
+    if(_overrides.remove(key))
+        emit overrideChanged(this, key);
+}
+
+QStringList BattleDialogModelCombatant::overrideKeys() const
+{
+    return _overrides.keys();
 }
 
 void BattleDialogModelCombatant::setShown(bool isShown)
@@ -184,7 +260,9 @@ void BattleDialogModelCombatant::setShown(bool isShown)
     if(_isShown != isShown)
     {
         _isShown = isShown;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_IS_SHOWN), isShown);
         emit visibilityChanged();
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_IS_SHOWN));
     }
 }
 
@@ -193,7 +271,9 @@ void BattleDialogModelCombatant::setKnown(bool isKnown)
     if(_isKnown != isKnown)
     {
         _isKnown = isKnown;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_IS_KNOWN), isKnown);
         emit visibilityChanged();
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_IS_KNOWN));
     }
 }
 
@@ -211,7 +291,9 @@ void BattleDialogModelCombatant::setDone(bool isDone)
     if(_isDone != isDone)
     {
         _isDone = isDone;
+        _overrides.insert(QString::fromLatin1(DMH_KEY_IS_DONE), isDone);
         emit combatantDoneChanged(this);
+        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_IS_DONE));
     }
 }
 
@@ -229,6 +311,9 @@ void BattleDialogModelCombatant::internalOutputXML(QDomDocument &doc, QDomElemen
     element.setAttribute("isShown", _isShown);
     element.setAttribute("isKnown", _isKnown);
     element.setAttribute("done", _isDone);
+
+    if(!_groupId.isNull())
+        element.setAttribute("groupId", _groupId.toString());
 
     BattleDialogModelObject::internalOutputXML(doc, element, targetDirectory, isExport);
 }

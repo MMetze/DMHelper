@@ -2,6 +2,7 @@
 #include "undofowpath.h"
 #include "undofowfill.h"
 #include "undofowshape.h"
+#include "undofowpolygon.h"
 #include "layerfow.h"
 #include "layerscene.h"
 #include <QPixmap>
@@ -20,7 +21,8 @@ BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     _size(10),
     _erase(true),
     _smooth(true),
-    _brushMode(DMHelper::BrushType_Circle)
+    _brushMode(DMHelper::BrushType_Circle),
+    _selectActive(false)
 
 {
     createCursor();
@@ -43,11 +45,34 @@ const QCursor& BattleFrameMapDrawer::getCursor() const
 
 void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers)
 {
-    Q_UNUSED(buttons);
     Q_UNUSED(modifiers);
 
     if(!_scene)
         return;
+
+    if(_brushMode == DMHelper::BrushType_Polygon)
+    {
+        if(buttons & Qt::RightButton)
+        {
+            applyPolygon();
+        }
+        else if(buttons & Qt::LeftButton)
+        {
+            _polygonPoints.append(pos.toPoint());
+            emit polygonChanged(QPolygonF(_polygonPoints));
+        }
+        return;
+    }
+
+    if(_brushMode == DMHelper::BrushType_Select)
+    {
+        if(buttons & Qt::LeftButton)
+        {
+            _mouseDownPos = pos;
+            _selectActive = true;
+        }
+        return;
+    }
 
     _mouseDownPos = pos;
     _mouseDown = true;
@@ -67,6 +92,16 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos, const Qt::MouseB
     Q_UNUSED(buttons);
     Q_UNUSED(modifiers);
 
+    if(_brushMode == DMHelper::BrushType_Polygon)
+        return;
+
+    if(_brushMode == DMHelper::BrushType_Select)
+    {
+        if(_selectActive)
+            emit selectRectChanged(QRectF(_mouseDownPos, pos).normalized());
+        return;
+    }
+
     if((!_undoPath) || (!_undoPath->getLayer()))
         return;
 
@@ -79,6 +114,21 @@ void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos, const Qt::MouseButt
     Q_UNUSED(pos);
     Q_UNUSED(buttons);
     Q_UNUSED(modifiers);
+
+    if(_brushMode == DMHelper::BrushType_Polygon)
+        return;
+
+    if(_brushMode == DMHelper::BrushType_Select)
+    {
+        if(_selectActive)
+        {
+            QRect selectRect = QRectF(_mouseDownPos, pos).normalized().toRect();
+            drawRect(selectRect);
+            _selectActive = false;
+            emit selectRectCancelled();
+        }
+        return;
+    }
 
     endPath();
     emit dirty();
@@ -183,6 +233,11 @@ void BattleFrameMapDrawer::setBrushMode(int brushMode)
     if(_brushMode == brushMode)
         return;
 
+    if(_brushMode == DMHelper::BrushType_Polygon && !_polygonPoints.isEmpty())
+        cancelPolygon();
+    if(_brushMode == DMHelper::BrushType_Select && _selectActive)
+        cancelSelect();
+
     _brushMode = brushMode;
     endPath();
     createCursor();
@@ -194,8 +249,52 @@ void BattleFrameMapDrawer::endPath()
     _mouseDown = false;
 }
 
+void BattleFrameMapDrawer::applyPolygon()
+{
+    if(_polygonPoints.count() >= 3 && _scene)
+    {
+        LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(layer)
+        {
+            QPolygon adjustedPolygon = _polygonPoints;
+            adjustedPolygon.translate(-layer->getPosition());
+            UndoFowPolygon* undoPolygon = new UndoFowPolygon(layer, MapEditPolygon(adjustedPolygon, _erase, false));
+            layer->getUndoStack()->push(undoPolygon);
+            emit dirty();
+        }
+    }
+    _polygonPoints.clear();
+    emit polygonCancelled();
+}
+
+void BattleFrameMapDrawer::cancelPolygon()
+{
+    _polygonPoints.clear();
+    emit polygonCancelled();
+}
+
+void BattleFrameMapDrawer::cancelSelect()
+{
+    _selectActive = false;
+    emit selectRectCancelled();
+}
+
 void BattleFrameMapDrawer::createCursor()
 {
+    if(_brushMode == DMHelper::BrushType_Polygon)
+    {
+        _cursor = QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        emit cursorChanged(_cursor);
+        return;
+    }
+
+    if(_brushMode == DMHelper::BrushType_Select)
+    {
+        _cursor = QCursor(QPixmap(":/img/data/icon_selectcursor.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        emit cursorChanged(_cursor);
+        return;
+    }
+
     int cursorSize = _gridScale * _zoomScale * _size / 5;
     QPixmap cursorPixmap(QSize(cursorSize, cursorSize));
     cursorPixmap.fill(Qt::transparent);

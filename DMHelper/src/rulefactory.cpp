@@ -3,6 +3,9 @@
 #include "ruleinitiative5e.h"
 #include "ruleinitiativegroup.h"
 #include "ruleinitiativegroupmonsters.h"
+#include "ruleinitiativenone.h"
+#include "rulehealth5e.h"
+#include "rulehealthdaggerheart.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QFile>
@@ -64,6 +67,9 @@ RuleInitiative* RuleFactory::createRuleInitiative(const QString& ruleInitiativeT
     if(ruleInitiativeType == RuleInitiative2e::InitiativeType)
         return new RuleInitiative2e(parent);
 
+    if(ruleInitiativeType == RuleInitiativeNone::InitiativeType)
+        return new RuleInitiativeNone(parent);
+
     return nullptr;
 }
 
@@ -79,7 +85,34 @@ QStringList RuleFactory::getRuleInitiativeNames()
     result << RuleInitiative5e::InitiativeType << RuleInitiative5e::InitiativeDescription
            << RuleInitiative2e::InitiativeType << RuleInitiative2e::InitiativeDescription
            << RuleInitiativeGroup::InitiativeType << RuleInitiativeGroup::InitiativeDescription
-           << RuleInitiativeGroupMonsters::InitiativeType << RuleInitiativeGroupMonsters::InitiativeDescription;
+           << RuleInitiativeGroupMonsters::InitiativeType << RuleInitiativeGroupMonsters::InitiativeDescription
+           << RuleInitiativeNone::InitiativeType << RuleInitiativeNone::InitiativeDescription;
+
+    return result;
+}
+
+RuleHealth* RuleFactory::createRuleHealth(const QString& ruleHealthType, QObject* parent)
+{
+    if(ruleHealthType == RuleHealth5e::HealthType)
+        return new RuleHealth5e(parent);
+
+    if(ruleHealthType == RuleHealthDaggerheart::HealthType)
+        return new RuleHealthDaggerheart(parent);
+
+    return nullptr;
+}
+
+QString RuleFactory::getRuleHealthDefault()
+{
+    return RuleHealth5e::HealthType;
+}
+
+QStringList RuleFactory::getRuleHealthNames()
+{
+    QStringList result;
+
+    result << RuleHealth5e::HealthType << RuleHealth5e::HealthDescription
+           << RuleHealthDaggerheart::HealthType << RuleHealthDaggerheart::HealthDescription;
 
     return result;
 }
@@ -186,11 +219,20 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
         if(!newRuleset._name.isEmpty())
         {
             newRuleset._initiative = rulesetElement.attribute(QString("initiative"));
+            newRuleset._health = rulesetElement.attribute(QString("health"));
             newRuleset._characterData = rulesetElement.attribute(QString("characterdata"));
             newRuleset._characterUI = rulesetElement.attribute(QString("characterui"));
             newRuleset._monsterData = rulesetElement.attribute(QString("monsterdata"));
             newRuleset._monsterUI = rulesetElement.attribute(QString("monsterui"));
             newRuleset._bestiary = rulesetElement.attribute(QString("bestiary"));
+            newRuleset._spellbook = rulesetElement.attribute(QString("spellbook"));
+            newRuleset._spellData = rulesetElement.attribute(QString("spelldata"));
+            newRuleset._spellUI = rulesetElement.attribute(QString("spellui"));
+            newRuleset._combatantUI = rulesetElement.attribute(QString("combatantui"));
+            newRuleset._combatantFrameUI = rulesetElement.attribute(QString("combatantframeui"));
+            newRuleset._combatantFrameData = rulesetElement.attribute(QString("combatantframedata"));
+            newRuleset._lairActionUI = rulesetElement.attribute(QString("lairactionui"));
+            newRuleset._conditionsFile = rulesetElement.attribute(QString("conditions"));
             newRuleset._rulesetDir = QFileInfo(rulesetFile).absolutePath();
             newRuleset._combatantDone = static_cast<bool>(rulesetElement.attribute(QString("combatantdone")).toInt());
             newRuleset._hitPointsCountDown = rulesetElement.hasAttribute("hitPointsCountDown") ? static_cast<bool>(rulesetElement.attribute("hitPointsCountDown").toInt()) : true;

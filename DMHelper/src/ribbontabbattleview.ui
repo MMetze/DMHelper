@@ -767,7 +767,7 @@
        <item>
         <widget class="QSpinBox" name="spinLineWidth">
          <property name="toolTip">
-          <string>Set the scale of the party icon</string>
+            <string>Set the line width</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>

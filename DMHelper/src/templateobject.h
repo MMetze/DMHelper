@@ -9,6 +9,7 @@
 
 class TemplateFactory;
 class DMHAttribute;
+class TemplateObjectNotifier;
 
 class TemplateObject
 {
@@ -18,6 +19,11 @@ public:
 
     TemplateFactory* getFactory() const;
     void setFactory(TemplateFactory* factory);
+
+    // Lazily-created notifier used by computed widgets and other consumers
+    // that need to react to per-key value changes without forcing the entire
+    // TemplateObject hierarchy to be QObjects. Always non-null.
+    TemplateObjectNotifier* notifier() const;
 
     // For support of GlobalSearch_Interface
     bool matchSearchString(const QString& searchString, QString& result) const;
@@ -68,6 +74,7 @@ protected:
     virtual void writeElementListValue(QDomDocument &doc, QDomElement& element, const QString& key, const QVariant& value) const;
 
     TemplateFactory* _factory;
+    mutable TemplateObjectNotifier* _notifier;
 };
 
 #endif // TEMPLATEOBJECT_H

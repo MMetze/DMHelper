@@ -2,7 +2,6 @@
 #define AUDIOPLAYBACKFRAME_H
 
 #include <QFrame>
-#include "audioplayer.h"
 
 namespace Ui {
 class AudioPlaybackFrame;
@@ -15,6 +14,13 @@ class AudioPlaybackFrame : public QFrame
     Q_OBJECT
 
 public:
+    enum State
+    {
+        Stopped,
+        Playing,
+        Paused
+    };
+
     explicit AudioPlaybackFrame(QWidget *parent = nullptr);
     ~AudioPlaybackFrame();
 
@@ -28,7 +34,7 @@ public slots:
     void setDuration(qint64 duration);
     void setPosition(qint64 position);
     void trackChanged(AudioTrack* track);
-    void stateChanged(AudioPlayer::State state);
+    void stateChanged(AudioPlaybackFrame::State state);
     void setVolume(int volume);
 
 protected:

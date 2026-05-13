@@ -2,6 +2,7 @@
 #include "ui_dicerolldialogcombatants.h"
 #include "battlecombatantwidget.h"
 #include "battledialogmodelcombatant.h"
+#include "conditions.h"
 #include "quickref.h"
 #include "characterv2.h"
 #include "character.h" // HACK - needed for "AbilityScorePair"
@@ -18,7 +19,7 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
     _combatants(combatants),
     _modifiers(),
     _fireAndForget(false),
-    _conditions(0),
+    _conditions(),
     _conditionGrid(nullptr),
     _mouseDown(false),
     _mouseDownPos()
@@ -72,7 +73,7 @@ void DiceRollDialogCombatants::setSaveType(const QString& saveType)
         ui->cmbType->setCurrentIndex(index);
 }
 
-void DiceRollDialogCombatants::setConditions(int conditions)
+void DiceRollDialogCombatants::setConditions(const QStringList& conditions)
 {
     if(_conditions == conditions)
         return;
@@ -181,11 +182,11 @@ void DiceRollDialogCombatants::modifierTypeChanged()
 
 void DiceRollDialogCombatants::editConditions()
 {
-    ConditionsEditDialog dlg;
-    dlg.setConditions(_conditions);
+    ConditionsEditDialog dlg(this);
+    dlg.setConditionList(_conditions);
     int result = dlg.exec();    
     if(result == QDialog::Accepted)
-        setConditions(dlg.getConditions());
+        setConditions(dlg.getConditionList());
 }
 
 void DiceRollDialogCombatants::applyEffect()
@@ -212,7 +213,7 @@ void DiceRollDialogCombatants::applyEffect()
                 else
                 {
                     combatantWidget->applyDamage(damage);
-                    if(_conditions != 0)
+                    if(!_conditions.isEmpty())
                         combatantWidget->applyConditions(_conditions);
                 }
             }
@@ -333,12 +334,8 @@ void DiceRollDialogCombatants::updateConditionLayout()
     _conditionGrid->setSpacing(CONDITION_FRAME_SPACING);
     ui->conditionScrollAreaWidgetContents->setLayout(_conditionGrid);
 
-    for(int i = 0; i < Combatant::getConditionCount(); ++i)
-    {
-        Combatant::Condition condition = Combatant::getConditionByIndex(i);
-        if(_conditions & condition)
-            addCondition(condition);
-    }
+    for(const QString& condId : _conditions)
+        addCondition(condId);
 
     int spacingColumn = _conditionGrid->columnCount();
 
@@ -352,19 +349,24 @@ void DiceRollDialogCombatants::updateConditionLayout()
     ui->conditionScrollAreaWidgetContents->update();
 }
 
-void DiceRollDialogCombatants::addCondition(Combatant::Condition condition)
+void DiceRollDialogCombatants::addCondition(const QString& conditionId)
 {
     if(!_conditionGrid)
         return;
 
-    QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
-    QLabel* conditionLabel = new QLabel(this);
-    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
+    Conditions* conds = Conditions::activeConditions();
+    if(!conds)
+        return;
 
-    QString conditionText = QString("<b>") + Combatant::getConditionDescription(condition) + QString("</b>");
+    QString iconPath = conds->getConditionIconPath(conditionId);
+    QLabel* conditionLabel = new QLabel(this);
+    if(!iconPath.isEmpty())
+        conditionLabel->setPixmap(QPixmap(iconPath).scaled(40, 40));
+
+    QString conditionText = QString("<b>") + conds->getConditionDescription(conditionId) + QString("</b>");
     if(QuickRef::Instance())
     {
-        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, conds->getConditionTitle(conditionId));
         if(conditionData)
             conditionText += QString("<p>") + conditionData->getOverview();
     }

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=DMHelper
+GenericName=D&D Campaign Manager
+Comment=Dungeons & Dragons campaign management tool with battle maps, character sheets, and multimedia
+Exec=DMHelper
+Icon=DMHelper
+Categories=Game;RolePlaying;
+Terminal=false
+StartupNotify=true

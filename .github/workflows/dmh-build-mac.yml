@@ -1,6 +1,10 @@
 name: DMHelper CI macOS Workflow
 
 on:
+  push:
+    branches: [ master, feature/linux-port ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -78,6 +82,28 @@ jobs:
         working-directory: ${{ runner.workspace }}
         run: |
           find . -type f
+
+      # -------------------------
+      # Smoke-test the built application
+      # -------------------------
+      - name: Smoke-test built application
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          EXE="$APP/Contents/MacOS/DMHelper"
+          if [ ! -f "$EXE" ]; then echo "DMHelper not found at $EXE"; exit 1; fi
+          output=$("$EXE" --smoke-test --skip-opengl 2>&1) || true
+          echo "$output"
+          if echo "$output" | grep -q '"passed"\s*:\s*false'; then
+            echo "Smoke test reported failures"
+            exit 1
+          fi
+          if ! echo "$output" | grep -q '"passed"\s*:\s*true'; then
+            echo "Smoke test did not produce expected JSON output"
+            exit 1
+          fi
+        env:
+          QT_QPA_PLATFORM: offscreen
 
       # -------------------------
       # Upload artifacts

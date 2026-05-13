@@ -121,8 +121,6 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
     if(!QOpenGLContext::currentContext())
         return;
 
-    // qDebug() << "[BattleGLBackground] Creating background image objects";
-
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
@@ -205,7 +203,11 @@ void PublishGLBattleBackground::loadTexture(const QImage& image)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
 
     // load and generate the background texture
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
+#else
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+#endif
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 }

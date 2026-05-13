@@ -20,6 +20,9 @@ public:
     virtual bool isPlayingAudio() const;
     virtual void setPlayingAudio(bool playAudio);
 
+    virtual int getVolume() const;
+    virtual void setVolume(int volume);
+
     virtual void setLooping(bool looping);
 
     virtual bool isError() const;
@@ -74,6 +77,7 @@ protected:
     QString _videoFile;
     bool _playVideo;
     bool _playAudio;
+    int _volume;
 
     bool _vlcError;
     libvlc_media_player_t* _vlcPlayer;

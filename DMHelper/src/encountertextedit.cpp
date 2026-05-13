@@ -16,10 +16,13 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QScrollBar>
+#include <QTextFrame>
 #include <QDebug>
 
 const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
 const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
+static constexpr int FULL_PERCENT = 100;
+static constexpr qreal HALF_PERCENT_DIVISOR = 200.0;
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -63,6 +66,14 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(takeFocus()));
+
+    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(onFormatterChanged()));
 
     ui->textBrowser->installEventFilter(this);
     ui->textFormatter->hide();
@@ -398,6 +409,11 @@ void EncounterTextEdit::setTextWidth(int textWidth)
 {
     if(_encounter)
         _encounter->setTextWidth(textWidth);
+}
+
+void EncounterTextEdit::toggleCheckbox()
+{
+    _formatter->toggleCheckbox();
 }
 
 void EncounterTextEdit::setAnimated(bool animated)
@@ -783,6 +799,14 @@ void EncounterTextEdit::scaleBackgroundImage()
         _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
 }
 
+void EncounterTextEdit::onFormatterChanged()
+{
+    if(!_isPublishing || !_renderer)
+        return;
+    prepareImages();
+    _renderer->setTextImage(_textImage);
+}
+
 void EncounterTextEdit::prepareImages()
 {
     if((!_encounter) || (_targetSize.isEmpty()))
@@ -821,18 +845,26 @@ QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
     if(doc)
     {
         int oldTextWidth = doc->textWidth();
-        int textPercentage = _encounter ? _encounter->getTextWidth() : 100;
-        int absoluteWidth = renderWidth * textPercentage / 100;
+        int textPercentage = _encounter ? _encounter->getTextWidth() : FULL_PERCENT;
+        qreal margin = renderWidth * (FULL_PERCENT - textPercentage) / HALF_PERCENT_DIVISOR;
 
-        doc->setTextWidth(absoluteWidth);
+        QTextFrame* rootFrame = doc->rootFrame();
+        QTextFrameFormat frameFormat = rootFrame->frameFormat();
+        QTextFrameFormat modifiedFormat = frameFormat;
+        modifiedFormat.setLeftMargin(margin);
+        modifiedFormat.setRightMargin(margin);
+        rootFrame->setFrameFormat(modifiedFormat);
 
-        result = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        doc->setTextWidth(renderWidth);
+
+        result = QImage(renderWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
         result.fill(Qt::transparent);
         QPainter painter;
         painter.begin(&result);
             doc->drawContents(&painter);
         painter.end();
 
+        rootFrame->setFrameFormat(frameFormat);
         doc->setTextWidth(oldTextWidth);
     }
 

@@ -55,6 +55,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _lastUpdateDate(),
     _heroForgeToken(),
     _lastMapDirectory(),
+    _mapDirectories(),
     _tokenSearchString(),
     _tokenBackgroundFill(false),
     _tokenBackgroundFillColor(Qt::white),
@@ -293,6 +294,11 @@ QString OptionsContainer::getLastMapDirectory() const
     return _lastMapDirectory;
 }
 
+QStringList OptionsContainer::getMapDirectories() const
+{
+    return _mapDirectories;
+}
+
 QString OptionsContainer::getTokenSearchString() const
 {
     return _tokenSearchString;
@@ -474,6 +480,8 @@ void OptionsContainer::readSettings()
     copyCoreData(QString("DMHelperBestiary"));
     copyCoreData(QString("monster"));
     copyCoreData(QString("character"));
+    copyCoreData(QString("conditions"));
+    copyCoreData(QString("spell"));
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
@@ -517,6 +525,12 @@ void OptionsContainer::readSettings()
 
     setHeroForgeToken(settings.value("heroforgeToken").toString());
     setLastMapDirectory(settings.value("lastMapDirectory").toString());
+
+    // Load map directories list; migrate from single lastMapDirectory if list is empty
+    QStringList mapDirs = settings.value("mapDirectories").toStringList();
+    if(mapDirs.isEmpty() && !_lastMapDirectory.isEmpty())
+        mapDirs.append(_lastMapDirectory);
+    setMapDirectories(mapDirs);
 
     setTokenSearchString(settings.value("tokenSearchString", QVariant(QString("dnd 5e"))).toString());
     setTokenFrameFile(getSettingsFile(settings, QString("tokenFrame"), QString("dmh_default_frame.png")));
@@ -613,6 +627,11 @@ void OptionsContainer::writeSettings()
         settings.remove("lastMapDirectory");
     else
         settings.setValue("lastMapDirectory", _lastMapDirectory);
+
+    if(_mapDirectories.isEmpty())
+        settings.remove("mapDirectories");
+    else
+        settings.setValue("mapDirectories", _mapDirectories);
 
     settings.setValue("tokenSearchString", getTokenSearchString());
     if(_tokenFrameFile.isEmpty())
@@ -1018,6 +1037,8 @@ void OptionsContainer::resetFileSettings()
     copyCoreData(QString("DMHelperBestiary"), true);
     copyCoreData(QString("monster"), true);
     copyCoreData(QString("character"), true);
+    copyCoreData(QString("conditions"), true);
+    copyCoreData(QString("spell"), true);
 }
 
 void OptionsContainer::setLastSpell(const QString& lastSpell)
@@ -1279,6 +1300,38 @@ void OptionsContainer::setLastMapDirectory(const QString& mapDirectory)
     _lastMapDirectory = mapDirectory;
 }
 
+void OptionsContainer::setMapDirectories(const QStringList& directories)
+{
+    if(_mapDirectories != directories)
+    {
+        _mapDirectories = directories;
+        if(!_mapDirectories.isEmpty())
+            _lastMapDirectory = _mapDirectories.first();
+        emit mapDirectoriesChanged(_mapDirectories);
+    }
+}
+
+void OptionsContainer::addMapDirectory(const QString& directory)
+{
+    if(!directory.isEmpty() && !_mapDirectories.contains(directory))
+    {
+        _mapDirectories.append(directory);
+        if(_mapDirectories.count() == 1)
+            _lastMapDirectory = directory;
+        emit mapDirectoriesChanged(_mapDirectories);
+    }
+}
+
+void OptionsContainer::removeMapDirectory(const QString& directory)
+{
+    if(_mapDirectories.removeAll(directory) > 0)
+    {
+        if(_lastMapDirectory == directory)
+            _lastMapDirectory = _mapDirectories.isEmpty() ? QString() : _mapDirectories.first();
+        emit mapDirectoriesChanged(_mapDirectories);
+    }
+}
+
 void OptionsContainer::setTokenSearchString(const QString& tokenSearchString)
 {
     if(_tokenSearchString != tokenSearchString)
@@ -1535,4 +1588,38 @@ QString OptionsContainer::getAppFile(const QString& filename)
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     return fileDirPath.path() + QString("/resources/") + filename;
 #endif
+}
+
+QStringList OptionsContainer::getExpectedAppResources()
+{
+    return QStringList{
+        getAppFile(QString("DMHelperBestiary.xml")),
+        getAppFile(QString("spellbook.xml")),
+        getAppFile(QString("quickref_data.xml")),
+        getAppFile(QString("calendar.xml")),
+        getAppFile(QString("equipment.xml")),
+        getAppFile(QString("shops.xml")),
+        getAppFile(QString("ruleset.xml")),
+        getAppFile(QString("dmh_default_frame.png")),
+        getAppFile(QString("dmh_default_mask.png"))
+    };
+}
+
+QStringList OptionsContainer::getExpectedAppDirectories()
+{
+    QString applicationPath = QCoreApplication::applicationDirPath();
+    QDir appDir(applicationPath);
+
+#ifdef Q_OS_MAC
+    appDir.cdUp();
+    QString base = appDir.path() + QString("/Resources/");
+#else
+    QString base = appDir.path() + QString("/resources/");
+#endif
+
+    return QStringList{
+        base + QString("tables"),
+        base + QString("ui"),
+        base + QString("Images")
+    };
 }

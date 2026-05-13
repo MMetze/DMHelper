@@ -158,6 +158,17 @@ void PublishGLImageRenderer::cleanupGL()
 {
     _initialized = false;
 
+    if((_shaderProgram != 0) && (QOpenGLContext::currentContext()))
+    {
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        if(f)
+        {
+            DMH_DEBUG_OPENGL_glDeleteProgram(_shaderProgram);
+            f->glDeleteProgram(_shaderProgram);
+        }
+        _shaderProgram = 0;
+    }
+
     delete _imageGLObject;
     _imageGLObject = nullptr;
 

@@ -73,7 +73,7 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
                          static_cast<bool>(fontItalics.toInt()));
         format.setFont(formatFont);
         QString colorName = element.attribute("fontColor");
-        if(QColor::isValidColor(colorName))
+        if(QColor::isValidColorName(colorName))
             format.setForeground(QBrush(QColor(colorName)));
         cursor.mergeCharFormat(format);
 
@@ -273,7 +273,6 @@ void EncounterText::setImageFile(const QString& imageFile)
         _layerScene.appendLayer(new LayerImage(QString("Background Image: ") + fileInfo.fileName(), imageFile));
 
     _imageFile = imageFile;
-//    emit imageFileChanged(_imageFile);
     emit dirty();
 }
 

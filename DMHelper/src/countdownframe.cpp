@@ -60,8 +60,6 @@ void CountdownFrame::timerEvent(QTimerEvent *event)
                 _secondsCurrent = 59;
             }
 
-            //ui->edtHours->setText(QString::number(_hoursCurrent));
-            //ui->frame->setHours(_hoursCurrent);
             emit hoursChanged(_hoursCurrent);
         }
         else
@@ -69,13 +67,9 @@ void CountdownFrame::timerEvent(QTimerEvent *event)
             _secondsCurrent = 59;
         }
 
-        //ui->edtMinutes->setText(QString::number(_minutesCurrent));
-        //ui->frame->setMinutes(_minutesCurrent);
         emit minutesChanged(_minutesCurrent);
     }
 
-    //ui->edtSeconds->setText(QString::number(_secondsCurrent));
-    //ui->frame->setSeconds(_secondsCurrent);
     emit secondsChanged(_secondsCurrent);
 }
 
@@ -109,9 +103,6 @@ void CountdownFrame::resetClicked()
     _minutesCurrent = _minutesTarget;
     _secondsCurrent = _secondsTarget;
 
-    //ui->edtHours->setText(QString::number(_hoursCurrent));
-    //ui->edtMinutes->setText(QString::number(_minutesCurrent));
-    //ui->edtSeconds->setText(QString::number(_secondsCurrent));
     emit hoursChanged(_hoursCurrent);
     emit minutesChanged(_minutesCurrent);
     emit secondsChanged(_secondsCurrent);

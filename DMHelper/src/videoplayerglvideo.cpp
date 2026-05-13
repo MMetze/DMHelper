@@ -1,4 +1,5 @@
 #include "videoplayerglvideo.h"
+#include <vlc/libvlc_version.h>
 #include "videoplayerglplayer.h"
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
@@ -179,7 +180,6 @@ bool VideoPlayerGLVideo::setup(void** data,
     return true;
 }
 
-
 // This callback is called to release the texture and FBO created in resize
 void VideoPlayerGLVideo::cleanup(void* data)
 {
@@ -197,6 +197,10 @@ void VideoPlayerGLVideo::cleanup(void* data)
     if((that->_width == 0) && (that->_height == 0))
         return;
 
+    // Make GL context current before deleting FBOs — their destructors require it
+    if(that->_context && that->_surface)
+        that->_context->makeCurrent(that->_surface);
+
     delete that->_buffers[0]; that->_buffers[0] = nullptr;
     delete that->_buffers[1]; that->_buffers[1] = nullptr;
     delete that->_buffers[2]; that->_buffers[2] = nullptr;
@@ -204,6 +208,12 @@ void VideoPlayerGLVideo::cleanup(void* data)
     delete that->_buffers[3]; that->_buffers[3] = nullptr;
     delete that->_buffers[4]; that->_buffers[4] = nullptr;
 #endif
+
+    if(that->_context)
+        that->_context->doneCurrent();
+
+    that->_width = 0;
+    that->_height = 0;
 }
 
 //This callback is called after VLC performs drawing calls

@@ -249,12 +249,54 @@ pg. 34  Stray "1" in sentence: "and import 1 the character icon as well"
 CODE CLEANUP
 ==============================================================================
 
+Completed (code review, April 2025):
+- Deleted orphaned bestiarydialog.cpp (no .h, no .ui, not in CMakeLists)
+- Removed dormant AudioPlayer class; moved State enum into AudioPlaybackFrame
+- Removed ~50 commented-out code blocks across mainwindow.cpp,
+  battledialogmodel.cpp, campaign.cpp, layertokens.cpp, countdownframe.cpp,
+  map.cpp, battleframe.cpp, combatantwidgetmonster.cpp,
+  combatantwidgetcharacter.cpp, encountertext.cpp, equipmentserver.cpp,
+  publishglimage.cpp, publishglbattletoken.cpp, publishglbattlebackground.cpp,
+  updatechecker.cpp, characterv2.cpp, customtableframe.cpp,
+  battledialoggraphicsscenemousehandler.cpp, characterframe.cpp,
+  battledialogmodelmonsterclass.cpp, campaigntreeitem.cpp
+- Removed self-describing comments in welcomeframe.cpp,
+  battlecombatantframe.cpp, characterframe.cpp
+- Wrapped loose qDebug in battledialoggraphicsscene.cpp behind
+  BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS flag
+
+Still open:
 - Remove BattleDialogModelMonsterCombatant if no longer needed
-- Clean up all commented-out dead code in battleframe.cpp, layertoken.cpp,
-  layertoken.h, map.cpp, layerfow.cpp
 - Fix emit itemMoved - second parameter missing/wrong
 - Audit BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
-- Search and resolve all remaining // TODO: Layers comments
 - Investigate accidental movement circle trigger on right-click release
 - Refactor backend queries into a class to automate versioning and
   debug query management
+
+TODO/FIXME/HACK triage (from code review, April 2025):
+- battledialoggraphicsscene.cpp:26 - adjust grid offsets to match resized
+  battle contents
+- characterframe.cpp:27 - automate character level, next level exp,
+  proficiency bonus
+- campaign.cpp:123 - remove special case for Daggerheart, add campaign-
+  specific data storage
+- campaign.cpp:139 - add back object counting
+- campaign.cpp:705 - "check if this works"
+- combatant.cpp:268 - "will be obsolete"
+- battledialogmodel.cpp (lines 59, 152, 559, 671, 821) - 5 "Layers" TODOs;
+  consolidate into one plan or resolve
+- battledialogmodelmonstercombatant.cpp (8 sites) and
+  battledialogmodelcharacter.cpp (9 sites) - repeated "should this just be
+  impossible?" TODOs; decide whether to assert/remove or document why
+- battledialogmodelmonsterbase.cpp:67 - HACK
+- battledialogmodelcharacter.cpp:166 - HACK
+- campaign.cpp:164, encountertext.cpp:380, encountertext.cpp:398 -
+  DEPRECATED v2.0 markers; decide whether deprecated code can be removed
+- undofowpath.cpp:61 - deprecated "points" entry maintained for compatibility
+
+Disabled feature flags (do not enable without discussion):
+- INCLUDE_NETWORK_SUPPORT (dmconstants.h:9) - network stack incomplete;
+  gated dead code in networkcontroller.h/cpp, optionsdialog.cpp,
+  optionscontainer.h/cpp (~15 blocks), mainwindow.h/cpp
+- LAYERVIDEO_USE_OPENGL (layervideo.h:7) - GPU video path not production-
+  ready; 17 #ifdef blocks in layervideo.cpp

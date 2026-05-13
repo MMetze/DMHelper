@@ -2,9 +2,9 @@
 #define SPELL_H
 
 #include "dice.h"
-#include "combatant.h"
 #include <QObject>
 #include <QList>
+#include <QStringList>
 #include <QDomElement>
 #include <QDir>
 #include <QSize>
@@ -47,8 +47,8 @@ public:
     QString getEffectToken() const;
     QString getEffectTokenPath() const;
     int getEffectTokenRotation() const;
-    int getEffectConditions() const;
-    bool hasEffectCondition(Combatant::Condition condition) const;
+    QStringList getEffectConditionList() const;
+    bool hasEffectCondition(const QString& conditionId) const;
 
 signals:
     void dirty();
@@ -73,10 +73,9 @@ public slots:
     void setEffectColor(const QColor& effectColor);
     void setEffectToken(QString effectToken);
     void setEffectTokenRotation(int effectTokenRotation);
-    void setEffectConditions(int conditions);
-    void applyEffectConditions(int conditions);
-    void addEffectCondition(Combatant::Condition condition);
-    void removeEffectCondition(Combatant::Condition condition);
+    void setEffectConditionList(const QStringList& conditions);
+    void addEffectCondition(const QString& conditionId);
+    void removeEffectCondition(const QString& conditionId);
 
     void clearRolls();
 
@@ -101,7 +100,7 @@ private:
     QColor _effectColor;
     QString _effectToken;
     int _effectTokenRotation;
-    int _effectConditions;
+    QStringList _effectConditionList;
 
     bool _batchChanges;
     bool _changesMade;

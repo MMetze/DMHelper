@@ -5,12 +5,18 @@
 #include "tokeneditdialog.h"
 #include "optionscontainer.h"
 #include "combatantfactory.h"
+#include "conditions.h"
+#include "conditionseditdialog.h"
+#include "quickref.h"
 #include <QFile>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMouseEvent>
 #include <QTextEdit>
 #include <QMenu>
+#include <QMessageBox>
+#include <QLabel>
+#include <QGridLayout>
 #include <QDebug>
 
 CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidget *parent) :
@@ -22,14 +28,23 @@ CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidge
     _mouseDown(false),
     _reading(false),
     _rotation(0),
-    _heroForgeToken()
+    _currentToken(0),
+    _heroForgeToken(),
+    _conditionGrid(nullptr)
 {
     ui->setupUi(this);
 
+    connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterTemplateFrame::editConditions);
+    connect(ui->btnRemoveConditions, &QAbstractButton::clicked, this, &CharacterTemplateFrame::clearConditions);
     connect(ui->btnEditIcon, &QAbstractButton::clicked, this, &CharacterTemplateFrame::editCharacterIcon);
-    connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterTemplateFrame::syncDndBeyond);
+    connect(ui->btnSync_2, &QAbstractButton::clicked, this, &CharacterTemplateFrame::syncDndBeyond);
     enableDndBeyondSync(false);
-    connect(ui->btnHeroForge, &QAbstractButton::clicked, this, &CharacterTemplateFrame::importHeroForge);
+    connect(ui->btnHeroForge_2, &QAbstractButton::clicked, this, &CharacterTemplateFrame::importHeroForge);
+    connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CharacterTemplateFrame::handlePreviousToken);
+    connect(ui->btnAddToken, &QAbstractButton::clicked, this, &CharacterTemplateFrame::handleAddToken);
+    connect(ui->btnReload, &QAbstractButton::clicked, this, &CharacterTemplateFrame::handleReloadImage);
+    connect(ui->btnClear, &QAbstractButton::clicked, this, &CharacterTemplateFrame::handleClearImage);
+    connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CharacterTemplateFrame::handleNextToken);
 
 }
 
@@ -210,8 +225,8 @@ void CharacterTemplateFrame::mouseReleaseEvent(QMouseEvent * event)
     if(filename.isEmpty())
         return;
 
-    _character->setIcon(filename);
-    loadCharacterImage();
+    _character->addIcon(filename);
+    setTokenIndex(_character->getIconCount() - 1);
 }
 
 QObject* CharacterTemplateFrame::getFrameObject()
@@ -229,8 +244,10 @@ void CharacterTemplateFrame::readCharacterData()
     CombatantFactory::Instance()->readObjectData(_uiWidget, _character, this, this);
 
     emit backgroundColorChanged(_character->getBackgroundColor());
-    loadCharacterImage();
+    _currentToken = 0;
+    setTokenIndex(0);
     enableDndBeyondSync(_character->getDndBeyondID() != -1);
+    updateConditionLayout();
 
     _reading = false;
 }
@@ -241,9 +258,9 @@ void CharacterTemplateFrame::handlePublishClicked()
         return;
 
     QImage iconImg;
-    QString iconFile = _character->getIconFile();
-    if(!iconImg.load(iconFile))
-        iconImg = _character->getIconPixmap(DMHelper::PixmapSize_Full).toImage();
+    QString iconFile = _character->getIcon(_currentToken);
+    if((!iconFile.isEmpty()) && (!iconImg.load(iconFile)))
+        iconImg = _character->getIconPixmap(DMHelper::PixmapSize_Full, _currentToken).toImage();
 
     if(iconImg.isNull())
         return;
@@ -260,18 +277,20 @@ void CharacterTemplateFrame::editCharacterIcon()
     if((!_character) || (!_options))
         return;
 
-    TokenEditDialog* dlg = new TokenEditDialog(_character->getIconPixmap(DMHelper::PixmapSize_Full).toImage(),
+    TokenEditDialog* dlg = new TokenEditDialog(_character->getIconPixmap(DMHelper::PixmapSize_Full, _currentToken).toImage(),
                                                *_options,
                                                1.0,
                                                QPoint(),
-                                               false);
+                                               false,
+                                               this);
     if(dlg->exec() == QDialog::Accepted)
     {
         QImage newToken = dlg->getFinalImage();
         if(newToken.isNull())
             return;
 
-        QString tokenPath = QFileDialog::getExistingDirectory(this, tr("Select Token Directory"), _character->getIconFile().isEmpty() ? QString() : QFileInfo(_character->getIconFile()).absolutePath());
+        QString currentFile = _character->getIcon(_currentToken);
+        QString tokenPath = QFileDialog::getExistingDirectory(this, tr("Select Token Directory"), currentFile.isEmpty() ? QString() : QFileInfo(currentFile).absolutePath());
         if(tokenPath.isEmpty())
             return;
 
@@ -285,8 +304,12 @@ void CharacterTemplateFrame::editCharacterIcon()
         QString finalTokenPath = tokenDir.absoluteFilePath(tokenFile);
         newToken.save(finalTokenPath);
 
-        _character->setIcon(finalTokenPath);
-        loadCharacterImage();
+        if(_character->getIconCount() > 0 && _currentToken < _character->getIconCount())
+            _character->setIcon(_currentToken, finalTokenPath);
+        else
+            _character->addIcon(finalTokenPath);
+
+        setTokenIndex(_currentToken);
 
         if(dlg->getEditor())
             dlg->getEditor()->applyEditorToOptions(*_options);
@@ -365,15 +388,71 @@ void CharacterTemplateFrame::updateCharacterName()
     //ui->edtName->setText(_character->getName());
 }
 
+void CharacterTemplateFrame::handlePreviousToken()
+{
+    setTokenIndex(_currentToken - 1);
+}
+
+void CharacterTemplateFrame::handleNextToken()
+{
+    setTokenIndex(_currentToken + 1);
+}
+
+void CharacterTemplateFrame::handleAddToken()
+{
+    if(!_character)
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Token Image..."));
+    if(filename.isEmpty())
+        return;
+
+    _character->addIcon(filename);
+    setTokenIndex(_character->getIconCount() - 1);
+}
+
+void CharacterTemplateFrame::handleReloadImage()
+{
+    if(!_character)
+        return;
+
+    _character->refreshIconPixmaps();
+    setTokenIndex(_currentToken);
+}
+
+void CharacterTemplateFrame::handleClearImage()
+{
+    if(!_character)
+        return;
+
+    int iconCount = _character->getIconCount();
+    if(iconCount <= 0)
+        return;
+
+    if(QMessageBox::question(this,
+                              QString("Confirm Delete"),
+                              QString("Are you sure you want to remove this token image?")) != QMessageBox::Yes)
+        return;
+
+    _character->removeIcon(_currentToken);
+
+    if(_currentToken >= _character->getIconCount())
+        _currentToken = _character->getIconCount() - 1;
+    if(_currentToken < 0)
+        _currentToken = 0;
+
+    setTokenIndex(_currentToken);
+}
+
 void CharacterTemplateFrame::loadCharacterImage()
 {
     if(_character)
-        ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
+        ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase, _currentToken));
 }
 
 void CharacterTemplateFrame::enableDndBeyondSync(bool enabled)
 {
-    ui->btnSync->setVisible(enabled);
+    ui->btnSync_2->setVisible(enabled);
     ui->lblDndBeyondLink->setVisible(enabled);
 
     if(_character)
@@ -383,4 +462,140 @@ void CharacterTemplateFrame::enableDndBeyondSync(bool enabled)
         qDebug() << "[CharacterTemplateFrame] Setting Dnd Beyond link for character to: " << fullLink;
         ui->lblDndBeyondLink->setText(fullLink);
     }
+}
+
+void CharacterTemplateFrame::setTokenIndex(int index)
+{
+    if(!_character)
+        return;
+
+    int count = _character->getIconCount();
+    if(count <= 0)
+    {
+        _currentToken = 0;
+        ui->lblIcon->setPixmap(QPixmap());
+        ui->btnPreviousToken->setEnabled(false);
+        ui->btnNextToken->setEnabled(false);
+        ui->btnClear->setEnabled(false);
+        ui->btnEditIcon->setEnabled(false);
+        return;
+    }
+
+    if(index < 0)
+        index = 0;
+    if(index >= count)
+        index = count - 1;
+
+    _currentToken = index;
+
+    ui->btnPreviousToken->setEnabled((count > 1) && (index > 0));
+    ui->btnNextToken->setEnabled((count > 1) && (index < count - 1));
+    ui->btnClear->setEnabled(true);
+    ui->btnEditIcon->setEnabled(true);
+
+    loadCharacterImage();
+}
+
+void CharacterTemplateFrame::editConditions()
+{
+    if(!_character)
+        return;
+
+    ConditionsEditDialog dlg(this);
+    dlg.setConditionList(_character->getConditionList());
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        if(dlg.getConditionList() != _character->getConditionList())
+        {
+            _character->setConditionList(dlg.getConditionList());
+            updateConditionLayout();
+        }
+    }
+}
+
+void CharacterTemplateFrame::clearConditions()
+{
+    if(!_character)
+        return;
+
+    _character->clearConditions();
+    updateConditionLayout();
+}
+
+void CharacterTemplateFrame::updateConditionLayout()
+{
+    clearConditionGrid();
+
+    if(!_character)
+        return;
+
+    _conditionGrid = new QGridLayout;
+    _conditionGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    _conditionGrid->setContentsMargins(2, 2, 2, 2);
+    _conditionGrid->setSpacing(2);
+    ui->scrollAreaWidgetContents_2->setLayout(_conditionGrid);
+
+    QStringList conditionList = _character->getConditionList();
+    for(const QString& condId : conditionList)
+        addCondition(condId);
+
+    int spacingColumn = _conditionGrid->columnCount();
+    _conditionGrid->addItem(new QSpacerItem(20, 40, QSizePolicy::Expanding), 0, spacingColumn);
+
+    for(int i = 0; i < spacingColumn; ++i)
+        _conditionGrid->setColumnStretch(i, 1);
+    _conditionGrid->setColumnStretch(spacingColumn, 10);
+
+    update();
+}
+
+void CharacterTemplateFrame::clearConditionGrid()
+{
+    if(!_conditionGrid)
+        return;
+
+    QLayoutItem* child = nullptr;
+    while((child = _conditionGrid->takeAt(0)) != nullptr)
+    {
+        delete child->widget();
+        delete child;
+    }
+
+    delete _conditionGrid;
+    _conditionGrid = nullptr;
+
+    ui->scrollAreaWidgetContents_2->update();
+}
+
+void CharacterTemplateFrame::addCondition(const QString& conditionId)
+{
+    if(!_conditionGrid)
+        return;
+
+    Conditions* conds = Conditions::activeConditions();
+    if(!conds)
+        return;
+
+    QString iconPath = conds->getConditionIconPath(conditionId);
+    QLabel* conditionLabel = new QLabel(this);
+    if(!iconPath.isEmpty())
+        conditionLabel->setPixmap(QPixmap(iconPath).scaled(40, 40));
+
+    QString conditionText = QString("<b>") + conds->getConditionDescription(conditionId) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, conds->getConditionTitle(conditionId));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+    conditionLabel->setToolTip(conditionText);
+
+    int columnCount = (ui->scrollAreaWidgetContents_2->width() - 2) / (40 + 2);
+    if(columnCount < 1)
+        columnCount = 1;
+    int row = _conditionGrid->count() / columnCount;
+    int column = _conditionGrid->count() % columnCount;
+
+    _conditionGrid->addWidget(conditionLabel, row, column);
 }

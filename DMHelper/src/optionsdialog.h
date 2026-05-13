@@ -112,6 +112,10 @@ private slots:
     void editMonsterUIFile();
     void setMonsterUIFile(const QString& monsterUIFile);
 
+    void browseConditionsFile();
+    void editConditionsFile();
+    void setConditionsFile(const QString& conditionsFile);
+
 private:
     Ui::OptionsDialog *ui;
 

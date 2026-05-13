@@ -88,6 +88,9 @@
        </item>
        <item>
         <widget class="QTreeView" name="treeView">
+         <property name="styleSheet">
+          <string notr="true">background: transparent;</string>
+         </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
          </property>
@@ -106,7 +109,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="edtMapPath"/>
+          <widget class="QLineEdit" name="edtMapPath">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btnBrowse">
@@ -128,8 +135,15 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Browse to find another folder</string>
+           </property>
            <property name="text">
-            <string>...</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/img/data/icon_plus.png</normaloff>:/img/data/icon_plus.png</iconset>
            </property>
            <property name="autoDefault">
             <bool>false</bool>
@@ -138,8 +152,32 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnRefresh">
+           <property name="toolTip">
+            <string>Refresh the scan of this location</string>
+           </property>
            <property name="text">
-            <string>Refresh</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/img/data/icon_redo.png</normaloff>:/img/data/icon_redo.png</iconset>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnRemoveDir">
+           <property name="toolTip">
+            <string>Remove this location from the list to scan</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/img/data/icon_remove.png</normaloff>:/img/data/icon_remove.png</iconset>
            </property>
            <property name="autoDefault">
             <bool>false</bool>
@@ -148,10 +186,20 @@
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="QLabel" name="lblScanStatus">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
       <widget class="QFrame" name="frame">
+       <property name="styleSheet">
+        <string notr="true">background: transparent;</string>
+       </property>
        <property name="frameShape">
         <enum>QFrame::Shape::StyledPanel</enum>
        </property>
@@ -161,6 +209,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="4,1,0">
         <item>
          <widget class="QLabel" name="lblPreview">
+          <property name="styleSheet">
+           <string notr="true">background: transparent;</string>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Shape::Box</enum>
           </property>
@@ -180,18 +231,27 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background: transparent;</string>
+          </property>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,2,1">
+         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,2,1,2,1">
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item>
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Preferred</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>10</width>
               <height>20</height>
              </size>
             </property>
@@ -199,8 +259,40 @@
           </item>
           <item>
            <widget class="QPushButton" name="btnCreateEntry">
+            <property name="toolTip">
+             <string>Add this file as a new map entry in the campaign</string>
+            </property>
             <property name="text">
              <string>Create Entry...</string>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>10</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnAddLayer">
+            <property name="toolTip">
+             <string>Add this file as a new layer in the current campaign entry</string>
+            </property>
+            <property name="text">
+             <string>Add Layer...</string>
             </property>
             <property name="autoDefault">
              <bool>false</bool>
@@ -212,9 +304,12 @@
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Preferred</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>10</width>
               <height>20</height>
              </size>
             </property>

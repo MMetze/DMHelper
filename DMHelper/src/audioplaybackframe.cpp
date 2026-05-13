@@ -51,8 +51,6 @@ void AudioPlaybackFrame::setPosition(qint64 position)
 
     if(!_sliderGrabbed)
         ui->sliderPlayback->setSliderPosition(_currentDuration == 0 ? 0 : 100 * _currentPosition / _currentDuration);
-
-    //emit positionChanged(_currentPosition);
 }
 
 void AudioPlaybackFrame::trackChanged(AudioTrack* track)
@@ -75,16 +73,16 @@ void AudioPlaybackFrame::trackChanged(AudioTrack* track)
     }
 }
 
-void AudioPlaybackFrame::stateChanged(AudioPlayer::State state)
+void AudioPlaybackFrame::stateChanged(AudioPlaybackFrame::State state)
 {
     switch(state)
     {
-        case AudioPlayer::Playing:
+        case AudioPlaybackFrame::Playing:
             ui->btnPlay->setChecked(true);
             qDebug() << "[AudioPlaybackFrame] Player set to playing.";
             break;
-        case AudioPlayer::Paused:
-        case AudioPlayer::Stopped:
+        case AudioPlaybackFrame::Paused:
+        case AudioPlaybackFrame::Stopped:
         default:
             ui->btnPlay->setChecked(false);
             qDebug() << "[AudioPlaybackFrame] Player set to paused.";

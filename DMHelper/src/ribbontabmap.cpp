@@ -19,6 +19,7 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
     ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
     ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
     ui->btnGrpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
+    ui->btnGrpBrush->setId(ui->btnBrushPolygon, DMHelper::BrushType_Polygon);
     connect(ui->btnGrpBrush, SIGNAL(idClicked(int)), this, SIGNAL(brushModeChanged(int)));
 
     // Set up the extra slot to configure the erase button
@@ -78,6 +79,7 @@ void RibbonTabMap::showEvent(QShowEvent *event)
     setButtonSize(*ui->btnBrushCircle, iconDim / 2, iconDim / 2);
     setButtonSize(*ui->btnBrushSquare, iconDim / 2, iconDim / 2);
     setButtonSize(*ui->btnBrushSelect, iconDim / 2, iconDim / 2);
+    setButtonSize(*ui->btnBrushPolygon, iconDim / 2, iconDim / 2);
     int sizeWidth = metrics.horizontalAdvance(ui->lblSize->text());
     setWidgetSize(*ui->lblSize, sizeWidth, iconDim / 2);
     setWidgetSize(*ui->spinSize, sizeWidth*3, iconDim / 2);

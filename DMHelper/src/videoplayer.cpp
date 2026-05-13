@@ -34,6 +34,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _videoFile(videoFile),
     _playVideo(playVideo),
     _playAudio(playAudio),
+    _volume(100),
     _vlcError(false),
     _vlcPlayer(nullptr),
     _vlcMedia(nullptr),
@@ -75,7 +76,30 @@ VideoPlayer::~VideoPlayer()
 #endif
 
     _selfRestart = false;
-    VideoPlayer::stopPlayer();
+    _deleteOnStop = false;
+
+    if(_vlcPlayer)
+    {
+        // Detach all event callbacks before stopping to prevent use-after-free
+        libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
+        if(eventManager)
+        {
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
+        }
+
+        // Stop playback and null out video callbacks so VLC thread stops calling into this object
+        libvlc_media_player_stop_async(_vlcPlayer);
+        libvlc_video_set_callbacks(_vlcPlayer, nullptr, nullptr, nullptr, nullptr);
+
+        // Release blocks until internal VLC threads finish
+        libvlc_media_player_release(_vlcPlayer);
+        _vlcPlayer = nullptr;
+    }
+
     VideoPlayer::cleanupBuffers();
 
     QMutex* deleteMutex = _mutex;
@@ -132,12 +156,24 @@ void VideoPlayer::setPlayingAudio(bool playAudio)
 
     _playAudio = playAudio;
     if(_vlcPlayer)
-        libvlc_audio_set_volume(_vlcPlayer, _playAudio ? 100 : 0);
+        libvlc_audio_set_volume(_vlcPlayer, _playAudio ? _volume : 0);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Playing audio state set, " << this << ", " << COUNT_CALLBACKS;
 #endif
 
+}
+
+int VideoPlayer::getVolume() const
+{
+    return _volume;
+}
+
+void VideoPlayer::setVolume(int volume)
+{
+    _volume = qBound(0, volume, 100);
+    if(_vlcPlayer && _playAudio)
+        libvlc_audio_set_volume(_vlcPlayer, _volume);
 }
 
 void VideoPlayer::setLooping(bool looping)
@@ -506,6 +542,8 @@ void VideoPlayer::internalStopCheck(int status)
         qDebug() << "[VideoPlayer] Internal Stop Check: Video ended, restarting playback" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
         _stopStatus = 0;
+        if(_playAudio)
+            _volume = libvlc_audio_get_volume(_vlcPlayer);
         libvlc_media_player_release(_vlcPlayer);
         _vlcPlayer = nullptr;
         if(_looping)
@@ -615,19 +653,13 @@ bool VideoPlayer::startPlayer()
     }
 
     // Create a new Media
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcMedia = libvlc_media_new_path(_videoFile.toUtf8().constData());
-#else
-    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), _videoFile.toUtf8().constData());
-#endif
     if (!_vlcMedia)
         return false;
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+    libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
+
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
-#else
-    _vlcPlayer = libvlc_media_player_new_from_media(_vlcMedia);
-#endif
     if(!_vlcPlayer)
         return false;
 
@@ -660,7 +692,7 @@ bool VideoPlayer::startPlayer()
 #else
     libvlc_media_player_play(_vlcPlayer);
 #endif
-    libvlc_audio_set_volume(_vlcPlayer, _playAudio ? 100 : 0);
+    libvlc_audio_set_volume(_vlcPlayer, _playAudio ? _volume : 0);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Player started: " << playResult << ", " << this << ", " << COUNT_CALLBACKS;

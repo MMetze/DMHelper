@@ -487,7 +487,8 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
     if(_activeCombatant == activeCombatant)
         return;
 
-    disconnect(_activeCombatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
+    if(_activeCombatant)
+        disconnect(_activeCombatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
 
     _activeCombatant = activeCombatant;
     if(_activeCombatant)

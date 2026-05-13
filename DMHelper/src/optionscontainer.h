@@ -70,6 +70,7 @@ public:
     QDate getLastUpdateCheck() const;
     QString getHeroForgeToken() const;
     QString getLastMapDirectory() const;
+    QStringList getMapDirectories() const;
 
     // Token search settings
     QString getTokenSearchString() const;
@@ -137,6 +138,7 @@ signals:
 
     // Data settings
     void heroForgeTokenChanged(const QString& token);
+    void mapDirectoriesChanged(const QStringList& directories);
 
     // Token search settings
     void tokenSearchStringChanged(const QString& tokenSearchString);
@@ -187,6 +189,10 @@ public slots:
     void backupFile(const QString& filename, const QString& overrideFilename = QString());
     void resetFileSettings();
 
+    static QString getAppFile(const QString& filename);
+    static QStringList getExpectedAppResources();
+    static QStringList getExpectedAppDirectories();
+
     void setLastSpell(const QString& lastSpell);
     void setLastRuleset(const QString& lastRuleset);
     void setShowAnimations(bool showAnimations);
@@ -227,6 +233,9 @@ public slots:
     void setLastUpdateDate(const QDate& date);
     void setHeroForgeToken(const QString& token);
     void setLastMapDirectory(const QString& mapDirectory);
+    void setMapDirectories(const QStringList& directories);
+    void addMapDirectory(const QString& directory);
+    void removeMapDirectory(const QString& directory);
 
     // Token search settings
     void setTokenSearchString(const QString& tokenSearchString);
@@ -258,7 +267,6 @@ private:
     void copy(OptionsContainer* other);
     QMainWindow* getMainWindow();
     void cleanupLegacy(OptionsAccessor& settings);
-    QString getAppFile(const QString& filename);
 
     bool _loading;
 
@@ -312,6 +320,7 @@ private:
     QDate _lastUpdateDate;
     QString _heroForgeToken;
     QString _lastMapDirectory;
+    QStringList _mapDirectories;
 
     // Token search settings
     QString _tokenSearchString;

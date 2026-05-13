@@ -67,6 +67,7 @@ public slots:
     virtual void playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
     virtual void setPlayAudio(bool playAudio);
     virtual void setLooping(bool looping);
+    virtual void setVideoFile(const QString& filename);
 
 signals:
     void updateProjectionMatrix();

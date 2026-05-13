@@ -3,7 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "bestiarytemplatedialog.h"
-#include "spellbookdialog.h"
+#include "spellbooktemplatedialog.h"
 #include "dmconstants.h"
 #include "optionscontainer.h"
 #include "campaigntreeactivestack.h"
@@ -28,7 +28,6 @@ class QStandardItem;
 class CampaignTreeModel;
 class QVBoxLayout;
 class QItemSelection;
-class AudioPlayer;
 class AudioTrack;
 class PublishFrame;
 class QuickRefFrame;
@@ -115,6 +114,7 @@ public slots:
     void linkActivated(const QUrl & link);
 
     void readSpellbook();
+    void handleSpellbookRead(const QString& spellbookFileName);
     void readQuickRef();
 
 signals:
@@ -208,6 +208,7 @@ protected slots:
 
     void openMapManager();
     void handleCreateMap(const QString& mapFile);
+    void handleAddMapLayer(const QString& mapFile);
     void openAboutDialog();
     void openHelpDialog();
     void openBackupDirectory();
@@ -250,7 +251,7 @@ private:
     OptionsContainer* _options;
 
     BestiaryTemplateDialog _bestiaryDlg;
-    SpellbookDialog _spellDlg;
+    SpellbookTemplateDialog _spellDlg;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;

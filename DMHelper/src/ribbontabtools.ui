@@ -564,7 +564,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the quick reference list (Ctrl+R)</string>
+        <string>Open search</string>
        </property>
        <property name="text">
         <string/>

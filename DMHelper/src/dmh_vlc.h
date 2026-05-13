@@ -37,6 +37,9 @@ protected:
     virtual void timerEvent(QTimerEvent *event) override;
 
 private:
+    static bool isCacheStale();
+    static void writeCacheSentinel();
+
     static DMH_VLC* _instance;
 
     libvlc_instance_t* _vlcInstance;

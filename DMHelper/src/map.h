@@ -13,8 +13,8 @@ class QDomDocument;
 class QDomElement;
 class UndoFowBase;
 class AudioTrack;
-class Party;
-class UndoMarker;
+#include "party.h"
+#include "undomarker.h"
 
 class Map : public CampaignObjectBase
 {

@@ -23,6 +23,9 @@ public:
     explicit MapManagerDialog(OptionsContainer& options, QWidget *parent = nullptr);
     ~MapManagerDialog();
 
+    void setCampaignOpen(bool open);
+    void setLayerSceneAvailable(bool available);
+
     struct MapFileMetadata
     {
         int _type;
@@ -32,6 +35,7 @@ public:
 
 signals:
     void createEntryImage(const QString& imageFile);
+    void addLayerImage(const QString& imageFile);
 
 protected slots:
     virtual void showEvent(QShowEvent *event) override;
@@ -40,7 +44,9 @@ protected slots:
     void openPreviewDialog(const QModelIndex &current);
     void previewCurrentItem();
 
-    void browsePath();
+    void addDirectory();
+    void removeDirectory();
+    void refreshDirectories();
     void findMaps();
     void scanNextDirectory();
     void scanDirectory(QStandardItem* parent, const QString& absolutePath);
@@ -52,9 +58,12 @@ protected slots:
     void handleTagsEdited();
 
     void readModel();
+    void readModelForDirectory(const QString& dirPath, QStandardItem* rootItem);
     void writeModel();
+    void writeModelForDirectory(const QString& dirPath, QStandardItem* rootItem);
 
     void handleCreateEntry();
+    void handleAddLayer();
 
 protected:
     virtual bool eventFilter(QObject* object, QEvent* event) override;
@@ -62,7 +71,7 @@ protected:
 private:
     void clearModel();
     QStandardItem* containsEntry(QStandardItem& item, const QString& fullPath);
-    void setCurrentPath(const QString& path);
+    void loadDirectories();
     void inputItemXML(QDomElement &element, QStandardItem& parent);
     void outputItemXML(QDomDocument &doc, QDomElement &parent, QStandardItem& item);
 
@@ -78,6 +87,11 @@ private:
     void registerTags(const QStringList& tags);
 
     QStringList proposeTags(const QString &filename) const;
+    int classifyFileType(const QString& filename) const;
+    QIcon iconForFileType(int fileType) const;
+    void applyFileTypeIcon(QStandardItem* item, int fileType);
+    void groupVariants(QStandardItem* parent);
+    void updateActionButtons();
 
     class TagFilterProxyModel;
 
@@ -86,9 +100,12 @@ private:
     QStandardItemModel* _model;
     TagFilterProxyModel* _proxy;
     OptionsContainer& _options;
-    QString _currentPath;
+    QStringList _directories;
     QList<QPair<QStandardItem*, QString>> _searchList;
     QSet<QString> _tagList;
+    bool _scanning;
+    bool _campaignOpen;
+    bool _layerSceneAvailable;
 
     // ------------------ KEYWORD → TAGS ------------------
     const QHash<QString, QStringList> keywordToTags {
@@ -213,13 +230,19 @@ private:
         void setRequiredTags(const QStringList& tags);
         void clearRequiredTags();
 
+        QString getSearchText() const;
+        void setSearchText(const QString& text);
+        void clearSearch();
+
     protected:
         virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
         bool pathMatchesRow(const QModelIndex& rowIndex) const;
         bool listContainsAllTags(const QStringList& list) const;
+        bool nameMatchesSearch(const QModelIndex& index) const;
 
     private:
         QStringList _requiredTags;
+        QString _searchText;
     };
 
 };

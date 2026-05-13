@@ -24,7 +24,6 @@ CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *paren
     ui->hSplitter->setStretchFactor(1, 3);
 
     ui->listWidget->setUniformItemSizes(true);
-    //ui->listEntries->setUniformItemSizes(true);
     ui->listEntries->setWordWrap(true);
     ui->listEntries->setTextElideMode(Qt::ElideNone);
 

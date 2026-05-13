@@ -53,7 +53,6 @@ set(DMHELPER_SOURCES
     attack.cpp
     audiofactory.cpp
     audioplaybackframe.cpp
-    audioplayer.cpp
     audiotrack.cpp
     audiotrackedit.cpp
     audiotrackfile.cpp
@@ -63,14 +62,18 @@ set(DMHELPER_SOURCES
     audiotrackyoutube.cpp
     basicdate.cpp
     basicdateserver.cpp
-    battlecombatantframe.cpp
     battlecombatantwidget.cpp
     battledialogeffectsettings.cpp
     battledialogeffectsettingsbase.cpp
+    battledialogeffectsettingsfire.cpp
+    battledialogeffectsettingslight.cpp
     battledialogeffectsettingsobjectvideo.cpp
+    battledialogeffectsettingssmoke.cpp
+    battledialogeffectsettingssparks.cpp
     battledialogevent.cpp
     battledialogeventdamage.cpp
     battledialogeventnewround.cpp
+    battledialogeventresetresources.cpp
     battledialoggraphicsscene.cpp
     battledialoggraphicsscenemousehandler.cpp
     battledialoggraphicsview.cpp
@@ -79,6 +82,8 @@ set(DMHELPER_SOURCES
     battledialogmodel.cpp
     battledialogmodelcharacter.cpp
     battledialogmodelcombatant.cpp
+    battledialogmodelcombatantgroup.cpp
+    battledialogmodelinitiativeevent.cpp
     battledialogmodeleffect.cpp
     battledialogmodeleffectcone.cpp
     battledialogmodeleffectcube.cpp
@@ -86,6 +91,10 @@ set(DMHELPER_SOURCES
     battledialogmodeleffectline.cpp
     battledialogmodeleffectobject.cpp
     battledialogmodeleffectobjectvideo.cpp
+    battledialogmodeleffectfire.cpp
+    battledialogmodeleffectlight.cpp
+    battledialogmodeleffectsmoke.cpp
+    battledialogmodeleffectsparks.cpp
     battledialogmodeleffectradius.cpp
     battledialogmodeleffectshape.cpp
     battledialogmodelmonsterbase.cpp
@@ -96,8 +105,8 @@ set(DMHELPER_SOURCES
     battleframemapdrawer.cpp
     battleframestate.cpp
     battleframestatemachine.cpp
+    battletokenhealthbar.cpp
     bestiary.cpp
-    bestiarydialog.cpp
     bestiaryexportdialog.cpp
     bestiaryfindtokendialog.cpp
     bestiarypopulatetokensdialog.cpp
@@ -116,7 +125,6 @@ set(DMHELPER_SOURCES
     campaigntreeitem.cpp
     campaigntreemodel.cpp
     character.cpp
-    characterframe.cpp
     characterimportdialog.cpp
     characterimporter.cpp
     characterimportheroforge.cpp
@@ -133,13 +141,13 @@ set(DMHELPER_SOURCES
     combatantreference.cpp
     combatantrolloverframe.cpp
     combatantselectdialog.cpp
+    combatantgroupwidget.cpp
+    combatanttemplateadapter.cpp
+    combatanttemplateframe.cpp
     combatantwidget.cpp
-    combatantwidgetcharacter.cpp
-    combatantwidgetinternals.cpp
-    combatantwidgetinternalscharacter.cpp
-    combatantwidgetinternalsmonster.cpp
-    combatantwidgetmonster.cpp
+    combatantwidgetbase.cpp
     complicationdata.cpp
+    conditions.cpp
     conditionseditdialog.cpp
     configurelockedgriddialog.cpp
     countdownframe.cpp
@@ -179,6 +187,7 @@ set(DMHELPER_SOURCES
     helpdialog.cpp
     initiativelistcombatantwidget.cpp
     initiativelistdialog.cpp
+    initiativeeventwidget.cpp
     itemselectdialog.cpp
     layer.cpp
     layerblank.cpp
@@ -201,6 +210,7 @@ set(DMHELPER_SOURCES
     layerscene.cpp
     layerseditdialog.cpp
     layertokens.cpp
+    layertokensdarkeneffect.cpp
     layervideo.cpp
     layervideoeffect.cpp
     layervideoeffectsettings.cpp
@@ -249,6 +259,7 @@ set(DMHELPER_SOURCES
     partycharactergridframe.cpp
     partyframe.cpp
     partyframecharacter.cpp
+    perroundresource.cpp
     placeholder.cpp
     popup.cpp
     popupaudio.cpp
@@ -261,6 +272,11 @@ set(DMHELPER_SOURCES
     publishglbattlebackground.cpp
     publishglbattleeffect.cpp
     publishglbattleeffectvideo.cpp
+    publishglbattleeffectanimated.cpp
+    publishglbattleeffectsmoke.cpp
+    publishglbattleeffectfire.cpp
+    publishglbattleeffectsparks.cpp
+    publishglbattleeffectlight.cpp
     publishglbattlegrid.cpp
     publishglbattleimagerenderer.cpp
     publishglbattleobject.cpp
@@ -278,6 +294,7 @@ set(DMHELPER_SOURCES
     publishgltextrenderer.cpp
     publishgltokenhighlight.cpp
     publishgltokenhighlighteffect.cpp
+    publishgltokenhighlighthealthbar.cpp
     publishgltokenhighlightref.cpp
     publishwindow.cpp
     quickref.cpp
@@ -298,17 +315,22 @@ set(DMHELPER_SOURCES
     ribbontabtools.cpp
     ribbontabworldmap.cpp
     rulefactory.cpp
+    rulehealth.cpp
+    rulehealth5e.cpp
+    rulehealthdaggerheart.cpp
     ruleinitiative.cpp
     ruleinitiative2e.cpp
     ruleinitiative5e.cpp
     ruleinitiativegroup.cpp
     ruleinitiativegroupmonsters.cpp
+    ruleinitiativenone.cpp
     ruleset.cpp
     scaledpixmap.cpp
     selectcombatantdialog.cpp
     selectitemdialog.cpp
     selectstringdialog.cpp
     selectzoom.cpp
+    smoketestrunner.cpp
     soundboardframe.cpp
     soundboardgroup.cpp
     soundboardgroupframe.cpp
@@ -316,12 +338,18 @@ set(DMHELPER_SOURCES
     soundboardtrackframe.cpp
     spell.cpp
     spellbook.cpp
-    spellbookdialog.cpp
+    spellbooktemplatedialog.cpp
+    spellbookfactory.cpp
     spellslotlevelbutton.cpp
     spellslotradiobutton.cpp
+    spellv2.cpp
+    spellv2converter.cpp
     templatefactory.cpp
     templateframe.cpp
     templateobject.cpp
+    templateobjectnotifier.cpp
+    templatefieldformat.cpp
+    intfieldkeyhandler.cpp
     templateresourcelayout.cpp
     textbrowsermargins.cpp
     texteditformatterframe.cpp
@@ -336,6 +364,7 @@ set(DMHELPER_SOURCES
     undofowfill.cpp
     undofowpath.cpp
     undofowpoint.cpp
+    undofowpolygon.cpp
     undofowshape.cpp
     undomarker.cpp
     unselectedellipse.cpp
@@ -376,7 +405,6 @@ set(DMHELPER_HEADERS
     attack.h
     audiofactory.h
     audioplaybackframe.h
-    audioplayer.h
     audiotrack.h
     audiotrackedit.h
     audiotrackfile.h
@@ -386,14 +414,18 @@ set(DMHELPER_HEADERS
     audiotrackyoutube.h
     basicdate.h
     basicdateserver.h
-    battlecombatantframe.h
     battlecombatantwidget.h
     battledialogeffectsettings.h
     battledialogeffectsettingsbase.h
+    battledialogeffectsettingsfire.h
+    battledialogeffectsettingslight.h
     battledialogeffectsettingsobjectvideo.h
+    battledialogeffectsettingssmoke.h
+    battledialogeffectsettingssparks.h
     battledialogevent.h
     battledialogeventdamage.h
     battledialogeventnewround.h
+    battledialogeventresetresources.h
     battledialoggraphicsscene.h
     battledialoggraphicsscenemousehandler.h
     battledialoggraphicsview.h
@@ -402,6 +434,8 @@ set(DMHELPER_HEADERS
     battledialogmodel.h
     battledialogmodelcharacter.h
     battledialogmodelcombatant.h
+    battledialogmodelcombatantgroup.h
+    battledialogmodelinitiativeevent.h
     battledialogmodeleffect.h
     battledialogmodeleffectcone.h
     battledialogmodeleffectcube.h
@@ -409,6 +443,10 @@ set(DMHELPER_HEADERS
     battledialogmodeleffectline.h
     battledialogmodeleffectobject.h
     battledialogmodeleffectobjectvideo.h
+    battledialogmodeleffectfire.h
+    battledialogmodeleffectlight.h
+    battledialogmodeleffectsmoke.h
+    battledialogmodeleffectsparks.h
     battledialogmodeleffectradius.h
     battledialogmodeleffectshape.h
     battledialogmodelmonsterbase.h
@@ -419,8 +457,8 @@ set(DMHELPER_HEADERS
     battleframemapdrawer.h
     battleframestate.h
     battleframestatemachine.h
+    battletokenhealthbar.h
     bestiary.h
-    bestiarydialog.h
     bestiaryexportdialog.h
     bestiaryfindtokendialog.h
     bestiarypopulatetokensdialog.h
@@ -439,7 +477,6 @@ set(DMHELPER_HEADERS
     campaigntreeitem.h
     campaigntreemodel.h
     character.h
-    characterframe.h
     characterimportdialog.h
     characterimporter.h
     characterimportheroforge.h
@@ -456,13 +493,13 @@ set(DMHELPER_HEADERS
     combatantreference.h
     combatantrolloverframe.h
     combatantselectdialog.h
+    combatantgroupwidget.h
+    combatanttemplateadapter.h
+    combatanttemplateframe.h
     combatantwidget.h
-    combatantwidgetcharacter.h
-    combatantwidgetinternals.h
-    combatantwidgetinternalscharacter.h
-    combatantwidgetinternalsmonster.h
-    combatantwidgetmonster.h
+    combatantwidgetbase.h
     complicationdata.h
+    conditions.h
     conditionseditdialog.h
     configurelockedgriddialog.h
     countdownframe.h
@@ -504,6 +541,7 @@ set(DMHELPER_HEADERS
     helpdialog.h
     initiativelistcombatantwidget.h
     initiativelistdialog.h
+    initiativeeventwidget.h
     itemselectdialog.h
     layer.h
     layerblank.h
@@ -526,6 +564,7 @@ set(DMHELPER_HEADERS
     layerreference.h
     layerscene.h
     layertokens.h
+    layertokensdarkeneffect.h
     layervideo.h
     layervideoeffect.h
     layervideoeffectsettings.h
@@ -574,6 +613,7 @@ set(DMHELPER_HEADERS
     partycharactergridframe.h
     partyframe.h
     partyframecharacter.h
+    perroundresource.h
     placeholder.h
     popup.h
     popupaudio.h
@@ -586,6 +626,11 @@ set(DMHELPER_HEADERS
     publishglbattlebackground.h
     publishglbattleeffect.h
     publishglbattleeffectvideo.h
+    publishglbattleeffectanimated.h
+    publishglbattleeffectsmoke.h
+    publishglbattleeffectfire.h
+    publishglbattleeffectsparks.h
+    publishglbattleeffectlight.h
     publishglbattlegrid.h
     publishglbattleimagerenderer.h
     publishglbattleobject.h
@@ -603,6 +648,7 @@ set(DMHELPER_HEADERS
     publishgltextrenderer.h
     publishgltokenhighlight.h
     publishgltokenhighlighteffect.h
+    publishgltokenhighlighthealthbar.h
     publishgltokenhighlightref.h
     publishwindow.h
     quickref.h
@@ -623,17 +669,22 @@ set(DMHELPER_HEADERS
     ribbontabtools.h
     ribbontabworldmap.h
     rulefactory.h
+    rulehealth.h
+    rulehealth5e.h
+    rulehealthdaggerheart.h
     ruleinitiative.h
     ruleinitiative2e.h
     ruleinitiative5e.h
     ruleinitiativegroup.h
     ruleinitiativegroupmonsters.h
+    ruleinitiativenone.h
     ruleset.h
     scaledpixmap.h
     selectcombatantdialog.h
     selectitemdialog.h
     selectstringdialog.h
     selectzoom.h
+    smoketestrunner.h
     soundboardframe.h
     soundboardgroup.h
     soundboardgroupframe.h
@@ -641,12 +692,18 @@ set(DMHELPER_HEADERS
     soundboardtrackframe.h
     spell.h
     spellbook.h
-    spellbookdialog.h
+    spellbooktemplatedialog.h
+    spellbookfactory.h
     spellslotlevelbutton.h
     spellslotradiobutton.h
+    spellv2.h
+    spellv2converter.h
     templatefactory.h
     templateframe.h
     templateobject.h
+    templateobjectnotifier.h
+    templatefieldformat.h
+    intfieldkeyhandler.h
     templateresourcelayout.h
     textbrowsermargins.h
     texteditformatterframe.h
@@ -661,6 +718,7 @@ set(DMHELPER_HEADERS
     undofowfill.h
     undofowpath.h
     undofowpoint.h
+    undofowpolygon.h
     undofowshape.h
     undomarker.h
     unselectedellipse.h
@@ -683,19 +741,20 @@ set(DMHELPER_FORMS
     aboutdialog.ui
     audioplaybackframe.ui
     audiotrackedit.ui
-    battlecombatantframe.ui
     battlecombatantwidget.ui
     battledialogeffectsettings.ui
+    battledialogeffectsettingsfire.ui
+    battledialogeffectsettingslight.ui
     battledialogeffectsettingsobjectvideo.ui
+    battledialogeffectsettingssmoke.ui
+    battledialogeffectsettingssparks.ui
     battledialoglogview.ui
     battleframe.ui
-    bestiarydialog.ui
     bestiaryexportdialog.ui
     bestiaryfindtokendialog.ui
     bestiarypopulatetokensdialog.ui
     bestiarytemplatedialog.ui
     campaignnotesdialog.ui
-    characterframe.ui
     characterimportdialog.ui
     characterimportheroforgedialog.ui
     charactertemplateframe.ui
@@ -703,9 +762,8 @@ set(DMHELPER_FORMS
     combatantdialog.ui
     combatantrolloverframe.ui
     combatantselectdialog.ui
-    combatantwidgetcharacter.ui
-    combatantwidgetmonster.ui
-    conditionseditdialog.ui
+    combatantgroupwidget.ui
+    combatantwidgetbase.ui
     configurelockedgriddialog.ui
     countdownframe.ui
     countdownsubframe.ui
@@ -724,6 +782,7 @@ set(DMHELPER_FORMS
     helpdialog.ui
     initiativelistcombatantwidget.ui
     initiativelistdialog.ui
+    initiativeeventwidget.ui
     itemselectdialog.ui
     layerdrawtooldialog.ui
     layereffectsettings.ui
@@ -776,7 +835,7 @@ set(DMHELPER_FORMS
     soundboardframe.ui
     soundboardgroupframe.ui
     soundboardtrackframe.ui
-    spellbookdialog.ui
+    spellbooktemplatedialog.ui
     textpublishdialog.ui
     texttranslatedialog.ui
     timeanddateframe.ui
@@ -835,8 +894,8 @@ if (WIN32)
         $<$<CONFIG:Release>:/O2>
     )
 
-    # Windows icon
-    target_sources(DMHelper PRIVATE dmhelper.ico)
+    # Windows icon — dmhelper.rc is compiled by rc.exe and embeds dmhelper.ico
+    target_sources(DMHelper PRIVATE dmhelper.rc)
     set_target_properties(DMHelper PROPERTIES WIN32_EXECUTABLE TRUE)
 
     # VLC
@@ -875,11 +934,31 @@ elseif (APPLE)
         data/macimg/DMHelper.icns
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources
     )
+elseif (UNIX AND NOT APPLE)
+    message(STATUS "Configuring Linux build")
+
+    target_compile_options(DMHelper PRIVATE
+        $<$<CONFIG:Debug>:-g>
+        $<$<CONFIG:Release>:-O2>
+    )
+
+    # VLC (bundled VLC 4, matching Win/Mac)
+    target_include_directories(DMHelper PRIVATE vlclinux)
+    target_link_directories(DMHelper PRIVATE vlclinux)
+    target_link_libraries(DMHelper PRIVATE vlc vlccore)
+    target_link_options(DMHelper PRIVATE "LINKER:-rpath-link,${CMAKE_CURRENT_SOURCE_DIR}/vlclinux")
+
+    # RPATH so the AppImage can find bundled libraries
+    set_target_properties(DMHelper PROPERTIES
+        INSTALL_RPATH "$ORIGIN/lib"
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
 endif()
 
 # -------------------------------------------------
 # Common definitions
 # -------------------------------------------------
+
 target_compile_definitions(DMHelper PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
 )

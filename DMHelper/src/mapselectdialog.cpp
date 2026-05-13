@@ -53,7 +53,7 @@ Layer* MapSelectDialog::getBlankLayer() const
     if(!isBlankMap())
         return nullptr;
 
-    MapBlankDialog blankDlg;
+    MapBlankDialog blankDlg(const_cast<MapSelectDialog*>(this));
     int result = blankDlg.exec();
     if(result != QDialog::Accepted)
         return nullptr;

@@ -210,6 +210,9 @@ void BattleDialogModelMonsterCombatant::setHitPoints(int hitPoints)
     if(_monsterHP != hitPoints)
     {
         _monsterHP = hitPoints;
+        setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
+        if((getMonsterMaxHP() <= 0) && (hitPoints > 0))
+            setMonsterMaxHP(hitPoints);
         emit dataChanged(this);
     }
 }
@@ -256,6 +259,7 @@ void BattleDialogModelMonsterCombatant::setMonsterName(const QString& monsterNam
     if(_monsterName != monsterName)
     {
         _monsterName = monsterName;
+        setOverride(QString::fromLatin1(DMH_KEY_NAME), monsterName);
         emit dataChanged(this);
     }
 }
@@ -272,9 +276,9 @@ void BattleDialogModelMonsterCombatant::setMonster(Monster* monster)
 
 void BattleDialogModelMonsterCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
+    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
+
     element.setAttribute("monsterSize", _monsterSize);
     element.setAttribute("monsterName", _monsterName);
     element.setAttribute("monsterHP", _monsterHP);
-
-    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

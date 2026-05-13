@@ -473,6 +473,12 @@ color: rgb(50, 50, 50);</string>
          <property name="dmhValue" stdset="0">
           <string>strengthMod</string>
          </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(strength-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -609,6 +615,12 @@ color: rgb(50, 50, 50);</string>
          </property>
          <property name="dmhValue" stdset="0">
           <string>dexterityMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(dexterity-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -747,6 +759,12 @@ color: rgb(50, 50, 50);</string>
          <property name="dmhValue" stdset="0">
           <string>constitutionMod</string>
          </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(constitution-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -883,6 +901,12 @@ color: rgb(50, 50, 50);</string>
          </property>
          <property name="dmhValue" stdset="0">
           <string>intelligenceMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(intelligence-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -1021,6 +1045,12 @@ color: rgb(50, 50, 50);</string>
          <property name="dmhValue" stdset="0">
           <string>wisdomMod</string>
          </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(wisdom-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -1157,6 +1187,12 @@ color: rgb(50, 50, 50);</string>
          </property>
          <property name="dmhValue" stdset="0">
           <string>charismaMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(charisma-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>

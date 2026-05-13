@@ -37,8 +37,6 @@ public:
     int getIconIndex() const;
     QString getIconFile() const;
 
-    void writeCombatant(Combatant* combatant);
-
 signals:
     void openMonster(const QString& monsterClass);
 

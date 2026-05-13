@@ -98,7 +98,7 @@ void ObjectImportDialog::runImport()
 
     if(!_waitingDlg)
     {
-        _waitingDlg = new DMHWaitingDialog(QString("Importing ") + ui->edtImportFile->text() + QString("..."));
+        _waitingDlg = new DMHWaitingDialog(QString("Importing ") + ui->edtImportFile->text() + QString("..."), this);
         _waitingDlg->resize(width() * 2 / 3, _waitingDlg->height() * 3 / 2);
     }
 

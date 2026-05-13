@@ -722,14 +722,28 @@ void Bestiary::showMonsterClassWarning(const QString& monsterClass)
 
 void Bestiary::loadAndConvertBestiary(const QDomElement& bestiaryElement)
 {
-    qDebug() << "[Bestiary] Loading bestiary...";
+    qDebug() << "[Bestiary] Loading and converting bestiary...";
 
+    // There's two potential types of conversion needed. Older bestiaries call monsters "element"
     QDomElement monsterElement = bestiaryElement.firstChildElement(QString("element"));
-    while(!monsterElement.isNull())
+    if(!monsterElement.isNull())
     {
-        MonsterClassv2* monster = new MonsterClassv2Converter(monsterElement);
-        insertMonsterClass(monster);
-        monsterElement = monsterElement.nextSiblingElement(QString("element"));
+        while(!monsterElement.isNull())
+        {
+            MonsterClassv2* monster = new MonsterClassv2Converter(monsterElement);
+            insertMonsterClass(monster);
+            monsterElement = monsterElement.nextSiblingElement(QString("element"));
+        }
+    }
+    else
+    {
+        monsterElement = bestiaryElement.firstChildElement(QString("monster"));
+        while(!monsterElement.isNull())
+        {
+            MonsterClassv2* monster = new MonsterClassv2(monsterElement, false);
+            insertMonsterClass(monster);
+            monsterElement = monsterElement.nextSiblingElement(QString("monster"));
+        }
     }
 
     QDomElement licenseElement = bestiaryElement.firstChildElement(QString("license"));

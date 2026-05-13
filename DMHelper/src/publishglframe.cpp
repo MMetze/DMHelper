@@ -45,6 +45,9 @@ void PublishGLFrame::cleanup()
 
     if(_renderer)
         _renderer->cleanupGL();
+
+    if(_overlayRenderer)
+        _overlayRenderer->cleanupGL();
 }
 
 void PublishGLFrame::updateWidget()

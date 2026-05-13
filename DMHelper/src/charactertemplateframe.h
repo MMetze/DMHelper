@@ -12,6 +12,7 @@ class CharacterTemplateFrame;
 class OptionsContainer;
 class QLineEdit;
 class QTextEdit;
+class QGridLayout;
 
 class CharacterTemplateFrame : public CampaignObjectFrame, public TemplateFrame
 {
@@ -56,10 +57,21 @@ private slots:
     void syncDndBeyond();
     void importHeroForge();
     void updateCharacterName();
+    void handlePreviousToken();
+    void handleNextToken();
+    void handleAddToken();
+    void handleReloadImage();
+    void handleClearImage();
+    void editConditions();
+    void clearConditions();
 
 private:
     void loadCharacterImage();
     void enableDndBeyondSync(bool enabled);
+    void setTokenIndex(int index);
+    void updateConditionLayout();
+    void clearConditionGrid();
+    void addCondition(const QString& conditionId);
 
     Ui::CharacterTemplateFrame *ui;
     QWidget *_uiWidget;
@@ -69,7 +81,9 @@ private:
     bool _mouseDown;
     bool _reading;
     int _rotation;
+    int _currentToken;
     QString _heroForgeToken;
+    QGridLayout* _conditionGrid;
 };
 
 #endif // CHARACTERTEMPLATEFRAME_H

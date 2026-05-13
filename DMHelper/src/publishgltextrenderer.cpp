@@ -9,6 +9,8 @@
 #include <QTextDocument>
 #include <QPainter>
 
+static constexpr qreal TEXT_HALF_DIVISOR = 2.0;
+
 PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
@@ -244,7 +246,10 @@ void PublishGLTextRenderer::setTextImage(QImage textImage)
     if(textImage.isNull())
         return;
 
+    int oldHeight = _textImage.height();
     _textImage = textImage;
+    if(oldHeight > 0 && _textImage.height() != oldHeight)
+        _textPos = _textPos * (static_cast<qreal>(_textImage.height()) / static_cast<qreal>(oldHeight));
     _recreateContent = true;
     updateSceneRect();
 
@@ -387,7 +392,7 @@ int PublishGLTextRenderer::getRotatedWidth()
     if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
         return (_rotation % 180 == 0) ? _scene.getSceneRect().width() : _scene.getSceneRect().height();
     else
-        return _scene.getSceneRect().width();
+        return (_rotation % 180 == 0) ? _encounter->getLayerScene().sceneSize().width() : _encounter->getLayerScene().sceneSize().height();
 }
 
 int PublishGLTextRenderer::getRotatedHeight()
@@ -395,11 +400,12 @@ int PublishGLTextRenderer::getRotatedHeight()
     if((!_encounter) || (_encounter->getLayerScene().sceneSize().isEmpty()))
         return (_rotation % 180 == 0) ? _scene.getSceneRect().height() : _scene.getSceneRect().width();
     else
-        return _scene.getSceneRect().height();
+        return (_rotation % 180 == 0) ? _encounter->getLayerScene().sceneSize().height() : _encounter->getLayerScene().sceneSize().width();
 }
 
 void PublishGLTextRenderer::recreateContent()
 {
+    // Called from paintGL — GL context is active; matrix and texture operations are safe here.
     if(!_encounter)
         return;
 
@@ -407,12 +413,37 @@ void PublishGLTextRenderer::recreateContent()
 
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
 
-    _textObject->setX(-(getRotatedWidth() * _encounter->getTextWidth() / 100) / 2.0);
+    qreal windowWidth  = (_rotation % 180 == 0) ? _targetSize.width()  : _targetSize.height();
+    qreal windowHeight = (_rotation % 180 == 0) ? _targetSize.height() : _targetSize.width();
+
+    // Compute scale factors up-front: PublishGLImage model matrix is T*S so position must be
+    // in scene/world units; when a layer scene is present, scale the texture to cover scene area.
+    qreal scaleX = 1.0;
+    qreal scaleY = 1.0;
+    if(!_encounter->getLayerScene().sceneSize().isEmpty())
+    {
+        qreal sceneW = getRotatedWidth();
+        qreal sceneH = getRotatedHeight();
+        if(!qFuzzyCompare(sceneW, windowWidth) || !qFuzzyCompare(sceneH, windowHeight))
+        {
+            scaleX = sceneW / windowWidth;
+            scaleY = sceneH / windowHeight;
+        }
+    }
+
+    // Position in scene/world units (T*S model matrix: translation is applied before scale).
+    _textObject->setX(-getRotatedWidth() / TEXT_HALF_DIVISOR);
 
     if(_encounter->getAnimated())
-        _textObject->setY((-getRotatedHeight() / 2) - _textObject->getImageSize().height() + _textPos);
+        _textObject->setY((-getRotatedHeight() / TEXT_HALF_DIVISOR) - (_textObject->getImageSize().height() * scaleY) + _textPos);
     else
-        _textObject->setY((getRotatedHeight() / 2.0) - _textObject->getImageSize().height());
+        _textObject->setY((getRotatedHeight() / TEXT_HALF_DIVISOR) - (_textObject->getImageSize().height() * scaleY));
+
+    if(!qFuzzyCompare(scaleX, 1.0) || !qFuzzyCompare(scaleY, 1.0))
+    {
+        _textObject->setScaleX(static_cast<float>(scaleX));
+        _textObject->setScaleY(static_cast<float>(scaleY));
+    }
 
     _recreateContent = false;
 }
@@ -429,7 +460,7 @@ void PublishGLTextRenderer::updateSceneRect()
     {
         _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
         qDebug() << "[PublishGLTextRenderer] scene rect updated from layer scene to " << _scene.getSceneRect();
-        emit sceneSizeChanged(_encounter->getLayerScene().sceneSize().toSize());
+        emit sceneSizeChanged(_targetSize);
     }
 }
 

@@ -21,9 +21,6 @@ EquipmentServer::EquipmentServer(const QString& equipmentFile, QObject *parent) 
 
 EquipmentServer* EquipmentServer::Instance()
 {
-//    if(!_instance)
-//        Initialize();
-
     return _instance;
 }
 

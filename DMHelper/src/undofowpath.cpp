@@ -12,12 +12,7 @@ UndoFowPath::UndoFowPath(LayerFow* layer, const MapDrawPath& mapDrawPath) :
 void UndoFowPath::apply()
 {
     if(_layer)
-    {
-        for(int i = 0; i < _mapDrawPath.points().count(); ++i)
-        {
-            _layer->paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath);
-        }
-    }
+        _layer->paintFoWPoints(_mapDrawPath.points(), _mapDrawPath);
 }
 
 QDomElement UndoFowPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const

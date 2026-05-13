@@ -779,7 +779,7 @@ void NewEntryDialog::editCharacterIcon()
 
     QImage currentToken(_primaryImageFile.isEmpty() ? QString(":/img/data/portrait.png") : _primaryImageFile);
 
-    TokenEditDialog* dlg = new TokenEditDialog(currentToken, *_options, 1.0, QPoint(), false);
+    TokenEditDialog* dlg = new TokenEditDialog(currentToken, *_options, 1.0, QPoint(), false, this);
     if(dlg->exec() == QDialog::Accepted)
     {
         QImage newToken = dlg->getFinalImage();
@@ -978,7 +978,7 @@ void NewEntryDialog::selectCombatSource()
     {
         _imageColor = Qt::white;
         _imageSize = QSize(400, 300);
-        MapBlankDialog blankDlg;
+        MapBlankDialog blankDlg(this);
         int result = blankDlg.exec();
         if(result == QDialog::Accepted)
         {

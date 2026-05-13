@@ -1,5 +1,6 @@
 #include "campaign.h"
 #include "characterv2.h"
+#include "conditions.h"
 #include "encounterfactory.h"
 #include "map.h"
 #include "party.h"
@@ -78,6 +79,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _notes(),
     _lastMonster(),
     _fearCount(0),
+    _showTokenHealthBars(false),
     _ruleset(),
     _batchChanges(false),
     _changesMade(false),
@@ -104,9 +106,17 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         return;
     }
 
+    // Remember the on-disk version so MainWindow can take a one-time pre-v3
+    // backup before rewriting the file under the new format. Cleared after the
+    // first successful save to avoid stacking duplicate backups.
+    _loadedMajorVersion = majorVersion;
+
     // Load the ruleset; without this we can't load the rest of the campaign
     if(!_ruleset.isInitialized())
         preloadRulesetXML(element, isImport);
+
+    // Set the active conditions from the ruleset
+    Conditions::setActiveConditions(_ruleset.getConditions());
 
     // Configure the campaign object factories based on the ruleset
     CampaignObjectFactory::configureFactories(_ruleset, majorVersion, minorVersion);
@@ -122,6 +132,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
+    _showTokenHealthBars = element.attribute("showTokenHealthBars", QString::number(0)).toInt() != 0;
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -136,20 +147,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     // Load the overlays
     loadOverlayXML(element.firstChildElement(QString("overlays")));
 
-    // TODO: add back in some kind of object counting
-    // Sum up all the elements loaded. The +2 is for the campaign object itself and the notes object
-    //int totalElements = characters.count() + settings.count() + npcs.count() + adventures.count() + tracks.count() + encounterCount + mapCount + 2;
-
     qDebug() << "[Campaign] Loaded campaign """ << getName();
-    //qDebug() << "[Campaign] Loaded campaign """ << _name << """ containing " << totalElements << " elements";
-    //qDebug() << "           Date: " << _date.toStringDDMMYYYY() << ", Time: " << _time;
-    //qDebug() << "           Party: " << characters.count() << " characters";
-    //qDebug() << "           Settings: " << settings.count();
-    //qDebug() << "           NPCs: " << npcs.count();
-    //qDebug() << "           Adventures: " << adventures.count();
-    //qDebug() << "               Encounters: " << encounterCount;
-    //qDebug() << "               Maps: " << mapCount;
-    //qDebug() << "           Audio Tracks: " << tracks.count();
+
 
     validateCampaignIds();
 
@@ -432,6 +431,11 @@ int Campaign::getFearCount() const
     return _fearCount;
 }
 
+bool Campaign::getShowTokenHealthBars() const
+{
+    return _showTokenHealthBars;
+}
+
 Ruleset& Campaign::getRuleset()
 {
     return _ruleset;
@@ -526,6 +530,16 @@ void Campaign::setFearCount(int fearCount)
     emit dirty();
 }
 
+void Campaign::setShowTokenHealthBars(bool show)
+{
+    if(show == _showTokenHealthBars)
+        return;
+
+    _showTokenHealthBars = show;
+    emit showTokenHealthBarsChanged(_showTokenHealthBars);
+    emit dirty();
+}
+
 bool Campaign::validateCampaignIds()
 {
     QList<QUuid> knownIds;
@@ -584,6 +598,9 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 
     if(_fearCount > 0)
         element.setAttribute("fear", _fearCount);
+
+    if(_showTokenHealthBars)
+        element.setAttribute("showTokenHealthBars", 1);
 
     if(_notes.count() > 0)
     {

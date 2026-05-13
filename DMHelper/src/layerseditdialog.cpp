@@ -156,7 +156,7 @@ void LayersEditDialog::addLayer()
     }
     else if(selectedItem == tr("Blank"))
     {
-        MapBlankDialog blankDlg;
+        MapBlankDialog blankDlg(this);
         int result = blankDlg.exec();
         if(result != QDialog::Accepted)
             return;

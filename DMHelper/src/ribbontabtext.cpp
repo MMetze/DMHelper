@@ -18,6 +18,7 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->btnPasteRich, &QAbstractButton::toggled, this, &RibbonTabText::pasteRichChanged);
 
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
+    connect(ui->btnCheckbox, &QAbstractButton::clicked, this, &RibbonTabText::checkboxClicked);
     connect(ui->btnTranslateText, &QAbstractButton::clicked, this, &RibbonTabText::translateTextClicked);
     connect(ui->btnCode, &QAbstractButton::clicked, this, &RibbonTabText::codeViewClicked);
 
@@ -147,6 +148,7 @@ void RibbonTabText::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_1, frameHeight);
     setStandardButtonSize(*ui->lblPasteRich, *ui->btnPasteRich, frameHeight);
     setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, frameHeight);
+    setStandardButtonSize(*ui->lblCheckbox, *ui->btnCheckbox, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
     setStandardButtonSize(*ui->lblAnimation, *ui->btnAnimation, frameHeight);
     setStandardButtonSize(*ui->lblPlayPause, *ui->btnPlayPause, frameHeight);

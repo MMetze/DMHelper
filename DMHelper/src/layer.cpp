@@ -25,7 +25,6 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
 
 Layer::~Layer()
 {
-    emit layerDestroyed(this);
 }
 
 QDomElement Layer::outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport)
@@ -199,6 +198,7 @@ void Layer::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int pr
 
 void Layer::aboutToDelete()
 {
+    emit layerDestroyed(this);
 }
 
 void Layer::setScale(int scale)

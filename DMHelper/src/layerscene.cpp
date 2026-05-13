@@ -333,6 +333,7 @@ void LayerScene::removeLayer(int position)
         return;
 
     disconnectLayer(deleteLayer);
+    deleteLayer->aboutToDelete();
     emit layerRemoved(deleteLayer);
     deleteLayer->deleteLater();
 

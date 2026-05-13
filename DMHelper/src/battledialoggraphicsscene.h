@@ -10,6 +10,7 @@ class BattleDialogModelObject;
 class BattleDialogModelEffect;
 class BattleDialogModelCombatant;
 class BattleDialogModelMonsterClass;
+class BattleDialogModelCharacter;
 class QAbstractGraphicsShapeItem;
 class QMimeData;
 
@@ -64,6 +65,10 @@ signals:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void addEffectSmoke();
+    void addEffectFire();
+    void addEffectSparks();
+    void addEffectLight();
     void duplicateSelection();
     void addPC();
     void addMonsters();
@@ -105,8 +110,17 @@ signals:
     void combatantRemove(BattleDialogModelCombatant* combatant);
     void combatantDamage(BattleDialogModelCombatant* combatant);
     void combatantHeal(BattleDialogModelCombatant* combatant);
+    void combatantHideSelected(BattleDialogModelCombatant* combatant);
+    void combatantUnhideSelected(BattleDialogModelCombatant* combatant);
+    void combatantKnowSelected(BattleDialogModelCombatant* combatant);
+    void combatantUnknowSelected(BattleDialogModelCombatant* combatant);
+    void combatantGroupSelected();
+    void combatantUngroupSelected(BattleDialogModelCombatant* combatant);
+    void combatantRemoveFromGroup(BattleDialogModelCombatant* combatant);
     void monsterChangeToken(BattleDialogModelMonsterClass* monster, int iconIndex);
     void monsterChangeTokenCustom(BattleDialogModelMonsterClass* monster);
+    void characterChangeToken(BattleDialogModelCharacter* character, int iconIndex);
+    void characterChangeTokenCustom(BattleDialogModelCharacter* character);
 
     void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 
@@ -123,8 +137,17 @@ protected slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void hideSelectedCombatants();
+    void unhideSelectedCombatants();
+    void knowSelectedCombatants();
+    void unknowSelectedCombatants();
+    void groupSelectedCombatants();
+    void ungroupSelectedCombatants();
+    void removeFromGroupCombatant();
     void changeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex);
     void changeMonsterTokenCustom(BattleDialogModelMonsterClass* monster);
+    void changeCharacterToken(BattleDialogModelCharacter* character, int iconIndex);
+    void changeCharacterTokenCustom(BattleDialogModelCharacter* character);
 
     void changeEffectLayer();
     void handleSelectionChanged();

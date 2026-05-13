@@ -1,4 +1,5 @@
 #include "combatant.h"
+#include "conditions.h"
 #include "dmconstants.h"
 #include "scaledpixmap.h"
 #include "monster.h"
@@ -9,30 +10,6 @@
 #include <QPainter>
 #include <QDebug>
 
-const Combatant::Condition CONDITION_ITERATOR_VALUES[Combatant::Condition_Iterator_Count] =
-{
-    Combatant::Condition_None,          // Condition_Iterator_None
-    Combatant::Condition_Blinded,       // Condition_Iterator_Blinded
-    Combatant::Condition_Charmed,       // Condition_Iterator_Charmed
-    Combatant::Condition_Deafened,      // Condition_Iterator_Deafened
-    Combatant::Condition_Exhaustion_1,  // Condition_Iterator_Exhaustion_1
-    Combatant::Condition_Exhaustion_2,  // Condition_Iterator_Exhaustion_2
-    Combatant::Condition_Exhaustion_3,  // Condition_Iterator_Exhaustion_3
-    Combatant::Condition_Exhaustion_4,  // Condition_Iterator_Exhaustion_4
-    Combatant::Condition_Exhaustion_5,  // Condition_Iterator_Exhaustion_5
-    Combatant::Condition_Frightened,    // Condition_Iterator_Frightened
-    Combatant::Condition_Grappled,      // Condition_Iterator_Grappled
-    Combatant::Condition_Incapacitated, // Condition_Iterator_Incapacitated
-    Combatant::Condition_Invisible,     // Condition_Iterator_Invisible
-    Combatant::Condition_Paralyzed,     // Condition_Iterator_Paralyzed
-    Combatant::Condition_Petrified,     // Condition_Iterator_Petrified
-    Combatant::Condition_Poisoned,      // Condition_Iterator_Poisoned
-    Combatant::Condition_Prone,         // Condition_Iterator_Prone
-    Combatant::Condition_Restrained,    // Condition_Iterator_Restrained
-    Combatant::Condition_Stunned,       // Condition_Iterator_Stunned
-    Combatant::Condition_Unconscious    // Condition_Iterator_Unconscious
-};
-
 Combatant::Combatant(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
     _initiative(0),
@@ -40,7 +17,7 @@ Combatant::Combatant(const QString& name, QObject *parent) :
     _attacks(),
     _hitPoints(0),
     _hitDice(),
-    _conditions(Condition_None),
+    _conditionList(),
     _icon(""),
     _iconPixmap(),
     _backgroundColor(Qt::black),
@@ -58,7 +35,19 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
     setArmorClass(element.attribute("armorClass").toInt());
     setHitPoints(element.attribute("hitPoints").toInt());
     setHitDice(Dice(element.attribute("hitDice")));
-    setConditions(element.attribute("conditions", QString("0")).toInt());
+
+    // Condition migration: detect old int bitmask format vs new comma-separated string IDs
+    QString condStr = element.attribute("conditions", QString());
+    if(!condStr.isEmpty())
+    {
+        bool ok = false;
+        int condInt = condStr.toInt(&ok);
+        if(ok)
+            _conditionList = Conditions::migrateFromBitmask(condInt);
+        else
+            _conditionList = condStr.split(QStringLiteral(","), Qt::SkipEmptyParts);
+    }
+
     setInitiative(element.attribute("initiative", QString("0")).toInt());
     setIcon(element.attribute("icon"));
     setBackgroundColor(QColor(element.attribute("backgroundColor", QString("#000000"))));
@@ -87,7 +76,7 @@ void Combatant::copyValues(const CampaignObjectBase* other)
     _armorClass = otherCombatant->_armorClass;
     _hitPoints = otherCombatant->_hitPoints;
     _hitDice = otherCombatant->_hitDice;
-    _conditions = otherCombatant->_conditions;
+    _conditionList = otherCombatant->_conditionList;
     _icon = otherCombatant->_icon;
     _iconPixmap.setBasePixmap(_icon);
 
@@ -302,172 +291,14 @@ QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup
 }
 */
 
-int Combatant::getConditionCount()
+QStringList Combatant::getConditionList() const
 {
-    return Combatant::Condition_Iterator_Count;
+    return _conditionList;
 }
 
-Combatant::Condition Combatant::getConditionByIndex(int index)
+bool Combatant::hasConditionId(const QString& conditionId) const
 {
-    if((index < 0) || (index >= Condition_Iterator_Count))
-        return Condition_None;
-    else
-        return CONDITION_ITERATOR_VALUES[index];
-}
-
-QString Combatant::getConditionIcon(int condition)
-{
-    switch(condition)
-    {
-        case Condition_Blinded: return QString("one-eyed");
-        case Condition_Charmed: return QString("smitten");
-        case Condition_Deafened: return QString("elf-ear");
-        case Condition_Exhaustion_1: return QString("crawl");
-        case Condition_Exhaustion_2: return QString("crawl");
-        case Condition_Exhaustion_3: return QString("crawl");
-        case Condition_Exhaustion_4: return QString("crawl");
-        case Condition_Exhaustion_5: return QString("crawl");
-        case Condition_Frightened: return QString("sharp-smile");
-        case Condition_Grappled: return QString("grab");
-        case Condition_Incapacitated: return QString("internal-injury");
-        case Condition_Invisible: return QString("invisible");
-        case Condition_Paralyzed: return QString("aura");
-        case Condition_Petrified: return QString("stone-pile");
-        case Condition_Poisoned: return QString("deathcab");
-        case Condition_Prone: return QString("falling");
-        case Condition_Restrained: return QString("imprisoned");
-        case Condition_Stunned: return QString("embrassed-energy");
-        case Condition_Unconscious: return QString("coma");
-        default: return QString();
-    }
-}
-
-QString Combatant::getConditionTitle(int condition)
-{
-    switch(condition)
-    {
-        case Condition_Blinded: return QString("Blinded");
-        case Condition_Charmed: return QString("Charmed");
-        case Condition_Deafened: return QString("Deafened");
-        case Condition_Exhaustion_1:
-        case Condition_Exhaustion_2:
-        case Condition_Exhaustion_3:
-        case Condition_Exhaustion_4:
-        case Condition_Exhaustion_5: return QString("Exhaustion");
-        case Condition_Frightened: return QString("Frightened");
-        case Condition_Grappled: return QString("Grappled");
-        case Condition_Incapacitated: return QString("Incapacitated");
-        case Condition_Invisible: return QString("Invisible");
-        case Condition_Paralyzed: return QString("Paralyzed");
-        case Condition_Petrified: return QString("Petrified");
-        case Condition_Poisoned: return QString("Poisoned");
-        case Condition_Prone: return QString("Prone");
-        case Condition_Restrained: return QString("Restrained");
-        case Condition_Stunned: return QString("Stunned");
-        case Condition_Unconscious: return QString("Unconscious");
-        default: return QString();
-    }
-}
-
-QString Combatant::getConditionDescription(int condition)
-{
-    switch(condition)
-    {
-        case Condition_Blinded: return QString("Blinded");
-        case Condition_Charmed: return QString("Charmed");
-        case Condition_Deafened: return QString("Deafened");
-        case Condition_Exhaustion_1: return QString("Exhaustion - Level 1");
-        case Condition_Exhaustion_2: return QString("Exhaustion - Level 2");
-        case Condition_Exhaustion_3: return QString("Exhaustion - Level 3");
-        case Condition_Exhaustion_4: return QString("Exhaustion - Level 4");
-        case Condition_Exhaustion_5: return QString("Exhaustion - Level 5");
-        case Condition_Frightened: return QString("Frightened");
-        case Condition_Grappled: return QString("Grappled");
-        case Condition_Incapacitated: return QString("Incapacitated");
-        case Condition_Invisible: return QString("Invisible");
-        case Condition_Paralyzed: return QString("Paralyzed");
-        case Condition_Petrified: return QString("Petrified");
-        case Condition_Poisoned: return QString("Poisoned");
-        case Condition_Prone: return QString("Prone");
-        case Condition_Restrained: return QString("Restrained");
-        case Condition_Stunned: return QString("Stunned");
-        case Condition_Unconscious: return QString("Unconscious");
-        default: return QString();
-    }
-}
-
-void Combatant::drawConditions(QPaintDevice* target, int conditions)
-{
-    if((!target) || (conditions == Condition_None))
-        return;
-
-    int spacing = target->width() / 20;
-    int iconSize = (target->width() / 3) - spacing;
-    if((spacing <= 0) || (iconSize <= 5) || (iconSize + spacing >= target->height()))
-    {
-        qDebug() << "[Combatant] spacing or icon size are not ok to draw conditions. Spacing: " << spacing << ", icon size: " << iconSize << ", target: " << target->width() << " x " << target->height();
-        return;
-    }
-
-    QPainter painter(target);
-    int cx = spacing;
-    int cy = spacing;
-    for(int i = 0; i < Combatant::getConditionCount(); ++i)
-    {
-        int condition = Combatant::getConditionByIndex(i);
-        if((conditions & condition) && (cy <= target->height() - iconSize))
-        {
-            // QPixmap conditionPixmap(QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png"));
-            // painter.drawPixmap(cx, cy, conditionPixmap.scaled(iconSize, iconSize));
-            QPixmap conditionPixmap(QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png"));
-            /*
-            QImage coloredIcon(iconSize, iconSize, QImage::Format_ARGB32);
-            coloredIcon.fill(Qt::yellow);
-            QPainter iconPainter;
-            iconPainter.begin(&coloredIcon);
-                iconPainter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-                iconPainter.drawPixmap(QPoint(0, 0), conditionPixmap.scaled(iconSize, iconSize));
-            iconPainter.end();
-            painter.drawImage(cx, cy, coloredIcon);
-            */
-            painter.drawPixmap(cx, cy, conditionPixmap.scaled(iconSize, iconSize));
-            cx += iconSize + spacing;
-            if(cx > target->width() - iconSize)
-            {
-                cx = spacing;
-                cy += iconSize;
-            }
-        }
-    }
-}
-
-QStringList Combatant::getConditionString(int conditions)
-{
-    QStringList result;
-
-    if(conditions != Condition_None)
-    {
-        for(int i = 0; i < Combatant::getConditionCount(); ++i)
-        {
-            int condition = Combatant::getConditionByIndex(i);
-            if(conditions & condition)
-            {
-                result.append(Combatant::getConditionDescription(condition));
-            }
-        }
-    }
-
-    return result;
-}
-
-int Combatant::getConditions() const
-{
-    return _conditions;
-}
-
-bool Combatant::hasCondition(Condition condition) const
-{
-    return ((_conditions & condition) != 0);
+    return _conditionList.contains(conditionId);
 }
 
 void Combatant::setInitiative(int initiative)
@@ -511,54 +342,39 @@ void Combatant::setHitPoints(int hitPoints)
     }
 }
 
-void Combatant::setConditions(int conditions)
+void Combatant::setConditionList(const QStringList& conditions)
 {
-    if(_conditions != conditions)
+    if(_conditionList != conditions)
     {
-        _conditions = conditions;
+        _conditionList = conditions;
         registerChange();
     }
 }
 
-void Combatant::applyConditions(int conditions)
+void Combatant::addConditionId(const QString& conditionId)
 {
-    if((_conditions & conditions) != conditions)
+    if(!conditionId.isEmpty() && !_conditionList.contains(conditionId))
     {
-        _conditions |= conditions;
+        _conditionList.append(conditionId);
         registerChange();
     }
 }
 
-void Combatant::removeConditions(int conditions)
+void Combatant::removeConditionId(const QString& conditionId)
 {
-    if((_conditions & ~conditions) != _conditions)
+    if(_conditionList.removeOne(conditionId))
     {
-        _conditions &= ~conditions;
-        registerChange();
-    }
-}
-
-void Combatant::addCondition(Condition condition)
-{
-    if(!hasCondition(condition))
-    {
-        _conditions |= condition;
-        registerChange();
-    }
-}
-
-void Combatant::removeCondition(Condition condition)
-{
-    if(hasCondition(condition))
-    {
-        _conditions &= ~condition;
         registerChange();
     }
 }
 
 void Combatant::clearConditions()
 {
-    setConditions(Condition_None);
+    if(!_conditionList.isEmpty())
+    {
+        _conditionList.clear();
+        registerChange();
+    }
 }
 
 void Combatant::applyDamage(int damage)
@@ -613,7 +429,8 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     element.setAttribute("armorClass", getArmorClass());
     element.setAttribute("hitPoints", getHitPoints());
     element.setAttribute("hitDice", getHitDice().toString());
-    element.setAttribute("conditions", getConditions());
+    if(!_conditionList.isEmpty())
+        element.setAttribute("conditions", _conditionList.join(QStringLiteral(",")));
     element.setAttribute("initiative", getInitiative());
 
     if((_backgroundColor.isValid()) && (_backgroundColor != Qt::black))
