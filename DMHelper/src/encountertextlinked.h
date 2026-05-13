@@ -25,7 +25,7 @@ public:
 
 public slots:
     // Text
-    // Writes through to the linked file immediately; dirty() is emitted by the base-class call.
+    // Guards on value change, then writes through to the linked file; dirty() is emitted by the base-class call.
     virtual void setText(const QString& newText) override;
 
     // Linked File
@@ -50,6 +50,10 @@ protected:
     QFileSystemWatcher* _watcher;
     int _fileType;
     QString _metadata;
+
+private:
+    void writeLinkedFile();
+    void readLinkedFileInternal(bool emitDirty);
 };
 
 #endif // ENCOUNTERTEXTLINKED_H

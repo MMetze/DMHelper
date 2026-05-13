@@ -18,9 +18,7 @@ EncounterTextLinked::EncounterTextLinked(const QString& encounterName, QObject *
 void EncounterTextLinked::inputXML(const QDomElement &element, bool isImport)
 {
     _linkedFile = element.attribute("linkedFile");
-    extractTextNode(element, isImport);
-
-    EncounterText::inputXML(element, isImport);
+    EncounterText::inputXML(element, isImport);  // this calls extractTextNode via virtual dispatch
 }
 
 void EncounterTextLinked::copyValues(const CampaignObjectBase* other)
@@ -56,11 +54,22 @@ QString EncounterTextLinked::getMetadata() const
 
 void EncounterTextLinked::setText(const QString& newText)
 {
-    EncounterText::setText(newText);
+    if (newText == getText())
+        return;
+    EncounterText::setText(newText);  // updates _text and emits dirty()
+    if (_linkedFile.isEmpty())
+        return;
+    writeLinkedFile();
+}
 
-    // TODO (filesdir-watcher): bracket with CampaignFilesManager::suspendWatch/_resumeWatch
+void EncounterTextLinked::writeLinkedFile()
+{
+    // TODO (filesdir-watcher): bracket with CampaignFilesManager::suspendWatch/resumeWatch
     // once CampaignFilesManager exists (chunk filesdir-manager / filesdir-watcher).
-    createTextNode(QDomDocument(), QDomElement(), QDir(), false);
+    QDomDocument doc;
+    QDomElement element;
+    QDir dir;
+    createTextNode(doc, element, dir, false);
 }
 
 void EncounterTextLinked::setLinkedFile(const QString& filename)
@@ -110,6 +119,11 @@ void EncounterTextLinked::internalOutputXML(QDomDocument &doc, QDomElement &elem
 
 void EncounterTextLinked::readLinkedFile()
 {
+    readLinkedFileInternal(true);
+}
+
+void EncounterTextLinked::readLinkedFileInternal(bool emitDirty)
+{
     if(_linkedFile.isEmpty())
         return;
 
@@ -143,7 +157,11 @@ void EncounterTextLinked::readLinkedFile()
     while(in.readLineInto(&line))
         inputString += QChar::LineFeed + line;
 
-    EncounterText::setText(extractMetadata(inputString));
+    QString extracted = extractMetadata(inputString);
+    if(emitDirty)
+        EncounterText::setText(extracted);   // updates _text AND emits dirty()
+    else
+        _text = extracted;                   // update _text silently (load-time only)
 }
 
 void EncounterTextLinked::createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -175,7 +193,7 @@ void EncounterTextLinked::extractTextNode(const QDomElement &element, bool isImp
     Q_UNUSED(element);
     Q_UNUSED(isImport);
 
-    readLinkedFile();
+    readLinkedFileInternal(false);
 }
 
 QString EncounterTextLinked::extractMetadata(const QString& inputString)

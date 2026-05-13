@@ -395,14 +395,32 @@ plan.
 ### Cycle 1
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-13
-- executor_files_touched: (pending)
-- executor_build_status: (pending)
-- executor_handoff_summary: (pending)
-- review_verdict: (pending)
-- review_findings: (pending)
-- next_action: (pending)
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
+- executor_build_status: pass — clean build, 117 targets linked
+- executor_handoff_summary: Uncommented extractTextNode call in inputXML (after base inputXML and _linkedFile assignment). Replaced setText stub with implementation that calls EncounterText::setText then writeLinkedFile() then emits dirty(). Added private writeLinkedFile() helper that declares named locals and delegates to createTextNode (temporaries not bindable to non-const refs). Build clean.
+- review_verdict: Fail
+- review_findings: [High — setText missing value-equality guard; writes file and emits dirty() even when newText==_text. Medium — double dirty() emission: base EncounterText::setText already emits dirty() on change, explicit emit in override is redundant. Low — double file read in inputXML: EncounterText::inputXML already calls extractTextNode() via virtual dispatch, so the added explicit call reads the file twice.]
+- next_action: re-execute
 
-## filesdir-data
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
+- executor_build_status: pass — clean build, 109 targets linked
+- executor_handoff_summary: Added value-equality guard at top of setText (if newText==getText() return). Removed redundant explicit emit dirty() — base EncounterText::setText handles it. Removed redundant extractTextNode call and TODO comment from inputXML — EncounterText::inputXML already triggers it via virtual dispatch. Header comment updated.
+- review_verdict: Fail
+- review_findings: [High — readLinkedFile calls EncounterText::setText which emits dirty() on every load; load-time read must not propagate as unsaved change. The fix requires distinguishing load-time vs watcher-triggered calls since the watcher path SHOULD emit dirty().]
+- next_action: re-execute
+
+### Cycle 3
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
+- executor_build_status: pass — clean build, 109 targets linked
+- executor_handoff_summary: Split readLinkedFile into no-arg public slot (delegates to readLinkedFileInternal(true)) and private readLinkedFileInternal(bool emitDirty) holding all file-read logic. extractTextNode now calls readLinkedFileInternal(false) — load path sets _text silently, no dirty(). Watcher path reaches readLinkedFile() → readLinkedFileInternal(true) → EncounterText::setText → dirty(). setText equality guard and writeLinkedFile unchanged from cycle 2.
+- review_verdict: Pass
+- review_findings: []
+- next_action: merge
 
 ### Cycle 1
 - dispatched_by: coordinator
