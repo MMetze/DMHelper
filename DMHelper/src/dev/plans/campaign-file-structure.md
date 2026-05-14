@@ -516,6 +516,18 @@ plan.
 - review_findings: [Low — build status not in handoff note but confirmed 110/110. Info — plan criterion said setLinkedFile; updateLinkedFilePath used instead per coordinator instruction; architecturally correct.]
 - next_action: merge
 
+## media-copy
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.cpp, DMHelper/src/newentrydialog.cpp]
+- executor_build_status: pass — clean build, 111 targets linked
+- executor_handoff_summary: Implemented copyMediaInto in campaignfilesmanager.cpp (was stub): early-return if root empty; already-inside check via relativeFilePath; allocateUniqueAssetPath for filename; QDir::mkpath then QFile::copy; outRelativePath relative to root. In newentrydialog.cpp createMediaEntry and createMapEntry route _primaryImageFile through copyMediaInto when filesDirectory non-empty; video detected via QMimeDatabase; QMessageBox::question shown for video. Owner passed is _currentObject.
+- review_verdict: Pass
+- review_findings: [Low — campaignfilesmanager.h not touched (allocateUniqueAssetPath pre-declared by prior chunk; correct). Low — QMessageBox title "Copy video?" vs plan-spec "Copy video into campaign?"; cosmetic only.]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review

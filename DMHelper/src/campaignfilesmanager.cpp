@@ -295,9 +295,17 @@ bool CampaignFilesManager::copyMediaInto(const QString& sourcePath, const Campai
 
     QString destPath = allocateUniqueAssetPath(ownerDir, baseName, ext);
 
+    if(!QDir().mkpath(ownerPath))
+    {
+        qWarning() << LOG_PREFIX << "copyMediaInto: failed to create directory" << ownerPath;
+        outRelativePath = sourcePath;
+        return false;
+    }
+
     if(!QFile::copy(sourcePath, destPath))
     {
         qWarning() << LOG_PREFIX << "copyMediaInto: failed to copy" << sourcePath << "to" << destPath;
+        outRelativePath = sourcePath;
         return false;
     }
 

@@ -382,15 +382,36 @@ CampaignObjectBase* NewEntryDialog::createMediaEntry()
     if((_primaryImageFile.isEmpty())|| (_imageType == DMHelper::FileType_Unknown))
         return nullptr;
 
+    QString mediaPath = _primaryImageFile;
+    CampaignFilesManager* manager = _campaign ? _campaign->filesManager() : nullptr;
+    if(manager && !_campaign->getFilesDirectory().isEmpty())
+    {
+        bool isVideo = (_imageType == DMHelper::FileType_Video);
+        bool doCopy = true;
+        if(isVideo)
+        {
+            int ret = QMessageBox::question(this, tr("Copy video?"),
+                tr("Copy '%1' into the campaign files directory?").arg(QFileInfo(_primaryImageFile).fileName()),
+                QMessageBox::Yes | QMessageBox::No);
+            doCopy = (ret == QMessageBox::Yes);
+        }
+        if(doCopy)
+        {
+            QString outRelPath;
+            if(manager->copyMediaInto(_primaryImageFile, _currentObject, isVideo, outRelPath))
+                mediaPath = QDir(manager->rootDirectory()).absoluteFilePath(outRelPath);
+        }
+    }
+
     Layer* mediaLayer;
     if(_imageType == DMHelper::FileType_Image)
     {
-        LayerImage* imageLayer = new LayerImage(QString("Media Image: ") + QFileInfo(_primaryImageFile).fileName(), _primaryImageFile);
+        LayerImage* imageLayer = new LayerImage(QString("Media Image: ") + QFileInfo(mediaPath).fileName(), mediaPath);
         mediaLayer = imageLayer;
     }
     else if(_imageType == DMHelper::FileType_Video)
     {
-        LayerVideo* videoLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(_primaryImageFile).fileName(), _primaryImageFile);
+        LayerVideo* videoLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(mediaPath).fileName(), mediaPath);
         mediaLayer = videoLayer;
     }
     else
@@ -416,15 +437,36 @@ CampaignObjectBase* NewEntryDialog::createMapEntry()
     if((_primaryImageFile.isEmpty())|| (_imageType == DMHelper::FileType_Unknown))
         return nullptr;
 
+    QString mediaPath = _primaryImageFile;
+    CampaignFilesManager* manager = _campaign ? _campaign->filesManager() : nullptr;
+    if(manager && !_campaign->getFilesDirectory().isEmpty())
+    {
+        bool isVideo = (_imageType == DMHelper::FileType_Video);
+        bool doCopy = true;
+        if(isVideo)
+        {
+            int ret = QMessageBox::question(this, tr("Copy video?"),
+                tr("Copy '%1' into the campaign files directory?").arg(QFileInfo(_primaryImageFile).fileName()),
+                QMessageBox::Yes | QMessageBox::No);
+            doCopy = (ret == QMessageBox::Yes);
+        }
+        if(doCopy)
+        {
+            QString outRelPath;
+            if(manager->copyMediaInto(_primaryImageFile, _currentObject, isVideo, outRelPath))
+                mediaPath = QDir(manager->rootDirectory()).absoluteFilePath(outRelPath);
+        }
+    }
+
     Layer* mediaLayer;
     if(_imageType == DMHelper::FileType_Image)
     {
-        LayerImage* imageLayer = new LayerImage(QString("Media Image: ") + QFileInfo(_primaryImageFile).fileName(), _primaryImageFile);
+        LayerImage* imageLayer = new LayerImage(QString("Media Image: ") + QFileInfo(mediaPath).fileName(), mediaPath);
         mediaLayer = imageLayer;
     }
     else if(_imageType == DMHelper::FileType_Video)
     {
-        LayerVideo* videoLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(_primaryImageFile).fileName(), _primaryImageFile);
+        LayerVideo* videoLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(mediaPath).fileName(), mediaPath);
         mediaLayer = videoLayer;
     }
     else
