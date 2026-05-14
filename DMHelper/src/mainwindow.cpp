@@ -1803,6 +1803,28 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
         _campaign->clearLoadedMajorVersion();
     }
 
+    // Mirror verification: ensure the files-directory mirror has all required subdirectories.
+    // Skip for legacy campaigns that have no files directory configured.
+    if(!_campaign->getFilesDirectory().isEmpty() && _campaign->filesManager())
+    {
+        QStringList missingDirs;
+        _campaign->filesManager()->verifyMirror(_campaign, missingDirs);
+        if(!missingDirs.isEmpty())
+        {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle(QString("Missing directories"));
+            msgBox.setText(QString("The following directories are missing from the campaign files mirror:\n\n") + missingDirs.join("\n"));
+            QPushButton* createButton = msgBox.addButton(QString("Create"), QMessageBox::AcceptRole);
+            msgBox.addButton(QString("Skip"), QMessageBox::RejectRole);
+            msgBox.exec();
+            if(msgBox.clickedButton() == createButton)
+            {
+                for(const QString& dir : missingDirs)
+                    QDir(_campaign->filesManager()->rootDirectory()).mkpath(dir);
+            }
+        }
+    }
+
     qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
 
     QDomDocument doc("DMHelperXML");

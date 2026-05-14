@@ -472,6 +472,28 @@ plan.
 - review_findings: [Info — inputXML calls setDate()/setTime() which can emit dirty(); pre-existing behaviour, out of scope]
 - next_action: merge
 
+## mirror-on-save
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/mainwindow.cpp]
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: Inserted mirror-check block in doSaveCampaign between the backup block and outputXML call. Guards on !_campaign->getFilesDirectory().isEmpty() && _campaign->filesManager(). Calls verifyMirror(_campaign, missing). If missing non-empty, shows QMessageBox with Create/Skip buttons. On Create, iterates missing with QDir().mkpath(dir) (relative paths — fixed in cycle 2).
+- review_verdict: Fail
+- review_findings: [High — QDir().mkpath(dir) resolves relative paths against process CWD rather than manager rootDirectory(); directory creation silently targets wrong location.]
+- next_action: re-execute
+
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/mainwindow.cpp]
+- executor_build_status: pass — clean build, 106 targets linked
+- executor_handoff_summary: Replaced QDir().mkpath(dir) with QDir(_campaign->filesManager()->rootDirectory()).mkpath(dir) so relative paths from verifyMirror are resolved against the absolute campaign files root. Single call site fixed.
+- review_verdict: Pass
+- review_findings: [Info — uses relative paths from relativePathForEntry resolved via QDir(rootDirectory()) rather than absolute paths from pathForEntry directly; mathematically equivalent and acceptance criteria met.]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review
