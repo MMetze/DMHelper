@@ -829,6 +829,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setMovementString(newCampaignDialog->getMovementString());
         _campaign->getRuleset().setCombatantDoneCheckbox(newCampaignDialog->isCombatantDone());
         _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
+        _campaign->setFilesDirectory(newCampaignDialog->getFilesDirectory());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
         MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
         SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
@@ -1789,6 +1790,13 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
         _campaignFileName = QFileDialog::getSaveFileName(this, QString("Save Campaign"), defaultFile, QString("XML files (*.xml)"));
         if(_campaignFileName.isEmpty())
             return false;
+
+        if(!_campaign->getFilesDirectory().isEmpty())
+        {
+            QString absFilesDir = QFileInfo(_campaignFileName).absoluteDir().absoluteFilePath(_campaign->getFilesDirectory());
+            QDir().mkpath(absFilesDir);
+            _campaign->resolveFilesDirectory(_campaignFileName);
+        }
     }
 
     // One-time pre-v3 backup: if the loaded campaign was a pre-v3 file, copy

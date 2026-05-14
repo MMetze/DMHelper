@@ -528,6 +528,30 @@ plan.
 - review_findings: [Low — campaignfilesmanager.h not touched (allocateUniqueAssetPath pre-declared by prior chunk; correct). Low — QMessageBox title "Copy video?" vs plan-spec "Copy video into campaign?"; cosmetic only.]
 - next_action: merge
 
+## newcampaign-dialog
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/newcampaigndialog.h, DMHelper/src/newcampaigndialog.cpp, DMHelper/src/mainwindow.cpp]
+- executor_build_status: pass — verified 188/188 (shared working tree with merge-add-entry)
+- executor_handoff_summary: Code was added manually by the user (not via Execution Agent dispatch). getFilesDirectory() reads edtFilesDirectory; btnBrowseFilesDirectory opens QFileDialog::getExistingDirectory; edtCampaignName textChanged auto-fills edtFilesDirectory with name_files until user manually edits (one-shot guard via textEdited); mainwindow.cpp calls setFilesDirectory on new-campaign path and QDir::mkpath in doSaveCampaign after resolveFilesDirectory.
+- review_verdict: Pass
+- review_findings: [Info — auto-fill guard correctly uses textEdited for user input detection. Info — directory creation deferred to doSaveCampaign when save path is known.]
+- next_action: merge
+
+## merge-add-entry
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/newentrydialog.cpp]
+- executor_build_status: pass — clean build, 188 targets linked
+- executor_handoff_summary: Removed all 8 ui->btnTypeLinked references from newentrydialog.cpp. CampaignType_LinkedText in setEntryType now routes to btnTypeText (unified flow). createTextEntry branches on filesDirectory non-empty: creates EncounterTextLinked with allocateUniqueMarkdownPath + setLinkedFile + setText when in file-structure mode; falls back to EncounterText for legacy mode.
+- review_verdict: Pass
+- review_findings: [Low — setLinkedFile before parenting means watcher not wired until reload; pre-existing architectural limitation. Low — null/Campaign _currentObject edge case for pathForEntry. Low — writeLinkedFile may fail silently if directory not yet on disk (deferred to mirror-on-save).]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review

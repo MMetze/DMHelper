@@ -26,11 +26,13 @@ NewCampaignDialog::NewCampaignDialog(const QString& rulesetName, QWidget *parent
         ui->cmbRulesets->setCurrentText(rulesetName);
 
     connect(ui->cmbRulesets, &QComboBox::currentIndexChanged, this, &NewCampaignDialog::handleRulesetSelected);
-    connect(ui->btnBrowseCharacterData, &QPushButton::clicked, this, &NewCampaignDialog::handleCharacterDataBrowse);
     connect(ui->btnBrowseCharacterUI, &QPushButton::clicked, this, &NewCampaignDialog::handleCharacterUIBrowse);
     connect(ui->btnBrowseBestiaryFile, &QPushButton::clicked, this, &NewCampaignDialog::handleBestiaryFileBrowse);
     connect(ui->btnBrowseMonsterData, &QPushButton::clicked, this, &NewCampaignDialog::handleMonsterDataBrowse);
     connect(ui->btnBrowseMonsterUI, &QPushButton::clicked, this, &NewCampaignDialog::handleMonsterUIBrowse);
+    connect(ui->btnBrowseFilesDirectory, &QPushButton::clicked, this, &NewCampaignDialog::handleFilesDirectoryBrowse);
+    connect(ui->edtCampaignName, &QLineEdit::textChanged, this, &NewCampaignDialog::handleCampaignNameChanged);
+    connect(ui->edtFilesDirectory, &QLineEdit::textEdited, this, [this]() { _filesDirectoryEdited = true; });
 
     handleRulesetSelected();
 }
@@ -175,4 +177,25 @@ void NewCampaignDialog::handleMonsterUIBrowse()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Select Monster UI File"), QString(), tr("UI Files (*.ui)"));
     if(!fileName.isEmpty())
         ui->edtMonsterUI->setText(fileName);
+}
+
+QString NewCampaignDialog::getFilesDirectory() const
+{
+    return ui->edtFilesDirectory->text();
+}
+
+void NewCampaignDialog::handleFilesDirectoryBrowse()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select Files Directory"), QString());
+    if(!dir.isEmpty())
+    {
+        ui->edtFilesDirectory->setText(dir);
+        _filesDirectoryEdited = true;
+    }
+}
+
+void NewCampaignDialog::handleCampaignNameChanged(const QString& name)
+{
+    if(!_filesDirectoryEdited)
+        ui->edtFilesDirectory->setText(name + QString("_files"));
 }

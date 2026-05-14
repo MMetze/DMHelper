@@ -63,7 +63,6 @@ NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, Ca
     connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &NewEntryDialog::newPageSelected);
 
     connect(ui->btnTypeText, &QPushButton::clicked, this, [this]() {ui->stackedWidget->setCurrentWidget(ui->pageEntry);});
-    connect(ui->btnTypeLinked, &QPushButton::clicked, this, [this]() {ui->stackedWidget->setCurrentWidget(ui->pageLinkedEntry);});
     connect(ui->btnTypeParty, &QPushButton::clicked, this, [this]() {ui->stackedWidget->setCurrentWidget(ui->pageParty);});
     connect(ui->btnTypeCharacter, &QPushButton::clicked, this, [this]() {ui->stackedWidget->setCurrentWidget(ui->pageCharacter);});
     connect(ui->btnTypeMedia, &QPushButton::clicked, this, [this]() {ui->stackedWidget->setCurrentWidget(ui->pageMedia);});
@@ -123,7 +122,7 @@ void NewEntryDialog::setEntryType(DMHelper::CampaignType type, const QString& fi
             ui->btnTypeText->click();
             break;
         case DMHelper::CampaignType_LinkedText:
-            ui->btnTypeLinked->click();
+            ui->btnTypeText->click();
             break;
         case DMHelper::CampaignType_Party:
             ui->btnTypeParty->click();
@@ -155,8 +154,6 @@ void NewEntryDialog::setEntryFile(const QString& filename)
 
     if(ui->buttonGroupType->checkedButton() == ui->btnTypeText)
         readTextFile(filename);
-    else if(ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
-        setLinkedTextFile(filename);
     else if(ui->buttonGroupType->checkedButton() == ui->btnTypeParty)
         setNewPrimaryImage(filename, nullptr, ui->btnPartyIcon, 128, 128, QString(":/img/data/icon_contentparty.png"));
     else if(ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)
@@ -182,8 +179,6 @@ CampaignObjectBase* NewEntryDialog::createNewEntry()
 
     if(ui->buttonGroupType->checkedButton() == ui->btnTypeText)
         return createTextEntry();
-    else if(ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
-        return createLinkedEntry();
     else if(ui->buttonGroupType->checkedButton() == ui->btnTypeParty)
         return createPartyEntry();
     else if(ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)
@@ -209,8 +204,6 @@ DMHelper::CampaignType NewEntryDialog::getEntryType()
 {
     if(ui->buttonGroupType->checkedButton() == ui->btnTypeText)
         return DMHelper::CampaignType_Text;
-    else if(ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
-        return DMHelper::CampaignType_LinkedText;
     else if(ui->buttonGroupType->checkedButton() == ui->btnTypeParty)
         return DMHelper::CampaignType_Party;
     else if(ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)
@@ -291,6 +284,21 @@ bool NewEntryDialog::eventFilter(QObject *obj, QEvent *event)
 
 CampaignObjectBase* NewEntryDialog::createTextEntry()
 {
+    CampaignFilesManager* manager = _campaign ? _campaign->filesManager() : nullptr;
+    if(manager && !_campaign->getFilesDirectory().isEmpty())
+    {
+        EncounterTextLinked* encounter = qobject_cast<EncounterTextLinked*>(EncounterFactory().createObject(DMHelper::CampaignType_LinkedText, -1, getNewEntryName(), false));
+        if(!encounter)
+            return nullptr;
+
+        QString parentDir = manager->pathForEntry(_currentObject);
+        QString absPath = manager->allocateUniqueMarkdownPath(QDir(parentDir), getNewEntryName());
+        encounter->setLinkedFile(absPath);
+        encounter->setText(ui->textBrowserEntry->toHtml());
+
+        return encounter;
+    }
+
     EncounterText* encounter = qobject_cast<EncounterText*>(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, getNewEntryName(), false));
     if(!encounter)
         return nullptr;
@@ -642,12 +650,7 @@ void NewEntryDialog::validateNewEntry()
         if(getNewEntryName().isEmpty())
             missing << tr("Entry name is required");
 
-        if(ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
-        {
-            if(ui->edtLinkedFile->text().isEmpty())
-                missing << tr("Linked file must be specified");
-        }
-        else if(ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)
+        if(ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)
         {
             if((ui->buttonGroupCharacter->checkedButton() == ui->btnCharacterMonster) && (ui->cmbCharacterMonster->currentText().isEmpty()))
                 missing << tr("Monster must be selected");
@@ -681,10 +684,6 @@ void NewEntryDialog::validateNewEntry()
 void NewEntryDialog::newPageSelected()
 {
     if (ui->buttonGroupType->checkedButton() == ui->btnTypeText)
-    {
-        disconnectScreenshot();
-    }
-    else if (ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
     {
         disconnectScreenshot();
     }
@@ -1066,11 +1065,6 @@ bool NewEntryDialog::isSelectedEntryValid()
     if (ui->buttonGroupType->checkedButton() == ui->btnTypeText)
     {
         // No further checks
-    }
-    else if (ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
-    {
-        if(ui->edtLinkedFile->text().isEmpty())
-            return false;
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeParty)
     {

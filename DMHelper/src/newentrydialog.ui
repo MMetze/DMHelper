@@ -82,47 +82,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btnTypeLinked">
-          <property name="minimumSize">
-           <size>
-            <width>50</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Linked Entry</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="resources.qrc">
-            <normaloff>:/img/data/icon_newlink.png</normaloff>:/img/data/icon_newlink.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>40</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">buttonGroupType</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="btnTypeParty">
           <property name="minimumSize">
            <size>
@@ -1106,7 +1065,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroupCharacter"/>
   <buttongroup name="buttonGroupType"/>
+  <buttongroup name="buttonGroupCharacter"/>
  </buttongroups>
 </ui>

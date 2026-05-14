@@ -116,6 +116,7 @@ set(DMHELPER_SOURCES
     campaign.cpp
     campaignexporter.cpp
     campaignfilesmanager.cpp
+    campaignmigrationdialog.cpp
     campaignnotesdialog.cpp
     campaignobjectbase.cpp
     campaignobjectfactory.cpp
@@ -469,6 +470,7 @@ set(DMHELPER_HEADERS
     campaign.h
     campaignexporter.h
     campaignfilesmanager.h
+    campaignmigrationdialog.h
     campaignnotesdialog.h
     campaignobjectbase.h
     campaignobjectfactory.h
@@ -756,6 +758,7 @@ set(DMHELPER_FORMS
     bestiaryfindtokendialog.ui
     bestiarypopulatetokensdialog.ui
     bestiarytemplatedialog.ui
+    campaignmigrationdialog.ui
     campaignnotesdialog.ui
     characterimportdialog.ui
     characterimportheroforgedialog.ui

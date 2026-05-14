@@ -30,6 +30,8 @@ public:
     QString getRuleset() const;
     void setRuleset(const QString& rulesetName);
 
+    QString getFilesDirectory() const;
+
 private slots:
     void handleRulesetSelected();
     void handleCharacterDataBrowse();
@@ -37,9 +39,12 @@ private slots:
     void handleBestiaryFileBrowse();
     void handleMonsterDataBrowse();
     void handleMonsterUIBrowse();
+    void handleFilesDirectoryBrowse();
+    void handleCampaignNameChanged(const QString& name);
 
 private:
     Ui::NewCampaignDialog *ui;
+    bool _filesDirectoryEdited = false;
 };
 
 #endif // NEWCAMPAIGNDIALOG_H
