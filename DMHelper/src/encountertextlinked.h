@@ -29,6 +29,7 @@ public slots:
 
     // Linked File
     virtual void setLinkedFile(const QString& filename);
+    virtual void updateLinkedFilePath(const QString& newAbsolutePath);
     virtual void setWatcher(bool enable);
 
 signals:

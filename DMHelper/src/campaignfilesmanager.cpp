@@ -1,6 +1,7 @@
 #include "campaignfilesmanager.h"
 #include "campaign.h"
 #include "campaignobjectbase.h"
+#include "encountertextlinked.h"
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
@@ -170,7 +171,7 @@ void CampaignFilesManager::verifyMirror(Campaign* campaign, QStringList& missing
 
 void CampaignFilesManager::renameEntryFile(CampaignObjectBase* entry, const QString& oldName, const QString& newName)
 {
-    if(!entry || oldName.isEmpty() || oldName == newName)
+    if(!entry || oldName.isEmpty() || newName.isEmpty() || oldName == newName)
         return;
 
     if(!findOwningCampaign(entry))
@@ -207,24 +208,63 @@ void CampaignFilesManager::renameEntryFile(CampaignObjectBase* entry, const QStr
     QString newAbsPath = parentDir.absoluteFilePath(safeNew);
 
     bool success = false;
+    QString renamedToAbsPath;
+
     if(!entry->getChildObjects().isEmpty())
     {
         // Directory entry — rename the directory
         success = QDir().rename(oldAbsPath, newAbsPath);
+        if(!success && QFileInfo::exists(newAbsPath))
+        {
+            // Collision — allocate a unique path and retry once
+            newAbsPath = allocateUniqueSubdirPath(parentDir, newName);
+            success = QDir().rename(oldAbsPath, newAbsPath);
+        }
+        if(success)
+            renamedToAbsPath = newAbsPath;
     }
     else
     {
-        // Leaf entry — rename the .md file if it exists, otherwise rename bare path
+        // Leaf entry — rename the .md file
         QString oldMdPath = oldAbsPath + QLatin1String(MARKDOWN_EXT);
         QString newMdPath = newAbsPath + QLatin1String(MARKDOWN_EXT);
         if(QFileInfo::exists(oldMdPath))
+        {
             success = QFile::rename(oldMdPath, newMdPath);
+            if(!success && QFileInfo::exists(newMdPath))
+            {
+                // Collision — allocate a unique .md path and retry once
+                newMdPath = allocateUniqueMarkdownPath(parentDir, newName);
+                success = QFile::rename(oldMdPath, newMdPath);
+            }
+            if(success)
+                renamedToAbsPath = newMdPath;
+        }
         else
+        {
             success = QFile::rename(oldAbsPath, newAbsPath);
+            if(!success && QFileInfo::exists(newAbsPath))
+            {
+                newAbsPath = allocateUniqueMarkdownPath(parentDir, newName);
+                success = QFile::rename(oldAbsPath, newAbsPath);
+            }
+            if(success)
+                renamedToAbsPath = newAbsPath;
+        }
     }
 
     if(!success)
+    {
         qWarning() << LOG_PREFIX << "renameEntryFile failed:" << oldAbsPath << "->" << newAbsPath;
+        return;
+    }
+
+    // Update EncounterTextLinked's linked file path after successful rename.
+    // Use updateLinkedFilePath (not setLinkedFile) so we do NOT re-read the file
+    // content — the content is unchanged; only the path moved.
+    EncounterTextLinked* linked = qobject_cast<EncounterTextLinked*>(entry);
+    if(linked && !renamedToAbsPath.isEmpty())
+        linked->updateLinkedFilePath(renamedToAbsPath);
 }
 
 bool CampaignFilesManager::copyMediaInto(const QString& sourcePath, const CampaignObjectBase* owner,

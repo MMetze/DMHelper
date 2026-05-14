@@ -122,6 +122,26 @@ void EncounterTextLinked::setLinkedFile(const QString& filename)
     }
 }
 
+void EncounterTextLinked::updateLinkedFilePath(const QString& newAbsolutePath)
+{
+    // Disconnect any prior linkedFileChanged connection
+    Campaign* owning = CampaignFilesManager::findOwningCampaign(this);
+    if(owning && owning->filesManager())
+        disconnect(owning->filesManager(), &CampaignFilesManager::linkedFileChanged, this, nullptr);
+
+    _linkedFile = newAbsolutePath;
+
+    // Re-wire the watcher without re-reading the file (content is unchanged)
+    if(owning && owning->filesManager() && !_linkedFile.isEmpty())
+    {
+        connect(owning->filesManager(), &CampaignFilesManager::linkedFileChanged,
+                this, [this](const QString& path){
+                    if(path == _linkedFile)
+                        readLinkedFile();
+                });
+    }
+}
+
 void EncounterTextLinked::setWatcher(bool enable)
 {
     Q_UNUSED(enable);

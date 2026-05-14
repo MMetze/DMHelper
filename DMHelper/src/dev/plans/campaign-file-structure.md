@@ -494,6 +494,28 @@ plan.
 - review_findings: [Info — uses relative paths from relativePathForEntry resolved via QDir(rootDirectory()) rather than absolute paths from pathForEntry directly; mathematically equivalent and acceptance criteria met.]
 - next_action: merge
 
+## rename-propagation
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.cpp, DMHelper/src/campaignobjectbase.cpp]
+- executor_build_status: pass — clean build, 108 targets linked
+- executor_handoff_summary: Implemented renameEntryFile in campaignfilesmanager.cpp (was stub). In campaignobjectbase.cpp setName, captures oldName before update then calls renameEntryFile(this, oldName, newName) if owning campaign has filesManager. Collision avoidance added. EncounterTextLinked: post-rename setLinkedFile call (fixed in cycle 2 to avoid dirty()).
+- review_verdict: Fail
+- review_findings: [High — renameEntryFile calls setLinkedFile which chains readLinkedFileInternal(true) → EncounterText::setText → emit dirty(). Content unchanged on rename; re-read and dirty emission both wrong.]
+- next_action: re-execute
+
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp, DMHelper/src/campaignfilesmanager.cpp]
+- executor_build_status: pass — clean build, 110 targets linked
+- executor_handoff_summary: Added EncounterTextLinked::updateLinkedFilePath(const QString&) — updates _linkedFile and re-wires watcher connection without calling readLinkedFile(). renameEntryFile now calls updateLinkedFilePath instead of setLinkedFile. Added newName.isEmpty() early-return guard.
+- review_verdict: Pass
+- review_findings: [Low — build status not in handoff note but confirmed 110/110. Info — plan criterion said setLinkedFile; updateLinkedFilePath used instead per coordinator instruction; architecturally correct.]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review

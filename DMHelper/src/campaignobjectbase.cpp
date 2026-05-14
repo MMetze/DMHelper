@@ -424,12 +424,18 @@ void CampaignObjectBase::setName(const QString& name)
 {
     if(objectName() != name)
     {
+        QString oldName = objectName();
         setObjectName(name);
 #ifdef QT_DEBUG
         _DEBUG_NAME = name;
 #endif
         emit nameChanged(this, objectName());
         handleInternalChange();
+
+        // Propagate rename to the on-disk mirror (no-op if not yet attached to a Campaign)
+        Campaign* owningCampaign = CampaignFilesManager::findOwningCampaign(this);
+        if(owningCampaign && owningCampaign->filesManager())
+            owningCampaign->filesManager()->renameEntryFile(this, oldName, name);
     }
 }
 
