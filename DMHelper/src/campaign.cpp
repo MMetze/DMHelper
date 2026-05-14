@@ -1,4 +1,5 @@
 #include "campaign.h"
+#include "campaignfilesmanager.h"
 #include "characterv2.h"
 #include "conditions.h"
 #include "encounterfactory.h"
@@ -16,6 +17,7 @@
 #include "overlaytimer.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QFileInfo>
 #include <QHash>
 #include <QDebug>
 
@@ -89,6 +91,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _filesDirectory()
 {
     connect(&_ruleset, &Ruleset::dirty, this, &Campaign::dirty);
+    _filesManager = new CampaignFilesManager(this);
 }
 
 Campaign::~Campaign()
@@ -433,6 +436,11 @@ QString Campaign::getFilesDirectory() const
     return _filesDirectory;
 }
 
+CampaignFilesManager* Campaign::filesManager() const
+{
+    return _filesManager;
+}
+
 int Campaign::getFearCount() const
 {
     return _fearCount;
@@ -534,6 +542,14 @@ void Campaign::setFilesDirectory(const QString& filesDirectory)
 
     _filesDirectory = filesDirectory;
     emit dirty();
+}
+
+void Campaign::resolveFilesDirectory(const QString& campaignXmlPath)
+{
+    if(_filesDirectory.isEmpty())
+        return;
+    QString abs = QFileInfo(campaignXmlPath).absoluteDir().absoluteFilePath(_filesDirectory);
+    _filesManager->setRootDirectory(abs);
 }
 
 void Campaign::setFearCount(int fearCount)

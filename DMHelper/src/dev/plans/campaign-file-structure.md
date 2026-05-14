@@ -7,8 +7,8 @@ arch_review_required: true
 arch_review_model: opus
 arch_review_reason: Introduces a new top-level subsystem (CampaignFilesManager owning a recursive QFileSystemWatcher and the on-disk mirror), changes the serialization shape of `Campaign` (new `filesDirectory` attribute) and `EncounterTextLinked` (inputXML now reads through to disk; setText now writes through), and touches both the campaign and UI-shell subsystems.
 pre_impl_arch_review_requested: true
-supersedes: campaign-file-structure-rev1
-status: in-progress
+supersedes: null
+status: draft
 ---
 
 # Summary
@@ -378,56 +378,66 @@ plan.
 
 # Cycle Log
 
-## textlinked-readwrite
+## filesdir-manager
 
 ### Cycle 1
 - dispatched_by: coordinator
-- dispatch_timestamp: 2026-05-13
-- executor_files_touched: (pending)
-- executor_build_status: (pending)
-- executor_handoff_summary: (pending)
-- review_verdict: (pending)
-- review_findings: (pending)
-- next_action: (pending)
-
-## textlinked-readwrite
-
-### Cycle 1
-- dispatched_by: coordinator
-- dispatch_timestamp: 2026-05-13
-- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
-- executor_build_status: pass — clean build, 117 targets linked
-- executor_handoff_summary: Uncommented extractTextNode call in inputXML (after base inputXML and _linkedFile assignment). Replaced setText stub with implementation that calls EncounterText::setText then writeLinkedFile() then emits dirty(). Added private writeLinkedFile() helper that declares named locals and delegates to createTextNode (temporaries not bindable to non-const refs). Build clean.
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.h (created), DMHelper/src/campaignfilesmanager.cpp (created), DMHelper/src/campaign.h, DMHelper/src/campaign.cpp, DMHelper/src/CMakeLists.txt]
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: Created CampaignFilesManager with full API surface (path allocation, collision avoidance, mirror verify, rename, media copy, suspend/resume watch, expected-paths registry, findOwningCampaign static). Campaign gains _filesManager member constructed in its ctor. Note: getChildCount() absent on CampaignObjectBase — verifyMirror uses getChildObjects().isEmpty() instead. No watcher code in this chunk per plan.
 - review_verdict: Fail
-- review_findings: [High — setText missing value-equality guard; writes file and emits dirty() even when newText==_text. Medium — double dirty() emission: base EncounterText::setText already emits dirty() on change, explicit emit in override is redundant. Low — double file read in inputXML: EncounterText::inputXML already calls extractTextNode() via virtual dispatch, so the added explicit call reads the file twice.]
+- review_findings: [High — setFilesDirectory never calls _filesManager->setRootDirectory so manager root stays empty. Medium — pathForEntry uses raw getName() without sanitisation, mismatching allocateUnique* paths for names with spaces/special chars. Low — copyMediaInto missing bool isVideo parameter needed by chunk media-copy.]
 - next_action: re-execute
 
 ### Cycle 2
 - dispatched_by: coordinator
-- dispatch_timestamp: 2026-05-13
-- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
-- executor_build_status: pass — clean build, 109 targets linked
-- executor_handoff_summary: Added value-equality guard at top of setText (if newText==getText() return). Removed redundant explicit emit dirty() — base EncounterText::setText handles it. Removed redundant extractTextNode call and TODO comment from inputXML — EncounterText::inputXML already triggers it via virtual dispatch. Header comment updated.
-- review_verdict: Fail
-- review_findings: [High — readLinkedFile calls EncounterText::setText which emits dirty() on every load; load-time read must not propagate as unsaved change. The fix requires distinguishing load-time vs watcher-triggered calls since the watcher path SHOULD emit dirty().]
-- next_action: re-execute
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/campaign.h, DMHelper/src/campaign.cpp, DMHelper/src/campaignfilesmanager.h, DMHelper/src/campaignfilesmanager.cpp]
+- executor_build_status: pass — clean build, 128 targets linked
+- executor_handoff_summary: Added Campaign::resolveFilesDirectory() resolving relative _filesDirectory to absolute and calling manager->setRootDirectory(). Extracted sanitiseName() as private static on CampaignFilesManager; pathForEntry now uses sanitiseName() per segment. Added bool isVideo to copyMediaInto signature (Q_UNUSED for now).
+- review_verdict: Pass
+- review_findings: [Low — QMap not explicitly included in campaignfilesmanager.h. Low — sanitiseName returns empty for all-special-char names. Info — watcher signals/allocateUniqueAssetPath/expected-paths pre-declared; downstream chunks must not re-add them.]
+- next_action: merge
 
 ### Cycle 3
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-13
 - executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
 - executor_build_status: pass — clean build, 109 targets linked
-- executor_handoff_summary: Split readLinkedFile into no-arg public slot (delegates to readLinkedFileInternal(true)) and private readLinkedFileInternal(bool emitDirty) holding all file-read logic. extractTextNode now calls readLinkedFileInternal(false) — load path sets _text silently, no dirty(). Watcher path reaches readLinkedFile() → readLinkedFileInternal(true) → EncounterText::setText → dirty(). setText equality guard and writeLinkedFile unchanged from cycle 2.
+- executor_handoff_summary: Split readLinkedFile into no-arg public slot (delegates to readLinkedFileInternal(true)) and private readLinkedFileInternal(bool emitDirty) holding all file-read logic. extractTextNode now calls readLinkedFileInternal(false) — load path sets _text silently, no dirty(). Watcher path reaches readLinkedFile() → readLinkedFileInternal(true) → EncounterText::setText → dirty().
 - review_verdict: Pass
 - review_findings: []
 - next_action: merge
+
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
+- executor_build_status: pass — clean build, 109 targets linked
+- executor_handoff_summary: Added value-equality guard at top of setText. Removed redundant explicit emit dirty(). Removed redundant extractTextNode call from inputXML.
+- review_verdict: Fail
+- review_findings: [High — readLinkedFile calls EncounterText::setText which emits dirty() on every load]
+- next_action: re-execute
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-13
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
+- executor_build_status: pass — clean build, 117 targets linked
+- executor_handoff_summary: Uncommented extractTextNode call in inputXML. Replaced setText stub with write-through implementation. Added private writeLinkedFile() helper.
+- review_verdict: Fail
+- review_findings: [High — setText missing value-equality guard. Medium — double dirty(). Low — double file read in inputXML.]
+- next_action: re-execute
+
+## filesdir-data
 
 ### Cycle 1
 - dispatched_by: coordinator
 - dispatch_timestamp: 2026-05-13
 - executor_files_touched: [DMHelper/src/campaign.h, DMHelper/src/campaign.cpp]
 - executor_build_status: pass — clean build, all 300 targets linked
-- executor_handoff_summary: Added _filesDirectory (QString) member to Campaign with getFilesDirectory()/setFilesDirectory() getter/setter. setFilesDirectory emits dirty() only on value change. inputXML reads element.attribute("filesDirectory") (empty on absence). internalOutputXML writes attribute only when non-empty, after calling base. No new files created, no CMakeLists.txt change needed.
+- executor_handoff_summary: Added _filesDirectory (QString) member to Campaign with getFilesDirectory()/setFilesDirectory() getter/setter. setFilesDirectory emits dirty() only on value change. inputXML reads element.attribute("filesDirectory") (empty on absence). internalOutputXML writes attribute only when non-empty, after calling base.
 - review_verdict: Pass
 - review_findings: [Info — inputXML calls setDate()/setTime() which can emit dirty(); pre-existing behaviour, out of scope]
 - next_action: merge
