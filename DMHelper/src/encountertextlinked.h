@@ -3,8 +3,6 @@
 
 #include "encountertext.h"
 
-class QFileSystemWatcher;
-
 class EncounterTextLinked : public EncounterText
 {
     Q_OBJECT
@@ -13,6 +11,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
     virtual int getObjectType() const override;
 
@@ -47,7 +46,6 @@ protected:
     void parseMetadata();
 
     QString _linkedFile;
-    QFileSystemWatcher* _watcher;
     int _fileType;
     QString _metadata;
 

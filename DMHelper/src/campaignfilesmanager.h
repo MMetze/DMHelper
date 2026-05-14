@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QDir>
+#include <QFileSystemWatcher>
+#include <QMap>
 #include <QSet>
 #include <QString>
 #include <QStringList>
@@ -62,13 +64,20 @@ signals:
     void subdirectoryAdded(const QString& path);
     void linkedFileDeleted(const QString& path);
 
+private slots:
+    void onFileChanged(const QString& path);
+    void onDirectoryChanged(const QString& dirPath);
+
 private:
+    void startWatching();
     static QString sanitiseName(const QString& name);
 
     QString _rootDirectory;
     QSet<QString> _expectedPaths;
     QMap<QString, int> _suspendedPaths;  // path → suspend count
     int _globalSuspendCount = 0;
+    QFileSystemWatcher* _watcher = nullptr;
+    QMap<QString, QStringList> _dirSnapshot;  // dir path → last-known contents
 };
 
 #endif // CAMPAIGNFILESMANAGER_H

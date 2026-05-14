@@ -182,7 +182,6 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
         if(linkedText)
         {
             connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::updateEncounter);
-            linkedText->setWatcher(true);
         }
     }
 }
@@ -196,13 +195,6 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
     if(_encounter)
     {
-        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
-        {
-            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
-            if(linkedText)
-                linkedText->setWatcher(false);
-        }
-
         _encounter->uninitialize();
 
         disconnect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::handleLayersChanged);

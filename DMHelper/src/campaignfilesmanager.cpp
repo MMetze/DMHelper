@@ -1,6 +1,7 @@
 #include "campaignfilesmanager.h"
 #include "campaign.h"
 #include "campaignobjectbase.h"
+#include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 #include <QRegularExpression>
@@ -62,7 +63,7 @@ CampaignFilesManager::CampaignFilesManager(QObject* parent)
 void CampaignFilesManager::setRootDirectory(const QString& absolutePath)
 {
     _rootDirectory = absolutePath;
-    // Note: watcher initialisation is intentionally deferred to chunk filesdir-watcher.
+    startWatching();
 }
 
 QString CampaignFilesManager::rootDirectory() const
@@ -320,4 +321,124 @@ Campaign* CampaignFilesManager::findOwningCampaign(const CampaignObjectBase* ent
     }
 
     return nullptr;
+}
+
+void CampaignFilesManager::startWatching()
+{
+    if(_rootDirectory.isEmpty())
+        return;
+
+    if(!_watcher)
+    {
+        _watcher = new QFileSystemWatcher(this);
+        connect(_watcher, &QFileSystemWatcher::fileChanged,
+                this, &CampaignFilesManager::onFileChanged);
+        connect(_watcher, &QFileSystemWatcher::directoryChanged,
+                this, &CampaignFilesManager::onDirectoryChanged);
+    }
+    else
+    {
+        QStringList watched = _watcher->files() + _watcher->directories();
+        if(!watched.isEmpty())
+            _watcher->removePaths(watched);
+    }
+
+    _dirSnapshot.clear();
+
+    // Add root directory itself
+    {
+        QString rootAbs = QDir::cleanPath(_rootDirectory);
+        _watcher->addPath(rootAbs);
+        if(!_watcher->directories().contains(rootAbs))
+            qWarning() << LOG_PREFIX << "startWatching: failed to watch directory" << rootAbs;
+        QDir d(rootAbs);
+        _dirSnapshot[rootAbs] = d.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    }
+
+    // Recurse into all subdirectories and .md files
+    QDirIterator it(_rootDirectory, QDirIterator::Subdirectories);
+    while(it.hasNext())
+    {
+        it.next();
+        QFileInfo info = it.fileInfo();
+        if(info.isDir())
+        {
+            // Watch directory for structural changes
+            QString absPath = info.absoluteFilePath();
+            if(!_watcher->addPath(absPath))
+                qWarning() << LOG_PREFIX << "startWatching: failed to watch directory" << absPath;
+            // Snapshot directory contents
+            _dirSnapshot[absPath] = QDir(absPath).entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        }
+        else if(info.suffix().compare(QLatin1String("md"), Qt::CaseInsensitive) == 0)
+        {
+            // Watch .md files for content changes
+            if(!_watcher->addPath(info.absoluteFilePath()))
+                qWarning() << LOG_PREFIX << "startWatching: failed to watch file:" << info.absoluteFilePath();
+        }
+    }
+}
+
+void CampaignFilesManager::onFileChanged(const QString& path)
+{
+    if(_globalSuspendCount > 0)
+        return;
+
+    auto it = _suspendedPaths.find(path);
+    if(it != _suspendedPaths.end())
+    {
+        if(--it.value() <= 0)
+            _suspendedPaths.erase(it);
+        return;
+    }
+
+    emit linkedFileChanged(path);
+}
+
+void CampaignFilesManager::onDirectoryChanged(const QString& dirPath)
+{
+    if(_globalSuspendCount > 0)
+        return;
+
+    QDir dir(dirPath);
+    QStringList newEntries = dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList oldEntries = _dirSnapshot.value(dirPath);
+
+    // Detect additions
+    for(const QString& entry : newEntries)
+    {
+        if(!oldEntries.contains(entry))
+        {
+            QString absEntry = dir.absoluteFilePath(entry);
+            QFileInfo info(absEntry);
+            if(info.isDir())
+            {
+                emit subdirectoryAdded(absEntry);
+                // Watch the new directory and take its snapshot
+                _watcher->addPath(absEntry);
+                if(!_watcher->directories().contains(absEntry))
+                    qWarning() << LOG_PREFIX << "onDirectoryChanged: failed to watch new directory" << absEntry;
+                QDir newDir(absEntry);
+                _dirSnapshot[absEntry] = newDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+            }
+            else if(entry.endsWith(QLatin1String(MARKDOWN_EXT), Qt::CaseInsensitive))
+            {
+                _watcher->addPath(absEntry);
+                emit markdownFileAdded(absEntry);
+            }
+        }
+    }
+
+    // Detect removals
+    for(const QString& entry : oldEntries)
+    {
+        if(!newEntries.contains(entry))
+        {
+            QString absEntry = dir.absoluteFilePath(entry);
+            if(entry.endsWith(QLatin1String(MARKDOWN_EXT), Qt::CaseInsensitive))
+                emit linkedFileDeleted(absEntry);
+        }
+    }
+
+    _dirSnapshot[dirPath] = newEntries;
 }

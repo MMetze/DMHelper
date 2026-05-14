@@ -1,7 +1,8 @@
 #include "encountertextlinked.h"
+#include "campaign.h"
+#include "campaignfilesmanager.h"
 #include "dmconstants.h"
 #include <QDir>
-#include <QFileSystemWatcher>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QDebug>
@@ -9,7 +10,6 @@
 EncounterTextLinked::EncounterTextLinked(const QString& encounterName, QObject *parent) :
     EncounterText{encounterName, parent},
     _linkedFile(),
-    _watcher(nullptr),
     _fileType(DMHelper::FileType_Unknown),
     _metadata()
 {
@@ -64,46 +64,67 @@ void EncounterTextLinked::setText(const QString& newText)
 
 void EncounterTextLinked::writeLinkedFile()
 {
-    // TODO (filesdir-watcher): bracket with CampaignFilesManager::suspendWatch/resumeWatch
-    // once CampaignFilesManager exists (chunk filesdir-manager / filesdir-watcher).
+    Campaign* owning = CampaignFilesManager::findOwningCampaign(this);
+    CampaignFilesManager* mgr = owning ? owning->filesManager() : nullptr;
+    const QString absPath = getLinkedFile();
+    if(mgr && !absPath.isEmpty()) mgr->suspendWatch(absPath);
     QDomDocument doc;
     QDomElement element;
     QDir dir;
     createTextNode(doc, element, dir, false);
+    if(mgr && !absPath.isEmpty()) mgr->resumeWatch(absPath);
+}
+
+void EncounterTextLinked::postProcessXML(const QDomElement &element, bool isImport)
+{
+    CampaignObjectBase::postProcessXML(element, isImport);
+
+    if(_linkedFile.isEmpty())
+        return;
+
+    Campaign* owning = CampaignFilesManager::findOwningCampaign(this);
+    CampaignFilesManager* mgr = owning ? owning->filesManager() : nullptr;
+    if(!mgr)
+        return;
+
+    // Disconnect any prior connection to avoid duplicates on re-load
+    disconnect(mgr, &CampaignFilesManager::linkedFileChanged, this, nullptr);
+
+    // Connect so that external edits to the linked file reload this entry
+    connect(mgr, &CampaignFilesManager::linkedFileChanged,
+            this, [this](const QString& path){
+                if(path == _linkedFile)
+                    readLinkedFile();
+            });
 }
 
 void EncounterTextLinked::setLinkedFile(const QString& filename)
 {
     if(_linkedFile != filename)
     {
-        if((_watcher) && (!_linkedFile.isEmpty()))
-            _watcher->removePath(_linkedFile);
+        // Disconnect any prior linkedFileChanged connection
+        Campaign* owning = CampaignFilesManager::findOwningCampaign(this);
+        if(owning && owning->filesManager())
+            disconnect(owning->filesManager(), &CampaignFilesManager::linkedFileChanged, this, nullptr);
 
         _linkedFile = filename;
         readLinkedFile();
 
-        if((_watcher) && (!_linkedFile.isEmpty()))
-            _watcher->addPath(_linkedFile);
+        // Connect to the campaign files manager so external edits reload this entry
+        if(owning && owning->filesManager() && !_linkedFile.isEmpty())
+        {
+            connect(owning->filesManager(), &CampaignFilesManager::linkedFileChanged,
+                    this, [this](const QString& path){
+                        if(path == _linkedFile)
+                            readLinkedFile();
+                    });
+        }
     }
 }
 
 void EncounterTextLinked::setWatcher(bool enable)
 {
-    if(enable)
-    {
-        if(_watcher)
-            return;
-
-        _watcher = new QFileSystemWatcher(this);
-        connect(_watcher, &QFileSystemWatcher::fileChanged, this, &EncounterTextLinked::readLinkedFile);
-        if(!getLinkedFile().isEmpty())
-            _watcher->addPath(getLinkedFile());
-    }
-    else
-    {
-        delete _watcher;
-        _watcher = nullptr;
-    }
+    Q_UNUSED(enable);
 }
 
 QDomElement EncounterTextLinked::createOutputXML(QDomDocument &doc)

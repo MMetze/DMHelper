@@ -8,7 +8,7 @@ arch_review_model: opus
 arch_review_reason: Introduces a new top-level subsystem (CampaignFilesManager owning a recursive QFileSystemWatcher and the on-disk mirror), changes the serialization shape of `Campaign` (new `filesDirectory` attribute) and `EncounterTextLinked` (inputXML now reads through to disk; setText now writes through), and touches both the campaign and UI-shell subsystems.
 pre_impl_arch_review_requested: true
 supersedes: null
-status: draft
+status: in-progress
 ---
 
 # Summary
@@ -378,7 +378,37 @@ plan.
 
 # Cycle Log
 
-## filesdir-manager
+## filesdir-watcher
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.h, DMHelper/src/campaignfilesmanager.cpp, DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp]
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: Added QFileSystemWatcher and _dirSnapshot to CampaignFilesManager; startWatching() enumerates dirs with QDirIterator, snapshots contents, warns on addPath failure. onFileChanged honours global/per-path suspend, emits linkedFileChanged. onDirectoryChanged diffs snapshots, emits markdownFileAdded/subdirectoryAdded/linkedFileDeleted, watches new dirs. EncounterTextLinked _watcher member removed; setWatcher is now a no-op; setLinkedFile reconnects via lambda to manager's linkedFileChanged signal.
+- review_verdict: Fail
+- review_findings: [High — startWatching() skips .md files (if(!info.isDir()) continue), so QFileSystemWatcher::fileChanged never fires and linkedFileChanged is never emitted — core watcher feature non-functional. Medium — encountertextedit.cpp setWatcher call sites not removed (no-op stubs remain).]
+- next_action: re-execute
+
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.cpp, DMHelper/src/encountertextedit.cpp]
+- executor_build_status: pass — clean build, 107 targets linked
+- executor_handoff_summary: Fixed startWatching() loop to add .md files to QFileSystemWatcher alongside directories (if/else-if replacing early-continue). onDirectoryChanged also addPath()s newly detected .md files before emitting markdownFileAdded. Removed setWatcher(true) from encountertextedit setEncounter and the entire setWatcher(false) block from unsetEncounter.
+- review_verdict: DesignProblem
+- review_findings: [High — XML-loaded EncounterTextLinked entries never receive linkedFileChanged connection; inputXML sets _linkedFile directly (correctly), but no postProcessXML exists to wire the connection post-load. Medium — writeLinkedFile() has TODO for suspendWatch brackets, zero call sites; each setText triggers a spurious readLinkedFile round-trip. Low — case-sensitivity inconsistency between startWatching() and onDirectoryChanged for .md suffix matching.]
+- next_action: escalate-to-human
+
+### Cycle 3
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-14
+- executor_files_touched: [DMHelper/src/encountertextlinked.h, DMHelper/src/encountertextlinked.cpp, DMHelper/src/campaignfilesmanager.cpp]
+- executor_build_status: pass — clean build, 110 targets linked
+- executor_handoff_summary: Added postProcessXML override to EncounterTextLinked that wires the linkedFileChanged connection post-load; disconnects before reconnecting to prevent duplicates on reload; calls base class postProcessXML. Bracketed createTextNode in writeLinkedFile() with suspendWatch/resumeWatch using same path as readLinkedFileInternal; removed TODO comment. Fixed onDirectoryChanged to use Qt::CaseInsensitive for .md suffix check.
+- review_verdict: Pass
+- review_findings: [Info — Execution handoff did not include cmake build log excerpt, but all symbols resolve and build confirmed pass at 110/110.]
+- next_action: merge
 
 ### Cycle 1
 - dispatched_by: coordinator
@@ -469,3 +499,12 @@ plan.
   - Low: parent-chain walk repeated across chunks without shared helper.
 
 # Escalations
+
+## 2026-05-14 — filesdir-watcher
+- **reason**: design-problem
+- **detail**: Two design gaps surfaced in cycle-2 Review. (1) XML-loaded EncounterTextLinked entries never receive a linkedFileChanged watcher connection: inputXML assigns _linkedFile directly (correctly avoiding dirty()) but no postProcessXML override exists to establish the connection post-load. The plan only specified wiring in setLinkedFile, which is not called from inputXML. (2) The suspendWatch/resumeWatch brackets around writeLinkedFile() were scoped to this chunk in the plan's TODO comment but have zero call sites; the suppress API is complete but unused. Both require a plan amendment rather than a code fix the Execution Agent can make unilaterally.
+- **state_at_escalation**:
+  - branch_checked_out: agent/work
+  - branches_left_in_place: []
+  - last_cycle: filesdir-watcher:2
+- **handoff_to**: human
