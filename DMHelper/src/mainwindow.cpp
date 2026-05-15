@@ -2191,6 +2191,58 @@ void MainWindow::openCampaign(const QString& filename)
     _campaign->postProcessXML(campaignElement, false);
     Bestiary::Instance()->finishBatchProcessing();
 
+    // Resolve the stored relative files-directory path to an absolute path and
+    // start the filesystem watcher.  This must happen before any scan.
+    if(!_campaign->getFilesDirectory().isEmpty())
+        _campaign->resolveFilesDirectory(filename);
+
+    // Scan for .md files that exist on disk but are not yet in the campaign tree
+    if(!_campaign->getFilesDirectory().isEmpty())
+    {
+        QList<CampaignObjectBase*> discovered;
+        _campaign->filesManager()->scanForNewEntries(_campaign, discovered);
+        if(!discovered.isEmpty())
+        {
+            QMessageBox::information(this, tr("New entries found"),
+                tr("%1 new entries were discovered in the campaign files directory and added to the campaign.")
+                .arg(discovered.count()));
+        }
+    }
+
+    // Connect ongoing-discovery signals so that files added externally while
+    // the campaign is open are also picked up.  Qt::QueuedConnection avoids
+    // re-entrant calls into the watcher during the callback.
+    if(_campaign->filesManager())
+    {
+        connect(_campaign->filesManager(), &CampaignFilesManager::markdownFileAdded,
+                this, [this](const QString&) {
+                    if(!_campaign || !_campaign->filesManager())
+                        return;
+                    QList<CampaignObjectBase*> discovered;
+                    _campaign->filesManager()->scanForNewEntries(_campaign, discovered);
+                    if(!discovered.isEmpty())
+                    {
+                        QMessageBox::information(this, tr("New entries found"),
+                            tr("%1 new entries were discovered in the campaign files directory and added to the campaign.")
+                            .arg(discovered.count()));
+                    }
+                }, Qt::QueuedConnection);
+
+        connect(_campaign->filesManager(), &CampaignFilesManager::subdirectoryAdded,
+                this, [this](const QString&) {
+                    if(!_campaign || !_campaign->filesManager())
+                        return;
+                    QList<CampaignObjectBase*> discovered;
+                    _campaign->filesManager()->scanForNewEntries(_campaign, discovered);
+                    if(!discovered.isEmpty())
+                    {
+                        QMessageBox::information(this, tr("New entries found"),
+                            tr("%1 new entries were discovered in the campaign files directory and added to the campaign.")
+                            .arg(discovered.count()));
+                    }
+                }, Qt::QueuedConnection);
+    }
+
     if((!_campaign->getLastMonster().isEmpty()) && (Bestiary::Instance()->exists(_campaign->getLastMonster())))
         _bestiaryDlg.setMonster(_campaign->getLastMonster());
 

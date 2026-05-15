@@ -36,6 +36,9 @@ public:
     // Mirror verification
     void verifyMirror(Campaign* campaign, QStringList& missingDirs) const;
 
+    // Auto-discovery scan
+    void scanForNewEntries(Campaign* campaign, QList<CampaignObjectBase*>& discovered);
+
     // Rename helper
     void renameEntryFile(CampaignObjectBase* entry, const QString& oldName, const QString& newName);
 

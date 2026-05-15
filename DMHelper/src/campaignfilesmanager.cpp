@@ -1,6 +1,7 @@
 #include "campaignfilesmanager.h"
 #include "campaign.h"
 #include "campaignobjectbase.h"
+#include "encountertext.h"
 #include "encountertextlinked.h"
 #include <QDirIterator>
 #include <QFile>
@@ -15,6 +16,7 @@ static const char MARKDOWN_EXT[] = ".md";
 static const char RESERVED_CONTENTS_NAME[] = "_contents";
 static const char RESERVED_CONTENTS_SUFFIX[] = "-entry";
 static const char LOG_PREFIX[] = "[CampaignFilesManager]";
+static const char SCAN_CONTENTS_FILENAME[] = "_contents.md";
 
 // ---------- file-local helpers ----------
 
@@ -167,6 +169,162 @@ void CampaignFilesManager::verifyMirror(Campaign* campaign, QStringList& missing
 
     for(CampaignObjectBase* child : campaign->getChildObjects())
         verifyMirrorRecursive(this, child, missingDirs);
+}
+
+// ---------- scanForNewEntries helpers ----------
+
+static void collectEntryPaths(const CampaignFilesManager* mgr,
+                               CampaignObjectBase* parent,
+                               QMap<QString, CampaignObjectBase*>& pathToEntry,
+                               QSet<QString>& knownPaths)
+{
+    for(CampaignObjectBase* child : parent->getChildObjects())
+    {
+        const QString p = mgr->pathForEntry(child);
+        if(!p.isEmpty())
+        {
+            pathToEntry.insert(p, child);
+            knownPaths.insert(p);
+        }
+        collectEntryPaths(mgr, child, pathToEntry, knownPaths);
+    }
+}
+
+void CampaignFilesManager::scanForNewEntries(Campaign* campaign, QList<CampaignObjectBase*>& discovered)
+{
+    if(_rootDirectory.isEmpty() || campaign == nullptr)
+        return;
+
+    // Build path-to-entry map and known-paths set from the existing campaign tree
+    QMap<QString, CampaignObjectBase*> pathToEntry;
+    QSet<QString> knownPaths;
+    collectEntryPaths(this, campaign, pathToEntry, knownPaths);
+
+    static const QLatin1String mdSuffix("md");
+    const QString cleanRoot = QDir::cleanPath(_rootDirectory);
+
+    // --- Pass 1: collect all items from the iterator into separate lists ---
+    // Directories and files are gathered in a single sweep; directories are
+    // processed first (shallow before deep) so parent container entries exist
+    // in pathToEntry before their children are resolved.
+    QStringList unknownDirs;
+    QList<QFileInfo> unknownFiles;
+
+    QDirIterator it(_rootDirectory, QDirIterator::Subdirectories);
+    while(it.hasNext())
+    {
+        it.next();
+        const QFileInfo info = it.fileInfo();
+        const QString absPath = QDir::cleanPath(info.absoluteFilePath());
+
+        if(info.isDir())
+        {
+            // Skip the root itself and any dir already present in the campaign tree
+            if(absPath == cleanRoot || knownPaths.contains(absPath))
+                continue;
+            unknownDirs.append(absPath);
+        }
+        else
+        {
+            // Only process .md files
+            if(info.suffix().compare(mdSuffix, Qt::CaseInsensitive) != 0)
+                continue;
+            // Skip _contents.md — loaded as part of the directory entry below
+            if(info.fileName() == QLatin1String(SCAN_CONTENTS_FILENAME))
+                continue;
+            // Base path = absolute path with .md stripped; matches pathForEntry() values
+            const QString basePath = QDir::cleanPath(
+                info.absolutePath() + QLatin1Char('/') + info.completeBaseName());
+            if(knownPaths.contains(basePath))
+                continue;
+            unknownFiles.append(info);
+        }
+    }
+
+    // --- Pass 2: process unknown directories, shallowest first ---
+    // Sorting by path length guarantees parents are inserted before children.
+    std::sort(unknownDirs.begin(), unknownDirs.end(),
+              [](const QString& a, const QString& b) { return a.length() < b.length(); });
+
+    for(const QString& dirPath : unknownDirs)
+    {
+        const QFileInfo dirInfo(dirPath);
+        const QString parentDirPath = QDir::cleanPath(dirInfo.absolutePath());
+
+        CampaignObjectBase* parentEntry = nullptr;
+        if(parentDirPath == cleanRoot)
+        {
+            parentEntry = campaign;
+        }
+        else
+        {
+            auto parentIt = pathToEntry.find(parentDirPath);
+            if(parentIt != pathToEntry.end())
+                parentEntry = parentIt.value();
+            else
+                parentEntry = campaign;  // Unknown parent — fall back to campaign root
+        }
+
+        EncounterText* dirEntry = new EncounterText(dirInfo.fileName());
+        parentEntry->addObject(dirEntry);
+
+        // Register in the lookup maps BEFORE processing children so that .md files
+        // nested inside this directory can resolve this entry as their parent.
+        pathToEntry.insert(dirPath, dirEntry);
+        knownPaths.insert(dirPath);
+
+        discovered.append(dirEntry);
+
+        // If a _contents.md exists in this directory, attach it as a linked child
+        // so the directory entry's body is backed by the on-disk file.
+        const QString contentsPath = dirPath + QLatin1Char('/') + QLatin1String(SCAN_CONTENTS_FILENAME);
+        if(QFileInfo::exists(contentsPath))
+        {
+            // addObject() before setLinkedFile() so findOwningCampaign() works inside setLinkedFile()
+            EncounterTextLinked* contentsEntry = new EncounterTextLinked(dirInfo.fileName());
+            dirEntry->addObject(contentsEntry);
+            contentsEntry->setLinkedFile(contentsPath);
+            discovered.append(contentsEntry);
+        }
+    }
+
+    // --- Pass 3: process unknown .md files ---
+    for(const QFileInfo& info : unknownFiles)
+    {
+        const QString basePath = QDir::cleanPath(
+            info.absolutePath() + QLatin1Char('/') + info.completeBaseName());
+        const QString parentDirPath = QDir::cleanPath(info.absolutePath());
+        CampaignObjectBase* parentEntry = nullptr;
+
+        if(parentDirPath == cleanRoot)
+        {
+            // File sits directly under the root — attach to the campaign itself
+            parentEntry = campaign;
+        }
+        else
+        {
+            auto parentIt = pathToEntry.find(parentDirPath);
+            if(parentIt != pathToEntry.end())
+                parentEntry = parentIt.value();
+            else
+                parentEntry = campaign;  // Unknown parent — fall back to campaign root
+        }
+
+        // Create the entry, wire it into the tree, then load its content.
+        // addObject() must be called before setLinkedFile() so that
+        // findOwningCampaign() can locate the CampaignFilesManager for
+        // the watcher connection inside setLinkedFile().
+        EncounterTextLinked* newEntry = new EncounterTextLinked(info.completeBaseName());
+        parentEntry->addObject(newEntry);
+        newEntry->setLinkedFile(info.absoluteFilePath());
+
+        // Register the new entry so that subsequent iterations in this scan
+        // can find it as a parent for deeper-nested files
+        pathToEntry.insert(basePath, newEntry);
+        knownPaths.insert(basePath);
+
+        discovered.append(newEntry);
+    }
 }
 
 void CampaignFilesManager::renameEntryFile(CampaignObjectBase* entry, const QString& oldName, const QString& newName)
