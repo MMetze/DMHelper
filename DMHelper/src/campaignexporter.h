@@ -6,12 +6,13 @@
 #include "encounterbattle.h"
 #include <QDomDocument>
 #include <QDir>
+#include <QString>
 #include <QUuid>
 
 class CampaignExporter
 {
 public:
-    CampaignExporter(Campaign& originalCampaign, QUuid exportId, QDir& exportDirectory);
+    CampaignExporter(Campaign& originalCampaign, QUuid exportId, QDir& exportDirectory, const QString& filesSourceDirectory = QString());
     virtual ~CampaignExporter();
 
     Campaign& getExportCampaign();
@@ -32,6 +33,7 @@ protected:
     Campaign& _originalCampaign;
     QUuid _exportId;
     QDir& _exportDirectory;
+    QString _filesSourceDirectory;
     Campaign* _exportCampaign;
     QDomDocument* _exportDocument;
     QList<QUuid> _exportedIds;

@@ -2,16 +2,21 @@
 #include "ui_objectimportdialog.h"
 #include "dmconstants.h"
 #include "campaign.h"
+#include "campaignfilesmanager.h"
 #include "characterv2.h"
 #include "audiotrack.h"
 #include "objectimportworker.h"
 #include "dmhwaitingdialog.h"
+#include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
-#include <QDir>
 #include <QMessageBox>
 #include <QDebug>
+
+static const QString FILES_SUBDIR_NAME = QStringLiteral("/_files");
+static const QString FILES_SUBDIR_BASE  = QStringLiteral("_files");
 
 ObjectImportDialog::ObjectImportDialog(Campaign* campaign, CampaignObjectBase* parentObject, const QString& campaignFile, QWidget *parent) :
     QDialog(parent),
@@ -134,6 +139,53 @@ void ObjectImportDialog::importFinished(bool success, const QString& error)
         QMessageBox::information(nullptr, QString("DMHelper - Import Object"), QString("Import completed successfully!"));
     else
         QMessageBox::critical(nullptr, QString("DMHelper - Import Object"), QString("Import could not be completed: ") + error);
+
+    if(success)
+    {
+        const QString importFilesDir = QFileInfo(ui->edtImportFile->text()).absolutePath() + FILES_SUBDIR_NAME;
+        if(QDir(importFilesDir).exists() &&
+           _campaign && _campaign->filesManager() &&
+           !_campaign->filesManager()->rootDirectory().isEmpty())
+        {
+            const QString targetRoot = _campaign->filesManager()->rootDirectory();
+            const QString subDirName = FILES_SUBDIR_BASE;
+            QString targetSubDir = targetRoot + QStringLiteral("/") + subDirName;
+
+            if(QDir(targetSubDir).exists())
+            {
+                QMessageBox::StandardButton result = QMessageBox::question(
+                    this,
+                    tr("Directory collision"),
+                    tr("A directory '%1' already exists in the campaign files directory. Merge (keep existing files, copy only new ones) or allocate a new name?").arg(subDirName),
+                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+                if(result == QMessageBox::Cancel)
+                {
+                    qDebug() << "[ObjectImportDialog] Files directory copy cancelled by user.";
+                    return;
+                }
+                else if(result == QMessageBox::No)
+                {
+                    targetSubDir = _campaign->filesManager()->allocateUniqueSubdirPath(
+                        QDir(targetRoot), subDirName);
+                }
+            }
+
+            QDir srcDir(importFilesDir);
+            QDirIterator it(importFilesDir, QDirIterator::Subdirectories);
+            while(it.hasNext())
+            {
+                const QString srcPath = it.next();
+                const QFileInfo fi(srcPath);
+                if(!fi.isFile())
+                    continue;
+                const QString relPath = srcDir.relativeFilePath(srcPath);
+                const QString destPath = targetSubDir + QStringLiteral("/") + relPath;
+                QDir().mkpath(QFileInfo(destPath).absolutePath());
+                if(!QFile::exists(destPath))
+                    QFile::copy(srcPath, destPath);
+            }
+        }
+    }
 
     qDebug() << "[ObjectImportDialog] Import worker finished.";
     emit importComplete(success);

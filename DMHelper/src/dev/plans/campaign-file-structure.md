@@ -8,7 +8,8 @@ arch_review_model: opus
 arch_review_reason: Introduces a new top-level subsystem (CampaignFilesManager owning a recursive QFileSystemWatcher and the on-disk mirror), changes the serialization shape of `Campaign` (new `filesDirectory` attribute) and `EncounterTextLinked` (inputXML now reads through to disk; setText now writes through), and touches both the campaign and UI-shell subsystems.
 pre_impl_arch_review_requested: true
 supersedes: null
-status: in-progress
+status: escalated
+# NOTE: export-import escalation resolved by human. Cycle 3: delete CampaignExporter (dead code), fix objectimportdialog.cpp bugs.
 ---
 
 # Summary
@@ -586,6 +587,38 @@ plan.
 - review_findings: [Info — handoff missing explicit build_status field.]
 - next_action: merge
 
+## export-import
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-16
+- executor_files_touched: [DMHelper/src/campaignexporter.h, DMHelper/src/campaignexporter.cpp, DMHelper/src/objectimportdialog.cpp]
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: Added setFilesSourceDirectory setter + _filesSourceDirectory member. Per-entry copy logic for EncounterTextLinked in checkObjectReferences. Recursive QDirIterator+QFile::copy import logic in objectimportdialog.cpp importFinished with QMessageBox collision prompt. Executor flagged: setter approach incompatible with constructor calling populateExport() immediately — _filesSourceDirectory always empty at copy time.
+- review_verdict: DesignProblem
+- review_findings: [High — CampaignExporter constructor calls populateExport() during construction; setter approach makes _filesSourceDirectory permanently empty at copy time. Medium — integration task 2 references scanForNewEntries but export-import only lists filesdir-manager as dependency (filesdir-autodiscovery already committed, function exists). Low — "/_files" string literal without shared named constant.]
+- next_action: escalate-to-human (human chose Option A: constructor parameter)
+
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-16
+- executor_files_touched: [DMHelper/src/campaignexporter.h, DMHelper/src/campaignexporter.cpp, DMHelper/src/objectimportdialog.cpp]
+- executor_build_status: pass — clean build, 108 targets linked
+- executor_handoff_summary: Changed to constructor parameter (Option A); _filesSourceDirectory assigned before populateExport(). Per-entry copy logic in checkObjectReferences. objectimportdialog.cpp recursive copy + QMessageBox collision prompt. No CampaignExporter call site found in codebase — executor flagged CODEBASE_DRIFT.
+- review_verdict: DesignProblem
+- review_findings: [High — CampaignExporter has zero instantiation call sites anywhere in codebase; export-side copy is dead code. High — Cancel branch in collision handler falls through to copy loop (does not return). High — integration task 2 requires extending scanForNewEntries via campaignfilesmanager.cpp which is not in files_to_modify. Medium — QMessageBox label says "overwrite" but code skips existing files. Low — named constants at wrong scope.]
+- next_action: escalate-to-human (human resolved: delete CampaignExporter, watcher handles discovery, fix bugs in cycle 3)
+
+### Cycle 3
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-16
+- executor_files_touched: [DMHelper/src/CMakeLists.txt, DMHelper/src/objectimportdialog.cpp] (campaignexporter.h/.cpp claimed deleted but still on disk)
+- executor_build_status: pass — clean build, 107 targets linked
+- executor_handoff_summary: CMakeLists.txt updated to remove campaignexporter.h/.cpp references. objectimportdialog.cpp: Cancel branch now returns before copy loop (Fix A); QMessageBox label updated to accurate skip description (Fix B); FILES_SUBDIR_NAME/FILES_SUBDIR_BASE moved to file scope (Fix C); subDirName initialised from FILES_SUBDIR_BASE (Fix D). Executor reported file deletion but files remain on disk.
+- review_verdict: Gap (not Pass — physical deletion of campaignexporter.h/.cpp not performed by executor)
+- review_findings: [High — campaignexporter.h not deleted (still on disk). High — campaignexporter.cpp not deleted (still on disk). Info — DMHelper.pro still references both files (out-of-scope qmake file).]
+- next_action: escalate-to-human (cycle cap reached; human must delete two files)
+
 # Architecture Review
 
 ## Pre-Implementation Review
@@ -614,7 +647,25 @@ plan.
 
 # Escalations
 
-## 2026-05-14 — filesdir-watcher
+## 2026-05-16 — export-import (third escalation — cycle cap)
+- **reason**: cycle-cap-reached
+- **detail**: All code fixes in objectimportdialog.cpp (Fix A–D) were correctly applied and verified by Review. CMakeLists.txt no longer references campaignexporter. However, the Execution Agent's file-deletion commands did not physically remove campaignexporter.h and campaignexporter.cpp from disk (files still exist but are excluded from the build). Cycle cap reached (3 cycles). Human must manually delete the two files to close the chunk.
+- **state_at_escalation**:
+  - branch_checked_out: agent/work
+  - branches_left_in_place: []
+  - last_cycle: export-import:3
+- **handoff_to**: human
+
+## 2026-05-16 — export-import (second escalation)
+- **reason**: design-problem
+- **detail**: Review Agent returned DesignProblem on cycle 2 with three blocking findings. (1) CampaignExporter has zero instantiation call sites anywhere in the codebase; no file includes campaignexporter.h except its own .cpp; the export-side file-copy feature is dead code until a call site is created. (2) The collision handler's Cancel branch in objectimportdialog.cpp does not return — control falls through to the copy loop, making Cancel identical to Yes/merge. (3) Integration task 2 requires extending CampaignFilesManager::scanForNewEntries with a path-marking skip mechanism, which would require modifying campaignfilesmanager.cpp — not listed in the chunk's files_to_modify.
+- **state_at_escalation**:
+  - branch_checked_out: agent/work
+  - branches_left_in_place: []
+  - last_cycle: export-import:2
+- **handoff_to**: human
+
+## 2026-05-16 — export-import (first escalation)
 - **reason**: design-problem
 - **detail**: Two design gaps surfaced in cycle-2 Review. (1) XML-loaded EncounterTextLinked entries never receive a linkedFileChanged watcher connection: inputXML assigns _linkedFile directly (correctly avoiding dirty()) but no postProcessXML override exists to establish the connection post-load. The plan only specified wiring in setLinkedFile, which is not called from inputXML. (2) The suspendWatch/resumeWatch brackets around writeLinkedFile() were scoped to this chunk in the plan's TODO comment but have zero call sites; the suppress API is complete but unused. Both require a plan amendment rather than a code fix the Execution Agent can make unilaterally.
 - **state_at_escalation**:

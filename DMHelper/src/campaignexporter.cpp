@@ -1,12 +1,19 @@
 #include "campaignexporter.h"
+#include "encountertextlinked.h"
 #include "map.h"
 #include "audiotrack.h"
 #include "combatantreference.h"
+#include <QDirIterator>
+#include <QFile>
+#include <QFileInfo>
 
-CampaignExporter::CampaignExporter(Campaign& originalCampaign, QUuid exportId, QDir& exportDirectory) :
+static const QString FILES_SUBDIR_NAME = QStringLiteral("/_files");
+
+CampaignExporter::CampaignExporter(Campaign& originalCampaign, QUuid exportId, QDir& exportDirectory, const QString& filesSourceDirectory) :
     _originalCampaign(originalCampaign),
     _exportId(exportId),
     _exportDirectory(exportDirectory),
+    _filesSourceDirectory(filesSourceDirectory),
     _exportCampaign(new Campaign("Export")),
     _exportDocument(new QDomDocument("DMHelperXML")),
     _exportedIds(),
@@ -119,6 +126,24 @@ bool CampaignExporter::checkObjectReferences(CampaignObjectBase* exportObject, Q
         Map* map = dynamic_cast<Map*>(exportObject);
         if(map)
             addObjectTree(map->getAudioTrackId(), doc, parent, targetDirectory);
+    }
+    else if(exportObject->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        if(!_filesSourceDirectory.isEmpty())
+        {
+            EncounterTextLinked* linked = dynamic_cast<EncounterTextLinked*>(exportObject);
+            if(linked && !linked->getLinkedFile().isEmpty())
+            {
+                const QString srcPath = linked->getLinkedFile();
+                const QString relPath = QDir(_filesSourceDirectory).relativeFilePath(srcPath);
+                if(!relPath.startsWith(QStringLiteral("..")))
+                {
+                    const QString destPath = _exportDirectory.absolutePath() + FILES_SUBDIR_NAME + QStringLiteral("/") + relPath;
+                    QDir().mkpath(QFileInfo(destPath).absolutePath());
+                    QFile::copy(srcPath, destPath);
+                }
+            }
+        }
     }
 
     return true;

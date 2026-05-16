@@ -114,7 +114,6 @@ set(DMHELPER_SOURCES
     camerarect.cpp
     camerascene.cpp
     campaign.cpp
-    campaignexporter.cpp
     campaignfilesmanager.cpp
     campaignmigrationdialog.cpp
     campaignnotesdialog.cpp
@@ -468,7 +467,6 @@ set(DMHELPER_HEADERS
     camerarect.h
     camerascene.h
     campaign.h
-    campaignexporter.h
     campaignfilesmanager.h
     campaignmigrationdialog.h
     campaignnotesdialog.h
