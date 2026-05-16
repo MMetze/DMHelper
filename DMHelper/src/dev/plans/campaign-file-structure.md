@@ -8,8 +8,8 @@ arch_review_model: opus
 arch_review_reason: Introduces a new top-level subsystem (CampaignFilesManager owning a recursive QFileSystemWatcher and the on-disk mirror), changes the serialization shape of `Campaign` (new `filesDirectory` attribute) and `EncounterTextLinked` (inputXML now reads through to disk; setText now writes through), and touches both the campaign and UI-shell subsystems.
 pre_impl_arch_review_requested: true
 supersedes: null
-status: escalated
-# NOTE: export-import escalation resolved by human. Cycle 3: delete CampaignExporter (dead code), fix objectimportdialog.cpp bugs.
+status: in-progress
+# NOTE: All chunks done. Proceeding to post-implementation Architecture Review (Opus).
 ---
 
 # Summary
@@ -617,7 +617,7 @@ plan.
 - executor_handoff_summary: CMakeLists.txt updated to remove campaignexporter.h/.cpp references. objectimportdialog.cpp: Cancel branch now returns before copy loop (Fix A); QMessageBox label updated to accurate skip description (Fix B); FILES_SUBDIR_NAME/FILES_SUBDIR_BASE moved to file scope (Fix C); subDirName initialised from FILES_SUBDIR_BASE (Fix D). Executor reported file deletion but files remain on disk.
 - review_verdict: Gap (not Pass — physical deletion of campaignexporter.h/.cpp not performed by executor)
 - review_findings: [High — campaignexporter.h not deleted (still on disk). High — campaignexporter.cpp not deleted (still on disk). Info — DMHelper.pro still references both files (out-of-scope qmake file).]
-- next_action: escalate-to-human (cycle cap reached; human must delete two files)
+- next_action: escalate-to-human (cycle cap reached; human must delete two files — RESOLVED: files deleted and committed by human)
 
 # Architecture Review
 
