@@ -4,6 +4,17 @@
 #include <QImage>
 #include <QDebug>
 
+// Returns true when 'minFilter' requires mipmap levels to be generated.
+// Used by loadTexture() to guard glGenerateMipmap; intended for reuse in
+// the updateImageRegion() path (chunk 4) without re-deriving the filter set.
+static constexpr bool isMipmapMinFilter(int minFilter)
+{
+    return minFilter == GL_NEAREST_MIPMAP_NEAREST ||
+           minFilter == GL_NEAREST_MIPMAP_LINEAR  ||
+           minFilter == GL_LINEAR_MIPMAP_NEAREST  ||
+           minFilter == GL_LINEAR_MIPMAP_LINEAR;
+}
+
 PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam) :
     PublishGLBattleObject(scene),
     _imageSize(),
@@ -209,5 +220,6 @@ void PublishGLBattleBackground::loadTexture(const QImage& image)
     QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
 #endif
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
+    if(isMipmapMinFilter(_textureParam))
+        f->glGenerateMipmap(GL_TEXTURE_2D);
 }

@@ -160,25 +160,25 @@ design.
 - **dependencies**: []
 - **branch**: agent/work/gl-upload-reuse
 - **files_to_modify**:
-  - layerfow.h — add private `bool _fowGLImageDirty = false;` and `bool _fowGLDeferredDestroy = false;` members. Add a private `void consumePendingGLUpdates()` helper declaration documented as "callable only from a `*GL*` function with a current GL context".
-  - layerfow.cpp — in `updateFowInternal()`, remove the `delete _fowGLObject; _fowGLObject = nullptr;` block; replace with `_fowGLImageDirty = true;` (no GL calls). In `applySize()`, replace the `delete _fowGLObject; _fowGLObject = nullptr;` block with `if(_fowGLObject) _fowGLDeferredDestroy = true;`. Implement `consumePendingGLUpdates()`: if `_fowGLDeferredDestroy`, `delete _fowGLObject; _fowGLObject = nullptr; _fowGLDeferredDestroy = false; _fowGLImageDirty = false;` (the next `playerGLInitialize` will rebuild). Else if `_fowGLImageDirty && _fowGLObject`, call `_fowGLObject->updateImage(getImage())` and clear the flag. Call `consumePendingGLUpdates()` as the first statement of `playerGLPaint()` (before the existing `_fowGLObject != nullptr` shader path) and as the first statement of `playerGLUninitialize()`. Name the mipmap-filter predicate locally (e.g. `static constexpr` helper at the top of the cpp) — no magic GL enums inline.
+  - layerfow.h — add private `bool _fowGLImageDirty = false;` and `bool _fowGLDeferredDestroy = false;` members. Add a private `void applyGLPendingUpdates()` helper declaration documented as "callable only from a `*GL*` function with a current GL context".
+  - layerfow.cpp — in `updateFowInternal()`, remove the `delete _fowGLObject; _fowGLObject = nullptr;` block; replace with `_fowGLImageDirty = true;` (no GL calls). In `applySize()`, replace the `delete _fowGLObject; _fowGLObject = nullptr;` block with `if(_fowGLObject) _fowGLDeferredDestroy = true;`. Implement `applyGLPendingUpdates()`: if `_fowGLDeferredDestroy`, `delete _fowGLObject; _fowGLObject = nullptr; _fowGLDeferredDestroy = false; _fowGLImageDirty = false;` (the next `playerGLInitialize` will rebuild). Else if `_fowGLImageDirty && _fowGLObject`, call `_fowGLObject->updateImage(getImage())` and clear the flag. Call `applyGLPendingUpdates()` as the first statement of `playerGLPaint()` (before the existing `_fowGLObject != nullptr` shader path) and as the first statement of `playerGLUninitialize()`. Name the mipmap-filter predicate locally (e.g. `static constexpr` helper at the top of the cpp) — no magic GL enums inline.
   - publishglbattlebackground.cpp — in `loadTexture()`, gate `glGenerateMipmap` on `_textureParam` being one of the mipmap-capable filters (`GL_NEAREST_MIPMAP_NEAREST`, `GL_NEAREST_MIPMAP_LINEAR`, `GL_LINEAR_MIPMAP_NEAREST`, `GL_LINEAR_MIPMAP_LINEAR`). Use a named `static constexpr` predicate or named constant set; do not inline magic GL enums.
 - **files_to_create**: []
 - **integration_tasks**:
-  - Document inline in `consumePendingGLUpdates()` that this is the **only** function in `LayerFow` permitted to touch `_fowGLObject`'s GL-state-mutating methods (constructor, `updateImage`, `setImage`, destructor). Every other call site sets a pending flag instead. The chunk's reviewer should grep `_fowGLObject->` and `delete _fowGLObject` after the change to confirm no GUI-thread call site remains.
+  - Document inline in `applyGLPendingUpdates()` that this is the **only** function in `LayerFow` permitted to touch `_fowGLObject`'s GL-state-mutating methods (constructor, `updateImage`, `setImage`, destructor). Every other call site sets a pending flag instead. The chunk's reviewer should grep `_fowGLObject->` and `delete _fowGLObject` after the change to confirm no GUI-thread call site remains.
   - `applySize()` runs on the GUI thread; deferring its destroy means the previous GL object remains alive (and rendered) for up to one player-window paint cycle after a resize. This is acceptable because resize already invalidates the FOW image content and the next `playerGLPaint()` will rebuild via `playerGLInitialize` on the cycle after the destroy. Document this inline.
   - The mipmap-filter predicate in `publishglbattlebackground.cpp` must also be applied to any future `updateImage()` / `updateImageRegion()` paths (chunk 4 will reuse the predicate); name it accordingly so chunk 4 does not re-derive it.
 - **acceptance_criteria**:
   - `LayerFow::updateFowInternal()` contains no `delete _fowGLObject`, no `_fowGLObject->updateImage(...)`, and no other call into `_fowGLObject`'s GL-mutating methods; its only `_fowGLObject`-related statement is `_fowGLImageDirty = true;`.
   - `LayerFow::applySize()` contains no `delete _fowGLObject`; instead sets `_fowGLDeferredDestroy = true` when `_fowGLObject` is non-null.
-  - `LayerFow` declares a private `consumePendingGLUpdates()` helper.
-  - `LayerFow::playerGLPaint()` calls `consumePendingGLUpdates()` as its first statement (before any other `_fowGLObject` access).
-  - `LayerFow::playerGLUninitialize()` calls `consumePendingGLUpdates()` (or equivalently consumes both flags) before tearing down its own GL state.
+  - `LayerFow` declares a private `applyGLPendingUpdates()` helper.
+  - `LayerFow::playerGLPaint()` calls `applyGLPendingUpdates()` as its first statement (before any other `_fowGLObject` access).
+  - `LayerFow::playerGLUninitialize()` calls `applyGLPendingUpdates()` (or equivalently consumes both flags) before tearing down its own GL state.
   - `PublishGLBattleBackground::loadTexture()` only calls `glGenerateMipmap` when `_textureParam` is one of the mipmap-capable filters, expressed via a named helper/constant set — not a literal enum comparison.
-  - A grep of `layerfow.cpp` for `_fowGLObject->` returns matches only inside `consumePendingGLUpdates()`, `playerGLInitialize()`, `playerGLPaint()`, `playerGLUninitialize()`, and `playerGLResize()`-equivalent GL helpers — never inside `updateFowInternal`, `applySize`, `paintFoW*`, `fillFoW`, `applyPaintTo`, `editSettings`, or any constructor/destructor.
+  - A grep of `layerfow.cpp` for `_fowGLObject->` returns matches only inside `applyGLPendingUpdates()`, `playerGLInitialize()`, `playerGLPaint()`, `playerGLUninitialize()`, and `playerGLResize()`-equivalent GL helpers — never inside `updateFowInternal`, `applySize`, `paintFoW*`, `fillFoW`, `applyPaintTo`, `editSettings`, or any constructor/destructor.
   - Windows debug build succeeds with no new warnings.
 - **constraints_in_scope**:
-  - GL context rule (per amended spec, central constraint): no GL-mutating call from a GUI-thread function. `consumePendingGLUpdates()` is the sole consumer and is only invoked from `*GL*` functions.
+  - GL context rule (per amended spec, central constraint): no GL-mutating call from a GUI-thread function. `applyGLPendingUpdates()` is the sole consumer and is only invoked from `*GL*` functions.
   - No magic numbers — name the mipmap-filter set per cpp-qt.instructions.md.
   - `dirty()` semantics unchanged in this chunk.
 - **out_of_scope**:
@@ -276,7 +276,7 @@ design.
     `void fowRegionChanged(const QRect& region);` signal; add private
     `QRect _pendingDirtyRect;` accumulator for the DM-side dispatch; add
     private `QRect _fowGLPendingRegion;` accumulator consumed by
-    chunk-1's `consumePendingGLUpdates()` (chunk-4 will read the region,
+    chunk-1's `applyGLPendingUpdates()` (chunk-4 will read the region,
     chunk-1/3 only union into it); expand `requestFowUpdate()` to accept
     a `QRect` and union it into `_pendingDirtyRect`; change the timer slot
     to dispatch with `_pendingDirtyRect` via `dispatchFowUpdate(region)`.
@@ -291,7 +291,7 @@ design.
     `update(region)`; (b) sets `_fowGLImageDirty = true` and unions
     `region` into a new private `QRect _fowGLPendingRegion` accumulator
     (chunk-4 will consume the region; this chunk still uploads full-image
-    in `consumePendingGLUpdates()`, so the accumulator may be ignored by
+    in `applyGLPendingUpdates()`, so the accumulator may be ignored by
     chunk-3's consumer but is populated for chunk-4); (c) emits
     `changed()` to wake the player renderer. `dispatchFowUpdate()` does
     **not** call into `_fowGLObject` — the chunk-1 deferred-upload
@@ -335,13 +335,13 @@ design.
     must reset to an empty `QRect()` after each timer dispatch, and a fill
     operation must replace (not union) the accumulator with the full-image
     rect. The GL-side accumulator (`_fowGLPendingRegion`) is cleared by
-    `consumePendingGLUpdates()` inside `playerGLPaint()` (chunk-1 owns this
+    `applyGLPendingUpdates()` inside `playerGLPaint()` (chunk-1 owns this
     contract); the chunk-3 dispatch path only writes to it.
   - Document inline at `dispatchFowUpdate()`: "Deferred-upload contract —
     runs on the GUI thread. Sets pending flags and emits signals; never
     calls into `_fowGLObject`. The next `playerGLPaint()` consumes
     `_fowGLImageDirty` / `_fowGLPendingRegion` via
-    `consumePendingGLUpdates()`."
+    `applyGLPendingUpdates()`."
 - **acceptance_criteria**:
   - `fowgraphicsitem.h` and `fowgraphicsitem.cpp` exist and are listed in
     `CMakeLists.txt`'s explicit source/header lists.
@@ -368,9 +368,9 @@ design.
     consumes pending GL state on its next `playerGLPaint()`.
   - GL context rule (chunk-1 contract, reaffirmed): the timer slot and
     `dispatchFowUpdate()` perform no GL calls. Pending state is consumed
-    in `playerGLPaint()` via `consumePendingGLUpdates()`. Any new code in
+    in `playerGLPaint()` via `applyGLPendingUpdates()`. Any new code in
     this chunk that needs to touch `_fowGLObject` must go through the
-    chunk-1 helper, not inline.
+    chunk-1 helper (`applyGLPendingUpdates()`), not inline.
 - **out_of_scope**:
   - Switching `_imageFow` to `Format_RGBA8888` (chunk 4).
   - Removing the CPU vertical flip in `loadTexture` (chunk 4).
@@ -382,17 +382,17 @@ design.
 ## Chunk 4: Storage-format change and subregion GL upload
 
 - **id**: subregion-upload
-- **summary**: Switch `_imageFow` and `_imageFowTexture` to `QImage::Format_RGBA8888` so the FOW-side `loadTexture` path can skip the CPU `convertToFormat` and `flipped` copies. Add `PublishGLBattleBackground::updateImageRegion(const QImage&, const QRect&)` that uses `glPixelStorei(GL_UNPACK_ROW_LENGTH, ...)` + `glTexSubImage2D` to upload only the dirty stripe. Extend chunk-1's `consumePendingGLUpdates()` to call `updateImageRegion(getImage(), _fowGLPendingRegion)` when a partial region is pending and `updateImage(getImage())` when the full-image region is pending — the GL call still happens inside `playerGLPaint()`, never on the GUI thread. Keep `loadTexture()` source-format-tolerant by reducing the `convertToFormat`/`flipped` work to a guarded fast-path (no-op when input is already `Format_RGBA8888` with a per-instance orientation flag), so non-FOW callers (`LayerImage`, `LayerVideo`, `LayerVideoEffect`, `LayerDraw`, `OverlayTimer`, battle background) continue to render correctly with their existing source images.
+- **summary**: Switch `_imageFow` and `_imageFowTexture` to `QImage::Format_RGBA8888` so the FOW-side `loadTexture` path can skip the CPU `convertToFormat` and `flipped` copies. Add `PublishGLBattleBackground::updateImageRegion(const QImage&, const QRect&)` that uses `glPixelStorei(GL_UNPACK_ROW_LENGTH, ...)` + `glTexSubImage2D` to upload only the dirty stripe. Extend chunk-1's `applyGLPendingUpdates()` to call `updateImageRegion(getImage(), _fowGLPendingRegion)` when a partial region is pending and `updateImage(getImage())` when the full-image region is pending — the GL call still happens inside `playerGLPaint()`, never on the GUI thread. Keep `loadTexture()` source-format-tolerant by reducing the `convertToFormat`/`flipped` work to a guarded fast-path (no-op when input is already `Format_RGBA8888` with a per-instance orientation flag), so non-FOW callers (`LayerImage`, `LayerVideo`, `LayerVideoEffect`, `LayerDraw`, `OverlayTimer`, battle background) continue to render correctly with their existing source images.
 - **dependencies**: [fow-graphics-item]
 - **branch**: agent/work/subregion-upload
 - **files_to_modify**:
   - layerfow.h — add inline comment near `_imageFow` declaration documenting the storage-format change to `Format_RGBA8888` and noting that `QPainter` composition still works because Qt converts internally.
-  - layerfow.cpp — change `QImage::Format_ARGB32_Premultiplied` to `QImage::Format_RGBA8888` at the two construction sites in `initialize()`. Verify the `QPainter` composition modes used by paint methods (`CompositionMode_Source`, `CompositionMode_DestinationIn`) still produce correct output against `Format_RGBA8888` (they do — Qt converts internally; document inline). Extend chunk-1's `consumePendingGLUpdates()` to inspect `_fowGLPendingRegion`: if equal to the full-image rect or empty, call `_fowGLObject->updateImage(getImage())`; else call `_fowGLObject->updateImageRegion(getImage(), _fowGLPendingRegion)`. Clear `_fowGLPendingRegion` to an empty rect after consumption. Construct `_fowGLObject` with a "source-is-RGBA8888, no-CPU-flip" flag so chunk-1's full-image upload path takes the zero-copy branch (see `publishglbattlebackground.h/.cpp` changes below).
+  - layerfow.cpp — change `QImage::Format_ARGB32_Premultiplied` to `QImage::Format_RGBA8888` at the two construction sites in `initialize()`. Verify the `QPainter` composition modes used by paint methods (`CompositionMode_Source`, `CompositionMode_DestinationIn`) still produce correct output against `Format_RGBA8888` (they do — Qt converts internally; document inline). Extend chunk-1's `applyGLPendingUpdates()` to inspect `_fowGLPendingRegion`: if equal to the full-image rect or empty, call `_fowGLObject->updateImage(getImage())`; else call `_fowGLObject->updateImageRegion(getImage(), _fowGLPendingRegion)`. Clear `_fowGLPendingRegion` to an empty rect after consumption. Construct `_fowGLObject` with a "source-is-RGBA8888, no-CPU-flip" flag so chunk-1's full-image upload path takes the zero-copy branch (see `publishglbattlebackground.h/.cpp` changes below).
   - publishglbattlebackground.h — declare `void updateImageRegion(const QImage& image, const QRect& region);`. Add a constructor overload (or a new setter `setSourceImageOptions(bool sourceIsRgba8888, bool sourceNeedsVerticalFlip)`) that records per-instance flags consumed by `loadTexture()` / `updateImage()` / `updateImageRegion()` / `createImageObjects()`. Default values must preserve existing behaviour: `sourceIsRgba8888 = false`, `sourceNeedsVerticalFlip = true` (CPU flip on).
   - publishglbattlebackground.cpp — implement `updateImageRegion`: guard with the existing `QOpenGLContext::currentContext()` null pattern from `loadTexture`; bind `_textureID`; set `glPixelStorei(GL_UNPACK_ROW_LENGTH, image.bytesPerLine() / BYTES_PER_PIXEL_RGBA)`; compute `flippedY = _imageSize.height() - region.y() - region.height()` and call `glTexSubImage2D(GL_TEXTURE_2D, 0, region.x(), flippedY, region.width(), region.height(), GL_RGBA, GL_UNSIGNED_BYTE, image.constScanLine(region.y()) + region.x() * BYTES_PER_PIXEL_RGBA)`; restore `glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)`; call `glGenerateMipmap` only via the chunk-1 mipmap-filter predicate. In `loadTexture()`, gate the `convertToFormat(RGBA8888)` and `flipped(Qt::Vertical)` calls on the new per-instance flags: when `sourceIsRgba8888 == true` skip `convertToFormat`; when `sourceNeedsVerticalFlip == false` skip the flip and instead emit V-inverted texcoords from `createImageObjects()` for this instance only. In `createImageObjects()`, branch the vertex-array V coordinates on the per-instance flip flag — do not change the global vertex layout. Name `BYTES_PER_PIXEL_RGBA = 4` as `static constexpr int`. Mark the V-coordinate values in the no-CPU-flip branch with an inline comment documenting GL bottom-left origin convention.
 - **files_to_create**: []
 - **integration_tasks**:
-  - All GL calls in `updateImageRegion`, the new no-CPU-flip `loadTexture` branch, and the chunk-3 dispatch's downstream consumer execute inside `playerGLPaint()` via the chunk-1 `consumePendingGLUpdates()` helper — **never** from the GUI thread. `dispatchFowUpdate()` (chunk 3) only writes to `_fowGLImageDirty` and `_fowGLPendingRegion` and continues to emit `changed()` to wake the renderer. The chunk's reviewer must grep `_fowGLObject->updateImage` and `_fowGLObject->updateImageRegion` to confirm both appear only inside `consumePendingGLUpdates()`.
+  - All GL calls in `updateImageRegion`, the new no-CPU-flip `loadTexture` branch, and the chunk-3 dispatch's downstream consumer execute inside `playerGLPaint()` via the chunk-1 `applyGLPendingUpdates()` helper — **never** from the GUI thread. `dispatchFowUpdate()` (chunk 3) only writes to `_fowGLImageDirty` and `_fowGLPendingRegion` and continues to emit `changed()` to wake the renderer. The chunk's reviewer must grep `_fowGLObject->updateImage` and `_fowGLObject->updateImageRegion` to confirm both appear only inside `applyGLPendingUpdates()`.
   - **Pre-merge integration task — enumerate every `PublishGLBattleBackground` caller and verify source-image format/orientation.** The known caller set, derived from a workspace grep of `new PublishGLBattleBackground(` and `->updateImage(` / `->setImage(`, is: `layerfow.cpp` (FOW — switches to `Format_RGBA8888`, no flip), `layerimage.cpp` (LayerImage — keeps `Format_ARGB32_Premultiplied` source, CPU flip on), `layervideo.cpp` (LayerVideo — VLC-decoded RGBA but Qt-side reshape; CPU flip on), `layervideoeffect.cpp` (same family), `layerdraw.cpp` (`GL_LINEAR`-filtered draw objects; CPU flip on), `overlaytimer.cpp` (timer overlay; CPU flip on), `mainwindow.cpp` (publish-image dispatcher path; CPU flip on). For each, confirm the source image's `format()` and required orientation by reading the call site in this chunk's Execution; record the audit results inline in the cpp constructor or in the chunk's handoff. Only the FOW caller passes `sourceIsRgba8888 = true, sourceNeedsVerticalFlip = false`; every other caller defaults to `false, true` and is unaffected by this chunk. If the audit finds any caller already passing RGBA8888 but still relying on the CPU flip, document it as a follow-up but **do not** change its behaviour in this chunk.
   - **macOS smoke test — human-mediated.** After Windows debug build passes, hand the merged chunk-4 branch to the human for a manual macOS build and a single-stroke FOW smoke test on a 4k map in both DM-only and DM+player-publishing modes (the spec amendment flags `Format_RGBA8888` interacting differently with the CoreGraphics-backed `QPainter` than `Format_ARGB32_Premultiplied`). Record the result in the chunk's `Cycle Log` handoff. Coordinator must surface this as a checkpoint before declaring the chunk merge-ready.
   - Constants `BYTES_PER_PIXEL_RGBA = 4`, the mipmap-filter predicate (reuse the chunk-1 helper), the per-instance flip flag, and the V-coordinate values in the no-CPU-flip branch must be named or accompanied by an inline GL-origin comment per cpp-qt.instructions.md.
@@ -402,14 +402,14 @@ design.
   - `PublishGLBattleBackground::loadTexture()` retains its `convertToFormat` and `flipped`/`mirrored` calls **as guarded fast-paths** that are skipped only when the per-instance `sourceIsRgba8888` / `sourceNeedsVerticalFlip` flags say so. Default-constructed callers continue to take the convert+flip path.
   - The FOW `_fowGLObject` construction passes `sourceIsRgba8888 = true, sourceNeedsVerticalFlip = false`; all other `PublishGLBattleBackground` construction sites continue to use the defaults.
   - `createImageObjects()` branches the vertex-array V coordinates on the per-instance flip flag; the global vertex layout (used by all defaulting callers) is unchanged.
-  - `LayerFow`'s `consumePendingGLUpdates()` routes partial-region uploads through `updateImageRegion()` and full-region uploads through `updateImage()`.
-  - A grep of `layerfow.cpp` confirms `_fowGLObject->updateImage` and `_fowGLObject->updateImageRegion` appear **only** inside `consumePendingGLUpdates()`.
+  - `LayerFow`'s `applyGLPendingUpdates()` routes partial-region uploads through `updateImageRegion()` and full-region uploads through `updateImage()`.
+  - A grep of `layerfow.cpp` confirms `_fowGLObject->updateImage` and `_fowGLObject->updateImageRegion` appear **only** inside `applyGLPendingUpdates()`.
   - The chunk's handoff note enumerates each `PublishGLBattleBackground` caller and the per-instance flag values it uses.
   - All literal byte-count and pixel-format integers in new code are named constants; the V-coordinate constants in the no-CPU-flip vertex branch carry an inline comment documenting the GL bottom-left origin convention.
   - Windows debug build succeeds.
   - Handoff note records macOS smoke-test status (Pending until human confirms; the chunk is **not** merge-ready until the macOS result is `pass`).
 - **constraints_in_scope**:
-  - GL context rule (central constraint, per amended spec): `updateImageRegion()`, `updateImage()`, and the no-CPU-flip `loadTexture` branch are all invoked exclusively from `consumePendingGLUpdates()` inside `playerGLPaint()`. The internal `QOpenGLContext::currentContext()` null-guard remains as defence-in-depth.
+  - GL context rule (central constraint, per amended spec): `updateImageRegion()`, `updateImage()`, and the no-CPU-flip `loadTexture` branch are all invoked exclusively from `applyGLPendingUpdates()` inside `playerGLPaint()`. The internal `QOpenGLContext::currentContext()` null-guard remains as defence-in-depth.
   - Cross-platform Qt: `Format_RGBA8888` storage may behave differently under macOS CoreGraphics QPainter back-end; the macOS smoke test is the gate.
   - No magic numbers — `BYTES_PER_PIXEL_RGBA` and the mipmap-filter predicate must be named.
   - `glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)` must be restored after the subregion upload to avoid bleeding state into other callers' subsequent `glTexImage2D` calls.
@@ -459,14 +459,39 @@ design.
 
 - **dispatched_by**: coordinator
 - **dispatched_at**: 2026-05-17T00:00:00Z
-- **executor_files_touched**: (pending)
-- **executor_build_status**: (pending)
-- **executor_handoff_summary**: (pending)
-- **review_verdict**: (pending)
-- **review_findings**: (pending)
-- **next_action**: (pending)
+- **executor_files_touched**:
+  - DMHelper/src/layerfow.h: modified
+  - DMHelper/src/layerfow.cpp: modified
+  - DMHelper/src/publishglbattlebackground.cpp: modified
+- **executor_build_status**: success — [145/146] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: All acceptance criteria met or partial-with-justification. The "partial" on criterion 7 (grep for `_fowGLObject->` outside GL functions) is pre-existing: `applyPosition()` retains a `_fowGLObject->setPosition()` call which updates only a CPU-side `QMatrix4x4` — no `glXxx` calls. This is outside the GL-state-mutating method set defined in the plan's integration_task. Named mipmap predicate `isMipmapMinFilter()` is file-local `static constexpr` in `publishglbattlebackground.cpp`, ready for chunk 4 reuse.
+- **review_verdict**: DesignProblem — resolved by plan amendment (Option A: renamed to `applyGLPendingUpdates()`)
+- **review_findings**: Critical — plan prescribed `consumePendingGLUpdates()` (no "GL" in name) for a function making GL-state-mutating calls, violating CLAUDE.md naming convention. Resolved: function renamed to `applyGLPendingUpdates()` in source and plan. Info — `playerGLPaint()` null-check ordering unconventional but non-defective.
+- **next_action**: plan-amended — re-dispatching cycle 2 (rename only)
+
+### Cycle 2
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/layerfow.h: modified
+  - DMHelper/src/layerfow.cpp: modified
+  - DMHelper/src/publishglbattlebackground.cpp: modified
+- **executor_build_status**: success — [118/118] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: Rename from `consumePendingGLUpdates` to `applyGLPendingUpdates` verified clean in all source files. No further source edits required. All acceptance criteria met.
+- **review_verdict**: Pass
+- **review_findings**: All acceptance criteria met. Low — `applyPosition()` calls `_fowGLObject->setPosition()` (pre-existing, not introduced by this chunk; `setPosition()` makes no GL calls). Low — plan file appears in diff (expected Coordinator maintenance). Info — no lazy-shader guard needed in `playerGLPaint()` (shaders injected externally; pre-existing pattern).
+- **next_action**: merge
 
 # Escalations
 
-(none)
+## 2026-05-17T00:00:00Z — gl-upload-reuse
+
+- **reason**: design-problem
+- **detail**: Review Agent returned `DesignProblem` on cycle 1. The plan prescribed `consumePendingGLUpdates()` as the private helper name. The implementation is correct and all acceptance criteria are met, but the function makes GL-state-mutating calls (`updateImage` → `glTexImage2D`; destructor → `glDeleteTextures`) without "GL" in its name, violating the CLAUDE.md convention that GL calls only appear in functions whose name contains "GL". Since the plan specified the name, Execution faithfully reproduced the defect. Fix options: (a) rename to e.g. `applyGLPendingUpdates()` or `consumeGLPendingUpdates()` — requires a plan amendment and re-execute; (b) accept the name as-is, treating the inline documentation ("callable only from a *GL* function") as sufficient — human discretion.
+- **state_at_escalation**:
+  - branch_checked_out: agent/work (working tree contains uncommitted chunk-1 edits)
+  - branches_left_in_place: []
+  - last_cycle: gl-upload-reuse:1
+- **handoff_to**: human (resolved — Option A approved; plan amended; re-dispatching cycle 2)
 

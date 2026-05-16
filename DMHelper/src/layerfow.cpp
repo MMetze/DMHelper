@@ -220,11 +220,13 @@ void LayerFow::applySize(const QSize& size)
     if(_graphicsItem)
         _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
 
+    // Defer GL object destruction to playerGLPaint() / playerGLUninitialize(), which run
+    // with a current GL context. The previous GL object remains alive and rendered for at
+    // most one player-window paint cycle after a resize; this is acceptable because resize
+    // already invalidates the FOW image content and the next playerGLInitialize() call
+    // (triggered when playerIsInitialized() returns false) will rebuild on the following cycle.
     if(_fowGLObject)
-    {
-        delete _fowGLObject;
-        _fowGLObject = nullptr;
-    }
+        _fowGLDeferredDestroy = true;
 }
 
 QImage LayerFow::getImage() const
@@ -674,12 +676,18 @@ void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* s
 
 void LayerFow::playerGLUninitialize()
 {
+    applyGLPendingUpdates();
     cleanupPlayer();
 }
 
 void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    applyGLPendingUpdates();
+
     Q_UNUSED(defaultModelMatrix);
+
+    if(!_fowGLObject)
+        return;
 
     if(!functions)
         return;
@@ -753,6 +761,27 @@ void LayerFow::editSettings()
     dlg->deleteLater();
 }
 
+void LayerFow::applyGLPendingUpdates()
+{
+    // This is the ONLY function in LayerFow permitted to call GL-state-mutating methods
+    // on _fowGLObject (constructor, updateImage, setImage, destructor). Every other call
+    // site in LayerFow sets _fowGLImageDirty or _fowGLDeferredDestroy instead of touching
+    // _fowGLObject directly. This function is only ever invoked from *GL* functions where
+    // the player window's GL context is current.
+    if(_fowGLDeferredDestroy)
+    {
+        delete _fowGLObject;
+        _fowGLObject = nullptr;
+        _fowGLDeferredDestroy = false;
+        _fowGLImageDirty = false; // image will be re-uploaded after the next playerGLInitialize()
+    }
+    else if(_fowGLImageDirty && _fowGLObject)
+    {
+        _fowGLObject->updateImage(getImage());
+        _fowGLImageDirty = false;
+    }
+}
+
 void LayerFow::updateFowInternal()
 {
     QImage newImage = getImage();
@@ -760,11 +789,9 @@ void LayerFow::updateFowInternal()
     if(_graphicsItem)
         _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
 
-    if(_fowGLObject)
-    {
-        delete _fowGLObject;
-        _fowGLObject = nullptr;
-    }
+    // Defer GL texture upload to playerGLPaint(), which runs with a current GL context.
+    // GUI-thread paint methods must never call GL-state-mutating functions directly.
+    _fowGLImageDirty = true;
 }
 
 void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

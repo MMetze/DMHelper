@@ -106,6 +106,16 @@ protected:
     QList<UndoFowBase*> _undoItems;
     bool _batchProcessing;
 
+private:
+    // Pending-state flags set by GUI-thread paths; consumed only from *GL* functions.
+    // See applyGLPendingUpdates() — the sole function permitted to call GL-state-
+    // mutating methods on _fowGLObject.
+    bool _fowGLImageDirty = false;
+    bool _fowGLDeferredDestroy = false;
+
+    // Callable only from a *GL* function with a current GL context.
+    void applyGLPendingUpdates();
+
 };
 
 #endif // LAYERFOW_H
