@@ -57,8 +57,6 @@ CampaignFilesManager::CampaignFilesManager(QObject* parent)
     : QObject(parent)
     , _rootDirectory()
     , _expectedPaths()
-    , _suspendedPaths()
-    , _globalSuspendCount(0)
 {
     // Constructor performs NO I/O and emits NO signals.
 }
@@ -471,32 +469,6 @@ bool CampaignFilesManager::copyMediaInto(const QString& sourcePath, const Campai
     return true;
 }
 
-void CampaignFilesManager::suspendWatch(const QString& absolutePath)
-{
-    ++_suspendedPaths[absolutePath];
-}
-
-void CampaignFilesManager::resumeWatch(const QString& absolutePath)
-{
-    auto it = _suspendedPaths.find(absolutePath);
-    if(it == _suspendedPaths.end())
-        return;
-
-    if(--it.value() <= 0)
-        _suspendedPaths.erase(it);
-}
-
-void CampaignFilesManager::suspendWatch()
-{
-    ++_globalSuspendCount;
-}
-
-void CampaignFilesManager::resumeWatch()
-{
-    if(_globalSuspendCount > 0)
-        --_globalSuspendCount;
-}
-
 void CampaignFilesManager::registerExpectedPath(const QString& absolutePath)
 {
     _expectedPaths.insert(absolutePath);
@@ -587,25 +559,13 @@ void CampaignFilesManager::startWatching()
 
 void CampaignFilesManager::onFileChanged(const QString& path)
 {
-    if(_globalSuspendCount > 0)
-        return;
-
-    auto it = _suspendedPaths.find(path);
-    if(it != _suspendedPaths.end())
-    {
-        if(--it.value() <= 0)
-            _suspendedPaths.erase(it);
-        return;
-    }
-
+    // Loop-breaker: EncounterText::setText's equality guard ("if(newText == getText()) return;")
+    // prevents the write→watcher→reload→setText cycle from repeating. No explicit suppression needed.
     emit linkedFileChanged(path);
 }
 
 void CampaignFilesManager::onDirectoryChanged(const QString& dirPath)
 {
-    if(_globalSuspendCount > 0)
-        return;
-
     QDir dir(dirPath);
     QStringList newEntries = dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList oldEntries = _dirSnapshot.value(dirPath);

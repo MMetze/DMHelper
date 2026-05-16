@@ -64,15 +64,11 @@ void EncounterTextLinked::setText(const QString& newText)
 
 void EncounterTextLinked::writeLinkedFile()
 {
-    Campaign* owning = CampaignFilesManager::findOwningCampaign(this);
-    CampaignFilesManager* mgr = owning ? owning->filesManager() : nullptr;
-    const QString absPath = getLinkedFile();
-    if(mgr && !absPath.isEmpty()) mgr->suspendWatch(absPath);
+    // EncounterText::setText's equality guard is the loop-breaker; no watcher suppression needed here.
     QDomDocument doc;
     QDomElement element;
     QDir dir;
     createTextNode(doc, element, dir, false);
-    if(mgr && !absPath.isEmpty()) mgr->resumeWatch(absPath);
 }
 
 void EncounterTextLinked::postProcessXML(const QDomElement &element, bool isImport)

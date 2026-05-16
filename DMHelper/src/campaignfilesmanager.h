@@ -46,13 +46,6 @@ public:
     bool copyMediaInto(const QString& sourcePath, const CampaignObjectBase* owner,
                        bool isVideo, QString& outRelativePath);
 
-    // Watcher suppression (per-path, reference-counted)
-    void suspendWatch(const QString& absolutePath);
-    void resumeWatch(const QString& absolutePath);
-    // Whole-watcher suppression (used during migration)
-    void suspendWatch();
-    void resumeWatch();
-
     // Expected-paths registry (scanForNewEntries skips these)
     void registerExpectedPath(const QString& absolutePath);
     void clearExpectedPaths();
@@ -77,8 +70,6 @@ private:
 
     QString _rootDirectory;
     QSet<QString> _expectedPaths;
-    QMap<QString, int> _suspendedPaths;  // path → suspend count
-    int _globalSuspendCount = 0;
     QFileSystemWatcher* _watcher = nullptr;
     QMap<QString, QStringList> _dirSnapshot;  // dir path → last-known contents
 };

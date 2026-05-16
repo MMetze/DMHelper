@@ -739,6 +739,18 @@ Guiding choices made in this addendum:
 - review_findings: []
 - next_action: merge
 
+## watcher-suspend-removal
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-16
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.h, DMHelper/src/campaignfilesmanager.cpp, DMHelper/src/encountertextlinked.cpp, DMHelper/src/campaign.cpp]
+- executor_build_status: pass — clean build, 129 targets linked
+- executor_handoff_summary: Removed suspendWatch/resumeWatch per-path and global overloads from header and implementation, _suspendedPaths and _globalSuspendCount members, and early-return guards from onFileChanged and onDirectoryChanged. Removed suspend/resume calls and unused helper vars from encountertextlinked.cpp::writeLinkedFile. Loop-breaker comments added in onFileChanged and writeLinkedFile. No suspend calls found in campaign.cpp. Executor flagged SCOPE_AMBIGUOUS: writes-before-setRootDirectory swap impossible because pathForEntry() requires _rootDirectory; watcher safety relies on queued-signal delivery after synchronous migration completes.
+- review_verdict: Pass
+- review_findings: [Low — integration task comment about setRootDirectory-before-writes safety rationale not added to campaign.cpp. Info — SCOPE_AMBIGUOUS migration order reasoning verified as sound.]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review

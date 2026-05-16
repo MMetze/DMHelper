@@ -581,14 +581,9 @@ void Campaign::migrateToFilesDirectory(const QString& absolutePath, QWidget* par
     _filesManager->setRootDirectory(absolutePath);
     QDir().mkpath(absolutePath);
 
-    // Suppress watcher signals during migration to avoid spurious auto-discovery
-    _filesManager->suspendWatch();
-
     const QList<CampaignObjectBase*> topLevel = getChildObjects();
     for(CampaignObjectBase* child : topLevel)
         migrateObjectRecursive(child, parent);
-
-    _filesManager->resumeWatch();
 
     qDebug() << "[Campaign] migrateToFilesDirectory complete.";
 }
