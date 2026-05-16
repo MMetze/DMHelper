@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QSet>
 #include <QDebug>
 
 // ---------- file-local constants ----------
@@ -56,7 +57,6 @@ static void verifyMirrorRecursive(const CampaignFilesManager* manager,
 CampaignFilesManager::CampaignFilesManager(QObject* parent)
     : QObject(parent)
     , _rootDirectory()
-    , _expectedPaths()
 {
     // Constructor performs NO I/O and emits NO signals.
 }
@@ -194,6 +194,7 @@ void CampaignFilesManager::scanForNewEntries(Campaign* campaign, QList<CampaignO
         return;
 
     // Build path-to-entry map and known-paths set from the existing campaign tree
+    // knownPaths is the canonical double-insertion guard: paths already in the campaign tree are skipped.
     QMap<QString, CampaignObjectBase*> pathToEntry;
     QSet<QString> knownPaths;
     collectEntryPaths(this, campaign, pathToEntry, knownPaths);
@@ -467,21 +468,6 @@ bool CampaignFilesManager::copyMediaInto(const QString& sourcePath, const Campai
 
     outRelativePath = root.relativeFilePath(destPath);
     return true;
-}
-
-void CampaignFilesManager::registerExpectedPath(const QString& absolutePath)
-{
-    _expectedPaths.insert(absolutePath);
-}
-
-void CampaignFilesManager::clearExpectedPaths()
-{
-    _expectedPaths.clear();
-}
-
-bool CampaignFilesManager::isExpectedPath(const QString& absolutePath) const
-{
-    return _expectedPaths.contains(absolutePath);
 }
 
 Campaign* CampaignFilesManager::findOwningCampaign(const CampaignObjectBase* entry)

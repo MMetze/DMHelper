@@ -751,6 +751,18 @@ Guiding choices made in this addendum:
 - review_findings: [Low — integration task comment about setRootDirectory-before-writes safety rationale not added to campaign.cpp. Info — SCOPE_AMBIGUOUS migration order reasoning verified as sound.]
 - next_action: merge
 
+## expected-paths-removal
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-16
+- executor_files_touched: [DMHelper/src/campaignfilesmanager.h, DMHelper/src/campaignfilesmanager.cpp]
+- executor_build_status: pass — clean build, 129 targets linked
+- executor_handoff_summary: Removed registerExpectedPath, clearExpectedPaths, isExpectedPath declarations and implementations. Removed _expectedPaths (QSet<QString>) member. Removed _expectedPaths check from scanForNewEntries. Added knownPaths canonical-guard comment. QSet include moved from header to .cpp. Zero calls found in campaign.cpp.
+- review_verdict: Pass
+- review_findings: [Info — campaign.cpp not touched (correctly zero calls to remove). Info — isExpectedPath removed as necessary collateral. Info — QSet include correctly relocated to .cpp.]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review

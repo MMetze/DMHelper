@@ -5,7 +5,6 @@
 #include <QDir>
 #include <QFileSystemWatcher>
 #include <QMap>
-#include <QSet>
 #include <QString>
 #include <QStringList>
 
@@ -46,11 +45,6 @@ public:
     bool copyMediaInto(const QString& sourcePath, const CampaignObjectBase* owner,
                        bool isVideo, QString& outRelativePath);
 
-    // Expected-paths registry (scanForNewEntries skips these)
-    void registerExpectedPath(const QString& absolutePath);
-    void clearExpectedPaths();
-    bool isExpectedPath(const QString& absolutePath) const;
-
     // Find owning campaign by walking parent() chain
     static Campaign* findOwningCampaign(const CampaignObjectBase* entry);
 
@@ -69,7 +63,6 @@ private:
     static QString sanitiseName(const QString& name);
 
     QString _rootDirectory;
-    QSet<QString> _expectedPaths;
     QFileSystemWatcher* _watcher = nullptr;
     QMap<QString, QStringList> _dirSnapshot;  // dir path → last-known contents
 };
