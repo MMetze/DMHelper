@@ -2,8 +2,9 @@
 
 date: 2026-05-16
 investigator_model: Claude Opus 4.7
-focus: End-to-end latency and frame-rate of FOW erase/draw while the left mouse button is held in edit mode, with the player (GL) window publishing.
+focus: End-to-end latency and frame-rate of FOW erase/draw while the left mouse button is held in edit mode, with the player (GL) window publishing. Priority is the DM-side editing experience; the player path may be deferred/batched.
 verdict: Warn
+revised: 2026-05-16 — F2 expanded with deferred-GL-cleanup constraint after Architecture Review correction; verdict rationale parenthetical corrected. Overall verdict remains Warn (no observed OOM/crash in practice).
 
 ## Summary
 
@@ -65,13 +66,14 @@ that's a viewport-wide repaint per mouse sample.
 
 ---
 
-### F2. GL texture object destroyed and rebuilt from scratch per stroke sample — Warn
+### F2. GL texture object destroyed and rebuilt from scratch per stroke sample — Warn (with leak risk)
 
-file: [layerfow.cpp](layerfow.cpp#L762-L765), [publishglbattlebackground.cpp](publishglbattlebackground.cpp#L68-L88)
-category: performance
+file: [layerfow.cpp](layerfow.cpp#L762-L765), [publishglbattlebackground.cpp](publishglbattlebackground.cpp#L26-L59), [publishglobject.cpp](publishglobject.cpp#L17-L29)
+category: performance / resource
 
 ```cpp
-// layerfow.cpp
+// layerfow.cpp — runs in updateFowInternal(), reached from paintFoWPoint
+// on the GUI thread inside UndoFowPath::addPoint(). NO current GL context.
 if(_fowGLObject)
 {
     delete _fowGLObject;
@@ -91,15 +93,65 @@ void PublishGLBattleBackground::setImage(const QImage& image)
 
 The next `playerGLPaint()` sees `_fowGLObject == nullptr` and reconstructs
 everything: VAO, VBO, EBO, texture, vertex upload, and full `glTexImage2D`.
-Note that `PublishGLBattleBackground::updateImage()` already has a
-same-size fast path that calls `loadTexture()` without destroying the GL
-objects — but LayerFow bypasses it by always going through full destroy
-instead of calling `updateImage()`. This is gratuitous: FOW image size never
-changes during a stroke.
+`PublishGLBattleBackground::updateImage()` already has a same-size fast
+path that calls `loadTexture()` without destroying the GL objects — but
+LayerFow bypasses it by always destroying instead of calling
+`updateImage()`. This is gratuitous: FOW image size never changes during a
+stroke.
 
-**Recommended action:** Keep `_fowGLObject` alive across edits; route updates
-through `updateImage()` (or a new `updateImageRegion()`); destroy only on
-resize or layer teardown.
+**GL-cleanup correctness sub-finding (added on revision).** `updateFowInternal()`
+is called synchronously from the GUI thread inside paint methods — there
+is no current GL context. The destructor chain that runs from
+`delete _fowGLObject` is:
+
+```cpp
+// publishglobject.cpp — texture deletion
+void PublishGLObject::cleanup()
+{
+    if(_textureID > 0)
+    {
+        if(QOpenGLContext::currentContext())          // guard fails on GUI thread
+        {
+            QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+            if(f)
+                f->glDeleteTextures(1, &_textureID);  // ← SKIPPED
+        }
+        _textureID = 0;                               // ← runs unconditionally
+    }
+}
+```
+
+The `glDeleteTextures` call is guarded by `currentContext()` and is
+skipped when the destructor runs on the GUI thread; the C++ side then
+zeros `_textureID` regardless, losing the GPU handle. The VAO/VBO/EBO
+deletes in `PublishGLBattleBackground::cleanup()` have the same
+`currentContext()` guard and are also skipped. In principle this leaks
+GPU resources per stroke sample (~85 MB of texture + mipmap pyramid for a
+4k×4k FOW). The application empirically does **not** OOM or crash over
+realistic edit sessions, so either the driver is reaping orphaned
+resources when the owning `QOpenGLContext` is later destroyed, or the
+context is being recreated more often than expected. Either way the C++
+side has clearly lost track of resources and the codepath is incorrect:
+freeing GL resources without a current context is undefined behaviour
+that happens to no-op on current Windows drivers.
+
+This sub-finding does **not** raise the overall verdict to Block because
+no crash or VRAM exhaustion has been observed in practice; the priority
+of this investigation remains the DM-side editing experience. But it
+establishes the **central constraint** that the architecture reviewer
+identified: no FOW code path reachable from a paint method may make GL
+calls — neither for upload nor for cleanup. The fix plan must therefore
+use a deferred-upload / deferred-destruction contract for **both**
+update and teardown.
+
+**Recommended action:** Keep `_fowGLObject` alive across edits; route
+image updates through `updateImage()` (or a new `updateImageRegion()`)
+from inside `playerGLPaint()` only. If `_fowGLObject` ever needs to be
+destroyed mid-session (e.g. on FOW resize), do it via a deferred-delete
+flag consumed inside `playerGLPaint()` / `playerGLUninitialize()` — never
+inline from `updateFowInternal()`. The primary performance benefit
+(avoid the destroy/recreate cycle) is unchanged; the correctness benefit
+(stop leaking GL handles when no context is current) comes for free.
 
 ---
 
@@ -252,12 +304,28 @@ both the DM repaint and the GL texture upload.
 
 ## Verdict Rationale
 
-No findings are crash-path, data-loss, race-condition, or undefined-behaviour
-issues. Every finding is a steady-state performance defect. The closest call
-is F2 — a stroke-rate destroy/create cycle of GL objects could in principle
-exhaust resources or expose a context-affinity bug, but no evidence of either
-was found and `delete _fowGLObject` runs on the GL thread (per CLAUDE.md GL
-context rules in `playerGL*` functions). Overall verdict: **Warn**.
+Most findings are steady-state performance defects, not correctness issues.
+The one exception is F2's GL-cleanup sub-finding (added on revision):
+`delete _fowGLObject` runs from `updateFowInternal()` on the **GUI thread
+with no current GL context** — contrary to the original investigation's
+parenthetical, which incorrectly stated this runs on the GL thread. The
+cleanup chain silently skips `glDeleteTextures` and the VAO/VBO/EBO deletes
+when no context is current, then zeros the C++ handles regardless, which
+is a real GPU-resource leak per stroke sample and is undefined behaviour
+per the OpenGL spec. The application does not in fact OOM or crash on
+realistic sessions (likely because the owning `QOpenGLContext` is
+periodically destroyed and the driver reaps its orphaned textures
+wholesale), so the practical impact today is bounded.
+
+The corrected GL-context constraint — that nothing reachable from a paint
+method may touch GL, including destruction — is the central architectural
+driver of the deferred-upload / deferred-destruction pattern required by
+all four chunks of the implementation plan.
+
+Overall verdict remains **Warn**: the priority is the DM-side editing
+experience, no crash has been observed, and the GL-side defects are
+fixed as a consequence of the perf restructuring rather than as separate
+remediation work.
 
 The defects compound multiplicatively: F1 + F2 + F3 + F4 + F5 means each
 mouse sample on a 4k map does roughly:
@@ -283,9 +351,15 @@ independently shippable and measurable:
    `glGenerateMipmap` on a mipmap-needing filter. Removes one of the largest
    per-upload costs immediately, no architectural change.
 
-2. **F2.** Stop deleting `_fowGLObject`. Route updates through
-   `PublishGLBattleBackground::updateImage()` which already has a same-size
-   fast path. Costs a small refactor of `updateFowInternal()`.
+2. **F2.** Stop deleting `_fowGLObject` from `updateFowInternal()`. Route
+   image updates through `PublishGLBattleBackground::updateImage()` — but
+   only from inside `playerGLPaint()` where the GL context is current.
+   `updateFowInternal()` only flips a `_fowGLImageDirty` flag (and stores
+   pending `QImage` / `QRect` state if available); `playerGLPaint()`
+   consumes the flag and performs the upload. Any GL-object destruction
+   required mid-session (resize) follows the same deferred pattern. This
+   simultaneously eliminates the per-sample destroy/recreate cost **and**
+   the GL-cleanup leak in F2's sub-finding.
 
 3. **F6.** Stop emitting `dirty()` from per-sample paints; emit from
    `endPath()` and shape/fill operations only.
