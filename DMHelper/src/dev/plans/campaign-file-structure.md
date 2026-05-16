@@ -9,7 +9,7 @@ arch_review_reason: Introduces a new top-level subsystem (CampaignFilesManager o
 pre_impl_arch_review_requested: true
 supersedes: null
 status: in-progress
-# NOTE: All chunks done. Proceeding to post-implementation Architecture Review (Opus).
+# NOTE: All 12 original chunks merged. Addendum (chunks 13-15) added 2026-05-16 in response to post-implementation Architecture Review (Revise). Executing follow-up chunks.
 ---
 
 # Summary
@@ -377,6 +377,114 @@ plan.
   - "Export as archive (zip)" mentioned in the spec — that is a future enhancement; this chunk delivers the folder-structure form, which is the prerequisite. The acceptance criteria above explicitly do not require zip support.
   - Per-entry export of just a single `.md` (the spec talks about subtree export, which is what `addObjectTree` already does).
 
+# Addendum (2026-05-16, post-implementation Architecture Review)
+
+The post-implementation Architecture Review on the merged `agent/work` HEAD
+returned `Revise` with three required follow-ups. Original chunks 1–12
+are merged and not rewritten. The three new chunks below address the
+follow-ups, each depending on the merged work it touches.
+
+Guiding choices made in this addendum:
+
+- **Follow-up 1 (watcher self-write suppression)**: choose **Option (c)
+  from the review** — remove the `suspendWatch`/`resumeWatch` API
+  entirely. The empirical observation in the review is that
+  `EncounterText::setText`'s `if(newText == getText()) return;` equality
+  guard already breaks the write/reload cycle in practice, and the
+  per-path counter is unfixable in its current shape because the
+  `QFileSystemWatcher::fileChanged` event is queued. Option (a) and
+  Option (b) both require non-trivial state (a per-path budget that
+  outlives the synchronous bracket) and add complexity to a hot path
+  for a problem already neutralised by the equality guard. Removing the
+  API deletes dead code, simplifies the manager, and documents the real
+  loop-breaker.
+- **Follow-up 2 (`registerExpectedPath`/`clearExpectedPaths`)**: the
+  importer's live-tree `knownPaths` filter in `scanForNewEntries` is
+  already the working mechanism. Delete the unused API rather than wire
+  it in — same rationale as Follow-up 1: prefer deleting dead code to
+  preserving a parallel mechanism with no proven need. Both follow-ups
+  together remove one consistent class of dead `CampaignFilesManager`
+  API surface.
+- **Follow-up 3 (Cancel branch `deleteLater`)**: trivial one-call swap,
+  isolated to `MainWindow::openCampaign`.
+
+## Chunk 13: watcher-suspend-removal
+
+- **id**: watcher-suspend-removal
+- **summary**: Remove the non-functional `suspendWatch`/`resumeWatch` API from `CampaignFilesManager` and the now-unnecessary bracketing in `EncounterTextLinked::writeLinkedFile`. Document `EncounterText::setText`'s value-equality guard as the loop-breaker for the write → watcher → reload → write cycle.
+- **dependencies**: [textlinked-readwrite, filesdir-watcher]
+- **branch**: agent/work/watcher-suspend-removal
+- **files_to_modify**:
+  - DMHelper/src/campaignfilesmanager.h — remove `suspendWatch(const QString&)`, `resumeWatch(const QString&)`, the parameterless `suspendWatch()` / `resumeWatch()` overloads, and the `_suspendedPaths` (and any related `_globallySuspended` / counter) members. Keep all other public API unchanged.
+  - DMHelper/src/campaignfilesmanager.cpp — delete the implementations and the early-return guard inside `onFileChanged` that consulted `_suspendedPaths`. Add a short comment in `onFileChanged` referencing the equality guard in `EncounterText::setText` as the loop-breaker.
+  - DMHelper/src/encountertextlinked.cpp — in `writeLinkedFile`, remove the `suspendWatch(absPath)` / `resumeWatch(absPath)` calls; the file write itself stays. Leave a one-line comment above the write naming the equality-guard loop-breaker so the next reader does not re-introduce a suppression scheme.
+  - DMHelper/src/campaign.cpp — in `Campaign::migrateToFilesDirectory`, remove the paired parameterless `suspendWatch()` / `resumeWatch()` bracketing if present. Migration relies on the same equality-guard mechanism plus `registerExpectedPath` (which is *also* being removed by chunk 14, so this chunk leaves migration with no special suppression; that is correct because migration writes happen before the watcher root is established for the new files directory — see integration tasks).
+- **files_to_create**: []
+- **integration_tasks**:
+  - Verify by inspection that `Campaign::migrateToFilesDirectory` writes the `.md` files **before** calling `filesManager()->setRootDirectory(absPath)` on the freshly migrated directory; if so, no watcher events can fire for those writes (the watcher has no paths yet). If the existing order calls `setRootDirectory` first, swap the order so writes precede watcher attachment. Document the chosen order in a comment.
+  - The equality guard `if(newText == getText()) return;` lives in `EncounterText::setText` (existing code, not introduced here). This chunk does not modify it; it only documents reliance on it via comments at the two new comment sites above.
+- **acceptance_criteria**:
+  - Diff shows the `suspendWatch` and `resumeWatch` member declarations removed from `campaignfilesmanager.h`.
+  - Diff shows the implementations removed from `campaignfilesmanager.cpp` and the `_suspendedPaths`-consulting branch removed from `onFileChanged`.
+  - `encountertextlinked.cpp::writeLinkedFile` no longer contains the strings `suspendWatch` or `resumeWatch`.
+  - `campaign.cpp::migrateToFilesDirectory` no longer contains the strings `suspendWatch` or `resumeWatch`.
+  - A grep across the entire `DMHelper/src/` tree for `suspendWatch` and `resumeWatch` returns zero hits.
+  - Build succeeds with no new warnings.
+- **constraints_in_scope**:
+  - This is a pure deletion plus comments — no functional change to the user-visible behaviour. Manual smoke test confirming that external `.md` edits still reload and that internal `setText` still writes through is part of the human checkpoint, not Execution's responsibility.
+  - Never emit `dirty()` from `inputXML` (unchanged constraint from chunk 3).
+- **out_of_scope**:
+  - Alternative suppression schemes (options (a) and (b) from the review): explicitly rejected per the addendum guidance above.
+  - Touching `EncounterText::setText` itself — the equality guard is pre-existing and remains the load-bearing mechanism.
+
+## Chunk 14: expected-paths-removal
+
+- **id**: expected-paths-removal
+- **summary**: Remove the unused `registerExpectedPath` / `clearExpectedPaths` API from `CampaignFilesManager`. Document that `scanForNewEntries`'s live-tree `knownPaths` filter is the sole double-insertion guard.
+- **dependencies**: [filesdir-manager, filesdir-autodiscovery, export-import]
+- **branch**: agent/work/expected-paths-removal
+- **files_to_modify**:
+  - DMHelper/src/campaignfilesmanager.h — remove `void registerExpectedPath(const QString&)`, `void clearExpectedPaths()`, and the backing set (e.g. `_expectedPaths`). Keep all other public API unchanged.
+  - DMHelper/src/campaignfilesmanager.cpp — delete the implementations; remove the `_expectedPaths` set membership check from `scanForNewEntries` (the `knownPaths` live-tree filter at lines around 185–199 remains and is now the sole mechanism). Add a one-line comment above `knownPaths` construction naming it as the canonical double-insertion guard.
+  - DMHelper/src/campaign.cpp — in `Campaign::migrateToFilesDirectory`, remove any `registerExpectedPath(...)` calls that were added as defence-in-depth. The migrated entries are inserted into the tree synchronously, so by the time any watcher event fires for the new `.md` files (after the watcher root is set on the new directory), `knownPaths` will already contain them.
+- **files_to_create**: []
+- **integration_tasks**:
+  - Confirm by inspection that `objectimportdialog.cpp::importFinished` does **not** call `registerExpectedPath` or `clearExpectedPaths` today (review finding confirms zero call sites). No change to `objectimportdialog.cpp` is required by this chunk.
+  - Verify migration order: tree insertion (`addObject` for each new linked entry) must occur **before** `setRootDirectory` is called on the new files directory. If the current implementation already does this (Cycle 2 of `migration-dialog` indicates it does), no behavioural change is required beyond the API removal.
+- **acceptance_criteria**:
+  - Diff shows `registerExpectedPath` and `clearExpectedPaths` member declarations removed from `campaignfilesmanager.h`.
+  - Diff shows the implementations removed from `campaignfilesmanager.cpp` and the `_expectedPaths` membership check removed from `scanForNewEntries`.
+  - `campaign.cpp::migrateToFilesDirectory` no longer contains the strings `registerExpectedPath` or `clearExpectedPaths`.
+  - A grep across `DMHelper/src/` for `registerExpectedPath` and `clearExpectedPaths` returns zero hits.
+  - Build succeeds with no new warnings.
+- **constraints_in_scope**:
+  - This is the second of two dead-API removals (paired with chunk 13). Combined effect: `CampaignFilesManager`'s public surface shrinks by four methods and two members; no behavioural change.
+- **out_of_scope**:
+  - Wiring the API into `objectimportdialog.cpp` — the review explicitly offers "or delete the unused API" and the addendum chooses delete (see guidance above).
+  - Refactoring `scanForNewEntries`'s `knownPaths` construction; it is correct as-is and only gets a clarifying comment.
+
+## Chunk 15: migration-cancel-deletelater
+
+- **id**: migration-cancel-deletelater
+- **summary**: In `MainWindow::openCampaign`, change the migration-dialog Cancel branch from `delete _campaign;` to `_campaign->deleteLater();` to avoid dangling queued signals that may have been emitted during `inputXML`, `postProcessXML`, or `Bestiary::Instance()->finishBatchProcessing()`.
+- **dependencies**: [migration-dialog]
+- **branch**: agent/work/migration-cancel-deletelater
+- **files_to_modify**:
+  - DMHelper/src/mainwindow.cpp — locate the migration-Cancel branch in `openCampaign` (the path that runs when the user dismisses `CampaignMigrationDialog` without choosing Migrate or Legacy). Replace `delete _campaign;` with `_campaign->deleteLater();`. The assignment `_campaign = nullptr;` (if present) must immediately follow the `deleteLater` call so the pointer is cleared in the same statement sequence.
+- **files_to_create**: []
+- **integration_tasks**:
+  - There is exactly one Cancel branch to fix; do not change any other `delete _campaign` site in the file (e.g. the close-campaign path, which runs after the GUI has had time to flush its signal queue).
+  - If the surrounding code does not already null out `_campaign` after the delete, add `_campaign = nullptr;` immediately after the `deleteLater` call. `deleteLater` does not synchronously destroy the object, so the local pointer must be cleared so subsequent checks (`if(!_campaign) ...`) still behave correctly.
+- **acceptance_criteria**:
+  - Diff shows exactly one `delete _campaign;` → `_campaign->deleteLater();` replacement inside `MainWindow::openCampaign`, located in the migration-dialog Cancel branch.
+  - `_campaign = nullptr;` follows the `deleteLater` call (already present or newly added).
+  - No other `delete _campaign` occurrences in the file are modified.
+  - Build succeeds with no new warnings.
+- **constraints_in_scope**:
+  - Never use `delete` on a `QObject` that has had signal emissions in flight in the current event-loop turn; `deleteLater` is the canonical Qt pattern.
+- **out_of_scope**:
+  - Auditing other `delete` sites in `MainWindow` (the review only flagged this one).
+
 # Cycle Log
 
 ## filesdir-watcher
@@ -619,6 +727,18 @@ plan.
 - review_findings: [High — campaignexporter.h not deleted (still on disk). High — campaignexporter.cpp not deleted (still on disk). Info — DMHelper.pro still references both files (out-of-scope qmake file).]
 - next_action: escalate-to-human (cycle cap reached; human must delete two files — RESOLVED: files deleted and committed by human)
 
+## migration-cancel-deletelater
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-16
+- executor_files_touched: [DMHelper/src/mainwindow.cpp]
+- executor_build_status: pass — clean build, 107 targets linked
+- executor_handoff_summary: Replaced `delete _campaign;` with `_campaign->deleteLater(); _campaign = nullptr;` in the migration-Cancel branch of MainWindow::openCampaign (line ~2228). No other delete _campaign sites modified.
+- review_verdict: Pass
+- review_findings: []
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review
@@ -644,6 +764,56 @@ plan.
   - Medium: filesDirectory relative-vs-absolute convention inconsistent across chunks.
   - Low: QFileSystemWatcher::addPath failures are silent.
   - Low: parent-chain walk repeated across chunks without shared helper.
+
+## Post-Implementation Review — 2026-05-16
+
+reviewer_model: opus
+verdict: Revise
+summary: Implementation builds, the feature works end-to-end, and the major architectural rules (GL boundaries, no constructor I/O, CMake registration, base-class serialisation calls) are respected — but the watcher self-write suppression that Cycle 2 Required Change #1 added to the plan is dead code in the merged result, leaving the safety of `EncounterTextLinked::setText` resting on `EncounterText::setText`'s equality guard rather than the documented `suspendWatch`/`resumeWatch` mechanism.
+reviewed_range: pre-feature-base..agent/work HEAD (merged at chunk-12 completion)
+
+triggers_evaluated:
+  - threading: concern: `CampaignFilesManager::suspendWatch(path)`/`resumeWatch(path)` is called synchronously around a file write, but `QFileSystemWatcher::fileChanged` is delivered asynchronously through the event loop — by the time the handler runs the suspend count has already been zeroed by `resumeWatch`, so the suppression never fires.
+  - layer_interface: not-applicable (feature does not touch Layer subclasses)
+  - serialization_shape: addressed — `EncounterTextLinked::createOutputXML`/`internalOutputXML` override pair calls the base, `postProcessXML` is used for the watcher reconnection (not `inputXML`), and `Campaign::inputXML` reads `_filesDirectory` via direct field assignment so the `setFilesDirectory` setter's `emit dirty()` is not triggered during load.
+  - subsystem_boundary: addressed — new `CampaignFilesManager` is owned by `Campaign`, accessed via the documented `filesManager()` accessor, and the `findOwningCampaign` parent-walk helper is centralised on the manager as the cycle-2 plan required.
+  - new_subsystem_or_flag: addressed — no new `dmconstants.h` feature flag added; disabled flags (`INCLUDE_NETWORK_SUPPORT`, `LAYERVIDEO_USE_OPENGL`) untouched; `CampaignFilesManager` and `CampaignMigrationDialog` source files are explicitly listed in `DMHelper/src/CMakeLists.txt` (lines 117–118, 470–471, 759).
+
+findings:
+  - High: campaignfilesmanager.cpp:474–509 — the per-path `suspendWatch`/`resumeWatch` mechanism is non-functional. `EncounterTextLinked::writeLinkedFile` (encountertextlinked.cpp:66–75) brackets the write between `suspendWatch(absPath)` and `resumeWatch(absPath)`, but both run synchronously while the `QFileSystemWatcher::fileChanged` signal is queued and delivered later — by then `_suspendedPaths` no longer contains the path, the early-return in `onFileChanged` (campaignfilesmanager.cpp:578–584) is skipped, and `linkedFileChanged` fires. The system only avoids an infinite write/reload cycle because `EncounterText::setText`'s `if(newText == getText()) return;` guard breaks it on the re-entry; the architectural safety mechanism documented in the plan is dead. (Pre-Implementation Review Cycle 2 explicitly anticipated this risk.)
+  - Medium: objectimportdialog.cpp:135–192 — the importer never calls `CampaignFilesManager::registerExpectedPath` or `clearExpectedPaths`, despite these APIs being added per Pre-Implementation Review required change #5 and being publicly exposed on `CampaignFilesManager`. The importer's correctness instead relies on `scanForNewEntries`'s live-tree `knownPaths` filter (campaignfilesmanager.cpp:185–199). The planned expected-paths API is dead code.
+  - Medium: mainwindow.cpp:2229–2232 — the migration-dialog Cancel branch uses raw `delete _campaign;` after `inputXML`/`postProcessXML` have run and after `Bestiary::Instance()->finishBatchProcessing()`. Any queued signal emissions or pending `deleteLater` callbacks targeting the campaign could dangle. Should be `deleteLater()`.
+  - Low: campaign.cpp:629–650 — `migrateObjectRecursive` only copies `getIconFile()` external media into the files directory; other external media references (audio paths, layerscene image layers) remain pointing outside the vault. Chunk 11 documented this as out-of-scope, so this is recorded for visibility rather than as a blocker.
+  - Low: campaign.cpp:686–688 — `parentObj->addObject(newLinked)` appends to the end of the parent's child list rather than replacing in-place. The plan's chunk-11 recipe step 4 asked for row-preservation, but no `insertChildObject(row)` API exists on `CampaignObjectBase`; the implementer did the only thing possible with the existing API. The plan was over-specified rather than the implementation defective — but the migrated tree's display order changes from the legacy load.
+  - Low: objectimportdialog.cpp:152–162 — the merge-vs-rename collision prompt uses stock Yes/No/Cancel buttons rather than localised "Merge"/"Rename" labels.
+  - Info: campaignfilesmanager.cpp:118–134 — `allocateUnique*` exhausts at suffix 99 and silently returns a colliding path. Caller writes/renames would overwrite. Pre-existing trade-off from chunk 2; not addressed here.
+  - Info: campaignfilesmanager.cpp:259–273 — when `scanForNewEntries` finds an unknown directory whose parent is not in `pathToEntry`, it attaches to the campaign root instead. Sort-by-length ordering minimises the cases this triggers; recorded for visibility.
+  - Info: campaign.cpp:228–238 — `Campaign::inputXML` still indirectly emits `dirty()` via `setDate`/`setTime` calls (pre-existing prior to this feature, unchanged by it).
+
+required_followups:
+  - Repair the watcher self-write suppression so it actually consumes the queued `fileChanged` event. Either (a) change `onFileChanged` to consume one suspend count per delivered event without `resumeWatch` zeroing the count first (i.e. `writeLinkedFile` calls only `suspendWatch(absPath)` and lets the next watcher event decrement), or (b) replace the per-path counter with a per-path "ignore-next-N-events" budget that survives until the FS event arrives, or (c) remove the suspend API entirely and document that the equality guard in `EncounterText::setText` is the loop-breaker. Whichever path is chosen, document it in the plan and update `EncounterTextLinked::writeLinkedFile` to match.
+  - Wire the `registerExpectedPath`/`clearExpectedPaths` API into `ObjectImportDialog::importFinished` around the `_files` copy block, calling `clearExpectedPaths()` once the post-copy `scanForNewEntries` run completes — or delete the unused API from `CampaignFilesManager` and update the plan to reflect that the live-tree filter is the sole mechanism.
+  - In `MainWindow::openCampaign`, change the migration-Cancel branch to `_campaign->deleteLater()` instead of `delete _campaign;` to avoid dangling queued signals fired during `inputXML`/`postProcessXML`.
+
+## Pre-Implementation Review — Addendum 2026-05-16
+
+reviewer_model: opus
+verdict: Pass
+summary: The addendum's three chunks (13: watcher-suspend-removal, 14: expected-paths-removal, 15: migration-cancel-deletelater) are pure-deletion plus a one-call swap; the guiding-choices preamble explicitly justifies Option (c) and the "delete the unused API" branch of the post-impl review, and each chunk has well-formed acceptance criteria with grep checks that catch any missed call site. Minor documentation gaps and one load-bearing assumption are recorded as Info findings rather than required changes.
+
+triggers_evaluated:
+  - threading: addressed — Chunk 13 explicitly names `EncounterText::setText`'s equality guard as the new loop-breaker and instructs comments at both the manager and the linked-text write site so future maintainers do not re-introduce a parallel suppression. Chunk 13's integration task asks the executor to verify that migration writes do not race the watcher (either by writing-before-attaching or by relying on synchronous tree population before any queued event runs).
+  - layer_interface: not-applicable (addendum touches no Layer subclass).
+  - serialization_shape: not-applicable (addendum touches no XML/serialisation surface; pre-existing `createOutputXML`/`internalOutputXML` overrides in `EncounterTextLinked` are unchanged).
+  - subsystem_boundary: addressed — both deletions shrink `CampaignFilesManager`'s public surface; no new cross-subsystem coupling is introduced.
+  - new_subsystem_or_flag: addressed — no new feature flags, no new subsystem; `INCLUDE_NETWORK_SUPPORT` and `LAYERVIDEO_USE_OPENGL` untouched.
+
+findings:
+  - Info: Chunk 13 — the equality guard `if(newText == getText()) return;` in `EncounterText::setText` is now the sole loop-breaker for the write → watcher → reload → setText cycle. Its correctness depends on `readLinkedFileInternal` producing a string identical to what `createTextNode` writes. The addendum documents the guard as the mechanism but does not add an acceptance criterion verifying round-trip identity (e.g. for representative inputs: empty, single-line, multi-line with trailing LF, with-metadata, without-metadata). Recommend the human smoke test cover this; not blocking because the property is testable post-merge and the architectural direction is sound.
+  - Info: Chunks 13 and 14 — both modify `campaign.cpp::migrateToFilesDirectory` but their `dependencies` lists omit `migration-dialog` (the chunk that introduced that function). Coordinator dispatch ordering will work fine in practice because all original chunks 1–12 are already merged, but the dependency graph is incomplete for documentation purposes.
+  - Info: Chunk 13 — the parenthetical rationale "no watcher events can fire (the watcher has no paths yet)" is conditional on swapping the current merged ordering (which calls `setRootDirectory` before the writes). In the current ordering, safety actually comes from synchronous tree population in `migrateToFilesDirectory` running to completion before any queued `fileChanged`/`directoryChanged` event reaches `scanForNewEntries` — by which time `knownPaths` already contains the new entries. The integration task correctly leaves the order-swap as conditional; the rationale in `files_to_modify` could be clearer that either ordering is safe under the live-tree filter.
+
+required_plan_changes: []
 
 # Escalations
 

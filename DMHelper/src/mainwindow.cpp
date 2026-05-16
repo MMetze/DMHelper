@@ -2225,7 +2225,7 @@ void MainWindow::openCampaign(const QString& filename)
         {
             // User cancelled — abort opening this campaign
             qDebug() << "[MainWindow] Campaign open cancelled at migration dialog";
-            delete _campaign;
+            _campaign->deleteLater();
             _campaign = nullptr;
             _campaignFileName.clear();
             return;
