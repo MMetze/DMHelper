@@ -18,6 +18,7 @@ class SoundboardGroup;
 class Overlay;
 class QDomDocument;
 class QDomElement;
+class QWidget;
 
 class Campaign : public CampaignObjectBase
 {
@@ -80,6 +81,10 @@ public:
     int getLoadedMajorVersion() const { return _loadedMajorVersion; }
     void clearLoadedMajorVersion() { _loadedMajorVersion = 0; }
 
+    bool isLegacyMode() const;
+    void setLegacyMode(bool legacy);
+    void migrateToFilesDirectory(const QString& absolutePath, QWidget* parent = nullptr);
+
 signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
@@ -113,6 +118,7 @@ protected:
     void loadOverlayXML(const QDomElement &element);
     bool validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject, bool correctDuplicates = false);
     bool isVersionCompatible(int majorVersion, int minorVersion) const;
+    void migrateObjectRecursive(CampaignObjectBase* obj, QWidget* parent);
 
     BasicDate _date;
     QTime _time;
@@ -134,6 +140,10 @@ protected:
 
     // See getLoadedMajorVersion(). Set during inputXML(); not serialised.
     int _loadedMajorVersion = 0;
+
+    // Transient per-session flag — not serialised. Set to true when the user
+    // chooses "Open in legacy mode" from the migration dialog.
+    bool _legacyMode = false;
 
     // Relative path to the campaign's files directory (relative to the campaign
     // XML file's parent directory). Empty means no directory has been set.

@@ -552,6 +552,40 @@ plan.
 - review_findings: [Low — setLinkedFile before parenting means watcher not wired until reload; pre-existing architectural limitation. Low — null/Campaign _currentObject edge case for pathForEntry. Low — writeLinkedFile may fail silently if directory not yet on disk (deferred to mirror-on-save).]
 - next_action: merge
 
+## filesdir-autodiscovery
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-15
+- executor_files_touched: [] (code already committed in working tree before dispatch)
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: scanForNewEntries already fully implemented. campaignfilesmanager.h declares void scanForNewEntries(Campaign*, QList<CampaignObjectBase*>&). campaignfilesmanager.cpp implements two-pass scan (dirs then .md files) with SCAN_CONTENTS_FILENAME="_contents.md" guard. mainwindow.cpp calls after postProcessXML/resolveFilesDirectory and connects markdownFileAdded/subdirectoryAdded via QueuedConnection lambdas. All tree mutations via addObject. setLinkedFile used (not setText) for linked entries.
+- review_verdict: Pass
+- review_findings: [Info — sort-by-path-length heuristic for directory depth; correct in common layouts. Info — _contents.md child inside discovered dir shows redundant display name; cosmetic.]
+- next_action: merge (already committed)
+
+## migration-dialog
+
+### Cycle 1
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-15
+- executor_files_touched: [DMHelper/src/campaignmigrationdialog.h, DMHelper/src/campaignmigrationdialog.cpp, DMHelper/src/campaign.h, DMHelper/src/campaign.cpp, DMHelper/src/mainwindow.cpp]
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: Implemented CampaignMigrationDialog (browse, legacy done(2), getFilesDirectory). Added Campaign::isLegacyMode/setLegacyMode (transient, no dirty). Added Campaign::migrateToFilesDirectory: creates dir, iterates tree recursively, for each EncounterText writes text to .md, creates EncounterTextLinked with same QUuid (setID), calls setLinkedFile, replaces old entry. mainwindow.cpp openCampaign shows dialog if filesDirectory empty; Accepted=migrate, done(2)=legacy, Rejected=abort.
+- review_verdict: Fail
+- review_findings: [Medium — isLegacyMode() has zero call sites; suppression not wired. Medium — copyMediaInto not called during migration for media paths. Low — bare magic number 2 used for legacy result.]
+- next_action: re-execute
+
+### Cycle 2
+- dispatched_by: coordinator
+- dispatch_timestamp: 2026-05-15
+- executor_files_touched: [DMHelper/src/campaignmigrationdialog.h, DMHelper/src/campaignmigrationdialog.cpp, DMHelper/src/campaign.h, DMHelper/src/campaign.cpp, DMHelper/src/mainwindow.cpp]
+- executor_build_status: pass — clean build, 130 targets linked
+- executor_handoff_summary: Added !isLegacyMode() guard to openCampaign migration check. migrateToFilesDirectory now takes QWidget* parent=nullptr; migrateObjectRecursive calls copyMediaInto for non-empty getIconFile() paths outside root with video prompt when parent non-null. CampaignMigrationDialog::LegacyModeResult=2 named constant replaces bare 2 in both sites.
+- review_verdict: Pass
+- review_findings: [Info — handoff missing explicit build_status field.]
+- next_action: merge
+
 # Architecture Review
 
 ## Pre-Implementation Review

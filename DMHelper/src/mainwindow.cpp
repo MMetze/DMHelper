@@ -89,6 +89,7 @@
 #include "overlayrenderer.h"
 #include "overlayfear.h"
 #include "overlayseditdialog.h"
+#include "campaignmigrationdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -2195,6 +2196,41 @@ void MainWindow::openCampaign(const QString& filename)
     // start the filesystem watcher.  This must happen before any scan.
     if(!_campaign->getFilesDirectory().isEmpty())
         _campaign->resolveFilesDirectory(filename);
+
+    // For campaigns that have no files directory set yet, prompt the user to
+    // migrate (convert inline EncounterText to linked .md files) or to open
+    // in legacy mode for this session.
+    if(_campaign->getFilesDirectory().isEmpty() && !_campaign->isLegacyMode())
+    {
+        CampaignMigrationDialog migDlg(this);
+        migDlg.setDefaultFilesDirectory(_campaign->getName() + QStringLiteral("_files"));
+        int result = migDlg.exec();
+        if(result == QDialog::Accepted)
+        {
+            QString dirName = migDlg.getFilesDirectory();
+            if(!dirName.isEmpty())
+            {
+                QString campaignDir = QFileInfo(filename).absolutePath();
+                QString absPath = QDir(campaignDir).absoluteFilePath(dirName);
+                _campaign->migrateToFilesDirectory(absPath, this);
+                _campaign->setFilesDirectory(QDir(campaignDir).relativeFilePath(absPath));
+            }
+        }
+        else if(result == CampaignMigrationDialog::LegacyModeResult)
+        {
+            // User chose "Open in legacy mode" — suppress migration for this session
+            _campaign->setLegacyMode(true);
+        }
+        else
+        {
+            // User cancelled — abort opening this campaign
+            qDebug() << "[MainWindow] Campaign open cancelled at migration dialog";
+            delete _campaign;
+            _campaign = nullptr;
+            _campaignFileName.clear();
+            return;
+        }
+    }
 
     // Scan for .md files that exist on disk but are not yet in the campaign tree
     if(!_campaign->getFilesDirectory().isEmpty())

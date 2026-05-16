@@ -3,6 +3,8 @@
 #include "characterv2.h"
 #include "conditions.h"
 #include "encounterfactory.h"
+#include "encountertext.h"
+#include "encountertextlinked.h"
 #include "map.h"
 #include "party.h"
 #include "audiotrack.h"
@@ -17,8 +19,13 @@
 #include "overlaytimer.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QFile>
 #include <QFileInfo>
 #include <QHash>
+#include <QMessageBox>
+#include <QMimeDatabase>
+#include <QMimeType>
+#include <QTextStream>
 #include <QDebug>
 
 /*
@@ -550,6 +557,144 @@ void Campaign::resolveFilesDirectory(const QString& campaignXmlPath)
         return;
     QString abs = QFileInfo(campaignXmlPath).absoluteDir().absoluteFilePath(_filesDirectory);
     _filesManager->setRootDirectory(abs);
+}
+
+bool Campaign::isLegacyMode() const
+{
+    return _legacyMode;
+}
+
+void Campaign::setLegacyMode(bool legacy)
+{
+    _legacyMode = legacy;
+    // Intentionally no dirty() emission — transient in-session flag, not persisted.
+}
+
+void Campaign::migrateToFilesDirectory(const QString& absolutePath, QWidget* parent)
+{
+    if(absolutePath.isEmpty() || !_filesManager)
+        return;
+
+    qDebug() << "[Campaign] migrateToFilesDirectory: " << absolutePath;
+
+    // Initialise the manager root and create the directory on disk
+    _filesManager->setRootDirectory(absolutePath);
+    QDir().mkpath(absolutePath);
+
+    // Suppress watcher signals during migration to avoid spurious auto-discovery
+    _filesManager->suspendWatch();
+
+    const QList<CampaignObjectBase*> topLevel = getChildObjects();
+    for(CampaignObjectBase* child : topLevel)
+        migrateObjectRecursive(child, parent);
+
+    _filesManager->resumeWatch();
+
+    qDebug() << "[Campaign] migrateToFilesDirectory complete.";
+}
+
+void Campaign::migrateObjectRecursive(CampaignObjectBase* obj, QWidget* parent)
+{
+    if(!obj)
+        return;
+
+    // Depth-first: migrate children before the parent so parent's path is still correct
+    const QList<CampaignObjectBase*> children = obj->getChildObjects();
+    for(CampaignObjectBase* child : children)
+        migrateObjectRecursive(child, parent);
+
+    // Only convert inline EncounterText (CampaignType_Text).
+    // EncounterTextLinked (CampaignType_LinkedText) already has a backing file — skip.
+    if(obj->getObjectType() != DMHelper::CampaignType_Text)
+        return;
+
+    EncounterText* textObj = dynamic_cast<EncounterText*>(obj);
+    if(!textObj)
+        return;
+
+    // Determine the parent directory for the .md file.
+    // pathForEntry(obj) returns e.g. "<root>/Adventure/EntryName".
+    // The .md file sits next to any subdirectory, so we want the dir of that path.
+    QString entryPath = _filesManager->pathForEntry(obj);
+    if(entryPath.isEmpty())
+    {
+        qDebug() << "[Campaign] migrateObjectRecursive: pathForEntry returned empty for: " << obj->getName();
+        return;
+    }
+    QDir parentDir(QFileInfo(entryPath).absolutePath());
+    QDir().mkpath(parentDir.absolutePath());
+
+    // Allocate a unique .md filename under the parent directory
+    QString mdPath = _filesManager->allocateUniqueMarkdownPath(parentDir, obj->getName());
+
+    // Write the text content to disk
+    QFile mdFile(mdPath);
+    if(!mdFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "[Campaign] migrateObjectRecursive: failed to open for write: " << mdPath;
+        return;
+    }
+    QTextStream out(&mdFile);
+    out.setEncoding(QStringConverter::Utf8);
+    out << textObj->getText();
+    mdFile.close();
+
+    qDebug() << "[Campaign] migrateObjectRecursive: migrated '" << obj->getName() << "' -> " << mdPath;
+
+    // Locate the parent CampaignObjectBase
+    CampaignObjectBase* parentObj = qobject_cast<CampaignObjectBase*>(obj->parent());
+    if(!parentObj)
+    {
+        qDebug() << "[Campaign] migrateObjectRecursive: no CampaignObjectBase parent for: " << obj->getName();
+        return;
+    }
+
+    // Create the replacement EncounterTextLinked.
+    // Campaign is a friend of DMHObjectBase, so we can call the protected setID.
+    EncounterTextLinked* newLinked = new EncounterTextLinked(obj->getName());
+    newLinked->setID(obj->getID());
+    newLinked->setLinkedFile(mdPath);
+
+    // Copy any icon/portrait media into the files directory
+    QString iconPath = textObj->getIconFile();
+    if(!iconPath.isEmpty())
+    {
+        QDir rootDir(_filesManager->rootDirectory());
+        // Only copy if the file is not already inside the files directory
+        QString rel = rootDir.relativeFilePath(iconPath);
+        bool alreadyInside = !rel.startsWith(QStringLiteral("..")) && !QDir::isAbsolutePath(rel);
+        if(!alreadyInside)
+        {
+            QMimeDatabase mimeDb;
+            QMimeType mime = mimeDb.mimeTypeForFile(iconPath);
+            bool isVideo = mime.name().startsWith(QStringLiteral("video/"));
+            bool doCopy = true;
+            if(isVideo && parent)
+            {
+                int answer = QMessageBox::question(parent, tr("Copy video file?"),
+                    tr("The entry '%1' has an associated video file:\n%2\n\nCopy it into the files directory?")
+                        .arg(textObj->getName(), iconPath));
+                doCopy = (answer == QMessageBox::Yes);
+            }
+            if(doCopy)
+            {
+                QString outRelPath;
+                if(_filesManager->copyMediaInto(iconPath, newLinked, isVideo, outRelPath))
+                    newLinked->setIconFile(outRelPath);
+            }
+        }
+    }
+
+    // Reparent any child objects from the old node to the new node
+    const QList<CampaignObjectBase*> grandchildren = obj->getChildObjects();
+    for(CampaignObjectBase* gc : grandchildren)
+        newLinked->addObject(gc);
+
+    // Swap in the tree: remove old, attach new to same parent
+    parentObj->removeObject(obj);
+    parentObj->addObject(newLinked);
+
+    obj->deleteLater();
 }
 
 void Campaign::setFearCount(int fearCount)
