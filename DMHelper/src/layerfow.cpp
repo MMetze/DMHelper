@@ -326,10 +326,6 @@ void LayerFow::applyPaintTo(int index, int startIndex)
 
 void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
 {
-    static int s_paintPointCount = 0;
-    QElapsedTimer t;
-    t.start();
-
     if(mapDraw.erase() && mapDraw.smooth())
         rebuildBrushStamp(mapDraw);
 
@@ -388,16 +384,11 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
     }
 
     p.end();
-    const qint64 painterUs = t.nsecsElapsed() / 1000;
     if(!_batchProcessing)
     {
         const int r = mapDraw.radius();
         requestFowUpdate(QRect(point.x() - r, point.y() - r, r * 2 + 1, r * 2 + 1));
     }
-    if(++s_paintPointCount % 10 == 0)
-        qDebug() << "[FoW-perf] paintFoWPoint #" << s_paintPointCount
-                 << " painter:" << painterUs << "us"
-                 << " total:" << t.nsecsElapsed() / 1000 << "us";
 }
 
 void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDraw)
@@ -814,10 +805,7 @@ void LayerFow::applyGLPendingUpdates()
     }
     else if(_fowGLImageDirty && _fowGLObject)
     {
-        QElapsedTimer tGL;
-        tGL.start();
         const QRect fullImageRect(QPoint(), _imageFow.size());
-        bool partialUpload = false;
         if(_fowGLPendingRegion.isValid() && _fowGLPendingRegion != fullImageRect)
         {
             // Partial region: clamp defensively then use glTexSubImage2D for an
@@ -825,10 +813,7 @@ void LayerFow::applyGLPendingUpdates()
             // the dirty region (updated in dispatchFowUpdate before this runs).
             const QRect safeRegion = _fowGLPendingRegion.intersected(fullImageRect);
             if(safeRegion.isValid())
-            {
                 _fowGLObject->updateImageRegion(_cachedImage, safeRegion);
-                partialUpload = true;
-            }
             else
                 _fowGLObject->updateImage(_cachedImage);
         }
@@ -837,10 +822,6 @@ void LayerFow::applyGLPendingUpdates()
             // Full image or no pending region: upload the complete texture.
             _fowGLObject->updateImage(_cachedImage);
         }
-        qDebug() << "[FoW-perf] applyGLPendingUpdates"
-                 << (partialUpload ? "partial" : "full")
-                 << "region=" << _fowGLPendingRegion
-                 << " glUpload:" << tGL.nsecsElapsed() / 1000 << "us";
         _fowGLImageDirty = false;
         _fowGLPendingRegion = QRect();
     }
@@ -921,17 +902,6 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
     if(region.isEmpty())
         return;
 
-    static QElapsedTimer s_dispatchInterval;
-    static bool s_dispatchIntervalFirst = true;
-    qint64 dispatchIntervalUs = 0;
-    if(!s_dispatchIntervalFirst)
-        dispatchIntervalUs = s_dispatchInterval.nsecsElapsed() / 1000;
-    s_dispatchInterval.restart();
-    s_dispatchIntervalFirst = false;
-
-    QElapsedTimer t;
-    t.start();
-
     // Partial composite update: rebuild only the dirty region of _cachedImage.
     // _imageFow is ARGB32_Premultiplied; _cachedImage is RGBA8888 (for GL upload).
     // The format difference is intentional — do NOT use _imageFow.format() as the
@@ -958,12 +928,9 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
         fowPainter.drawImage(region, _imageFowTexture, region);
     }
 
-    const qint64 compositeUs = t.nsecsElapsed() / 1000;
-
     // Wake the DM-side item to repaint the changed region only.
     if(_graphicsItem)
         _graphicsItem->updateRegion(region);
-    const qint64 updateRegionUs = t.nsecsElapsed() / 1000;
 
     // Queue a full-image GL upload for the player window. The _fowGLPendingRegion
     // accumulator is populated for chunk-4 use; chunk-3 applyGLPendingUpdates()
@@ -973,13 +940,6 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
 
     // Wake the player renderer.
     emit changed();
-
-    qDebug() << "[FoW-perf] dispatchFowUpdate interval:" << dispatchIntervalUs << "us"
-             << " coalesceAge:" << (s_coalesceStart.isValid() ? s_coalesceStart.nsecsElapsed() / 1000 : -1) << "us"
-             << " composite:" << compositeUs << "us"
-             << " updateRegion:" << updateRegionUs - compositeUs << "us"
-             << " total:" << t.nsecsElapsed() / 1000 << "us"
-             << " region=" << region;
 }
 
 void LayerFow::rebuildBrushStamp(const MapDraw& mapDraw)

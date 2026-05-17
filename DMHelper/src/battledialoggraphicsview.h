@@ -13,9 +13,6 @@ public:
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
-    virtual void paintEvent(QPaintEvent *event) override;
-    virtual bool eventFilter(QObject *watched, QEvent *event) override;
-    virtual void showEvent(QShowEvent *event) override;
 
 };
 
