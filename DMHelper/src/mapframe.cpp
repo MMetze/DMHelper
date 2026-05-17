@@ -1546,6 +1546,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             if(_undoPath)
             {
                 static int s_fowMoveCount = 0;
+                static QElapsedTimer s_fowEventInterval;
+                static bool s_fowIntervalFirst = true;
+                qint64 intervalUs = 0;
+                if(!s_fowIntervalFirst)
+                    intervalUs = s_fowEventInterval.nsecsElapsed() / 1000;
+                s_fowEventInterval.restart();
+                s_fowIntervalFirst = false;
+
                 QElapsedTimer t;
                 t.start();
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -1554,10 +1562,10 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                     drawPoint -= _undoPath->getLayer()->getPosition();
                 _undoPath->addPoint(drawPoint);
                 const qint64 addPointUs = t.nsecsElapsed() / 1000;
-                if(++s_fowMoveCount % 10 == 0)
-                    qDebug() << "[FoW-perf] MapFrame MouseMove #" << s_fowMoveCount
-                             << " addPoint (incl. paintFoWPoint):" << addPointUs << "us"
-                             << " total:" << t.nsecsElapsed() / 1000 << "us";
+                ++s_fowMoveCount;
+                qDebug() << "[FoW-perf] MapFrame MouseMove #" << s_fowMoveCount
+                         << " interval:" << intervalUs << "us"
+                         << " addPoint:" << addPointUs << "us";
             }
             return true;
         }

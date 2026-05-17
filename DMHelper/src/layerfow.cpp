@@ -26,6 +26,10 @@ const qreal LAYER_FOW_DM_RAISE = 1.0;
 // per this many milliseconds during an active brush stroke.
 static constexpr int FOW_UPDATE_COALESCE_MS = 16;
 
+// Timing probe: records when the coalescer was last started (requestFowUpdate, first
+// call in a burst) so dispatchFowUpdate can log how long the coalescer actually waited.
+static QElapsedTimer s_coalesceStart;
+
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
@@ -865,8 +869,10 @@ void LayerFow::requestFowUpdate(const QRect& region)
     // the same FOW_UPDATE_COALESCE_MS window accumulate into the union; a single
     // dispatchFowUpdate fires when the timer expires.
     _pendingDirtyRect = _pendingDirtyRect.united(clamped);
-    if(!_updateCoalescer->isActive())
+    if(!_updateCoalescer->isActive()) {
+        s_coalesceStart.restart();
         _updateCoalescer->start();
+    }
 }
 
 void LayerFow::dispatchFowUpdate(const QRect& region)
@@ -874,6 +880,14 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
     // Deferred-upload contract — runs on the GUI thread. Sets pending flags and emits
     // signals; never calls into _fowGLObject. The next playerGLPaint() consumes
     // _fowGLImageDirty / _fowGLPendingRegion via applyGLPendingUpdates().
+    static QElapsedTimer s_dispatchInterval;
+    static bool s_dispatchIntervalFirst = true;
+    qint64 dispatchIntervalUs = 0;
+    if(!s_dispatchIntervalFirst)
+        dispatchIntervalUs = s_dispatchInterval.nsecsElapsed() / 1000;
+    s_dispatchInterval.restart();
+    s_dispatchIntervalFirst = false;
+
     QElapsedTimer t;
     t.start();
 
@@ -919,10 +933,12 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
     // Wake the player renderer.
     emit changed();
 
-    qDebug() << "[FoW-perf] dispatchFowUpdate region=" << region
+    qDebug() << "[FoW-perf] dispatchFowUpdate interval:" << dispatchIntervalUs << "us"
+             << " coalesceAge:" << (s_coalesceStart.isValid() ? s_coalesceStart.nsecsElapsed() / 1000 : -1) << "us"
              << " composite:" << compositeUs << "us"
              << " updateRegion:" << updateRegionUs - compositeUs << "us"
-             << " total:" << t.nsecsElapsed() / 1000 << "us";
+             << " total:" << t.nsecsElapsed() / 1000 << "us"
+             << " region=" << region;
 }
 
 void LayerFow::rebuildBrushStamp(const MapDraw& mapDraw)

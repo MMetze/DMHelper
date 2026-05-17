@@ -13,6 +13,7 @@ public:
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void paintEvent(QPaintEvent *event) override;
 
 };
 
