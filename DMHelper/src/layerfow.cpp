@@ -703,7 +703,9 @@ void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* s
     f->glUseProgram(_shaderProgramRGBA);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    _fowGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
+    _fowGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST,
+                                                 /*sourceIsRgba8888=*/true,
+                                                 /*sourceNeedsVerticalFlip=*/false);
 
     Layer::playerGLInitialize(renderer, scene);
 }
@@ -763,8 +765,15 @@ void LayerFow::initialize(const QSize& sceneSize)
     if(getSize().isEmpty())
         setSize(sceneSize);
 
-    _imageFow = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
-    _imageFowTexture = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
+    // Format_RGBA8888: QPainter composition modes (CompositionMode_Source,
+    // CompositionMode_DestinationIn) work correctly against this format — Qt
+    // converts internally when drawing between images of differing formats.
+    // Using RGBA8888 here allows the GL upload path (applyGLPendingUpdates) to
+    // skip the convertToFormat deep copy on every FOW update.
+    _imageFow = QImage(getSize(), QImage::Format_RGBA8888);
+    // Same rationale: stored as RGBA8888 to match _imageFow and keep getImage()
+    // compositing consistent with the format expected by the GL upload path.
+    _imageFowTexture = QImage(getSize(), QImage::Format_RGBA8888);
     fillFoWImage();
 
     initializeUndoStack();
@@ -813,9 +822,20 @@ void LayerFow::applyGLPendingUpdates()
     }
     else if(_fowGLImageDirty && _fowGLObject)
     {
-        _fowGLObject->updateImage(getImage());
+        const QRect fullImageRect(QPoint(), _imageFow.size());
+        if(_fowGLPendingRegion.isValid() && _fowGLPendingRegion != fullImageRect)
+        {
+            // Partial region: use glTexSubImage2D for an efficient sub-image upload
+            // that avoids re-uploading the entire texture.
+            _fowGLObject->updateImageRegion(getImage(), _fowGLPendingRegion);
+        }
+        else
+        {
+            // Full image or no pending region: upload the complete texture.
+            _fowGLObject->updateImage(getImage());
+        }
         _fowGLImageDirty = false;
-        _fowGLPendingRegion = QRect(); // cleared; chunk-4 will use this for glTexSubImage2D
+        _fowGLPendingRegion = QRect();
     }
 }
 

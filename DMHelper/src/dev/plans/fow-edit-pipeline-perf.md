@@ -528,6 +528,23 @@ design.
 - **review_findings**: n/a — review waived
 - **next_action**: merge
 
+## Chunk: subregion-upload
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/publishglbattlebackground.h: modified (updateImageRegion declared; _sourceIsRgba8888/_sourceNeedsVerticalFlip flags; constructor default args)
+  - DMHelper/src/publishglbattlebackground.cpp: modified (BYTES_PER_PIXEL_RGBA constant; updateImageRegion implemented; loadTexture guarded fast-paths; createImageObjects V-coord branch on flip flag)
+  - DMHelper/src/layerfow.h: modified (comment near _imageFow/_imageFowTexture documenting Format_RGBA8888)
+  - DMHelper/src/layerfow.cpp: modified (initialize() uses Format_RGBA8888; applyGLPendingUpdates() routes partial/full upload; FOW _fowGLObject constructed with sourceIsRgba8888=true, sourceNeedsVerticalFlip=false)
+- **executor_build_status**: success — [125/125] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: All acceptance criteria met. BYTES_PER_PIXEL_RGBA named static constexpr. V-coord locals named vTop/vBottom with inline GL-origin comment. applyGLPendingUpdates routes partial region to updateImageRegion(), full/empty region to updateImage(); _fowGLPendingRegion cleared after consumption. loadTexture guarded: convertToFormat skipped when _sourceIsRgba8888=true; flip skipped when _sourceNeedsVerticalFlip=false. createImageObjects branches V-coords on flag; global layout unchanged. Caller audit: 8 call sites — only layerfow.cpp (FOW) uses (true, false) flags; all others unchanged. Pre-existing Format_ARGB32_Premultiplied in fillFoWImage() for texture-pattern QPainter composition intentionally unchanged. macOS smoke test: PASS — human verified single-stroke FOW on 4k map in DM-only and DM+player modes.
+- **review_verdict**: Pass
+- **review_findings**: All acceptance criteria met. Low — caller-audit handoff lists 8 sites as a block rather than individually; reviewer independently verified all 8 by grep — functionally satisfied, documentation shortfall only. Info — `updateImageRegion()` lacks a `_textureID==0` guard (non-reachable via production path; defence-in-depth gap). Info — `_fowGLObject->setPosition()` in `applyPosition()` is pre-existing CPU-only; no GL calls.
+- **next_action**: merge
+
 # Escalations
 
 ## 2026-05-17T00:00:00Z — gl-upload-reuse

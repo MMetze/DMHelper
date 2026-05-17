@@ -4,9 +4,14 @@
 #include <QImage>
 #include <QDebug>
 
+// Bytes per pixel for the GL_RGBA / GL_UNSIGNED_BYTE layout expected by
+// glTexImage2D / glTexSubImage2D. Used to convert bytesPerLine → pixel stride
+// in updateImageRegion's GL_UNPACK_ROW_LENGTH call.
+static constexpr int BYTES_PER_PIXEL_RGBA = 4;
+
 // Returns true when 'minFilter' requires mipmap levels to be generated.
-// Used by loadTexture() to guard glGenerateMipmap; intended for reuse in
-// the updateImageRegion() path (chunk 4) without re-deriving the filter set.
+// Used by loadTexture() to guard glGenerateMipmap; reused by updateImageRegion()
+// without re-deriving the filter set (chunk 1 predicate).
 static constexpr bool isMipmapMinFilter(int minFilter)
 {
     return minFilter == GL_NEAREST_MIPMAP_NEAREST ||
@@ -15,7 +20,8 @@ static constexpr bool isMipmapMinFilter(int minFilter)
            minFilter == GL_LINEAR_MIPMAP_LINEAR;
 }
 
-PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam) :
+PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam,
+                                                     bool sourceIsRgba8888, bool sourceNeedsVerticalFlip) :
     PublishGLBattleObject(scene),
     _imageSize(),
     _position(),
@@ -23,7 +29,9 @@ PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, cons
     _textureParam(textureParam),
     _VAO(0),
     _VBO(0),
-    _EBO(0)
+    _EBO(0),
+    _sourceIsRgba8888(sourceIsRgba8888),
+    _sourceNeedsVerticalFlip(sourceNeedsVerticalFlip)
 {
     createImageObjects(image);
 }
@@ -140,16 +148,27 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
 
     _imageSize = image.size();
 
+    // V-coordinate convention:
+    // When _sourceNeedsVerticalFlip=true (default), loadTexture() CPU-flips the image before
+    // uploading so image row 0 (top) ends up at GL texture T=1 (top in GL space). V=1.0 at
+    // the screen-top vertex and V=0.0 at the screen-bottom vertex → image renders right-side-up.
+    //
+    // GL bottom-left origin: when skipping the CPU vertical flip (_sourceNeedsVerticalFlip=false,
+    // FOW path), image row 0 (top) maps directly to GL texture T=0 (bottom in GL space).
+    // Inverting V here compensates, so the image still appears right-side-up on screen.
+    const float vTop    = _sourceNeedsVerticalFlip ? 1.0f : 0.0f; // texcoord at screen-top edge
+    const float vBottom = _sourceNeedsVerticalFlip ? 0.0f : 1.0f; // texcoord at screen-bottom edge
+
     float vertices[] = {
         // positions                                                   // colors           // texture coords
-//         (float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-//         (float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-//        -(float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-//        -(float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
-        (float)image.width(),                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-        (float)image.width(), -(float)image.height(),            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        0.0f,                 -(float)image.height(),            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        0.0f,                                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left
+//         (float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, vTop,    // top right
+//         (float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, vBottom, // bottom right
+//        -(float)image.width() / 2, -(float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, vBottom, // bottom left
+//        -(float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, vTop     // top left
+        (float)image.width(),                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, vTop,    // top right
+        (float)image.width(), -(float)image.height(),            0.0f,   1.0f, 1.0f, 1.0f,   1.0f, vBottom, // bottom right
+        0.0f,                 -(float)image.height(),            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, vBottom, // bottom left
+        0.0f,                                   0.0f,            0.0f,   1.0f, 1.0f, 1.0f,   0.0f, vTop     // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -214,12 +233,59 @@ void PublishGLBattleBackground::loadTexture(const QImage& image)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
 
     // load and generate the background texture
+    // convertToFormat is a guarded fast-path: skipped when _sourceIsRgba8888=true (FOW path)
+    // because the image is already Format_RGBA8888, avoiding a full-image deep copy on
+    // every update. Non-FOW callers continue to take the convert path.
+    QImage glBackgroundImage = _sourceIsRgba8888 ? image : image.convertToFormat(QImage::Format_RGBA8888);
+    // CPU vertical flip is a guarded fast-path: skipped when _sourceNeedsVerticalFlip=false
+    // (FOW path). In that case, V-coordinates in createImageObjects() are inverted to
+    // compensate for GL's bottom-left origin, so the image renders right-side-up without
+    // the per-upload copy. Non-FOW callers continue to take the flip path.
+    if(_sourceNeedsVerticalFlip)
+    {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
+        glBackgroundImage = glBackgroundImage.flipped(Qt::Vertical);
 #else
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+        glBackgroundImage = glBackgroundImage.mirrored(false, true);
 #endif
+    }
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    if(isMipmapMinFilter(_textureParam))
+        f->glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void PublishGLBattleBackground::updateImageRegion(const QImage& image, const QRect& region)
+{
+    // Callable only from a *GL* function (applyGLPendingUpdates in playerGLPaint).
+    // The caller must guarantee image.format() == Format_RGBA8888 (sourceIsRgba8888=true).
+    if(!QOpenGLContext::currentContext())
+        return;
+
+    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
+    if(!f)
+        return;
+
+    f->glBindTexture(GL_TEXTURE_2D, _textureID);
+
+    // Set the unpacking row stride so the driver reads the correct sub-row from
+    // the full-image scan-line buffer without requiring a pixel-pack copy.
+    f->glPixelStorei(GL_UNPACK_ROW_LENGTH, image.bytesPerLine() / BYTES_PER_PIXEL_RGBA);
+
+    // Compute flipped Y: since loadTexture() skips the CPU vertical flip for this
+    // instance (_sourceNeedsVerticalFlip=false), the texture is stored with GL's
+    // bottom-left convention (row 0 of image data = texture bottom). To upload
+    // region starting at image row region.y(), we map it to the correct GL row.
+    const int flippedY = _imageSize.height() - region.y() - region.height();
+
+    f->glTexSubImage2D(GL_TEXTURE_2D, 0,
+                       region.x(), flippedY, region.width(), region.height(),
+                       GL_RGBA, GL_UNSIGNED_BYTE,
+                       image.constScanLine(region.y()) + region.x() * BYTES_PER_PIXEL_RGBA);
+
+    // GL_UNPACK_ROW_LENGTH must be restored to 0 to avoid bleeding state into
+    // subsequent callers' glTexImage2D calls.
+    f->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
     if(isMipmapMinFilter(_textureParam))
         f->glGenerateMipmap(GL_TEXTURE_2D);
 }

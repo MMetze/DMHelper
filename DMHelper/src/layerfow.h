@@ -107,7 +107,12 @@ protected:
 
     // Core contents
     QColor _fowColor;
+    // Stored as Format_RGBA8888 (changed from Format_ARGB32_Premultiplied in chunk 4).
+    // QPainter composition modes (CompositionMode_Source, CompositionMode_DestinationIn)
+    // continue to work correctly against Format_RGBA8888 — Qt converts internally.
     QImage _imageFow;
+    // Stored as Format_RGBA8888 (changed from Format_ARGB32_Premultiplied in chunk 4).
+    // See _imageFow comment above for the rationale.
     QImage _imageFowTexture;
     QString _fowTextureFile;
     int _fowTextureScale;
