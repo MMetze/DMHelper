@@ -8,7 +8,7 @@ arch_review_model: opus
 arch_review_reason: Touches OpenGL upload pipeline (texture lifetime, storage format, glTexSubImage2D) and modifies the `LayerFow` Layer subclass across four chunks, including a structural pivot to a new `FowGraphicsItem`, a new `fowRegionChanged` signal contract, and a deferred-upload / deferred-destruction contract for GL state mutation that must never run from GUI-thread paint methods.
 pre_impl_arch_review_requested: true
 supersedes: DMHelper/src/dev/plans/fow-edit-pipeline-perf.md
-status: in-progress
+status: post-impl-arch-review
 ---
 
 # Summary
