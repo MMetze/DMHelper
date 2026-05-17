@@ -78,11 +78,6 @@ signals:
     // do NOT connect to save logic.
     void changed();
 
-    // Visual-update signal only (changed()-like, not dirty()-like). Emitted by
-    // dispatchFowUpdate() so the DM-side FowGraphicsItem can repaint exactly the
-    // changed sub-rect. dirty() is emitted only from batch/bulk operations.
-    void fowRegionChanged(const QRect& region);
-
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

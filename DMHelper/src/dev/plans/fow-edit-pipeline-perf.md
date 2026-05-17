@@ -8,7 +8,7 @@ arch_review_model: opus
 arch_review_reason: Touches OpenGL upload pipeline (texture lifetime, storage format, glTexSubImage2D) and modifies the `LayerFow` Layer subclass across four chunks, including a structural pivot to a new `FowGraphicsItem`, a new `fowRegionChanged` signal contract, and a deferred-upload / deferred-destruction contract for GL state mutation that must never run from GUI-thread paint methods.
 pre_impl_arch_review_requested: true
 supersedes: DMHelper/src/dev/plans/fow-edit-pipeline-perf.md
-status: post-impl-arch-review
+status: draft
 ---
 
 # Summary
@@ -419,6 +419,61 @@ design.
   - Adding caching to non-FOW `QGraphicsItem` instances (deferred).
   - Replacing `getImage()` composition (texture+FOW) with a GL-side composite — texture compositing remains CPU-side this chunk.
 
+## Chunk 5: Correct sub-region GL upload yoffset (addendum)
+
+- **id**: fix-subregion-yoffset
+- **summary**: Drop the vertical-mirror `flippedY` computation in `PublishGLBattleBackground::updateImageRegion()` so partial FOW uploads land at the correct texel row.
+- **dependencies**: [subregion-upload]
+- **branch**: agent/work/fix-subregion-yoffset
+- **files_to_modify**:
+  - DMHelper/src/publishglbattlebackground.cpp — replace `flippedY` with `region.y()` as the `glTexSubImage2D` yoffset and update the inline comment that currently invokes GL's bottom-left convention.
+- **files_to_create**: []
+- **integration_tasks**:
+  - In `PublishGLBattleBackground::updateImageRegion()`, remove the local `const int flippedY = _imageSize.height() - region.y() - region.height();` line and pass `region.y()` as the yoffset argument to `glTexSubImage2D`.
+  - Rewrite the inline comment immediately above the `glTexSubImage2D` call so it states: the no-CPU-flip path (`_sourceNeedsVerticalFlip=false`, FOW) uploads `image.bits()` directly via `glTexImage2D`, so `scanLine(R)` lives at GL texel row `R`; the vertex V-coordinate inversion in `createImageObjects()` compensates at sample time, so `glTexSubImage2D` must address the same row as the original upload (`yoffset = region.y()`).
+  - [HUMAN, SMOKE TEST] After the build succeeds, with the player window published and a 4k FOW map loaded, paint a small brush stroke near the top edge, near the bottom edge, and at one corner of the FOW image. Confirm that each stroke appears at the same screen Y in the player window as in the DM window. Record the result (pass/fail, OS, image dimensions, stroke locations) in the chunk's handoff summary; the chunk's `review_verdict` cannot be `Pass` without this evidence.
+- **acceptance_criteria**:
+  - `grep -n flippedY DMHelper/src/publishglbattlebackground.cpp` returns no matches.
+  - The `glTexSubImage2D` call inside `updateImageRegion()` passes `region.y()` (or an identifier whose definition is `region.y()`) as its yoffset argument.
+  - The inline comment above the `glTexSubImage2D` call no longer states that GL's bottom-left origin requires a yoffset inversion; it documents the storage convention as described in `integration_tasks`.
+  - Windows debug build (cmake) succeeds with no new warnings.
+  - Chunk handoff summary contains the human smoke-test record described in `integration_tasks`.
+- **constraints_in_scope**:
+  - GL context discipline (CLAUDE.md): the changed code remains inside `updateImageRegion()`, which is only invoked from `LayerFow::applyGLPendingUpdates()` (itself called from `playerGLPaint()` / `playerGLUninitialize()`); do not introduce new call sites outside the GL-current path.
+  - Magic-number policy: if any new literal is introduced (none expected), promote it to a named constant per cpp-qt.instructions.md.
+  - Backward compatibility: `PublishGLBattleBackground::updateImageRegion()` has exactly one caller (FOW). Do not alter the function signature; do not introduce a branch on `_sourceNeedsVerticalFlip` to preserve the old (incorrect) formula for the unused flipped path — there is no caller to preserve.
+- **out_of_scope**:
+  - Refactoring `loadTexture()` or `createImageObjects()` vertex layout.
+  - Performance changes; this is a correctness-only edit.
+  - Touching any other `PublishGLBattleBackground` caller.
+
+## Chunk 6: Remove dead `fowRegionChanged` signal (addendum)
+
+- **id**: remove-fowregion-signal
+- **summary**: Delete the unused `LayerFow::fowRegionChanged(QRect)` signal and its emission, since DM-side rect-scoped repaint is already driven directly by `_graphicsItem->updateRegion()` inside `dispatchFowUpdate()` and no `connect()` consumer exists.
+- **dependencies**: [fow-graphics-item, coalesce-and-defer-dirty]
+- **branch**: agent/work/remove-fowregion-signal
+- **files_to_modify**:
+  - DMHelper/src/layerfow.h — remove the `void fowRegionChanged(const QRect& region);` declaration from the `signals:` section.
+  - DMHelper/src/layerfow.cpp — remove the `emit fowRegionChanged(region);` line inside `dispatchFowUpdate()`.
+- **files_to_create**: []
+- **integration_tasks**:
+  - Before deleting, run `grep -rn "fowRegionChanged" DMHelper/src` to confirm the signal has zero `connect()` consumers and zero references outside the declaration and the single emit site. If grep returns any additional reference, **stop** and escalate — the assumption underpinning this chunk is invalidated and the signal must be wired instead of removed.
+  - Remove the signal declaration in `layerfow.h` and the `emit fowRegionChanged(region);` statement in `LayerFow::dispatchFowUpdate()` in `layerfow.cpp`. Do not remove the surrounding `_graphicsItem->updateRegion(region)` call — that is the live DM-side repaint path and must remain.
+  - If a code comment near the removed lines references the signal, update it to describe the actual repaint path (`_graphicsItem->updateRegion(region)` for DM; `_fowGLPendingRegion` accumulated and consumed by `applyGLPendingUpdates()` for player).
+- **acceptance_criteria**:
+  - `grep -rn fowRegionChanged DMHelper/src` returns zero matches after the edit.
+  - `dispatchFowUpdate()` still calls `_graphicsItem->updateRegion(region)` (when `_graphicsItem != nullptr`) and still unions `region` into `_fowGLPendingRegion` and still sets `_fowGLImageDirty = true`.
+  - Windows debug build (cmake) succeeds with no new warnings.
+  - No `connect(..., &LayerFow::fowRegionChanged, ...)` exists anywhere in the workspace.
+- **constraints_in_scope**:
+  - Signal-semantics rule (CLAUDE.md): `dirty()` vs `changed()` distinction is unaffected; the `emit changed();` call at the end of `dispatchFowUpdate()` must remain.
+  - Layer interface: this is a private signal addition introduced earlier in this plan, never exposed externally; removal is safe per the grep precondition above.
+- **out_of_scope**:
+  - Refactoring `dispatchFowUpdate()` body beyond the single `emit` line.
+  - Renaming `_graphicsItem` or its `updateRegion()` API.
+  - Any change to the coalescer, timer interval, or `flushPendingUpdate()` flow.
+
 # Architecture Review
 
 ## Pre-Implementation Review — 2026-05-16T00:00:00Z
@@ -450,6 +505,49 @@ design.
   - fow-graphics-item: Update `dispatchFowUpdate(region)` to (a) update `_pendingDirtyRect` / mark `_fowGLImageDirty`, (b) emit `fowRegionChanged(region)` for the DM-side `update(rect)`, and (c) wake the player renderer. The GL-side `updateImage(...)` call moves into `playerGLPaint()` and consumes the pending state. Update the `constraints_in_scope` text that currently says "the timer slot must check `_fowGLObject != nullptr` and let the player window pick up the update on its next paint" — replace with an explicit contract: the timer slot performs no GL calls; the next `playerGLPaint()` consumes pending state.
   - subregion-upload: (a) Move the `updateImageRegion(...)` invocation into `playerGLPaint()` so it always runs with a current GL context; rewrite the chunk's `constraints_in_scope` GL-context bullet to reflect this. (b) Add a pre-merge integration task enumerating every caller of `PublishGLBattleBackground` (battle background, tokens, any other) and verifying the source-image format and orientation each one passes; either keep a guarded `convertToFormat` fast path inside `loadTexture()` (no-op when already RGBA8888) so non-FOW callers remain correct, or update each caller to supply RGBA8888 in the same chunk. The "document as follow-up in commit message" approach is insufficient for a shared function and must be removed from `integration_tasks`.
   - global: Add an explicit note in `# Architectural Risk Assessment` that the investigation's parenthetical "delete `_fowGLObject` runs on the GL thread" is incorrect — `updateFowInternal()` and all FOW paint methods execute on the GUI thread with no current GL context — and that this is the central constraint driving the deferred-upload pattern across all four chunks.
+
+## Post-Implementation Review — 2026-05-17
+
+reviewer_model: opus
+verdict: Revise
+summary: Deferred-upload, layer-interface, signal-semantics, named-constant, and per-instance backward-compatibility contracts are all upheld across the merged result; however `PublishGLBattleBackground::updateImageRegion()` computes its `glTexSubImage2D` yoffset as a vertical mirror (`_imageSize.height() - region.y() - region.height()`) that is inconsistent with how `loadTexture()` uploaded the no-CPU-flip source in the first place, so sub-region FOW edits land at the mirrored Y in the player texture.
+reviewed_range: v3.9-fow-optimizations (4 merged chunks)
+
+triggers_evaluated:
+  - threading: addressed — `applyGLPendingUpdates()` is the sole call site for `_fowGLObject->updateImage` / `updateImageRegion` / `delete _fowGLObject`, and it is invoked only from `playerGLPaint()` (first statement) and `playerGLUninitialize()`; `dispatchFowUpdate()`, `requestFowUpdate()`, the coalescer timer lambda, and `flushPendingUpdate()` perform no GL calls, only setting `_fowGLImageDirty` / `_fowGLPendingRegion` and emitting `fowRegionChanged` / `changed`. No new VLC-thread → Qt GUI access introduced.
+  - layer_interface: addressed — both DM path (`dmInitialize` constructs `FowGraphicsItem`, `dmUninitialize`, `dmUpdate`) and player path (`playerGLInitialize` / `playerGLUninitialize` / `playerGLPaint` / `playerGLResize`) implemented; neither path assumes the other is active (`_fowGLObject` and `_graphicsItem` are independently nullable).
+  - serialization_shape: not-applicable — `internalOutputXML` / `inputXML` unchanged; no `dirty()` emission in constructor or `inputXML()`.
+  - subsystem_boundary: addressed — battle subsystem only; `FowGraphicsItem` is a scoped helper; `PublishGLBattleBackground` constructor extended with defaulted args so non-FOW callers are unaffected (verified: `layerimage.cpp:224`, `layervideo.cpp:268`, `layerdraw.cpp:492`, `publishglbattleimagerenderer.cpp:40`, `publishglmaprenderer.cpp:596`, `publishglimagerenderer.cpp:131`, `publishglbattlevideorenderer.cpp:145` all construct with the 3-arg form, taking `sourceIsRgba8888=false, sourceNeedsVerticalFlip=true`).
+  - new_subsystem_or_flag: not-applicable — no `dmconstants.h` flag added; `INCLUDE_NETWORK_SUPPORT` and `LAYERVIDEO_USE_OPENGL` remain disabled.
+
+findings:
+  - High: publishglbattlebackground.cpp:283-293 (`updateImageRegion`) — yoffset computed as `flippedY = _imageSize.height() - region.y() - region.height()` is incorrect for the only caller path (`_sourceNeedsVerticalFlip=false`, FOW). `loadTexture()` uploads `image.bits()` directly via `glTexImage2D` without a CPU flip, so QImage `scanLine(R)` lives at GL texel row `R` (the V-coordinate inversion in `createImageObjects()` compensates at sample time, not at storage time). `glTexSubImage2D(..., yoffset=R, ...)` is therefore the correct address; the present `flippedY` formula writes `scanLine(region.y())..scanLine(region.y()+h-1)` to texel rows `H-R-h..H-R-1`, producing a vertically mirrored sub-update in the player window for any region off the vertical center. The chunk-4 handoff's macOS "PASS" should be revisited — the smoke test would only mask this for strokes whose footprint is near the vertical midline or fully replaced by a subsequent full-image upload. Fix: pass `region.y()` directly and remove the `flippedY` computation (and update the surrounding comment about "GL bottom-left convention"). Re-test on macOS and Windows by painting a small region near the top and bottom edges and confirming the player-window update lands at the same Y as the DM-window update.
+  - Low: layerfow.h:84 / layerfow.cpp:885 — `fowRegionChanged(QRect)` signal is declared and emitted from `dispatchFowUpdate()` but has no `connect()` site in the workspace. DM-side rect-scoped repaint still works because `dispatchFowUpdate()` also calls `_graphicsItem->updateRegion(region)` directly. The signal is functionally dead. Not blocking; either wire it to its intended external consumer or remove the declaration / emission to avoid documentation drift relative to the plan's "new signal contract" framing.
+  - Info: layerfow.cpp `applyPosition()` retains `_fowGLObject->setPosition()` on the GUI thread — verified non-GL (`setPosition` only mutates the CPU-side `QMatrix4x4` via `updateModelMatrix`). Pre-existing pattern noted in chunk-1/2/4 review cycles. No action.
+  - Info: `_textureID == 0` is not guarded in `updateImageRegion()` (only in `loadTexture()`). Production path always sees `_textureID != 0` because `createImageObjects()` runs at construction, but defence-in-depth is asymmetric with `loadTexture()`. No action required for this chunk; noted from the chunk-4 review.
+
+required_followups:
+  - Replace `flippedY` in `PublishGLBattleBackground::updateImageRegion()` with `region.y()` (the storage address used by `glTexImage2D` in the no-CPU-flip branch) and update the inline comment about "GL's bottom-left convention" to reflect that storage order matches QImage scanline order for this path. After the fix, re-run the macOS single-stroke smoke test painting at the top edge, bottom edge, and a corner of a 4k FOW map in DM+player-publishing mode, and record the result in a new chunk handoff before re-marking the feature merge-ready.
+  - Either wire `LayerFow::fowRegionChanged(QRect)` to its intended consumer (the plan's "new signal contract") or remove the signal declaration and emission, so the codebase matches the plan's stated semantics.
+
+## Pre-Implementation Review — 2026-05-17 (addendum)
+
+reviewer_model: opus
+verdict: Pass
+summary: The two addendum chunks (`fix-subregion-yoffset`, `remove-fowregion-signal`) directly and minimally address both `required_followups` from the post-impl review; each chunk has correct dependencies on already-merged work, mechanically-verifiable acceptance criteria, an explicit pre-action grep precondition (chunk 6) or human smoke-test gate (chunk 5), and respects every architectural trigger that applies.
+
+triggers_evaluated:
+  - threading: addressed — chunk 5's edit is entirely contained inside `PublishGLBattleBackground::updateImageRegion()`, whose only caller is `LayerFow::applyGLPendingUpdates()`, which is itself invoked only from `playerGLPaint()` / `playerGLUninitialize()`; the chunk explicitly prohibits introducing new call sites. Chunk 6 removes a Qt signal declaration and emission on the GUI thread — no threading boundary touched.
+  - layer_interface: addressed — chunk 6 modifies `LayerFow` by removing a private signal added earlier in this same plan, with no external consumers (gated by a mandatory pre-action grep that escalates if any reference is found); neither dm-path nor playerGL-path entry points are touched.
+  - serialization_shape: not-applicable — neither chunk touches `inputXML` / `createOutputXML` / `internalOutputXML` / `postProcessXML`.
+  - subsystem_boundary: addressed — battle subsystem only; no cross-subsystem coupling introduced.
+  - new_subsystem_or_flag: not-applicable — no new `dmconstants.h` flag, no new subsystem.
+
+findings:
+  - Info: chunk 5 `constraints_in_scope` correctly refuses to retain a branched fallback that preserves the old (incorrect) `flippedY` formula for the `_sourceNeedsVerticalFlip=true` path, noting there is no caller. Optional defensive hardening (out of scope, not required): a future cleanup could add an `Q_ASSERT(!_sourceNeedsVerticalFlip)` or early-return in `updateImageRegion()` to document that the function is correct only for the no-CPU-flip path. Not a precondition for Pass.
+  - Info: chunk 6's `acceptance_criteria` line "`grep -rn fowRegionChanged DMHelper/src` returns zero matches" is correct as written; the Coordinator/Review should run this from the repo root with the path argument as given so that any stray match in archived folders (`DMHelper-Backend/`, `DMHelperClient/`, etc., which are scoped out) does not falsely fail the criterion. Plan-level wording already scopes to `DMHelper/src` — no change required.
+
+required_plan_changes: []
 
 # Cycle Log
 
@@ -545,7 +643,32 @@ design.
 - **review_findings**: All acceptance criteria met. Low — caller-audit handoff lists 8 sites as a block rather than individually; reviewer independently verified all 8 by grep — functionally satisfied, documentation shortfall only. Info — `updateImageRegion()` lacks a `_textureID==0` guard (non-reachable via production path; defence-in-depth gap). Info — `_fowGLObject->setPosition()` in `applyPosition()` is pre-existing CPU-only; no GL calls.
 - **next_action**: merge
 
-# Escalations
+## Chunk: fix-subregion-yoffset
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/publishglbattlebackground.cpp: modified (flippedY removed; glTexSubImage2D yoffset changed to region.y(); inline comment updated)
+- **executor_build_status**: success — [125/125] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: Single-line correctness fix. `flippedY` local removed; `glTexSubImage2D` yoffset is now `region.y()`. Comment updated to document storage convention. Human smoke test: PENDING — paint strokes near top edge, bottom edge, and corner of a 4k FOW map in DM+player mode; verify stroke appears at correct Y in player window.
+- **review_verdict**: (pending)
+- **review_findings**: (pending)
+- **next_action**: (pending)
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/layerfow.h: modified (fowRegionChanged signal declaration removed)
+  - DMHelper/src/layerfow.cpp: modified (emit fowRegionChanged(region) removed from dispatchFowUpdate(); nearby comment updated to "Wake the player renderer.")
+- **executor_build_status**: success — [118/118] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: Pre-check confirmed only two occurrences of fowRegionChanged — declaration in layerfow.h and emit in layerfow.cpp; no connect() consumer found anywhere. Both removed. dispatchFowUpdate() body otherwise untouched: _graphicsItem->updateRegion(region), _fowGLImageDirty=true, _fowGLPendingRegion union, emit changed() all present.
+- **review_verdict**: Pass
+- **review_findings**: All acceptance criteria met. No fowRegionChanged references remain in any .cpp or .h file. dispatchFowUpdate() body intact with all required statements present. Info: plan document contains historical mentions of fowRegionChanged — non-blocking; plan cannot be stripped of its own history.
+- **next_action**: merge
 
 ## 2026-05-17T00:00:00Z — gl-upload-reuse
 

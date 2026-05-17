@@ -271,14 +271,12 @@ void PublishGLBattleBackground::updateImageRegion(const QImage& image, const QRe
     // the full-image scan-line buffer without requiring a pixel-pack copy.
     f->glPixelStorei(GL_UNPACK_ROW_LENGTH, image.bytesPerLine() / BYTES_PER_PIXEL_RGBA);
 
-    // Compute flipped Y: since loadTexture() skips the CPU vertical flip for this
-    // instance (_sourceNeedsVerticalFlip=false), the texture is stored with GL's
-    // bottom-left convention (row 0 of image data = texture bottom). To upload
-    // region starting at image row region.y(), we map it to the correct GL row.
-    const int flippedY = _imageSize.height() - region.y() - region.height();
-
+    // No-CPU-flip path: loadTexture() uploaded image.bits() directly via glTexImage2D,
+    // so QImage scanLine(R) lives at GL texel row R. glTexSubImage2D addresses the same
+    // row directly (yoffset = region.y()). The V-coordinate inversion in
+    // createImageObjects() compensates at sample time, not storage time.
     f->glTexSubImage2D(GL_TEXTURE_2D, 0,
-                       region.x(), flippedY, region.width(), region.height(),
+                       region.x(), region.y(), region.width(), region.height(),
                        GL_RGBA, GL_UNSIGNED_BYTE,
                        image.constScanLine(region.y()) + region.x() * BYTES_PER_PIXEL_RGBA);
 

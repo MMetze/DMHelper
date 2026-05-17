@@ -881,8 +881,7 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
     _fowGLImageDirty = true;
     _fowGLPendingRegion = _fowGLPendingRegion.united(region);
 
-    // Notify signal subscribers and wake the player renderer.
-    emit fowRegionChanged(region);
+    // Wake the player renderer.
     emit changed();
 }
 
