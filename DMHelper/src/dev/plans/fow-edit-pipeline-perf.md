@@ -670,6 +670,20 @@ required_plan_changes: []
 - **review_findings**: All acceptance criteria met. No fowRegionChanged references remain in any .cpp or .h file. dispatchFowUpdate() body intact with all required statements present. Info: plan document contains historical mentions of fowRegionChanged — non-blocking; plan cannot be stripped of its own history.
 - **next_action**: merge
 
+## Chunk: fix-perf-and-bounds
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/layerfow.cpp: modified (requestFowUpdate: bounds clamp added; dispatchFowUpdate: partial composite replaces full getImage(); applyGLPendingUpdates: _cachedImage used in both upload branches; defensive safeRegion clamp added)
+- **executor_build_status**: success — [107/107] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: All three hot-path getImage() calls eliminated from dispatchFowUpdate and applyGLPendingUpdates. requestFowUpdate now clamps brush rect to image bounds before accumulating. Remaining getImage() calls are intentional: dmInitialize one-time full rebuild and playerGLInitialize constructor (both correct). dispatchFowUpdate fallback path (_cachedImage = getImage() when size/format mismatches) handles first call and post-resize.
+- **review_verdict**: (pending)
+- **review_findings**: (pending)
+- **next_action**: (pending)
+
 ## 2026-05-17T00:00:00Z — gl-upload-reuse
 
 - **reason**: design-problem

@@ -825,14 +825,19 @@ void LayerFow::applyGLPendingUpdates()
         const QRect fullImageRect(QPoint(), _imageFow.size());
         if(_fowGLPendingRegion.isValid() && _fowGLPendingRegion != fullImageRect)
         {
-            // Partial region: use glTexSubImage2D for an efficient sub-image upload
-            // that avoids re-uploading the entire texture.
-            _fowGLObject->updateImageRegion(getImage(), _fowGLPendingRegion);
+            // Partial region: clamp defensively then use glTexSubImage2D for an
+            // efficient sub-image upload. _cachedImage is already up-to-date for
+            // the dirty region (updated in dispatchFowUpdate before this runs).
+            const QRect safeRegion = _fowGLPendingRegion.intersected(fullImageRect);
+            if(safeRegion.isValid())
+                _fowGLObject->updateImageRegion(_cachedImage, safeRegion);
+            else
+                _fowGLObject->updateImage(_cachedImage);
         }
         else
         {
             // Full image or no pending region: upload the complete texture.
-            _fowGLObject->updateImage(getImage());
+            _fowGLObject->updateImage(_cachedImage);
         }
         _fowGLImageDirty = false;
         _fowGLPendingRegion = QRect();
@@ -856,10 +861,18 @@ void LayerFow::flushPendingUpdate()
 
 void LayerFow::requestFowUpdate(const QRect& region)
 {
+    // Clamp to image bounds so out-of-image brush strokes (partially above or to
+    // the right of the map) do not produce a negative-y or oversized pending region
+    // that would cause QImage::constScanLine() to assert in updateImageRegion().
+    if(_imageFow.isNull())
+        return;
+    const QRect clamped = region.intersected(QRect(QPoint(), _imageFow.size()));
+    if(clamped.isEmpty())
+        return;
     // Union the new footprint into the pending dirty rect. Subsequent calls within
     // the same FOW_UPDATE_COALESCE_MS window accumulate into the union; a single
     // dispatchFowUpdate fires when the timer expires.
-    _pendingDirtyRect = _pendingDirtyRect.united(region);
+    _pendingDirtyRect = _pendingDirtyRect.united(clamped);
     if(!_updateCoalescer->isActive())
         _updateCoalescer->start();
 }
@@ -869,7 +882,31 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
     // Deferred-upload contract — runs on the GUI thread. Sets pending flags and emits
     // signals; never calls into _fowGLObject. The next playerGLPaint() consumes
     // _fowGLImageDirty / _fowGLPendingRegion via applyGLPendingUpdates().
-    _cachedImage = getImage();
+
+    // Partial composite update: rebuild only the dirty region of _cachedImage.
+    // Falls back to a full getImage() rebuild when the cached image size or format
+    // doesn't match (first call, or after applySize changes the map dimensions),
+    // so _cachedImage is always valid for the GL upload path.
+    if(_cachedImage.size() != _imageFow.size() || _cachedImage.format() != _imageFow.format())
+    {
+        _cachedImage = getImage();
+    }
+    else if(_imageFowTexture.isNull())
+    {
+        // No texture: copy dirty region from _imageFow directly.
+        QPainter fowPainter(&_cachedImage);
+        fowPainter.setCompositionMode(QPainter::CompositionMode_Source);
+        fowPainter.drawImage(region, _imageFow, region);
+    }
+    else
+    {
+        // Has texture: composite dirty region — first copy _imageFow then apply texture.
+        QPainter fowPainter(&_cachedImage);
+        fowPainter.setCompositionMode(QPainter::CompositionMode_Source);
+        fowPainter.drawImage(region, _imageFow, region);
+        fowPainter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        fowPainter.drawImage(region, _imageFowTexture, region);
+    }
 
     // Wake the DM-side item to repaint the changed region only.
     if(_graphicsItem)
