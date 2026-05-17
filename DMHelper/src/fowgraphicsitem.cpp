@@ -55,7 +55,14 @@ void FowGraphicsItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
 
 void FowGraphicsItem::updateRegion(const QRect& region)
 {
-    QGraphicsItem::update(QRectF(region));
+    // Guard: QRectF(QRect()) is null, and Qt treats a null rect in update() as
+    // "repaint full bounding rect". Only forward non-empty regions.
+    if(!region.isEmpty())
+        QGraphicsItem::update(QRectF(region));
+    #ifdef QT_DEBUG
+    else
+        qDebug() << "[FowGraphicsItem] updateRegion called with empty region — ignoring to avoid full repaint";
+    #endif
 }
 
 void FowGraphicsItem::notifyGeometryChange()

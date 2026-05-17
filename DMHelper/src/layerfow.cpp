@@ -872,6 +872,18 @@ void LayerFow::requestFowUpdate(const QRect& region)
     if(!_updateCoalescer->isActive()) {
         s_coalesceStart.restart();
         _updateCoalescer->start();
+    } else if(s_coalesceStart.elapsed() >= FOW_UPDATE_COALESCE_MS) {
+        // WM_TIMER is starved while the mouse is dragging: hardware input keeps the
+        // Windows message queue non-empty so WM_TIMER never fires. We're called from
+        // a Qt mouse-event handler (posted-event priority, reliably scheduled), so
+        // dispatch here instead of waiting. Restart the coalescer so the final stamp
+        // after the mouse stops is still delivered.
+        _updateCoalescer->stop();
+        QRect pendingRegion = _pendingDirtyRect;
+        _pendingDirtyRect = QRect();
+        s_coalesceStart.restart();
+        _updateCoalescer->start();
+        dispatchFowUpdate(pendingRegion);
     }
 }
 
@@ -880,6 +892,14 @@ void LayerFow::dispatchFowUpdate(const QRect& region)
     // Deferred-upload contract — runs on the GUI thread. Sets pending flags and emits
     // signals; never calls into _fowGLObject. The next playerGLPaint() consumes
     // _fowGLImageDirty / _fowGLPendingRegion via applyGLPendingUpdates().
+    // Guard: an empty region means there are no pending stamps to dispatch. This can
+    // happen when the coalescer tail-timer fires after the elapsed-time path already
+    // cleared _pendingDirtyRect. QRectF(QRect()) is null, and Qt interprets a null
+    // QRectF passed to QGraphicsItem::update() as "update full bounding rect", so we
+    // must return before reaching _graphicsItem->updateRegion().
+    if(region.isEmpty())
+        return;
+
     static QElapsedTimer s_dispatchInterval;
     static bool s_dispatchIntervalFirst = true;
     qint64 dispatchIntervalUs = 0;

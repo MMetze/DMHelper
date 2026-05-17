@@ -4,6 +4,8 @@
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QDebug>
+#include <QEvent>
+#include <QShowEvent>
 
 // File-scope statics for the post-paint idle probe (shared between paintEvent and the
 // 0-delay lambda — avoids an extern on a function-local static).
@@ -50,6 +52,32 @@ void BattleDialogGraphicsView::paintEvent(QPaintEvent *event)
         qDebug() << "[FoW-perf] BattleView post-paint idle #" << s_postPaintProbeCount
                  << " delay:" << s_postPaintProbeTimer.nsecsElapsed() / 1000 << "us";
     });
+}
+
+void BattleDialogGraphicsView::showEvent(QShowEvent *event)
+{
+    QGraphicsView::showEvent(event);
+    if(viewport())
+        viewport()->installEventFilter(this);
+}
+
+bool BattleDialogGraphicsView::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched == viewport() && event->type() == QEvent::UpdateRequest)
+    {
+        static int s_updateReqCount = 0;
+        static QElapsedTimer s_updateReqInterval;
+        static bool s_updateReqFirst = true;
+        qint64 intervalUs = 0;
+        if(!s_updateReqFirst)
+            intervalUs = s_updateReqInterval.nsecsElapsed() / 1000;
+        s_updateReqInterval.restart();
+        s_updateReqFirst = false;
+        ++s_updateReqCount;
+        qDebug() << "[FoW-perf] Viewport UpdateRequest #" << s_updateReqCount
+                 << " interval:" << intervalUs << "us";
+    }
+    return QGraphicsView::eventFilter(watched, event);
 }
 
 void BattleDialogGraphicsView::keyPressEvent(QKeyEvent *event)
