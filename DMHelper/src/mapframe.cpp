@@ -29,6 +29,8 @@
 #include <QMutexLocker>
 #include <QFileDialog>
 #include <QStyleOptionGraphicsItem>
+#include <QElapsedTimer>
+#include <QDebug>
 #include <QMessageBox>
 #include <QDebug>
 #include <QtMath>
@@ -1543,12 +1545,19 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
         {
             if(_undoPath)
             {
+                static int s_fowMoveCount = 0;
+                QElapsedTimer t;
+                t.start();
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint drawPoint =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
                 if(_undoPath->getLayer())
                     drawPoint -= _undoPath->getLayer()->getPosition();
                 _undoPath->addPoint(drawPoint);
-                emit dirty();
+                const qint64 addPointUs = t.nsecsElapsed() / 1000;
+                if(++s_fowMoveCount % 10 == 0)
+                    qDebug() << "[FoW-perf] MapFrame MouseMove #" << s_fowMoveCount
+                             << " addPoint (incl. paintFoWPoint):" << addPointUs << "us"
+                             << " total:" << t.nsecsElapsed() / 1000 << "us";
             }
             return true;
         }

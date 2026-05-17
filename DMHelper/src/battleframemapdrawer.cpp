@@ -8,6 +8,8 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QMessageBox>
+#include <QDebug>
+#include <QElapsedTimer>
 
 BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     QObject(parent),
@@ -105,8 +107,15 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos, const Qt::MouseB
     if((!_undoPath) || (!_undoPath->getLayer()))
         return;
 
+    static int s_fowBattleMoveCount = 0;
+    QElapsedTimer t;
+    t.start();
     _undoPath->addPoint(pos.toPoint() - _undoPath->getLayer()->getPosition());
-    emit dirty();
+    const qint64 addPointUs = t.nsecsElapsed() / 1000;
+    if(++s_fowBattleMoveCount % 10 == 0)
+        qDebug() << "[FoW-perf] BattleFrame MouseMove #" << s_fowBattleMoveCount
+                 << " addPoint (incl. paintFoWPoint):" << addPointUs << "us"
+                 << " total:" << t.nsecsElapsed() / 1000 << "us";
 }
 
 void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers)

@@ -102,12 +102,13 @@ protected:
 
     // Core contents
     QColor _fowColor;
-    // Stored as Format_RGBA8888 (changed from Format_ARGB32_Premultiplied in chunk 4).
-    // QPainter composition modes (CompositionMode_Source, CompositionMode_DestinationIn)
-    // continue to work correctly against Format_RGBA8888 — Qt converts internally.
+    // Stored as Format_ARGB32_Premultiplied — Qt's software rasterizer has SIMD-optimised
+    // compositing paths (CompositionMode_Source, CompositionMode_DestinationIn) for this
+    // format. _cachedImage is kept as RGBA8888 for GL upload; the format conversion happens
+    // once per coalesce window in dispatchFowUpdate(), not on every brush-stroke pixel.
     QImage _imageFow;
-    // Stored as Format_RGBA8888 (changed from Format_ARGB32_Premultiplied in chunk 4).
-    // See _imageFow comment above for the rationale.
+    // Same format as _imageFow so getImage() compositing stays within
+    // ARGB32_Premultiplied throughout the CPU painting path.
     QImage _imageFowTexture;
     QString _fowTextureFile;
     int _fowTextureScale;
@@ -146,14 +147,27 @@ private:
     // it so the accumulator is ready.
     QRect _fowGLPendingRegion;
 
-    // Cached composed image (LayerFow owns this; FowGraphicsItem holds a pointer to it).
-    // Updated by dispatchFowUpdate() via getImage(). Stable address — never reassigned
-    // by value (only overwritten in-place via operator=).
+    // Cached composed image in Format_RGBA8888 (LayerFow owns this; FowGraphicsItem holds
+    // a pointer to it). Updated by dispatchFowUpdate() via partial QPainter composite from
+    // _imageFow (ARGB32_Premultiplied). Stable address — never reassigned by value (only
+    // overwritten in-place). The RGBA8888 format lets applyGLPendingUpdates() upload directly
+    // via glTexSubImage2D without an extra convertToFormat() copy.
     QImage _cachedImage;
 
     // Single-shot coalescing timer: fires at most once per FOW_UPDATE_COALESCE_MS window.
     // Started by requestFowUpdate(); cancelled by flushPendingUpdate().
     QTimer* _updateCoalescer;
+
+    void rebuildBrushStamp(const MapDraw& mapDraw);
+
+    // Pre-rendered smooth-erase brush stamp (ARGB32_Premultiplied). Rebuilt when radius,
+    // brushType, or fowColor changes. Applied via drawImage + CompositionMode_DestinationIn
+    // in paintFoWPoint / paintFoWPoints, replacing per-call radial gradient rasterization
+    // on the large _imageFow image.
+    QImage _brushStamp;
+    int _brushStampBrushType = -1;
+    bool _brushStampSmooth = false;
+    QRgb _brushStampFowColor = 0;
 
 };
 
