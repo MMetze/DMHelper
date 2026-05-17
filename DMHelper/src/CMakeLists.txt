@@ -229,6 +229,7 @@ set(DMHELPER_SOURCES
     mapmanagerdialog.cpp
     mapmarkerdialog.cpp
     mapmarkergraphicsitem.cpp
+    mappartyiconitem.cpp
     mapselectdialog.cpp
     monster.cpp
     monsteraction.cpp
@@ -584,6 +585,7 @@ set(DMHELPER_HEADERS
     mapmarker.h
     mapmarkerdialog.h
     mapmarkergraphicsitem.h
+    mappartyiconitem.h
     mapselectdialog.h
     monster.h
     monsteraction.h

@@ -276,7 +276,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::mapMousePress, this, &BattleFrame::handleMapMousePress);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseMove, this, &BattleFrame::handleMapMouseMove);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseRelease, this, &BattleFrame::handleMapMouseRelease);
-    connect(_scene, &BattleDialogGraphicsScene::changed, this, &BattleFrame::handleSceneChanged);
+    // NOTE: do NOT connect QGraphicsScene::changed here. Any connection to that signal puts the entire
+    // scene into Qt compat-update mode: processDirtyItemsRecursive expands every item's dirty sub-rect
+    // to its full bounding rect, defeating partial-repaint optimisation. Renderer updates are instead
+    // driven by Layer::changed() connections in PublishGLBattleRenderer.
 
     setEditMode();
 

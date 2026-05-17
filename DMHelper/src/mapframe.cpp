@@ -852,7 +852,9 @@ void MapFrame::initializeMap()
     connect(_scene, &MapFrameScene::editFile, this, &MapFrame::editMapFile);
 
     connect(_scene, &MapFrameScene::itemChanged, this, &MapFrame::handleItemChanged);
-    connect(_scene, &MapFrameScene::changed, this, &MapFrame::handleSceneChanged);
+    // NOTE: do NOT connect QGraphicsScene::changed here. Any connection to that signal puts the entire
+    // scene into Qt compat-update mode, defeating partial-repaint optimisation. Party icon position
+    // is tracked via MapPartyIconItem::positionChanged; renderer updates go through Map model signals.
 
     if(!_mapSource)
         return;
@@ -2029,8 +2031,9 @@ void MapFrame::checkPartyUpdate()
     {
         if(!_partyIcon)
         {
-            _partyIcon = new UnselectedPixmap();
+            _partyIcon = new MapPartyIconItem();
             _scene->addItem(_partyIcon);
+            connect(_partyIcon, &MapPartyIconItem::positionChanged, this, &MapFrame::handlePartyIconMoved);
             if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
                 _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
             _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -2159,15 +2162,12 @@ void MapFrame::handleItemChanged(QGraphicsItem* item)
     }
 }
 
-void MapFrame::handleSceneChanged(const QList<QRectF> &region)
+void MapFrame::handlePartyIconMoved(const QPointF& pos)
 {
-    Q_UNUSED(region);
-
-    if((_mapSource) && (_partyIcon))
-        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
-
-    if((_isPublishing) && (_renderer))
-        _renderer->updateRender();
+    if(_mapSource)
+        _mapSource->setPartyIconPos(pos.toPoint());
+    // Renderer update is handled automatically via Map::partyIconPosChanged
+    // -> PublishGLMapRenderer::handlePartyIconPosChanged -> updateRender().
 }
 
 void MapFrame::handleMapSceneChanged()
