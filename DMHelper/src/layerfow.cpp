@@ -30,6 +30,11 @@ static constexpr int FOW_UPDATE_COALESCE_MS = 16;
 // call in a burst) so dispatchFowUpdate can log how long the coalescer actually waited.
 static QElapsedTimer s_coalesceStart;
 
+// Records the wall-clock time of the most recent dispatchFowUpdate() call.
+// Used in requestFowUpdate() to detect the "coalescer inactive but >= 16ms since
+// last dispatch" case and dispatch directly instead of starting a fresh WM_TIMER.
+static QElapsedTimer s_lastDispatch;
+
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
@@ -63,6 +68,7 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
         // call that arrives during the dispatch itself starts a fresh accumulation.
         QRect region = _pendingDirtyRect;
         _pendingDirtyRect = QRect();
+        s_lastDispatch.restart();
         dispatchFowUpdate(region);
     });
 
@@ -870,8 +876,22 @@ void LayerFow::requestFowUpdate(const QRect& region)
     // dispatchFowUpdate fires when the timer expires.
     _pendingDirtyRect = _pendingDirtyRect.united(clamped);
     if(!_updateCoalescer->isActive()) {
-        s_coalesceStart.restart();
-        _updateCoalescer->start();
+        // Coalescer is inactive: the WM_TIMER already fired (or this is the first call).
+        // If >= 16ms has elapsed since the last dispatch we are already inside the mouse-
+        // event handler (posted-event priority) — dispatch directly now rather than
+        // starting a fresh WM_TIMER that will be starved for another ~35ms.
+        // Keep the coalescer running as a tail-timer for the final stamp when the mouse stops.
+        if(s_lastDispatch.isValid() && s_lastDispatch.elapsed() >= FOW_UPDATE_COALESCE_MS) {
+            QRect pendingRegion = _pendingDirtyRect;
+            _pendingDirtyRect = QRect();
+            s_coalesceStart.restart();
+            s_lastDispatch.restart();
+            _updateCoalescer->start();
+            dispatchFowUpdate(pendingRegion);
+        } else {
+            s_coalesceStart.restart();
+            _updateCoalescer->start();
+        }
     } else if(s_coalesceStart.elapsed() >= FOW_UPDATE_COALESCE_MS) {
         // WM_TIMER is starved while the mouse is dragging: hardware input keeps the
         // Windows message queue non-empty so WM_TIMER never fires. We're called from
@@ -882,6 +902,7 @@ void LayerFow::requestFowUpdate(const QRect& region)
         QRect pendingRegion = _pendingDirtyRect;
         _pendingDirtyRect = QRect();
         s_coalesceStart.restart();
+        s_lastDispatch.restart();
         _updateCoalescer->start();
         dispatchFowUpdate(pendingRegion);
     }
