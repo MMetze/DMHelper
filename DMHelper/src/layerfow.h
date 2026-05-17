@@ -7,6 +7,7 @@
 
 class PublishGLBattleBackground;
 class QGraphicsPixmapItem;
+class QTimer;
 class QUndoStack;
 class UndoFowBase;
 
@@ -51,6 +52,8 @@ public:
     void raiseOpacity();
     void resetOpacity();
 
+    void flushPendingUpdate();
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene* scene) override;
@@ -69,6 +72,11 @@ public slots:
     virtual void uninitialize() override;
     virtual void aboutToDelete() override;
     virtual void editSettings() override;
+
+signals:
+    // Emitted by the coalescing-timer slot after updateFowInternal(); used to wake
+    // the player renderer. This is a visual-only signal — do NOT connect to save logic.
+    void changed();
 
 protected slots:
     // Local Interface
@@ -106,6 +114,11 @@ protected:
     QList<UndoFowBase*> _undoItems;
     bool _batchProcessing;
 
+private slots:
+    // Starts the coalescing timer if not already running. Called by paintFoWPoint /
+    // paintFoWPoints in place of direct updateFowInternal() + dirty() per sample.
+    void requestFowUpdate();
+
 private:
     // Pending-state flags set by GUI-thread paths; consumed only from *GL* functions.
     // See applyGLPendingUpdates() — the sole function permitted to call GL-state-
@@ -115,6 +128,10 @@ private:
 
     // Callable only from a *GL* function with a current GL context.
     void applyGLPendingUpdates();
+
+    // Single-shot coalescing timer: fires at most once per FOW_UPDATE_COALESCE_MS window.
+    // Started by requestFowUpdate(); cancelled by flushPendingUpdate().
+    QTimer* _updateCoalescer;
 
 };
 

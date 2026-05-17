@@ -1532,6 +1532,9 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             if(_undoPath)
             {
                 _undoPath = nullptr;
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+                if(fowLayer)
+                    fowLayer->flushPendingUpdate();
                 emit dirty();
             }
             return true;

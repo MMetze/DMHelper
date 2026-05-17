@@ -247,6 +247,15 @@ void BattleFrameMapDrawer::endPath()
 {
     _undoPath = nullptr;
     _mouseDown = false;
+
+    // Flush any deferred FOW update so the player renderer sees consistent imagery
+    // before the caller emits dirty().
+    if(_scene)
+    {
+        LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(layer)
+            layer->flushPendingUpdate();
+    }
 }
 
 void BattleFrameMapDrawer::applyPolygon()

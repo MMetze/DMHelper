@@ -483,6 +483,33 @@ design.
 - **review_findings**: All acceptance criteria met. Low — `applyPosition()` calls `_fowGLObject->setPosition()` (pre-existing, not introduced by this chunk; `setPosition()` makes no GL calls). Low — plan file appears in diff (expected Coordinator maintenance). Info — no lazy-shader guard needed in `playerGLPaint()` (shaders injected externally; pre-existing pattern).
 - **next_action**: merge
 
+## Chunk: coalesce-and-defer-dirty
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/layerfow.cpp: modified
+- **executor_build_status**: success — [107/107] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: Most chunk-2 changes (layerfow.h declarations, timer wiring, paintFoWPoint/paintFoWPoints conversion, flushPendingUpdate call sites) were already committed as part of chunk-1's working-tree edits (scope bleed). This cycle added: (1) `emit dirty()` to `editSettings()` which was missing, and (2) inline undo/redo replay comment to `applyPaintTo()`. Reviewer should verify the chunk-1 commit contained no chunk-2 acceptance criteria that should have been out-of-scope.
+- **review_verdict**: Pass
+- **review_findings**: All acceptance criteria met. Info — `changed()` declared as new signal on `LayerFow` (not inherited from `Layer`; plan description "Layer's existing" was inaccurate but implementation is sound). Low — `mapframe.cpp` MouseMove branch still emits `dirty()` per sample (pre-existing; out of scope). Low — `BattleFrameMapDrawer::drawRect()` double `dirty()` (pre-existing). Info — `_fowGLObject->setPosition()` in `applyPosition()` CPU-only; GL-discipline contract intact.
+- **next_action**: merge
+
+## Chunk: coalesce-and-defer-dirty
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**: (none — all chunk-2 changes were already present in the committed working tree; gl-upload-reuse commit included both chunk-1 and chunk-2 machinery)
+- **executor_build_status**: success — ninja: no work to do (all changes pre-committed)
+- **executor_handoff_summary**: All chunk-2 acceptance criteria confirmed met by reading the source. `paintFoWPoint`/`paintFoWPoints` call `requestFowUpdate()` with no `emit dirty()`. `fillFoW`/`paintFoWRect`/`paintFoWPolygon`/`applyPaintTo`/`editSettings` keep `updateFowInternal()` + `emit dirty()`. Timer lambda at layerfow.cpp:46–53 calls `updateFowInternal()` then `emit changed()` with no GL calls. `flushPendingUpdate()` stops timer and calls `updateFowInternal()` if timer was active (uses `_updateCoalescer->isActive()` instead of a `_fowUpdatePending` flag — functionally equivalent). `endPath()` in battleframemapdrawer.cpp:257 and `mapframe.cpp:1535–1536` both call `flushPendingUpdate()` before `emit dirty()`.
+- **review_verdict**: Pass (same Review Agent run as prior entry — implementation verified consistent)
+- **review_findings**: Duplicate entry; see Cycle 1 entry above for full findings.
+- **next_action**: merge
+
 # Escalations
 
 ## 2026-05-17T00:00:00Z — gl-upload-reuse

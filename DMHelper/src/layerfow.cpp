@@ -12,6 +12,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QImage>
+#include <QTimer>
 #include <QUndoStack>
 #include <QPainter>
 #include <QDebug>
@@ -19,6 +20,10 @@
 const qreal LAYER_FOW_DM_OPACITY = 0.6;
 const qreal LAYER_FOW_DM_DIP = 0.3;
 const qreal LAYER_FOW_DM_RAISE = 1.0;
+
+// Coalescing window for deferred FOW updates: at most one updateFowInternal() call
+// per this many milliseconds during an active brush stroke.
+static constexpr int FOW_UPDATE_COALESCE_MS = 16;
 
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -32,8 +37,22 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     _fowTextureScale(),
     _undoStack(nullptr),
     _undoItems(),
-    _batchProcessing(false)
+    _batchProcessing(false),
+    _updateCoalescer(nullptr)
 {
+    _updateCoalescer = new QTimer(this);
+    _updateCoalescer->setSingleShot(true);
+    _updateCoalescer->setInterval(FOW_UPDATE_COALESCE_MS);
+    connect(_updateCoalescer, &QTimer::timeout, this, [this]() {
+        // Deferred-upload contract — this slot runs on the GUI thread with no current GL
+        // context. It MUST NOT call into _fowGLObject’s GL-mutating methods. The chunk-1
+        // pending-flag pattern is the only permitted path to a GL upload: updateFowInternal()
+        // sets _fowGLImageDirty = true; the next playerGLPaint() consumes the flag via
+        // applyGLPendingUpdates(). changed() wakes the player renderer.
+        updateFowInternal();
+        emit changed();
+    });
+
     _undoStack = new QUndoStack(this);
     setSize(imageSize);
 }
@@ -276,6 +295,9 @@ void LayerFow::applyPaintTo(int index, int startIndex)
     }
     _batchProcessing = false;
 
+    // Undo/redo replay: call updateFowInternal() directly rather than via the coalescer.
+    // The replay is an atomic operation that must flush immediately so the UI reflects the
+    // correct state before this function returns. The coalescer is intentionally bypassed.
     updateFowInternal();
     emit dirty();
 }
@@ -352,8 +374,7 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
-        emit dirty();
+        requestFowUpdate();
     }
 }
 
@@ -443,8 +464,7 @@ void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDra
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
-        emit dirty();
+        requestFowUpdate();
     }
 }
 
@@ -757,6 +777,7 @@ void LayerFow::editSettings()
 
     fillFoWImage();
     updateFowInternal();
+    emit dirty();
 
     dlg->deleteLater();
 }
@@ -780,6 +801,28 @@ void LayerFow::applyGLPendingUpdates()
         _fowGLObject->updateImage(getImage());
         _fowGLImageDirty = false;
     }
+}
+
+void LayerFow::flushPendingUpdate()
+{
+    // If the coalescing timer is pending, cancel it and apply the deferred update
+    // immediately. This is called by stroke-end handlers (mouse-up) so the player
+    // renderer sees consistent imagery before the caller emits dirty().
+    // Does NOT emit dirty() \u2014 the caller is responsible for that.
+    if(_updateCoalescer->isActive())
+    {
+        _updateCoalescer->stop();
+        updateFowInternal();
+    }
+}
+
+void LayerFow::requestFowUpdate()
+{
+    // Starts the coalescing timer if it is not already running. Subsequent calls
+    // within the same FOW_UPDATE_COALESCE_MS window are ignored; a single
+    // updateFowInternal() fires when the timer expires.
+    if(!_updateCoalescer->isActive())
+        _updateCoalescer->start();
 }
 
 void LayerFow::updateFowInternal()
