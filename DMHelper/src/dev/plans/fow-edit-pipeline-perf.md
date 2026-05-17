@@ -510,6 +510,24 @@ design.
 - **review_findings**: Duplicate entry; see Cycle 1 entry above for full findings.
 - **next_action**: merge
 
+## Chunk: fow-graphics-item
+
+### Cycle 1
+
+- **dispatched_by**: coordinator
+- **dispatched_at**: 2026-05-17T00:00:00Z
+- **executor_files_touched**:
+  - DMHelper/src/fowgraphicsitem.h: created
+  - DMHelper/src/fowgraphicsitem.cpp: created
+  - DMHelper/src/layerfow.h: modified (FowGraphicsItem* _graphicsItem; fowRegionChanged signal; dispatchFowUpdate/requestFowUpdate signatures; _pendingDirtyRect, _fowGLPendingRegion, _cachedImage members)
+  - DMHelper/src/layerfow.cpp: modified (dmInitialize uses FowGraphicsItem; updateFowInternal() replaced by dispatchFowUpdate(rect) everywhere; flushPendingUpdate/requestFowUpdate take QRect; _cachedImage updated in dispatchFowUpdate; applyGLPendingUpdates clears _fowGLPendingRegion; applySize calls notifyGeometryChange())
+  - DMHelper/src/CMakeLists.txt: modified (fowgraphicsitem.cpp and fowgraphicsitem.h added in alphabetical position)
+- **executor_build_status**: success — [119/119] Linking CXX executable DMHelper.exe, no new warnings
+- **executor_handoff_summary**: FowGraphicsItem class created with ItemUsesExtendedStyleOption, exposedRect-scoped paint(), updateRegion(), notifyGeometryChange(). updateFowInternal() eliminated; replaced throughout by dispatchFowUpdate(region). requestFowUpdate(const QRect&) unions into _pendingDirtyRect. Timer slot resets _pendingDirtyRect before dispatching. applyGLPendingUpdates clears _fowGLPendingRegion on both destroy and image-dirty paths. All bulk ops (paintFoWRect, paintFoWPolygon, fillFoW, applyPaintTo, editSettings, initializeUndoStack) now call dispatchFowUpdate + emit dirty(). Deferred-upload contract intact: dispatchFowUpdate sets flags only, no GL calls.
+- **review_verdict**: Pass (waived by human — review agent behaviour unsatisfactory; build verified clean)
+- **review_findings**: n/a — review waived
+- **next_action**: merge
+
 # Escalations
 
 ## 2026-05-17T00:00:00Z — gl-upload-reuse

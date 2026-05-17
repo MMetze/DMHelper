@@ -179,6 +179,7 @@ set(DMHELPER_SOURCES
     exportdialog.cpp
     exportworker.cpp
     fearframe.cpp
+    fowgraphicsitem.cpp
     globalsearch.cpp
     globalsearchframe.cpp
     grid.cpp
@@ -533,6 +534,7 @@ set(DMHELPER_HEADERS
     exportdialog.h
     exportworker.h
     fearframe.h
+    fowgraphicsitem.h
     globalsearch.h
     globalsearchframe.h
     grid.h

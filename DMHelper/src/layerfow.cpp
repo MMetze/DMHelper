@@ -1,4 +1,5 @@
-#include "layerfow.h"
+﻿#include "layerfow.h"
+#include "fowgraphicsitem.h"
 #include "publishglbattlebackground.h"
 #include "undofowbase.h"
 #include "undofowfill.h"
@@ -9,7 +10,6 @@
 #include "undomarker.h"
 #include "dmh_opengl.h"
 #include "layerfowsettings.h"
-#include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QImage>
 #include <QTimer>
@@ -21,7 +21,7 @@ const qreal LAYER_FOW_DM_OPACITY = 0.6;
 const qreal LAYER_FOW_DM_DIP = 0.3;
 const qreal LAYER_FOW_DM_RAISE = 1.0;
 
-// Coalescing window for deferred FOW updates: at most one updateFowInternal() call
+// Coalescing window for deferred FOW updates: at most one dispatchFowUpdate() call
 // per this many milliseconds during an active brush stroke.
 static constexpr int FOW_UPDATE_COALESCE_MS = 16;
 
@@ -38,6 +38,11 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     _undoStack(nullptr),
     _undoItems(),
     _batchProcessing(false),
+    _fowGLImageDirty(false),
+    _fowGLDeferredDestroy(false),
+    _pendingDirtyRect(),
+    _fowGLPendingRegion(),
+    _cachedImage(),
     _updateCoalescer(nullptr)
 {
     _updateCoalescer = new QTimer(this);
@@ -46,11 +51,14 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     connect(_updateCoalescer, &QTimer::timeout, this, [this]() {
         // Deferred-upload contract — this slot runs on the GUI thread with no current GL
         // context. It MUST NOT call into _fowGLObject’s GL-mutating methods. The chunk-1
-        // pending-flag pattern is the only permitted path to a GL upload: updateFowInternal()
+        // pending-flag pattern is the only permitted path to a GL upload: dispatchFowUpdate()
         // sets _fowGLImageDirty = true; the next playerGLPaint() consumes the flag via
-        // applyGLPendingUpdates(). changed() wakes the player renderer.
-        updateFowInternal();
-        emit changed();
+        // applyGLPendingUpdates(). changed() (emitted inside dispatchFowUpdate) wakes the
+        // player renderer. Reset _pendingDirtyRect before dispatching so any requestFowUpdate()
+        // call that arrives during the dispatch itself starts a fresh accumulation.
+        QRect region = _pendingDirtyRect;
+        _pendingDirtyRect = QRect();
+        dispatchFowUpdate(region);
     });
 
     _undoStack = new QUndoStack(this);
@@ -234,10 +242,13 @@ void LayerFow::applySize(const QSize& size)
     _size = size;
     initialize(size);
 
-    QImage newImage = getImage();
-
     if(_graphicsItem)
-        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
+    {
+        // Notify the scene that the bounding rect is changing, then refresh the
+        // cached image and request a full repaint of the new bounds.
+        _graphicsItem->notifyGeometryChange();
+        dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
+    }
 
     // Defer GL object destruction to playerGLPaint() / playerGLUninitialize(), which run
     // with a current GL context. The previous GL object remains alive and rendered for at
@@ -295,10 +306,10 @@ void LayerFow::applyPaintTo(int index, int startIndex)
     }
     _batchProcessing = false;
 
-    // Undo/redo replay: call updateFowInternal() directly rather than via the coalescer.
+    // Undo/redo replay: call dispatchFowUpdate() directly rather than via the coalescer.
     // The replay is an atomic operation that must flush immediately so the UI reflects the
     // correct state before this function returns. The coalescer is intentionally bypassed.
-    updateFowInternal();
+    dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
     emit dirty();
 }
 
@@ -374,7 +385,8 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
     p.end();
     if(!_batchProcessing)
     {
-        requestFowUpdate();
+        const int r = mapDraw.radius();
+        requestFowUpdate(QRect(point.x() - r, point.y() - r, r * 2 + 1, r * 2 + 1));
     }
 }
 
@@ -464,7 +476,11 @@ void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDra
     p.end();
     if(!_batchProcessing)
     {
-        requestFowUpdate();
+        const int r = mapDraw.radius();
+        QRect footprint;
+        for(const QPoint& pt : points)
+            footprint = footprint.united(QRect(pt.x() - r, pt.y() - r, r * 2 + 1, r * 2 + 1));
+        requestFowUpdate(footprint);
     }
 }
 
@@ -523,7 +539,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
+        dispatchFowUpdate(rect);
         emit dirty();
     }
 }
@@ -549,7 +565,7 @@ void LayerFow::paintFoWPolygon(const MapEditPolygon& mapEditPolygon)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
+        dispatchFowUpdate(mapEditPolygon.polygon().boundingRect());
         emit dirty();
     }
 }
@@ -562,7 +578,7 @@ void LayerFow::fillFoW(const QColor& color)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
+        dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
         emit dirty();
     }
 }
@@ -651,15 +667,13 @@ void LayerFow::dmInitialize(QGraphicsScene* scene)
         return;
     }
 
-    _graphicsItem = scene->addPixmap(QPixmap::fromImage(getImage()));
-    if(_graphicsItem)
-    {
-        _graphicsItem->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
-        _graphicsItem->setPos(_position);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _graphicsItem->setZValue(getOrder());
-    }
+    _cachedImage = getImage();
+    _graphicsItem = new FowGraphicsItem(&_cachedImage);
+    _graphicsItem->setPos(_position);
+    _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    _graphicsItem->setZValue(getOrder());
+    scene->addItem(_graphicsItem);
 
     Layer::dmInitialize(scene);
 }
@@ -776,7 +790,7 @@ void LayerFow::editSettings()
     _fowTextureScale = dlg->fowScale();
 
     fillFoWImage();
-    updateFowInternal();
+    dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
     emit dirty();
 
     dlg->deleteLater();
@@ -795,11 +809,13 @@ void LayerFow::applyGLPendingUpdates()
         _fowGLObject = nullptr;
         _fowGLDeferredDestroy = false;
         _fowGLImageDirty = false; // image will be re-uploaded after the next playerGLInitialize()
+        _fowGLPendingRegion = QRect(); // cleared; new object will upload full image on initialize
     }
     else if(_fowGLImageDirty && _fowGLObject)
     {
         _fowGLObject->updateImage(getImage());
         _fowGLImageDirty = false;
+        _fowGLPendingRegion = QRect(); // cleared; chunk-4 will use this for glTexSubImage2D
     }
 }
 
@@ -808,33 +824,46 @@ void LayerFow::flushPendingUpdate()
     // If the coalescing timer is pending, cancel it and apply the deferred update
     // immediately. This is called by stroke-end handlers (mouse-up) so the player
     // renderer sees consistent imagery before the caller emits dirty().
-    // Does NOT emit dirty() \u2014 the caller is responsible for that.
+    // Does NOT emit dirty() — the caller is responsible for that.
     if(_updateCoalescer->isActive())
     {
         _updateCoalescer->stop();
-        updateFowInternal();
+        QRect region = _pendingDirtyRect;
+        _pendingDirtyRect = QRect();
+        dispatchFowUpdate(region);
     }
 }
 
-void LayerFow::requestFowUpdate()
+void LayerFow::requestFowUpdate(const QRect& region)
 {
-    // Starts the coalescing timer if it is not already running. Subsequent calls
-    // within the same FOW_UPDATE_COALESCE_MS window are ignored; a single
-    // updateFowInternal() fires when the timer expires.
+    // Union the new footprint into the pending dirty rect. Subsequent calls within
+    // the same FOW_UPDATE_COALESCE_MS window accumulate into the union; a single
+    // dispatchFowUpdate fires when the timer expires.
+    _pendingDirtyRect = _pendingDirtyRect.united(region);
     if(!_updateCoalescer->isActive())
         _updateCoalescer->start();
 }
 
-void LayerFow::updateFowInternal()
+void LayerFow::dispatchFowUpdate(const QRect& region)
 {
-    QImage newImage = getImage();
+    // Deferred-upload contract — runs on the GUI thread. Sets pending flags and emits
+    // signals; never calls into _fowGLObject. The next playerGLPaint() consumes
+    // _fowGLImageDirty / _fowGLPendingRegion via applyGLPendingUpdates().
+    _cachedImage = getImage();
 
+    // Wake the DM-side item to repaint the changed region only.
     if(_graphicsItem)
-        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
+        _graphicsItem->updateRegion(region);
 
-    // Defer GL texture upload to playerGLPaint(), which runs with a current GL context.
-    // GUI-thread paint methods must never call GL-state-mutating functions directly.
+    // Queue a full-image GL upload for the player window. The _fowGLPendingRegion
+    // accumulator is populated for chunk-4 use; chunk-3 applyGLPendingUpdates()
+    // still uploads the full image.
     _fowGLImageDirty = true;
+    _fowGLPendingRegion = _fowGLPendingRegion.united(region);
+
+    // Notify signal subscribers and wake the player renderer.
+    emit fowRegionChanged(region);
+    emit changed();
 }
 
 void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -982,7 +1011,7 @@ void LayerFow::initializeUndoStack()
             }
         }
         _batchProcessing = false;
-        updateFowInternal();
+        dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
     }
     else
     {

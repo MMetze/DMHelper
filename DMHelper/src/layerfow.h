@@ -5,8 +5,8 @@
 #include "mapcontent.h"
 #include <QImage>
 
+class FowGraphicsItem;
 class PublishGLBattleBackground;
-class QGraphicsPixmapItem;
 class QTimer;
 class QUndoStack;
 class UndoFowBase;
@@ -74,13 +74,14 @@ public slots:
     virtual void editSettings() override;
 
 signals:
-    // Emitted by the coalescing-timer slot after updateFowInternal(); used to wake
-    // the player renderer. This is a visual-only signal — do NOT connect to save logic.
+    // Emitted by dispatchFowUpdate() to wake the player renderer. Visual-only —
+    // do NOT connect to save logic.
     void changed();
 
-protected slots:
-    // Local Interface
-    void updateFowInternal();
+    // Visual-update signal only (changed()-like, not dirty()-like). Emitted by
+    // dispatchFowUpdate() so the DM-side FowGraphicsItem can repaint exactly the
+    // changed sub-rect. dirty() is emitted only from batch/bulk operations.
+    void fowRegionChanged(const QRect& region);
 
 protected:
     // Layer Specific Interface
@@ -98,7 +99,7 @@ protected:
     void initializeUndoStack();
 
     // DM Window Members
-    QGraphicsPixmapItem* _graphicsItem;
+    FowGraphicsItem* _graphicsItem;
 
     // Player Window Members
     PublishGLBattleBackground* _fowGLObject;
@@ -115,9 +116,10 @@ protected:
     bool _batchProcessing;
 
 private slots:
-    // Starts the coalescing timer if not already running. Called by paintFoWPoint /
-    // paintFoWPoints in place of direct updateFowInternal() + dirty() per sample.
-    void requestFowUpdate();
+    // Unions region into _pendingDirtyRect and starts the coalescing timer if not
+    // already running. Called by paintFoWPoint / paintFoWPoints with the footprint
+    // rect of the changed area.
+    void requestFowUpdate(const QRect& region);
 
 private:
     // Pending-state flags set by GUI-thread paths; consumed only from *GL* functions.
@@ -128,6 +130,26 @@ private:
 
     // Callable only from a *GL* function with a current GL context.
     void applyGLPendingUpdates();
+
+    // Deferred-upload contract — runs on the GUI thread. Sets pending flags and emits
+    // signals; never calls into _fowGLObject. The next playerGLPaint() consumes
+    // _fowGLImageDirty / _fowGLPendingRegion via applyGLPendingUpdates().
+    void dispatchFowUpdate(const QRect& region);
+
+    // Accumulated dirty rect for the coalescing timer (DM-side). Unioned by
+    // requestFowUpdate(); consumed and reset by the timer slot and flushPendingUpdate().
+    QRect _pendingDirtyRect;
+
+    // Accumulated dirty region for the GL upload path (player-side). Unioned by
+    // dispatchFowUpdate(); consumed and reset by applyGLPendingUpdates() inside
+    // playerGLPaint(). Chunk 4 will use this for glTexSubImage2D; chunk 3 populates
+    // it so the accumulator is ready.
+    QRect _fowGLPendingRegion;
+
+    // Cached composed image (LayerFow owns this; FowGraphicsItem holds a pointer to it).
+    // Updated by dispatchFowUpdate() via getImage(). Stable address — never reassigned
+    // by value (only overwritten in-place via operator=).
+    QImage _cachedImage;
 
     // Single-shot coalescing timer: fires at most once per FOW_UPDATE_COALESCE_MS window.
     // Started by requestFowUpdate(); cancelled by flushPendingUpdate().
