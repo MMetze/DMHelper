@@ -32,7 +32,7 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">background: transparent;</string>
+      <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
      </property>
      <property name="readOnly">
       <bool>false</bool>

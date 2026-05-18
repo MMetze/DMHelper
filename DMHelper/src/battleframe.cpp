@@ -802,7 +802,8 @@ void BattleFrame::resizeGrid()
     _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
 
-    // Position the grid sizer at the first grid-aligned point inside the visible area
+    // Position the grid sizer as top-left as possible: at the grid origin if visible,
+    // otherwise at the first grid-aligned intersection inside the visible viewport.
     QRectF visibleRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
     qreal xPixelOffset = 0.0;
     qreal yPixelOffset = 0.0;
@@ -811,9 +812,8 @@ void BattleFrame::resizeGrid()
         xPixelOffset = currentScale * gridLayer->getConfig().getGridOffsetX() / 100.0;
         yPixelOffset = currentScale * gridLayer->getConfig().getGridOffsetY() / 100.0;
     }
-    // Find the first grid line at or past the visible left/top, then add one grid square
-    qreal xPos = xPixelOffset + qCeil((visibleRect.left() - xPixelOffset) / currentScale) * currentScale + currentScale;
-    qreal yPos = yPixelOffset + qCeil((visibleRect.top() - yPixelOffset) / currentScale) * currentScale + currentScale;
+    qreal xPos = qMax(xPixelOffset, xPixelOffset + qCeil((visibleRect.left() - xPixelOffset) / currentScale) * currentScale);
+    qreal yPos = qMax(yPixelOffset, yPixelOffset + qCeil((visibleRect.top()  - yPixelOffset) / currentScale) * currentScale);
     _gridSizer->setPos(xPos, yPos);
 
     connect(_gridSizer, &GridSizer::accepted, this, &BattleFrame::gridSizerAccepted);
@@ -5066,6 +5066,8 @@ void BattleFrame::createSceneContents()
         zoomFit();
     }
     ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
+    _scale = ui->graphicsView->transform().m11();
+    setMapCursor();
 
     _scene->createBattleContents();
 
