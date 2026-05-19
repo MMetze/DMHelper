@@ -16,7 +16,7 @@ OK, this one is huge. No really, major stuff. Don't read the rest, go check it o
 <li> MAJOR improvement in Fog of War editing performance! And even other DM View activities. Smooooooooth...
 </ul>
 
-Good - did you like it? Then jump on Patreon, it took quite a lot of tokens to figure that one out ;-)
+Good - did you like it? Then jump on Patreon, it took quite a lot of tokens to figure that one out!
 
 So, now on with all the news; and there's a lot of hot new toys to play with this time!
 
@@ -41,6 +41,7 @@ So, now on with all the news; and there's a lot of hot new toys to play with thi
 <p>
 <ul>
 <li> Linux support!
+<li> MacOS support for Apple chips (and Intel chips)
 </ul>
 
 <p>
