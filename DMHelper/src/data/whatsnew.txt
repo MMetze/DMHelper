@@ -10,14 +10,16 @@
 <body>
 <div class="myDiv">
 <h2>What's New: Version 3.9</h2>
-<b>
-OK, this one is huge. No really, major stuff. Don't read the rest, go check it out <i>RIGHT NOW</i>! You can re-open this <i>What's New</i> dialog from the Welcome Screen the rest.
-</b>
+
+<h3>
+OK, this one is huge. No really, major stuff. Don't read the rest, go check it out <i>RIGHT NOW</i>! You can re-open this <i>What's New</i> dialog from the Welcome Screen to read the rest:
+</h3>
 <ul>
-<li> MAJOR improvement in Fog of War editing performance! And even other DM View activities. Smooooooooth...
+<li> <b>MAJOR improvement in Fog of War editing performance!</b> And all other DM View activities. Smooooooooth...
 </ul>
 <p>
-Good - did you like it? Then jump on Patreon, it took quite a lot of tokens to figure that one out!
+<p>
+OK, back again? Good - did you like it? Then jump on Patreon, it took quite a lot of tokens to figure that one out!
 <p>
 So, now on with all the news; and there's a lot of hot new toys to play with this time!
 
