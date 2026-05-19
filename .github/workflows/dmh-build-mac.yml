@@ -9,8 +9,15 @@ on:
 
 jobs:
   build-macos:
-    #runs-on: macos-15  # Apple Silicon runner (recommended)
-    runs-on: macos-15-intel  # Intel Silicon runner (recommended)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch-label: intel
+          - runner: macos-15
+            arch-label: apple-silicon
+    runs-on: ${{ matrix.runner }}
 
     defaults:
       run:
@@ -111,7 +118,7 @@ jobs:
       - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-macOS-Installer
+          name: DMHelper-macOS-Installer-${{ matrix.arch-label }}
           path: |
             DMHelper/DMHelper-macOS-Installer.app
           if-no-files-found: error
@@ -119,7 +126,7 @@ jobs:
       - name: Upload ZIP Distribution
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-macOS-Zip
+          name: DMHelper-macOS-Zip-${{ matrix.arch-label }}
           path: |
             DMHelper/DMHelper-macOS-release.zip
           if-no-files-found: error
