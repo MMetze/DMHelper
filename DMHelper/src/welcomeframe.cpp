@@ -79,7 +79,9 @@ bool WelcomeFrame::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::MouseButtonRelease)
     {
-        if(watched == ui->lblUsersGuide)
+        if(watched == ui->lblWhatsNew)
+            openWhatsNew();
+        else if(watched == ui->lblUsersGuide)
             openUsersGuide();
         else if(watched == ui->lblGettingStartedGuide)
             openGettingStarted();
