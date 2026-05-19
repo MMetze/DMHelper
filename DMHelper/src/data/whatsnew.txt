@@ -11,7 +11,7 @@
 <div class="myDiv">
 <h2>What's New: Version 3.9</h2>
 
-OK, this one is huge. No really, major stuff. Don't read the rest, go check it out <i>RIGHT NOW</i>! Then open <b>File > What's New</b> to read the rest.
+OK, this one is huge. No really, major stuff. Don't read the rest, go check it out <i>RIGHT NOW</i>! You can re-open this <b>What's New</b> dialog from the Welcome Screen the rest.
 <ul>
 <li> MAJOR improvement in Fog of War editing performance! And even other DM View activities. Smooooooooth...
 </ul>

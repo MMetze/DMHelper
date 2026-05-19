@@ -1,6 +1,7 @@
 #include "welcomeframe.h"
 #include "ui_welcomeframe.h"
 #include "mruhandler.h"
+#include "whatsnewdialog.h"
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
@@ -14,6 +15,8 @@ WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->lblWhatsNew->setCursor(Qt::PointingHandCursor);
+    ui->lblWhatsNew->installEventFilter(this);
     ui->lblUsersGuide->setCursor(Qt::PointingHandCursor);
     ui->lblUsersGuide->installEventFilter(this);
     ui->lblGettingStartedGuide->setCursor(Qt::PointingHandCursor);
@@ -33,6 +36,13 @@ WelcomeFrame::~WelcomeFrame()
 void WelcomeFrame::setMRUHandler(MRUHandler* mruHandler)
 {
     _mruHandler = mruHandler;
+}
+
+void WelcomeFrame::openWhatsNew()
+{
+    WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
+    whatsNewDlg->show();
+    whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
 }
 
 void WelcomeFrame::openUsersGuide()
