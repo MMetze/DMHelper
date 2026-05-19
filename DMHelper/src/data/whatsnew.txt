@@ -50,6 +50,10 @@ So, now on with all the news; and there's a lot of hot new toys to play with thi
 <li> Expanded limits on min/max HP
 <li> Fixed bug on audio settings for repeating videos
 <li> Videos loop by default, and this can now be toggled in the layer settings
+<li> Performance improvements on text entry editing
+<li> The FoW editing cursor is the right size on first load as well
+<li> Activating the grid sizer causes all visible grid layers to be temporarily hidden
+<li> The grid sizer is positioned more consistently
 </ul>
 
 <p>
