@@ -29,8 +29,8 @@
 #include <QMutexLocker>
 #include <QFileDialog>
 #include <QStyleOptionGraphicsItem>
-#include <QMessageBox>
 #include <QDebug>
+#include <QMessageBox>
 #include <QtMath>
 
 MapFrame::MapFrame(QWidget *parent) :
@@ -352,7 +352,8 @@ void MapFrame::resizeGrid()
     _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
 
-    // Position the grid sizer at the first grid-aligned point inside the visible area
+    // Position the grid sizer as top-left as possible: at the grid origin if visible,
+    // otherwise at the first grid-aligned intersection inside the visible viewport.
     QRectF visibleRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
     qreal xPixelOffset = 0.0;
     qreal yPixelOffset = 0.0;
@@ -361,13 +362,16 @@ void MapFrame::resizeGrid()
         xPixelOffset = currentScale * gridLayer->getConfig().getGridOffsetX() / 100.0;
         yPixelOffset = currentScale * gridLayer->getConfig().getGridOffsetY() / 100.0;
     }
-    // Find the first grid line at or past the visible left/top, then add one grid square
-    qreal xPos = xPixelOffset + qCeil((visibleRect.left() - xPixelOffset) / currentScale) * currentScale + currentScale;
-    qreal yPos = yPixelOffset + qCeil((visibleRect.top() - yPixelOffset) / currentScale) * currentScale + currentScale;
+    qreal xPos = qMax(xPixelOffset, xPixelOffset + qCeil((visibleRect.left() - xPixelOffset) / currentScale) * currentScale);
+    qreal yPos = qMax(yPixelOffset, yPixelOffset + qCeil((visibleRect.top()  - yPixelOffset) / currentScale) * currentScale);
     _gridSizer->setPos(xPos, yPos);
 
     connect(_gridSizer, &GridSizer::accepted, this, &MapFrame::gridSizerAccepted);
     connect(_gridSizer, &GridSizer::rejected, this, &MapFrame::gridSizerRejected);
+
+    const QList<Layer*> gridLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+    for(Layer* layer : gridLayers)
+        layer->applyLayerVisibleDM(false);
 }
 
 void MapFrame::setShowMarkers(bool show)
@@ -850,7 +854,9 @@ void MapFrame::initializeMap()
     connect(_scene, &MapFrameScene::editFile, this, &MapFrame::editMapFile);
 
     connect(_scene, &MapFrameScene::itemChanged, this, &MapFrame::handleItemChanged);
-    connect(_scene, &MapFrameScene::changed, this, &MapFrame::handleSceneChanged);
+    // NOTE: do NOT connect QGraphicsScene::changed here. Any connection to that signal puts the entire
+    // scene into Qt compat-update mode, defeating partial-repaint optimisation. Party icon position
+    // is tracked via MapPartyIconItem::positionChanged; renderer updates go through Map model signals.
 
     if(!_mapSource)
         return;
@@ -1532,6 +1538,9 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             if(_undoPath)
             {
                 _undoPath = nullptr;
+                LayerFow* fowLayer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Fow));
+                if(fowLayer)
+                    fowLayer->flushPendingUpdate();
                 emit dirty();
             }
             return true;
@@ -1541,11 +1550,10 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             if(_undoPath)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-                QPoint drawPoint =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
+                QPoint drawPoint = ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
                 if(_undoPath->getLayer())
                     drawPoint -= _undoPath->getLayer()->getPosition();
                 _undoPath->addPoint(drawPoint);
-                emit dirty();
             }
             return true;
         }
@@ -2009,8 +2017,9 @@ void MapFrame::checkPartyUpdate()
     {
         if(!_partyIcon)
         {
-            _partyIcon = new UnselectedPixmap();
+            _partyIcon = new MapPartyIconItem();
             _scene->addItem(_partyIcon);
+            connect(_partyIcon, &MapPartyIconItem::positionChanged, this, &MapFrame::handlePartyIconMoved);
             if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
                 _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
             _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -2048,6 +2057,10 @@ void MapFrame::gridSizerRejected()
 {
     if(!_gridSizer)
         return;
+
+    const QList<Layer*> gridLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+    for(Layer* layer : gridLayers)
+        layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
 
     _gridSizer->deleteLater();
     _gridSizer = nullptr;
@@ -2139,15 +2152,12 @@ void MapFrame::handleItemChanged(QGraphicsItem* item)
     }
 }
 
-void MapFrame::handleSceneChanged(const QList<QRectF> &region)
+void MapFrame::handlePartyIconMoved(const QPointF& pos)
 {
-    Q_UNUSED(region);
-
-    if((_mapSource) && (_partyIcon))
-        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
-
-    if((_isPublishing) && (_renderer))
-        _renderer->updateRender();
+    if(_mapSource)
+        _mapSource->setPartyIconPos(pos.toPoint());
+    // Renderer update is handled automatically via Map::partyIconPosChanged
+    // -> PublishGLMapRenderer::handlePartyIconPosChanged -> updateRender().
 }
 
 void MapFrame::handleMapSceneChanged()

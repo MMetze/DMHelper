@@ -11,7 +11,14 @@
 <div class="myDiv">
 <h2>What's New: Version 3.9</h2>
 
-It's a lot of hot new toys to play with this time!
+OK, this one is huge. No really, major stuff. Don't read the rest, go check it out <i>RIGHT NOW</i>! Then open <b>File > What's New</b> to read the rest.
+<ul>
+<li> MAJOR improvement in Fog of War editing performance! And even other DM View activities. Smooooooooth...
+</ul>
+
+Good - did you like it? Then jump on Patreon, it took quite a lot of tokens to figure that one out ;-)
+
+So, now on with all the news; and there's a lot of hot new toys to play with this time!
 
 <h3>New v3.9 Features:</h3>
 <ul>
@@ -29,7 +36,9 @@ It's a lot of hot new toys to play with this time!
 <li> <b>Delete multiple effects at once</b> because this should have always been possible
 <li> <b>Show/hide and know/unknown multiple combatants at once</b> because ditto
 </ul>
-...... and, by popular demand....
+<p>
+...  and, finally, by popular demand and beloved community support ...
+<p>
 <ul>
 <li> Linux support!
 </ul>

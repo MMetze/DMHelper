@@ -1,4 +1,5 @@
 #include "publishglmaprenderer.h"
+#include "layerfow.h"
 #include "map.h"
 #include "party.h"
 #include "layer.h"
@@ -131,6 +132,15 @@ void PublishGLMapRenderer::initializeGL()
 
     // Create the party token
     createPartyToken();
+
+    // Connect FoW layers so changes update the player view
+    QList<Layer*> fowLayers = _map->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+    for(int i = 0; i < fowLayers.count(); ++i)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(fowLayers.at(i));
+        if(fowLayer)
+            connect(fowLayer, &LayerFow::changed, this, &PublishGLRenderer::updateWidget);
+    }
 
     // Create the markers
     _recreateMarkers = true;
@@ -944,6 +954,13 @@ void PublishGLMapRenderer::layerAdded(Layer* layer)
 {
     if((!layer) || (!_initialized))
         return;
+
+    if(layer->getFinalType() == DMHelper::LayerType_Fow)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        if(fowLayer)
+            connect(fowLayer, &LayerFow::changed, this, &PublishGLRenderer::updateWidget);
+    }
 
     layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
     //layer->playerGLInitialize(this, &_scene);

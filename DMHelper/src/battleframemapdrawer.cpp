@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QMessageBox>
 
+
 BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     QObject(parent),
     _mouseDown(false),
@@ -106,7 +107,6 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos, const Qt::MouseB
         return;
 
     _undoPath->addPoint(pos.toPoint() - _undoPath->getLayer()->getPosition());
-    emit dirty();
 }
 
 void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers)
@@ -247,6 +247,15 @@ void BattleFrameMapDrawer::endPath()
 {
     _undoPath = nullptr;
     _mouseDown = false;
+
+    // Flush any deferred FOW update so the player renderer sees consistent imagery
+    // before the caller emits dirty().
+    if(_scene)
+    {
+        LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
+        if(layer)
+            layer->flushPendingUpdate();
+    }
 }
 
 void BattleFrameMapDrawer::applyPolygon()

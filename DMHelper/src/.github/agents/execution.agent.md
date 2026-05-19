@@ -175,6 +175,42 @@ open include file: 'type_traits'` — that is missing MSVC env, not a
 code error. IntelliSense and `get_errors` output for `.cpp` files in
 this project are unreliable; trust only this build command.
 
+## File Editing — Use the Standard Editing Tools Only
+
+All source edits must go through the standard read/write editing
+tools (`read_file`, `replace_string_in_file`,
+`multi_replace_string_in_file`, `create_file`, and `edit_notebook_file`
+for notebooks). **You may not use command-line, shell, or scripted
+editing of any kind.** The following are forbidden:
+
+- Heredocs or redirection that writes file contents
+  (`Set-Content`, `Out-File`, `>`, `>>`, `echo ... >`, `tee`, etc.)
+- Inline edit utilities (`sed`, `awk`, `perl -i`, `tr`, `ed`)
+- Patch application (`git apply`, `patch`, `Apply-Patch`)
+- One-off scripts in Python, Node, PowerShell, bash, or any other
+  language whose purpose is to mutate source files. This includes
+  scripts you write yourself "just to do this edit" and any
+  `python -c "..."` / `node -e "..."` invocation that writes to disk.
+- Bulk find-and-replace via `Get-ChildItem | ForEach-Object { ... }`
+  pipelines.
+- Code-generation tools or formatters that rewrite files in-place.
+
+Why: scripted edits bypass the safety properties of the editing
+tools (exact-string matching, conflict detection, single-occurrence
+guards). They tend to munge whitespace, corrupt UTF-8 / BOM, mangle
+line endings, and silently make unintended changes that Review then
+flags as `extra-touched` files. The editing tools exist to make
+edits auditable and reproducible \u2014 use them.
+
+The only permitted command-line activity is **read-only inspection**
+(`Get-Content`, `Get-ChildItem`, `Select-String` for searches not
+covered by the workspace search tools, `git diff` as referenced in
+the Review Agent's read-only inspection allowance) and **running the
+build** as specified above. If you find yourself wanting to script
+an edit because there are "too many" call sites to touch by hand,
+that's a `SCOPE_AMBIGUOUS` or `MISSING_FILE_IN_PLAN` signal \u2014 raise
+the flag and stop, do not improvise.
+
 ## Git Activity — None
 
 **You do not run `git` for any reason.** This is non-negotiable. The

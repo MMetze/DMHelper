@@ -8,7 +8,7 @@
 #include <QRubberBand>
 #include "undofowpath.h"
 #include "videoplayer.h"
-#include "unselectedpixmap.h"
+#include "mappartyiconitem.h"
 
 namespace Ui {
 class MapFrame;
@@ -211,7 +211,7 @@ protected slots:
     void handleActivateMapMarker();
 
     void handleItemChanged(QGraphicsItem* item);
-    void handleSceneChanged(const QList<QRectF> &region);
+    void handlePartyIconMoved(const QPointF& pos);
     void handleMapSceneChanged();
 
 private:
@@ -223,7 +223,7 @@ private:
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
-    UnselectedPixmap* _partyIcon;
+    MapPartyIconItem* _partyIcon;
     CameraRect* _cameraRect;
 
     int _editMode;

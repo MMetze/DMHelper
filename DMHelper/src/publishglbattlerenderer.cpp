@@ -8,6 +8,7 @@
 #include "layer.h"
 #include "layertokens.h"
 #include "layerdraw.h"
+#include "layerfow.h"
 #include "characterv2.h"
 #include "campaign.h"
 #include "dmh_opengl.h"
@@ -175,6 +176,14 @@ void PublishGLBattleRenderer::initializeGL()
         LayerDraw* drawLayer = dynamic_cast<LayerDraw*>(drawLayers.at(i));
         if(drawLayer)
             connect(drawLayer, &LayerDraw::contentChanged, this, &PublishGLRenderer::updateWidget);
+    }
+
+    QList<Layer*> fowLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+    for(int i = 0; i < fowLayers.count(); ++i)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(fowLayers.at(i));
+        if(fowLayer)
+            connect(fowLayer, &LayerFow::changed, this, &PublishGLRenderer::updateWidget);
     }
 
     QMatrix4x4 modelMatrix;
@@ -1297,6 +1306,13 @@ void PublishGLBattleRenderer::layerAdded(Layer* layer)
             connect(drawLayer, &LayerDraw::contentChanged, this, &PublishGLRenderer::updateWidget);
     }
 
+    else if(layer->getFinalType() == DMHelper::LayerType_Fow)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        if(fowLayer)
+            connect(fowLayer, &LayerFow::changed, this, &PublishGLRenderer::updateWidget);
+    }
+
     layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
     emit updateWidget();
 }
@@ -1317,6 +1333,13 @@ void PublishGLBattleRenderer::layerRemoved(Layer* layer)
         LayerDraw* drawLayer = dynamic_cast<LayerDraw*>(layer);
         if(drawLayer)
             disconnect(drawLayer, &LayerDraw::contentChanged, this, &PublishGLRenderer::updateWidget);
+    }
+
+    else if(layer->getFinalType() == DMHelper::LayerType_Fow)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        if(fowLayer)
+            disconnect(fowLayer, &LayerFow::changed, this, &PublishGLRenderer::updateWidget);
     }
 }
 

@@ -1,4 +1,5 @@
-#include "layerfow.h"
+﻿#include "layerfow.h"
+#include "fowgraphicsitem.h"
 #include "publishglbattlebackground.h"
 #include "undofowbase.h"
 #include "undofowfill.h"
@@ -9,16 +10,30 @@
 #include "undomarker.h"
 #include "dmh_opengl.h"
 #include "layerfowsettings.h"
-#include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QImage>
+#include <QTimer>
 #include <QUndoStack>
 #include <QPainter>
 #include <QDebug>
+#include <QElapsedTimer>
 
 const qreal LAYER_FOW_DM_OPACITY = 0.6;
 const qreal LAYER_FOW_DM_DIP = 0.3;
 const qreal LAYER_FOW_DM_RAISE = 1.0;
+
+// Coalescing window for deferred FOW updates: at most one dispatchFowUpdate() call
+// per this many milliseconds during an active brush stroke.
+static constexpr int FOW_UPDATE_COALESCE_MS = 16;
+
+// Timing probe: records when the coalescer was last started (requestFowUpdate, first
+// call in a burst) so dispatchFowUpdate can log how long the coalescer actually waited.
+static QElapsedTimer s_coalesceStart;
+
+// Records the wall-clock time of the most recent dispatchFowUpdate() call.
+// Used in requestFowUpdate() to detect the "coalescer inactive but >= 16ms since
+// last dispatch" case and dispatch directly instead of starting a fresh WM_TIMER.
+static QElapsedTimer s_lastDispatch;
 
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
@@ -32,8 +47,31 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     _fowTextureScale(),
     _undoStack(nullptr),
     _undoItems(),
-    _batchProcessing(false)
+    _batchProcessing(false),
+    _fowGLImageDirty(false),
+    _fowGLDeferredDestroy(false),
+    _pendingDirtyRect(),
+    _fowGLPendingRegion(),
+    _cachedImage(),
+    _updateCoalescer(nullptr)
 {
+    _updateCoalescer = new QTimer(this);
+    _updateCoalescer->setSingleShot(true);
+    _updateCoalescer->setInterval(FOW_UPDATE_COALESCE_MS);
+    connect(_updateCoalescer, &QTimer::timeout, this, [this]() {
+        // Deferred-upload contract — this slot runs on the GUI thread with no current GL
+        // context. It MUST NOT call into _fowGLObject’s GL-mutating methods. The chunk-1
+        // pending-flag pattern is the only permitted path to a GL upload: dispatchFowUpdate()
+        // sets _fowGLImageDirty = true; the next playerGLPaint() consumes the flag via
+        // applyGLPendingUpdates(). changed() (emitted inside dispatchFowUpdate) wakes the
+        // player renderer. Reset _pendingDirtyRect before dispatching so any requestFowUpdate()
+        // call that arrives during the dispatch itself starts a fresh accumulation.
+        QRect region = _pendingDirtyRect;
+        _pendingDirtyRect = QRect();
+        s_lastDispatch.restart();
+        dispatchFowUpdate(region);
+    });
+
     _undoStack = new QUndoStack(this);
     setSize(imageSize);
 }
@@ -215,16 +253,21 @@ void LayerFow::applySize(const QSize& size)
     _size = size;
     initialize(size);
 
-    QImage newImage = getImage();
-
     if(_graphicsItem)
-        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
-
-    if(_fowGLObject)
     {
-        delete _fowGLObject;
-        _fowGLObject = nullptr;
+        // Notify the scene that the bounding rect is changing, then refresh the
+        // cached image and request a full repaint of the new bounds.
+        _graphicsItem->notifyGeometryChange();
+        dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
     }
+
+    // Defer GL object destruction to playerGLPaint() / playerGLUninitialize(), which run
+    // with a current GL context. The previous GL object remains alive and rendered for at
+    // most one player-window paint cycle after a resize; this is acceptable because resize
+    // already invalidates the FOW image content and the next playerGLInitialize() call
+    // (triggered when playerIsInitialized() returns false) will rebuild on the following cycle.
+    if(_fowGLObject)
+        _fowGLDeferredDestroy = true;
 }
 
 QImage LayerFow::getImage() const
@@ -274,12 +317,18 @@ void LayerFow::applyPaintTo(int index, int startIndex)
     }
     _batchProcessing = false;
 
-    updateFowInternal();
+    // Undo/redo replay: call dispatchFowUpdate() directly rather than via the coalescer.
+    // The replay is an atomic operation that must flush immediately so the UI reflects the
+    // correct state before this function returns. The coalescer is intentionally bypassed.
+    dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
     emit dirty();
 }
 
 void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
 {
+    if(mapDraw.erase() && mapDraw.smooth())
+        rebuildBrushStamp(mapDraw);
+
     QPainter p(&_imageFow);
     p.setPen(Qt::NoPen);
 
@@ -289,53 +338,40 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
         {
             if(mapDraw.smooth())
             {
-                QRadialGradient grad(point, mapDraw.radius());
-                grad.setColorAt(0, QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
-                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
-                grad.setColorAt(1, _fowColor.rgb());
-                p.setBrush(grad);
+                // Stamp: pre-computed gradient baked into alpha channel. One drawImage +
+                // DestinationIn is cheaper than per-call radial gradient rasterization.
+                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+                p.drawImage(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), _brushStamp);
             }
             else
             {
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+                // Source + transparent: same result as DestinationIn + alpha=0 but
+                // uses Qt's SIMD solid-fill path instead of the scalar DestinationIn path.
+                p.setBrush(Qt::transparent);
+                p.setCompositionMode(QPainter::CompositionMode_Source);
+                p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
             }
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         }
         else
         {
             p.setBrush(_fowColor);
             p.setCompositionMode(QPainter::CompositionMode_Source);
+            p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
         }
-
-        p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
     }
     else
     {
         if(mapDraw.erase())
         {
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
             if(mapDraw.smooth())
             {
-                qreal border = static_cast<qreal>(mapDraw.radius()) / 20.0;
-                qreal radius = static_cast<qreal>(mapDraw.radius()) - (border * 4);
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 50));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 100));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 150));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 200));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
+                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+                p.drawImage(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), _brushStamp);
             }
             else
             {
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+                p.setBrush(Qt::transparent);
+                p.setCompositionMode(QPainter::CompositionMode_Source);
                 p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
             }
         }
@@ -350,8 +386,8 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
-        emit dirty();
+        const int r = mapDraw.radius();
+        requestFowUpdate(QRect(point.x() - r, point.y() - r, r * 2 + 1, r * 2 + 1));
     }
 }
 
@@ -360,6 +396,9 @@ void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDra
     if(points.isEmpty())
         return;
 
+    if(mapDraw.erase() && mapDraw.smooth())
+        rebuildBrushStamp(mapDraw);
+
     QPainter p(&_imageFow);
     p.setPen(Qt::NoPen);
 
@@ -367,22 +406,16 @@ void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDra
     {
         if(mapDraw.erase())
         {
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
             if(mapDraw.smooth())
             {
+                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
                 for(const QPoint& point : points)
-                {
-                    QRadialGradient grad(point, mapDraw.radius());
-                    grad.setColorAt(0, QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
-                    grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
-                    grad.setColorAt(1, _fowColor.rgb());
-                    p.setBrush(grad);
-                    p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
-                }
+                    p.drawImage(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), _brushStamp);
             }
             else
             {
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+                p.setBrush(Qt::transparent);
+                p.setCompositionMode(QPainter::CompositionMode_Source);
                 for(const QPoint& point : points)
                     p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
             }
@@ -399,32 +432,16 @@ void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDra
     {
         if(mapDraw.erase())
         {
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
             if(mapDraw.smooth())
             {
-                qreal border = static_cast<qreal>(mapDraw.radius()) / 20.0;
+                p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
                 for(const QPoint& point : points)
-                {
-                    qreal radius = static_cast<qreal>(mapDraw.radius()) - (border * 4);
-                    p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
-                    p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                    radius += border;
-                    p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 50));
-                    p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                    radius += border;
-                    p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 100));
-                    p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                    radius += border;
-                    p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 150));
-                    p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                    radius += border;
-                    p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 200));
-                    p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                }
+                    p.drawImage(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), _brushStamp);
             }
             else
             {
-                p.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+                p.setBrush(Qt::transparent);
+                p.setCompositionMode(QPainter::CompositionMode_Source);
                 for(const QPoint& point : points)
                     p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
             }
@@ -441,8 +458,11 @@ void LayerFow::paintFoWPoints(const QList<QPoint>& points, const MapDraw& mapDra
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
-        emit dirty();
+        const int r = mapDraw.radius();
+        QRect footprint;
+        for(const QPoint& pt : points)
+            footprint = footprint.united(QRect(pt.x() - r, pt.y() - r, r * 2 + 1, r * 2 + 1));
+        requestFowUpdate(footprint);
     }
 }
 
@@ -501,7 +521,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
+        dispatchFowUpdate(rect);
         emit dirty();
     }
 }
@@ -527,7 +547,7 @@ void LayerFow::paintFoWPolygon(const MapEditPolygon& mapEditPolygon)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
+        dispatchFowUpdate(mapEditPolygon.polygon().boundingRect());
         emit dirty();
     }
 }
@@ -540,7 +560,7 @@ void LayerFow::fillFoW(const QColor& color)
     p.end();
     if(!_batchProcessing)
     {
-        updateFowInternal();
+        dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
         emit dirty();
     }
 }
@@ -629,15 +649,13 @@ void LayerFow::dmInitialize(QGraphicsScene* scene)
         return;
     }
 
-    _graphicsItem = scene->addPixmap(QPixmap::fromImage(getImage()));
-    if(_graphicsItem)
-    {
-        _graphicsItem->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
-        _graphicsItem->setPos(_position);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _graphicsItem->setZValue(getOrder());
-    }
+    _cachedImage = getImage().convertToFormat(QImage::Format_RGBA8888);
+    _graphicsItem = new FowGraphicsItem(&_cachedImage);
+    _graphicsItem->setPos(_position);
+    _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    _graphicsItem->setZValue(getOrder());
+    scene->addItem(_graphicsItem);
 
     Layer::dmInitialize(scene);
 }
@@ -667,19 +685,27 @@ void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* s
     f->glUseProgram(_shaderProgramRGBA);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    _fowGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
+    _fowGLObject = new PublishGLBattleBackground(nullptr, getImage().convertToFormat(QImage::Format_RGBA8888), GL_NEAREST,
+                                                 /*sourceIsRgba8888=*/true,
+                                                 /*sourceNeedsVerticalFlip=*/false);
 
     Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerFow::playerGLUninitialize()
 {
+    applyGLPendingUpdates();
     cleanupPlayer();
 }
 
 void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    applyGLPendingUpdates();
+
     Q_UNUSED(defaultModelMatrix);
+
+    if(!_fowGLObject)
+        return;
 
     if(!functions)
         return;
@@ -721,7 +747,15 @@ void LayerFow::initialize(const QSize& sceneSize)
     if(getSize().isEmpty())
         setSize(sceneSize);
 
+    // Format_ARGB32_Premultiplied: Qt's software rasterizer has SIMD-optimised
+    // compositing paths for this format. CPU painting (paintFoWPoint, paintFoWPoints)
+    // is the dominant per-event cost; keeping _imageFow in the native rasterizer
+    // format avoids falling back to scalar loops on every brush stroke.
+    // _cachedImage is produced as RGBA8888 by dispatchFowUpdate() so the GL upload
+    // path can call glTexSubImage2D directly without an extra conversion.
     _imageFow = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
+    // Same format as _imageFow so getImage() compositing stays within
+    // ARGB32_Premultiplied throughout the CPU painting path.
     _imageFowTexture = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
     fillFoWImage();
 
@@ -748,23 +782,227 @@ void LayerFow::editSettings()
     _fowTextureScale = dlg->fowScale();
 
     fillFoWImage();
-    updateFowInternal();
+    dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
+    emit dirty();
 
     dlg->deleteLater();
 }
 
-void LayerFow::updateFowInternal()
+void LayerFow::applyGLPendingUpdates()
 {
-    QImage newImage = getImage();
-
-    if(_graphicsItem)
-        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
-
-    if(_fowGLObject)
+    // This is the ONLY function in LayerFow permitted to call GL-state-mutating methods
+    // on _fowGLObject (constructor, updateImage, setImage, destructor). Every other call
+    // site in LayerFow sets _fowGLImageDirty or _fowGLDeferredDestroy instead of touching
+    // _fowGLObject directly. This function is only ever invoked from *GL* functions where
+    // the player window's GL context is current.
+    if(_fowGLDeferredDestroy)
     {
         delete _fowGLObject;
         _fowGLObject = nullptr;
+        _fowGLDeferredDestroy = false;
+        _fowGLImageDirty = false; // image will be re-uploaded after the next playerGLInitialize()
+        _fowGLPendingRegion = QRect(); // cleared; new object will upload full image on initialize
     }
+    else if(_fowGLImageDirty && _fowGLObject)
+    {
+        const QRect fullImageRect(QPoint(), _imageFow.size());
+        if(_fowGLPendingRegion.isValid() && _fowGLPendingRegion != fullImageRect)
+        {
+            // Partial region: clamp defensively then use glTexSubImage2D for an
+            // efficient sub-image upload. _cachedImage is already up-to-date for
+            // the dirty region (updated in dispatchFowUpdate before this runs).
+            const QRect safeRegion = _fowGLPendingRegion.intersected(fullImageRect);
+            if(safeRegion.isValid())
+                _fowGLObject->updateImageRegion(_cachedImage, safeRegion);
+            else
+                _fowGLObject->updateImage(_cachedImage);
+        }
+        else
+        {
+            // Full image or no pending region: upload the complete texture.
+            _fowGLObject->updateImage(_cachedImage);
+        }
+        _fowGLImageDirty = false;
+        _fowGLPendingRegion = QRect();
+    }
+}
+
+void LayerFow::flushPendingUpdate()
+{
+    // If the coalescing timer is pending, cancel it and apply the deferred update
+    // immediately. This is called by stroke-end handlers (mouse-up) so the player
+    // renderer sees consistent imagery before the caller emits dirty().
+    // Does NOT emit dirty() — the caller is responsible for that.
+    if(_updateCoalescer->isActive())
+    {
+        _updateCoalescer->stop();
+        QRect region = _pendingDirtyRect;
+        _pendingDirtyRect = QRect();
+        dispatchFowUpdate(region);
+    }
+}
+
+void LayerFow::requestFowUpdate(const QRect& region)
+{
+    // Clamp to image bounds so out-of-image brush strokes (partially above or to
+    // the right of the map) do not produce a negative-y or oversized pending region
+    // that would cause QImage::constScanLine() to assert in updateImageRegion().
+    if(_imageFow.isNull())
+        return;
+    const QRect clamped = region.intersected(QRect(QPoint(), _imageFow.size()));
+    if(clamped.isEmpty())
+        return;
+    // Union the new footprint into the pending dirty rect. Subsequent calls within
+    // the same FOW_UPDATE_COALESCE_MS window accumulate into the union; a single
+    // dispatchFowUpdate fires when the timer expires.
+    _pendingDirtyRect = _pendingDirtyRect.united(clamped);
+    if(!_updateCoalescer->isActive()) {
+        // Coalescer is inactive: the WM_TIMER already fired (or this is the first call).
+        // If >= 16ms has elapsed since the last dispatch we are already inside the mouse-
+        // event handler (posted-event priority) — dispatch directly now rather than
+        // starting a fresh WM_TIMER that will be starved for another ~35ms.
+        // Keep the coalescer running as a tail-timer for the final stamp when the mouse stops.
+        if(s_lastDispatch.isValid() && s_lastDispatch.elapsed() >= FOW_UPDATE_COALESCE_MS) {
+            QRect pendingRegion = _pendingDirtyRect;
+            _pendingDirtyRect = QRect();
+            s_coalesceStart.restart();
+            s_lastDispatch.restart();
+            _updateCoalescer->start();
+            dispatchFowUpdate(pendingRegion);
+        } else {
+            s_coalesceStart.restart();
+            _updateCoalescer->start();
+        }
+    } else if(s_coalesceStart.elapsed() >= FOW_UPDATE_COALESCE_MS) {
+        // WM_TIMER is starved while the mouse is dragging: hardware input keeps the
+        // Windows message queue non-empty so WM_TIMER never fires. We're called from
+        // a Qt mouse-event handler (posted-event priority, reliably scheduled), so
+        // dispatch here instead of waiting. Restart the coalescer so the final stamp
+        // after the mouse stops is still delivered.
+        _updateCoalescer->stop();
+        QRect pendingRegion = _pendingDirtyRect;
+        _pendingDirtyRect = QRect();
+        s_coalesceStart.restart();
+        s_lastDispatch.restart();
+        _updateCoalescer->start();
+        dispatchFowUpdate(pendingRegion);
+    }
+}
+
+void LayerFow::dispatchFowUpdate(const QRect& region)
+{
+    // Deferred-upload contract — runs on the GUI thread. Sets pending flags and emits
+    // signals; never calls into _fowGLObject. The next playerGLPaint() consumes
+    // _fowGLImageDirty / _fowGLPendingRegion via applyGLPendingUpdates().
+    // Guard: an empty region means there are no pending stamps to dispatch. This can
+    // happen when the coalescer tail-timer fires after the elapsed-time path already
+    // cleared _pendingDirtyRect. QRectF(QRect()) is null, and Qt interprets a null
+    // QRectF passed to QGraphicsItem::update() as "update full bounding rect", so we
+    // must return before reaching _graphicsItem->updateRegion().
+    if(region.isEmpty())
+        return;
+
+    // Partial composite update: rebuild only the dirty region of _cachedImage.
+    // _imageFow is ARGB32_Premultiplied; _cachedImage is RGBA8888 (for GL upload).
+    // The format difference is intentional — do NOT use _imageFow.format() as the
+    // expected format here. Trigger a full rebuild only on first call (isNull) or
+    // after applySize() changes the map dimensions.
+    if(_cachedImage.isNull() || _cachedImage.size() != _imageFow.size() || _cachedImage.format() != QImage::Format_RGBA8888)
+    {
+        _cachedImage = getImage().convertToFormat(QImage::Format_RGBA8888);
+    }
+    else if(_imageFowTexture.isNull())
+    {
+        // No texture: copy dirty region from _imageFow directly.
+        QPainter fowPainter(&_cachedImage);
+        fowPainter.setCompositionMode(QPainter::CompositionMode_Source);
+        fowPainter.drawImage(region, _imageFow, region);
+    }
+    else
+    {
+        // Has texture: composite dirty region — first copy _imageFow then apply texture.
+        QPainter fowPainter(&_cachedImage);
+        fowPainter.setCompositionMode(QPainter::CompositionMode_Source);
+        fowPainter.drawImage(region, _imageFow, region);
+        fowPainter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        fowPainter.drawImage(region, _imageFowTexture, region);
+    }
+
+    // Wake the DM-side item to repaint the changed region only.
+    if(_graphicsItem)
+        _graphicsItem->updateRegion(region);
+
+    // Queue a full-image GL upload for the player window. The _fowGLPendingRegion
+    // accumulator is populated for chunk-4 use; chunk-3 applyGLPendingUpdates()
+    // still uploads the full image.
+    _fowGLImageDirty = true;
+    _fowGLPendingRegion = _fowGLPendingRegion.united(region);
+
+    // Wake the player renderer.
+    emit changed();
+}
+
+void LayerFow::rebuildBrushStamp(const MapDraw& mapDraw)
+{
+    const int r = mapDraw.radius();
+    if(!_brushStamp.isNull() &&
+       _brushStamp.width() == 2 * r + 1 &&
+       _brushStampBrushType == mapDraw.brushType() &&
+       _brushStampSmooth == mapDraw.smooth() &&
+       _brushStampFowColor == _fowColor.rgba())
+        return;
+
+    _brushStampBrushType = mapDraw.brushType();
+    _brushStampSmooth = mapDraw.smooth();
+    _brushStampFowColor = _fowColor.rgba();
+
+    // Fill with full-opacity fowColor (alpha=255). Pixels outside the brush shape
+    // then act as "preserve destination" when applied with CompositionMode_DestinationIn
+    // (dest × 255/255 = dest, unchanged).
+    _brushStamp = QImage(QSize(2 * r + 1, 2 * r + 1), QImage::Format_ARGB32_Premultiplied);
+    _brushStamp.fill(_fowColor.rgba());
+
+    QPainter sp(&_brushStamp);
+    sp.setPen(Qt::NoPen);
+
+    if(mapDraw.brushType() == DMHelper::BrushType_Circle)
+    {
+        // Pre-render the radial gradient inside the ellipse with Source composition.
+        // Outside the ellipse the fill (alpha=255) remains, so DestinationIn applied
+        // to _imageFow leaves those pixels unchanged.
+        QRadialGradient grad(r, r, r);
+        grad.setColorAt(0, QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+        grad.setColorAt(1.0 - (5.0 / static_cast<qreal>(r)), QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+        grad.setColorAt(1, _fowColor);
+        sp.setBrush(grad);
+        sp.setCompositionMode(QPainter::CompositionMode_Source);
+        sp.drawEllipse(QPoint(r, r), r, r);
+    }
+    else
+    {
+        // Pre-render the 5-rect stepped soft edge on the small stamp image using
+        // DestinationIn. The stamp's alpha channel encodes the compound multiplier
+        // at each pixel. One drawImage+DestinationIn per event is cheaper than
+        // 5 drawRect+DestinationIn calls on the full _imageFow image.
+        sp.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        const qreal border = static_cast<qreal>(r) / 20.0;
+        qreal sr = static_cast<qreal>(r) - border * 4;
+        sp.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 0));
+        sp.drawRect(QRectF(r - sr, r - sr, sr * 2, sr * 2));
+        sr += border;
+        sp.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 50));
+        sp.drawRect(QRectF(r - sr, r - sr, sr * 2, sr * 2));
+        sr += border;
+        sp.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 100));
+        sp.drawRect(QRectF(r - sr, r - sr, sr * 2, sr * 2));
+        sr += border;
+        sp.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 150));
+        sp.drawRect(QRectF(r - sr, r - sr, sr * 2, sr * 2));
+        sr += border;
+        sp.setBrush(QColor(_fowColor.red(), _fowColor.green(), _fowColor.blue(), 200));
+        sp.drawRect(QRectF(r - sr, r - sr, sr * 2, sr * 2));
+    }
+    sp.end();
 }
 
 void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -912,7 +1150,7 @@ void LayerFow::initializeUndoStack()
             }
         }
         _batchProcessing = false;
-        updateFowInternal();
+        dispatchFowUpdate(QRect(QPoint(), _imageFow.size()));
     }
     else
     {
