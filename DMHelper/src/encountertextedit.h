@@ -161,6 +161,7 @@ protected:
 
     int _encounterChangedTimer;
     int _updateAnchorTimer;
+    int _publishUpdateTimer;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

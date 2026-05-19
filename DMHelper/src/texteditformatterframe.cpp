@@ -2,7 +2,6 @@
 #include <QFontDatabase>
 #include <QTextEdit>
 #include <QTextBlock>
-#include <QDebug>
 
 TextEditFormatterFrame::TextEditFormatterFrame(QWidget *parent) :
     QObject(parent),
@@ -67,6 +66,7 @@ void TextEditFormatterFrame::setFont(const QString& fontFamily)
         format.setFont(formatFont);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontFamilyChanged(fontFamily);
+        _textEdit->setFocus();
     }
 }
 
@@ -81,6 +81,7 @@ void TextEditFormatterFrame::setFontSize(int fontSize)
         format.setFontPointSize(fontSize);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontSizeChanged(fontSize);
+        _textEdit->setFocus();
     }
 }
 
@@ -95,6 +96,7 @@ void TextEditFormatterFrame::setBold(bool bold)
         format.setFontWeight(bold ? QFont::Bold : QFont::Normal);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontBoldChanged(bold);
+        _textEdit->setFocus();
     }
 }
 
@@ -109,6 +111,7 @@ void TextEditFormatterFrame::setItalics(bool italics)
         format.setFontItalic(italics);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontItalicsChanged(italics);
+        _textEdit->setFocus();
     }
 }
 
@@ -123,6 +126,7 @@ void TextEditFormatterFrame::setUnterline(bool underline)
         format.setFontUnderline(underline);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontUnderlineChanged(underline);
+        _textEdit->setFocus();
     }
 }
 
@@ -137,6 +141,7 @@ void TextEditFormatterFrame::setColor(const QColor& color)
         format.setForeground(QBrush(color));
         _textEdit->mergeCurrentCharFormat(format);
         emit colorChanged(color);
+        _textEdit->setFocus();
     }
 }
 
@@ -149,6 +154,7 @@ void TextEditFormatterFrame::setAlignment(Qt::Alignment alignment)
     {
         _textEdit->setAlignment(alignment);
         emit alignmentChanged(alignment);
+        _textEdit->setFocus();
     }
 }
 

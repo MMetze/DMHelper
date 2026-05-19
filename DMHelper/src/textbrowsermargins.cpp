@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QTextCursor>
 #include <QTextBlock>
+#include <QCoreApplication>
 
 TextBrowserMargins::TextBrowserMargins(QWidget *parent) :
     QTextBrowser(parent),
@@ -29,9 +30,14 @@ void TextBrowserMargins::resizeEvent(QResizeEvent *event)
 void TextBrowserMargins::keyPressEvent(QKeyEvent *event)
 {
     if(event->modifiers() == Qt::AltModifier)
+    {
         event->ignore();
+    }
     else
+    {
         QTextBrowser::keyPressEvent(event);
+        QCoreApplication::sendPostedEvents(window(), QEvent::UpdateRequest);
+    }
 }
 
 void TextBrowserMargins::mouseReleaseEvent(QMouseEvent *event)

@@ -21,6 +21,7 @@
 
 const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
 const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
+const int ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL = 100;
 static constexpr int FULL_PERCENT = 100;
 static constexpr qreal HALF_PERCENT_DIVISOR = 200.0;
 
@@ -42,7 +43,8 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _rotation(0),
     _textPos(),
     _encounterChangedTimer(0),
-    _updateAnchorTimer(0)
+    _updateAnchorTimer(0),
+    _publishUpdateTimer(0)
 {
     ui->setupUi(this);
 
@@ -58,14 +60,6 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SIGNAL(alignmentChanged(Qt::Alignment)));
     connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
-
-    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(takeFocus()));
 
     connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(onFormatterChanged()));
     connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(onFormatterChanged()));
@@ -571,7 +565,6 @@ void EncounterTextEdit::updateAnchors()
     if (!_encounter)
         return;
 
-    // Block signals to prevent unwanted textChanged() recursion
     ui->textBrowser->blockSignals(true);
 
     QTextCursor originalCursor = ui->textBrowser->textCursor();
@@ -642,7 +635,6 @@ void EncounterTextEdit::storeEncounter()
     }
 
     connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
-
 }
 
 void EncounterTextEdit::readEncounter()
@@ -740,6 +732,13 @@ void EncounterTextEdit::triggerEncounterChanged()
         killTimer(_encounterChangedTimer);
 
     _encounterChangedTimer = startTimer(ENCOUNTERTEXTEDIT_STORE_INTERVAL);
+
+    if(_isPublishing && _renderer)
+    {
+        if(_publishUpdateTimer)
+            killTimer(_publishUpdateTimer);
+        _publishUpdateTimer = startTimer(ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL);
+    }
 }
 
 void EncounterTextEdit::triggerUpdateAnchor()
@@ -791,6 +790,17 @@ void EncounterTextEdit::timerEvent(QTimerEvent *event)
         _updateAnchorTimer = 0;
         updateAnchors();
     }
+
+    if(event->timerId() == _publishUpdateTimer)
+    {
+        killTimer(_publishUpdateTimer);
+        _publishUpdateTimer = 0;
+        if(_isPublishing && _renderer)
+        {
+            prepareImages();
+            _renderer->setTextImage(_textImage);
+        }
+    }
 }
 
 void EncounterTextEdit::scaleBackgroundImage()
@@ -803,8 +813,10 @@ void EncounterTextEdit::onFormatterChanged()
 {
     if(!_isPublishing || !_renderer)
         return;
-    prepareImages();
-    _renderer->setTextImage(_textImage);
+
+    if(_publishUpdateTimer)
+        killTimer(_publishUpdateTimer);
+    _publishUpdateTimer = startTimer(ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL);
 }
 
 void EncounterTextEdit::prepareImages()
@@ -918,5 +930,11 @@ void EncounterTextEdit::cancelTimers()
     {
         killTimer(_updateAnchorTimer);
         _updateAnchorTimer = 0;
+    }
+
+    if(_publishUpdateTimer)
+    {
+        killTimer(_publishUpdateTimer);
+        _publishUpdateTimer = 0;
     }
 }
