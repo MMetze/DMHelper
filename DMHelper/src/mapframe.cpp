@@ -368,6 +368,10 @@ void MapFrame::resizeGrid()
 
     connect(_gridSizer, &GridSizer::accepted, this, &MapFrame::gridSizerAccepted);
     connect(_gridSizer, &GridSizer::rejected, this, &MapFrame::gridSizerRejected);
+
+    const QList<Layer*> gridLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+    for(Layer* layer : gridLayers)
+        layer->applyLayerVisibleDM(false);
 }
 
 void MapFrame::setShowMarkers(bool show)
@@ -2053,6 +2057,10 @@ void MapFrame::gridSizerRejected()
 {
     if(!_gridSizer)
         return;
+
+    const QList<Layer*> gridLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+    for(Layer* layer : gridLayers)
+        layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
 
     _gridSizer->deleteLater();
     _gridSizer = nullptr;

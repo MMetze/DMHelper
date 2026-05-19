@@ -818,6 +818,10 @@ void BattleFrame::resizeGrid()
 
     connect(_gridSizer, &GridSizer::accepted, this, &BattleFrame::gridSizerAccepted);
     connect(_gridSizer, &GridSizer::rejected, this, &BattleFrame::gridSizerRejected);
+
+    const QList<Layer*> gridLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+    for(Layer* layer : gridLayers)
+        layer->applyLayerVisibleDM(false);
 }
 
 void BattleFrame::setGridAngle(int gridAngle)
@@ -3873,6 +3877,10 @@ void BattleFrame::gridSizerRejected()
 {
     if(!_gridSizer)
         return;
+
+    const QList<Layer*> gridLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+    for(Layer* layer : gridLayers)
+        layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
 
     _gridSizer->deleteLater();
     _gridSizer = nullptr;
