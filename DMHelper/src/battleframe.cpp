@@ -4280,6 +4280,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     connect(this, &BattleFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
     connect(this, &BattleFrame::movementChanged, renderer, &PublishGLBattleRenderer::movementChanged);
+    connect(_mapDrawer, &BattleFrameMapDrawer::fowPointAdded, renderer, &PublishGLRenderer::updateRender);
     connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
 
     renderer->setPointerFileName(_pointerFile);
@@ -4314,6 +4315,7 @@ void BattleFrame::rendererDeactivated()
     disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
     disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
     disconnect(this, &BattleFrame::movementChanged, _renderer, &PublishGLBattleRenderer::movementChanged);
+    disconnect(_mapDrawer, &BattleFrameMapDrawer::fowPointAdded, _renderer, &PublishGLRenderer::updateRender);
     disconnect(_renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
 
     _renderer = nullptr;

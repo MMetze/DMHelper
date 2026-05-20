@@ -107,6 +107,7 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos, const Qt::MouseB
         return;
 
     _undoPath->addPoint(pos.toPoint() - _undoPath->getLayer()->getPosition());
+    emit fowPointAdded();
 }
 
 void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers)

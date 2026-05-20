@@ -1554,6 +1554,8 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 if(_undoPath->getLayer())
                     drawPoint -= _undoPath->getLayer()->getPosition();
                 _undoPath->addPoint(drawPoint);
+                if(_isPublishing && _renderer)
+                    _renderer->updateRender();
             }
             return true;
         }

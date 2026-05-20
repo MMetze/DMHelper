@@ -20,6 +20,7 @@ public:
 
 signals:
     void dirty();
+    void fowPointAdded();
     void cursorChanged(const QCursor& cursor);
     void polygonChanged(const QPolygonF& polygon);
     void polygonCancelled();
