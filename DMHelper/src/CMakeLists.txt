@@ -925,8 +925,15 @@ elseif (APPLE)
 
     target_compile_definitions(DMHelper PRIVATE NDEBUG)
 
+    # Headers are architecture-neutral; dylibs differ by CPU family
     target_include_directories(DMHelper PRIVATE vlcMac)
-    target_link_directories(DMHelper PRIVATE vlcMac)
+    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+        message(STATUS "Using Apple Silicon VLC (vlcMacArm)")
+        target_link_directories(DMHelper PRIVATE vlcMacArm)
+    else()
+        message(STATUS "Using Intel VLC (vlcMac)")
+        target_link_directories(DMHelper PRIVATE vlcMac)
+    endif()
     target_link_libraries(DMHelper PRIVATE vlc)
 
     set_target_properties(DMHelper PROPERTIES

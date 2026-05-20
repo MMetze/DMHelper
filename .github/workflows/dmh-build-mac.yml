@@ -15,8 +15,12 @@ jobs:
         include:
           - runner: macos-15-intel
             arch-label: intel
+            build-script: buildanddeploy_macos_cmake.sh
+            app-bin-dir: bin-macos
           - runner: macos-15
             arch-label: apple-silicon
+            build-script: buildanddeploy_macos_cmake_arm.sh
+            app-bin-dir: bin-macos-arm-out
     runs-on: ${{ matrix.runner }}
 
     defaults:
@@ -69,8 +73,8 @@ jobs:
       - name: Make build script executable
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          chmod +x buildanddeploy_macos_cmake.sh
-          ls -l buildanddeploy_macos_cmake.sh
+          chmod +x ${{ matrix.build-script }}
+          ls -l ${{ matrix.build-script }}
 
       # -------------------------
       # Run build & deploy script
@@ -80,7 +84,7 @@ jobs:
         env:
           QT_ROOT_DIR: ${{ env.QT_ROOT_DIR }}
         run: |
-          echo "y" | ./buildanddeploy_macos_cmake.sh
+          echo "y" | ./${{ matrix.build-script }}
 
       # -------------------------
       # Debug workspace (post-build)
@@ -96,7 +100,7 @@ jobs:
       - name: Smoke-test built application
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          APP="${{ matrix.app-bin-dir }}/packages/com.dmhelper.app/data/DMHelper.app"
           EXE="$APP/Contents/MacOS/DMHelper"
           if [ ! -f "$EXE" ]; then echo "DMHelper not found at $EXE"; exit 1; fi
           output=$("$EXE" --smoke-test --skip-opengl 2>&1) || true
