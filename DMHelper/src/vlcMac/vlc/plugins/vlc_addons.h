@@ -22,7 +22,6 @@
 #define VLC_ADDONS_H 1
 
 #include <vlc_arrays.h>
-#include <vlc_threads.h>
 
 # ifdef __cplusplus
 extern "C" {
@@ -200,7 +199,7 @@ static inline bool addons_uuid_read( const char *psz_uuid, addon_uuid_t *p_uuid 
     return true;
 }
 
-VLC_MALLOC static inline char * addons_uuid_to_psz( const addon_uuid_t * p_uuid )
+static inline char * addons_uuid_to_psz( const addon_uuid_t * p_uuid )
 {
     char *psz = (char*) calloc( ADDON_UUID_PSZ_SIZE + 1 , sizeof(char) );
     if ( psz )

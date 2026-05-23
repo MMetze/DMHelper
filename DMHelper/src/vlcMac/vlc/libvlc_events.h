@@ -24,11 +24,6 @@
 #ifndef LIBVLC_EVENTS_H
 #define LIBVLC_EVENTS_H 1
 
-# include <vlc/libvlc.h>
-# include <vlc/libvlc_picture.h>
-# include <vlc/libvlc_media_track.h>
-# include <vlc/libvlc_media.h>
-
 /**
  * \file
  * This file defines libvlc_event external API
@@ -36,16 +31,10 @@
 
 # ifdef __cplusplus
 extern "C" {
-# else
-#  include <stdbool.h>
 # endif
 
 typedef struct libvlc_renderer_item_t libvlc_renderer_item_t;
 typedef struct libvlc_title_description_t libvlc_title_description_t;
-typedef struct libvlc_picture_t libvlc_picture_t;
-typedef struct libvlc_picture_list_t libvlc_picture_list_t;
-typedef struct libvlc_media_t libvlc_media_t;
-typedef struct libvlc_media_list_t libvlc_media_list_t;
 
 /**
  * \ingroup libvlc_event
@@ -61,7 +50,7 @@ enum libvlc_event_e {
      */
 
     /**
-     * 1 or several Metadata of a \link #libvlc_media_t media item\endlink changed
+     * Metadata of a \link #libvlc_media_t media item\endlink changed
      */
     libvlc_MediaMetaChanged=0,
     /**
@@ -70,7 +59,8 @@ enum libvlc_event_e {
      */
     libvlc_MediaSubItemAdded,
     /**
-     * Deprecated, use libvlc_MediaParsedChanged or libvlc_MediaPlayerLengthChanged.
+     * Duration of a \link #libvlc_media_t media item\endlink changed
+     * \see libvlc_media_get_duration()
      */
     libvlc_MediaDurationChanged,
     /**
@@ -157,7 +147,6 @@ enum libvlc_event_e {
      */
     libvlc_MediaPlayerTitleSelectionChanged,
     libvlc_MediaPlayerChapterChanged,
-    libvlc_MediaPlayerRecordChanged,
 
     /**
      * A \link #libvlc_media_t media item\endlink was added to a
@@ -240,18 +229,6 @@ enum libvlc_event_e {
      * The renderer item is no longer valid.
      */
     libvlc_RendererDiscovererItemDeleted,
-
-    /**
-     * The current media set into the \ref libvlc_media_player_t is stopping.
-     *
-     * This event can be used to notify when the media callbacks, initialized
-     * from \ref libvlc_media_new_callbacks, should be interrupted, and in
-     * particular the \ref libvlc_media_read_cb. It can also be used to signal
-     * the application state that any input resource (webserver, file mounting,
-     * etc) can be discarded. Output resources still need to be active until
-     * the player switches to the \ref libvlc_Stopped state.
-     */
-    libvlc_MediaPlayerMediaStopping,
 };
 
 /**
@@ -266,7 +243,7 @@ typedef struct libvlc_event_t
         /* media descriptor */
         struct
         {
-            libvlc_meta_t meta_type; /**< Deprecated, any meta_type can change */
+            libvlc_meta_t meta_type;
         } media_meta_changed;
         struct
         {
@@ -308,7 +285,7 @@ typedef struct libvlc_event_t
         } media_player_chapter_changed;
         struct
         {
-            double new_position;
+            float new_position;
         } media_player_position_changed;
         struct
         {
@@ -382,12 +359,6 @@ typedef struct libvlc_event_t
             libvlc_media_t * new_media;
         } media_player_media_changed;
 
-        struct
-        {
-            libvlc_media_t * media;
-        } media_player_media_stopping;
-
-
         /* ESAdded, ESDeleted, ESUpdated */
         struct
         {
@@ -428,13 +399,6 @@ typedef struct libvlc_event_t
         {
             const char *device;
         } media_player_audio_device;
-
-        struct
-        {
-            bool recording;
-            /** Only valid when recording ends (recording == false) */
-            const char *recorded_file_path;
-        } media_player_record_changed;
 
         struct
         {

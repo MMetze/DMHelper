@@ -23,7 +23,6 @@
  * This file implements gcrypt support functions in vlc
  */
 
-#include <vlc_threads.h>
 #include <errno.h>
 
 static inline void vlc_gcrypt_init (void)

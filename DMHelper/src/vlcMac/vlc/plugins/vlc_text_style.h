@@ -47,22 +47,23 @@ typedef struct
     /* Font style */
     float      f_font_relsize;    /**< The font size in video height % */
     int        i_font_size;       /**< The font size in pixels */
-    uint32_t   i_font_color;      /**< The color of the text in XRGB */
+    int        i_font_color;      /**< The color of the text 0xRRGGBB
+                                       (native endianness) */
     uint8_t    i_font_alpha;      /**< The transparency of the text.*/
     int        i_spacing;         /**< The spaceing between glyphs in pixels */
 
     /* Outline */
-    uint32_t   i_outline_color;   /**< The color of the outline in XRGB */
+    int        i_outline_color;   /**< The color of the outline 0xRRGGBB */
     uint8_t    i_outline_alpha;   /**< The transparency of the outline */
     int        i_outline_width;   /**< The width of the outline in pixels */
 
     /* Shadow */
-    uint32_t   i_shadow_color;    /**< The color of the shadow in XRGB */
+    int        i_shadow_color;    /**< The color of the shadow 0xRRGGBB */
     uint8_t    i_shadow_alpha;    /**< The transparency of the shadow. */
     int        i_shadow_width;    /**< The width of the shadow in pixels */
 
     /* Background */
-    uint32_t   i_background_color;/**< The color of the background in XRGB */
+    int        i_background_color;/**< The color of the background 0xRRGGBB */
     uint8_t    i_background_alpha;/**< The transparency of the background */
 
     /* Line breaking */
@@ -72,13 +73,6 @@ typedef struct
         STYLE_WRAP_CHAR,          /**< Breaks at character level only */
         STYLE_WRAP_NONE,          /**< No line breaks (except explicit ones) */
     } e_wrapinfo;
-
-    /*blending style*/
-    enum
-    {
-       STYLE_BLENDING_DEFAULT = 0,      /**< Overlay blending style>**/
-       STYLE_BLENDING_TRANSPARENT,      /**< Knockout blending style>**/
-    } e_blending_mode;
 } text_style_t;
 
 #define STYLE_ALPHA_OPAQUE      0xFF
@@ -97,7 +91,6 @@ typedef struct
 #define STYLE_HAS_BACKGROUND_COLOR      (1 << 7)
 #define STYLE_HAS_BACKGROUND_ALPHA      (1 << 8)
 #define STYLE_HAS_WRAP_INFO             (1 << 9)
-#define STYLE_HAS_BLENDING_MODE         (1 << 10)
 
 /* Style flags for \ref text_style_t */
 #define STYLE_BOLD              (1 << 0)

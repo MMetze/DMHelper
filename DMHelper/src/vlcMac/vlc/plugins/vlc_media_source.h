@@ -24,7 +24,6 @@
 #include <vlc_common.h>
 #include <vlc_input_item.h>
 #include <vlc_services_discovery.h>
-#include <vlc_preparser.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,14 +122,9 @@ struct vlc_media_tree_callbacks
      */
     void
     (*on_preparse_end)(vlc_media_tree_t *tree, input_item_node_t * node,
-                       int status, void *userdata);
+                       enum input_item_preparse_status status,
+                       void *userdata);
 };
-
-/**
- * Create an empty media tree.
- */
-VLC_API vlc_media_tree_t *
-vlc_media_tree_New(void);
 
 /**
  * Listener for media tree events.
@@ -164,24 +158,6 @@ vlc_media_tree_RemoveListener(vlc_media_tree_t *tree,
                               vlc_media_tree_listener_id *listener);
 
 /**
- * Increase the media tree reference count.
- *
- * \param tree the media tree, unlocked
- */
-VLC_API void
-vlc_media_tree_Hold(vlc_media_tree_t *tree);
-
-/**
- * Decrease the media tree reference count.
- *
- * Destroy the media tree if it reaches 0.
- *
- * \param tree the media tree, unlocked
- */
-VLC_API void
-vlc_media_tree_Release(vlc_media_tree_t *tree);
-
-/**
  * Lock the media tree (non-recursive).
  */
 VLC_API void
@@ -194,30 +170,9 @@ VLC_API void
 vlc_media_tree_Unlock(vlc_media_tree_t *);
 
 /**
- * Add an item to the media tree.
- *
- * \param tree the media tree, locked
- * \param parent the parent node, belonging to the media tree
- * \param media the media to add as a child of `parent`
- */
-VLC_API input_item_node_t *
-vlc_media_tree_Add(vlc_media_tree_t *tree, input_item_node_t *parent,
-                   input_item_t *media);
-
-/**
- * Remove an item from the media tree.
- *
- * \param tree the media tree, locked
- * \param media the media to remove
- */
-VLC_API bool
-vlc_media_tree_Remove(vlc_media_tree_t *tree, input_item_t *media);
-
-/**
  * Find the node containing the requested input item (and its parent).
  *
  * \param tree the media tree, locked
- * \param media the media to look for in the tree
  * \param result point to the matching node if the function returns true [OUT]
  * \param result_parent if not NULL, point to the matching node parent
  *                      if the function returns true [OUT]
@@ -234,14 +189,23 @@ vlc_media_tree_Find(vlc_media_tree_t *tree, const input_item_t *media,
  * Preparse a media, and expand it in the media tree on subitems added.
  *
  * \param tree   the media tree (not necessarily locked)
- * \param parser a valid preparser
+ * \param libvlc the libvlc instance
  * \param media  the media to preparse
- * \returns NULL in case of error, or a valid request handle if the
- * item was scheduled for preparsing. Cancel it vlc_preparser_Cancel().
+ * \param id     a task identifier
  */
-VLC_API vlc_preparser_req *
-vlc_media_tree_Preparse(vlc_media_tree_t *tree, vlc_preparser_t *parser,
-                        input_item_t *media);
+VLC_API void
+vlc_media_tree_Preparse(vlc_media_tree_t *tree, libvlc_int_t *libvlc,
+                        input_item_t *media, void *id);
+
+
+/**
+ * Cancel a media tree preparse request
+ *
+ * \param libvlc the libvlc instance
+ * \param id the preparse task id
+ */
+VLC_API void
+vlc_media_tree_PreparseCancel(libvlc_int_t *libvlc, void* id);
 
 /**
  * Media source.
@@ -350,3 +314,4 @@ vlc_media_source_meta_list_Delete(vlc_media_source_meta_list_t *);
 #endif
 
 #endif
+

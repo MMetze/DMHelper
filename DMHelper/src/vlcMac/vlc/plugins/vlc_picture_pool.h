@@ -104,4 +104,37 @@ VLC_API picture_t * picture_pool_Get( picture_pool_t * ) VLC_USED;
  */
 VLC_API picture_t *picture_pool_Wait(picture_pool_t *) VLC_USED;
 
+/**
+ * Cancel the picture pool.
+ *
+ * It won't return any pictures via picture_pool_Get or picture_pool_Wait if
+ * canceled is true. This function will also unblock picture_pool_Wait.
+ */
+void picture_pool_Cancel( picture_pool_t *, bool canceled );
+
+/**
+ * Reserves pictures from a pool and creates a new pool with those.
+ *
+ * When the new pool is released, pictures are returned to the master pool.
+ * If the master pool was already released, pictures will be destroyed.
+ *
+ * @param count number of picture to reserve
+ *
+ * @return the new pool, or NULL if there were not enough pictures available
+ * or on error
+ *
+ * @note This function is thread-safe (but it might return NULL if other
+ * threads have already allocated too many pictures).
+ */
+VLC_API picture_pool_t * picture_pool_Reserve(picture_pool_t *, unsigned count)
+VLC_USED;
+
+/**
+ * @return the total number of pictures in the given pool
+ * @note This function is thread-safe.
+ */
+unsigned picture_pool_GetSize(const picture_pool_t *);
+
+
 #endif /* VLC_PICTURE_POOL_H */
+

@@ -27,6 +27,7 @@
 
 #include <vlc_es.h>
 #include <vlc_picture.h>
+#include <vlc_subpicture.h>
 
 /**
  * \defgroup output Output
@@ -84,19 +85,6 @@ enum vlc_vout_order
     VLC_VOUT_ORDER_SECONDARY,
 };
 
-/**
-  * Stereoscopic display mode.
-  */
-typedef enum vlc_stereoscopic_mode_t
-{
-    VIDEO_STEREO_OUTPUT_AUTO = 0,
-    VIDEO_STEREO_OUTPUT_STEREO,
-    VIDEO_STEREO_OUTPUT_LEFT_ONLY,
-    VIDEO_STEREO_OUTPUT_RIGHT_ONLY,
-    VIDEO_STEREO_OUTPUT_SIDE_BY_SIDE,
-#define VIDEO_STEREO_OUTPUT_MAX VIDEO_STEREO_OUTPUT_SIDE_BY_SIDE
-} vlc_stereoscopic_mode_t;
-
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
@@ -131,6 +119,7 @@ VLC_API int vout_GetSnapshot( vout_thread_t *p_vout,
                               const char *psz_format, vlc_tick_t i_timeout );
 
 /* */
+VLC_API picture_t * vout_GetPicture( vout_thread_t * );
 VLC_API void vout_PutPicture( vout_thread_t *, picture_t * );
 
 /* Subpictures channels ID */
@@ -148,10 +137,8 @@ VLC_API void vout_FlushSubpictureChannel( vout_thread_t *, size_t );
 /**
  * This function will ensure that all ready/displayed pictures have at most
  * the provided date.
- *
- * @return the last displayed pts before flush
  */
-VLC_API vlc_tick_t vout_Flush( vout_thread_t *p_vout, vlc_tick_t i_date );
+VLC_API void vout_Flush( vout_thread_t *p_vout, vlc_tick_t i_date );
 
 /**
  * Empty all the pending pictures in the vout

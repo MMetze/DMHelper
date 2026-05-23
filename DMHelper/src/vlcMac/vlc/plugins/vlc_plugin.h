@@ -24,8 +24,6 @@
 #ifndef LIBVLC_MODULES_MACROS_H
 # define LIBVLC_MODULES_MACROS_H 1
 
-#include <stdint.h>
-
 /**
  * \file
  * This file implements plugin (module) macros used to define a vlc module.
@@ -50,7 +48,6 @@ enum vlc_module_properties
     VLC_MODULE_DESCRIPTION,
     VLC_MODULE_HELP,
     VLC_MODULE_TEXTDOMAIN,
-    VLC_MODULE_HELP_HTML,
     /* Insert new VLC_MODULE_* here */
 
     /* DO NOT EVER REMOVE, INSERT OR REPLACE ANY ITEM! It would break the ABI!
@@ -117,21 +114,21 @@ enum vlc_module_properties
 #define CONFIG_SECTION                      0x08 /* Start of new section */
 
 /* Configuration item types */
-#define CONFIG_ITEM_FLOAT                   (1 << 5)  /* Float option */
-#define CONFIG_ITEM_INTEGER                 (2 << 5)  /* Integer option */
-#define CONFIG_ITEM_RGB                     (CONFIG_ITEM_INTEGER | 0x01)  /* RGB color option */
-#define CONFIG_ITEM_BOOL                    (3 << 5)  /* Bool option */
-#define CONFIG_ITEM_STRING                  (4 << 5)  /* String option */
-#define CONFIG_ITEM_PASSWORD                (CONFIG_ITEM_STRING | 0x01)  /* Password option (*) */
-#define CONFIG_ITEM_KEY                     (CONFIG_ITEM_STRING | 0x02)  /* Hot key option */
-#define CONFIG_ITEM_MODULE                  (CONFIG_ITEM_STRING | 0x04)  /* Module option */
-#define CONFIG_ITEM_MODULE_CAT              (CONFIG_ITEM_STRING | 0x05)  /* Module option */
-#define CONFIG_ITEM_MODULE_LIST             (CONFIG_ITEM_STRING | 0x06)  /* Module option */
-#define CONFIG_ITEM_MODULE_LIST_CAT         (CONFIG_ITEM_STRING | 0x07)  /* Module option */
-#define CONFIG_ITEM_LOADFILE                (CONFIG_ITEM_STRING | 0x0C)  /* Read file option */
-#define CONFIG_ITEM_SAVEFILE                (CONFIG_ITEM_STRING | 0x0D)  /* Written file option */
-#define CONFIG_ITEM_DIRECTORY               (CONFIG_ITEM_STRING | 0x0E)  /* Directory option */
-#define CONFIG_ITEM_FONT                    (CONFIG_ITEM_STRING | 0x0F)  /* Font option */
+#define CONFIG_ITEM_FLOAT                   0x20  /* Float option */
+#define CONFIG_ITEM_INTEGER                 0x40  /* Integer option */
+#define CONFIG_ITEM_RGB                     0x41  /* RGB color option */
+#define CONFIG_ITEM_BOOL                    0x60  /* Bool option */
+#define CONFIG_ITEM_STRING                  0x80  /* String option */
+#define CONFIG_ITEM_PASSWORD                0x81  /* Password option (*) */
+#define CONFIG_ITEM_KEY                     0x82  /* Hot key option */
+#define CONFIG_ITEM_MODULE                  0x84  /* Module option */
+#define CONFIG_ITEM_MODULE_CAT              0x85  /* Module option */
+#define CONFIG_ITEM_MODULE_LIST             0x86  /* Module option */
+#define CONFIG_ITEM_MODULE_LIST_CAT         0x87  /* Module option */
+#define CONFIG_ITEM_LOADFILE                0x8C  /* Read file option */
+#define CONFIG_ITEM_SAVEFILE                0x8D  /* Written file option */
+#define CONFIG_ITEM_DIRECTORY               0x8E  /* Directory option */
+#define CONFIG_ITEM_FONT                    0x8F  /* Font option */
 
 /* reduce specific type to type class */
 #define CONFIG_CLASS(x) ((x) & ~0x1F)
@@ -217,10 +214,7 @@ enum vlc_config_subcat
 };
 
 /**
- * Current plugin ABI version.
- *
- * \note This must be synchronized with the values from:
- *  - src/rust/vlcrs-macros/module.rs
+ * Current plugin ABI version
  */
 #define VLC_API_VERSION_STRING "4.0.6"
 
@@ -239,8 +233,6 @@ enum vlc_config_subcat
 /* I need to do _this_ to change « foo bar » to « module_foo_bar » ! */
 #define CONCATENATE( y, z ) CRUDE_HACK( y, z )
 #define CRUDE_HACK( y, z )  y##__##z
-#define STRINGIFY_NAME_( z ) #z
-#define STRINGIFY_NAME( z )   STRINGIFY_NAME_( z )
 
 #if defined(__cplusplus)
 #define EXTERN_SYMBOL extern "C"
@@ -248,20 +240,9 @@ enum vlc_config_subcat
 #define EXTERN_SYMBOL
 #endif
 
-#if !defined(MODULE_STRING) && defined(MODULE_NAME)
-# define MODULE_STRING  STRINGIFY_NAME(MODULE_NAME)
-#endif
-
-// defines a statically linked module entry point
-#define VLC_ENTRY_FUNC(name)          int (name)(vlc_set_cb, void *)
-// name of the module entry point table
-#define VLC_MODULE_ENTRY(name)        CONCATENATE(vlc_entry, name)
-// declare a vlc_plugin_cb
-#define VLC_DECL_MODULE_ENTRY(name)   VLC_ENTRY_FUNC(VLC_MODULE_ENTRY(name))
-
 /* If the module is built-in, then we need to define foo_InitModule instead
  * of InitModule. Same for Activate- and DeactivateModule. */
-#ifdef VLC_DYNAMIC_PLUGIN
+#ifdef __PLUGIN__
 # define VLC_SYMBOL(symbol) symbol
 # define VLC_MODULE_NAME_HIDDEN_SYMBOL \
     EXTERN_SYMBOL const char vlc_module_name[] = MODULE_STRING;
@@ -271,12 +252,8 @@ enum vlc_config_subcat
 #endif
 
 #define CDECL_SYMBOL
-#if defined (VLC_DYNAMIC_PLUGIN)
-/* Libtool exports symbols with .def file. If exporting those symbols with
- * __declspec(dllexport), a linker complains about it. So do not export
- * symbols with the modifier when using libtool on OS/2.
- * DLL_EXPORT is defined by libtool. */
-# if defined (_WIN32) || (defined (__OS2__) && !defined (DLL_EXPORT))
+#if defined (__PLUGIN__)
+# if defined (_WIN32)
 #   define DLL_SYMBOL              __declspec(dllexport)
 #   undef CDECL_SYMBOL
 #   define CDECL_SYMBOL            __cdecl
@@ -292,9 +269,6 @@ enum vlc_config_subcat
 struct vlc_param;
 
 EXTERN_SYMBOL typedef int (*vlc_set_cb) (void *, void *, int, ...);
-
-/** Plugin entry point prototype */
-typedef int (*vlc_plugin_cb) (vlc_set_cb, void *);
 
 #define vlc_plugin_set(...) vlc_set (opaque,   NULL, __VA_ARGS__)
 #define vlc_module_set(...) vlc_set (opaque, module, __VA_ARGS__)
@@ -366,10 +340,6 @@ VLC_METADATA_EXPORTS
     if (vlc_module_set (VLC_MODULE_HELP, VLC_CHECKED_TYPE(const char *, help))) \
         goto error;
 
-#define set_help_html( help_html ) \
-    if (vlc_module_set (VLC_MODULE_HELP_HTML, VLC_CHECKED_TYPE(const char *, help_html))) \
-        goto error;
-
 #define set_capability( cap, score ) \
     if (vlc_module_set (VLC_MODULE_CAPABILITY, VLC_CHECKED_TYPE(const char *, cap)) \
      || vlc_module_set (VLC_MODULE_SCORE, VLC_CHECKED_TYPE(int, score))) \
@@ -434,6 +404,11 @@ VLC_METADATA_EXPORTS
 #define set_section( text, longtext ) \
     add_typedesc_inner( CONFIG_SECTION, text, longtext )
 
+#ifndef __PLUGIN__
+#define add_category_hint(text, longtext) \
+    add_typedesc_inner( CONFIG_HINT_CATEGORY, text, longtext )
+#endif
+
 #define add_string( name, value, text, longtext ) \
     add_string_inner(CONFIG_ITEM_STRING, name, text, longtext, value)
 
@@ -459,6 +434,17 @@ VLC_METADATA_EXPORTS
 #define add_module_list(name, cap, value, text, longtext) \
     add_string_inner(CONFIG_ITEM_MODULE_LIST, name, text, longtext, value) \
     vlc_config_set (VLC_CONFIG_CAPABILITY, VLC_CHECKED_TYPE(const char *, cap));
+
+#ifndef __PLUGIN__
+#define add_module_cat(name, subcategory, value, text, longtext) \
+    add_string_inner(CONFIG_ITEM_MODULE_CAT, name, text, longtext, value) \
+    change_integer_range (subcategory /* gruik */, 0);
+
+#define add_module_list_cat(name, subcategory, value, text, longtext) \
+    add_string_inner(CONFIG_ITEM_MODULE_LIST_CAT, name, text, longtext, \
+                     value) \
+    change_integer_range (subcategory /* gruik */, 0);
+#endif
 
 #define add_integer( name, value, text, longtext ) \
     add_int_inner(CONFIG_ITEM_INTEGER, name, text, longtext, value)
@@ -591,7 +577,7 @@ int CDECL_SYMBOL VLC_SYMBOL(vlc_entry_cfg_str_enum)(const char *name, \
     "\x47\x4e\x55\x20\x47\x65\x6e\x65\x72\x61\x6c\x20\x50\x75\x62\x6c" \
     "\x69\x63\x20\x4c\x69\x63\x65\x6e\x73\x65\x2c\x20\x76\x65\x72\x73" \
     "\x69\x6f\x6e\x20\x32\x20\x6f\x72\x20\x6c\x61\x74\x65\x72\x2e"
-#if defined (LIBVLC_INTERNAL_)
+#if defined (__LIBVLC__)
 # define VLC_MODULE_COPYRIGHT VLC_COPYRIGHT_VIDEOLAN
 # ifndef VLC_MODULE_LICENSE
 #  define VLC_MODULE_LICENSE VLC_LICENSE_LGPL_2_1_PLUS

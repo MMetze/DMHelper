@@ -48,11 +48,6 @@
 #   ifndef IPV6_V6ONLY
 #       define IPV6_V6ONLY 27
 #   endif
-#   if !defined(SHUT_RDWR)
-#       define SHUT_RDWR (SD_BOTH)
-#       define SHUT_WR   (SD_SEND)
-#       define SHUT_RD   (SD_RECEIVE)
-#   endif
 #else
 #   include <sys/socket.h>
 #   include <netinet/in.h>
@@ -89,7 +84,6 @@ VLC_API int vlc_socket(int pf, int type, int proto, bool nonblock) VLC_USED;
  * @param pf protocol family
  * @param type socket type
  * @param proto network protocol
- * @param fds the output array storing the file descriptor pair
  * @param nonblock true to create non-blocking sockets
  * @retval 0 on success
  * @retval -1 on failure
@@ -183,6 +177,9 @@ VLC_API int * net_Listen(vlc_object_t *p_this, const char *psz_host, unsigned i_
 
 #define net_ListenTCP(a, b, c) net_Listen(VLC_OBJECT(a), b, c, \
                                           SOCK_STREAM, IPPROTO_TCP)
+
+VLC_API int net_ConnectTCP (vlc_object_t *obj, const char *host, int port);
+#define net_ConnectTCP(a, b, c) net_ConnectTCP(VLC_OBJECT(a), b, c)
 
 /**
  * Accepts an new connection on a set of listening sockets.
@@ -283,38 +280,15 @@ static inline int vlc_setsockopt(int s, int level, int name,
 #endif
 
 #ifdef _WIN32
-# if defined(UNICODE)
+# if !defined(WINAPI_FAMILY) || WINAPI_FAMILY != WINAPI_FAMILY_APP
 #  undef gai_strerror
 #  define gai_strerror gai_strerrorA
 # endif
 #endif
 
-/* union of the various sockaddr structures often used together */
-typedef union {
-    struct sockaddr         sa;
-    struct sockaddr_storage ss;
-    struct sockaddr_in      sin;
-#ifdef AF_INET6
-    struct sockaddr_in6     sin6;
-#endif
-} vlc_sockaddr;
-
 VLC_API int vlc_getnameinfo( const struct sockaddr *, int, char *, int, int *, int );
-
-/**
- * Resolves a host name to a list of socket addresses (like getaddrinfo()).
- *
- * @param node host name to resolve (encoded as UTF-8), or NULL
- * @param i_port port number for the socket addresses
- * @param p_hints parameters (see getaddrinfo() manual page)
- * @param res pointer set to the resulting chained list.
- * @return 0 on success, a getaddrinfo() error otherwise.
- * On failure, *res is undefined. On success, it must be freed with
- * freeaddrinfo().
- */
-VLC_API int vlc_getaddrinfo (const char *node, unsigned i_port,
-                             const struct addrinfo *p_hints,
-                             struct addrinfo **res);
+VLC_API int vlc_getaddrinfo (const char *, unsigned,
+                             const struct addrinfo *, struct addrinfo **);
 VLC_API int vlc_getaddrinfo_i11e(const char *, unsigned,
                                  const struct addrinfo *, struct addrinfo **);
 
@@ -350,31 +324,26 @@ net_SockAddrIsMulticast (const struct sockaddr *addr, socklen_t len)
 
 static inline int net_GetSockAddress( int fd, char *address, int *port )
 {
-    vlc_sockaddr addr;
-    socklen_t addrlen = sizeof( addr.ss );
+    struct sockaddr_storage addr;
+    socklen_t addrlen = sizeof( addr );
 
-    return getsockname( fd, &addr.sa, &addrlen )
-        || vlc_getnameinfo( &addr.sa, addrlen, address,
+    return getsockname( fd, (struct sockaddr *)&addr, &addrlen )
+        || vlc_getnameinfo( (struct sockaddr *)&addr, addrlen, address,
                             NI_MAXNUMERICHOST, port, NI_NUMERICHOST )
         ? VLC_EGENERIC : 0;
 }
 
 static inline int net_GetPeerAddress( int fd, char *address, int *port )
 {
-    vlc_sockaddr addr;
-    socklen_t addrlen = sizeof( addr.ss );
+    struct sockaddr_storage addr;
+    socklen_t addrlen = sizeof( addr );
 
-    return getpeername( fd, &addr.sa, &addrlen )
-        || vlc_getnameinfo( &addr.sa, addrlen, address,
+    return getpeername( fd, (struct sockaddr *)&addr, &addrlen )
+        || vlc_getnameinfo( (struct sockaddr *)&addr, addrlen, address,
                             NI_MAXNUMERICHOST, port, NI_NUMERICHOST )
         ? VLC_EGENERIC : 0;
 }
 
-/**
- * Determines the network proxy server to use (if any).
- * @param url absolute URL for which to get the proxy server
- * @return proxy URL, NULL if no proxy or error
- */
 VLC_API char *vlc_getProxyUrl(const char *);
 
 # ifdef __cplusplus

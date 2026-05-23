@@ -27,14 +27,12 @@
 #ifndef VLC_SOUT_H_
 #define VLC_SOUT_H_
 
-#include <sys/types.h>
-#include <vlc_es.h>
-#include <vlc_clock.h>
-#include <vlc_tick.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <sys/types.h>
+#include <vlc_es.h>
 
 /**
  * \defgroup sout Stream output
@@ -60,7 +58,7 @@ struct sout_access_out_t
 
     char                    *psz_path;
     void                    *p_sys;
-    int                     (*pf_seek)( sout_access_out_t *, uint64_t );
+    int                     (*pf_seek)( sout_access_out_t *, off_t );
     ssize_t                 (*pf_read)( sout_access_out_t *, block_t * );
     ssize_t                 (*pf_write)( sout_access_out_t *, block_t * );
     int                     (*pf_control)( sout_access_out_t *, int, va_list );
@@ -78,7 +76,7 @@ VLC_API sout_access_out_t * sout_AccessOutNew( vlc_object_t *, const char *psz_a
 #define sout_AccessOutNew( obj, access, name ) \
         sout_AccessOutNew( VLC_OBJECT(obj), access, name )
 VLC_API void sout_AccessOutDelete( sout_access_out_t * );
-VLC_API int sout_AccessOutSeek( sout_access_out_t *, uint64_t );
+VLC_API int sout_AccessOutSeek( sout_access_out_t *, off_t );
 VLC_API ssize_t sout_AccessOutRead( sout_access_out_t *, block_t * );
 VLC_API ssize_t sout_AccessOutWrite( sout_access_out_t *, block_t * );
 VLC_API int sout_AccessOutControl( sout_access_out_t *, int, ... );
@@ -168,105 +166,19 @@ static inline int sout_MuxControl( sout_mux_t *p_mux, int i_query, ... )
 
 /** @} */
 
-/**
- * Stream output control list.
- *
- * Call the related actions with ::sout_StreamControl().
- */
-enum sout_stream_query_e
-{
-    /**
-     * Some ES such as closed captions are considered optional and shouldn't be
-     * added to the stream output modules that return false for that query.
-     *
-     * \param bool* Closed caption support value, should be assumed false if the
-     * control fails.
-     *
-     * Usage:
-     * \code{c}
-     * bool supports_substreams;
-     * if (sout_StreamControl(stream, SOUT_STREAM_WANTS_SUBSTREAMS, &supports_substreams) != VLC_SUCCESS)
-     *     supports_substreams = false;
-     * \endcode
-     */
-    SOUT_STREAM_WANTS_SUBSTREAMS,
-
-    /**
-     * Signal the currently selected subtitle track that should be displayed to
-     * the stream output.
-     * This control should fail and do nothing if not implemented.
-     *
-     * \param void* Stream ID
-     * \param vlc_spu_highlight_t* Selected spu data.
-     *
-     * Usage:
-     * \code{c}
-     * void *stream_id;
-     * const vlc_spu_highlight_t hl_data = {... SPU infos...};
-     * sout_StreamControl(stream, SOUT_STREAM_ID_SPU_HIGHLIGHT, stream_id, &hl_data);
-     * \endcode
-     */
-    SOUT_STREAM_ID_SPU_HIGHLIGHT,
-
-    /**
-     * A synchronous stream output is a stream paced by the input clock. The
-     * data will be sent at input rate if true is returned.
-     *
-     * \param bool* True if the stream output should be input paced. Should be
-     * assumed false if the control fails.
-     *
-     * Usage:
-     * \code{c}
-     * bool is_input_paced;
-     * if (sout_StreamControl(stream, SOUT_STREAM_IS_SYNCHRONOUS, &supports_substreams) != VLC_SUCCESS)
-     *     supports_substreams = false;
-     * \endcode
-     */
-    SOUT_STREAM_IS_SYNCHRONOUS,
+enum sout_stream_query_e {
+    SOUT_STREAM_WANTS_SUBSTREAMS,  /* arg1=bool *, res=can fail (assume false) */
+    SOUT_STREAM_ID_SPU_HIGHLIGHT,  /* arg1=void *, arg2=const vlc_spu_highlight_t *, res=can fail */
+    SOUT_STREAM_IS_SYNCHRONOUS, /* arg1=bool *, can fail (assume false) */
 };
 
-typedef struct vlc_frame_t vlc_frame_t;
 struct sout_stream_operations {
-    /**
-     * Implementation of ::sout_StreamIdAdd().
-     *
-     * \note Mandatory callback.
-     */
-    void *(*add)(sout_stream_t *, const es_format_t *, const char *);
-    /**
-     * Implementation of ::sout_StreamIdDel().
-     *
-     * \note Mandatory callback.
-     */
+    void *(*add)(sout_stream_t *, const es_format_t *);
     void (*del)(sout_stream_t *, void *);
-    /**
-     * Implementation of ::sout_StreamIdSend().
-     *
-     * \note Mandatory callback.
-     */
-    int (*send)(sout_stream_t *, void *, vlc_frame_t *);
-    /**
-     * Implementation of ::sout_StreamControl().
-     *
-     * \note Optional callback.
-     */
+    int (*send)(sout_stream_t *, void *, block_t *);
     int (*control)( sout_stream_t *, int, va_list );
-    /**
-     * Implementation of ::sout_StreamFlush().
-     *
-     * \note Optional callback.
-     */
     void (*flush)( sout_stream_t *, void *);
-    /**
-     * Implementation of ::sout_StreamSetPCR().
-     *
-     * \note Optional callback.
-     */
     void (*set_pcr)(sout_stream_t *, vlc_tick_t);
-    /**
-     * \note Optional callback.
-     */
-    void (*close)(sout_stream_t *);
 };
 
 struct sout_stream_t
@@ -281,132 +193,17 @@ struct sout_stream_t
     void              *p_sys;
 };
 
-/**
- * Allocate an empty Stream Output object.
- *
- * The object is empty, operation callbacks should be populated manually by the
- * caller. To create a stream output associated with a module, use
- * ::sout_StreamChainNew() instead.
- *
- * \note The stream should be destroyed with ::sout_StreamChainDelete().
- *
- * \param parent The parent object of the stream output.
- * \param config A valid config chain of the object, of the form
- *               "objname{option=*,option=*,...}"
- *
- * \retval An empty allocated Stream Output object.
- * \retval NULL on allocation error.
- */
-VLC_API sout_stream_t *sout_StreamNew(vlc_object_t *parent, const char *config) VLC_USED;
-
 VLC_API void sout_StreamChainDelete(sout_stream_t *first, sout_stream_t *end);
-
-/**
- * Creates a complete "stream_out" modules chain
- *
- * Chain format: module1{option=*:option=*}[:module2{option=*:...}]
- *
- * The modules are created starting from the last one and linked together
- *
- * \retval A pointer to the first module.
- * \retval NULL if the chain creation failed.
- */
 VLC_API sout_stream_t *sout_StreamChainNew(vlc_object_t *parent,
         const char *psz_chain, sout_stream_t *p_next) VLC_USED;
 
-/**
- * Add an ES to the stream output.
- *
- * The returned opaque identifier should be released by ::sout_StreamIdDel().
- *
- * \param s
- * \param fmt A non-NULL es-format descriptor.
- * \param es_id A non-NULL unique string describing the ES. This string is
- *              guaranteed to be valid for the whole lifetime of the ES (at
- *              least until ::sout_StreamIdDel() is called).
- *              Note that if stream output filters creates or duplicate a new
- *              ES, they are responsible for the validity and uniqueness of the
- *              string ID they pass to the next stream.
- *
- * \return An opaque pointer identifying the ES.
- * \retval NULL In case of error.
- */
-VLC_API void *sout_StreamIdAdd(sout_stream_t *s,
-                               const es_format_t *fmt,
-                               const char *es_id) VLC_USED;
-
-/**
- * Delete an ES from the stream output.
- *
- * \param s
- * \param id An opaque pointer identifying the ES returned by
- * ::sout_StreamIdAdd().
- */
+VLC_API void *sout_StreamIdAdd(sout_stream_t *s, const es_format_t *fmt);
 VLC_API void sout_StreamIdDel(sout_stream_t *s, void *id);
-
-/**
- * Pass a \ref vlc_frame_t to the stream output.
- *
- * Takes ownership of the frame, it should be considered as invalid
- * and released after this call.
- *
- * \warning Only single frames are expected through this call, for frame chains,
- * you'll have to call this for each frames.
- *
- * \param s
- * \param id The ES identifier that sent the frame.
- * \param f a frame that will be consumed (through vlc_frame_Release)
- *
- * \retval VLC_SUCCESS on success.
- * \retval VLC_EGENERIC on non-recoverable unspecific error cases.
- * \retval (-ERRNO) A negated errno value describing the error case.
- */
-VLC_API int sout_StreamIdSend(sout_stream_t *s, void *id, vlc_frame_t *f);
-
-/**
- * Signal a flush of an ES to the stream output.
- *
- * Flush is an optional control, if implemented, it will drop all the bufferized
- * data from ES and/or forward the Flush command to the next stream.
- *
- * \param s
- * \param id An identifier of the ES to flush.
- */
+VLC_API int sout_StreamIdSend( sout_stream_t *s, void *id, block_t *b);
 VLC_API void sout_StreamFlush(sout_stream_t *s, void *id);
+VLC_API void sout_StreamSetPCR(sout_stream_t *s, vlc_tick_t pcr);
+VLC_API int sout_StreamControlVa(sout_stream_t *s, int i_query, va_list args);
 
-/**
- * Signal a PCR update to the stream output.
- *
- * The PCR (Program Clock Reference from the MPEG-TS spec.) gives a global
- * stream advancement timestamp.
- * The demuxer is required to:
- *   - Yield a PCR value at fix and frequent interval. Even if no ES are added
- *     to the stream output.
- *   - Send frames that have timestamp values greater than the last PCR value.
- *
- * \note PCR resets in case of handled discontinuity are implied by a frame
- * marked by \ref VLC_FRAME_FLAG_DISCONTINUITY and/or by a ::sout_StreamFlush()
- * call.
- */
-VLC_API void sout_StreamSetPCR(sout_stream_t *, vlc_tick_t pcr);
-
-struct vlc_sout_clock_bus;
-VLC_API struct vlc_sout_clock_bus *sout_ClockMainCreate(sout_stream_t *) VLC_USED;
-VLC_API void sout_ClockMainDelete(struct vlc_sout_clock_bus *);
-VLC_API void sout_ClockMainSetFirstPcr(struct vlc_sout_clock_bus *, vlc_tick_t pcr);
-VLC_API vlc_clock_t *sout_ClockCreate(struct vlc_sout_clock_bus *, const es_format_t *) VLC_USED;
-VLC_API void sout_ClockDelete(vlc_clock_t *);
-
-
-VLC_API int sout_StreamControlVa(sout_stream_t *, int i_query, va_list args);
-
-/**
- * Various controls forwarded through the stream output chain.
- *
- * Controls are various misc accessors or set of actions that can be used to
- * query the stream output.
- * See \ref sout_stream_query_e for the list of availables controls.
- */
 static inline int sout_StreamControl( sout_stream_t *s, int i_query, ... )
 {
     va_list args;

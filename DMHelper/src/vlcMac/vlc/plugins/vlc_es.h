@@ -26,7 +26,6 @@
 #include <vlc_common.h>
 #include <vlc_fourcc.h>
 #include <vlc_viewpoint.h>
-#include <vlc_replay_gain.h>
 
 /**
  * \file
@@ -39,13 +38,32 @@
  * \see subs_format_t
  */
 #define VIDEO_PALETTE_COLORS_MAX 256
-#define VIDEO_PALETTE_CLUT_COUNT 16
 
 struct video_palette_t
 {
     int i_entries;                         /**< number of in-use palette entries */
     uint8_t palette[VIDEO_PALETTE_COLORS_MAX][4];  /**< 4-byte RGBA/YUVA palette */
 };
+
+/**
+ * audio replay gain description
+ */
+#define AUDIO_REPLAY_GAIN_MAX (2)
+#define AUDIO_REPLAY_GAIN_TRACK (0)
+#define AUDIO_REPLAY_GAIN_ALBUM (1)
+typedef struct
+{
+    /* true if we have the peak value */
+    bool pb_peak[AUDIO_REPLAY_GAIN_MAX];
+    /* peak value where 1.0 means full sample value */
+    float      pf_peak[AUDIO_REPLAY_GAIN_MAX];
+
+    /* true if we have the gain value */
+    bool pb_gain[AUDIO_REPLAY_GAIN_MAX];
+    /* gain value in dB */
+    float      pf_gain[AUDIO_REPLAY_GAIN_MAX];
+} audio_replay_gain_t;
+
 
 /**
  * Audio channel type
@@ -183,7 +201,7 @@ typedef enum video_orientation_t
 /** Convert enum video_orientation_t to EXIF */
 #define ORIENT_TO_EXIF(orient) ((0x76853421U >> (4 * (orient))) & 15)
 /** If the orientation is natural or mirrored */
-#define ORIENT_IS_MIRROR(orient) vlc_parity(orient)
+#define ORIENT_IS_MIRROR(orient) parity(orient)
 /** If the orientation swaps dimensions */
 #define ORIENT_IS_SWAP(orient) (((orient) & 4) != 0)
 /** Applies horizontal flip to an orientation */
@@ -192,9 +210,6 @@ typedef enum video_orientation_t
 #define ORIENT_VFLIP(orient) ((orient) ^ 2)
 /** Applies 180 degree rotation to an orientation */
 #define ORIENT_ROTATE_180(orient) ((orient) ^ 3)
-
-VLC_API void
-vlc_viewpoint_from_orientation(vlc_viewpoint_t *vp, video_orientation_t orient);
 
 typedef enum video_transform_t
 {
@@ -343,12 +358,15 @@ struct video_format_t
     unsigned int i_visible_width;                 /**< width of visible area */
     unsigned int i_visible_height;               /**< height of visible area */
 
+    unsigned int i_bits_per_pixel;             /**< number of bits per pixel */
+
     unsigned int i_sar_num;                   /**< sample/pixel aspect ratio */
     unsigned int i_sar_den;
 
     unsigned int i_frame_rate;                     /**< frame rate numerator */
     unsigned int i_frame_rate_base;              /**< frame rate denominator */
 
+    uint32_t i_rmask, i_gmask, i_bmask;      /**< color masks for RGB chroma */
     video_palette_t *p_palette;              /**< video palette from demuxer */
     video_orientation_t orientation;                /**< picture orientation */
     video_color_primaries_t primaries;                  /**< color primaries */
@@ -374,15 +392,6 @@ struct video_format_t
         uint16_t MaxCLL;  /* max content light level */
         uint16_t MaxFALL; /* max frame average light level */
     } lighting;
-    struct {
-        uint8_t version_major;
-        uint8_t version_minor;
-        unsigned profile : 7;
-        unsigned level : 6;
-        unsigned rpu_present : 1;
-        unsigned el_present : 1;
-        unsigned bl_present : 1;
-    } dovi;
     uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
 };
 
@@ -518,9 +527,6 @@ VLC_API video_transform_t video_format_GetTransform(video_orientation_t src, vid
  */
 VLC_API bool video_format_IsSimilar( const video_format_t *, const video_format_t * );
 
-/** Checks whether the video formats have the same chroma and mask */
-VLC_API bool video_format_IsSameChroma( const video_format_t *, const video_format_t * );
-
 /**
  * It prints details about the given video_format_t
  */
@@ -539,6 +545,73 @@ static inline video_transform_t transform_Inverse( video_transform_t transform )
     }
 }
 
+/**
+ * Dolby Vision metadata description
+ */
+enum vlc_dovi_reshape_method_t
+{
+    VLC_DOVI_RESHAPE_POLYNOMIAL = 0,
+    VLC_DOVI_RESHAPE_MMR = 1,
+};
+
+enum vlc_dovi_nlq_method_t
+{
+    VLC_DOVI_NLQ_NONE = -1,
+    VLC_DOVI_NLQ_LINEAR_DZ = 0,
+};
+
+#define VLC_ANCILLARY_ID_DOVI VLC_FOURCC('D','o','V','i')
+
+typedef struct vlc_video_dovi_metadata_t
+{
+    /* Common header fields */
+    uint8_t coef_log2_denom;
+    uint8_t bl_bit_depth;
+    uint8_t el_bit_depth;
+    enum vlc_dovi_nlq_method_t nlq_method_idc;
+
+    /* Colorspace metadata */
+    float nonlinear_offset[3];
+    float nonlinear_matrix[9];
+    float linear_matrix[9];
+    uint16_t source_min_pq; /* 12-bit PQ values */
+    uint16_t source_max_pq;
+
+    /**
+     * Do not reorder or modify the following structs, they are intentionally
+     * specified to be identical to AVDOVIReshapingCurve / AVDOVINLQParams.
+     */
+    struct vlc_dovi_reshape_t {
+        uint8_t num_pivots;
+        uint16_t pivots[9];
+        enum vlc_dovi_reshape_method_t mapping_idc[8];
+        uint8_t poly_order[8];
+        int64_t poly_coef[8][3];
+        uint8_t mmr_order[8];
+        int64_t mmr_constant[8];
+        int64_t mmr_coef[8][3][7];
+    } curves[3];
+
+    struct vlc_dovi_nlq_t {
+        uint8_t offset_depth; /* bit depth of offset value */
+        uint16_t offset;
+        uint64_t hdr_in_max;
+        uint64_t dz_slope;
+        uint64_t dz_threshold;
+    } nlq[3];
+} vlc_video_dovi_metadata_t;
+
+/**
+ * Embedded ICC profiles
+ */
+
+#define VLC_ANCILLARY_ID_ICC VLC_FOURCC('i','C','C','P')
+
+typedef struct vlc_icc_profile_t
+{
+    size_t size;
+    uint8_t data[]; /* binary profile data, see ICC.1:2022 (or later) */
+} vlc_icc_profile_t;
 
 /**
  * subtitles format description
@@ -555,14 +628,13 @@ struct subs_format_t
 
     struct
     {
-        /* the width of the original movie the spu was extracted from */
-        unsigned i_original_frame_width;
-        /* the height of the original movie the spu was extracted from */
-        unsigned i_original_frame_height;
-
         /*  */
-        uint32_t palette[VIDEO_PALETTE_CLUT_COUNT]; /* CLUT Palette AYVU */
-        bool b_palette;
+        uint32_t palette[16+1]; /* CLUT Palette AYVU */
+
+        /* the width of the original movie the spu was extracted from */
+        int i_original_frame_width;
+        /* the height of the original movie the spu was extracted from */
+        int i_original_frame_height;
     } spu;
 
     struct
@@ -581,6 +653,8 @@ struct subs_format_t
         int i_reorder_depth;
     } cc;
 };
+
+#define SPU_PALETTE_DEFINED  0xbeefbeef
 
 /**
  * ES language definition
@@ -647,10 +721,15 @@ struct es_format_t
     int      i_level;         /**< codec specific information: indicates maximum restrictions on the stream (resolution, bitrate, codec features ...) */
 
     bool     b_packetized;  /**< whether the data is packetized (ie. not truncated) */
-    size_t   i_extra;       /**< length in bytes of extra data pointer */
+    int     i_extra;        /**< length in bytes of extra data pointer */
     void    *p_extra;       /**< extra data needed by some decoders or muxers */
 
 };
+
+/**
+ * This function will fill all RGB shift from RGB masks.
+ */
+VLC_API void video_format_FixRgb( video_format_t * );
 
 /**
  * This function will initialize a es_format_t structure.
@@ -681,21 +760,6 @@ VLC_API void es_format_Clean( es_format_t *fmt );
  * All descriptive fields are ignored.
  */
 VLC_API bool es_format_IsSimilar( const es_format_t *, const es_format_t * );
-
-/**
- * Log differences between 2 ES format.
- * The difference checks the same fields as \ref es_format_IsSimilar
- */
-VLC_API void es_format_LogDifferences(struct vlc_logger *,
-                                      const char *name_a, const es_format_t *a,
-                                      const char *name_b, const es_format_t *b);
-/**
- * Log differences between 2 video format.
- * The difference checks the same fields as \ref video_format_IsSimilar
- */
-VLC_API void video_format_LogDifferences(struct vlc_logger *log,
-                                         const char *name_a, const video_format_t *a,
-                                         const char *name_b, const video_format_t *b);
 
 /**
  * Changes ES format to another category
@@ -772,77 +836,5 @@ vlc_es_id_GetStrId(vlc_es_id_t *id);
  */
 VLC_API enum es_format_category_e
 vlc_es_id_GetCat(vlc_es_id_t *id);
-
-/**
- * Get the native endianness mask for a RGB fourcc
- *
- * @note the alpha mask is 0 when the chroma doesn't contain an alpha component.
- *
- * @return VLC_SUCCESS if the mask values were filled
- */
-static inline int vlc_RGBChromaToMask( vlc_fourcc_t fcc, uint32_t *rmask,
-                                       uint32_t *gmask, uint32_t *bmask,
-                                       uint32_t *amask )
-{
-    switch(fcc)
-    {
-        case VLC_CODEC_BGRA:
-            *bmask = 0xff000000;
-            *gmask = 0x00ff0000;
-            *rmask = 0x0000ff00;
-            *amask = 0x000000ff;
-            break;
-        case VLC_CODEC_BGRX:
-            *bmask = 0xff000000;
-            *gmask = 0x00ff0000;
-            *rmask = 0x0000ff00;
-            *amask = 0;
-            break;
-        case VLC_CODEC_RGBA:
-            *rmask = 0xff000000;
-            *gmask = 0x00ff0000;
-            *bmask = 0x0000ff00;
-            *amask = 0x000000ff;
-            break;
-        case VLC_CODEC_RGBX:
-            *rmask = 0xff000000;
-            *gmask = 0x00ff0000;
-            *bmask = 0x0000ff00;
-            *amask = 0;
-            break;
-        case VLC_CODEC_ABGR:
-            *amask = 0xff000000;
-            *bmask = 0x00ff0000;
-            *gmask = 0x0000ff00;
-            *rmask = 0x000000ff;
-            break;
-        case VLC_CODEC_XBGR:
-            *amask = 0;
-            *bmask = 0x00ff0000;
-            *gmask = 0x0000ff00;
-            *rmask = 0x000000ff;
-            break;
-        case VLC_CODEC_ARGB:
-            *amask = 0xff000000;
-            *rmask = 0x00ff0000;
-            *gmask = 0x0000ff00;
-            *bmask = 0x000000ff;
-            break;
-        case VLC_CODEC_XRGB:
-            *amask = 0;
-            *rmask = 0x00ff0000;
-            *gmask = 0x0000ff00;
-            *bmask = 0x000000ff;
-            break;
-        default:
-            return VLC_EINVAL;
-    }
-    return VLC_SUCCESS;
-}
-
-static inline bool es_format_HasVpxAlpha(const es_format_t *es)
-{
-    return es->i_level != -1 && (es->i_level & 0x1000) == 0x1000;
-}
 
 #endif

@@ -38,6 +38,7 @@
 #include <vlc_epg.h>
 #include <vlc_input_item.h>
 #include <vlc_vout.h>
+#include <vlc_vout_osd.h>
 
 #include <string.h>
 
@@ -72,19 +73,11 @@ static inline void vlc_seekpoint_Delete( seekpoint_t *point )
 static inline seekpoint_t *vlc_seekpoint_Duplicate( const seekpoint_t *src )
 {
     seekpoint_t *point = vlc_seekpoint_New();
-    if (unlikely(point == NULL))
-        return NULL;
-
-    if (src->psz_name)
+    if( likely(point) )
     {
-        point->psz_name = strdup(src->psz_name);
-        if (point->psz_name == NULL)
-        {
-            vlc_seekpoint_Delete(point);
-            return NULL;
-        }
+        if( src->psz_name ) point->psz_name = strdup( src->psz_name );
+        point->i_time_offset = src->i_time_offset;
     }
-    point->i_time_offset = src->i_time_offset;
     return point;
 }
 

@@ -23,9 +23,7 @@
 #ifndef VLC_ES_OUT_H
 #define VLC_ES_OUT_H 1
 
-#include <vlc_es.h>
-
-#include <vlc_tick.h>
+#include <assert.h>
 
 /**
  * \defgroup es_out ES output
@@ -72,7 +70,7 @@ enum es_out_query_e
     ES_OUT_SET_ES_FMT,         /* arg1= es_out_id_t* arg2=es_format_t* res=can fail */
 
     /* Allow preroll of data (data with dts/pts < i_pts for all ES will be decoded but not displayed */
-    ES_OUT_SET_NEXT_DISPLAY_TIME,       /* arg1=vlc_tick_t i_pts(microsecond) */
+    ES_OUT_SET_NEXT_DISPLAY_TIME,       /* arg1=int64_t i_pts(microsecond) */
     /* Set meta data for group (dynamic) (The vlc_meta_t is not modified nor released) */
     ES_OUT_SET_GROUP_META,  /* arg1=int i_group arg2=const vlc_meta_t */
     /* Set epg for group (dynamic) (The vlc_epg_t is not modified nor released) */
@@ -86,17 +84,19 @@ enum es_out_query_e
     /* Set scrambled state for one es */
     ES_OUT_SET_ES_SCRAMBLED_STATE,  /* arg1=int i_group arg2=es_out_id_t* */
 
-    /* Stop any buffering being done, and drain
-     * It will not block and so MUST be used carefully. The only good reason
+    /* Stop any buffering being done, and ask if es_out has no more data to
+     * play.
+     * It will not block and so MUST be used carrefully. The only good reason
      * is for interactive playback (like for DVD menu).
-     * XXX You SHALL call ES_OUT_RESET_PCR before any other es_out_Control/Send calls in case of success. */
-    ES_OUT_DRAIN, /* res=can fail */
-
-    /* Ask if es_out has no more data to play */
-    ES_OUT_IS_EMPTY, /* arg1=bool*               res=cannot fail */
+     * XXX You SHALL call ES_OUT_RESET_PCR before any other es_out_Control/Send calls. */
+    ES_OUT_GET_EMPTY,       /* arg1=bool*   res=cannot fail */
 
     /* Set global meta data (The vlc_meta_t is not modified nor released) */
     ES_OUT_SET_META, /* arg1=const vlc_meta_t * */
+
+    /* PCR system clock manipulation for external clock synchronization */
+    ES_OUT_GET_PCR_SYSTEM, /* arg1=vlc_tick_t *, arg2=vlc_tick_t * res=can fail */
+    ES_OUT_MODIFY_PCR_SYSTEM, /* arg1=int is_absolute, arg2=vlc_tick_t, res=can fail */
 
     ES_OUT_POST_SUBNODE, /* arg1=input_item_node_t *, res=can fail */
 
@@ -133,6 +133,10 @@ struct es_out_callbacks
     void         (*del)(es_out_t *, es_out_id_t *);
     int          (*control)(es_out_t *, input_source_t *in, int query, va_list);
     void         (*destroy)(es_out_t *);
+    /**
+     * Private control callback, must be NULL for es_out created from modules.
+     */
+    int          (*priv_control)(es_out_t *, int query, va_list);
 };
 
 struct es_out_t
@@ -178,87 +182,24 @@ static inline void es_out_Delete( es_out_t *p_out )
     p_out->cbs->destroy( p_out );
 }
 
-/* PCR handling, DTS/PTS will be automatically computed using those PCR
- * XXX: SET_PCR(_GROUP) are in charge of the pace control. They will wait
- * to slow down the demuxer so that it reads at the right speed.
- * XXX: if you want PREROLL just call ES_OUT_SET_NEXT_DISPLAY_TIME and send
- * as you would normally do.
- */
 static inline int es_out_SetPCR( es_out_t *out, vlc_tick_t pcr )
 {
     return es_out_Control( out, ES_OUT_SET_PCR, pcr );
 }
 
-/* Reset the PCR */
-VLC_USED static inline int es_out_ResetPCR( es_out_t *out )
+static inline int es_out_ControlSetMeta( es_out_t *out, const vlc_meta_t *p_meta )
 {
-    return es_out_Control( out, ES_OUT_RESET_PCR );
+    return es_out_Control( out, ES_OUT_SET_META, p_meta );
 }
 
-/* Set or change the selected ES in its category (audio/video/spu) */
-VLC_USED static inline int es_out_SetES( es_out_t *out, es_out_id_t *id )
+static inline int es_out_ControlGetPcrSystem( es_out_t *out, vlc_tick_t *pi_system, vlc_tick_t *pi_delay )
 {
-    return es_out_Control( out, ES_OUT_SET_ES, id );
+    return es_out_Control( out, ES_OUT_GET_PCR_SYSTEM, pi_system, pi_delay );
 }
-
-/* Unset selected ES */
-VLC_USED static inline int es_out_UnsetES( es_out_t *out, es_out_id_t *id )
+static inline int es_out_ControlModifyPcrSystem( es_out_t *out, bool b_absolute, vlc_tick_t i_system )
 {
-    return es_out_Control( out, ES_OUT_UNSET_ES, id );
+    return es_out_Control( out, ES_OUT_MODIFY_PCR_SYSTEM, b_absolute, i_system );
 }
-
-/* Restart the selected ES */
-VLC_USED static inline int es_out_RestartES( es_out_t *out, es_out_id_t *id )
-{
-    return es_out_Control( out, ES_OUT_RESTART_ES, id );
-}
-
-/* Set or change the default ES */
-VLC_USED static inline int es_out_SetESDefault( es_out_t *out, es_out_id_t *id )
-{
-    return es_out_Control( out, ES_OUT_SET_ES_DEFAULT, id );
-}
-
-/* Force (un)selection of the ES (bypass current mode) */
-VLC_USED static inline int es_out_SetESState( es_out_t *out, es_out_id_t *id, bool state )
-{
-    return es_out_Control( out, ES_OUT_SET_ES_STATE, id, state );
-}
-
-/* This will update the fmt, drain and restart the decoder (if any).
- * The new fmt must have the same i_cat and i_id. */
-VLC_USED static inline int es_out_SetESFmt( es_out_t *out, es_format_t *fmt )
-{
-    return es_out_Control( out, ES_OUT_SET_ES_FMT, fmt );
-}
-
-/* Sets ES selection policy when in auto mode */
-VLC_USED static inline int es_out_SetESCatPolicy( es_out_t *out, enum es_format_category_e cat, enum es_out_policy_e policy )
-{
-    return es_out_Control( out, ES_OUT_SET_ES_CAT_POLICY, cat, policy );
-}
-
-/* Get the selected state of the ES */
-VLC_USED static inline bool es_out_GetESState( es_out_t *out, es_out_id_t *id)
-{
-    bool state = false;
-
-    es_out_Control( out, ES_OUT_GET_ES_STATE, id, &state );
-    return state;
-}
-
-/* Allow preroll of data (data with dts/pts < i_pts for all ES will be decoded but not displayed) */
-VLC_USED static inline int es_out_SetNextDisplayTime( es_out_t *out, vlc_tick_t ndt )
-{
-    return es_out_Control( out, ES_OUT_SET_NEXT_DISPLAY_TIME, ndt );
-}
-
-/* Set global meta data (The vlc_meta_t is not modified nor released) */
-static inline int es_out_SetMeta( es_out_t *out, const vlc_meta_t *meta )
-{
-    return es_out_Control( out, ES_OUT_SET_META, meta );
-}
-#define es_out_ControlSetMeta es_out_SetMeta
 
 /**
  * @}

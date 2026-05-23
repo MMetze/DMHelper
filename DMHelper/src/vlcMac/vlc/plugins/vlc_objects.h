@@ -20,14 +20,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VLC_OBJECTS_H
-#define VLC_OBJECTS_H 1
-
-#ifdef __cplusplus
-#include <new>
-extern "C" {
-#endif
-
 /**
  * \defgroup vlc_object VLC objects
  * \ingroup vlc
@@ -66,10 +58,6 @@ struct vlc_object_t
     bool force;
 };
 
-#ifdef __cplusplus
-}
-#endif
-
 /**
  * Type-safe vlc_object_t cast
  *
@@ -82,7 +70,7 @@ struct vlc_object_t
 # define VLC_OBJECT(x) \
     _Generic((x)->obj, \
         struct vlc_object_marker *: (x), \
-        struct vlc_object_t: (&((x)->obj)) \
+        default: (&((x)->obj)) \
     )
 #else
 static inline vlc_object_t *VLC_OBJECT(vlc_object_t *o)
@@ -106,15 +94,11 @@ struct libvlc_int_t
 /**
  * Allocates and initializes a vlc object.
  *
- * The object will need to be released with ::vlc_object_release()
- * before \p parent is released.
- *
- * @param parent A parent object to create the new object from
  * @param i_size object byte size
  *
  * @return the new object, or NULL on error.
  */
-VLC_API void *vlc_object_create(vlc_object_t *parent, size_t i_size) VLC_MALLOC VLC_USED;
+VLC_API void *vlc_object_create( vlc_object_t *, size_t i_size) VLC_MALLOC VLC_USED;
 
 /**
  * Drops the strong reference to an object.
@@ -301,8 +285,6 @@ VLC_API void vlc_obj_free(vlc_object_t *obj, void *ptr);
 #ifdef __cplusplus
 } /* extern "C" */
 
-# include <type_traits>
-
 #undef vlc_object_create
 
 template <typename O> VLC_MALLOC VLC_USED
@@ -315,25 +297,9 @@ template<typename T, typename O> VLC_MALLOC VLC_USED
 static inline T* vlc_object_create(O *obj)
 {
     static_assert(std::is_pointer<T>::value == false, "vlc_object_create can only create objects");
-    void *object = vlc_object_create(VLC_OBJECT(obj), sizeof(T));
-    if (object == nullptr)
-        return nullptr;
-
-    return new(object) T;
+    return static_cast<T*>(vlc_object_create(VLC_OBJECT(obj), sizeof(T)));
 }
-
-#undef vlc_object_delete
-template<typename O>
-static inline void vlc_object_delete(O *obj)
-{
-    if (!std::is_trivially_destructible<O>::value)
-        obj->~O();
-    vlc_object_delete(VLC_OBJECT(obj));
-}
-
 #endif
 
 /** @} */
 /** @} */
-
-#endif

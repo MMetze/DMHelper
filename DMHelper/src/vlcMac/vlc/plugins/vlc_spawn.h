@@ -21,7 +21,7 @@
 #ifndef VLC_SPAWN_H
 #define VLC_SPAWN_H 1
 
-#include <unistd.h>
+#include <sys/types.h>
 
 /**
  * \defgroup spawn Process management
@@ -38,7 +38,7 @@
  * file name must be absolute.
  *
  * \param pid storage space for the child process identifier [OUT]
- * \param file executable file path [IN]
+ * \param path executable file path [IN]
  * \param fdv file descriptor array [IN]
  * \param argv NULL-terminated array of command line arguments [IN]
  *
@@ -84,9 +84,7 @@ int vlc_spawnp(pid_t *pid, const char *path, const int *fdv,
  *
  * \param pid process identifier as returned by vlc_spawn() or vlc_spawnp()
  *
- * \return If the process terminates cleanly, this function returns the exit
- * code of the process. Otherwise, it returns an implementation-defined value
- * that is not a valid exit code.
+ * \return This function returns the process exit code.
  */
 VLC_API
 int vlc_waitpid(pid_t pid);

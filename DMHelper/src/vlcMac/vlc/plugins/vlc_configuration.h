@@ -228,8 +228,8 @@ VLC_API ssize_t config_GetIntChoices(const char *, int64_t **values,
 VLC_API ssize_t config_GetPszChoices(const char *,
                                      char ***values, char ***texts) VLC_USED;
 
-VLC_API int config_SaveConfigFile( libvlc_int_t * );
-#define config_SaveConfigFile(a) config_SaveConfigFile(vlc_object_instance(a))
+VLC_API int config_SaveConfigFile( vlc_object_t * );
+#define config_SaveConfigFile(a) config_SaveConfigFile(VLC_OBJECT(a))
 
 /**
  * Resets the configuration.
@@ -250,26 +250,6 @@ VLC_API void config_ResetAll(void);
  * \return The internal structure, or NULL if not found.
  */
 VLC_API module_config_t *config_FindConfig(const char *name) VLC_USED;
-
-/**
- * Gets the config label string for a configuration item, acquired by name.
- * A valid configuration item name is required.
- *
- * \param name Configuration item name
- */
-static inline const char *config_GetLabel(const char *const psz_name)
-{
-    module_config_t *const p_config = config_FindConfig(psz_name);
-
-    /* sanity checks */
-    if (p_config == NULL)
-        return NULL;
-    if (p_config->psz_longtext)
-        return p_config->psz_longtext;
-    if (p_config->psz_text)
-        return p_config->psz_text;
-    return NULL;
-}
 
 /**
  * System directory identifiers
@@ -323,7 +303,6 @@ typedef enum vlc_user_dir
     VLC_MUSIC_DIR,
     VLC_PICTURES_DIR,
     VLC_VIDEOS_DIR,
-    VLC_SNAPSHOTS_DIR,
 } vlc_userdir_t;
 
 VLC_API char * config_GetUserDir( vlc_userdir_t ) VLC_USED VLC_MALLOC;

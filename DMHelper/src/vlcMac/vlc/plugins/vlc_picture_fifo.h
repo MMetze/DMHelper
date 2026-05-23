@@ -50,19 +50,6 @@ VLC_API picture_fifo_t * picture_fifo_New( void ) VLC_USED;
 VLC_API void picture_fifo_Delete( picture_fifo_t * );
 
 /**
- * Lock the picture_fifo
- *
- * All picture_fifo_t functions, except picture_fifo_Delete(), need to be
- * called with the lock held.
- */
-VLC_API void picture_fifo_Lock( picture_fifo_t * );
-
-/**
- * Unlock the picture_fifo
- */
-VLC_API void picture_fifo_Unlock( picture_fifo_t * );
-
-/**
  * It retrieves a picture_t from the fifo.
  *
  * If the fifo is empty, it return NULL without waiting.
@@ -73,11 +60,6 @@ VLC_API picture_t * picture_fifo_Pop( picture_fifo_t * ) VLC_USED;
  * It returns whether the fifo is empty or not.
  */
 VLC_API bool picture_fifo_IsEmpty( picture_fifo_t * );
-
-/**
- * It returns the number of pictures queued
- */
-VLC_API size_t picture_fifo_GetCount( picture_fifo_t * );
 
 /**
  * It saves a picture_t into the fifo.

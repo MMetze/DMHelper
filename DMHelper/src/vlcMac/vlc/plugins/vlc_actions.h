@@ -163,7 +163,6 @@ typedef enum vlc_action_id {
     ACTIONID_PAUSE,
     ACTIONID_STOP,
     ACTIONID_FRAME_NEXT,
-    ACTIONID_FRAME_PREVIOUS,
     /* input seeking */
     ACTIONID_JUMP_BACKWARD_EXTRASHORT,
     ACTIONID_JUMP_FORWARD_EXTRASHORT,
@@ -263,8 +262,6 @@ typedef enum vlc_action_id {
     /* Combo Actions */
     ACTIONID_COMBO_VOL_FOV_DOWN,
     ACTIONID_COMBO_VOL_FOV_UP,
-
-    ACTIONID_PROJECTION_TOGGLE,
 } vlc_action_id_t;
 
 /**

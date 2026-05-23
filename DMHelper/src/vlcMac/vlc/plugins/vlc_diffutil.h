@@ -24,7 +24,7 @@
 #include <vlc_vector.h>
 
 /**
- * this structure defines callback to access and compare elements from
+ * this struture defines callback to access and compare elements from
  * the old and the new list
  */
 typedef struct {
@@ -58,7 +58,7 @@ typedef struct {
     void (*remove)(void* opaque, const void* listOld, uint32_t posOld, const void* listNew,  uint32_t posNew);
     /**
      * notify that the item as @a posOld from the old list @a listOld is unchanged, the respective item
-     * position in the new list is at the position @a posNew in @a listNew
+     * position in the new list is at the positoin @a posNew in @a listNew
      */
     void (*equal)(void* opaque, const void* listOld, uint32_t posOld, const void* listNew, uint32_t posNew);
 } vlc_diffutil_snake_callback_t;
@@ -78,73 +78,6 @@ enum vlc_diffutil_op_type {
 
 
 /**
- * The data positioned at newModel[ y ] is inserted at position index
- * in the current model.
- *
- * @code
- * model = "abcdefg"
- * newModel[3] = 'X'
- * after operation insert(y=3, index = 3), model will be
- * model = "abcXdefg"
- * @endcode
- */
-struct vlc_diffutil_insert {
-    /// data position in the old model
-    uint32_t x;
-    /// data position in the new model
-    uint32_t y;
-    /// insertion position in the updated model
-    uint32_t index;
-};
-
-
-/**
- * The data positioned at oldModel[ y ] is removed at position index
- * in the current model.
- *
- * @code
- * model = "abCdefg"
- * oldModel[4] = 'C'
- * after operation remove(x=4, index = 2), model will be
- * model = "abdefg"
- * @endcode
- */
-struct vlc_diffutil_remove {
-    /// data position in the old model
-    uint32_t x;
-    /// data position in the new model
-    uint32_t y;
-    /// removal position in the updated model
-    uint32_t index;
-};
-
-
-/**
- * Moves the data from position model[ from ] to model[ to ]
- * the data is available either at newModel[ y ] or oldModel[ x ]
- *
- * the positions @a from and @a to are given in the referenrial before the operation
- *
- * @code
- * model = "aBCdefg"
- * after operation move(from=1, to=5, count=2), model will be
- * model = "adeCBfg"
- * @endcode
- */
-struct vlc_diffutil_move {
-    /// move origin
-    uint32_t from;
-    /// move destination
-    uint32_t to;
-    /// data position in the old model
-    uint32_t x;
-    /// data position in the new model
-    uint32_t y;
-};
-
-
-
-/**
  * represent a change to the model, each change assumes that previous changes
  * have already been applied
  *
@@ -153,9 +86,64 @@ struct vlc_diffutil_move {
  */
 typedef struct {
     union {
-        struct vlc_diffutil_insert insert;
-        struct vlc_diffutil_remove remove;
-        struct vlc_diffutil_move move;
+        /**
+         * the data positionned at newModel[ y ] is inserted at position index in the current model
+         *
+         * @example
+         * model = "abcdefg"
+         * newModel[3] = 'X'
+         * after operation insert(y=3, index = 3), model will be
+         * model = "abcXdefg"
+         */
+        struct {
+            /// data position in the old model
+            uint32_t x;
+            /// data position in the new model
+            uint32_t y;
+            /// insertion position in the updated model
+            uint32_t index;
+        } insert;
+
+        /**
+         * the data positionned at oldModel[ y ] is removed at position index in the current model
+         *
+         * @example
+         * model = "abCdefg"
+         * oldModel[4] = 'C'
+         * after operation remove(x=4, index = 2), model will be
+         * model = "abdefg"
+         */
+        struct {
+            /// data position in the old model
+            uint32_t x;
+            /// data position in the new model
+            uint32_t y;
+            /// removal position in the updated model
+            uint32_t index;
+        } remove;
+
+        /**
+         * moves the data from position model[ from ] to model[ to ]
+         * the data is available either at newModel[ y ] or oldModel[ x ]
+         *
+         * the positions @a from and @a to are given in the referenrial before the operation
+         *
+         * @example
+         * model = "aBCdefg"
+         * after operation move(from=1, to=5, count=2), model will be
+         * model = "adeCBfg"
+         */
+        struct {
+            /// move origin
+            uint32_t from;
+            /// move destination
+            uint32_t to;
+            /// data position in the old model
+            uint32_t x;
+            /// data position in the new model
+            uint32_t y;
+        } move;
+
     } op;
 
     /// type of change operation
@@ -168,13 +156,13 @@ typedef struct {
 typedef struct VLC_VECTOR(vlc_diffutil_change_t) vlc_diffutil_changelist_t;
 
 enum vlc_diffutil_result_flag {
-    /// try to transform an insertion with a matching suppression into a move operation
+    /// try to transform an insertion with a matching supression into a move operation
     VLC_DIFFUTIL_RESULT_MOVE = 0x1,
     /**
-     * aggregate similar consecutive operations into a single operation
+     * aggreate similar consecutive operations into a single operation
      * for instance this:
      *  [{INSERT, i=5}{INSERT, x=6}{REMOVE, i=10}{REMOVE, i=10}{REMOVE, i=10}]
-     * would be transformed into:
+     * would be tranformed into:
      *  [{INSERT, i=5, count=2}{REMOVE, i=10, count=3}]
      */
     VLC_DIFFUTIL_RESULT_AGGREGATE = 0x2,

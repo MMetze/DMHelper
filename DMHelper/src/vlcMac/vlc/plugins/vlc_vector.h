@@ -20,7 +20,6 @@
 #ifndef VLC_VECTOR_H
 #define VLC_VECTOR_H
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -320,26 +319,6 @@ vlc_vector_growsize_(size_t value)
 )
 
 /**
- * Push a hole at the end of the vector.
- *
- * The amortized complexity is O(1). The items in the hole are left
- * uninitialized and can be accessed in the range [size-count; size-1].
- *
- * \param pv a pointer to the vector
- * \param count the number of items in the hole
- * \retval true if no allocation failed
- * \retval false on allocation failure (the vector is left untouched)
- */
-#define vlc_vector_push_hole(pv, count) \
-( \
-    vlc_vector_reserve(pv, (pv)->size + vlc_vector_enforce_size_t_(count)) && \
-    ( \
-        (pv)->size += vlc_vector_enforce_size_t_(count), \
-        true \
-    ) \
-)
-
-/**
  * Append `count` items at the end of the vector.
  *
  * \param pv a pointer to the vector
@@ -353,7 +332,6 @@ vlc_vector_growsize_(size_t value)
 
 #define vlc_vector_push_all_internal_(pv, items, count) \
 ( \
-    assert(count), \
     vlc_vector_check_same_ptr_type_((pv)->data, items), \
     vlc_vector_reserve(pv, (pv)->size + (count)) && \
     ( \
@@ -381,7 +359,6 @@ vlc_vector_growsize_(size_t value)
 
 #define vlc_vector_insert_hole_internal_(pv, index, count) \
 ( \
-    assert(count), \
     vlc_vector_reserve(pv, (pv)->size + (count)) && \
     ( \
         (index) == (pv)->size || \
@@ -490,7 +467,6 @@ vlc_vector_rotate_array_right_(char *array, size_t len, size_t distance)
 static inline void
 vlc_vector_move_(char *array, size_t index, size_t count, size_t target)
 {
-    assert(count);
     if (index < target)
         vlc_vector_rotate_array_left_(&array[index], target - index + count,
                                       count);
@@ -553,7 +529,6 @@ vlc_vector_move_(char *array, size_t index, size_t count, size_t target)
 
 #define vlc_vector_remove_slice_noshrink_internal_(pv, index, count) \
     do { \
-        assert(count); \
         if ((index) + (count) < (pv)->size) \
             memmove(&(pv)->data[index], \
                     &(pv)->data[(index) + (count)], \
@@ -663,38 +638,6 @@ vlc_vector_move_(char *array, size_t index, size_t count, size_t target)
          vlc_vector_idx_##item < (pv)->size && \
              ((item) = (pv)->data[vlc_vector_idx_##item], true); \
          ++vlc_vector_idx_##item)
-
-/**
- * For-each loop with a reference iterator.
- *
- * Should be used for vector holding non-trivially copyable data.
- *
- * \param[out] ref The reference iterator
- * \param[in] pv a pointer to the vector
- */
-#define vlc_vector_foreach_ref(ref, pv) \
-    for (size_t vlc_vector_idx_##ref = 0; \
-         vlc_vector_idx_##ref < (pv)->size && \
-             ((ref) = &(pv)->data[vlc_vector_idx_##ref], true); \
-         ++vlc_vector_idx_##ref)
-
-/**
- * Returns the vector's last element.
- */
-#define vlc_vector_last(pv) \
-( \
-    assert((pv)->size != 0), \
-    (pv)->data[(pv)->size - 1] \
-)
-
-/**
- * Returns a reference on the vector's last element.
- */
-#define vlc_vector_last_ref(pv) \
-( \
-    assert((pv)->size != 0), \
-    &(pv)->data[(pv)->size - 1] \
-)
 
 /** @} */
 

@@ -2,11 +2,9 @@
  * vlc_config_cat.h : Definition of configuration categories
  *****************************************************************************
  * Copyright (C) 2003 VLC authors and VideoLAN
- * Copyright (C) 2023 Videolabs
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Anil Daoud <anil@videolan.org>
- *          Alexandre Janniaux <ajanni@videolabs.io>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -162,26 +160,93 @@ struct config_subcategory_t
     const char *help;
 };
 
-/**
- * Fetch category information from VLC
- */
-VLC_API VLC_USED const struct config_category_t *
-vlc_config_cat_Find(enum vlc_config_cat cat);
+static const struct config_category_t categories_array[] =
+{
+    { CAT_PLAYLIST,   SUBCAT_PLAYLIST_GENERAL,   PLAYLIST_HELP  },
+    { CAT_INTERFACE,  SUBCAT_INTERFACE_GENERAL,  INTF_HELP      },
+    { CAT_AUDIO,      SUBCAT_AUDIO_GENERAL,      AUDIO_HELP     },
+    { CAT_VIDEO,      SUBCAT_VIDEO_GENERAL,      VIDEO_HELP     },
+    { CAT_INPUT,      SUBCAT_INPUT_GENERAL,      INPUT_HELP     },
+    { CAT_SOUT,       SUBCAT_SOUT_GENERAL,       SOUT_HELP      },
+    { CAT_ADVANCED,   SUBCAT_ADVANCED_MISC,      AADVANCED_HELP },
+};
 
-VLC_API VLC_USED const struct config_category_t *
-vlc_config_cat_GetAt(size_t index);
+static const struct config_subcategory_t subcategories_array[] =
+{
+    { SUBCAT_PLAYLIST_GENERAL,     CAT_PLAYLIST,   PLAYLIST_TITLE,            PGENERAL_HELP      },
+    { SUBCAT_PLAYLIST_EXPORT,      CAT_PLAYLIST,   N_("Export"),              PEXPORT_HELP       },
+    { SUBCAT_PLAYLIST_SD,          CAT_PLAYLIST,   N_("Services discovery"),  SD_HELP            },
 
-VLC_API VLC_USED const struct config_subcategory_t *
-vlc_config_subcat_Find(enum vlc_config_subcat subcat);
+    { SUBCAT_INTERFACE_GENERAL,    CAT_INTERFACE,  INTF_TITLE,                INTF_GENERAL_HELP  },
+    { SUBCAT_INTERFACE_CONTROL,    CAT_INTERFACE,  N_("Control interfaces"),  INTF_CONTROL_HELP  },
+    { SUBCAT_INTERFACE_HOTKEYS,    CAT_INTERFACE,  N_("Hotkeys settings"),    INTF_HOTKEYS_HELP  },
+    { SUBCAT_INTERFACE_MAIN,       CAT_INTERFACE,  N_("Main interfaces"),     INTF_MAIN_HELP     },
 
-VLC_API VLC_USED const struct config_subcategory_t *
-vlc_config_subcat_GetAt(size_t index);
+    { SUBCAT_AUDIO_GENERAL,        CAT_AUDIO,      AUDIO_TITLE,               AUDIO_GENERAL_HELP },
+    { SUBCAT_AUDIO_RESAMPLER,      CAT_AUDIO,      N_("Audio resampler"),     AFILTER_HELP       },
+    { SUBCAT_AUDIO_AFILTER,        CAT_AUDIO,      N_("Filters"),             AFILTER_HELP       },
+    { SUBCAT_AUDIO_AOUT,           CAT_AUDIO,      N_("Output modules"),      AOUT_HELP          },
+    { SUBCAT_AUDIO_VISUAL,         CAT_AUDIO,      N_("Visualizations"),      AVISUAL_HELP       },
 
-VLC_API VLC_USED size_t
-vlc_config_cat_Count(void);
+    { SUBCAT_VIDEO_GENERAL,        CAT_VIDEO,      VIDEO_TITLE,               VIDEO_GENERAL_HELP },
+    { SUBCAT_VIDEO_VFILTER,        CAT_VIDEO,      N_("Filters"),             VFILTER_HELP       },
+    { SUBCAT_VIDEO_VOUT,           CAT_VIDEO,      N_("Output modules"),      VOUT_HELP          },
+    { SUBCAT_VIDEO_SPLITTER,       CAT_VIDEO,      N_("Splitters"),           SPLITTER_HELP      },
+    { SUBCAT_VIDEO_SUBPIC,         CAT_VIDEO,      N_("Subtitles / OSD"),     SUBPIC_HELP        },
 
-VLC_API VLC_USED size_t
-vlc_config_subcat_Count(void);
+    { SUBCAT_INPUT_GENERAL,        CAT_INPUT,      INPUT_TITLE,               INPUT_HELP         },
+    { SUBCAT_INPUT_ACCESS,         CAT_INPUT,      N_("Access modules"),      ACCESS_HELP        },
+    { SUBCAT_INPUT_ACODEC,         CAT_INPUT,      N_("Audio codecs"),        ADEC_HELP          },
+    { SUBCAT_INPUT_DEMUX,          CAT_INPUT,      N_("Demuxers"),            DEMUX_HELP         },
+    { SUBCAT_INPUT_STREAM_FILTER,  CAT_INPUT,      N_("Stream filters"),      STREAM_FILTER_HELP },
+    { SUBCAT_INPUT_SCODEC,         CAT_INPUT,      N_("Subtitle codecs"),     SDEC_HELP          },
+    { SUBCAT_INPUT_VCODEC,         CAT_INPUT,      N_("Video codecs"),        VDEC_HELP          },
+
+    { SUBCAT_SOUT_GENERAL,         CAT_SOUT,       SOUT_TITLE,                SOUT_GENERAL_HELP  },
+    { SUBCAT_SOUT_ACO,             CAT_SOUT,       N_("Access output"),       SOUT_ACO_HELP      },
+    { SUBCAT_SOUT_MUX,             CAT_SOUT,       N_("Muxers"),              SOUT_MUX_HELP      },
+    { SUBCAT_SOUT_PACKETIZER,      CAT_SOUT,       N_("Packetizers"),         SOUT_PACKET_HELP   },
+    { SUBCAT_SOUT_RENDERER,        CAT_SOUT,       N_("Renderers"),           SOUT_RENDER_HELP   },
+    { SUBCAT_SOUT_STREAM,          CAT_SOUT,       N_("Sout stream"),         SOUT_STREAM_HELP   },
+    { SUBCAT_SOUT_VOD,             CAT_SOUT,       N_("VOD"),                 SOUT_VOD_HELP      },
+
+    { SUBCAT_ADVANCED_MISC,        CAT_ADVANCED,   AADVANCED_TITLE,           AADVANCED_HELP     },
+    { SUBCAT_ADVANCED_NETWORK,     CAT_ADVANCED,   N_("Network"),             ANETWORK_HELP      },
+
+    { SUBCAT_HIDDEN,               CAT_HIDDEN,     NULL,                      NULL               },
+};
+
+/** Get the table index for the given category entry. */
+VLC_USED
+static inline int vlc_config_cat_IndexOf( enum vlc_config_cat cat )
+{
+    int index = -1;
+    for( unsigned i = 0; i < ARRAY_SIZE(categories_array); i++ )
+    {
+        if( categories_array[i].id == cat )
+        {
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
+/** Get the table index for the given subcategory entry. */
+VLC_USED
+static inline int vlc_config_subcat_IndexOf( enum vlc_config_subcat subcat )
+{
+    int index = -1;
+    for( unsigned i = 0; i < ARRAY_SIZE(subcategories_array); i++ )
+    {
+        if( subcategories_array[i].id == subcat )
+        {
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
 
 /** Get the "general" subcategory for a given category.
  *
@@ -201,30 +266,24 @@ vlc_config_subcat_Count(void);
 VLC_USED
 static inline enum vlc_config_subcat vlc_config_cat_GetGeneralSubcat( enum vlc_config_cat cat )
 {
-    const struct config_category_t *c = vlc_config_cat_Find(cat);
-    if (c == NULL)
-        return SUBCAT_UNKNOWN;
-    return c->general_subcat;
+    int i = vlc_config_cat_IndexOf( cat );
+    return (i != -1) ? categories_array[i].general_subcat : SUBCAT_UNKNOWN;
 }
 
 /** Get the name for a subcategory. */
 VLC_USED
 static inline const char *vlc_config_subcat_GetName( enum vlc_config_subcat subcat )
 {
-    const struct config_subcategory_t *s = vlc_config_subcat_Find(subcat);
-    if (s == NULL)
-        return NULL;
-    return vlc_gettext(s->name);
+    int i = vlc_config_subcat_IndexOf( subcat );
+    return (i != -1) ? vlc_gettext(subcategories_array[i].name) : NULL;
 }
 
 /** Get the help text for a subcategory. */
 VLC_USED
 static inline const char *vlc_config_subcat_GetHelp( enum vlc_config_subcat subcat )
 {
-    const struct config_subcategory_t *s = vlc_config_subcat_Find(subcat);
-    if (s == NULL)
-        return NULL;
-    return vlc_gettext(s->help);
+    int i = vlc_config_subcat_IndexOf( subcat );
+    return (i != -1) ? vlc_gettext(subcategories_array[i].help) : NULL;
 }
 
 /** Get the name for a category. */
@@ -239,20 +298,16 @@ static inline const char *vlc_config_cat_GetName( enum vlc_config_cat cat )
 VLC_USED
 static inline const char *vlc_config_cat_GetHelp( enum vlc_config_cat cat )
 {
-    const struct config_category_t *c = vlc_config_cat_Find(cat);
-    if (c == NULL)
-        return NULL;
-    return vlc_gettext(c->help);
+    int i = vlc_config_cat_IndexOf( cat );
+    return (i != -1) ? vlc_gettext(categories_array[i].help) : NULL;
 }
 
 /** Get the parent category for the given subcategory. */
 VLC_USED
 static inline enum vlc_config_cat vlc_config_cat_FromSubcat( enum vlc_config_subcat subcat )
 {
-    const struct config_subcategory_t *s = vlc_config_subcat_Find(subcat);
-    if (s == NULL)
-        return CAT_UNKNOWN;
-    return s->cat;
+    int i = vlc_config_subcat_IndexOf( subcat );
+    return (i != -1) ? subcategories_array[i].cat : CAT_UNKNOWN;
 }
 
 /** Check if the given subcategory is a "general" one. */

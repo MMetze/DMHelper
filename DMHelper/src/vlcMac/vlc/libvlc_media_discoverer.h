@@ -29,8 +29,6 @@
 extern "C" {
 # endif
 
-typedef struct libvlc_media_list_t libvlc_media_list_t;
-
 /**
  * Category of a media discoverer
  * \see libvlc_media_discoverer_list_get()
@@ -132,8 +130,6 @@ libvlc_media_discoverer_release( libvlc_media_discoverer_t * p_mdis );
  *
  * \param p_mdis media service discover object
  * \return list of media items
- * \note the caller is responsible for releasing the returned list
- *       with libvlc_media_list_release().
  */
 LIBVLC_API libvlc_media_list_t *
 libvlc_media_discoverer_media_list( libvlc_media_discoverer_t * p_mdis );

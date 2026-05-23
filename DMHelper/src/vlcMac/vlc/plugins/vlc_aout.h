@@ -26,7 +26,6 @@
 #include <assert.h>
 #include <vlc_list.h>
 #include <vlc_es.h>
-#include <vlc_threads.h>
 
 /* FIXME to remove once aout.h is cleaned a bit more */
 #include <vlc_block.h>
@@ -133,7 +132,7 @@ struct vlc_audio_output_events {
     void (*policy_report)(audio_output_t *, bool);
     void (*device_report)(audio_output_t *, const char *);
     void (*hotplug_report)(audio_output_t *, const char *, const char *);
-    void (*restart_request)(audio_output_t *, bool);
+    void (*restart_request)(audio_output_t *, unsigned);
     int (*gain_request)(audio_output_t *, float);
 };
 
@@ -156,7 +155,7 @@ struct audio_output
 
     void *sys; /**< Private data for callbacks */
 
-    int (*start)(audio_output_t *, audio_sample_format_t * restrict fmt);
+    int (*start)(audio_output_t *, audio_sample_format_t *fmt);
     /**< Starts a new stream (mandatory, cannot be NULL).
       *
       * This callback changes the audio output from stopped to playing state
@@ -182,7 +181,7 @@ struct audio_output
       * \note This callback needs not be reentrant.
       */
 
-    int (*time_get)(audio_output_t *, vlc_tick_t * restrict delay);
+    int (*time_get)(audio_output_t *, vlc_tick_t *delay);
     /**< Estimates playback buffer latency (can be NULL).
       *
       * This callback computes an estimation of the delay until the current
@@ -226,14 +225,15 @@ struct audio_output
       */
 
     void (*pause)( audio_output_t *, bool pause, vlc_tick_t date);
-    /**< Pauses or resumes playback (can be NULL).
+    /**< Pauses or resumes playback (mandatory, cannot be NULL).
       *
       * This callback pauses or resumes audio playback as quickly as possible.
       * When pausing, it is desirable to stop producing sound immediately, but
       * retain already queued audio samples in the buffer to play when later
       * when resuming.
       *
-      * If pausing is impossible, the core will flush the module.
+      * If pausing is impossible, then aout_PauseDefault() can provide a
+      * fallback implementation of this callback.
       *
       * \param pause pause if true, resume from pause if false
       * \param date timestamp when the pause or resume was requested
@@ -303,27 +303,20 @@ struct audio_output
 /**
  * Report a new timing point
  *
+ * system_ts doesn't have to be close to vlc_tick_now(). Any valid { system_ts,
+ * audio_ts } points in the past are sufficient to update the clock.
+ *
+ * \note audio_ts starts at 0 and should not take the block PTS into account.
+ *
  * It is important to report the first point as soon as possible (and the
  * following points if the audio delay take some time to be stabilized). Once
- * the audio is stabilized, it is recommended to report timing points every
+ * the audio is stabilized, it is recommended to report timing points every few
  * seconds.
- *
- * This function can be called from the play() callback or from any threads
- * after the first play(). This should not be called after a flush(), a stop(),
- * a drain() or while paused. After a flush(), play() need to be called again
- * before reporting a new timing. In that case, audio_ts should start again at
- * 0 (for the first sample played).
- *
- * \param aout the audio output instance
- * \param system_ts system timestamp when audio_ts is played, based on
- * vlc_tick_now(), can be now, in the past or in the future.
- * \param audio_pts audio timestamp played at system_ts, starts at block->i_pts
- * for the first sample played.
  */
 static inline void aout_TimingReport(audio_output_t *aout, vlc_tick_t system_ts,
-                                     vlc_tick_t audio_pts)
+                                     vlc_tick_t audio_ts)
 {
-    aout->events->timing_report(aout, system_ts, audio_pts);
+    aout->events->timing_report(aout, system_ts, audio_ts);
 }
 
 /**
@@ -352,7 +345,6 @@ static inline void aout_MuteReport(audio_output_t *aout, bool mute)
 
 /**
  * Report audio policy status.
- * \param aout the audio output instance reporting the cork policy
  * \param cork true to request a cork, false to undo any pending cork.
  */
 static inline void aout_PolicyReport(audio_output_t *aout, bool cork)
@@ -370,7 +362,6 @@ static inline void aout_DeviceReport(audio_output_t *aout, const char *id)
 
 /**
  * Report a device hot-plug event.
- * @param aout the audio output instance reporting the new device
  * @param id device ID
  * @param name human-readable device name (NULL for hot unplug)
  */
@@ -382,19 +373,37 @@ static inline void aout_HotplugReport(audio_output_t *aout,
 
 /**
  * Request a change of software audio amplification.
- * \param aout the audio output instance requesting software gain
  * \param gain linear amplitude gain (must be positive)
- * \warning Values in excess 1.0 may cause overflow and distortion.
+ * \warning Values in excess 1.0 may cause overflow and distorsion.
  */
 static inline int aout_GainRequest(audio_output_t *aout, float gain)
 {
     return aout->events->gain_request(aout, gain);
 }
 
-static inline void aout_RestartRequest(audio_output_t *aout, bool restart_dec)
+static inline void aout_RestartRequest(audio_output_t *aout, unsigned mode)
 {
-    aout->events->restart_request(aout, restart_dec);
+    aout->events->restart_request(aout, mode);
 }
+
+/**
+ * Default implementation for audio_output_t.pause
+ *
+ * \warning This default callback implementation is suboptimal as it will
+ * discard some audio samples.
+ * Do not use this unless there are really no possible better alternatives.
+ */
+static inline void aout_PauseDefault(audio_output_t *aout, bool paused,
+                                     vlc_tick_t date)
+{
+    if (paused)
+        aout->flush(aout);
+    (void) date;
+}
+
+#define AOUT_RESTART_FILTERS        0x1
+#define AOUT_RESTART_OUTPUT         (AOUT_RESTART_FILTERS|0x2)
+#define AOUT_RESTART_STEREOMODE     (AOUT_RESTART_OUTPUT|0x4)
 
 /** @} */
 
@@ -433,9 +442,7 @@ VLC_API unsigned aout_CheckChannelReorder( const uint32_t *, const uint32_t *,
  * \param fourcc sample format (must be a linear sample format)
  * \note The samples must be naturally aligned in memory.
  */
-VLC_API void aout_ChannelReorder(void *ptr, size_t bytes, uint8_t channels,
-                                 const uint8_t *chans_table,
-                                 vlc_fourcc_t fourcc);
+VLC_API void aout_ChannelReorder(void *, size_t, uint8_t, const uint8_t *, vlc_fourcc_t);
 
 /**
  * This function will compute the extraction parameter into pi_selection to go
@@ -493,70 +500,14 @@ VLC_API const char * aout_FormatPrintChannels( const audio_sample_format_t * ) V
 #define AOUT_VOLUME_DEFAULT             256
 #define AOUT_VOLUME_MAX                 512
 
-/**
- * Gets the volume of the audio output stream (independent of mute).
- * \return Current audio volume (0. = silent, 1. = nominal),
- * or a strictly negative value if undefined.
- */
 VLC_API float aout_VolumeGet (audio_output_t *);
-
-/**
- * Sets the volume of the audio output stream.
- * \note The mute status is not changed.
- * \return 0 on success, -1 on failure.
- */
 VLC_API int aout_VolumeSet (audio_output_t *, float);
-
-/**
- * Adjusts the volume.
- * \param aout the audio output to update the volume for
- * \param value how much to increase (> 0) or decrease (< 0) the volume
- * \param volp if non-NULL, will contain contain the resulting volume
- */
-VLC_API int aout_VolumeUpdate (audio_output_t *aout, int value,
-                               float *volp);
-
-/**
- * Gets the audio output stream mute flag.
- * \return 0 if not muted, 1 if muted, -1 if undefined.
- */
+VLC_API int aout_VolumeUpdate (audio_output_t *, int, float *);
 VLC_API int aout_MuteGet (audio_output_t *);
-
-/**
- * Sets the audio output stream mute flag.
- * \return 0 on success, -1 on failure.
- */
 VLC_API int aout_MuteSet (audio_output_t *, bool);
-
-/**
- * Gets the currently selected device.
- * \return the selected device ID (caller must free() it)
- *         NULL if no device is selected or in case of error.
- */
 VLC_API char *aout_DeviceGet (audio_output_t *);
-
-/**
- * Selects an audio output device.
- * \param aout the audio output to set the device for
- * \param id device ID to select, or NULL for the default device
- * \return zero on success, non-zero on error.
- */
-VLC_API int aout_DeviceSet (audio_output_t *aout, const char *id);
-
-/**
- * Enumerates possible audio output devices.
- *
- * The function will heap-allocate two tables of heap-allocated strings;
- * the caller is responsible for freeing all strings and both tables.
- *
- * \param aout the audio output to get the device list from
- * \param ids pointer to a table of device identifiers [OUT]
- * \param names pointer to a table of device human-readable descriptions [OUT]
- * \return the number of devices, or negative on error.
- * \note In case of error, *ids and *names are undefined.
- */
-VLC_API int aout_DevicesList (audio_output_t *aout, char ***ids,
-                              char ***names);
+VLC_API int aout_DeviceSet (audio_output_t *, const char *);
+VLC_API int aout_DevicesList (audio_output_t *, char ***, char ***);
 
 /** @} */
 

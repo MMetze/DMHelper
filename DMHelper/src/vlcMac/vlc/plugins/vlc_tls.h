@@ -75,7 +75,7 @@ struct vlc_tls_operations
      *
      * See \ref vlc_tls_GetPollFD().
      */
-    int (*get_fd)(struct vlc_tls *, short *restrict events);
+    int (*get_fd)(struct vlc_tls *, short *events);
 
     /** Callback for receiving data.
      *
@@ -195,7 +195,7 @@ VLC_API void vlc_tls_ClientDelete(vlc_tls_client_t *);
  **/
 VLC_API vlc_tls_t *vlc_tls_ClientSessionCreate(vlc_tls_client_t *creds,
                                                vlc_tls_t *sock,
-                                               const char *hostname,
+                                               const char *host,
                                                const char *service,
                                                const char *const *alpn,
                                                char **alp);
@@ -233,14 +233,13 @@ struct vlc_tls_server_operations
 /**
  * Allocates server TLS credentials.
  *
- * @param tls the TLS stream object
  * @param cert path to an x509 certificate (required)
  * @param key path to the PKCS private key for the certificate,
  *            or NULL to use cert path
  *
  * @return TLS credentials object, or NULL on error.
  */
-VLC_API vlc_tls_server_t *vlc_tls_ServerCreate(vlc_object_t *tls,
+VLC_API vlc_tls_server_t *vlc_tls_ServerCreate(vlc_object_t *,
                                                const char *cert,
                                                const char *key);
 
@@ -264,7 +263,6 @@ static inline int vlc_tls_SessionHandshake(vlc_tls_server_t *crd,
  * This function is non-blocking and is not a cancellation point.
  *
  * @param creds server credentials, i.e. keys pair and X.509 certificates chain
- * @param sock the TLS stream object
  * @param alpn NULL-terminated list of Application Layer Protocols
  *             to negotiate, or NULL to not negotiate protocols
  *
@@ -308,7 +306,6 @@ VLC_API void vlc_tls_SessionDelete (vlc_tls_t *);
  * This function is necessary both for receiving and sending data, therefore
  * it is reentrant. It is not a cancellation point.
  *
- * @param tls the TLS stream object
  * @param events a pointer to a mask of poll events (e.g. POLLIN, POLLOUT)
  *               [IN/OUT]
  * @return the file descriptor to poll
@@ -336,7 +333,6 @@ static inline int vlc_tls_GetFD(vlc_tls_t *tls)
  *
  * This dequeues incoming data from a transport layer socket.
  *
- * @param tls the TLS stream object
  * @param buf received buffer start address [OUT]
  * @param len buffer length (in bytes)
  * @param waitall whether to wait for the exact buffer length (true),
@@ -347,7 +343,7 @@ static inline int vlc_tls_GetFD(vlc_tls_t *tls)
  *
  * @return the number of bytes actually dequeued, or -1 on error.
  */
-VLC_API ssize_t vlc_tls_Read(vlc_tls_t *tls, void *buf, size_t len, bool waitall);
+VLC_API ssize_t vlc_tls_Read(vlc_tls_t *, void *buf, size_t len, bool waitall);
 
 /**
  * Receives a text line through a socket.
@@ -374,7 +370,6 @@ VLC_API ssize_t vlc_tls_Write(vlc_tls_t *, const void *buf, size_t len);
  * Data can still be received until a close notification is received from the
  * other end.
  *
- * @param tls the TLS stream object
  * @param duplex whether to stop receiving data as well
  * @retval 0 the session was terminated securely and cleanly
  *           (the underlying socket can be reused for other purposes)

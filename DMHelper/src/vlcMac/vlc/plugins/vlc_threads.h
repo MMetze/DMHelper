@@ -32,8 +32,6 @@
 #include <stdatomic.h>
 #endif
 
-#include <vlc_tick.h>
-
 /**
  * \ingroup os
  * \defgroup thread Threads and synchronization primitives
@@ -64,6 +62,18 @@ typedef struct vlc_thread *vlc_thread_t;
 typedef struct vlc_threadvar *vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
 
+static inline int vlc_poll(struct pollfd *fds, unsigned nfds, int timeout)
+{
+    int val;
+
+    vlc_testcancel();
+    val = poll(fds, nfds, timeout);
+    if (val < 0)
+        vlc_testcancel();
+    return val;
+}
+# define poll(u,n,t) vlc_poll(u, n, t)
+
 #elif defined (__OS2__)
 # include <errno.h>
 
@@ -75,6 +85,26 @@ typedef struct vlc_timer *vlc_timer_t;
 
 # define pthread_sigmask  sigprocmask
 
+static inline int vlc_poll (struct pollfd *fds, unsigned nfds, int timeout)
+{
+    static int (*vlc_poll_os2)(struct pollfd *, unsigned, int) = NULL;
+
+    if (!vlc_poll_os2)
+    {
+        HMODULE hmod;
+        CHAR szFailed[CCHMAXPATH];
+
+        if (DosLoadModule(szFailed, sizeof(szFailed), "vlccore", &hmod))
+            return -1;
+
+        if (DosQueryProcAddr(hmod, 0, "_vlc_poll_os2", (PFN *)&vlc_poll_os2))
+            return -1;
+    }
+
+    return (*vlc_poll_os2)(fds, nfds, timeout);
+}
+# define poll(u,n,t) vlc_poll(u, n, t)
+
 #elif defined (__ANDROID__)      /* pthreads subset without pthread_cancel() */
 # include <unistd.h>
 # include <pthread.h>
@@ -85,6 +115,26 @@ typedef struct vlc_thread *vlc_thread_t;
 #define VLC_THREAD_CANCELED ((void*) UINTPTR_MAX)
 typedef pthread_key_t   vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
+
+static inline int vlc_poll (struct pollfd *fds, unsigned nfds, int timeout)
+{
+    int val;
+
+    do
+    {
+        int ugly_timeout = ((unsigned)timeout >= 50) ? 50 : timeout;
+        if (timeout >= 0)
+            timeout -= ugly_timeout;
+
+        vlc_testcancel ();
+        val = poll (fds, nfds, ugly_timeout);
+    }
+    while (val == 0 && timeout != 0);
+
+    return val;
+}
+
+# define poll(u,n,t) vlc_poll(u, n, t)
 
 #else /* POSIX threads */
 # include <unistd.h> /* _POSIX_SPIN_LOCKS */
@@ -160,12 +210,12 @@ typedef struct
  * Static initializer for (static) mutex.
  *
  * \note This only works in C code.
- * In C++, consider using a global ::vlc::threads::mutex instance instead.
+ * In C++, consider using a global \ref vlc::threads::mutex instance instead.
  */
 #define VLC_STATIC_MUTEX { \
-    .value = 0, \
-    .recursion = 0, \
-    .owner = 0, \
+    .value = ATOMIC_VAR_INIT(0), \
+    .recursion = ATOMIC_VAR_INIT(0), \
+    .owner = ATOMIC_VAR_INIT(0), \
 }
 
 /**
@@ -346,6 +396,8 @@ VLC_API void vlc_cond_wait(vlc_cond_t *cond, vlc_mutex_t *mutex);
 VLC_API int vlc_cond_timedwait(vlc_cond_t *cond, vlc_mutex_t *mutex,
                                vlc_tick_t deadline);
 
+int vlc_cond_timedwait_daytime(vlc_cond_t *, vlc_mutex_t *, time_t);
+
 /** @} */
 
 /**
@@ -376,10 +428,9 @@ typedef struct
 /**
  * Initializes a semaphore.
  *
- * @param sem a semaphore to initialize
  * @param count initial semaphore value (typically 0)
  */
-VLC_API void vlc_sem_init(vlc_sem_t *sem, unsigned count);
+VLC_API void vlc_sem_init(vlc_sem_t *, unsigned count);
 
 /**
  * Increments the value of a semaphore.
@@ -451,10 +502,9 @@ typedef struct
 /**
  * Initializes a latch.
  *
- * @param latch a latch instance
  * @param value initial latch value (typically 1)
  */
-VLC_API void vlc_latch_init(vlc_latch_t *latch, size_t value);
+VLC_API void vlc_latch_init(vlc_latch_t *, size_t value);
 
 /**
  * Decrements the value of a latch.
@@ -466,12 +516,11 @@ VLC_API void vlc_latch_init(vlc_latch_t *latch, size_t value);
  * \warning If the result is (arithmetically) strictly negative, the behaviour
  * is undefined.
  *
- * \param latch an initialized latch
  * \param n quantity to subtract from the latch value (typically 1)
  *
  * \note This function is not a cancellation point.
  */
-VLC_API void vlc_latch_count_down(vlc_latch_t *latch, size_t n);
+VLC_API void vlc_latch_count_down(vlc_latch_t *, size_t n);
 
 /**
  * Decrements the value of a latch and waits on it.
@@ -485,12 +534,11 @@ VLC_API void vlc_latch_count_down(vlc_latch_t *latch, size_t n);
  *
  * \warning If the result is strictly negative, the behaviour is undefined.
  *
- * \param latch an initialized latch
- * \param n number of times to decrement the value (typically 1)
+ * @param n number of times to decrement the value (typically 1)
  *
  * \note This function may be a cancellation point.
  */
-VLC_API void vlc_latch_count_down_and_wait(vlc_latch_t *latch, size_t n);
+VLC_API void vlc_latch_count_down_and_wait(vlc_latch_t *, size_t n);
 
 /**
  * Checks if a latch is ready.
@@ -527,7 +575,7 @@ typedef struct
 /**
  * Static initializer for one-time initialization.
  */
-#define VLC_STATIC_ONCE { 0 }
+#define VLC_STATIC_ONCE { ATOMIC_VAR_INIT(0) }
 
 /**
  * Begins a one-time initialization.
@@ -663,7 +711,7 @@ VLC_API void *vlc_threadvar_get(vlc_threadvar_t);
 VLC_API int vlc_clone(vlc_thread_t *th, void *(*entry)(void *),
                       void *data) VLC_USED;
 
-#if defined(__GNUC__) && !defined(__COVERITY__)
+#if defined(__GNUC__)
 static
 VLC_UNUSED_FUNC
 VLC_WARN_CALL("thread name too big")
@@ -815,7 +863,7 @@ VLC_API void vlc_tick_sleep(vlc_tick_t delay);
 #define VLC_HARD_MIN_SLEEP  VLC_TICK_FROM_MS(10)   /* 10 milliseconds = 1 tick at 100Hz */
 #define VLC_SOFT_MIN_SLEEP  VLC_TICK_FROM_SEC(9)   /* 9 seconds */
 
-#if defined(__GNUC__) && !defined(__COVERITY__)
+#if defined(__GNUC__)
 
 /* Linux has 100, 250, 300 or 1000Hz
  *

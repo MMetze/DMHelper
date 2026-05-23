@@ -25,12 +25,12 @@
 
 #include <vlc_es.h>
 #include <vlc_picture.h>
+#include <vlc_subpicture.h>
+#include <vlc_actions.h>
 #include <vlc_mouse.h>
 #include <vlc_vout.h>
 #include <vlc_window.h>
 #include <vlc_viewpoint.h>
-
-struct vlc_render_subpicture;
 
 /**
  * \defgroup video_display Video output display
@@ -99,7 +99,6 @@ struct vout_display_placement {
     vlc_video_align_t align; /**< Alignment within the window */
     enum vlc_video_fitting fitting; /**< Scaling/fitting mode */
     vlc_rational_t zoom; /**< Zoom ratio (if fitting is disabled) */
-    bool full_fill; /**< whether the rendering will take the whole display */
 };
 
 /**
@@ -107,9 +106,8 @@ struct vout_display_placement {
  *
  * This primarily controls the size of the display area within the video
  * window, as follows:
- * - If \ref vout_display_placement::fitting is not disabled, ie. equals
- *   to \ref VLC_VIDEO_FIT_NONE, in \ref vout_display_cfg::display, the
- *   video size is fitted to the display size.
+ * - If \ref vout_display_cfg::display::fitting is not disabled,
+ *   the video size is fitted to the display size.
  * - If \ref vout_display_cfg::window "window" size is valid, the video size
  *   is set to the window size,
  * - Otherwise, the video size is determined from the original video format,
@@ -118,13 +116,7 @@ struct vout_display_placement {
 typedef struct vout_display_cfg {
     struct vlc_window *window; /**< Window */
     struct vout_display_placement display; /**< Display placement properties */
-    vlc_icc_profile_t *icc_profile; /**< Currently active ICC profile */
-    /** Final source projection requested for display. */
-    video_projection_mode_t projection;
-
-    /** Initial viewpoint when projection != PROJECTION_MODE_RECTANGULAR */
     vlc_viewpoint_t viewpoint;
-    vlc_stereoscopic_mode_t stereo_mode; /**< Stereoscopic/3D mode used by the display */
 } vout_display_cfg_t;
 
 /**
@@ -135,8 +127,62 @@ typedef struct vout_display_cfg {
  *
  */
 typedef struct {
+    bool can_scale_spu;                     /* Handles subpictures with a non default zoom factor */
     const vlc_fourcc_t *subpicture_chromas; /* List of supported chromas for subpicture rendering. */
 } vout_display_info_t;
+
+/**
+ * Control query for vout_display_t
+ */
+enum vout_display_query {
+    /**
+     * Notifies a change in display size.
+     *
+     * \retval VLC_SUCCESS if the display handled the change
+     * \retval VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
+     *         request is necessary
+     */
+    VOUT_DISPLAY_CHANGE_DISPLAY_SIZE,
+
+    /**
+     * Notifies a change of the display fitting mode by the user.
+     *
+     * \retval VLC_SUCCESS if the display handled the change
+     * \retval VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
+     *         request is necessary
+     */
+    VOUT_DISPLAY_CHANGE_DISPLAY_FILLED,
+
+    /**
+     * Notifies a change of the user zoom factor.
+     *
+     * \retval VLC_SUCCESS if the display handled the change
+     * \retval VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
+     *         request is necessary
+     */
+    VOUT_DISPLAY_CHANGE_ZOOM,
+
+    /**
+     * Notifies a change of the sample aspect ratio.
+     *
+     * \retval VLC_SUCCESS if the display handled the change
+     * \retval VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
+     *         request is necessary
+     */
+    VOUT_DISPLAY_CHANGE_SOURCE_ASPECT,
+
+    /**
+     * Notifies a change of the source cropping.
+     *
+     * The cropping requested is stored by source \ref video_format_t `i_x`/`y_offset`
+     * and `i_visible_width`/`height`
+     *
+     * \retval VLC_SUCCESS if the display handled the change
+     * \retval VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
+     *         request is necessary
+     */
+    VOUT_DISPLAY_CHANGE_SOURCE_CROP,
+};
 
 /**
  * Vout owner structures
@@ -180,8 +226,6 @@ typedef int (*vout_display_open_cb)(vout_display_t *vd,
     } \
     set_capability( "vout display", priority )
 
-struct vout_display_place_t;
-
 struct vlc_display_operations
 {
     /**
@@ -218,7 +262,7 @@ struct vlc_display_operations
      * \param date time when the picture is intended to be shown
      */
     void       (*prepare)(vout_display_t *, picture_t *pic,
-                          const struct vlc_render_subpicture *subpic, vlc_tick_t date);
+                          subpicture_t *subpic, vlc_tick_t date);
 
     /**
      * Displays a picture.
@@ -236,23 +280,23 @@ struct vlc_display_operations
     void       (*display)(vout_display_t *, picture_t *pic);
 
     /**
-     * Let the display module know the display size has changed.
+     * Performs a control request (mandatory).
      *
-     * \return VLC_SUCCESS if the size is accepted.
-     * \return an error if the size is not accepted and
-     * \ref vlc_display_operations::reset_pictures "reset_pictures" needs to be called.
+     * \param query request type
      *
-     * When the callback is NULL, it is considered as returning VLC_SUCCESS.
+     * See \ref vout_display_query for the list of request types.
      */
-    int (*set_display_size)(vout_display_t *, unsigned width, unsigned height);
+    int        (*control)(vout_display_t *, int query);
 
     /**
      * Reset the picture format handled by the module.
-     * This occurs after an error in \ref vlc_display_operations::set_display_size,
-     * \ref vlc_display_operations::set_source_aspect,
-     * \ref vlc_display_operations::set_source_crop or
-     * \ref vlc_display_operations::video_place_changed
-     * calls returns an error.
+     * This occurs after a
+     * \ref VOUT_DISPLAY_CHANGE_DISPLAY_SIZE,
+     * \ref VOUT_DISPLAY_CHANGE_DISPLAY_FILLED,
+     * \ref VOUT_DISPLAY_CHANGE_ZOOM,
+     * \ref VOUT_DISPLAY_CHANGE_SOURCE_ASPECT or
+     * \ref VOUT_DISPLAY_CHANGE_SOURCE_CROP
+     * control query returns an error.
      *
      * \param ftmp video format that the module expects as input
      */
@@ -266,106 +310,7 @@ struct vlc_display_operations
      * \param vp viewpoint to use on the next render
      */
     int        (*set_viewpoint)(vout_display_t *, const vlc_viewpoint_t *vp);
-
-    /**
-     * Notifies a change in output ICC profile.
-     *
-     * May be NULL. Memory owned by the caller.
-     *
-     * \param prof new ICC profile associated with display, or NULL for none
-     */
-    void       (*set_icc_profile)(vout_display_t *, const vlc_icc_profile_t *prof);
-
-    /**
-     * Notifies a change in the input format.
-     *
-     * The format size is not expected to change.
-     *
-     * \param fmt the requested input format
-     * \param ctx the video context
-     * \return VLC_SUCCESS on success, another value on error
-     */
-    int (*update_format)(vout_display_t *, const video_format_t *fmt,
-                         vlc_video_context *ctx);
-
-    /**
-     * Set the source projection used by the display.
-     *
-     * May be NULL.
-     *
-     * \param display the display to change projection for
-     * \param projection the new projection mode considered for the source
-     * \return VLC_SUCCESS on succes, another value if changing projection failed
-     */
-    int (*change_source_projection)(vout_display_t *display,
-                                    video_projection_mode_t projection);
-
-    /**
-     * Notifies the new Stereoscopic 3D mode in \ref vout_display_cfg_t changed.
-     *
-     * May be NULL.
-     *
-     * \retval VLC_SUCCESS if the display handled the change
-     * \retval VLC_EGENERIC if the display handled the change was not handled
-     */
-    int        (*set_stereo)(vout_display_t *, vlc_stereoscopic_mode_t);
-
-    /**
-     * Let the display module know the placement of the video in the display changed.
-     *
-     * May be NULL.
-     *
-     * This is always called from the same thread as prepare/display.
-     *
-     * \return VLC_SUCCESS if the placement change is accepted.
-     * \return an error if the placement is not accepted and
-     * \ref vlc_display_operations::reset_pictures "reset_pictures" needs to be called.
-     *
-     * When the callback is NULL, it is considered as returning VLC_SUCCESS.
-     */
-    int (*video_place_changed)(vout_display_t *, const struct vout_display_place_t *);
-
-    /**
-     * Notifies a change of the sample aspect ratio.
-     *
-     * May be NULL.
-     *
-     * \return VLC_SUCCESS on success, another value on error
-     * \return VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
-     *         request is necessary
-     *
-     * When the callback is NULL, it is considered as returning VLC_SUCCESS.
-     */
-    int (*set_source_aspect)(vout_display_t *, const video_format_t *);
-
-    /**
-     * Notifies a change of the video crop values.
-     *
-     * The cropping requested is stored by source \ref video_format_t `i_x`/`y_offset`
-     * and `i_visible_width`/`height`
-     *
-     * May be NULL.
-     *
-     * \return VLC_SUCCESS on success, another value on error
-     * \return VLC_EGENERIC if a \ref vlc_display_operations::reset_pictures
-     *         request is necessary
-     *
-     * When the callback is NULL, it is considered as returning VLC_SUCCESS.
-     */
-    int (*set_source_crop)(vout_display_t *, const video_format_t *);
 };
-
-/**
- * Video placement.
- *
- * This structure stores the result of a vout_display_PlacePicture() call.
- */
-typedef struct vout_display_place_t {
-    int x; /*< Relative pixel offset from the display left edge */
-    int y; /*< Relative pixel offset from the display top edge */
-    unsigned width; /*< Picture pixel width */
-    unsigned height; /*< Picture pixel height */
-} vout_display_place_t;
 
 struct vout_display_t {
     struct vlc_object_t obj;
@@ -387,14 +332,6 @@ struct vout_display_t {
      * Cropping is not requested while in the open function.
      */
     const video_format_t *source;
-
-    /**
-     * Placement of the source picture in the display. (cannot be NULL)
-     *
-     * This cannot be modified directly and cannot be NULL.
-     * It reflects the current values.
-     */
-    const vout_display_place_t *place;
 
     /**
      * Picture format.
@@ -463,7 +400,7 @@ VLC_API void vout_display_Delete(vout_display_t *);
  *
  * \bug Currently, only one picture can be prepared at a time. It must be
  * displayed with vout_display_Display() before any picture is prepared or
- * before the display is destroyed with vout_display_Delete().
+ * before the display is destroyd with vout_display_Delete().
  *
  \ bug Rendering subpictures is not supported with this function yet.
  * \c subpic must be @c NULL .
@@ -475,7 +412,7 @@ VLC_API void vout_display_Delete(vout_display_t *);
  * \return The prepared picture is returned, NULL on error.
  */
 VLC_API picture_t *vout_display_Prepare(vout_display_t *vd, picture_t *picture,
-                                        const struct vlc_render_subpicture *subpic, vlc_tick_t date);
+                                        subpicture_t *subpic, vlc_tick_t date);
 
 /**
  * Displays a picture.
@@ -522,13 +459,6 @@ static inline bool vout_display_cfg_IsWindowed(const vout_display_cfg_t *cfg)
     return cfg->window->type != VLC_WINDOW_TYPE_DUMMY;
 }
 
-static inline int vout_display_ChangeProjection(vout_display_t *vd, video_projection_mode_t projection)
-{
-    if (vd->ops->change_source_projection == NULL)
-        return VLC_ENOTSUP;
-    return vd->ops->change_source_projection(vd, projection);
-}
-
 /**
  * Computes the default display size given the source and
  * the display configuration.
@@ -539,6 +469,18 @@ VLC_API
 void vout_display_GetDefaultDisplaySize(unsigned *width, unsigned *height,
                                         const video_format_t *source,
                                         const struct vout_display_placement *);
+
+/**
+ * Video placement.
+ *
+ * This structure stores the result of a vout_display_PlacePicture() call.
+ */
+typedef struct {
+    int x; /*< Relative pixel offset from the display left edge */
+    int y; /*< Relative pixel offset from the display top edge */
+    unsigned width; /*< Picture pixel width */
+    unsigned height; /*< Picture pixel height */
+} vout_display_place_t;
 
 /**
  * Compares two \ref vout_display_place_t.

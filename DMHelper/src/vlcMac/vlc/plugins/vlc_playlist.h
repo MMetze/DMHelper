@@ -22,7 +22,6 @@
 #define VLC_PLAYLIST_NEW_H
 
 #include <vlc_common.h>
-#include <vlc_preparser.h>
 
 # ifdef __cplusplus
 extern "C" {
@@ -153,33 +152,6 @@ struct vlc_playlist_sort_criterion
 {
     enum vlc_playlist_sort_key key;
     enum vlc_playlist_sort_order order;
-};
-
-/** Preparsing depth */
-enum vlc_playlist_preparsing
-{
-    /** Don't parse anything */
-    VLC_PLAYLIST_PREPARSING_DISABLED,
-    /** Auto parse items but don't auto-parse sub items */
-    VLC_PLAYLIST_PREPARSING_ENABLED,
-    /** Auto parse sub items of items (1 level depth) */
-    VLC_PLAYLIST_PREPARSING_COLLAPSE,
-    /** Auto parse all sub items recursively */
-    VLC_PLAYLIST_PREPARSING_RECURSIVE,
-};
-
-/**
- * Action when a media is stopped
- *
- * @see vlc_playlist_SetMediaStoppedAction()
- */
-enum vlc_playlist_media_stopped_action {
-    /** Continue (or stop if there is no next media), default behavior */
-    VLC_PLAYLIST_MEDIA_STOPPED_CONTINUE,
-    /** Stop, even if there is a next media to play */
-    VLC_PLAYLIST_MEDIA_STOPPED_STOP,
-    /** Exit VLC */
-    VLC_PLAYLIST_MEDIA_STOPPED_EXIT,
 };
 
 /**
@@ -320,19 +292,6 @@ struct vlc_playlist_callbacks
     void
     (*on_has_next_changed)(vlc_playlist_t *playlist,
                            bool has_next, void *userdata);
-
-    /**
-     * Called when the stopped action has changed
-     *
-     * @see vlc_playlist_SetMediaStoppedAction()
-     *
-     * \param playlist the playlist
-     * @param new_action action to execute when a media is stopped
-     * \param userdata userdata provided to AddListener()
-     */
-    void (*on_media_stopped_action_changed)(vlc_playlist_t *playlist,
-                                            enum vlc_playlist_media_stopped_action new_action,
-                                            void *userdata);
 };
 
 /* Playlist items */
@@ -371,14 +330,10 @@ vlc_playlist_item_GetId(vlc_playlist_item_t *);
  * Create a new playlist.
  *
  * \param parent   a VLC object
- * \param rec preparsing depth
- * \param preparse_max_threads the maximum number of threads used to parse, must be >= 1
- * \param preparse_timeout default timeout of the preparser, 0 for no limits.
  * \return a pointer to a valid playlist instance, or NULL if an error occurred
  */
 VLC_API VLC_USED vlc_playlist_t *
-vlc_playlist_New(vlc_object_t *parent, enum vlc_playlist_preparsing rec,
-                 unsigned preparse_max_threads, vlc_tick_t preparse_timeout);
+vlc_playlist_New(vlc_object_t *parent);
 
 /**
  * Delete a playlist.
@@ -447,16 +402,6 @@ vlc_playlist_RemoveListener(vlc_playlist_t *playlist,
                             vlc_playlist_listener_id *id);
 
 /**
- * Setup an action when a media is stopped
- *
- * @param playlist the playlist, locked
- * @param action action to do when a media is stopped
- */
-VLC_API void
-vlc_playlist_SetMediaStoppedAction(vlc_playlist_t *playlist,
-                              enum vlc_playlist_media_stopped_action action);
-
-/**
  * Return the number of items.
  *
  * \param playlist the playlist, locked
@@ -490,7 +435,7 @@ vlc_playlist_Clear(vlc_playlist_t *playlist);
  * The index must be in range (less than or equal to vlc_playlist_Count()).
  *
  * \param playlist the playlist, locked
- * \param index    the index where the media are to be inserted
+ * \index index    the index where the media are to be inserted
  * \param media    the array of media to insert
  * \param count    the number of media to insert
  * \return VLC_SUCCESS on success, another value on error
@@ -505,7 +450,7 @@ vlc_playlist_Insert(vlc_playlist_t *playlist, size_t index,
  * The index must be in range (less than or equal to vlc_playlist_Count()).
  *
  * \param playlist the playlist, locked
- * \param index    the index where the media is to be inserted
+ * \index index    the index where the media is to be inserted
  * \param media    the media to insert
  * \return VLC_SUCCESS on success, another value on error
  */
@@ -616,7 +561,7 @@ vlc_playlist_RemoveOne(vlc_playlist_t *playlist, size_t index)
  * change.
  *
  * \param playlist the playlist, locked
- * \param index    the index where the media are to be inserted
+ * \index index    the index where the media are to be inserted
  * \param media    the array of media to insert
  * \param count    the number of media to insert
  * \return VLC_SUCCESS on success, another value on error
@@ -913,9 +858,17 @@ vlc_playlist_PlayAt(vlc_playlist_t *playlist, size_t index)
 }
 
 /**
+ * Preparse a media, and expand it in the playlist on subitems added.
+ *
+ * \param playlist the playlist (not necessarily locked)
+ * \param media the media to preparse
+ */
+VLC_API void
+vlc_playlist_Preparse(vlc_playlist_t *playlist, input_item_t *media);
+
+/**
  * Export the playlist to a file.
  *
- * \param playlist a playlist instance
  * \param filename the location where the exported file will be saved
  * \param type the type of the playlist file to create (m3u, m3u8, xspf, ...)
  * \return VLC_SUCCESS on success, another value on error

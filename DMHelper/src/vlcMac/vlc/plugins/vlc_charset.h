@@ -42,12 +42,12 @@
  *
  * \return the number of bytes occupied by the decoded code point
  *
- * \retval -1 not a valid UTF-8 sequence
+ * \retval (size_t)-1 not a valid UTF-8 sequence
  * \retval 0 null character (i.e. str points to an empty string)
  * \retval 1 (non-null) ASCII character
  * \retval 2-4 non-ASCII character
  */
-VLC_API ssize_t vlc_towc(const char *str, uint32_t *restrict pwc);
+VLC_API size_t vlc_towc(const char *str, uint32_t *restrict pwc);
 
 /**
  * Checks UTF-8 validity.
@@ -61,11 +61,11 @@ VLC_API ssize_t vlc_towc(const char *str, uint32_t *restrict pwc);
  */
 VLC_USED static inline const char *IsUTF8(const char *str)
 {
-    ssize_t n;
+    size_t n;
     uint32_t cp;
 
     while ((n = vlc_towc(str, &cp)) != 0)
-        if (likely(n != -1))
+        if (likely(n != (size_t)-1))
             str += n;
         else
             return NULL;
@@ -114,11 +114,11 @@ VLC_USED static inline const char *IsASCII(const char *str)
 static inline char *EnsureUTF8(char *str)
 {
     char *ret = str;
-    ssize_t n;
+    size_t n;
     uint32_t cp;
 
     while ((n = vlc_towc(str, &cp)) != 0)
-        if (likely(n != -1))
+        if (likely(n != (size_t)-1))
             str += n;
         else
         {
@@ -197,8 +197,6 @@ VLC_USED static inline char *FromCFString(const CFStringRef cfString,
 #endif
 
 #ifdef _WIN32
-# include <windows.h>
-
 VLC_USED
 static inline char *FromWide (const wchar_t *wide)
 {
@@ -421,7 +419,7 @@ VLC_API int vlc_vasprintf_c(char **restrict p, const char *restrict fmt,
  * Formats a string using the C locale.
  *
  * This function formats a string from a format string and a variable argument
- * list, just like the standard asprintf() but using the C locale for the
+ * list, just like the standard vasprintf() but using the C locale for the
  * formatting of numerals.
  *
  * \param[out] p storage space for a pointer to the heap-allocated formatted
@@ -430,36 +428,7 @@ VLC_API int vlc_vasprintf_c(char **restrict p, const char *restrict fmt,
  * \return number of bytes formatted (excluding the nul terminator)
  *        or -1 on error
  */
-VLC_API int vlc_asprintf_c( char **p, const char *fmt, ... ) VLC_USED;
-
-/**
- * Write a string to the output using the C locale
- *
- * This function formats a string from a format string and a variable argument
- * list, just like the standard vfprintf() but using the C locale for the
- * formatting of numerals.
- *
- * \param f output stream to write the string to
- * \param fmt format string
- * \param ap variable argument list
- * \return number of bytes formatted (excluding the nul terminator)
- *        or -1 on error
- */
-VLC_API int vlc_vfprintf_c(FILE *f, const char *fmt, va_list ap);
-
-/**
- * Write a string to the output using the C locale
- *
- * This function formats a string from a format string and a variable argument
- * list, just like the standard fprintf() but using the C locale for the
- * formatting of numerals.
- *
- * \param f output stream to write the string to
- * \param fmt format string
- * \return number of bytes formatted (excluding the nul terminator)
- *        or -1 on error
- */
-VLC_API int vlc_fprintf_c(FILE *f, const char *fmt, ...);
+VLC_API int vlc_asprintf_c( char **, const char *, ... ) VLC_USED;
 
 int vlc_vsscanf_c(const char *, const char *, va_list) VLC_USED;
 int vlc_sscanf_c(const char*, const char*, ...) VLC_USED

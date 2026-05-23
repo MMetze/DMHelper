@@ -21,8 +21,6 @@
 #ifndef VLC_AVCODEC_H
 # define VLC_AVCODEC_H 1
 
-#include <vlc_threads.h>
-
 static inline void vlc_avcodec_lock (void)
 {
     vlc_global_lock (VLC_AVCODEC_MUTEX);

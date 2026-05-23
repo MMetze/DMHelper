@@ -23,17 +23,9 @@
 #ifndef LIBVLC_MEDIA_LIST_PLAYER_H
 #define LIBVLC_MEDIA_LIST_PLAYER_H 1
 
-#include <vlc/libvlc.h>
-#include <vlc/libvlc_media.h>
-
 # ifdef __cplusplus
 extern "C" {
 # endif
-
-typedef struct libvlc_instance_t libvlc_instance_t;
-typedef struct libvlc_media_player_t libvlc_media_player_t;
-typedef struct libvlc_media_list_t libvlc_media_list_t;
-typedef struct libvlc_media_t libvlc_media_t;
 
 /** \defgroup libvlc_media_list_player LibVLC media list player
  * \ingroup libvlc
@@ -86,9 +78,8 @@ LIBVLC_API void
  * libvlc_media_list_player_release() to decrement reference count.
  *
  * \param p_mlp media player list object
- * \return the same object
  */
-LIBVLC_API libvlc_media_list_player_t *
+LIBVLC_API void
     libvlc_media_list_player_retain( libvlc_media_list_player_t *p_mlp );
 
 /**
@@ -117,7 +108,7 @@ LIBVLC_API void
  * \param p_mlp media list player instance
  * \return media player instance
  * \note the caller is responsible for releasing the returned instance
- *       with libvlc_media_player_release().
+         with libvlc_media_list_player_set_media_player().
  */
 LIBVLC_API libvlc_media_player_t *
     libvlc_media_list_player_get_media_player(libvlc_media_list_player_t * p_mlp);

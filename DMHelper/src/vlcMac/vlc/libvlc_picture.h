@@ -35,8 +35,6 @@ typedef enum libvlc_picture_type_t
     libvlc_picture_Argb,
     libvlc_picture_Png,
     libvlc_picture_Jpg,
-    libvlc_picture_WebP,
-    libvlc_picture_Rgba,
 } libvlc_picture_type_t;
 
 /**
@@ -44,9 +42,8 @@ typedef enum libvlc_picture_type_t
  *
  * \see libvlc_picture_release()
  * \param pic A picture object
- * \return the same object
  */
-LIBVLC_API libvlc_picture_t *
+LIBVLC_API void
 libvlc_picture_retain( libvlc_picture_t* pic );
 
 /**
@@ -94,8 +91,7 @@ libvlc_picture_type( const libvlc_picture_t* pic );
 
 /**
  * Returns the image stride, ie. the number of bytes per line.
- * This can only be called on images of type libvlc_picture_Argb or
- * libvlc_picture_Rgba
+ * This can only be called on images of type libvlc_picture_Argb
  *
  * \param pic A picture object
  */

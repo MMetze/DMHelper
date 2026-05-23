@@ -70,8 +70,8 @@ struct xml_reader_t
     stream_t *p_stream;
     module_t *p_module;
 
-    int (*pf_next_node) ( xml_reader_t *, const char **, const char ** );
-    const char *(*pf_next_attr) ( xml_reader_t *, const char **, const char ** );
+    int (*pf_next_node) ( xml_reader_t *, const char ** );
+    const char *(*pf_next_attr) ( xml_reader_t *, const char ** );
 
     int (*pf_use_dtd) ( xml_reader_t * );
     int (*pf_is_empty) ( xml_reader_t * );
@@ -83,27 +83,13 @@ VLC_API void xml_ReaderDelete(xml_reader_t *);
 
 static inline int xml_ReaderNextNode( xml_reader_t *reader, const char **pval )
 {
-    return reader->pf_next_node( reader, pval, NULL );
-}
-
-static inline int xml_ReaderNextNodeNS( xml_reader_t *reader,
-                                        const char **pval,
-                                        const char **pnamespace )
-{
-    return reader->pf_next_node( reader, pval, pnamespace );
+    return reader->pf_next_node( reader, pval );
 }
 
 static inline const char *xml_ReaderNextAttr( xml_reader_t *reader,
                                               const char **pval )
 {
-  return reader->pf_next_attr( reader, pval, NULL );
-}
-
-static inline const char *xml_ReaderNextAttrNS( xml_reader_t *reader,
-                                                const char **pval,
-                                                const char **pnamespace )
-{
-    return reader->pf_next_attr( reader, pval, pnamespace );
+  return reader->pf_next_attr( reader, pval );
 }
 
 static inline int xml_ReaderUseDTD( xml_reader_t *reader )

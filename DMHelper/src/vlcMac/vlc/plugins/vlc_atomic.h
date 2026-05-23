@@ -36,10 +36,9 @@ using std::memory_order_relaxed;
 using std::memory_order_acq_rel;
 #endif
 # include <vlc_common.h>
-# include <vlc_tick.h>
 
 #define VLC_STATIC_RC { \
-    .refs = (uintptr_t) 1 \
+    .refs = ATOMIC_VAR_INIT(0) \
 }
 
 typedef struct vlc_atomic_rc_t {
@@ -49,11 +48,7 @@ typedef struct vlc_atomic_rc_t {
 /** Init the RC to 1 */
 static inline void vlc_atomic_rc_init(vlc_atomic_rc_t *rc)
 {
-#ifndef __cplusplus
     atomic_init(&rc->refs, (uintptr_t)1);
-#else
-    rc->refs = (uintptr_t)1;
-#endif
 }
 
 /** Increment the RC */
@@ -113,6 +108,8 @@ VLC_API void vlc_atomic_wait(void *addr, unsigned val);
  */
 VLC_API
 int vlc_atomic_timedwait(void *addr, unsigned val, vlc_tick_t deadline);
+
+int vlc_atomic_timedwait_daytime(void *addr, unsigned val, time_t deadline);
 
 /**
  * Wakes up one thread on an address.

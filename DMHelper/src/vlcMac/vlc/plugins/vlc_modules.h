@@ -84,7 +84,7 @@ void *vlc_module_map(struct vlc_logger *log, module_t *mod);
  * support arbitrary prototypes for the module entry point.
  *
  * \param log logger for debugging (or NULL to ignore)
- * \param cap capability, i.e. class of module
+ * \param capability capability, i.e. class of module
  * \param name name of the module asked, if any
  * \param strict if true, do not fallback to plugin with a different name
  *                 but the same capability
@@ -94,6 +94,17 @@ void *vlc_module_map(struct vlc_logger *log, module_t *mod);
 VLC_API module_t *vlc_module_load(struct vlc_logger *log, const char *cap,
                                   const char *name, bool strict,
                                   vlc_activate_t probe, ... ) VLC_USED;
+#ifndef __cplusplus
+#define vlc_module_load(ctx, cap, name, strict, ...) \
+    _Generic ((ctx), \
+        struct vlc_logger *: \
+            vlc_module_load((void *)(ctx), cap, name, strict, __VA_ARGS__), \
+        void *: \
+            vlc_module_load((void *)(ctx), cap, name, strict, __VA_ARGS__), \
+        default: \
+            vlc_module_load(vlc_object_logger((vlc_object_t *)(ctx)), cap, \
+                            name, strict, __VA_ARGS__))
+#endif
 
 VLC_API module_t * module_need( vlc_object_t *, const char *, const char *, bool ) VLC_USED;
 #define module_need(a,b,c,d) module_need(VLC_OBJECT(a),b,c,d)
@@ -207,14 +218,6 @@ VLC_API const char *module_get_name(const module_t *m, bool longname) VLC_USED;
  * \return the help
  */
 VLC_API const char *module_get_help(const module_t *m) VLC_USED;
-
-/**
- * Gets the help HTML for a module.
- *
- * \param m the module
- * \return the help HTML
- */
-VLC_API const char *module_get_help_html(const module_t *m) VLC_USED;
 
 /**
  * Gets the capability string of a module.

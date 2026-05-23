@@ -23,9 +23,8 @@
 #ifndef VLC_FRAME_H
 #define VLC_FRAME_H 1
 
-#include <vlc_tick.h>
-#include <vlc_ancillary.h>
-
+struct vlc_ancillary;
+typedef uint32_t vlc_ancillary_id;
 
 /**
  * \defgroup frame Frames
@@ -82,6 +81,8 @@ typedef struct vlc_frame_t vlc_frame_t;
 #define VLC_FRAME_FLAG_HEADER        0x0020
 /** This frame contains the last part of a sequence  */
 #define VLC_FRAME_FLAG_END_OF_SEQUENCE 0x0040
+/** This frame contains a clock reference */
+#define VLC_FRAME_FLAG_CLOCK         0x0080
 /** This frame is scrambled */
 #define VLC_FRAME_FLAG_SCRAMBLED     0x0100
 /** This frame has to be decoded but not be displayed */
@@ -133,7 +134,9 @@ struct vlc_frame_t
     vlc_tick_t  i_dts;
     vlc_tick_t  i_length;
 
-    vlc_ancillary_array ancillaries;
+    /** Private ancillary struct. Don't use it directly, but use it via
+     * vlc_frame_AttachAncillary() and vlc_frame_GetAncillary(). */
+    struct vlc_ancillary **priv_ancillaries;
 
     const struct vlc_frame_callbacks *cbs;
 };
@@ -159,24 +162,6 @@ VLC_API vlc_frame_t *vlc_frame_Init(vlc_frame_t *frame,
                                     void *base, size_t length);
 
 /**
- * Creates a custom frame.
- *
- * This function initialize a frame of timed data allocated by custom means.
- * This allows passing data without copying even if the data has been allocated
- * with unusual means or outside of LibVLC.
- *
- * Normally, frames are allocated and initialized by vlc_frame_Alloc() instead.
- *
- * @param cbs structure of custom callbacks to handle the frame [IN]
- * @param base start address of the frame data
- * @param length byte length of the frame data
- *
- * @return the created frame, or NULL on memory error.
- */
-VLC_API vlc_frame_t *vlc_frame_New(const struct vlc_frame_callbacks *cbs,
-                                   void *base, size_t length);
-
-/**
  * Allocates a frame.
  *
  * Creates a new frame with the requested size.
@@ -197,8 +182,6 @@ VLC_API vlc_frame_t *vlc_frame_TryRealloc(vlc_frame_t *, ssize_t pre, size_t bod
  * reusing spare buffer space. Otherwise, a new frame is created and data is
  * copied.
  *
- * @param frame the frame to realloc, which will be freed after the call to
- *        this function
  * @param pre count of bytes to prepend if positive,
  *            count of leading bytes to discard if negative
  * @param body new bytes size of the frame
@@ -212,8 +195,7 @@ VLC_API vlc_frame_t *vlc_frame_TryRealloc(vlc_frame_t *, ssize_t pre, size_t bod
  * @note On error, the frame is discarded.
  * To avoid that, use vlc_frame_TryRealloc() instead.
  */
-VLC_API vlc_frame_t *
-vlc_frame_Realloc(vlc_frame_t *frame, ssize_t pre, size_t body) VLC_USED;
+VLC_API vlc_frame_t *vlc_frame_Realloc(vlc_frame_t *, ssize_t pre, size_t body) VLC_USED;
 
 /**
  * Releases a frame.
@@ -230,35 +212,6 @@ vlc_frame_Realloc(vlc_frame_t *frame, ssize_t pre, size_t body) VLC_USED;
 VLC_API void vlc_frame_Release(vlc_frame_t *frame);
 
 /**
- * Merge two ancillary arrays
- *
- * @param frame the frame that hold the destination ancillary array
- * @param src_array pointer to an ancillary array
- * @return VLC_SUCCESS in case of success, VLC_ENOMEM in case of alloc error
- */
-static inline int
-vlc_frame_MergeAncillaries(vlc_frame_t *frame,
-                           const vlc_ancillary_array *src_array)
-{
-    return vlc_ancillary_array_Merge(&frame->ancillaries, src_array);
-}
-
-/**
- * Merge and clear two ancillary arrays
- *
- * @param frame the frame that hold the destination ancillary array
- * @param src_array pointer to the source ancillary array, will point to empty
- * data after this call.
- * @return VLC_SUCCESS in case of success, VLC_ENOMEM in case of alloc error
- */
-static inline int
-vlc_frame_MergeAndClearAncillaries(vlc_frame_t *frame,
-                                   vlc_ancillary_array *src_array)
-{
-    return vlc_ancillary_array_MergeAndClear(&frame->ancillaries, src_array);
-}
-
-/**
  * Attach an ancillary to the frame
  *
  * @warning the ancillary will be released only if the frame is allocated from
@@ -271,25 +224,18 @@ vlc_frame_MergeAndClearAncillaries(vlc_frame_t *frame,
  * @param ancillary ancillary that will be held by the frame, can't be NULL
  * @return VLC_SUCCESS in case of success, VLC_ENOMEM in case of alloc error
  */
-static inline int
-vlc_frame_AttachAncillary(vlc_frame_t *frame, struct vlc_ancillary *ancillary)
-{
-    return vlc_ancillary_array_Insert(&frame->ancillaries, ancillary);
-}
+VLC_API int
+vlc_frame_AttachAncillary(vlc_frame_t *frame, struct vlc_ancillary *ancillary);
 
 /**
  * Return the ancillary identified by an ID
  *
- * @param frame the frame to read the ancillary from
  * @param id id of ancillary to request
  * @return the ancillary or NULL if the ancillary for that particular id is
  * not present
  */
-static inline struct vlc_ancillary *
-vlc_frame_GetAncillary(vlc_frame_t *frame, vlc_ancillary_id id)
-{
-    return vlc_ancillary_array_Get(&frame->ancillaries, id);
-}
+VLC_API struct vlc_ancillary *
+vlc_frame_GetAncillary(vlc_frame_t *frame, vlc_ancillary_id id);
 
 /**
  * Copy frame properties from src to dst
@@ -394,13 +340,10 @@ VLC_API vlc_frame_t *vlc_frame_File(int fd, bool write) VLC_USED VLC_MALLOC;
  * Loads a file into a frame of memory from a path to the file.
  * See also vlc_frame_File().
  *
- * @param path the file path to load the memory block from
  * @param write If true, request a read/write private mapping.
  *              If false, request a read-only potentially shared mapping.
  */
-VLC_API vlc_frame_t *
-vlc_frame_FilePath(const char *path, bool write)
-VLC_USED VLC_MALLOC;
+VLC_API vlc_frame_t *vlc_frame_FilePath(const char *, bool write) VLC_USED VLC_MALLOC;
 
 static inline void vlc_frame_Cleanup (void *frame)
 {
@@ -544,7 +487,7 @@ static size_t vlc_frame_ChainExtract( vlc_frame_t *p_list, void *p_data, size_t 
  * @param[out]  pi_size     Pointer to number of bytes in the chain (may be NULL)
  * @param[out]  pi_length   Pointer to length (duration) of the chain (may be NULL)
  */
-static inline void vlc_frame_ChainProperties( const vlc_frame_t *p_list, int *pi_count, size_t *pi_size, vlc_tick_t *pi_length )
+static inline void vlc_frame_ChainProperties( vlc_frame_t *p_list, int *pi_count, size_t *pi_size, vlc_tick_t *pi_length )
 {
     size_t i_size = 0;
     vlc_tick_t i_length = 0;
@@ -572,7 +515,7 @@ static inline void vlc_frame_ChainProperties( const vlc_frame_t *p_list, int *pi
  *
  * All frames in the chain are gathered into a single vlc_frame_t and the
  * original chain is released.
- *
+ * 
  * @param   p_list  Pointer to the first vlc_frame_t of the chain to gather
  * @return  Returns a pointer to a new vlc_frame_t or NULL if the frame can not
  *          be allocated, in which case the original chain is not released.
@@ -731,7 +674,6 @@ static inline void vlc_fifo_WaitCond(vlc_fifo_t *fifo, vlc_cond_t *condvar)
 /**
  * Queues a linked-list of blocks into a locked FIFO.
  *
- * @param fifo a fifo object locked with ::vlc_fifo_Lock()
  * @param block the head of the list of blocks
  *              (if NULL, this function has no effects)
  *
@@ -800,28 +742,6 @@ VLC_API size_t vlc_fifo_GetCount(const vlc_fifo_t *) VLC_USED;
  * a FIFO is empty.
  */
 VLC_API size_t vlc_fifo_GetBytes(const vlc_fifo_t *) VLC_USED;
-
-/**
- * Checks whether the vlc_fifo_t object is being locked.
- *
- * This function checks if the calling thread holds a given vlc_fifo_t
- * object. It has no side effects and is essentially intended for run-time
- * debugging.
- *
- * @note This function is the vlc_fifo_t equivalent of vlc_mutex_held.
- *
- * @note To assert that the calling thread holds a lock, the helper macro
- * vlc_fifo_Assert() should be used instead of this function.
- *
- * @retval false the fifo is not locked by the calling thread
- * @retval true the fifo is locked by the calling thread
- */
-VLC_API bool vlc_fifo_Held(const vlc_fifo_t *fifo) VLC_USED;
-
-/**
- * Asserts that a vlc_fifo_t is locked by the calling thread.
- */
-#define vlc_fifo_Assert(fifo) assert(vlc_fifo_Held(fifo))
 
 VLC_USED static inline bool vlc_fifo_IsEmpty(const vlc_fifo_t *fifo)
 {

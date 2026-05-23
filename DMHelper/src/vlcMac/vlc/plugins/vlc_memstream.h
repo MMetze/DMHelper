@@ -39,8 +39,12 @@
  */
 struct vlc_memstream
 {
-    FILE *stream;
-    char *ptr; /**< Buffer start address */
+    union
+    {
+        FILE *stream;
+        int error;
+    };
+    char *ptr; /**< Buffer start address */ 
     size_t length; /**< Buffer length in bytes */
 };
 
@@ -104,9 +108,8 @@ int vlc_memstream_close(struct vlc_memstream *ms) VLC_USED;
  *
  * Compare with @c fwrite().
  *
- * @param ms the VLC memstream to write to
  * @param ptr start address of the blob
- * @param len byte length of the blob
+ * @param length byte length of the blob
  */
 VLC_API
 size_t vlc_memstream_write(struct vlc_memstream *ms,
@@ -117,8 +120,7 @@ size_t vlc_memstream_write(struct vlc_memstream *ms,
  *
  * Compare with @c putc() or @c fputc().
  *
- * @param ms the VLC memstream to write to
- * @param c Unsigned byte value converted to int.
+ * @param Unsigned byte value converted to int.
  */
 VLC_API
 int vlc_memstream_putc(struct vlc_memstream *ms, int c);

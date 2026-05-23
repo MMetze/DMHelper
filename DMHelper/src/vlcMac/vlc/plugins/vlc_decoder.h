@@ -29,10 +29,9 @@
  * @{
  */
 
-#include <vlc_tick.h>
+#include <vlc_subpicture.h>
 
 typedef struct vlc_input_decoder_t vlc_input_decoder_t;
-typedef struct vlc_spu_highlight_t vlc_spu_highlight_t;
 
 /**
  * This defines an opaque input resource handler.
@@ -40,67 +39,13 @@ typedef struct vlc_spu_highlight_t vlc_spu_highlight_t;
 typedef struct input_resource_t input_resource_t;
 
 /* */
-struct vlc_clock_t;
-struct vlc_frame_t;
-
-
-/**
- * Spawn a decoder thread outside of the input thread.
- */
 VLC_API vlc_input_decoder_t *
-vlc_input_decoder_Create( vlc_object_t *, const es_format_t *, const char *es_id,
-                          struct vlc_clock_t *, input_resource_t * ) VLC_USED;
-
-/**
- * Delete an existing vlc_input_decoder_t instance.
- *
- * Close the decoder implementation and delete the vlc_input_decoder_t
- * instance.
- * The instance must have been drained using vlc_input_decoder_Drain() or
- * flushed using vlc_input_decoder_Flush() after any previous call to
- * vlc_input_decoder_Decode() before calling the destructor.
- *
- * @param decoder The vlc_input_decoder_t to delete, created from
- *        vlc_input_decoder_Create().
- */
-VLC_API void vlc_input_decoder_Delete( vlc_input_decoder_t * decoder);
-
-/**
- * Put a vlc_frame_t in the decoder's fifo.
- * Thread-safe w.r.t. the decoder. May be a cancellation point.
- *
- * @param p_dec the decoder object
- * @param frame the data frame
- * @param do_pace whether we wait for some decoding to happen or not
- */
-VLC_API void vlc_input_decoder_Decode( vlc_input_decoder_t *p_dec, struct vlc_frame_t *frame, bool do_pace );
-
-/**
- * Signals that there are no further frames to decode, and requests that the
- * decoder drain all pending buffers. This is used to ensure that all
- * intermediate buffers empty and no samples get lost at the end of the stream.
- *
- * @note The function does not actually wait for draining. It just signals that
- * draining should be performed once the decoder has emptied FIFO.
- */
+vlc_input_decoder_Create( vlc_object_t *, const es_format_t *, input_resource_t * ) VLC_USED;
+VLC_API void vlc_input_decoder_Delete( vlc_input_decoder_t * );
+VLC_API void vlc_input_decoder_Decode( vlc_input_decoder_t *, block_t *, bool b_do_pace );
 VLC_API void vlc_input_decoder_Drain( vlc_input_decoder_t * );
-
-/**
- * Returns the drained state
- *
- * @warning This function need to be polled (every few ms) to know when the
- * decoder is drained
- * @return true if drained (after a call to vlc_input_decoder_Drain())
- */
- VLC_API bool vlc_input_decoder_IsDrained( vlc_input_decoder_t * );
-
-/**
- * Requests that the decoder immediately discard all pending buffers.
- * This is useful when seeking or when deselecting a stream.
- */
 VLC_API void vlc_input_decoder_Flush( vlc_input_decoder_t * );
 VLC_API int  vlc_input_decoder_SetSpuHighlight( vlc_input_decoder_t *, const vlc_spu_highlight_t * );
-VLC_API void vlc_input_decoder_ChangeDelay( vlc_input_decoder_t *, vlc_tick_t i_delay );
 
 /**
  * It creates an empty input resource handler.
