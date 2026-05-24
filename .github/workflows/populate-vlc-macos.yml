@@ -286,19 +286,10 @@ jobs:
             exit 0
           fi
 
-          git commit -m "ci: populate VLC 4.0.0-dev macOS dylibs and plugins (Intel + ARM64)
-
-Source: VLC 4.0.0-dev nightly artifacts ($(date -u +%Y-%m-%d))
-Intel:  vlc-macos-sdk-4.0.0-dev-intel64-4f465d43.tar.gz
-ARM64:  vlc-macos-sdk-4.0.0-dev-arm64-4f465d43.tar.gz
-
-Directories updated:
-  src/vlcMac/        Intel link-time dylibs + headers
-  src/vlcMacArm/     ARM64 link-time dylibs
-  src/bin-macos/     Intel deploy-time dylibs + plugins
-  src/bin-macos-arm/ ARM64 deploy-time dylibs + plugins
-
-Symlinks dereferenced: real Mach-O binaries stored in git
-to avoid cross-platform extraction issues."
+          git commit \
+            -m "ci: populate VLC 4.0.0-dev macOS dylibs and plugins (Intel + ARM64)" \
+            -m "Intel: vlc-macos-sdk-4.0.0-dev-intel64-4f465d43.tar.gz | ARM64: vlc-macos-sdk-4.0.0-dev-arm64-4f465d43.tar.gz" \
+            -m "Dirs: vlcMac (Intel dylibs+headers), vlcMacArm (ARM64 dylibs), bin-macos (Intel deploy), bin-macos-arm (ARM64 deploy)" \
+            -m "Symlinks dereferenced via cp -fL / rsync -L to store real Mach-O binaries in git."
 
           git push
