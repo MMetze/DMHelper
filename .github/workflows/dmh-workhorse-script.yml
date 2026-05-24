@@ -1,0 +1,34 @@
+# Use this workflow file to define and execute scripts on the code base in github, such as updating MacOS files
+
+name: Generic Workflow file for automation
+
+on:
+  workflow_dispatch:
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION: 6.6.0
+  QT_INSTALLER_VERSION: 4.7
+  MSVC_VERSION: 2019
+  INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.exe
+  ZIPARTIFACT: DMHelper-64-bit-release.zip
+
+jobs:
+  build-DMH-win64:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.6.0'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        cache: 'true'
+        modules: 'qtmultimedia qtnetworkauth qtimageformats'
+        tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2019_x64 tools_ifw'
+        add-tools-to-path: 'true'
+        archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
