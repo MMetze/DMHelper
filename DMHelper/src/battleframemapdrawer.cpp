@@ -19,7 +19,7 @@ BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     _cursor(),
     _gridScale(10),
     _zoomScale(1.f),
-    _size(10),
+    _size(20),
     _erase(true),
     _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),

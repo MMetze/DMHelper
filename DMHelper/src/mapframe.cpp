@@ -43,7 +43,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _erase(true),
     _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),
-    _brushSize(30),
+    _brushSize(20),
     _isPublishing(false),
     _isVideo(false),
     _rotation(0),
