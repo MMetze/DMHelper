@@ -68,6 +68,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMousePress, this, &BattleDialogGraphicsScene::battleMousePress);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseMove, this, &BattleDialogGraphicsScene::battleMouseMove);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseRelease, this, &BattleDialogGraphicsScene::battleMouseRelease);
+    connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseDoubleClick, this, &BattleDialogGraphicsScene::battleMouseDoubleClick);
 
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMousePress, this, &BattleDialogGraphicsScene::mapMousePress);
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseMove, this, &BattleDialogGraphicsScene::mapMouseMove);

@@ -44,11 +44,11 @@ public slots:
     void setBrushMode(int brushMode);
     void cancelPolygon();
     void cancelSelect();
+    void applyPolygon();
 
 private:
 
     void endPath();
-    void applyPolygon();
     void createCursor();
 
     bool _mouseDown;

@@ -1817,6 +1817,16 @@ void BattleFrame::keyPressEvent(QKeyEvent * event)
         return;
     }
 
+    if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWEdit)
+    {
+        if((event->key() == Qt::Key_Return) || (event->key() == Qt::Key_Enter))
+        {
+            if(_mapDrawer)
+                _mapDrawer->applyPolygon();
+            return;
+        }
+    }
+
     if((_drawEngine) && (_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_Draw))
     {
         if(_drawEngine->handleKeyPress(event))
@@ -4086,6 +4096,7 @@ void BattleFrame::setEditMode()
         connect(_scene, &BattleDialogGraphicsScene::battleMousePress, _mapDrawer, &BattleFrameMapDrawer::handleMouseDown);
         connect(_scene, &BattleDialogGraphicsScene::battleMouseMove, _mapDrawer, &BattleFrameMapDrawer::handleMouseMoved);
         connect(_scene, &BattleDialogGraphicsScene::battleMouseRelease, _mapDrawer, &BattleFrameMapDrawer::handleMouseUp);
+        connect(_scene, &BattleDialogGraphicsScene::battleMouseDoubleClick, _mapDrawer, &BattleFrameMapDrawer::applyPolygon);
 
         if((_mapDrawer) && (_model))
         {
@@ -4115,6 +4126,7 @@ void BattleFrame::setEditMode()
         disconnect(_scene, &BattleDialogGraphicsScene::battleMousePress, _mapDrawer, &BattleFrameMapDrawer::handleMouseDown);
         disconnect(_scene, &BattleDialogGraphicsScene::battleMouseMove, _mapDrawer, &BattleFrameMapDrawer::handleMouseMoved);
         disconnect(_scene, &BattleDialogGraphicsScene::battleMouseRelease, _mapDrawer, &BattleFrameMapDrawer::handleMouseUp);
+        disconnect(_scene, &BattleDialogGraphicsScene::battleMouseDoubleClick, _mapDrawer, &BattleFrameMapDrawer::applyPolygon);
 
         if(_mapDrawer)
             _mapDrawer->cancelPolygon();

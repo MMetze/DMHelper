@@ -405,6 +405,16 @@ bool BattleDialogGraphicsSceneMouseHandlerRaw::mouseReleaseEvent(QGraphicsSceneM
     return false;
 }
 
+bool BattleDialogGraphicsSceneMouseHandlerRaw::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    if(mouseEvent)
+    {
+        emit rawMouseDoubleClick();
+        mouseEvent->accept();
+    }
+    return false;
+}
+
 
 /******************************************************************************************************/
 

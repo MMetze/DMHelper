@@ -300,7 +300,8 @@ void BattleFrameMapDrawer::createCursor()
 
     if(_brushMode == DMHelper::BrushType_Select)
     {
-        _cursor = QCursor(QPixmap(":/img/data/icon_selectcursor.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        QPixmap selectPixmap = QPixmap(":/img/data/icon_selectcursor.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        _cursor = QCursor(selectPixmap, DMHelper::CURSOR_SIZE / 4, DMHelper::CURSOR_SIZE / 4);
         emit cursorChanged(_cursor);
         return;
     }
