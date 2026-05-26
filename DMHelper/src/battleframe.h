@@ -31,6 +31,7 @@ class CameraRect;
 class BattleCombatantFrame;
 class QGraphicsPolygonItem;
 class QGraphicsRectItem;
+class QGraphicsLineItem;
 class UnselectedPixmap;
 class CombatantRolloverFrame;
 class PublishGLBattleRenderer;
@@ -341,6 +342,7 @@ private slots:
 
     void handlePolygonChanged(const QPolygonF& polygon);
     void handlePolygonCancelled();
+    void handlePolygonPendingLineChanged(const QLineF& line);
 
     void handleSelectRectChanged(const QRectF& rect);
     void handleSelectRectCancelled();
@@ -478,6 +480,7 @@ private:
 
     BattleFrameMapDrawer* _mapDrawer;
     QGraphicsPolygonItem* _polygonPreview;
+    QGraphicsLineItem* _polygonPendingLine;
     QGraphicsRectItem* _selectRectPreview;
 
     PublishGLBattleRenderer* _renderer;

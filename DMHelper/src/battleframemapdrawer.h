@@ -24,6 +24,7 @@ signals:
     void cursorChanged(const QCursor& cursor);
     void polygonChanged(const QPolygonF& polygon);
     void polygonCancelled();
+    void polygonPendingLineChanged(const QLineF& line);
     void selectRectChanged(const QRectF& rect);
     void selectRectCancelled();
 

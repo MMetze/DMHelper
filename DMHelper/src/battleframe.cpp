@@ -177,6 +177,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _gridLockScale(0.0),
     _mapDrawer(nullptr),
     _polygonPreview(nullptr),
+    _polygonPendingLine(nullptr),
     _selectRectPreview(nullptr),
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
@@ -219,6 +220,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _mapDrawer = new BattleFrameMapDrawer(this);
     connect(_mapDrawer, &BattleFrameMapDrawer::polygonChanged, this, &BattleFrame::handlePolygonChanged);
     connect(_mapDrawer, &BattleFrameMapDrawer::polygonCancelled, this, &BattleFrame::handlePolygonCancelled);
+    connect(_mapDrawer, &BattleFrameMapDrawer::polygonPendingLineChanged, this, &BattleFrame::handlePolygonPendingLineChanged);
     connect(_mapDrawer, &BattleFrameMapDrawer::selectRectChanged, this, &BattleFrame::handleSelectRectChanged);
     connect(_mapDrawer, &BattleFrameMapDrawer::selectRectCancelled, this, &BattleFrame::handleSelectRectCancelled);
 
@@ -4188,6 +4190,32 @@ void BattleFrame::handlePolygonCancelled()
         delete _polygonPreview;
         _polygonPreview = nullptr;
     }
+
+    if(_polygonPendingLine)
+    {
+        if(_polygonPendingLine->scene())
+            _polygonPendingLine->scene()->removeItem(_polygonPendingLine);
+        delete _polygonPendingLine;
+        _polygonPendingLine = nullptr;
+    }
+}
+
+void BattleFrame::handlePolygonPendingLineChanged(const QLineF& line)
+{
+    if(!_scene)
+        return;
+
+    if(!_polygonPendingLine)
+    {
+        _polygonPendingLine = new QGraphicsLineItem();
+        QPen pen(Qt::white, 1, Qt::DotLine);
+        pen.setCosmetic(true);
+        _polygonPendingLine->setPen(pen);
+        _polygonPendingLine->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _scene->addItem(_polygonPendingLine);
+    }
+
+    _polygonPendingLine->setLine(line);
 }
 
 void BattleFrame::handleSelectRectChanged(const QRectF& rect)

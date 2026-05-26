@@ -1935,7 +1935,10 @@ void MapFrame::setMapCursor()
                 else if(_brushMode == DMHelper::BrushType_Polygon)
                     ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 else
-                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                {
+                    QPixmap selectPixmap = QPixmap(":/img/data/icon_selectcursor.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+                    ui->graphicsView->viewport()->setCursor(QCursor(selectPixmap, DMHelper::CURSOR_SIZE / 4, DMHelper::CURSOR_SIZE / 4));
+                }
                 break;
         }
     }

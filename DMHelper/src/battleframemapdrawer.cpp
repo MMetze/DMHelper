@@ -94,7 +94,11 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos, const Qt::MouseB
     Q_UNUSED(modifiers);
 
     if(_brushMode == DMHelper::BrushType_Polygon)
+    {
+        if(!_polygonPoints.isEmpty())
+            emit polygonPendingLineChanged(QLineF(_polygonPoints.last(), pos.toPoint()));
         return;
+    }
 
     if(_brushMode == DMHelper::BrushType_Select)
     {
