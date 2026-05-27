@@ -21,6 +21,7 @@
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QDebug>
@@ -1469,24 +1470,29 @@ void BattleDialogGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 
     if(isMimeDataImage(event->mimeData()))
     {
-        // Create a QMessageBox
         QMessageBox msgBox;
-        msgBox.setText("Do you want to add the image as a layer or a token?");
+        msgBox.setText("Do you want to add the image as a layer, token, or monster?");
         msgBox.setIcon(QMessageBox::Question);
-        msgBox.addButton("Layer", QMessageBox::ActionRole);
-        msgBox.addButton("Token", QMessageBox::ActionRole);
+        QPushButton* layerButton = msgBox.addButton("Layer", QMessageBox::ActionRole);
+        QPushButton* tokenButton = msgBox.addButton("Token", QMessageBox::ActionRole);
+        QPushButton* monsterButton = msgBox.addButton("Monster", QMessageBox::ActionRole);
         msgBox.addButton("Cancel", QMessageBox::RejectRole);
-        int result = msgBox.exec();
+        msgBox.exec();
 
-        if(result == 0)
+        if(msgBox.clickedButton() == layerButton)
         {
             event->acceptProposedAction();
             emit addLayerImageFile(getMimeDataImageFile(event->mimeData()));
         }
-        else if(result == 1)
+        else if(msgBox.clickedButton() == tokenButton)
         {
             event->acceptProposedAction();
             emit addEffectObjectFile(getMimeDataImageFile(event->mimeData()));
+        }
+        else if(msgBox.clickedButton() == monsterButton)
+        {
+            event->acceptProposedAction();
+            emit addMonsterImageFile(getMimeDataImageFile(event->mimeData()), event->scenePos());
         }
         else
         {

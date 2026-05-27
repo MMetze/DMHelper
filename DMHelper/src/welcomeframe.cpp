@@ -5,7 +5,6 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
-#include <QMessageBox>
 #include <QtDebug>
 #include "dmhmessagebox.h"
 

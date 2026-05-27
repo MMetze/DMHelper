@@ -3,7 +3,6 @@
 #include <QDir>
 #include <QStringList>
 #include <QDomDocument>
-#include <QMessageBox>
 #include <QDebug>
 #include "dmhmessagebox.h"
 

@@ -1,6 +1,5 @@
 #include "characterimportheroforge.h"
 #include "characterimportheroforgedata.h"
-#include <QMessageBox>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
 #include <QUrlQuery>

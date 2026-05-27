@@ -2,7 +2,6 @@
 #include "dmconstants.h"
 #include "dmversion.h"
 #include <QUrlQuery>
-#include <QMessageBox>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QIcon>

@@ -900,7 +900,7 @@ bool MainWindow::closeCampaign()
                                                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if(result == QMessageBox::Cancel)
         {
-            qDebug() << "[MainWindow] Closíng Campaign cancelled";
+            qDebug() << "[MainWindow] Closï¿½ng Campaign cancelled";
             return false;
         }
 
@@ -1796,7 +1796,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     // the on-disk version aside before we overwrite it with the new format. The
     // canonical "dmh:" key migration is read-only via CombatantTemplateAdapter
     // alias, but the version stamp itself bumps and older DMHelper builds will
-    // refuse to load the result — the backup gives the user a safety net.
+    // refuse to load the result ï¿½ the backup gives the user a safety net.
     if((_campaign->getLoadedMajorVersion() > 0) && (_campaign->getLoadedMajorVersion() < DMHelper::CAMPAIGN_MAJOR_VERSION))
     {
         qDebug() << "[MainWindow] Loaded campaign is pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " (was v" << _campaign->getLoadedMajorVersion() << "), writing pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " backup before save.";

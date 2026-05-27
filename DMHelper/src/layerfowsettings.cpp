@@ -4,7 +4,6 @@
 #include <QFileDialog>
 #include <QImageReader>
 #include <QPainter>
-#include <QMessageBox>
 #include "dmhmessagebox.h"
 
 LayerFowSettings::LayerFowSettings(QWidget *parent) :

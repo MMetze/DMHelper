@@ -22,7 +22,6 @@
 #include <QScrollArea>
 #include <QLayout>
 #include <QLabel>
-#include <QMessageBox>
 #include <QBuffer>
 #include <QFileInfo>
 #include <QDateTime>

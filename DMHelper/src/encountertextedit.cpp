@@ -13,7 +13,6 @@
 #include <QPainter>
 #include <QInputDialog>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QRegularExpression>
 #include <QScrollBar>
 #include <QTextFrame>

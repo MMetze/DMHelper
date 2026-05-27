@@ -143,6 +143,7 @@ public slots:
     void addLairActionsEvent();
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
+    void addMonsterImageFile(const QString& filename, const QPointF& position);
     void addEffectObjectVideo();
     void addEffectObjectVideoFile(const QString& filename);
     void addLayerImageFile(const QString& filename);

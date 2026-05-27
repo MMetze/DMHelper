@@ -12,6 +12,7 @@
 #include "battledialoglogview.h"
 #include "map.h"
 #include "campaign.h"
+#include "bestiary.h"
 #include "characterv2.h"
 #include "mapselectdialog.h"
 #include "combatantdialog.h"
@@ -254,6 +255,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObjectVideo, this, &BattleFrame::addEffectObjectVideo);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObjectFile, this, &BattleFrame::addEffectObjectFile);
+    connect(_scene, &BattleDialogGraphicsScene::addMonsterImageFile, this, &BattleFrame::addMonsterImageFile);
     connect(_scene, &BattleDialogGraphicsScene::addLayerImageFile, this, &BattleFrame::addLayerImageFile);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, &BattleDialogGraphicsScene::itemChangeLayer, this, &BattleFrame::handleItemChangeLayer);
@@ -1366,6 +1368,63 @@ void BattleFrame::addEffectObjectFile(const QString& filename)
         return;
 
     registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename));
+}
+
+void BattleFrame::addMonsterImageFile(const QString& filename, const QPointF& position)
+{
+    if((filename.isEmpty()) || (!_model))
+        return;
+
+    if(!QImageReader(filename).canRead())
+    {
+        qDebug() << "[BattleFrame] addMonsterImageFile: " << filename << " is not a valid image file.";
+        return;
+    }
+
+    if(!validateTokenLayerExists())
+        return;
+
+    bool nameOk = false;
+    QString monsterName = QInputDialog::getText(this,
+                                                QString("Add Monster"),
+                                                QString("Monster name:"),
+                                                QLineEdit::Normal,
+                                                QFileInfo(filename).baseName(),
+                                                &nameOk).trimmed();
+
+    if((!nameOk) || (monsterName.isEmpty()))
+        return;
+
+    Bestiary* bestiary = Bestiary::Instance();
+    if(!bestiary)
+        return;
+
+    if(bestiary->exists(monsterName))
+    {
+        DMHMessageBox::warning(this,
+                               QString("Monster Already Exists"),
+                               QString("A monster named \"") + monsterName + QString("\" already exists in the bestiary."));
+        return;
+    }
+
+    MonsterClassv2* monsterClass = new MonsterClassv2(monsterName);
+    if(!bestiary->insertMonsterClass(monsterClass))
+    {
+        delete monsterClass;
+        DMHMessageBox::warning(this,
+                               QString("Add Monster Failed"),
+                               QString("Unable to create the monster in the bestiary."));
+        return;
+    }
+
+    BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
+    monster->setMonsterName(monsterName);
+    monster->setInitiative(Dice::d20());
+    monster->setPosition(position);
+    monster->setIconFile(filename);
+
+    addCombatant(monster, nullptr);
+    recreateCombatantWidgets();
 }
 
 void BattleFrame::addEffectObjectVideo()

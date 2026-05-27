@@ -4,7 +4,6 @@
 #include <QMouseEvent>
 #include <QInputDialog>
 #include <QMenu>
-#include <QMessageBox>
 
 TemplateResourceLayout::TemplateResourceLayout(const QString& key, const ResourcePair& value) :
     QHBoxLayout(),

@@ -3,7 +3,6 @@
 #include "dmversion.h"
 #include <QUrlQuery>
 #include <QDomDocument>
-#include <QMessageBox>
 #include <QDebug>
 #include "dmhmessagebox.h"
 

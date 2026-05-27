@@ -9,7 +9,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrlQuery>
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QDomDocument>
 #include <QDomElement>

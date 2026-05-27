@@ -11,7 +11,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
-#include <QMessageBox>
 
 // Uncomment this define to output payload data to a local file "_dmhpayload.txt"
 //#define DMH_NETWORK_CONTROLLER_LOCAL_PAYLOAD

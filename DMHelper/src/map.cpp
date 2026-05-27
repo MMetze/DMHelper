@@ -19,7 +19,6 @@
 #include <QDir>
 #include <QPainter>
 #include <QImageReader>
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QIcon>
 #include <QDebug>

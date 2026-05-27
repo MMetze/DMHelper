@@ -5,7 +5,6 @@
 #include <QFileDialog>
 #include <QImageReader>
 #include <QMouseEvent>
-#include <QMessageBox>
 #include <QDebug>
 #include "dmhmessagebox.h"
 

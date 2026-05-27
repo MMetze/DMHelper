@@ -1,7 +1,6 @@
 #include "audiotracksyrinscapeonline.h"
 #include "dmconstants.h"
 #include <QDesktopServices>
-#include <QMessageBox>
 #include <QUrlQuery>
 #include <QIcon>
 #include <QDebug>

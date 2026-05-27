@@ -10,7 +10,6 @@
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QDir>
-#include <QMessageBox>
 #include <QImageReader>
 #include <QIcon>
 #include <QDebug>

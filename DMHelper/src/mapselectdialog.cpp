@@ -5,7 +5,6 @@
 #include "mapblankdialog.h"
 #include "layerblank.h"
 #include <QBrush>
-#include <QMessageBox>
 
 MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent) :
     QDialog(parent),

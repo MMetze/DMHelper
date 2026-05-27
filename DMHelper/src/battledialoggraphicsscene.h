@@ -77,6 +77,7 @@ signals:
     void addEffectObjectVideo();
     void addLayerImageFile(const QString& filename);
     void addEffectObjectFile(const QString& filename);
+    void addMonsterImageFile(const QString& filename, const QPointF& position);
     void castSpell();
 
     void effectChanged(QGraphicsItem* effect);
