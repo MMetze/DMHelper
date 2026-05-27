@@ -526,6 +526,9 @@ void BattleFrame::recreateCombatantWidgets()
     qDebug() << "[Battle Frame] recreating combatant widgets";
     clearCombatantWidgets();
     buildCombatantWidgets();
+    // Reorder once after rebuild to ensure group rows are repopulated in
+    // initiative order and remain visible after group membership changes.
+    reorderCombatantWidgets();
     qDebug() << "[Battle Frame] combatant widgets recreated";
 }
 
@@ -2389,7 +2392,7 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
                 ++selectedCombatantCount;
         }
 
-        if(selectedCombatantCount >= 2)
+        if((selectedCombatantCount >= 1) || (_contextMenuCombatant != nullptr))
         {
             QAction* groupItem = new QAction(QString("Group Selected..."), contextMenu);
             connect(groupItem, SIGNAL(triggered()), this, SLOT(groupSelectedCombatants()));
@@ -3377,7 +3380,10 @@ void BattleFrame::groupSelectedCombatants()
             selectedCombatants.append(c);
     }
 
-    if(selectedCombatants.count() < 2)
+    if((selectedCombatants.isEmpty()) && (_contextMenuCombatant))
+        selectedCombatants.append(_contextMenuCombatant);
+
+    if(selectedCombatants.isEmpty())
         return;
 
     bool ok;

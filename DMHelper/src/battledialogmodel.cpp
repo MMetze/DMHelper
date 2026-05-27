@@ -567,7 +567,7 @@ QList<BattleDialogModelCombatant*> BattleDialogModel::getGroupMembers(const QUui
 
 BattleDialogModelCombatantGroup* BattleDialogModel::createGroup(const QString& name, const QList<BattleDialogModelCombatant*>& members)
 {
-    if(members.count() < 2)
+    if(members.isEmpty())
         return nullptr;
 
     BattleDialogModelCombatantGroup* group = new BattleDialogModelCombatantGroup(name, this);
@@ -639,13 +639,10 @@ void BattleDialogModel::removeCombatantFromGroup(BattleDialogModelCombatant* com
 
     combatant->setGroupId(QUuid());
 
-    // Remove group if it has fewer than 2 members remaining
+    // Remove the group only when it becomes empty.
     QList<BattleDialogModelCombatant*> remaining = getGroupMembers(groupId);
-    if(remaining.count() < 2)
+    if(remaining.isEmpty())
     {
-        // Ungroup the last remaining member too
-        for(BattleDialogModelCombatant* member : remaining)
-            member->setGroupId(QUuid());
         removeGroup(groupId);
     }
     else

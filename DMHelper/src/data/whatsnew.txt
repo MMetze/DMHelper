@@ -36,6 +36,7 @@ So, now on with all the news; and there's a lot of hot new toys to play with thi
 <li> <b>Customizable Conditions</b> in case you don't like the usual ones
 <li> <b>Customizable Spellbooks</b> for any system you want to play...
 <li> <b>Customizable Health and Initiative rules</b> ...even if they're really different 
+<li> <b>Customizable per-field display formatting and arithmetic computed fields</b> to make those character sheets more helpful
 <li> <b>Delete multiple effects at once</b> because this should have always been possible
 <li> <b>Show/hide and know/unknown multiple combatants at once</b> because ditto
 </ul>

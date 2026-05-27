@@ -764,10 +764,17 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                     }
                 }
 
-                if(selectedCombatantCount >= 2)
+                if((selectedCombatantCount >= 1) || (combatantObj != nullptr))
                 {
                     QAction* groupItem = new QAction(QString("Group Selected..."), &menu);
-                    connect(groupItem, SIGNAL(triggered()), this, SLOT(groupSelectedCombatants()));
+                    connect(groupItem, &QAction::triggered, this, [this, item]() {
+                        if(item)
+                        {
+                            clearSelection();
+                            item->setSelected(true);
+                        }
+                        groupSelectedCombatants();
+                    });
                     menu.addAction(groupItem);
                 }
 
@@ -782,7 +789,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                     menu.addAction(ungroupItem);
                 }
 
-                if((selectedCombatantCount >= 2) || ((combatantObj) && (!combatantObj->getGroupId().isNull())))
+                if((selectedCombatantCount >= 1) || (combatantObj != nullptr) || ((combatantObj) && (!combatantObj->getGroupId().isNull())))
                     menu.addSeparator();
             }
         }
