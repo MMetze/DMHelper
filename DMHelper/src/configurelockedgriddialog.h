@@ -39,6 +39,7 @@ private slots:
 private:
     void rebuildGrid();
     qreal getPixelsPerInch();
+    void updateGridSizerMaximumSize();
 
     Ui::ConfigureLockedGridDialog *ui;
 

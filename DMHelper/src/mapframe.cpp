@@ -33,6 +33,9 @@
 #include <QMessageBox>
 #include <QtMath>
 
+static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
+static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
+
 MapFrame::MapFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::MapFrame),
@@ -349,6 +352,10 @@ void MapFrame::resizeGrid()
         currentScale = _mapSource->getLayerScene().getScale();
 
     _gridSizer = new GridSizer(currentScale);
+    const QRectF mapRect = _mapSource->getLayerScene().boundingRect();
+    const qreal maximumGridSize = qMin(mapRect.width() * GRID_SIZER_MAX_MAP_RATIO,
+                                       mapRect.height() * GRID_SIZER_MAX_MAP_RATIO) / GRID_SIZER_CELL_COUNT;
+    _gridSizer->setMaximumSize(maximumGridSize);
     _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
 

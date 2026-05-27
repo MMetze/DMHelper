@@ -89,6 +89,8 @@
 
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
+static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
+static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
 
 // Fallback combatant-row UI used when the active ruleset does not specify one
 // via Ruleset::getCombatantUIFile() (i.e. the ruleset.xml has no
@@ -801,6 +803,10 @@ void BattleFrame::resizeGrid()
         currentScale = _model->getLayerScene().getScale();
 
     _gridSizer = new GridSizer(currentScale);
+    const QRectF mapRect = _model->getLayerScene().boundingRect();
+    const qreal maximumGridSize = qMin(mapRect.width() * GRID_SIZER_MAX_MAP_RATIO,
+                                       mapRect.height() * GRID_SIZER_MAX_MAP_RATIO) / GRID_SIZER_CELL_COUNT;
+    _gridSizer->setMaximumSize(maximumGridSize);
     _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
 

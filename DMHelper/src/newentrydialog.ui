@@ -377,7 +377,7 @@
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
             <property name="currentIndex">
-             <number>4</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="pageEntry">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -391,7 +391,10 @@
               <item>
                <widget class="QTextBrowser" name="textBrowserEntry">
                 <property name="frameShape">
-                 <enum>QFrame::Shape::Panel</enum>
+                 <enum>QFrame::Shape::Box</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Shadow::Plain</enum>
                 </property>
                 <property name="readOnly">
                  <bool>false</bool>
@@ -798,6 +801,9 @@
                   <property name="toolTip">
                    <string>Turn on/off audio for this media</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(240, 240, 240);</string>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -820,6 +826,9 @@
                   </property>
                   <property name="toolTip">
                    <string>Turn on/off looping playback for this media</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(240, 240, 240);</string>
                   </property>
                   <property name="text">
                    <string/>
