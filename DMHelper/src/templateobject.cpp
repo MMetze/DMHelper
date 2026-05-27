@@ -38,8 +38,24 @@ bool TemplateObject::matchSearchString(const QString& searchString, QString& res
     if(!_factory)
         return false;
 
-    QHash<QString, DMHAttribute> elementAttributes = _factory->getElements();
+    QHash<QString, DMHAttribute> attributes = _factory->getAttributes();
     QString searchResult;
+    for(auto keyIt = attributes.keyBegin(), end = attributes.keyEnd(); keyIt != end; ++keyIt)
+    {
+        DMHAttribute attribute = attributes.value(*keyIt);
+        if((attribute._type == TemplateFactory::TemplateType_html) || (attribute._type == TemplateFactory::TemplateType_string))
+        {
+            QString value = getStringValue(*keyIt);
+            if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
+            {
+                result = *keyIt + ": " + searchResult;
+                return true;
+            }
+        }
+    }
+
+    QHash<QString, DMHAttribute> elementAttributes = _factory->getElements();
+    searchResult.clear();
     for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
     {
         DMHAttribute attribute = elementAttributes.value(*keyIt);
