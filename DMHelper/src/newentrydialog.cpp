@@ -391,6 +391,8 @@ CampaignObjectBase* NewEntryDialog::createMediaEntry()
     else if(_imageType == DMHelper::FileType_Video)
     {
         LayerVideo* videoLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(_primaryImageFile).fileName(), _primaryImageFile);
+        videoLayer->setPlayAudio(ui->btnPlayAudio->isChecked());
+        videoLayer->setLooping(ui->btnLooping->isChecked());
         mediaLayer = videoLayer;
     }
     else
@@ -673,6 +675,10 @@ void NewEntryDialog::newPageSelected()
     {
         loadPrimaryImage(ui->lblMediaPreview, nullptr, ui->lblMediaPreview->width() - 20, ui->lblMediaPreview->height() - 20, QString());
         ui->edtMediaFile->setText(_primaryImageFile);
+
+        bool isMediaVideo = (_imageType == DMHelper::FileType_Video);
+        ui->btnPlayAudio->setEnabled(isMediaVideo);
+        ui->btnLooping->setEnabled(isMediaVideo);
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeMap)
     {
@@ -1087,6 +1093,13 @@ void NewEntryDialog::readNewFile(const QString& filename, QLabel* label, int wid
     {
         label->setPixmap(QPixmap(defaultIcon).scaled(width, height, Qt::KeepAspectRatio));
         _imageType = DMHelper::FileType_Unknown;
+    }
+
+    if(label == ui->lblMediaPreview)
+    {
+        bool isMediaVideo = (_imageType == DMHelper::FileType_Video);
+        ui->btnPlayAudio->setEnabled(isMediaVideo);
+        ui->btnLooping->setEnabled(isMediaVideo);
     }
 
     validateNewEntry();

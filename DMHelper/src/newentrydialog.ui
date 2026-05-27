@@ -377,7 +377,7 @@
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
             <property name="currentIndex">
-             <number>3</number>
+             <number>4</number>
             </property>
             <widget class="QWidget" name="pageEntry">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -791,6 +791,52 @@
                  <widget class="QLineEdit" name="edtMediaFile"/>
                 </item>
                 <item>
+                 <widget class="QPushButton" name="btnPlayAudio">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>Turn on/off audio for this media</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources.qrc">
+                    <normaloff>:/img/data/icon_volumeon.png</normaloff>:/img/data/icon_volumeon.png</iconset>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnLooping">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>Turn on/off looping playback for this media</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources.qrc">
+                    <normaloff>:/img/data/icon_redo.png</normaloff>:/img/data/icon_redo.png</iconset>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QPushButton" name="btnMediaBrowse">
                   <property name="text">
                    <string>Browse...</string>
@@ -1112,7 +1158,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroupCharacter"/>
   <buttongroup name="buttonGroupType"/>
+  <buttongroup name="buttonGroupCharacter"/>
  </buttongroups>
 </ui>
