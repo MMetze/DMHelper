@@ -14,6 +14,7 @@
 #include <QImageReader>
 #include <QIcon>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 const int ENCOUNTERTYPE_SCROLLINGTEXT = 5;
 
@@ -250,7 +251,7 @@ void EncounterText::setImageFile(const QString& imageFile)
 
     if(!QFile::exists(imageFile))
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Image File Not Found"),
                               QString("The new image file could not be found: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
         qDebug() << "[EncounterText] setImageFile - New image file not found: " << imageFile << " for entry " << getTreePath();
@@ -260,7 +261,7 @@ void EncounterText::setImageFile(const QString& imageFile)
     QFileInfo fileInfo(imageFile);
     if(!fileInfo.isFile())
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Image File Not Valid"),
                               QString("The new image isn't a file: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
         qDebug() << "[EncounterText] setImageFile - Image file not a file: " << imageFile << " for entry " << getTreePath();

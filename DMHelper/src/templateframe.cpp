@@ -7,6 +7,7 @@
 #include <QTextEdit>
 #include <QKeyEvent>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 TemplateFrame::TemplateFrame() :
     _uiFilename()
@@ -125,7 +126,7 @@ void TemplateFrame::handleRemoveResource(QWidget* widget, TemplateObject* templa
     if(scrollArea == nullptr)
         return;
 
-    if(QMessageBox::question(nullptr, QObject::tr("Remove Resource"), QObject::tr("Are you sure you want to remove this resource?")) != QMessageBox::Yes)
+    if(DMHMessageBox::question(nullptr, QObject::tr("Remove Resource"), QObject::tr("Are you sure you want to remove this resource?")) != QMessageBox::Yes)
         return;
 
     QString keyString = scrollArea->property(TemplateFactory::TEMPLATE_PROPERTY).toString();

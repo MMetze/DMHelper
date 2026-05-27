@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QDomElement>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 AudioTrackFile::AudioTrackFile(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent),
@@ -92,7 +93,7 @@ void AudioTrackFile::play()
     QString fileString = getUrl().toString();
     if(!QFile::exists(fileString))
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Audio Track File Not Found"),
                               QString("The audio track could not be found: ") + fileString);
         qDebug() << "[AudioTrackFile] Audio track file not found: " << fileString;
@@ -102,7 +103,7 @@ void AudioTrackFile::play()
     QFileInfo fileInfo(fileString);
     if(!fileInfo.isFile())
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Audio Track File Not Valid"),
                               QString("The audio track isn't a file: ") + fileString);
         qDebug() << "[AudioTrackFile] Audio track file not a file: " << fileString;

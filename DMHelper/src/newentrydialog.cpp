@@ -39,6 +39,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, CampaignObjectBase* currentObject, QWidget *parent) :
     QDialog(parent),
@@ -176,7 +177,7 @@ CampaignObjectBase* NewEntryDialog::createNewEntry()
 {
     if(getNewEntryName().isEmpty())
     {
-        QMessageBox::warning(this, tr("Invalid Entry Name"), tr("Please enter a valid name for the new entry."));
+        DMHMessageBox::warning(this, tr("Invalid Entry Name"), tr("Please enter a valid name for the new entry."));
         return nullptr;
     }
 
@@ -304,7 +305,7 @@ CampaignObjectBase* NewEntryDialog::createLinkedEntry()
 {
     if((ui->edtLinkedFile->text().isEmpty()) || (!QFile::exists(ui->edtLinkedFile->text())))
     {
-        QMessageBox::warning(this, tr("Invalid Linked File"), tr("Please enter a valid file name for the linked entry: ") + ui->edtLinkedFile->text());
+        DMHMessageBox::warning(this, tr("Invalid Linked File"), tr("Please enter a valid file name for the linked entry: ") + ui->edtLinkedFile->text());
         return nullptr;
     }
 
@@ -712,7 +713,7 @@ void NewEntryDialog::readTextFile(const QString& filename)
         QFile textFile(filename);
         if(!textFile.open(QIODevice::ReadOnly))
         {
-            QMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not able to be opened.") + QChar::LineFeed + QChar::LineFeed + filename);
+            DMHMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not able to be opened.") + QChar::LineFeed + QChar::LineFeed + filename);
             qDebug() << "[NewEntryDialog] ERROR: unabled to open the text file for reading: " << filename;
             return;
         }
@@ -736,7 +737,7 @@ void NewEntryDialog::readTextFile(const QString& filename)
     }
     else
     {
-        QMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not a supported file type for inputing text into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
+        DMHMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not a supported file type for inputing text into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
         qDebug() << "[NewEntryDialog] ERROR: trying to add an unsupported file type as a text file: " << filename;
     }
 }
@@ -753,7 +754,7 @@ void NewEntryDialog::setLinkedTextFile(const QString& filename)
     }
     else
     {
-        QMessageBox::critical(this, QString("Invalid Linked File"), QString("The selected file is not a supported file type for linking into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
+        DMHMessageBox::critical(this, QString("Invalid Linked File"), QString("The selected file is not a supported file type for linking into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
         qDebug() << "[NewEntryDialog] ERROR: trying to add an unsupported file type as a linked file: " << filename;
     }
 }
@@ -828,7 +829,7 @@ void NewEntryDialog::importHeroForge()
         token = QInputDialog::getText(this, QString("Enter Hero Forge Access Key"), QString("Please enter your Hero Forge Access Key. You can find this in your Hero Forge account information."));
         if(!token.isEmpty())
         {
-            if(QMessageBox::question(this,
+            if(DMHMessageBox::question(this,
                                       QString("Confirm Store Access Key"),
                                       QString("Should DMHelper store your access key for ease of use in the future?") + QChar::LineFeed + QChar::LineFeed + QString("Please note: the Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.")) == QMessageBox::Yes)
             {

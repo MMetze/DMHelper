@@ -18,6 +18,7 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 CharacterTemplateFrame::CharacterTemplateFrame(OptionsContainer* options, QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -343,7 +344,7 @@ void CharacterTemplateFrame::importHeroForge()
         token = QInputDialog::getText(this, QString("Enter Hero Forge Access Key"), QString("Please enter your Hero Forge Access Key. You can find this in your Hero Forge account information."));
         if(!token.isEmpty())
         {
-            if(QMessageBox::question(this,
+            if(DMHMessageBox::question(this,
                                       QString("Confirm Store Access Key"),
                                       QString("Should DMHelper store your access key for ease of use in the future?") + QChar::LineFeed + QChar::LineFeed + QString("Please note: the Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.")) == QMessageBox::Yes)
             {
@@ -429,7 +430,7 @@ void CharacterTemplateFrame::handleClearImage()
     if(iconCount <= 0)
         return;
 
-    if(QMessageBox::question(this,
+    if(DMHMessageBox::question(this,
                               QString("Confirm Delete"),
                               QString("Are you sure you want to remove this token image?")) != QMessageBox::Yes)
         return;

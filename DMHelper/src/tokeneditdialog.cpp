@@ -7,6 +7,7 @@
 #include <QMouseEvent>
 #include <QMessageBox>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 TokenEditDialog::TokenEditDialog(const QString& tokenFilename, bool backgroundFill, const QColor& backgroundFillColor, bool transparent, const QColor& transparentColor, int transparentLevel, bool maskApplied, const QString& maskFile, bool frameApplied, const QString& frameFile, qreal zoom, const QPoint& offset, bool browsable, QWidget *parent) :
     QDialog(parent),
@@ -218,7 +219,7 @@ void TokenEditDialog::browseImage()
     QImage newImage(filename);
     if(newImage.isNull())
     {
-        QMessageBox::critical(nullptr, QString("Error"), QString("Unable to load image from: ") + filename);
+        DMHMessageBox::critical(nullptr, QString("Error"), QString("Unable to load image from: ") + filename);
         qDebug() << "[TokenEditDialog] ERROR: Unable to load source image from: " << filename;
     }
 

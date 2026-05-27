@@ -23,6 +23,7 @@
 #include <QFileDialog>
 #include <QIcon>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 Map::Map(const QString& mapName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
@@ -230,7 +231,7 @@ bool Map::setFileName(const QString& newFileName)
 
     if(!QFile::exists(newFileName))
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
                               QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
         qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getTreePath();
@@ -240,7 +241,7 @@ bool Map::setFileName(const QString& newFileName)
     QFileInfo fileInfo(newFileName);
     if(!fileInfo.isFile())
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Valid"),
                               QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
         qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getTreePath();

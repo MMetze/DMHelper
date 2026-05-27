@@ -1,4 +1,4 @@
-﻿#include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "dmversion.h"
 #include "publishwindow.h"
@@ -49,6 +49,7 @@
 #include "audiotrackedit.h"
 #include "audiotrack.h"
 #include "basicdateserver.h"
+#include "dmhmessagebox.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
 #endif
@@ -893,13 +894,13 @@ bool MainWindow::closeCampaign()
 
     if(_dirty)
     {
-        QMessageBox::StandardButton result = QMessageBox::question(this,
+        QMessageBox::StandardButton result = DMHMessageBox::question(this,
                                                                    QString("Save Campaign"),
                                                                    QString("Would you like to save the current campaign before proceeding? Unsaved changes will be lost."),
                                                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if(result == QMessageBox::Cancel)
         {
-            qDebug() << "[MainWindow] Closíng Campaign cancelled";
+            qDebug() << "[MainWindow] Clos�ng Campaign cancelled";
             return false;
         }
 
@@ -1108,7 +1109,7 @@ void MainWindow::removeCurrentItem()
         return;
     }
 
-    if(QMessageBox::question(this,
+    if(DMHMessageBox::question(this,
                              QString("Confirm Delete"),
                              QString("Are you sure you would like to delete the entry ") + removeObject->getName() + QString("?")) != QMessageBox::Yes)
         return;
@@ -1769,7 +1770,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     _campaign->validateCampaignIds();
     if(!_campaign->isValid())
     {
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
                                                                    QString("An invalid structure has been detected in the open campaign. Saving may corrupt the file and lead to data loss.\n\nIt is strongly recommended to back up your campaign file before saving!\n\nDo you wish to save now?"),
                                                                    QMessageBox::Yes | QMessageBox::No);
@@ -1795,7 +1796,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     // the on-disk version aside before we overwrite it with the new format. The
     // canonical "dmh:" key migration is read-only via CombatantTemplateAdapter
     // alias, but the version stamp itself bumps and older DMHelper builds will
-    // refuse to load the result — the backup gives the user a safety net.
+    // refuse to load the result � the backup gives the user a safety net.
     if((_campaign->getLoadedMajorVersion() > 0) && (_campaign->getLoadedMajorVersion() < DMHelper::CAMPAIGN_MAJOR_VERSION))
     {
         qDebug() << "[MainWindow] Loaded campaign is pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " (was v" << _campaign->getLoadedMajorVersion() << "), writing pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " backup before save.";
@@ -1855,7 +1856,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     // Optionally save the Spellbook
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
     {
-        if(QMessageBox::critical(this,
+        if(DMHMessageBox::critical(this,
                                  QString("Save Spellbook"),
                                  QString("The Spellbook has been changed. Would you like to save it as well?"),
                                  QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
@@ -2047,7 +2048,7 @@ void MainWindow::openCampaign(const QString& filename)
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical(this,
+        DMHMessageBox::critical(this,
                               QString("Campaign file open failed"),
                               QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Unable to open campaign file";
@@ -2062,7 +2063,7 @@ void MainWindow::openCampaign(const QString& filename)
 
     if(!contentResult)
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        DMHMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Error reading the campaign file: (line ") + QString::number(contentResult.errorLine) + QString(", column ") + QString::number(contentResult.errorColumn) + QString("): ") + contentResult.errorMessage);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML (line " << contentResult.errorLine << ", column " << contentResult.errorColumn << "): " << contentResult.errorMessage;
         return;
@@ -2071,7 +2072,7 @@ void MainWindow::openCampaign(const QString& filename)
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        DMHMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to find the root entry in the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find root entry";
         return;
@@ -2080,7 +2081,7 @@ void MainWindow::openCampaign(const QString& filename)
     QDomElement campaignElement = root.firstChildElement(QString("campaign"));
     if(campaignElement.isNull())
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        DMHMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to find the campaign entry in the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
@@ -2092,7 +2093,7 @@ void MainWindow::openCampaign(const QString& filename)
     if((majorVersion < 2) || ((majorVersion == 2) && (minorVersion < 4)))
     {
         qDebug() << "[Campaign] WARNING: Campaign file is an older format, informing user of character template conversion.";
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                    QString("Campaign file version check"),
                                                                    QString("PLEASE READ: IMPORTANT!") + QChar::LineFeed + QChar::LineFeed +
                                                                        QString("With version 3.6, DMHelper has added more flexible Bestiary data to the already flexible character data and UI template system added to support different game systems in v3.3. In a similar fashion to the changes with characters in v3.3, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.") + QChar::LineFeed + QChar::LineFeed +
@@ -2119,7 +2120,7 @@ void MainWindow::openCampaign(const QString& filename)
         // takes a pre-v3 backup automatically; warn the user up front so they
         // know what to expect.
         qDebug() << "[Campaign] INFO: Loading pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " campaign (v" << majorVersion << "." << minorVersion << "); user notified of one-way upgrade.";
-        QMessageBox::StandardButton result = QMessageBox::warning(this,
+        QMessageBox::StandardButton result = DMHMessageBox::warning(this,
                                                                   QString("Campaign file version check"),
                                                                   QString("This campaign file is from an older version of DM Helper (v%1.%2). It can be opened, but saving will rewrite it in the new v%3 format and older versions of DM Helper will no longer be able to open it.")
                                                                           .arg(majorVersion).arg(minorVersion).arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
@@ -2128,7 +2129,7 @@ void MainWindow::openCampaign(const QString& filename)
                                                                   QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
         {
-            qDebug() << "[Campaign] INFO: User declined v" << majorVersion << " → v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " upgrade for: " << filename;
+            qDebug() << "[Campaign] INFO: User declined v" << majorVersion << " ? v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " upgrade for: " << filename;
             return;
         }
     }
@@ -2166,13 +2167,13 @@ void MainWindow::openCampaign(const QString& filename)
 
     if(!_campaign->isValid())
     {
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
                                                                    QString("The loaded campaign has an invalid structure: there is a high risk of data loss and/or program malfunction! Would you like to continue?"),
                                                                    QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
         {
-            QMessageBox::information(this,
+            DMHMessageBox::information(this,
                                      QString("Invalid Campaign"),
                                      QString("The campaign has not been opened."));
             qDebug() << "[MainWindow] Invalid campaign discarded";
@@ -2201,7 +2202,7 @@ void MainWindow::reloadCampaign()
     if((!_campaign) || (_campaignFileName.isEmpty()))
         return;
 
-    QMessageBox::StandardButton result = QMessageBox::question(this,
+    QMessageBox::StandardButton result = DMHMessageBox::question(this,
                                                                QString("Reload Campaign"),
                                                                QString("You have changed the ruleset for this campaign. To reconfigure it safely, the campaign needs to be closed and reopened:") + QChar::LineFeed + QChar::LineFeed + _campaignFileName + QChar::LineFeed + QChar::LineFeed + QString("Would you like to continue?"),
                                                                QMessageBox::Yes | QMessageBox::Cancel);
@@ -2949,7 +2950,7 @@ void MainWindow::handleAddMapLayer(const QString& mapFile)
     Map* currentMap = dynamic_cast<Map*>(currentObject);
     if(!currentMap)
     {
-        QMessageBox::warning(this, tr("Add Layer"), tr("Please select a Map entry in the campaign tree to add the layer to."));
+        DMHMessageBox::warning(this, tr("Add Layer"), tr("Please select a Map entry in the campaign tree to add the layer to."));
         return;
     }
 

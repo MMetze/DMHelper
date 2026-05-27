@@ -5,6 +5,7 @@
 #include <QUrlQuery>
 #include <QIcon>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 AudioTrackSyrinscapeOnline::AudioTrackSyrinscapeOnline(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent),
@@ -44,7 +45,7 @@ bool AudioTrackSyrinscapeOnline::checkRequestError(QNetworkReply *reply, QString
 {
     if (!reply)
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("Syrinscape Online Failure"),
                               QString("An unexpected and unknown error was encountered trying to ") + action + QString(" a Syrinscape online track"));
         return false;
@@ -55,13 +56,13 @@ bool AudioTrackSyrinscapeOnline::checkRequestError(QNetworkReply *reply, QString
         qDebug() << bytes;
         if(reply->error() == QNetworkReply::HostNotFoundError)
         {
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("Syrinscape Online Failure"),
                                   QString("A network error was encountered trying to ") + action + QString(" a Syrinscape online track. It was not possible to reach the server!"));
         }
         else
         {
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("Syrinscape Online Failure"),
                                   QString("A network error was encountered trying to ") + action + QString(" a Syrinscape online track") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
         }

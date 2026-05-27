@@ -1,6 +1,7 @@
 #include "legaldialog.h"
 #include "ui_legaldialog.h"
 #include <QMessageBox>
+#include "dmhmessagebox.h"
 
 LegalDialog::LegalDialog(QWidget *parent) :
     QDialog(parent),
@@ -30,7 +31,7 @@ void LegalDialog::okClicked()
 {
     if(ui->chkEnableUpdates->isChecked() == false)
     {
-        if(QMessageBox::warning(this,
+        if(DMHMessageBox::warning(this,
                                 QString("Checking for Updates disabled"),
                                 QString("You have chosen that DMHelper should not check occassionally for new updates. This means you won't be informed when a new version of DMHelper becomes available. Are you sure?"),
                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
@@ -39,7 +40,7 @@ void LegalDialog::okClicked()
 
     if(ui->chkAllowStatistics->isChecked() == false)
     {
-        QMessageBox::information(this,
+        DMHMessageBox::information(this,
                                  QString("Anonymous statistics disabled"),
                                  QString("You have chosen that DMHelper may not gather anonymous usage data. We respect your choice. If you would like to change this setting in the future, you can find it in the menu under Tools --> Options"));
     }

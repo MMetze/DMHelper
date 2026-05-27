@@ -15,6 +15,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 Bestiary* Bestiary::_instance = nullptr;
 
@@ -188,7 +189,7 @@ bool Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     if(bestiaryElement.isNull())
     {
         qDebug() << "[Bestiary]    ERROR: invalid bestiary file, unable to find base bestiary element";
-        QMessageBox::critical(nullptr, QString("Invalid Bestiary File"), QString("The new bestiary file is invalid - it is missing a base bestiary element and can't be loaded."));
+        DMHMessageBox::critical(nullptr, QString("Invalid Bestiary File"), QString("The new bestiary file is invalid - it is missing a base bestiary element and can't be loaded."));
         return false;
     }
 
@@ -198,7 +199,7 @@ bool Bestiary::inputXML(const QDomElement &element, const QString& importFile)
     if(!isVersionCompatible())
     {
         qDebug() << "[Bestiary]    ERROR: Bestiary version is not compatible with expected version: " << getExpectedVersion();
-        QMessageBox::critical(nullptr, QString("Incompatible Bestiary File"), QString("The new bestiary file is incompatible with this version of DMHelper and can't be loaded."));
+        DMHMessageBox::critical(nullptr, QString("Incompatible Bestiary File"), QString("The new bestiary file is incompatible with this version of DMHelper and can't be loaded."));
         return false;
     }
 
@@ -212,7 +213,7 @@ bool Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         else
         {
             qDebug() << "[Bestiary]    ERROR: Importing an old bestiary version is not supported. Please convert the file to the new format before importing.";
-            QMessageBox::critical(nullptr, QString("Importing old version"), QString("Importing an old bestiary version is not supported. Please convert the file to the new format before importing. You can do this by setting the file to import as the primary bestiary file in DMHelper and then saving it again."));
+            DMHMessageBox::critical(nullptr, QString("Importing old version"), QString("Importing an old bestiary version is not supported. Please convert the file to the new format before importing. You can do this by setting the file to import as the primary bestiary file in DMHelper and then saving it again."));
             return false;
         }
     }
@@ -520,7 +521,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if(targetFilename.isEmpty())
     {
         qDebug() << "[Bestiary] ERROR! No known bestiary found, unable to load bestiary: " << targetFilename;
-        QMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file is invalid: ") + targetFilename);
+        DMHMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file is invalid: ") + targetFilename);
         return false;
     }
 
@@ -528,7 +529,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if(absoluteTargetFilename.isEmpty())
     {
         qDebug() << "[Bestiary] ERROR! Bestiary not found based on relative file path: " << targetFilename;
-        QMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file could not be found: ") + targetFilename);
+        DMHMessageBox::critical(nullptr, QString("Invalid bestiary file"), QString("The bestiary file could not be found: ") + targetFilename);
         return false;
     }
 
@@ -541,7 +542,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if(isDirty())
     {
         qDebug() << "[Bestiary] Existing bestiary is unsaved!";
-        QMessageBox::StandardButton result = QMessageBox::critical(nullptr,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(nullptr,
                                                                    QString("Unsaved Bestiary"),
                                                                    QString("The current bestiary has not been saved. Would you like to save it before loading a new bestiary? If you don't. you may lose monster data!"),
                                                                    QMessageBox::Yes | QMessageBox::No);
@@ -569,7 +570,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[Bestiary] Reading bestiary file open failed: " << file.error() << ", " << file.errorString();
-        QMessageBox::critical(nullptr, QString("Bestiary file open failed"), QString("Unable to open the bestiary file: ") + absoluteTargetFilename + QString(": ") + file.errorString());
+        DMHMessageBox::critical(nullptr, QString("Bestiary file open failed"), QString("Unable to open the bestiary file: ") + absoluteTargetFilename + QString(": ") + file.errorString());
         return false;
     }
 
@@ -582,7 +583,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if(!contentResult)
     {
         qDebug() << "[Bestiary] Error reading bestiary XML content. The XML is probably not valid, at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
-        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + absoluteTargetFilename + QString(", the XML is invalid"));
+        DMHMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + absoluteTargetFilename + QString(", the XML is invalid"));
         return false;
     }
 
@@ -590,7 +591,7 @@ bool Bestiary::readBestiary(const QString& targetFilename)
     if((root.isNull()) || (root.tagName() != "root"))
     {
         qDebug() << "[Bestiary] Bestiary file missing root item";
-        QMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + absoluteTargetFilename + QString(", the XML does not have the expected root item."));
+        DMHMessageBox::critical(nullptr, QString("Bestiary file invalid"), QString("Unable to read the bestiary file: ") + absoluteTargetFilename + QString(", the XML does not have the expected root item."));
         return false;
     }
 
@@ -716,7 +717,7 @@ void Bestiary::showMonsterClassWarning(const QString& monsterClass)
     }
     else
     {
-        QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + monsterClass + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
+        DMHMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + monsterClass + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
     }
 }
 
@@ -811,7 +812,7 @@ void Bestiary::importBestiary(const QDomElement& bestiaryElement, const QString&
         {
             if((challengeResult != QMessageBox::YesToAll) && (challengeResult != QMessageBox::NoToAll))
             {
-                challengeResult = QMessageBox::question(nullptr,
+                challengeResult = DMHMessageBox::question(nullptr,
                                                         QString("Import Monster Conflict"),
                                                         QString("The monster '") + monsterName + QString("' already exists in the Bestiary. Would you like to overwrite the existing entry?"),
                                                         QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel);

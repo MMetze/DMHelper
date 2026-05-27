@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QIntValidator>
 #include <QImageReader>
+#include "dmhmessagebox.h"
 
 OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWidget *parent) :
     QDialog(parent),
@@ -253,7 +254,7 @@ void OptionsDialog::setDefaultBestiary(const QString& bestiaryFile)
 
     if(!QFile::exists(bestiaryFile))
     {
-        QMessageBox::critical(this, QString("Default bestiary file not found"), QString("The selected default bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
+        DMHMessageBox::critical(this, QString("Default bestiary file not found"), QString("The selected default bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
         qDebug() << "[OptionsDialog] ERROR: The selected default bestiary file could not be found: " << bestiaryFile;
         return;
     }
@@ -279,7 +280,7 @@ void OptionsDialog::setSpellbook(const QString& spellbookFile)
 
     if(!QFile::exists(spellbookFile))
     {
-        QMessageBox::critical(this, QString("Spellbook file not found"), QString("The selected spellbook file could not be found!") + QChar::LineFeed + spellbookFile);
+        DMHMessageBox::critical(this, QString("Spellbook file not found"), QString("The selected spellbook file could not be found!") + QChar::LineFeed + spellbookFile);
         qDebug() << "[OptionsDialog] ERROR: The selected spellbook file could not be found: " << spellbookFile;
         return;
     }
@@ -305,7 +306,7 @@ void OptionsDialog::setQuickReference(const QString& quickRefFile)
 
     if(!QFile::exists(quickRefFile))
     {
-        QMessageBox::critical(this, QString("Quick Reference file not found"), QString("The selected quick reference file could not be found!") + QChar::LineFeed + quickRefFile);
+        DMHMessageBox::critical(this, QString("Quick Reference file not found"), QString("The selected quick reference file could not be found!") + QChar::LineFeed + quickRefFile);
         qDebug() << "[OptionsDialog] ERROR: The selected quick reference file could not be found: " << quickRefFile;
         return;
     }
@@ -331,7 +332,7 @@ void OptionsDialog::setCalendar(const QString& calendarFile)
 
     if(!QFile::exists(calendarFile))
     {
-        QMessageBox::critical(this, QString("Calendar file not found"), QString("The selected calendar file could not be found!") + QChar::LineFeed + calendarFile);
+        DMHMessageBox::critical(this, QString("Calendar file not found"), QString("The selected calendar file could not be found!") + QChar::LineFeed + calendarFile);
         qDebug() << "[OptionsDialog] ERROR: The selected calendar file could not be found: " << calendarFile;
         return;
     }
@@ -357,7 +358,7 @@ void OptionsDialog::setEquipment(const QString& equipmentFile)
 
     if(!QFile::exists(equipmentFile))
     {
-        QMessageBox::critical(this, QString("Equipment file not found"), QString("The selected equipment file could not be found!") + QChar::LineFeed + equipmentFile);
+        DMHMessageBox::critical(this, QString("Equipment file not found"), QString("The selected equipment file could not be found!") + QChar::LineFeed + equipmentFile);
         qDebug() << "[OptionsDialog] ERROR: The selected equipment file could not be found: " << equipmentFile;
         return;
     }
@@ -383,7 +384,7 @@ void OptionsDialog::setShops(const QString& shopsFile)
 
     if(!QFile::exists(shopsFile))
     {
-        QMessageBox::critical(this, QString("Shops file not found"), QString("The selected shops file could not be found!") + QChar::LineFeed + shopsFile);
+        DMHMessageBox::critical(this, QString("Shops file not found"), QString("The selected shops file could not be found!") + QChar::LineFeed + shopsFile);
         qDebug() << "[OptionsDialog] ERROR: The selected shops file could not be found: " << shopsFile;
         return;
     }
@@ -409,7 +410,7 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
 
     if(!QDir(tablesDirectory).exists())
     {
-        QMessageBox::critical(this, QString("Tables directory not found"), QString("The selected tables directory could not be found!") + QChar::LineFeed + tablesDirectory);
+        DMHMessageBox::critical(this, QString("Tables directory not found"), QString("The selected tables directory could not be found!") + QChar::LineFeed + tablesDirectory);
         qDebug() << "[OptionsDialog] ERROR: The selected tables directory could not be found: " << tablesDirectory;
         return;
     }
@@ -432,7 +433,7 @@ void OptionsDialog::setRuleset(const QString& rulesetFile)
 {
     if((!rulesetFile.isEmpty()) && (!QFile::exists(rulesetFile)))
     {
-        QMessageBox::critical(this, QString("Ruleset file not found"), QString("The selected ruleset file could not be found!") + QChar::LineFeed + rulesetFile);
+        DMHMessageBox::critical(this, QString("Ruleset file not found"), QString("The selected ruleset file could not be found!") + QChar::LineFeed + rulesetFile);
         qDebug() << "[OptionsDialog] ERROR: The selected ruleset file could not be found: " << rulesetFile;
         return;
     }
@@ -440,7 +441,7 @@ void OptionsDialog::setRuleset(const QString& rulesetFile)
     ui->edtRuleset->setText(rulesetFile);
     _options->setRulesetFileName(rulesetFile);
 
-    QMessageBox::information(this, QString("Restart to reload ruleset"), QString("Please restart DMHelper to load the new ruleset file!"));
+    DMHMessageBox::information(this, QString("Restart to reload ruleset"), QString("Please restart DMHelper to load the new ruleset file!"));
 }
 
 void OptionsDialog::handleInitiativeScaleChanged(qreal initiativeScale)
@@ -542,7 +543,7 @@ void OptionsDialog::heroForgeTokenEdited()
 
     if(_options->getHeroForgeToken().isEmpty())
     {
-        if(QMessageBox::question(this,
+        if(DMHMessageBox::question(this,
                                  QString("Confirm Store Access Key"),
                                  QString("DMHelper will store your access key for ease of use in the future.") + QChar::LineFeed + QChar::LineFeed + QString("The Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure?")) != QMessageBox::Yes)
         {
@@ -581,7 +582,7 @@ void OptionsDialog::setTokenFrame(const QString& tokenFrame)
         QImageReader reader(tokenFrame);
         if(!reader.canRead())
         {
-            QMessageBox::critical(this, QString("Token Frame image not valid"), QString("Not able to read the selected token frame image!") + QChar::LineFeed + tokenFrame);
+            DMHMessageBox::critical(this, QString("Token Frame image not valid"), QString("Not able to read the selected token frame image!") + QChar::LineFeed + tokenFrame);
             qDebug() << "[OptionsDialog] ERROR: Not able to read the selected token frame image: " << tokenFrame;
             return;
         }
@@ -612,7 +613,7 @@ void OptionsDialog::setTokenMask(const QString& tokenMask)
         QImageReader reader(tokenMask);
         if(!reader.canRead())
         {
-            QMessageBox::critical(this, QString("Token Mask image not valid"), QString("Not able to read the selected token mask image!") + QChar::LineFeed + tokenMask);
+            DMHMessageBox::critical(this, QString("Token Mask image not valid"), QString("Not able to read the selected token mask image!") + QChar::LineFeed + tokenMask);
             qDebug() << "[OptionsDialog] ERROR: Not able to read the selected token mask image: " << tokenMask;
             return;
         }
@@ -652,7 +653,7 @@ void OptionsDialog::resetFileLocations()
     if(!_options)
         return;
 
-    QMessageBox::StandardButton result = QMessageBox::critical(this,
+    QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm File Location Reset"),
                                                                QString("All file paths will be reset to their default locations. None of your current files will be deleted, but if default files do not exist, they will be created.") + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);
@@ -676,7 +677,7 @@ void OptionsDialog::editCharacterDataFile()
 
 void OptionsDialog::setCharacterDataFile(const QString& characterDataFile)
 {
-    QMessageBox::StandardButton result = QMessageBox::critical(this,
+    QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm Character Data Format Change"),
                                                                QString("You are about to chnage the path for the character data definition of a campaign. This will result in a loss of any data that is not reflected in the new template!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);
@@ -729,7 +730,7 @@ void OptionsDialog::editMonsterDataFile()
 
 void OptionsDialog::setMonsterDataFile(const QString& monsterDataFile)
 {
-    QMessageBox::StandardButton result = QMessageBox::critical(this,
+    QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm Monster Data Format Change"),
                                                                QString("You are about to chnage the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);

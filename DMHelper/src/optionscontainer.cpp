@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 // TODO: consider copy of MRU functionality
 
@@ -421,7 +422,7 @@ void OptionsContainer::editSettings(Campaign* currentCampaign)
     if(dlg.exec() == QDialog::Accepted)
     {
         if(_fontChanged)
-            QMessageBox::information(nullptr, QString("Font Changed"), QString("Changes made in the font used by the DMHelper will only be applied when then application is restarted."));
+            DMHMessageBox::information(nullptr, QString("Font Changed"), QString("Changes made in the font used by the DMHelper will only be applied when then application is restarted."));
 
         copy(editCopyContainer);
         dlg.applyCampaignChanges();
@@ -740,7 +741,7 @@ QString OptionsContainer::getSettingsFile(OptionsAccessor& settings, const QStri
     if(result == QString("./bestiary/DMHelperBestiary.xml"))
     {
         qDebug() << "[OptionsContainer] WARNING: old style relative path found for bestiary. Asking user for how to proceed...";
-        QMessageBox::StandardButton response = QMessageBox::warning(nullptr,
+        QMessageBox::StandardButton response = DMHMessageBox::warning(nullptr,
                                                                     QString("Invalid bestiary path"),
                                                                     QString("Older versions of the DMHelper had a bad choice of location for the bestiary. The file itself is fine, but sometimes the application would get confused where the file is actually located.") + QChar::LineFeed + QChar::LineFeed + QString("Would you like to point the DMHelper at the right location of your Bestiary file now?") + QChar::LineFeed + QChar::LineFeed + QString("If you answer No, it will create a new default bestiary in the ""right"" location for your system."),
                                                                     QMessageBox::Yes | QMessageBox::No);

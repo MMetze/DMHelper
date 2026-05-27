@@ -5,6 +5,7 @@
 #include <QDomDocument>
 #include <QMessageBox>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *parent) :
     QFrame(parent),
@@ -204,7 +205,7 @@ QString CustomTableFrame::getEntryText(const QString& tableName)
 
     if(_usedTables.contains(tableName))
     {
-        QMessageBox::information(nullptr, QString("Looped subtables"), QString("Subtables were found to refer to each other, which would create an infinite loop."));
+        DMHMessageBox::information(nullptr, QString("Looped subtables"), QString("Subtables were found to refer to each other, which would create an infinite loop."));
         return result;
     }
 

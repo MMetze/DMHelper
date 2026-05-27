@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 Spellbook* Spellbook::_instance = nullptr;
 
@@ -145,7 +146,7 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[Spellbook] Reading spellbook file open failed.";
-        QMessageBox::critical(nullptr, QString("Spellbook file open failed"), QString("Unable to open the spellbook file: ") + absoluteTargetFilename);
+        DMHMessageBox::critical(nullptr, QString("Spellbook file open failed"), QString("Unable to open the spellbook file: ") + absoluteTargetFilename);
         return false;
     }
 
@@ -158,7 +159,7 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
     if(!contentResult)
     {
         qDebug() << "[Spellbook] Error reading spellbook XML content. The XML is probably not valid at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
-        QMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML is invalid"));
+        DMHMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML is invalid"));
         return false;
     }
 
@@ -166,7 +167,7 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
     if((root.isNull()) || (root.tagName() != "root"))
     {
         qDebug() << "[Spellbook] Spellbook file missing root item";
-        QMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML does not have the expected root item."));
+        DMHMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML does not have the expected root item."));
         return false;
     }
 
@@ -265,7 +266,7 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
             {
                 if((challengeResult != QMessageBox::YesToAll) && (challengeResult != QMessageBox::NoToAll))
                 {
-                    challengeResult = QMessageBox::question(nullptr,
+                    challengeResult = DMHMessageBox::question(nullptr,
                                                             QString("Import Spell Conflict"),
                                                             QString("The spell '") + spellName + QString("' already exists in the Spell. Would you like to overwrite the existing entry?"),
                                                             QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel);
@@ -605,7 +606,7 @@ void Spellbook::showSpellWarning(const QString& spell)
     }
     else
     {
-        QMessageBox::critical(nullptr, QString("Unknown spell"), QString("WARNING: The spell """) + spell + QString(""" was not found in the current spellbook! If you save the current campaign, all references to this spell will be lost!"));
+        DMHMessageBox::critical(nullptr, QString("Unknown spell"), QString("WARNING: The spell """) + spell + QString(""" was not found in the current spellbook! If you save the current campaign, all references to this spell will be lost!"));
     }
 }
 

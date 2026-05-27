@@ -14,6 +14,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 //#define DEBUG_POPULATE_TOKENS
 
@@ -99,7 +100,7 @@ void BestiaryPopulateTokensDialog::populateTokens()
     if(_monsterList.isEmpty())
     {
         qDebug() << "[BestiaryPopulateTokensDialog] No monsters found missing tokens - no need to populate tokens.";
-        QMessageBox::information(this, tr("No Tokens to Populate"), tr("All monsters already have tokens! No need to populate tokens."));
+        DMHMessageBox::information(this, tr("No Tokens to Populate"), tr("All monsters already have tokens! No need to populate tokens."));
         return;
     }
 
@@ -140,7 +141,7 @@ void BestiaryPopulateTokensDialog::urlRequestFinished(QNetworkReply *reply)
         qDebug() << "[BestiaryPopulateTokensDialog] ERROR: network image URL reply not ok: " << reply->error();
         qDebug() << "[BestiaryPopulateTokensDialog] ERROR: " << reply->errorString();
 
-        QMessageBox::critical(this, tr("Token Search Error"), tr("Error encountered retrieving link to token for ") + _currentMonster + tr(": ") + reply->errorString());
+        DMHMessageBox::critical(this, tr("Token Search Error"), tr("Error encountered retrieving link to token for ") + _currentMonster + tr(": ") + reply->errorString());
 
         reply->deleteLater();
         cancelRequests();
@@ -287,7 +288,7 @@ void BestiaryPopulateTokensDialog::checkNextMonster()
     if(_monsterList.isEmpty())
     {
         qDebug() << "[BestiaryPopulateTokensDialog] All " << _totalPopulated << " tokens populated!";
-        QMessageBox::information(this, tr("Tokens Populated"), tr("All tokens have been populated!"));
+        DMHMessageBox::information(this, tr("Tokens Populated"), tr("All tokens have been populated!"));
         cancelRequests();
         accept();
     }

@@ -79,6 +79,7 @@
 #include <QMimeDatabase>
 #include <QMimeType>
 #include <qforeach.h>
+#include "dmhmessagebox.h"
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
@@ -639,7 +640,7 @@ void BattleFrame::next()
     if(BattleDialogModelInitiativeEvent* event = dynamic_cast<BattleDialogModelInitiativeEvent*>(nextCombatant))
     {
         const QString eventName = event->getName().isEmpty() ? QStringLiteral("Event") : event->getName();
-        QMessageBox::information(this, eventName, QString("%1 triggers!").arg(eventName));
+        DMHMessageBox::information(this, eventName, QString("%1 triggers!").arg(eventName));
     }
 
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
@@ -1262,7 +1263,7 @@ void BattleFrame::addCharacter()
 
     if(characterList.isEmpty())
     {
-        QMessageBox::information(this, QString("Add Character"), QString("No further characters could be found to add to the current battle."));
+        DMHMessageBox::information(this, QString("Add Character"), QString("No further characters could be found to add to the current battle."));
         qDebug() << "[Battle Dialog Manager] ...no characters found to add";
         return;
     }
@@ -1295,7 +1296,7 @@ void BattleFrame::addNPC()
 
     if(characterList.isEmpty())
     {
-        QMessageBox::information(this, QString("Add NPC"), QString("No further NPCs could be found to add to the current battle."));
+        DMHMessageBox::information(this, QString("Add NPC"), QString("No further NPCs could be found to add to the current battle."));
         qDebug() << "[Battle Dialog Manager] ...no NPCs found to add";
         return;
     }
@@ -2915,7 +2916,7 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 
     if(affectedCombatantList.isEmpty())
     {
-        QMessageBox::information(this, QString("Apply Effect"), QString("No target combatants were found for the selected effect."));
+        DMHMessageBox::information(this, QString("Apply Effect"), QString("No target combatants were found for the selected effect."));
         return;
     }
 
@@ -4008,7 +4009,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
             }
             if(!orphanedIds.isEmpty())
             {
-                QMessageBox::information(this,
+                DMHMessageBox::information(this,
                                          QString("Unrecognized Conditions"),
                                          QString("The following conditions assigned to combatants in this battle are not recognized in the current conditions file and will be ignored:") + QChar::LineFeed + QChar::LineFeed + orphanedIds.join(QString(", ")));
             }
@@ -4981,7 +4982,7 @@ bool BattleFrame::validateTokenLayerExists()
     if(_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 0)
         return true;
 
-    if(QMessageBox::question(this, tr("No Token Layer"), tr("No token layer has been created for this battle. Would you like to create a token layer to be able to add tokens?")) == QMessageBox::Yes)
+    if(DMHMessageBox::question(this, tr("No Token Layer"), tr("No token layer has been created for this battle. Would you like to create a token layer to be able to add tokens?")) == QMessageBox::Yes)
         return false;
 
     _model->getLayerScene().prependLayer(new LayerTokens(nullptr, tr("Token Layer")));

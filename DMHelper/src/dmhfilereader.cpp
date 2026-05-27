@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QImageReader>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 DMHFileReader::DMHFileReader(const QString& filename, const QString& objectName, bool accept, QObject *parent) :
     QObject{parent},
@@ -109,7 +110,7 @@ void DMHFileReader::userMessage(const QString& message)
     if(_acceptErrors)
         return;
 
-    QMessageBox::critical(nullptr, QString("DMHelper File Read Error"), message);
+    DMHMessageBox::critical(nullptr, QString("DMHelper File Read Error"), message);
 }
 
 QMessageBox::StandardButton DMHFileReader::userQuery(const QString& query)
@@ -123,7 +124,7 @@ QMessageBox::StandardButton DMHFileReader::userQuery(const QString& query)
         return QMessageBox::No;
     }
 
-    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("DMHelper File Read Error"), localQuery, QMessageBox::Yes | QMessageBox::No | QMessageBox::NoAll, QMessageBox::Yes);
+    QMessageBox::StandardButton result = DMHMessageBox::critical(nullptr, QString("DMHelper File Read Error"), localQuery, QMessageBox::Yes | QMessageBox::No | QMessageBox::NoAll, QMessageBox::Yes);
     qDebug() << "[DMHFileReader] ERROR QUERY: " << localQuery << ", RESULT: " << result;
     if(result == QMessageBox::NoAll)
         _acceptErrors = true;

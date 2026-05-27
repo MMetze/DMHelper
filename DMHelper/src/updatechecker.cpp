@@ -5,6 +5,7 @@
 #include <QDomDocument>
 #include <QMessageBox>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 const int UPDATECHECKER_PERIOD_RELEASE = 7;
 const int UPDATECHECKER_PERIOD_DEBUG = 1;
@@ -32,7 +33,7 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
     if(!reply)
     {
         if(!_silentUpdate)
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("DMHelper Update"),
                                   QString("An unexpected and unknown error was encountered trying to check for updates!"));
         qDebug() << "[UpdateChecker] ERROR identified in reply, unexpected null pointer reply received!";
@@ -45,13 +46,13 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
         {
             if(reply->error() == QNetworkReply::HostNotFoundError)
             {
-                QMessageBox::critical(nullptr,
+                DMHMessageBox::critical(nullptr,
                                       QString("DMHelper Update"),
                                       QString("A network error was encountered trying to check for updates. It was not possible to reach the server!"));
             }
             else
             {
-                QMessageBox::critical(nullptr,
+                DMHMessageBox::critical(nullptr,
                                       QString("DMHelper Update"),
                                       QString("A network error was encountered trying to check for updates:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
             }
@@ -66,7 +67,7 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
     _options.setLastUpdateDate(QDate::currentDate());
 
     if((!handleReplyPayload(bytes)) && (!_silentUpdate))
-        QMessageBox::information(nullptr,
+        DMHMessageBox::information(nullptr,
                                  QString("DMHelper Update"),
                                  QString("Your DMHelper is up to date!"));
 

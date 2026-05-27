@@ -20,6 +20,7 @@
 #include <QIntValidator>
 #include <QTransform>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 static constexpr int EFFECT_SIZE_VALIDATOR_MAX = 1000;
 static constexpr int EFFECT_TOKEN_ROTATION_STEP = 90;
@@ -206,7 +207,7 @@ void SpellbookTemplateDialog::deleteCurrentSpell()
     if((!_spell) || (!Spellbook::Instance()))
         return;
 
-    QMessageBox::StandardButton confirm = QMessageBox::critical(this,
+    QMessageBox::StandardButton confirm = DMHMessageBox::critical(this,
                                                                 QString("Delete Spell"),
                                                                 QString("Are you sure you want to delete the spell ") + _spell->getName(),
                                                                 QMessageBox::Yes | QMessageBox::No);

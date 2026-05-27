@@ -21,6 +21,7 @@
 #include <QGridLayout>
 #include <QFontMetrics>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 const int CONDITION_FRAME_SPACING = 8;
 const int SPELL_LEVEL_PACT_MAGIC = -1;
@@ -646,7 +647,7 @@ void CharacterFrame::importHeroForge()
         token = QInputDialog::getText(this, QString("Enter Hero Forge Access Key"), QString("Please enter your Hero Forge Access Key. You can find this in your Hero Forge account information."));
         if(!token.isEmpty())
         {
-            if(QMessageBox::question(this,
+            if(DMHMessageBox::question(this,
                                      QString("Confirm Store Access Key"),
                                      QString("Should DMHelper store your access key for ease of use in the future?") + QChar::LineFeed + QChar::LineFeed + QString("Please note: the Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.")) == QMessageBox::Yes)
             {

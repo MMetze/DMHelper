@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 ObjectImportDialog::ObjectImportDialog(Campaign* campaign, CampaignObjectBase* parentObject, const QString& campaignFile, QWidget *parent) :
     QDialog(parent),
@@ -124,16 +125,16 @@ void ObjectImportDialog::importFinished(bool success, const QString& error)
     {
         if(!_campaign->correctDuplicateIds())
         {
-            QMessageBox::information(this,
+            DMHMessageBox::information(this,
                                      QString("Duplicate Entries for Loki"),
                                      QString("After the import, some duplicate entries in your campaign have been created. This may have happened to avoid accidentally losing information."));
         }
     }
 
     if(success)
-        QMessageBox::information(nullptr, QString("DMHelper - Import Object"), QString("Import completed successfully!"));
+        DMHMessageBox::information(nullptr, QString("DMHelper - Import Object"), QString("Import completed successfully!"));
     else
-        QMessageBox::critical(nullptr, QString("DMHelper - Import Object"), QString("Import could not be completed: ") + error);
+        DMHMessageBox::critical(nullptr, QString("DMHelper - Import Object"), QString("Import could not be completed: ") + error);
 
     qDebug() << "[ObjectImportDialog] Import worker finished.";
     emit importComplete(success);

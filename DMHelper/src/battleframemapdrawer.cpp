@@ -8,6 +8,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QMessageBox>
+#include "dmhmessagebox.h"
 
 
 BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
@@ -188,7 +189,7 @@ void BattleFrameMapDrawer::resetFoW()
     if(!_scene)
         return;
 
-    if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
+    if(DMHMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
         return;
 
     LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));
@@ -205,7 +206,7 @@ void BattleFrameMapDrawer::clearFoW()
     if(!_scene)
         return;
 
-    if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
+    if(DMHMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
     LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getNearest(_scene->getSelectedLayer(), DMHelper::LayerType_Fow));

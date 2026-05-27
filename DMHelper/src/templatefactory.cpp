@@ -29,6 +29,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 const char* TemplateFactory::TEMPLATE_PROPERTY = "dmhValue";
 const char* TemplateFactory::TEMPLATE_WIDGET = "dmhWidget";
@@ -1067,7 +1068,7 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[TemplateFactory] Template file open failed: " << absoluteTemplateFile << ", error: " << file.error() << ", " << file.errorString();
-        QMessageBox::critical(nullptr, QString("Template file open failed"), QString("Unable to open the template file: ") + " - " + file.errorString());
+        DMHMessageBox::critical(nullptr, QString("Template file open failed"), QString("Unable to open the template file: ") + " - " + file.errorString());
         return;
     }
 
@@ -1080,7 +1081,7 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
     if(!contentResult)
     {
         qDebug() << "[TemplateFactory] Error reading template XML content. The XML is probably not valid at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
-        QMessageBox::critical(nullptr, QString("Template invalid"), QString("Unable to read the template: ") + absoluteTemplateFile + QString(", the XML is invalid"));
+        DMHMessageBox::critical(nullptr, QString("Template invalid"), QString("Unable to read the template: ") + absoluteTemplateFile + QString(", the XML is invalid"));
         return;
     }
 
@@ -1092,7 +1093,7 @@ void TemplateFactory::loadTemplate(const QString& templateFile)
     if((root.isNull()) || (root.tagName() != TEMPLATEVALUES[TemplateType_template]))
     {
         qDebug() << "[TemplateFactory] Ttemplate missing root item: " << absoluteTemplateFile;
-        QMessageBox::critical(nullptr, QString("Template file invalid"), QString("Unable to read the template: ") + absoluteTemplateFile + QString(", the XML does not have the expected root item."));
+        DMHMessageBox::critical(nullptr, QString("Template file invalid"), QString("Unable to read the template: ") + absoluteTemplateFile + QString(", the XML does not have the expected root item."));
         return;
     }
 

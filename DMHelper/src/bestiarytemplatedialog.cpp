@@ -16,6 +16,7 @@
 #include <QAbstractItemView>
 #include <QCompleter>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     QDialog(parent),
@@ -187,7 +188,7 @@ void BestiaryTemplateDialog::createNewMonster()
 
         if(Bestiary::Instance()->count() > 0)
         {
-            QMessageBox::StandardButton templateQuestion = QMessageBox::question(this,
+            QMessageBox::StandardButton templateQuestion = DMHMessageBox::question(this,
                                                                                  QString("New Monster"),
                                                                                  QString("Do you want to base this monster on an already existing monster?"));
 
@@ -236,7 +237,7 @@ void BestiaryTemplateDialog::deleteCurrentMonster()
 
     qDebug() << "[BestiaryTemplateDialog] Deleting monster: " << _monster->getStringValue("name");
 
-    QMessageBox::StandardButton confirm = QMessageBox::critical(this,
+    QMessageBox::StandardButton confirm = DMHMessageBox::critical(this,
                                                                 QString("Delete Monster"),
                                                                 QString("Are you sure you want to delete the monster ") + _monster->getStringValue("name"),
                                                                 QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
@@ -454,7 +455,7 @@ void BestiaryTemplateDialog::handleClearImage()
     }
 
     // Ask if the app should remove the file
-    QMessageBox::StandardButton result = QMessageBox::question(this, tr("Delete Image"), tr("Do you want to also delete the token file from the disk?\n\n") + currentIconPath);
+    QMessageBox::StandardButton result = DMHMessageBox::question(this, tr("Delete Image"), tr("Do you want to also delete the token file from the disk?\n\n") + currentIconPath);
     if(result == QMessageBox::Yes)
     {
         qDebug() << "[BestiaryTemplateDialog] Removing token file for monster: " << _monster->getStringValue("name") << ", " << currentIconPath;

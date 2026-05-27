@@ -6,6 +6,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QIcon>
+#include "dmhmessagebox.h"
 
 const int AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE = 0x01;
 const int AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED = 0x02;
@@ -179,7 +180,7 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
 {
     if(!reply)
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
         QString("DMHelper Audio Error"),
         QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
         qDebug() << "[AudioTrackYoutube] ERROR identified in reply, unexpected null pointer reply received!";
@@ -192,13 +193,13 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
         {
             if(reply->error() == QNetworkReply::HostNotFoundError)
             {
-                QMessageBox::critical(nullptr,
+                DMHMessageBox::critical(nullptr,
                                       QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video. It was not possible to reach the server!"));
             }
             else
             {
-                QMessageBox::critical(nullptr,
+                DMHMessageBox::critical(nullptr,
                                       QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
             }

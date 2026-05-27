@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QtDebug>
+#include "dmhmessagebox.h"
 
 WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -68,7 +69,7 @@ void WelcomeFrame::openSampleCampaign()
     if(!QFile::exists(filePath))
     {
         qDebug() << "[WelcomeFrame]: unable to open the sample campaign: " << filePath;
-        QMessageBox::critical(this, QString("File Open Error"), QString("The sample campaign file could not be found: ") + filePath);
+        DMHMessageBox::critical(this, QString("File Open Error"), QString("The sample campaign file could not be found: ") + filePath);
         return;
     }
 
@@ -125,7 +126,7 @@ void WelcomeFrame::openDoc(const QString& docName)
     if(!QFile::exists(filePath))
     {
         qDebug() << "[WelcomeFrame]: unable to open document: " << filePath;
-        QMessageBox::critical(this, QString("File Open Error"), QString("The requested document could not be found: ") + filePath);
+        DMHMessageBox::critical(this, QString("File Open Error"), QString("The requested document could not be found: ") + filePath);
         return;
     }
 

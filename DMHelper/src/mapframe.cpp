@@ -32,6 +32,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QtMath>
+#include "dmhmessagebox.h"
 
 static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
 static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
@@ -245,7 +246,7 @@ void MapFrame::resetFoW()
     if(!_mapSource)
         return;
 
-    if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
+    if(DMHMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
         return;
 
     // TODO: layers
@@ -263,7 +264,7 @@ void MapFrame::clearFoW()
     if(!_mapSource)
         return;
 
-    if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
+    if(DMHMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
     // TODO: layers
@@ -440,7 +441,7 @@ void MapFrame::deleteMapMarker(UndoMarker* marker)
     if((!_mapSource) || (!marker))
         return;
 
-    QMessageBox::StandardButton deleteConfirm = QMessageBox::question(this,
+    QMessageBox::StandardButton deleteConfirm = DMHMessageBox::question(this,
                                                                       QString("Delete Marker"),
                                                                       QString("Are you sure that you want to delete this marker?"));
 

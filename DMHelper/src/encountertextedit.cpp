@@ -18,6 +18,7 @@
 #include <QScrollBar>
 #include <QTextFrame>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
 const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
@@ -386,7 +387,7 @@ void EncounterTextEdit::hyperlinkClicked()
         if(!(QUrl(newHRef).isValid()))
         {
             qDebug() << "[EncounterTextEdit] Invalid URL detected: " << newHRef;
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("Hyperlink Error"),
                                   QString("The provided hyperlink is not valid: ") + newHRef);
             return;
