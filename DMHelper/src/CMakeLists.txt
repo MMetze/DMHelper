@@ -166,6 +166,7 @@ set(DMHELPER_SOURCES
     dmhelperribbon.cpp
     dmhfilereader.cpp
     dmhlogger.cpp
+    dmhmessagebox.cpp
     dmhwaitingdialog.cpp
     dmscreentabwidget.cpp
     emptycampaignframe.cpp
@@ -521,6 +522,7 @@ set(DMHELPER_HEADERS
     dmhelperribbon.h
     dmhfilereader.h
     dmhlogger.h
+    dmhmessagebox.h
     dmhwaitingdialog.h
     dmscreentabwidget.h
     dmversion.h

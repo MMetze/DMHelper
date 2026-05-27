@@ -7,6 +7,7 @@
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelcombatant.h"
 #include "characterv2.h"
+#include "dmhmessagebox.h"
 #include "monsterclassv2.h"
 #include "unselectedpixmap.h"
 #include "layertokens.h"
@@ -1094,7 +1095,7 @@ void BattleDialogGraphicsScene::deleteItem()
         ? QString("Are you sure you wish to delete this effect?")
         : QString("Are you sure you wish to delete these %1 effects?").arg(effectsToDelete.size());
     const QString title = (effectsToDelete.size() == 1) ? QString("Confirm Delete Effect") : QString("Confirm Delete Effects");
-    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, title, prompt, QMessageBox::Yes | QMessageBox::No);
+    QMessageBox::StandardButton result = DMHMessageBox::question(nullptr, title, prompt, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if(result != QMessageBox::Yes)
         return;
 
