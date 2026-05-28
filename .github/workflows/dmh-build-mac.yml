@@ -83,6 +83,36 @@ jobs:
           echo "y" | ./buildanddeploy_macos_cmake.sh
 
       # -------------------------
+      # Normalize unsigned bundle signature state
+      # (avoids "app is damaged" from invalid stale signatures)
+      # -------------------------
+      - name: Normalize unsigned app signature
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+
+          if [ ! -d "$APP" ]; then
+            echo "DMHelper.app not found at $APP"
+            exit 1
+          fi
+
+          /usr/bin/codesign --force --deep --sign - --timestamp=none "$APP"
+          /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP"
+
+          if [ -d "DMHelper-macOS-Installer.app" ]; then
+            /usr/bin/codesign --force --deep --sign - --timestamp=none "DMHelper-macOS-Installer.app" || true
+          fi
+
+      # -------------------------
+      # Gatekeeper assessment (informational for unsigned builds)
+      # -------------------------
+      - name: Check Gatekeeper assessment
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          /usr/sbin/spctl -a -vv "$APP" || true
+
+      # -------------------------
       # Repackage app bundle safely for unsigned distribution
       # (preserves symlinks and bundle metadata used by Gatekeeper checks)
       # -------------------------
