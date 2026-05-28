@@ -83,6 +83,42 @@ jobs:
           echo "y" | ./buildanddeploy_macos_cmake.sh
 
       # -------------------------
+      # Repackage app bundle safely for unsigned distribution
+      # (preserves symlinks and bundle metadata used by Gatekeeper checks)
+      # -------------------------
+      - name: Repackage ZIP and create DMG distributions
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          INSTALLER_APP="DMHelper-macOS-Installer.app"
+
+          if [ ! -d "$APP" ]; then
+            echo "DMHelper.app not found at $APP"
+            exit 1
+          fi
+
+          rm -f DMHelper-macOS-release.zip
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" DMHelper-macOS-release.zip
+
+          rm -f DMHelper-macOS-release.dmg
+          /usr/bin/hdiutil create \
+            -volname "DMHelper" \
+            -srcfolder "$APP" \
+            -ov \
+            -format UDZO \
+            DMHelper-macOS-release.dmg
+
+          if [ -d "$INSTALLER_APP" ]; then
+            rm -f DMHelper-macOS-Installer.dmg
+            /usr/bin/hdiutil create \
+              -volname "DMHelper Installer" \
+              -srcfolder "$INSTALLER_APP" \
+              -ov \
+              -format UDZO \
+              DMHelper-macOS-Installer.dmg
+          fi
+
+      # -------------------------
       # Debug workspace (post-build)
       # -------------------------
       - name: Debug Workspace output post-build
@@ -118,10 +154,18 @@ jobs:
       - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-macOS-Installer-${{ matrix.arch-label }}
+          name: DMHelper-macOS-Installer-DMG-${{ matrix.arch-label }}
+          path: |
+            DMHelper/DMHelper-macOS-Installer.dmg
+          if-no-files-found: error
+
+      - name: Upload Installer App (fallback)
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-macOS-Installer-APP-${{ matrix.arch-label }}
           path: |
             DMHelper/DMHelper-macOS-Installer.app
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Upload ZIP Distribution
         uses: actions/upload-artifact@v4
@@ -129,4 +173,12 @@ jobs:
           name: DMHelper-macOS-Zip-${{ matrix.arch-label }}
           path: |
             DMHelper/DMHelper-macOS-release.zip
+          if-no-files-found: error
+
+      - name: Upload DMG Distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-macOS-DMG-${{ matrix.arch-label }}
+          path: |
+            DMHelper/DMHelper-macOS-release.dmg
           if-no-files-found: error
