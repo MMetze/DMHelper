@@ -1,0 +1,40 @@
+name: Windows CMake Multi-Arch
+
+on:
+  push:
+    branches:
+      - main
+      - agent/work
+  pull_request:
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            vcvars_arch: x64
+            configure_preset: windows-x64-debug
+            build_preset: windows-x64-debug
+          - arch: arm64
+            vcvars_arch: x64_arm64
+            configure_preset: windows-arm64-debug
+            build_preset: windows-arm64-debug
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure (${{ matrix.arch }})
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vcvars_arch }}
+          C:\Qt\Tools\CMake_64\bin\cmake.exe --preset ${{ matrix.configure_preset }} --fresh
+
+      - name: Build (${{ matrix.arch }})
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vcvars_arch }}
+          C:\Qt\Tools\CMake_64\bin\cmake.exe --build --preset ${{ matrix.build_preset }}

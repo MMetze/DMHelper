@@ -11,6 +11,48 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # -------------------------------------------------
 # Qt 6
 # -------------------------------------------------
+if (WIN32)
+    # Resolve Qt6_DIR robustly when IDE profiles or presets provide a stale path.
+    set(_dmh_qt6_candidates)
+
+    if (DMH_WINDOWS_ARCH STREQUAL "arm64")
+        list(APPEND _dmh_qt6_candidates
+            "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6"
+            "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6")
+    else()
+        list(APPEND _dmh_qt6_candidates
+            "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6"
+            "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6")
+    endif()
+
+    if (DEFINED ENV{Qt6_DIR})
+        list(PREPEND _dmh_qt6_candidates "$ENV{Qt6_DIR}")
+        list(PREPEND _dmh_qt6_candidates "$ENV{Qt6_DIR}/lib/cmake/Qt6")
+    endif()
+
+    if (DEFINED Qt6_DIR)
+        if (EXISTS "${Qt6_DIR}/Qt6Config.cmake")
+            list(PREPEND _dmh_qt6_candidates "${Qt6_DIR}")
+        else()
+            message(WARNING "Qt6_DIR is set but invalid: ${Qt6_DIR}. Searching fallback Qt paths.")
+        endif()
+    endif()
+
+    foreach (_dmh_qt6_candidate IN LISTS _dmh_qt6_candidates)
+        if (EXISTS "${_dmh_qt6_candidate}/Qt6Config.cmake")
+            set(Qt6_DIR "${_dmh_qt6_candidate}" CACHE PATH "Path to Qt6Config.cmake folder" FORCE)
+
+            get_filename_component(_dmh_qt6_cmake_dir "${_dmh_qt6_candidate}" DIRECTORY)
+            get_filename_component(_dmh_qt6_lib_dir "${_dmh_qt6_cmake_dir}" DIRECTORY)
+            get_filename_component(_dmh_qt6_root "${_dmh_qt6_lib_dir}" DIRECTORY)
+            list(PREPEND CMAKE_PREFIX_PATH "${_dmh_qt6_root}")
+
+            message(STATUS "Using Qt6_DIR=${Qt6_DIR}")
+            break()
+        endif()
+    endforeach()
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
@@ -905,7 +947,15 @@ if (WIN32)
     set_target_properties(DMHelper PROPERTIES WIN32_EXECUTABLE TRUE)
 
     # VLC
-    if (CMAKE_SIZEOF_VOID_P EQUAL 4)
+    if (DMH_WINDOWS_ARCH STREQUAL "arm64")
+        message(STATUS "Using ARM64 VLC")
+        target_include_directories(DMHelper PRIVATE vlcArm64)
+        target_link_directories(DMHelper PRIVATE vlcArm64)
+    elseif (DMH_WINDOWS_ARCH STREQUAL "x64")
+        message(STATUS "Using x64 VLC")
+        target_include_directories(DMHelper PRIVATE vlc64)
+        target_link_directories(DMHelper PRIVATE vlc64)
+    elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         message(STATUS "Using 32-bit VLC")
         target_include_directories(DMHelper PRIVATE vlc32)
         target_link_directories(DMHelper PRIVATE vlc32)
@@ -916,6 +966,23 @@ if (WIN32)
     endif()
 
     target_link_libraries(DMHelper PRIVATE libvlc)
+
+    if (DMH_WINDOWS_ARCH STREQUAL "arm64")
+        set(_dmh_preparebuilddirectory_script "${CMAKE_CURRENT_SOURCE_DIR}/preparebuilddirectory_msvcarm64.cmd")
+    elseif (DMH_WINDOWS_ARCH STREQUAL "x64")
+        set(_dmh_preparebuilddirectory_script "${CMAKE_CURRENT_SOURCE_DIR}/preparebuilddirectory_msvc64.cmd")
+    elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set(_dmh_preparebuilddirectory_script "${CMAKE_CURRENT_SOURCE_DIR}/preparebuilddirectory_msvc32.cmd")
+    else()
+        set(_dmh_preparebuilddirectory_script "${CMAKE_CURRENT_SOURCE_DIR}/preparebuilddirectory_msvc64.cmd")
+    endif()
+
+    add_custom_command(TARGET DMHelper POST_BUILD
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMAND cmd /c call "${_dmh_preparebuilddirectory_script}" "$<TARGET_FILE_DIR:DMHelper>"
+        COMMENT "Preparing Windows runtime directory"
+        VERBATIM
+    )
 
 elseif (APPLE)
     message(STATUS "Configuring macOS build")
