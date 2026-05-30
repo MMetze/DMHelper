@@ -39,10 +39,10 @@ jobs:
       # -------------------------
       # Install Qt (MSVC 2022)
       # -------------------------
-      - name: Install Qt 6.10.1 (${{ matrix.target.name }}, MSVC 2022)
+      - name: Install Qt 6.11.1 (${{ matrix.target.name }}, MSVC 2022)
         uses: jurplel/install-qt-action@v4
         with:
-          version: 6.10.1
+          version: 6.11.1
           arch: ${{ matrix.target.qt_arch }}
           tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2022_x64 tools_ifw'
           cache: true
