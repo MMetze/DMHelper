@@ -6,11 +6,61 @@
 #include <QFile>
 #include <QTimerEvent>
 #include <QDebug>
+#include <cstdarg>
 
 //#define VIDEO_DEBUG_MESSAGES
 //#define VIDEO_CREATE_CACHE
 
 DMH_VLC* DMH_VLC::_instance = nullptr;
+
+namespace
+{
+void libVlcLogCallback(void* data, int level, const libvlc_log_t* context, const char* fmt, va_list args)
+{
+    Q_UNUSED(data)
+    Q_UNUSED(context)
+
+    if(!fmt)
+        return;
+
+    va_list argsCopy;
+    va_copy(argsCopy, args);
+    int required = vsnprintf(nullptr, 0, fmt, argsCopy);
+    va_end(argsCopy);
+
+    QString message;
+    if(required > 0)
+    {
+        QByteArray buffer(required + 1, '\0');
+        va_copy(argsCopy, args);
+        vsnprintf(buffer.data(), static_cast<size_t>(buffer.size()), fmt, argsCopy);
+        va_end(argsCopy);
+        message = QString::fromUtf8(buffer.constData()).trimmed();
+    }
+
+    if(message.isEmpty())
+        return;
+
+    switch(level)
+    {
+        case LIBVLC_DEBUG:
+            qDebug().noquote() << "[libvlc]" << message;
+            break;
+        case LIBVLC_NOTICE:
+            qInfo().noquote() << "[libvlc]" << message;
+            break;
+        case LIBVLC_WARNING:
+            qWarning().noquote() << "[libvlc]" << message;
+            break;
+        case LIBVLC_ERROR:
+            qCritical().noquote() << "[libvlc]" << message;
+            break;
+        default:
+            qInfo().noquote() << "[libvlc]" << message;
+            break;
+    }
+}
+}
 
 DMH_VLC::DMH_VLC(QObject *parent) :
     QObject(parent),
@@ -51,6 +101,9 @@ DMH_VLC::DMH_VLC(QObject *parent) :
 #else
     _vlcInstance = libvlc_new(0, nullptr);
 #endif
+
+    if(_vlcInstance)
+        libvlc_log_set(_vlcInstance, libVlcLogCallback, nullptr);
 }
 
 DMH_VLC::~DMH_VLC()
