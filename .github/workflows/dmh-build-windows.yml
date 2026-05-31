@@ -50,14 +50,35 @@ jobs:
 
       - name: Install Qt 6.10.3 (arm64, MSVC 2022)
         if: ${{ matrix.target.name == 'arm64' }}
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: 6.10.3
-          arch: ${{ matrix.target.qt_arch }}
-          tools: 'tools_vcredist,qt.tools.vcredist_msvc2022_arm64 tools_ifw'
-          cache: true
-          modules: 'qtmultimedia qtnetworkauth qtimageformats'
-          add-tools-to-path: 'true'
+        run: |
+          pip install "aqtinstall==3.3.*"
+          $qtDir = "D:\a\DMHelper\Qt"
+
+          # x64 host tools required for cross-compile (windeployqt, qmake, etc.)
+          python -m aqt install-qt windows desktop 6.10.3 win64_msvc2022_64 `
+            --outputdir $qtDir `
+            --modules qtmultimedia qtnetworkauth qtimageformats `
+            --archives qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47
+
+          # ARM64 cross-compiled libs — manual call WITHOUT --autodesktop to avoid
+          # the aqtinstall 3.3.0 regression that tries to patch a non-existent qmake.bat
+          python -m aqt install-qt windows desktop 6.10.3 win64_msvc2022_arm64_cross_compiled `
+            --outputdir $qtDir `
+            --modules qtmultimedia qtnetworkauth qtimageformats
+
+          # IFW and ARM64 vcredist tools
+          python -m aqt install-tool windows desktop tools_ifw --outputdir $qtDir
+          python -m aqt install-tool windows desktop tools_vcredist qt.tools.vcredist_msvc2022_arm64 --outputdir $qtDir
+
+          # QT_ROOT_DIR must point to the ARM64 directory (read by the build script)
+          "QT_ROOT_DIR=$qtDir\6.10.3\msvc2022_arm64" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+          # Add x64 Qt bin to PATH (windeployqt and other host tools run as x64)
+          "$qtDir\6.10.3\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+          # Add IFW bin to PATH (version-agnostic glob)
+          $ifwBin = Get-ChildItem "$qtDir\Tools\QtInstallerFramework\*\bin" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($ifwBin) { $ifwBin.FullName | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8 }
 
       # -------------------------
       # Ensure 7-Zip exists
