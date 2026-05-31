@@ -139,7 +139,7 @@ jobs:
           if (-not (Test-Path $exe)) { throw "DMHelper.exe not found at $exe" }
           $output = & $exe --smoke-test --skip-opengl 2>&1 | Out-String
           Write-Host $output
-          $json = $output | Select-String -Pattern '^\{"checks":' | Select-Object -Last 1
+          $json = ($output -split "`r?`n") | Select-String -Pattern '^\{"checks":' | Select-Object -Last 1
           if (-not $json) { throw "Smoke test did not produce JSON output" }
           $result = $json.Line | ConvertFrom-Json
           # vlc_plugins_dat is generated on first VLC load — not a build defect
