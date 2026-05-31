@@ -93,7 +93,6 @@ Assert-Exists $vswhere "vswhere"
 $VsInstallDir = & $vswhere `
     -latest `
     -products * `
-    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
     -property installationPath
 
 if (-not $VsInstallDir) {
@@ -106,12 +105,12 @@ Write-Host "Found Visual Studio at $VsInstallDir"
 # Initialize MSVC environment (cross-compile: host=x64, target=arm64)
 # =========================
 
-Write-Section "Initializing MSVC environment (cross: x64 host -> arm64 target)"
+Write-Section "Initializing MSVC environment (ARM64)"
 
 $VsDevCmd = Join-Path $VsInstallDir "Common7\Tools\VsDevCmd.bat"
 Assert-Exists $VsDevCmd "VsDevCmd.bat"
 
-cmd /c "`"$VsDevCmd`" -arch=arm64 -host_arch=x64 && set" |
+cmd /c "`"$VsDevCmd`" -arch=arm64 && set" |
     ForEach-Object {
         if ($_ -match "^(.*?)=(.*)$") {
             [Environment]::SetEnvironmentVariable($matches[1], $matches[2])

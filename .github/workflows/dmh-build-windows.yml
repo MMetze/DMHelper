@@ -9,15 +9,19 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-2022
+    runs-on: ${{ matrix.target.runner }}
     strategy:
       fail-fast: false
       matrix:
         target:
           - name: x64
+            runner: windows-2022
             qt_arch: win64_msvc2022_64
+            bin_subdir: bin64
           - name: arm64
-            qt_arch: win64_msvc2022_arm64_cross_compiled
+            runner: windows-11-arm
+            qt_arch: win64_msvc2022_arm64
+            bin_subdir: binarm64
 
     defaults:
       run:
@@ -32,9 +36,8 @@ jobs:
 
       # -------------------------
       # Install Qt (MSVC 2022)
-      # x64:   full archive set including opengl32sw/d3dcompiler for the packaging script
-      # arm64: cross-compiled package; archives list omitted to avoid qmake.bat
-      #        patching errors; IFW installed as a standalone tool (not an archive)
+      # x64:   windows-2022 runner; opengl32sw/d3dcompiler included for the packaging script
+      # arm64: windows-11-arm native runner; standard install, no cross-compile workarounds
       # -------------------------
       - name: Install Qt 6.10.3 (x64, MSVC 2022)
         if: ${{ matrix.target.name == 'x64' }}
@@ -50,34 +53,15 @@ jobs:
 
       - name: Install Qt 6.10.3 (arm64, MSVC 2022)
         if: ${{ matrix.target.name == 'arm64' }}
-        run: |
-          pip install "aqtinstall==3.3.*"
-          $qtDir = "D:\a\DMHelper\Qt"
-
-          # x64 host tools required for cross-compile (windeployqt, qmake, etc.)
-          python -m aqt install-qt windows desktop 6.10.3 win64_msvc2022_64 `
-            --outputdir $qtDir `
-            --modules qtmultimedia qtnetworkauth qtimageformats `
-            --archives qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47
-
-          # ARM64 cross-compiled libs — manual call WITHOUT --autodesktop to avoid
-          # the aqtinstall 3.3.0 regression that tries to patch a non-existent qmake.bat
-          python -m aqt install-qt windows desktop 6.10.3 win64_msvc2022_arm64_cross_compiled `
-            --outputdir $qtDir `
-            --modules qtmultimedia qtnetworkauth qtimageformats
-
-          # IFW tool
-          python -m aqt install-tool windows desktop tools_ifw --outputdir $qtDir
-
-          # QT_ROOT_DIR must point to the ARM64 directory (read by the build script)
-          "QT_ROOT_DIR=$qtDir\6.10.3\msvc2022_arm64" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-
-          # Add x64 Qt bin to PATH (windeployqt and other host tools run as x64)
-          "$qtDir\6.10.3\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-
-          # Add IFW bin to PATH (version-agnostic glob)
-          $ifwBin = Get-ChildItem "$qtDir\Tools\QtInstallerFramework\*\bin" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($ifwBin) { $ifwBin.FullName | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8 }
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.10.3
+          arch: ${{ matrix.target.qt_arch }}
+          tools: 'tools_ifw'
+          cache: true
+          modules: 'qtmultimedia qtnetworkauth qtimageformats'
+          add-tools-to-path: 'true'
+          archives: 'qttranslations qttools qtsvg qtbase'
 
       # -------------------------
       # Download ARM64 vcredist for the installer package
@@ -138,13 +122,13 @@ jobs:
           Get-ChildItem -Recurse -File
 
       # -------------------------
-      # Smoke-test the built application (x64 only — ARM64 exe cannot run on x64 runner)
+      # Smoke-test the built application
+      # Both x64 and arm64 run natively on their respective runners
       # -------------------------
       - name: Smoke-test built application
-        if: ${{ matrix.target.name == 'x64' }}
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          $exe = "bin64\packages\com.dmhelper.app\data\DMHelper.exe"
+          $exe = "${{ matrix.target.bin_subdir }}\packages\com.dmhelper.app\data\DMHelper.exe"
           if (-not (Test-Path $exe)) { throw "DMHelper.exe not found at $exe" }
           $output = & $exe --smoke-test --skip-opengl 2>&1 | Out-String
           Write-Host $output
