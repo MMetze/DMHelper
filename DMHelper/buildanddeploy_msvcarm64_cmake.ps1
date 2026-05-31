@@ -130,7 +130,12 @@ if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
 $Qt6Dir          = Join-Path $QtDir "lib\cmake\Qt6"
 $QtBinDir        = Join-Path $QtDir "bin"
 $WinDeployQt     = Join-Path $QtBinDir "windeployqt.exe"
-$QtIfwDir        = Join-Path $QtRoot "Tools\QtInstallerFramework\$QtInstallerVersion\bin"
+$IfwBase         = Get-ChildItem "$QtRoot\Tools\QtInstallerFramework" -Directory -ErrorAction SilentlyContinue |
+                       Sort-Object Name -Descending | Select-Object -First 1
+if (-not $IfwBase) {
+    throw "QtInstallerFramework not found under $QtRoot\Tools"
+}
+$QtIfwDir        = Join-Path $IfwBase.FullName "bin"
 $BinaryCreator   = Join-Path $QtIfwDir "binarycreator.exe"
 
 Assert-Exists $QtDir        "Qt ARM64 MSVC directory"

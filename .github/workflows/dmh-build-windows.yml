@@ -57,11 +57,18 @@ jobs:
         with:
           version: 6.10.3
           arch: ${{ matrix.target.qt_arch }}
-          tools: 'tools_ifw'
           cache: true
           modules: 'qtmultimedia qtnetworkauth qtimageformats'
           add-tools-to-path: 'true'
           archives: 'qttranslations qttools qtsvg qtbase'
+
+      # tools_ifw is only available for the windows (x64) aqt platform, not windows_arm64.
+      # binarycreator.exe is an x64 binary that runs via emulation on ARM64 Windows.
+      - name: Install Qt IFW (arm64 runner, x64 tool)
+        if: ${{ matrix.target.name == 'arm64' }}
+        run: |
+          $qtRoot = Split-Path (Split-Path $env:QT_ROOT_DIR -Parent) -Parent
+          python -m aqt install-tool windows desktop tools_ifw --outputdir $qtRoot
 
       # -------------------------
       # Download ARM64 vcredist for the installer package
