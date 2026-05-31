@@ -67,6 +67,7 @@ jobs:
       - name: Install Qt IFW (arm64 runner, x64 tool)
         if: ${{ matrix.target.name == 'arm64' }}
         run: |
+          python -m pip install aqtinstall
           $qtRoot = Split-Path (Split-Path $env:QT_ROOT_DIR -Parent) -Parent
           python -m aqt install-tool windows desktop tools_ifw --outputdir $qtRoot
 
