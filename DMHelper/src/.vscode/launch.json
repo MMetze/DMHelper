@@ -12,7 +12,7 @@
             "environment": [
                 {
                     "name": "PATH",
-                    "value": "C:\\Qt\\6.11.1\\msvc2022_arm64\\bin;${env:PATH}"
+                    "value": "C:\\Qt\\6.10.3\\msvc2022_arm64\\bin;${env:PATH}"
                 }
             ]
         }

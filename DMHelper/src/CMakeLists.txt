@@ -17,12 +17,12 @@ if (WIN32)
 
     if (DMH_WINDOWS_ARCH STREQUAL "arm64")
         list(APPEND _dmh_qt6_candidates
-            "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6"
-            "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6")
+            "C:/Qt/6.10.3/msvc2022_arm64/lib/cmake/Qt6"
+            "C:/Qt/6.10.3/msvc2022_64/lib/cmake/Qt6")
     else()
         list(APPEND _dmh_qt6_candidates
-            "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6"
-            "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6")
+            "C:/Qt/6.10.3/msvc2022_64/lib/cmake/Qt6"
+            "C:/Qt/6.10.3/msvc2022_arm64/lib/cmake/Qt6")
     endif()
 
     if (DEFINED ENV{Qt6_DIR})

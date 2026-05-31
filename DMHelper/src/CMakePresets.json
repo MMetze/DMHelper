@@ -10,8 +10,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/../out/install/${presetName}",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_arm64",
-        "Qt6_DIR": "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.10.3/msvc2022_arm64",
+        "Qt6_DIR": "C:/Qt/6.10.3/msvc2022_arm64/lib/cmake/Qt6",
         "DMH_WINDOWS_ARCH": "arm64",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
@@ -32,8 +32,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/../out/install/${presetName}",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_arm64",
-        "Qt6_DIR": "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.10.3/msvc2022_arm64",
+        "Qt6_DIR": "C:/Qt/6.10.3/msvc2022_arm64/lib/cmake/Qt6",
         "DMH_WINDOWS_ARCH": "arm64",
         "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"
@@ -53,8 +53,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/../out/install/${presetName}",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_64",
-        "Qt6_DIR": "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.10.3/msvc2022_64",
+        "Qt6_DIR": "C:/Qt/6.10.3/msvc2022_64/lib/cmake/Qt6",
         "DMH_WINDOWS_ARCH": "x64",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
@@ -75,8 +75,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/../out/install/${presetName}",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_64",
-        "Qt6_DIR": "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.10.3/msvc2022_64",
+        "Qt6_DIR": "C:/Qt/6.10.3/msvc2022_64/lib/cmake/Qt6",
         "DMH_WINDOWS_ARCH": "x64",
         "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"
@@ -96,8 +96,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/../out/install/${presetName}",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_arm64",
-        "Qt6_DIR": "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.10.3/msvc2022_arm64",
+        "Qt6_DIR": "C:/Qt/6.10.3/msvc2022_arm64/lib/cmake/Qt6",
         "DMH_WINDOWS_ARCH": "arm64",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
@@ -118,8 +118,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/../out/install/${presetName}",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_arm64",
-        "Qt6_DIR": "C:/Qt/6.11.1/msvc2022_arm64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.10.3/msvc2022_arm64",
+        "Qt6_DIR": "C:/Qt/6.10.3/msvc2022_arm64/lib/cmake/Qt6",
         "DMH_WINDOWS_ARCH": "arm64",
         "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"

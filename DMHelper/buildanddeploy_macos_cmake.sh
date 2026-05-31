@@ -21,7 +21,7 @@ cd "$SCRIPT_ROOT"
 # Configuration
 # =========================
 
-QT_VERSION="6.10.1"
+QT_VERSION="6.10.3"
 QT_IFW_VERSION="4.7"
 
 if [[ -n "$QT_ROOT_DIR" ]]; then

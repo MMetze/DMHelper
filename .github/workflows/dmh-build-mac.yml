@@ -33,10 +33,10 @@ jobs:
       # -------------------------
       # Install Qt (macOS)
       # -------------------------
-      - name: Install Qt 6.10.1 (macOS)
+      - name: Install Qt 6.10.3 (macOS)
         uses: jurplel/install-qt-action@v4
         with:
-          version: 6.10.1
+          version: 6.10.3
           arch: clang_64
           tools: tools_ifw
           cache: true

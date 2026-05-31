@@ -8,7 +8,7 @@ if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
 set QT_DIR=C:\Qt
-set QT_VERSION=6.10.1
+set QT_VERSION=6.10.3
 set QT_INSTALLER_VERSION=4.6
 set MSVC_VERSION=2022
 set SEVENZIP_APP=C:\Program Files\7-Zip\7z
