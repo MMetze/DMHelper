@@ -38,7 +38,6 @@ jobs:
         with:
           version: 6.10.3
           arch: clang_64
-          tools: tools_ifw
           cache: true
           modules: qtmultimedia qtnetworkauth qtimageformats
           add-tools-to-path: true
@@ -51,7 +50,6 @@ jobs:
         run: |
           echo "QT_ROOT_DIR=$QT_ROOT_DIR"
           which macdeployqt
-          which binarycreator
 
       # -------------------------
       # Debug workspace (pre-build)
@@ -89,7 +87,7 @@ jobs:
       - name: Normalize unsigned app signature
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          APP="bin-macos/DMHelper.app"
 
           if [ ! -d "$APP" ]; then
             echo "DMHelper.app not found at $APP"
@@ -99,17 +97,13 @@ jobs:
           /usr/bin/codesign --force --deep --sign - --timestamp=none "$APP"
           /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP"
 
-          if [ -d "DMHelper-macOS-Installer.app" ]; then
-            /usr/bin/codesign --force --deep --sign - --timestamp=none "DMHelper-macOS-Installer.app" || true
-          fi
-
       # -------------------------
       # Gatekeeper assessment (informational for unsigned builds)
       # -------------------------
       - name: Check Gatekeeper assessment
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          APP="bin-macos/DMHelper.app"
           /usr/sbin/spctl -a -vv "$APP" || true
 
       # -------------------------
@@ -119,8 +113,7 @@ jobs:
       - name: Repackage ZIP and create DMG distributions
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
-          INSTALLER_APP="DMHelper-macOS-Installer.app"
+          APP="bin-macos/DMHelper.app"
 
           if [ ! -d "$APP" ]; then
             echo "DMHelper.app not found at $APP"
@@ -138,16 +131,6 @@ jobs:
             -format UDZO \
             DMHelper-macOS-release.dmg
 
-          if [ -d "$INSTALLER_APP" ]; then
-            rm -f DMHelper-macOS-Installer.dmg
-            /usr/bin/hdiutil create \
-              -volname "DMHelper Installer" \
-              -srcfolder "$INSTALLER_APP" \
-              -ov \
-              -format UDZO \
-              DMHelper-macOS-Installer.dmg
-          fi
-
       # -------------------------
       # Debug workspace (post-build)
       # -------------------------
@@ -162,7 +145,7 @@ jobs:
       - name: Smoke-test built application
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/packages/com.dmhelper.app/data/DMHelper.app"
+          APP="bin-macos/DMHelper.app"
           EXE="$APP/Contents/MacOS/DMHelper"
           if [ ! -f "$EXE" ]; then echo "DMHelper not found at $EXE"; exit 1; fi
           output=$("$EXE" --smoke-test --skip-opengl 2>&1) || true
@@ -181,22 +164,6 @@ jobs:
       # -------------------------
       # Upload artifacts
       # -------------------------
-      - name: Upload Installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: DMHelper-macOS-Installer-DMG-${{ matrix.arch-label }}
-          path: |
-            DMHelper/DMHelper-macOS-Installer.dmg
-          if-no-files-found: error
-
-      - name: Upload Installer App (fallback)
-        uses: actions/upload-artifact@v4
-        with:
-          name: DMHelper-macOS-Installer-APP-${{ matrix.arch-label }}
-          path: |
-            DMHelper/DMHelper-macOS-Installer.app
-          if-no-files-found: ignore
-
       - name: Upload ZIP Distribution
         uses: actions/upload-artifact@v4
         with:

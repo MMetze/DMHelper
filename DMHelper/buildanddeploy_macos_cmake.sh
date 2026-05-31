@@ -22,7 +22,6 @@ cd "$SCRIPT_ROOT"
 # =========================
 
 QT_VERSION="6.10.3"
-QT_IFW_VERSION="4.7"
 
 if [[ -n "$QT_ROOT_DIR" ]]; then
     QT_DIR="$QT_ROOT_DIR"
@@ -41,9 +40,6 @@ BIN_DIR="$SCRIPT_ROOT/bin-macos"
 QT_BIN_DIR="$QT_DIR/bin"
 MACDEPLOYQT="$QT_BIN_DIR/macdeployqt"
 QT6_CMAKE_DIR="$QT_DIR/lib/cmake/Qt6"
-
-QT_IFW_DIR="$QT_ROOT/Tools/QtInstallerFramework/$QT_IFW_VERSION/bin"
-BINARY_CREATOR="$QT_IFW_DIR/binarycreator"
 
 # =========================
 # Helpers
@@ -83,7 +79,6 @@ assert_exists "$(xcode-select -p)" "Xcode Command Line Tools"
 assert_exists "$QT_DIR" "Qt directory"
 assert_exists "$QT6_CMAKE_DIR" "Qt6 CMake config"
 assert_exists "$MACDEPLOYQT" "macdeployqt"
-assert_exists "$BINARY_CREATOR" "binarycreator"
 
 export CMAKE_PREFIX_PATH="$QT_DIR"
 export Qt6_DIR="$QT6_CMAKE_DIR"
@@ -97,20 +92,11 @@ section "Preparing output directories"
 rm -rf "$BIN_DIR"
 
 mkdir -p \
-    "$BIN_DIR/config" \
-    "$BIN_DIR/packages/com.dmhelper.app/meta" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/pkgconfig" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/plugins" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources"
-
-cp -R "$SRC_DIR/installer/"* "$BIN_DIR"
-
-mv \
-    "$BIN_DIR/packages/com.dmhelper.app/meta/installscript64.qs" \
-    "$BIN_DIR/packages/com.dmhelper.app/meta/installscript.qs"
+    "$BIN_DIR/DMHelper.app/Contents" \
+    "$BIN_DIR/DMHelper.app/Contents/Frameworks" \
+    "$BIN_DIR/DMHelper.app/Contents/Frameworks/pkgconfig" \
+    "$BIN_DIR/DMHelper.app/Contents/Frameworks/plugins" \
+    "$BIN_DIR/DMHelper.app/Contents/Resources"
 
 # =========================
 # Build
@@ -143,20 +129,20 @@ APP_PATH="$BUILD_DIR/Release/DMHelper.app"
 assert_exists "$APP_PATH" "DMHelper.app"
 
 cp -R "$APP_PATH" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/"
+    "$BIN_DIR/"
 
 cp -R "$SRC_DIR/bin-macos/Info.plist" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/"
+    "$BIN_DIR/DMHelper.app/Contents/"
 
 cp -R "$SRC_DIR/bin-macos/pkgconfig/"* \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/pkgconfig"
+    "$BIN_DIR/DMHelper.app/Contents/Frameworks/pkgconfig"
 
 cp -R "$SRC_DIR/bin-macos/vlc/plugins/"* \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/plugins"
+    "$BIN_DIR/DMHelper.app/Contents/Frameworks/plugins"
 
 # Copy VLC dylibs into the app bundle's Frameworks directory
 cp -R "$SRC_DIR/bin-macos/"libvlc*.dylib \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Frameworks/"
+    "$BIN_DIR/DMHelper.app/Contents/Frameworks/"
 
 # =========================
 # Qt deployment
@@ -165,7 +151,7 @@ cp -R "$SRC_DIR/bin-macos/"libvlc*.dylib \
 section "Running macdeployqt"
 
 "$MACDEPLOYQT" \
-    "$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app" \
+    "$BIN_DIR/DMHelper.app" \
     -always-overwrite \
     -verbose=1
 
@@ -176,7 +162,7 @@ section "Running macdeployqt"
 
 section "Copying resources into app bundle"
 
-RESOURCES_DIR="$BIN_DIR/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources"
+RESOURCES_DIR="$BIN_DIR/DMHelper.app/Contents/Resources"
 
 cp -R "$SRC_DIR/bestiary/"*  "$RESOURCES_DIR/"
 cp -R "$SRC_DIR/resources/"* "$RESOURCES_DIR/"
@@ -184,32 +170,13 @@ cp -R "$SRC_DIR/doc/"*       "$RESOURCES_DIR/"
 cp "$SRC_DIR/bin-macos/DMHelper.icns" "$RESOURCES_DIR/"
 
 # =========================
-# Create installer (.app or .dmg)
-# =========================
-
-section "Creating installer (Qt IFW)"
-
-pushd "$BIN_DIR" > /dev/null
-
-"$BINARY_CREATOR" \
-    -c config/config_mac.xml \
-    -p packages \
-    DMHelper-macOS-Installer
-
-popd > /dev/null
-
-mv \
-    "$BIN_DIR/DMHelper-macOS-Installer.app" \
-    "$SCRIPT_ROOT/DMHelper-macOS-Installer.app"
-
-# =========================
 # Create ZIP
 # =========================
 
 section "Creating ZIP distribution"
 
-cd "$BIN_DIR/packages/com.dmhelper.app/data"
-zip -r "$SCRIPT_ROOT/DMHelper-macOS-release.zip" .
+cd "$BIN_DIR"
+zip -r "$SCRIPT_ROOT/DMHelper-macOS-release.zip" DMHelper.app
 
 # =========================
 # Done

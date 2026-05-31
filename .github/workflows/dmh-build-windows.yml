@@ -16,14 +16,8 @@ jobs:
         target:
           - name: x64
             qt_arch: win64_msvc2022_64
-            vcvars_arch: x64
-            dmh_windows_arch: x64
-            use_packaging_script: true
           - name: arm64
             qt_arch: win64_msvc2022_arm64_cross_compiled
-            vcvars_arch: arm64
-            dmh_windows_arch: arm64
-            use_packaging_script: false
 
     defaults:
       run:
@@ -38,8 +32,12 @@ jobs:
 
       # -------------------------
       # Install Qt (MSVC 2022)
+      # x64:   full archive set including opengl32sw/d3dcompiler for the packaging script
+      # arm64: cross-compiled package; archives list omitted to avoid qmake.bat
+      #        patching errors; IFW installed as a standalone tool (not an archive)
       # -------------------------
-      - name: Install Qt 6.10.3 (${{ matrix.target.name }}, MSVC 2022)
+      - name: Install Qt 6.10.3 (x64, MSVC 2022)
+        if: ${{ matrix.target.name == 'x64' }}
         uses: jurplel/install-qt-action@v4
         with:
           version: 6.10.3
@@ -49,6 +47,17 @@ jobs:
           modules: 'qtmultimedia qtnetworkauth qtimageformats'
           add-tools-to-path: 'true'
           archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
+
+      - name: Install Qt 6.10.3 (arm64, MSVC 2022)
+        if: ${{ matrix.target.name == 'arm64' }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.10.3
+          arch: ${{ matrix.target.qt_arch }}
+          tools: 'tools_vcredist,qt.tools.vcredist_msvc2022_arm64 tools_ifw'
+          cache: true
+          modules: 'qtmultimedia qtnetworkauth qtimageformats'
+          add-tools-to-path: 'true'
 
       # -------------------------
       # Ensure 7-Zip exists
@@ -76,43 +85,16 @@ jobs:
       # Run build & deploy script
       # -------------------------
       - name: Build DMHelper x64 (MSVC Release)
-        if: ${{ matrix.target.use_packaging_script }}
+        if: ${{ matrix.target.name == 'x64' }}
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          Get-ChildItem -Recurse -File -Filter "buildanddeploy_msvc64_cmake.ps1"
           "y" | pwsh -NoProfile -ExecutionPolicy Bypass -File buildanddeploy_msvc64_cmake.ps1
 
-      - name: Build DMHelper arm64 (CMake)
-        if: ${{ !matrix.target.use_packaging_script }}
+      - name: Build DMHelper arm64 (MSVC Release)
+        if: ${{ matrix.target.name == 'arm64' }}
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          if (-not (Test-Path $vswhere)) { throw "vswhere not found" }
-
-          $vsInstallDir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          if (-not $vsInstallDir) { throw "Visual Studio with C++ tools not found" }
-
-          $vsDevCmd = Join-Path $vsInstallDir "Common7\Tools\VsDevCmd.bat"
-          if (-not (Test-Path $vsDevCmd)) { throw "VsDevCmd.bat not found" }
-
-          cmd /c "`"$vsDevCmd`" -arch=${{ matrix.target.vcvars_arch }} -host_arch=x64 && set" |
-            ForEach-Object {
-              if ($_ -match "^(.*?)=(.*)$") {
-                [Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-              }
-            }
-
-          if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
-            throw "MSVC compiler not available"
-          }
-
-          $buildDir = "out\build\windows-${{ matrix.target.name }}-release"
-          cmake -S src -B $buildDir -G Ninja `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" `
-            -DQt6_DIR="$env:QT_ROOT_DIR\lib\cmake\Qt6" `
-            -DDMH_WINDOWS_ARCH=${{ matrix.target.dmh_windows_arch }}
-          cmake --build $buildDir --config Release
+          "y" | pwsh -NoProfile -ExecutionPolicy Bypass -File buildanddeploy_msvcarm64_cmake.ps1
       
       # -------------------------
       # Check the full file tree
@@ -123,10 +105,10 @@ jobs:
           Get-ChildItem -Recurse -File
 
       # -------------------------
-      # Smoke-test the built application
+      # Smoke-test the built application (x64 only — ARM64 exe cannot run on x64 runner)
       # -------------------------
       - name: Smoke-test built application
-        if: ${{ matrix.target.use_packaging_script }}
+        if: ${{ matrix.target.name == 'x64' }}
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
           $exe = "bin64\packages\com.dmhelper.app\data\DMHelper.exe"
@@ -142,30 +124,34 @@ jobs:
       # -------------------------
       # Upload artifacts
       # -------------------------
-      - name: Upload Installer
-        if: ${{ matrix.target.use_packaging_script }}
+      - name: Upload Installer (x64)
+        if: ${{ matrix.target.name == 'x64' }}
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-Windows-Installer-${{ matrix.target.name }}
-          path: |
-            DMHelper/DMHelper-64-bit-release-Installer.exe
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+          name: DMHelper-Windows-Installer-x64
+          path: DMHelper/DMHelper-64-bit-release-Installer.exe
+          if-no-files-found: error
 
-      - name: Upload ZIP Distribution
-        if: ${{ matrix.target.use_packaging_script }}
+      - name: Upload ZIP Distribution (x64)
+        if: ${{ matrix.target.name == 'x64' }}
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-Windows-Zip-${{ matrix.target.name }}
-          path: |
-            DMHelper/DMHelper-64-bit-release.zip
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+          name: DMHelper-Windows-Zip-x64
+          path: DMHelper/DMHelper-64-bit-release.zip
+          if-no-files-found: error
 
-      - name: Upload ARM64 binary
-        if: ${{ !matrix.target.use_packaging_script }}
+      - name: Upload Installer (arm64)
+        if: ${{ matrix.target.name == 'arm64' }}
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-Windows-${{ matrix.target.name }}-binary
-          path: |
-            DMHelper/out/build/windows-${{ matrix.target.name }}-release/DMHelper.exe
-            DMHelper/out/build/windows-${{ matrix.target.name }}-release/Release/DMHelper.exe
+          name: DMHelper-Windows-Installer-arm64
+          path: DMHelper/DMHelper-arm64-release-Installer.exe
+          if-no-files-found: error
+
+      - name: Upload ZIP Distribution (arm64)
+        if: ${{ matrix.target.name == 'arm64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-Windows-Zip-arm64
+          path: DMHelper/DMHelper-arm64-release.zip
           if-no-files-found: error

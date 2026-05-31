@@ -10,5 +10,6 @@
     <Banner>dmhelper_banner.png</Banner>
     <StartMenuDir>DMHelper</StartMenuDir>
     <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
+    <MaintenanceToolName>uninstaller</MaintenanceToolName>
     <StyleSheet>style.qss</StyleSheet>
 </Installer>
