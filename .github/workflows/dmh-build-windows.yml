@@ -138,6 +138,7 @@ jobs:
           $exe = "${{ matrix.target.bin_subdir }}\packages\com.dmhelper.app\data\DMHelper.exe"
           if (-not (Test-Path $exe)) { throw "DMHelper.exe not found at $exe" }
           $output = & $exe --smoke-test --skip-opengl 2>&1 | Out-String
+          $global:LASTEXITCODE = 0  # DMHelper exits 1 when any check fails; we evaluate failures ourselves below
           Write-Host $output
           $json = ($output -split "`r?`n") | Select-String -Pattern '^\{"checks":' | Select-Object -Last 1
           if (-not $json) { throw "Smoke test did not produce JSON output" }
