@@ -41,6 +41,9 @@ protected:
     unsigned int _EBO;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
+    int _shaderGridColor;
+    int _shaderLineWidth;
+    int _shaderViewportSize;
 
     GridConfig _config;
     QPoint _position;

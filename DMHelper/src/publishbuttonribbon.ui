@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
+    <width>590</width>
     <height>67</height>
    </rect>
   </property>
@@ -26,7 +26,8 @@
    <string>Frame</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);
+QFrame#line_2, QFrame#line_3, QFrame#line_4 { background: transparent; }</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <property name="spacing">
@@ -134,13 +135,13 @@
     <widget class="Line" name="line_4">
      <property name="minimumSize">
       <size>
-       <width>10</width>
+       <width>5</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>10</width>
+       <width>5</width>
        <height>55</height>
       </size>
      </property>
@@ -201,13 +202,13 @@
         <widget class="Line" name="line_3">
          <property name="minimumSize">
           <size>
-           <width>10</width>
+           <width>5</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>10</width>
+           <width>5</width>
            <height>40</height>
           </size>
          </property>
@@ -365,13 +366,13 @@
     <widget class="Line" name="line_2">
      <property name="minimumSize">
       <size>
-       <width>10</width>
+       <width>5</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>10</width>
+       <width>5</width>
        <height>55</height>
       </size>
      </property>
