@@ -14,6 +14,7 @@ CampaignTree::CampaignTree(QWidget *parent) :
     setAcceptDrops(true);
     setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::DragDrop);
+    setStyleSheet("background: transparent;");
 }
 
 CampaignObjectBase* CampaignTree::currentCampaignObject()
