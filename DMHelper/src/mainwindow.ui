@@ -27,9 +27,7 @@
     <normaloff>:/img/data/dmhelper_opaque.png</normaloff>:/img/data/dmhelper_opaque.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(243, 243, 243);
-background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
