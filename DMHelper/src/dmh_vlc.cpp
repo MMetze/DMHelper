@@ -1,6 +1,10 @@
 #include "dmh_vlc.h"
 #include "videoplayergl.h"
 #include "videoplayerglvideo.h"
+#include "dmhwaitingdialog.h"
+#include <QApplication>
+#include <QEventLoop>
+#include <QThread>
 #include <QTimerEvent>
 #include <QDebug>
 #include <cstdarg>
@@ -12,6 +16,52 @@ DMH_VLC* DMH_VLC::_instance = nullptr;
 
 namespace
 {
+class VlcInitializationThread final : public QThread
+{
+public:
+    libvlc_instance_t* result;
+
+    VlcInitializationThread() :
+        QThread(),
+        result(nullptr)
+    {
+    }
+
+protected:
+    virtual void run() override
+    {
+#ifndef Q_OS_MAC
+        const char *args[] = {
+            "--no-reset-plugins-cache",
+            "--plugins-cache",
+            "--verbose=0"
+        };
+        result = libvlc_new(sizeof(args) / sizeof(*args), args);
+        if(result)
+        {
+            qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins succeeded";
+            return;
+        }
+
+        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins failed; retrying with plugin cache rebuild";
+        const char *recoveryArgs[] = {
+            "--reset-plugins-cache",
+            "--plugins-cache",
+            "--plugins-scan",
+            "--verbose=0"
+        };
+        result = libvlc_new(sizeof(recoveryArgs) / sizeof(*recoveryArgs), recoveryArgs);
+
+        if(result)
+            qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild succeeded";
+        else
+            qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild failed";
+#else
+        result = libvlc_new(0, nullptr);
+#endif
+    }
+};
+
 void libVlcLogCallback(void* data, int level, const libvlc_log_t* context, const char* fmt, va_list args)
 {
     Q_UNUSED(data)
@@ -64,35 +114,21 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     _vlcInstance(nullptr),
     _currentVideo(nullptr)
 {
-#ifndef Q_OS_MAC
-    const char *args[] = {
-        "--no-reset-plugins-cache",
-        "--plugins-cache",
-        "--verbose=0"
-    };
-    _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-    if(_vlcInstance)
-    {
-        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins succeeded";
-    }
-    else
-    {
-        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins failed; retrying with plugin cache rebuild";
-        const char *recoveryArgs[] = {
-            "--reset-plugins-cache",
-            "--plugins-cache",
-            "--plugins-scan",
-            "--verbose=0"
-        };
-        _vlcInstance = libvlc_new(sizeof(recoveryArgs) / sizeof(*recoveryArgs), recoveryArgs);
-        if(_vlcInstance)
-            qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild succeeded";
-        else
-            qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild failed";
-    }
-#else
-    _vlcInstance = libvlc_new(0, nullptr);
-#endif
+    VlcInitializationThread initThread;
+    DMHWaitingDialog waitingDlg(QString("Initializing DMHelper's video player (using VLC)..."));
+    waitingDlg.setModal(true);
+    waitingDlg.show();
+    qApp->processEvents();
+
+    QEventLoop waitLoop;
+    connect(&initThread, &QThread::finished, &waitLoop, &QEventLoop::quit);
+    initThread.start();
+    waitLoop.exec();
+    initThread.wait();
+
+    _vlcInstance = initThread.result;
+
+    waitingDlg.close();
 
     if(_vlcInstance)
         libvlc_log_set(_vlcInstance, libVlcLogCallback, nullptr);
