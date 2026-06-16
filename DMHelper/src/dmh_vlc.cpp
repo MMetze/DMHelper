@@ -66,14 +66,23 @@ DMH_VLC::DMH_VLC(QObject *parent) :
 {
 #ifndef Q_OS_MAC
     const char *args[] = {
-        "--reset-plugins-cache",
+        "--no-reset-plugins-cache",
         "--plugins-cache",
-        "--plugins-scan",
-        "--verbose=0",
-        "--file-caching=100",
-        "--clock-jitter=0"
+        "--verbose=0"
     };
     _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
+
+    if(!_vlcInstance)
+    {
+        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins failed; retrying with plugin cache rebuild.";
+        const char *recoveryArgs[] = {
+            "--reset-plugins-cache",
+            "--plugins-cache",
+            "--plugins-scan",
+            "--verbose=0"
+        };
+        _vlcInstance = libvlc_new(sizeof(recoveryArgs) / sizeof(*recoveryArgs), recoveryArgs);
+    }
 #else
     _vlcInstance = libvlc_new(0, nullptr);
 #endif
