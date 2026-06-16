@@ -1,9 +1,6 @@
 #include "dmh_vlc.h"
 #include "videoplayergl.h"
 #include "videoplayerglvideo.h"
-#include <QCoreApplication>
-#include <QDir>
-#include <QFile>
 #include <QTimerEvent>
 #include <QDebug>
 #include <cstdarg>
@@ -68,36 +65,15 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     _currentVideo(nullptr)
 {
 #ifndef Q_OS_MAC
-    bool needsReset = isCacheStale();
-
-    if(needsReset)
-    {
-        qInfo() << "[DMH_VLC] VLC plugins cache is stale or missing, regenerating...";
-        const char *args[] = {
-            "--reset-plugins-cache",
-            "--plugins-cache",
-            "--plugins-scan",
-            "--verbose=0",
-            "--file-caching=100",
-            "--clock-jitter=0"
-        };
-        _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-
-        if(_vlcInstance)
-            writeCacheSentinel();
-    }
-    else
-    {
-        const char *args[] = {
-            "--no-reset-plugins-cache",
-            "--plugins-cache",
-            "--no-plugins-scan",
-            "--verbose=0",
-            "--file-caching=100",
-            "--clock-jitter=0"
-        };
-        _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-    }
+    const char *args[] = {
+        "--reset-plugins-cache",
+        "--plugins-cache",
+        "--plugins-scan",
+        "--verbose=0",
+        "--file-caching=100",
+        "--clock-jitter=0"
+    };
+    _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
 #else
     _vlcInstance = libvlc_new(0, nullptr);
 #endif
@@ -112,38 +88,6 @@ DMH_VLC::~DMH_VLC()
     {
         libvlc_release(_vlcInstance);
         _vlcInstance = nullptr;
-    }
-}
-
-bool DMH_VLC::isCacheStale()
-{
-    QString appDir = QCoreApplication::applicationDirPath();
-    QString sentinelPath = appDir + QString("/plugins/.vlc_cache_sentinel");
-
-    QFile sentinel(sentinelPath);
-    if(!sentinel.exists())
-        return true;
-
-    if(!sentinel.open(QIODevice::ReadOnly | QIODevice::Text))
-        return true;
-
-    QString storedDir = QString::fromUtf8(sentinel.readAll()).trimmed();
-    sentinel.close();
-
-    return (storedDir != appDir);
-}
-
-void DMH_VLC::writeCacheSentinel()
-{
-    QString appDir = QCoreApplication::applicationDirPath();
-    QString sentinelPath = appDir + QString("/plugins/.vlc_cache_sentinel");
-
-    QFile sentinel(sentinelPath);
-    if(sentinel.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-    {
-        sentinel.write(appDir.toUtf8());
-        sentinel.close();
-        qInfo() << "[DMH_VLC] VLC plugins cache regenerated for:" << appDir;
     }
 }
 
