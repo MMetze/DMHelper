@@ -71,10 +71,13 @@ DMH_VLC::DMH_VLC(QObject *parent) :
         "--verbose=0"
     };
     _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
-
-    if(!_vlcInstance)
+    if(_vlcInstance)
     {
-        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins failed; retrying with plugin cache rebuild.";
+        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins succeeded";
+    }
+    else
+    {
+        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins failed; retrying with plugin cache rebuild";
         const char *recoveryArgs[] = {
             "--reset-plugins-cache",
             "--plugins-cache",
@@ -82,6 +85,10 @@ DMH_VLC::DMH_VLC(QObject *parent) :
             "--verbose=0"
         };
         _vlcInstance = libvlc_new(sizeof(recoveryArgs) / sizeof(*recoveryArgs), recoveryArgs);
+        if(_vlcInstance)
+            qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild succeeded";
+        else
+            qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild failed";
     }
 #else
     _vlcInstance = libvlc_new(0, nullptr);
