@@ -115,7 +115,7 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     _currentVideo(nullptr)
 {
     VlcInitializationThread initThread;
-    DMHWaitingDialog waitingDlg(QString("Initializing DMHelper's video player (using VLC)..."));
+    DMHWaitingDialog waitingDlg(QString("Initializing DMHelper's video player.."));
     waitingDlg.setModal(true);
     waitingDlg.show();
     qApp->processEvents();
