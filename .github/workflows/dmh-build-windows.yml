@@ -120,6 +120,49 @@ jobs:
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
           "y" | pwsh -NoProfile -ExecutionPolicy Bypass -File buildanddeploy_msvcarm64_cmake.ps1
+
+      # -------------------------
+      # Generate VLC plugins.dat in packaged output when cache generator is available
+      # -------------------------
+      - name: Generate VLC plugins cache
+        id: vlc_plugins_cache
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          $generated = $false
+          $packageRoot = "${{ matrix.target.bin_subdir }}\packages\com.dmhelper.app\data"
+          $pluginsDir = Join-Path $packageRoot "plugins"
+
+          if (-not (Test-Path $pluginsDir)) {
+            Write-Host "VLC plugins directory not found at $pluginsDir. Skipping cache generation."
+            "generated=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
+          $cacheGenCandidates = @(
+            (Join-Path $packageRoot "vlc-cache-gen.exe"),
+            (Join-Path $pluginsDir "vlc-cache-gen.exe"),
+            (Join-Path $env:ProgramFiles "VideoLAN\VLC\vlc-cache-gen.exe")
+          )
+
+          $cacheGenExe = $cacheGenCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+          if (-not $cacheGenExe) {
+            Write-Host "vlc-cache-gen.exe was not found. Leaving plugins.dat as provided by the packaged runtime."
+            "generated=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
+          Write-Host "Generating plugins.dat using $cacheGenExe"
+          & $cacheGenExe $pluginsDir
+          if ($LASTEXITCODE -ne 0) {
+            throw "vlc-cache-gen failed with exit code $LASTEXITCODE"
+          }
+
+          if (Test-Path (Join-Path $pluginsDir "plugins.dat")) {
+            $generated = $true
+          }
+
+          "generated=$($generated.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
       
       # -------------------------
       # Check the full file tree
@@ -144,8 +187,13 @@ jobs:
           $json = ($output -split "`r?`n") | Select-String -Pattern '^\{"checks":' | Select-Object -Last 1
           if (-not $json) { throw "Smoke test did not produce JSON output" }
           $result = $json.Line | ConvertFrom-Json
-          # vlc_plugins_dat is generated on first VLC load — not a build defect
-          $failures = $result.checks | Where-Object { $_.passed -eq $false -and $_.name -ne 'vlc_plugins_dat' }
+          $cacheGenerated = "${{ steps.vlc_plugins_cache.outputs.generated }}" -eq "true"
+          if ($cacheGenerated) {
+            $failures = $result.checks | Where-Object { $_.passed -eq $false }
+          } else {
+            # If the cache generator is unavailable in CI, allow runtime generation fallback.
+            $failures = $result.checks | Where-Object { $_.passed -eq $false -and $_.name -ne 'vlc_plugins_dat' }
+          }
           if ($failures) { throw "Smoke test failures: $($failures.name -join ', ')" }
         env:
           QT_QPA_PLATFORM: offscreen
