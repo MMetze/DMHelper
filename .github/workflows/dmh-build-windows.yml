@@ -18,12 +18,10 @@ jobs:
             runner: windows-2022
             qt_arch: win64_msvc2022_64
             bin_subdir: bin64
-            vlc_cache_gen_source: src\vlc64\vlc-cache-gen.exe
           - name: arm64
             runner: windows-11-arm
             qt_arch: win64_msvc2022_arm64
             bin_subdir: binarm64
-            vlc_cache_gen_source: src\vlcArm64\vlc-cache-gen.exe
 
     defaults:
       run:
@@ -135,22 +133,22 @@ jobs:
           $pluginsDir = Join-Path $packageRoot "plugins"
 
           try {
+            if ("${{ matrix.target.name }}" -eq "arm64") {
+              Write-Host "::warning::Skipping vlc-cache-gen on arm64 by project policy. plugins.dat is provided manually."
+              "generated=false" >> $env:GITHUB_OUTPUT
+              exit 0
+            }
+
             if (-not (Test-Path $pluginsDir)) {
               Write-Host "::warning::VLC plugins directory not found at $pluginsDir. Skipping cache generation."
               "generated=false" >> $env:GITHUB_OUTPUT
               exit 0
             }
 
-            $cacheGenCandidates = @(
-              (Join-Path (Get-Location) "${{ matrix.target.vlc_cache_gen_source }}"),
-              (Join-Path $packageRoot "vlc-cache-gen.exe"),
-              (Join-Path $pluginsDir "vlc-cache-gen.exe"),
-              (Join-Path $env:ProgramFiles "VideoLAN\VLC\vlc-cache-gen.exe")
-            )
+            # x64 only: execute cache generator from packaged data directory so VLC DLLs resolve locally.
+            $cacheGenExe = Join-Path $packageRoot "vlc-cache-gen.exe"
 
-            $cacheGenExe = $cacheGenCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-
-            if (-not $cacheGenExe) {
+            if (-not (Test-Path $cacheGenExe)) {
               Write-Host "::warning::vlc-cache-gen.exe was not found. Leaving plugins.dat as provided by the packaged runtime."
               "generated=false" >> $env:GITHUB_OUTPUT
               exit 0
