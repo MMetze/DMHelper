@@ -141,33 +141,72 @@ jobs:
               exit 0
             }
 
+            # Diagnostic: always attempt both source-tree cache generators in every matrix run.
+            $diagnosticCacheGens = @(
+              (Join-Path (Get-Location) "src\vlc64\vlc-cache-gen.exe"),
+              (Join-Path (Get-Location) "src\vlcArm64\vlc-cache-gen.exe")
+            )
+
+            foreach ($diagnosticExe in $diagnosticCacheGens) {
+              if (-not (Test-Path $diagnosticExe)) {
+                Write-Host "::warning::Diagnostic vlc-cache-gen candidate not found: $diagnosticExe"
+                continue
+              }
+
+              $diagnosticDir = Split-Path $diagnosticExe -Parent
+              $originalPath = $env:PATH
+              try {
+                $env:PATH = "$packageRoot;$diagnosticDir;$originalPath"
+                Write-Host "Diagnostic run with $diagnosticExe"
+                & $diagnosticExe $pluginsDir
+                $diagExitCode = $LASTEXITCODE
+                Write-Host "::warning::Diagnostic vlc-cache-gen exit code $diagExitCode for $diagnosticExe"
+              } catch {
+                Write-Host "::warning::Diagnostic vlc-cache-gen threw for $diagnosticExe: $($_.Exception.Message)"
+              } finally {
+                $env:PATH = $originalPath
+              }
+            }
+
             $cacheGenCandidates = @(
               (Join-Path (Get-Location) "${{ matrix.target.vlc_cache_gen_source }}"),
               (Join-Path $packageRoot "vlc-cache-gen.exe"),
               (Join-Path $pluginsDir "vlc-cache-gen.exe"),
               (Join-Path $env:ProgramFiles "VideoLAN\VLC\vlc-cache-gen.exe")
-            )
+            ) | Select-Object -Unique
 
-            $cacheGenExe = $cacheGenCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-
-            if (-not $cacheGenExe) {
+            $existingCandidates = $cacheGenCandidates | Where-Object { Test-Path $_ }
+            if (-not $existingCandidates) {
               Write-Host "::warning::vlc-cache-gen.exe was not found. Leaving plugins.dat as provided by the packaged runtime."
               "generated=false" >> $env:GITHUB_OUTPUT
               exit 0
             }
 
-            Write-Host "Generating plugins.dat using $cacheGenExe"
-            & $cacheGenExe $pluginsDir
-            if ($LASTEXITCODE -ne 0) {
-              Write-Host "::warning::vlc-cache-gen failed with exit code $LASTEXITCODE. Continuing without generated plugins.dat."
-              "generated=false" >> $env:GITHUB_OUTPUT
-              exit 0
+            foreach ($cacheGenExe in $existingCandidates) {
+              $cacheGenDir = Split-Path $cacheGenExe -Parent
+              $originalPath = $env:PATH
+              try {
+                # Help the loader resolve libvlc/libvlccore dependencies for source-tree cache generators.
+                $env:PATH = "$packageRoot;$cacheGenDir;$originalPath"
+
+                Write-Host "Trying plugins cache generation with $cacheGenExe"
+                & $cacheGenExe $pluginsDir
+                $exitCode = $LASTEXITCODE
+
+                if ($exitCode -eq 0 -and (Test-Path (Join-Path $pluginsDir "plugins.dat"))) {
+                  $generated = $true
+                  Write-Host "Successfully generated plugins.dat with $cacheGenExe"
+                  break
+                }
+
+                Write-Host "::warning::vlc-cache-gen candidate failed ($cacheGenExe) with exit code $exitCode. Trying next candidate."
+              } finally {
+                $env:PATH = $originalPath
+              }
             }
 
-            if (Test-Path (Join-Path $pluginsDir "plugins.dat")) {
-              $generated = $true
-            } else {
-              Write-Host "::warning::vlc-cache-gen completed but plugins.dat was not found in $pluginsDir."
+            if (-not $generated) {
+              Write-Host "::warning::Unable to generate plugins.dat with any available vlc-cache-gen.exe candidate."
             }
           } catch {
             Write-Host "::warning::Unexpected error while generating VLC plugins cache: $($_.Exception.Message)"
