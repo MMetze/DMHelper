@@ -942,9 +942,20 @@ if (WIN32)
     # DbgHelp provides MiniDumpWriteDump used by the crash handler
     target_link_libraries(DMHelper PRIVATE dbghelp)
 
+    # /Zi in Release keeps full optimisation but emits a PDB so release/installed
+    # crash minidumps can be symbolicated.
     target_compile_options(DMHelper PRIVATE
         $<$<CONFIG:Debug>:/FS>
         $<$<CONFIG:Release>:/O2>
+        $<$<CONFIG:Release>:/Zi>
+    )
+
+    # /DEBUG makes the linker produce the PDB; /OPT:REF and /OPT:ICF restore the
+    # size optimisations that /DEBUG would otherwise disable.
+    target_link_options(DMHelper PRIVATE
+        $<$<CONFIG:Release>:/DEBUG>
+        $<$<CONFIG:Release>:/OPT:REF>
+        $<$<CONFIG:Release>:/OPT:ICF>
     )
 
     # Windows icon — dmhelper.rc is compiled by rc.exe and embeds dmhelper.ico

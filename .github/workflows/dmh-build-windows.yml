@@ -169,6 +169,18 @@ jobs:
           path: DMHelper/DMHelper-64-bit-release.zip
           if-no-files-found: error
 
+      - name: Upload Debug Symbols (x64)
+        if: ${{ matrix.target.name == 'x64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-Windows-Symbols-x64
+          # PDB (from the build tree) plus the matching deployed EXE so a
+          # minidump can be symbolicated against the exact release binary.
+          path: |
+            DMHelper/**/DMHelper.pdb
+            DMHelper/${{ matrix.target.bin_subdir }}/packages/com.dmhelper.app/data/DMHelper.exe
+          if-no-files-found: error
+
       - name: Upload Installer (arm64)
         if: ${{ matrix.target.name == 'arm64' }}
         uses: actions/upload-artifact@v4
@@ -183,4 +195,16 @@ jobs:
         with:
           name: DMHelper-Windows-Zip-arm64
           path: DMHelper/DMHelper-arm64-release.zip
+          if-no-files-found: error
+
+      - name: Upload Debug Symbols (arm64)
+        if: ${{ matrix.target.name == 'arm64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-Windows-Symbols-arm64
+          # PDB (from the build tree) plus the matching deployed EXE so a
+          # minidump can be symbolicated against the exact release binary.
+          path: |
+            DMHelper/**/DMHelper.pdb
+            DMHelper/${{ matrix.target.bin_subdir }}/packages/com.dmhelper.app/data/DMHelper.exe
           if-no-files-found: error
