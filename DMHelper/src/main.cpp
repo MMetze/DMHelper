@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "dmhlogger.h"
+#include "dmhcrashhandler.h"
 #include "optionsaccessor.h"
 #include "smoketestrunner.h"
 #include <QApplication>
@@ -31,6 +32,8 @@ int main(int argc, char *argv[]) {
     int result = 0;
     try {
         DMHLogger logger;
+
+        DMHCrashHandler::install(DMHLogger::getLogDirPath());
 
         qInfo() << "[Main] #########################################################################################";
         qInfo() << "[Main]                                  DMHELPER STARTED";

@@ -205,6 +205,7 @@ set(DMHELPER_SOURCES
     dmh_opengl.cpp
     dmh_vlc.cpp
     dmhcache.cpp
+    dmhcrashhandler.cpp
     dmhelperribbon.cpp
     dmhfilereader.cpp
     dmhlogger.cpp
@@ -561,6 +562,7 @@ set(DMHELPER_HEADERS
     dmh_opengl.h
     dmh_vlc.h
     dmhcache.h
+    dmhcrashhandler.h
     dmhelperribbon.h
     dmhfilereader.h
     dmhlogger.h
@@ -936,6 +938,9 @@ target_link_libraries(DMHelper PRIVATE
 # -------------------------------------------------
 if (WIN32)
     target_compile_definitions(DMHelper PRIVATE WIN32)
+
+    # DbgHelp provides MiniDumpWriteDump used by the crash handler
+    target_link_libraries(DMHelper PRIVATE dbghelp)
 
     target_compile_options(DMHelper PRIVATE
         $<$<CONFIG:Debug>:/FS>
