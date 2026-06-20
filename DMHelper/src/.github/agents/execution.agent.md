@@ -167,7 +167,7 @@ memory. Top hazards — a violation in any of these is automatically
 Build from the repo root with the MSVC env wrapped in:
 
 ```powershell
-cmd /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"" x64 > nul 2>&1 && cd /d <repo-root> && C:\Qt\Tools\CMake_64\bin\cmake.exe --build DMHelper/out/build/windows-debug 2>&1"
+cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d <repo-root>\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --build --preset windows-debug 2>&1"
 ```
 
 A plain `cmake --build` will fail with `fatal error C1083: Cannot

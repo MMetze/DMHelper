@@ -6,6 +6,10 @@
 #include <QEventLoop>
 #include <QThread>
 #include <QTimerEvent>
+#include <QCoreApplication>
+#include <QDir>
+#include <QFileInfo>
+#include <QString>
 #include <QDebug>
 #include <cstdarg>
 
@@ -16,14 +20,37 @@ DMH_VLC* DMH_VLC::_instance = nullptr;
 
 namespace
 {
+#ifndef Q_OS_MAC
+// Name of the libVLC plugin description cache. Its presence lets libVLC skip
+// loading every plugin binary just to read its description, which makes
+// startup dramatically faster. libVLC only ever writes this file when started
+// with --reset-plugins-cache; a normal cached startup just reads it.
+const QString VlcPluginCacheFileName = QStringLiteral("plugins.dat");
+
+// Resolves the on-disk path where libVLC keeps (or expects) its plugin cache.
+// Mirrors the plugin directory layout that DMHelper deploys per platform.
+QString vlcPluginCacheFilePath()
+{
+#if defined(Q_OS_WIN)
+    return QCoreApplication::applicationDirPath() + QStringLiteral("/plugins/") + VlcPluginCacheFileName;
+#else
+    const QByteArray envPluginPath = qgetenv("VLC_PLUGIN_PATH");
+    if(!envPluginPath.isEmpty())
+        return QString::fromLocal8Bit(envPluginPath) + QDir::separator() + VlcPluginCacheFileName;
+    return QCoreApplication::applicationDirPath() + QStringLiteral("/plugins/") + VlcPluginCacheFileName;
+#endif
+}
+#endif
+
 class VlcInitializationThread final : public QThread
 {
 public:
     libvlc_instance_t* result;
 
-    VlcInitializationThread() :
+    explicit VlcInitializationThread(bool rebuildPluginCache) :
         QThread(),
-        result(nullptr)
+        result(nullptr),
+        _rebuildPluginCache(rebuildPluginCache)
     {
     }
 
@@ -31,26 +58,30 @@ protected:
     virtual void run() override
     {
 #ifndef Q_OS_MAC
-        const char *args[] = {
-            "--no-reset-plugins-cache",
-            "--plugins-cache",
-            "--verbose=0"
-        };
-        result = libvlc_new(sizeof(args) / sizeof(*args), args);
-        if(result)
+        // If the plugin cache is missing, rebuild it up front so the file is
+        // created and subsequent launches take the fast cached path.
+        if(_rebuildPluginCache)
         {
-            qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins succeeded";
+            qDebug() << "[DMH_VLC] Plugin cache missing; starting libVLC with a plugin cache rebuild to create it";
+            result = createVlcInstance(true);
+            if(result)
+                qDebug() << "[DMH_VLC] libVLC startup with plugin cache rebuild succeeded";
+            else
+                qDebug() << "[DMH_VLC] libVLC startup with plugin cache rebuild failed";
             return;
         }
 
-        qDebug() << "[DMH_VLC] Initial libVLC startup with cached plugins failed; retrying with plugin cache rebuild";
-        const char *recoveryArgs[] = {
-            "--reset-plugins-cache",
-            "--plugins-cache",
-            "--plugins-scan",
-            "--verbose=0"
-        };
-        result = libvlc_new(sizeof(recoveryArgs) / sizeof(*recoveryArgs), recoveryArgs);
+        result = createVlcInstance(false);
+        if(result)
+        {
+            qDebug() << "[DMH_VLC] libVLC startup with existing plugin cache succeeded";
+            return;
+        }
+
+        // The cache exists but startup failed (e.g. a stale cache after a
+        // libVLC version change); recover by rebuilding it.
+        qDebug() << "[DMH_VLC] libVLC startup with existing plugin cache failed; retrying with a plugin cache rebuild";
+        result = createVlcInstance(true);
 
         if(result)
             qDebug() << "[DMH_VLC] Recovery libVLC startup with plugin cache rebuild succeeded";
@@ -60,6 +91,32 @@ protected:
         result = libvlc_new(0, nullptr);
 #endif
     }
+
+private:
+#ifndef Q_OS_MAC
+    static libvlc_instance_t* createVlcInstance(bool rebuildPluginCache)
+    {
+        if(rebuildPluginCache)
+        {
+            const char *args[] = {
+                "--reset-plugins-cache",
+                "--plugins-cache",
+                "--plugins-scan",
+                "--verbose=0"
+            };
+            return libvlc_new(sizeof(args) / sizeof(*args), args);
+        }
+
+        const char *args[] = {
+            "--no-reset-plugins-cache",
+            "--plugins-cache",
+            "--verbose=0"
+        };
+        return libvlc_new(sizeof(args) / sizeof(*args), args);
+    }
+#endif
+
+    bool _rebuildPluginCache;
 };
 
 void libVlcLogCallback(void* data, int level, const libvlc_log_t* context, const char* fmt, va_list args)
@@ -114,7 +171,16 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     _vlcInstance(nullptr),
     _currentVideo(nullptr)
 {
-    VlcInitializationThread initThread;
+#ifndef Q_OS_MAC
+    const QString cacheFilePath = vlcPluginCacheFilePath();
+    const bool rebuildPluginCache = !QFileInfo::exists(cacheFilePath);
+    if(rebuildPluginCache)
+        qDebug() << "[DMH_VLC] Plugin cache not found at" << cacheFilePath << "; it will be created on startup";
+#else
+    const bool rebuildPluginCache = false;
+#endif
+
+    VlcInitializationThread initThread(rebuildPluginCache);
     DMHWaitingDialog waitingDlg(QString("Initializing DMHelper's video player.."));
     waitingDlg.setModal(true);
     waitingDlg.show();

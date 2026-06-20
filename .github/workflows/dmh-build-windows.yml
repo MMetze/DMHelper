@@ -122,59 +122,6 @@ jobs:
           "y" | pwsh -NoProfile -ExecutionPolicy Bypass -File buildanddeploy_msvcarm64_cmake.ps1
 
       # -------------------------
-      # Generate VLC plugins.dat in packaged output when cache generator is available
-      # -------------------------
-      - name: Generate VLC plugins cache
-        id: vlc_plugins_cache
-        working-directory: ${{ github.workspace }}/DMHelper
-        run: |
-          $generated = $false
-          $packageRoot = "${{ matrix.target.bin_subdir }}\packages\com.dmhelper.app\data"
-          $pluginsDir = Join-Path $packageRoot "plugins"
-
-          try {
-            if ("${{ matrix.target.name }}" -eq "arm64") {
-              Write-Host "::warning::Skipping vlc-cache-gen on arm64 by project policy. plugins.dat is provided manually."
-              "generated=false" >> $env:GITHUB_OUTPUT
-              exit 0
-            }
-
-            if (-not (Test-Path $pluginsDir)) {
-              Write-Host "::warning::VLC plugins directory not found at $pluginsDir. Skipping cache generation."
-              "generated=false" >> $env:GITHUB_OUTPUT
-              exit 0
-            }
-
-            # x64 only: execute cache generator from packaged data directory so VLC DLLs resolve locally.
-            $cacheGenExe = Join-Path $packageRoot "vlc-cache-gen.exe"
-
-            if (-not (Test-Path $cacheGenExe)) {
-              Write-Host "::warning::vlc-cache-gen.exe was not found. Leaving plugins.dat as provided by the packaged runtime."
-              "generated=false" >> $env:GITHUB_OUTPUT
-              exit 0
-            }
-
-            Write-Host "Generating plugins.dat using $cacheGenExe"
-            & $cacheGenExe $pluginsDir
-            if ($LASTEXITCODE -ne 0) {
-              Write-Host "::warning::vlc-cache-gen failed with exit code $LASTEXITCODE. Continuing without generated plugins.dat."
-              "generated=false" >> $env:GITHUB_OUTPUT
-              exit 0
-            }
-
-            if (Test-Path (Join-Path $pluginsDir "plugins.dat")) {
-              $generated = $true
-            } else {
-              Write-Host "::warning::vlc-cache-gen completed but plugins.dat was not found in $pluginsDir."
-            }
-          } catch {
-            Write-Host "::warning::Unexpected error while generating VLC plugins cache: $($_.Exception.Message)"
-            $generated = $false
-          }
-
-          "generated=$($generated.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
-      
-      # -------------------------
       # Check the full file tree
       # -------------------------
       - name: Debug Workspace output post-build
@@ -197,13 +144,8 @@ jobs:
           $json = ($output -split "`r?`n") | Select-String -Pattern '^\{"checks":' | Select-Object -Last 1
           if (-not $json) { throw "Smoke test did not produce JSON output" }
           $result = $json.Line | ConvertFrom-Json
-          $cacheGenerated = "${{ steps.vlc_plugins_cache.outputs.generated }}" -eq "true"
-          if ($cacheGenerated) {
-            $failures = $result.checks | Where-Object { $_.passed -eq $false }
-          } else {
-            # If the cache generator is unavailable in CI, allow runtime generation fallback.
-            $failures = $result.checks | Where-Object { $_.passed -eq $false -and $_.name -ne 'vlc_plugins_dat' }
-          }
+          # plugins.dat is provided manually in the binary folders
+          $failures = $result.checks | Where-Object { $_.passed -eq $false -and $_.name -ne 'vlc_plugins_dat' }
           if ($failures) { throw "Smoke test failures: $($failures.name -join ', ')" }
         env:
           QT_QPA_PLATFORM: offscreen
