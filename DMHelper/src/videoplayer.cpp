@@ -486,7 +486,14 @@ void VideoPlayer::stopThenDelete()
     qDebug() << "[VideoPlayer] stopThenDelete called, " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-  if(isProcessing())
+    // Never delete synchronously: VLC worker threads may still be inside the
+    // open / decode callbacks for this object (especially right after
+    // startPlayer(), before any status event has arrived). Deleting here would
+    // free the object out from under those threads (use-after-free inside
+    // libVLC). If a player exists, stop it and defer destruction until the
+    // Stopped event is confirmed in internalStopCheck(); otherwise it is safe
+    // to schedule deletion on the event loop.
+    if(_vlcPlayer)
     {
 #ifdef VIDEO_DEBUG_MESSAGES
         qDebug() << "[VideoPlayer] Stop Then Delete triggered, stop called, " << this << ", " << COUNT_CALLBACKS;
@@ -497,9 +504,9 @@ void VideoPlayer::stopThenDelete()
     else
     {
 #ifdef VIDEO_DEBUG_MESSAGES
-        qDebug() << "[VideoPlayer] Stop Then Delete triggered, immediate delete possible, " << this << ", " << COUNT_CALLBACKS;
+        qDebug() << "[VideoPlayer] Stop Then Delete triggered, no player running - deferred delete, " << this << ", " << COUNT_CALLBACKS;
 #endif
-        delete this;
+        deleteLater();
     }
 
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -566,6 +573,16 @@ void VideoPlayer::internalStopCheck(int status)
 
     cleanupBuffers();
 
+    if(_deleteOnStop)
+    {
+#ifdef VIDEO_DEBUG_MESSAGES
+        qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed." << ", " << this << ", " << COUNT_CALLBACKS;
+#endif
+        _deleteOnStop = false;
+        deleteLater();
+        return;
+    }
+
     if(_selfRestart)
     {
         _selfRestart = false;
@@ -573,15 +590,6 @@ void VideoPlayer::internalStopCheck(int status)
         qDebug() << "[VideoPlayer] Internal Stop Check: player restarting" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
         startPlayer();
-    }
-
-    if(_deleteOnStop)
-    {
-#ifdef VIDEO_DEBUG_MESSAGES
-        qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed." << ", " << this << ", " << COUNT_CALLBACKS;
-#endif
-        // TODO: should this not delete the player?
-        return;
     }
 }
 

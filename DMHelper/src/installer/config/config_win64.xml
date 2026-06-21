@@ -12,4 +12,5 @@
     <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
     <MaintenanceToolName>uninstaller</MaintenanceToolName>
     <StyleSheet>style.qss</StyleSheet>
+    <ControlScript>controlscript.qs</ControlScript>
 </Installer>
