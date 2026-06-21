@@ -1,9 +1,15 @@
 // DMHelper installer/maintenance-tool control script.
 //
 // Two responsibilities:
-//   1. Acquire admin rights up front so the installer registers machine-wide
-//      (HKLM) to match its Program Files target, and so the maintenance tool
-//      (uninstaller) runs elevated when launched from "Add or Remove Programs".
+//   1. Elevation. The installer acquires admin rights up front so it registers
+//      machine-wide (HKLM) to match its Program Files target. The maintenance
+//      tool (uninstaller) does NOT elevate in place: when launched from "Add or
+//      Remove Programs" the host runs it inside a job object and terminates the
+//      visible UI process right after the first page (confirmed: exit code 1 =
+//      TerminateProcess, not a crash). Instead it relaunches itself elevated
+//      via ShellExecute/RunAs, which the UAC service spawns OUTSIDE the host's
+//      job object, so the surviving UI process is no longer killed. See the
+//      IntroductionPageCallback.
 //   2. Write a verbose log of the install/uninstall lifecycle to a file, so the
 //      "flash and close" uninstall behaviour can be diagnosed from the field.
 //
@@ -16,7 +22,20 @@
 // littered the log directory with one "<name>.<random>" file per write.
 
 var LOG_DIR_NAME = "DMHelper\\log";
-var LOG_FILE_NAME = "dmhelper_install.log";
+
+// One log file per run, stamped with the start time (UTC, matching the in-file
+// timestamps), e.g. "dmhelper_install-2026-06-21-22-10-26.log". Computed once
+// when the script is loaded so every flush in this process targets the same
+// file (a single, complete file per install/uninstall run).
+function startTimestamp()
+{
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getUTCFullYear() + "-" + p(d.getUTCMonth() + 1) + "-" + p(d.getUTCDate())
+        + "-" + p(d.getUTCHours()) + "-" + p(d.getUTCMinutes()) + "-" + p(d.getUTCSeconds());
+}
+
+var LOG_FILE_NAME = "dmhelper_install-" + startTimestamp() + ".log";
 var logBuffer = [];
 
 function logFilePath()
@@ -78,9 +97,20 @@ function Controller()
         + " isPackageManager=" + installer.isPackageManager());
     log("hasAdminRights (before)=" + installer.hasAdminRights());
 
-    if (systemInfo.productType === "windows") {
+    // The installer is double-clicked by the user, so it can elevate in place
+    // here (this path is known-good: install completes and registers HKLM).
+    //
+    // The maintenance tool (uninstaller) is NOT elevated here. When launched
+    // from "Add or Remove Programs", the host runs us inside a job object and
+    // calls TerminateProcess on the visible UI process right after the first
+    // page (confirmed: exit code 1, no crash, no error dialog). Elevating in
+    // place keeps that doomed UI process as the live one. Instead, the
+    // IntroductionPageCallback relaunches the tool elevated via ShellExecute
+    // (RunAs); the UAC service spawns the new process OUTSIDE the host's job
+    // object, so it survives. See IntroductionPageCallback below.
+    if (systemInfo.productType === "windows" && installer.isInstaller()) {
         var gained = installer.gainAdminRights();
-        log("gainAdminRights returned " + gained
+        log("installer gainAdminRights returned " + gained
             + ", hasAdminRights (after)=" + installer.hasAdminRights());
     }
 
@@ -93,7 +123,36 @@ function Controller()
 
 Controller.prototype.IntroductionPageCallback = function()
 {
-    log("IntroductionPageCallback");
+    log("IntroductionPageCallback hasAdminRights=" + installer.hasAdminRights());
+
+    // Only the Windows maintenance tool needs the out-of-job relaunch.
+    if (systemInfo.productType !== "windows" || !installer.isUninstaller())
+        return;
+
+    // The elevated relaunch starts already running with admin rights, so this
+    // branch is the surviving, out-of-job instance: just proceed normally.
+    // This is also the guard that prevents an infinite relaunch loop.
+    if (installer.hasAdminRights()) {
+        log("running elevated and out-of-job; proceeding with maintenance UI");
+        return;
+    }
+
+    // Not elevated => this is the in-job instance launched by the Add/Remove
+    // host, which will TerminateProcess us in a moment. Relaunch the tool
+    // elevated and detached: powershell's Start-Process -Verb RunAs routes
+    // through the UAC service, which spawns uninstaller.exe outside this job
+    // object so it is not killed. Then cancel this (doomed) instance.
+    var targetDir = installer.value("TargetDir");
+    var tool = installer.toNativeSeparators(targetDir) + "\\uninstaller.exe";
+    log("in-job instance detected; relaunching elevated/detached: " + tool);
+
+    var ok = installer.executeDetached("powershell",
+        ["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
+         "Start-Process -FilePath '" + tool + "' -Verb RunAs"],
+        targetDir);
+    log("elevated relaunch started=" + ok + "; cancelling in-job instance");
+
+    gui.clickButton(buttons.CancelButton);
 };
 
 Controller.prototype.TargetDirectoryPageCallback = function()
