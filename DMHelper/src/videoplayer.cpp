@@ -666,6 +666,12 @@ bool VideoPlayer::startPlayer()
         return false;
 
     libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
+    // Force software decoding. Hardware decoders (d3d11va / dxva2) feeding the
+    // vmem callback path are unstable on translated GPU stacks (e.g. D3D12-on-
+    // Adreno via Mesa), where they emit "decoded zero sample" and can corrupt
+    // the heap a few frames in. Software decode is robust for the resolutions
+    // DMHelper plays back.
+    libvlc_media_add_option(_vlcMedia, ":avcodec-hw=none");
 
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
     if(!_vlcPlayer)
