@@ -7,23 +7,52 @@
 //   2. Write a verbose log of the install/uninstall lifecycle to a file, so the
 //      "flash and close" uninstall behaviour can be diagnosed from the field.
 //
-// Preferred log location: %APPDATA%\DMHelper\logs
-// Fallback (if APPDATA is unavailable): <TargetDir>\logs
+// Preferred log location: %APPDATA%\DMHelper\log
+// Fallback (if APPDATA is unavailable): <TargetDir>\log
+//
+// The log is buffered in memory and the complete buffer is rewritten on every
+// flush. We deliberately avoid the QtIFW "AppendFile" operation: it creates a
+// timestamped backup of the file (for its UNDO step) on every call, which
+// littered the log directory with one "<name>.<random>" file per write.
 
-var LOG_DIR_NAME = "DMHelper\\logs";
+var LOG_DIR_NAME = "DMHelper\\log";
 var LOG_FILE_NAME = "dmhelper_install.log";
+var logBuffer = [];
 
-function logDirectory()
+function logFilePath()
 {
     var appData = installer.environmentVariable("APPDATA");
     if (appData && appData.length > 0)
-        return appData + "\\" + LOG_DIR_NAME;
+        return appData + "\\" + LOG_DIR_NAME + "\\" + LOG_FILE_NAME;
 
     var targetDir = installer.value("TargetDir");
     if (targetDir && targetDir.length > 0)
-        return installer.toNativeSeparators(targetDir) + "\\logs";
+        return installer.toNativeSeparators(targetDir) + "\\log\\" + LOG_FILE_NAME;
 
     return "";
+}
+
+function flushLog()
+{
+    if (systemInfo.productType !== "windows")
+        return;
+
+    var file = logFilePath();
+    if (!file || file.length === 0)
+        return;
+
+    // Rewrite the whole buffer in one process. The content is piped over stdin
+    // so it needs no shell escaping; only the path is embedded, and the install
+    // path never contains a single quote.
+    var content = logBuffer.join("\r\n") + "\r\n";
+    var psCommand =
+        "$p = '" + file + "'; " +
+        "New-Item -ItemType Directory -Force -Path (Split-Path -Parent $p) | Out-Null; " +
+        "$input | Set-Content -LiteralPath $p -Encoding UTF8";
+
+    installer.execute("powershell",
+        ["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", psCommand],
+        content);
 }
 
 function log(message)
@@ -31,14 +60,10 @@ function log(message)
     // Always emit to the console too (visible with --verbose).
     console.log("DMHelper installer: " + message);
 
-    try {
-        var dir = logDirectory();
-        if (!dir || dir.length === 0)
-            return;
+    logBuffer.push("[" + new Date().toISOString() + "] " + message);
 
-        var line = "[" + new Date().toISOString() + "] " + message + "\n";
-        installer.performOperation("Mkdir", [dir]);
-        installer.performOperation("AppendFile", [dir + "\\" + LOG_FILE_NAME, line]);
+    try {
+        flushLog();
     } catch (e) {
         console.log("DMHelper installer: log write failed: " + e);
     }
