@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QStandardPaths>
+#include <QMutexLocker>
 #include <QDebug>
 
 #ifndef QT_DEBUG
@@ -106,6 +107,11 @@ void DMHLogger::shutdown()
 {
     qInstallMessageHandler(0);
 
+    // The Qt message handler can be invoked concurrently from libVLC worker
+    // threads; take the same lock writeOutput() uses before tearing the
+    // stream down so an in-flight log write can't touch freed objects.
+    QMutexLocker locker(&_mutex);
+
     if(_out)
     {
         QTextStream* tempOut = _out;
@@ -123,6 +129,12 @@ void DMHLogger::shutdown()
 
 void DMHLogger::writeOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    // qInstallMessageHandler() callbacks arrive from any thread with no
+    // serialisation from Qt. libVLC logs heavily from its own worker threads,
+    // so without this lock concurrent writes corrupt the shared QTextStream
+    // (heap corruption / crash). Serialise every write.
+    QMutexLocker locker(&_mutex);
+
     if(!_out)
         return;
 
