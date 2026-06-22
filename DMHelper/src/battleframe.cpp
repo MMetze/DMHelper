@@ -4062,7 +4062,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
                 const QStringList conditionIds = modelCombatant->getConditionList();
                 for(const QString& conditionId : conditionIds)
                 {
-                    if((!conditionId.isEmpty()) && (!activeConditions->hasConditionDef(conditionId)) && (!orphanedIds.contains(conditionId)))
+                    if((!conditionId.isEmpty()) && (!activeConditions->hasConditionDef(conditionId)) && (!orphanedIds.contains(conditionId) && (conditionId != QStringLiteral("0"))))
                         orphanedIds.append(conditionId);
                 }
             }

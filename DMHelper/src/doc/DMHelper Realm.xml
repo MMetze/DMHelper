@@ -1,102 +1,133 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign majorVersion="2" row="-1" date="01/01/0000" calendar="Gregorian" _baseID="{05505a84-851a-40a3-8cb3-31acdb1f2369}" expanded="1" time="0" name="DMHelper Realm" minorVersion="0">
-  <text-object row="0" _baseID="{92a827ef-4552-4708-8765-0e8cfb8c38f9}" expanded="1" name="Notes"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+ <campaign _baseID="{05505a84-851a-40a3-8cb3-31acdb1f2369}" calendar="Gregorian" date="01/01/0000" expanded="1" lastElement="{bd47156b-b2f7-4f56-9897-2bfc35e9e8e9}" majorVersion="3" minorVersion="0" name="DMHelper Realm" row="-1" time="0">
+  <ruleset _baseID="{e0da6951-0f02-4abe-9ecc-d2d308de4fc1}" combatantframedata="" combatantframeui="" expanded="1" lairactionui="" name="DnD 5e 2014" row="-1"/>
+  <soundboard/>
+  <entry-object _baseID="{92a827ef-4552-4708-8765-0e8cfb8c38f9}" animated="0" expanded="1" imageFile="" name="Notes" row="0" scrollSpeed="25" textWidth="100" translated="0">
+   <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
 p, li { white-space: pre-wrap; }
-</style></head><body style=" font-family:'Trebuchet MS'; font-size:8pt; font-weight:400; font-style:normal;">
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;"><br /></p></body></html>]]></text-object>
-  <party icon="" row="1" _baseID="{55cd78bf-2dbb-4df1-b398-5161fada1207}" expanded="1" name="Party">
-   <combatant performance="0" alignment="" size="medium" active="1" investigation="0" strength="10" wisdom="10" wisdomSave="0" copper="0" _baseID="{2c0bcc7a-01e4-4c12-a1dc-4411711aa54e}" gold="0" equipment="" sex="" persuasion="0" nature="0" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="10" spells="" silver="0" weight="" dexterity="10" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/Immarel-the-magnificent.png" speed="30" perception="0" jackofalltrades="0" deception="0" charisma="10" class="" armorClass="10" athletics="0" acrobatics="0" arcana="0" survival="0" eyes="" row="0" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="1" proficiencies="" history="0" level="1" stealth="0" race="" sleightOfHand="0" name="John" intimidation="0" level3="0" strengthSave="0" background="N/A" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
-    <attacks/>
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></text-data>
+  </entry-object>
+  <party _baseID="{55cd78bf-2dbb-4df1-b398-5161fada1207}" animated="0" expanded="1" icon="" imageFile="" name="Party" row="1" scrollSpeed="25" textWidth="100" translated="0">
+   <combatant _baseID="{2c0bcc7a-01e4-4c12-a1dc-4411711aa54e}" acrobatics="0" active="1" age="" alignment="" animalHandling="0" arcana="0" armorClass="10" athletics="0" background="N/A" bardic-inspiration="0,0" charisma="10" charismaMod="0" charismaSave="0" class="" conditions="0" constitution="10" constitutionMod="0" constitutionSave="0" copper="0" deception="0" dexterity="10" dexterityMod="0" dexteritySave="0" dndBeyondID="-1" electrum="0" expanded="1" experience="0" eyes="" gold="0" hair="" height="" history="0" hitDice="---" hitPoints="1" icon="Images/Immarel-the-magnificent.png" initiative="0" insight="0" inspiration="0" intelligence="10" intelligenceMod="0" intelligenceSave="0" intimidation="0" investigation="0" level="1" maximumHp="1" medicine="0" movement="30" name="John" nature="0" pactmagiclevel="0" pactmagicslots="0,0" passiveperception="10" perception="0" performance="0" persuasion="0" platinum="0" player="" race="" religion="0" row="0" sex="" silver="0" size="medium" sleightOfHand="0" speed="30" stealth="0" strength="10" strengthMod="0" strengthSave="0" subrace="N/A" survival="0" tempHp="" type="1" weight="" wisdom="10" wisdomMod="0" wisdomSave="0"/>
+   <combatant _baseID="{36a4ca4b-910b-4ded-b455-e793dfd37eaf}" acrobatics="0" active="1" age="" alignment="" animalHandling="0" arcana="0" armorClass="10" athletics="0" background="N/A" bardic-inspiration="0,0" charisma="10" charismaMod="0" charismaSave="0" class="" conditions="0" constitution="10" constitutionMod="0" constitutionSave="0" copper="0" deception="0" dexterity="10" dexterityMod="0" dexteritySave="0" dndBeyondID="-1" electrum="0" expanded="1" experience="0" eyes="" gold="0" hair="" height="" history="0" hitDice="---" hitPoints="1" icon="Images/Possessed-torgun.png" initiative="0" insight="0" inspiration="0" intelligence="10" intelligenceMod="0" intelligenceSave="0" intimidation="0" investigation="0" level="1" maximumHp="1" medicine="0" movement="30" name="Viol" nature="0" pactmagiclevel="0" pactmagicslots="0,0" passiveperception="10" perception="0" performance="0" persuasion="0" platinum="0" player="" race="" religion="0" row="1" sex="" silver="0" size="medium" sleightOfHand="0" speed="30" stealth="0" strength="10" strengthMod="0" strengthSave="0" subrace="N/A" survival="0" tempHp="" type="1" weight="" wisdom="10" wisdomMod="0" wisdomSave="0"/>
+   <combatant _baseID="{54d82383-efe1-4885-931a-967634c7fa06}" acrobatics="1" active="1" age="" alignment="Chaotic Good" animalHandling="2" arcana="7" armorClass="13" athletics="-1" background="Sage" bardic-inspiration="0,0" charisma="11" charismaMod="0" charismaSave="0" class="Wizard" conditions="0" constitution="10" constitutionMod="0" constitutionSave="0" copper="0" deception="0" dexterity="12" dexterityMod="1" dexteritySave="1" dndBeyondID="-1" electrum="0" expanded="1" experience="0" eyes="" gold="0" hair="" height="" history="7" hitDice="---" hitPoints="45" icon="Images/The-archmage.png" initiative="0" insight="2" inspiration="0" intelligence="18" intelligenceMod="4" intelligenceSave="4" intimidation="0" investigation="4" level="5" maximumHp="5" medicine="2" movement="30" name="Tick" nature="7" pactmagiclevel="0" pactmagicslots="0,0" passiveperception="15" perception="5" performance="0" persuasion="0" platinum="0" player="" race="Elf" religion="4" row="2" sex="" silver="0" size="medium" sleightOfHand="1" speed="30" stealth="1" strength="9" strengthMod="-1" strengthSave="-1" subrace="N/A" survival="2" tempHp="" type="1" weight="" wisdom="14" wisdomMod="2" wisdomSave="2">
+    <equipment><![CDATA[Staff of Fire
+]]></equipment>
    </combatant>
-   <combatant performance="0" alignment="" size="medium" active="1" investigation="0" strength="10" wisdom="10" wisdomSave="0" copper="0" _baseID="{36a4ca4b-910b-4ded-b455-e793dfd37eaf}" gold="0" equipment="" sex="" persuasion="0" nature="0" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="10" spells="" silver="0" weight="" dexterity="10" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/Possessed-torgun.png" speed="30" perception="0" jackofalltrades="0" deception="0" charisma="10" class="" armorClass="10" athletics="0" acrobatics="0" arcana="0" survival="0" eyes="" row="1" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="1" proficiencies="" history="0" level="1" stealth="0" race="" sleightOfHand="0" name="Viol" intimidation="0" level3="0" strengthSave="0" background="N/A" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
-    <attacks/>
-   </combatant>
-   <combatant performance="0" alignment="Chaotic Good" size="medium" active="1" investigation="0" strength="9" wisdom="14" wisdomSave="0" copper="0" _baseID="{54d82383-efe1-4885-931a-967634c7fa06}" gold="0" equipment="Staff of Fire&#xa;" sex="" persuasion="0" nature="1" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="18" spells="" silver="0" weight="" dexterity="12" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/The-archmage.png" speed="30" perception="1" jackofalltrades="0" deception="0" charisma="11" class="Wizard" armorClass="13" athletics="0" acrobatics="0" arcana="1" survival="0" eyes="" row="2" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="45" proficiencies="" history="1" level="5" stealth="0" race="Elf" sleightOfHand="0" name="Tick" intimidation="0" level3="0" strengthSave="0" background="Sage" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
-    <attacks/>
-   </combatant>
-   <combatant performance="0" alignment="" size="medium" active="1" investigation="0" strength="10" wisdom="10" wisdomSave="0" copper="0" _baseID="{2a026847-13f0-4bee-81ec-669742ebc734}" gold="0" equipment="" sex="" persuasion="0" nature="0" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="10" spells="" silver="0" weight="" dexterity="10" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/Aroc-the-grey.png" speed="30" perception="0" jackofalltrades="0" deception="0" charisma="10" class="" armorClass="10" athletics="0" acrobatics="0" arcana="0" survival="0" eyes="" row="3" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="1" proficiencies="" history="0" level="1" stealth="0" race="" sleightOfHand="0" name="Grog" intimidation="0" level3="0" strengthSave="0" background="N/A" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
-    <attacks/>
-   </combatant>
+   <combatant _baseID="{2a026847-13f0-4bee-81ec-669742ebc734}" acrobatics="0" active="1" age="" alignment="" animalHandling="0" arcana="0" armorClass="10" athletics="0" background="N/A" bardic-inspiration="0,0" charisma="10" charismaMod="0" charismaSave="0" class="" conditions="0" constitution="10" constitutionMod="0" constitutionSave="0" copper="0" deception="0" dexterity="10" dexterityMod="0" dexteritySave="0" dndBeyondID="-1" electrum="0" expanded="1" experience="0" eyes="" gold="0" hair="" height="" history="0" hitDice="---" hitPoints="1" icon="Images/Aroc-the-grey.png" initiative="0" insight="0" inspiration="0" intelligence="10" intelligenceMod="0" intelligenceSave="0" intimidation="0" investigation="0" level="1" maximumHp="1" medicine="0" movement="30" name="Grog" nature="0" pactmagiclevel="0" pactmagicslots="0,0" passiveperception="10" perception="0" performance="0" persuasion="0" platinum="0" player="" race="" religion="0" row="3" sex="" silver="0" size="medium" sleightOfHand="0" speed="30" stealth="0" strength="10" strengthMod="0" strengthSave="0" subrace="N/A" survival="0" tempHp="" type="1" weight="" wisdom="10" wisdomMod="0" wisdomSave="0"/>
   </party>
-  <text-object row="2" _baseID="{6ab1a185-0948-4417-b19d-6e3120b614fa}" expanded="1" name="Adventures"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+  <entry-object _baseID="{6ab1a185-0948-4417-b19d-6e3120b614fa}" animated="0" expanded="1" imageFile="" name="Adventures" row="2" scrollSpeed="25" textWidth="100" translated="0">
+   <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
 </style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><text-object row="0" _baseID="{3772df3d-510c-4529-b0eb-864453484748}" expanded="1" name="Lair of the Necromancer"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></text-data>
+   <entry-object _baseID="{3772df3d-510c-4529-b0eb-864453484748}" animated="0" expanded="1" imageFile="" name="Lair of the Necromancer" row="0" scrollSpeed="25" textWidth="100" translated="0">
+    <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
 </style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><text-object row="0" _baseID="{5048b84e-67e1-47f0-8253-3f6c01b3da1d}" expanded="1" name="Encounters"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></text-data>
+    <entry-object _baseID="{5048b84e-67e1-47f0-8253-3f6c01b3da1d}" animated="0" expanded="1" imageFile="" name="Encounters" row="0" scrollSpeed="25" textWidth="100" translated="0">
+     <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
 </style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><text-object row="0" _baseID="{98b5e1c5-5b4a-4ebb-82df-75ea3ea5b474}" expanded="1" name="Room 1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></text-data>
+     <entry-object _baseID="{98b5e1c5-5b4a-4ebb-82df-75ea3ea5b474}" animated="0" expanded="1" imageFile="" name="Room 1" row="0" scrollSpeed="25" textWidth="100" translated="0">
+      <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
 </style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The room is mostly dark. Only lightened by the bit of moonlight, shining through the hole in the ceiling through which you dropped into here. You can see that the ceiling was braced by some wooden planks and one broke, creating an instability which caused the cavein and you dropping down. At first glance this is a mostly empty room, just some broken furniture, some empty barrels and stuff, left by rats who long wandered away.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">There are two wooden doors to the east and one in the south.</p></body></html>]]></text-object>
-     <text-object row="1" _baseID="{8b0c5fa7-e664-4583-9af3-f261d4b6132d}" expanded="1" name="Room 19"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">There are two wooden doors to the east and one in the south.</p></body></html>]]></text-data>
+     </entry-object>
+     <entry-object _baseID="{8b0c5fa7-e664-4583-9af3-f261d4b6132d}" animated="0" expanded="1" imageFile="" name="Room 19" row="1" scrollSpeed="25" textWidth="100" translated="0">
+      <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
 </style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The old, wooden door opens to your pushing it, the hinges creaking loudly. After a few inches the door gets stuck, just wide enough opened for you and your companions to push through, one by one. The following room is dark. Really dark. The little light spilling over from the room before does not help, even a little.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If the players have a torch or darkvision: The room is mostly empty. Here and there are some little clusters of rubble. The door got stuck on a rock, embedded in the muddy ground. On the other corner of the room, there are two, halfling sized holes, right next to each other. (perception check) You think you saw a reflection off an eye. Just before two large rats emerge from the holes.</p></body></html>]]><battle-object row="0" _baseID="{bd47156b-b2f7-4f56-9897-2bfc35e9e8e9}" expanded="1" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Room 19 Battle">
-       <waves/>
-       <battle cameraRectHeight="236.67358349523681" cameraRectX="357.68581575193184" showCompass="0" showLairActions="0" cameraRectY="732.65909325482016" gridOffsetX="0" showGrid="0" activeId="{d7810c1d-ef8b-42c2-8c2f-d0e5eca3febb}" gridScale="14" cameraRectWidth="283.59669396211859" gridOffsetY="0" mapRectX="431" showAlive="1" showDead="0" backgroundColorG="0" mapRectY="783" mapRectWidth="141" showMovement="1" background="109" backgroundColorR="0" mapRectHeight="109" mapID="{1482558c-86c5-4a17-bd81-3f83698df11a}" backgroundColorB="0" showEffects="1">
-        <battlelogger/>
-        <combatants>
-         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{54d82383-efe1-4885-931a-967634c7fa06}" initiative="9" positionY="856.12393553742697" _baseID="{b7c060ee-20c1-4997-922d-6acd01c367fc}" expanded="1" positionX="468.79384078382787" name="Tick" isShown="1"/>
-         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{36a4ca4b-910b-4ded-b455-e793dfd37eaf}" initiative="8" positionY="857.26694238722814" _baseID="{d7810c1d-ef8b-42c2-8c2f-d0e5eca3febb}" expanded="1" positionX="495.41049925025209" name="Viol" isShown="1"/>
-         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{2c0bcc7a-01e4-4c12-a1dc-4411711aa54e}" initiative="7" positionY="873.35223173514953" _baseID="{cf222a85-7ae3-426e-a15a-8e1dc9599fc3}" expanded="1" positionX="483.98913423572014" name="John" isShown="1"/>
-         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{2a026847-13f0-4bee-81ec-669742ebc734}" initiative="6" positionY="881.2088357190828" _baseID="{0e23ee81-c0cc-4d2c-b674-0d1372b0f549}" expanded="1" positionX="500.47155237249751" name="Grog" isShown="1"/>
-         <battlecombatant type="2" monsterType="2" isKnown="1" row="-1" monsterHP="10" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="10" positionY="817.31018631291261" _baseID="{0bcf5118-e32e-482f-b0a3-76f0dc6750dd}" legendaryCount="3" expanded="1" positionX="509.18138104283531" name="Giant Rat#1" monsterName="Giant Rat#1" isShown="1"/>
-         <battlecombatant type="2" monsterType="2" isKnown="1" row="-1" monsterHP="8" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="22" positionY="833.43794763266351" _baseID="{38a68e3d-95ab-4fa7-a9bd-1949e45bb40a}" legendaryCount="3" expanded="1" positionX="520.96029073291095" name="Giant Rat#2" monsterName="Giant Rat#2" isShown="1"/>
-         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="10" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="8" positionY="820.15811131557996" _baseID="{4c0bf9a1-c99b-4701-8d88-0c0521a10bf7}" legendaryCount="3" expanded="1" positionX="455.22789779991092" name="Giant Rat#1" monsterName="Giant Rat#1" isShown="1"/>
-         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="5" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="21" positionY="819.66738048903858" _baseID="{621edf03-5831-4ae4-ad4c-97b9273f678a}" legendaryCount="3" expanded="1" positionX="442.95962713638261" name="Giant Rat#2" monsterName="Giant Rat#2" isShown="1"/>
-         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="8" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="17" positionY="806.17228275915772" _baseID="{c4d6842b-1a7b-4ba4-8274-67f4704dd8b6}" legendaryCount="3" expanded="1" positionX="455.22789779991092" name="Giant Rat#3" monsterName="Giant Rat#3" isShown="1"/>
-         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="4" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="11" positionY="806.66301358569876" _baseID="{8ba67bd9-ea8f-483c-82a5-e8145d70f6a5}" legendaryCount="3" expanded="1" positionX="442.95962713638266" name="Giant Rat#4" monsterName="Giant Rat#4" isShown="1"/>
-        </combatants>
-        <effects>
-         <battleeffect size="20" type="2" active="1" rotation="-142.02141701436756" colorR="115" tip="Burning Hands" row="-1" visible="1" colorG="18" colorB="0" colorA="92" positionY="849.59241968706874" _baseID="{3c2950d8-dd47-4fbf-afac-fbb0e87ee322}" expanded="1" positionX="498.41574068398825" name="unknown"/>
-        </effects>
-       </battle><![CDATA[]]></battle-object>
-     </text-object>
-    </text-object>
-    <text-object row="1" _baseID="{41f68819-1f96-4643-b236-f5c4f6837203}" expanded="1" name="Maps"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If the players have a torch or darkvision: The room is mostly empty. Here and there are some little clusters of rubble. The door got stuck on a rock, embedded in the muddy ground. On the other corner of the room, there are two, halfling sized holes, right next to each other. (perception check) You think you saw a reflection off an eye. Just before two large rats emerge from the holes.</p></body></html>]]></text-data>
+      <battle-object _baseID="{bd47156b-b2f7-4f56-9897-2bfc35e9e8e9}" animated="0" audiotrack="{00000000-0000-0000-0000-000000000000}" expanded="1" imageFile="" name="Room 19 Battle" row="0" scrollSpeed="25" textWidth="100" translated="0">
+       <battle _baseID="{ca270603-7770-4cf1-bb89-0785feb6c136}" activeId="{d7810c1d-ef8b-42c2-8c2f-d0e5eca3febb}" background="109" backgroundColorB="0" backgroundColorG="0" backgroundColorR="0" cameraRectHeight="236.67358349523681" cameraRectWidth="283.59669396211859" cameraRectX="357.68581575193184" cameraRectY="732.65909325482016" expanded="1" mapID="{1482558c-86c5-4a17-bd81-3f83698df11a}" mapRectHeight="109" mapRectWidth="141" mapRectX="431" mapRectY="783" name="" row="-1" showAlive="1" showDead="0" showEffects="1" showMovement="1">
+        <layer-scene scale="14" selected="2">
+         <layer _baseID="{a375629d-1698-49cd-a22c-8adfe9ed74ad}" layerId="{1482558c-86c5-4a17-bd81-3f83698df11a}" layerName="" objectId="{1482558c-86c5-4a17-bd81-3f83698df11a}" type="4"/>
+         <layer _baseID="{542d15d3-a1d0-48d6-8465-66ba51f76fc8}" layerId="{1482558c-86c5-4a17-bd81-3f83698df11a}" layerName="" objectId="{1482558c-86c5-4a17-bd81-3f83698df11a}" order="1" type="4"/>
+         <layer _baseID="{85070582-338a-4d7a-a5ae-77338c26745e}" h="0" layerName="tokens" order="2" type="3" w="0" x="0" y="0">
+          <combatants>
+           <battlecombatant _baseID="{b7c060ee-20c1-4997-922d-6acd01c367fc}" combatantId="{54d82383-efe1-4885-931a-967634c7fa06}" done="0" expanded="1" initiative="9" isKnown="1" isShown="1" name="Tick" positionX="468.79384078382787" positionY="856.12393553742697" row="-1" sort="4" type="1"/>
+           <battlecombatant _baseID="{d7810c1d-ef8b-42c2-8c2f-d0e5eca3febb}" combatantId="{36a4ca4b-910b-4ded-b455-e793dfd37eaf}" done="1" expanded="1" initiative="8" isKnown="1" isShown="1" name="Viol" positionX="495.41049925025209" positionY="857.26694238722814" row="-1" sort="5" type="1"/>
+           <battlecombatant _baseID="{cf222a85-7ae3-426e-a15a-8e1dc9599fc3}" combatantId="{2c0bcc7a-01e4-4c12-a1dc-4411711aa54e}" done="0" expanded="1" initiative="7" isKnown="1" isShown="1" name="John" positionX="483.98913423572014" positionY="873.35223173514953" row="-1" sort="6" type="1"/>
+           <battlecombatant _baseID="{0e23ee81-c0cc-4d2c-b674-0d1372b0f549}" combatantId="{2a026847-13f0-4bee-81ec-669742ebc734}" done="0" expanded="1" initiative="6" isKnown="1" isShown="1" name="Grog" positionX="500.47155237249751" positionY="881.2088357190828" row="-1" sort="7" type="1"/>
+           <battlecombatant _baseID="{2afcd345-da17-4615-aa3b-8cdc120690bd}" combatantId="{00000000-0000-0000-0000-000000000000}" conditions="" done="0" expanded="1" initiative="16" isKnown="0" isShown="1" legendaryCount="-1" monsterClass="Goblin" monsterHP="7" monsterMaxHP="7" monsterName="Goblin#1" monsterType="2" name="" positionX="442.68879668049794" positionY="806.96680497925331" row="-1" sort="3" type="2"/>
+           <battlecombatant _baseID="{26413ea9-a806-47fe-8716-7ab1bb2e92d5}" combatantId="{00000000-0000-0000-0000-000000000000}" conditions="" done="0" expanded="1" initiative="19" isKnown="0" isShown="1" legendaryCount="-1" monsterClass="Goblin" monsterHP="8" monsterMaxHP="8" monsterName="Goblin#2" monsterType="2" name="" positionX="455.39999999999998" positionY="819.87302904564319" row="-1" sort="1" type="2"/>
+           <battlecombatant _baseID="{e1850511-cba3-417f-aaf6-d845bbe3f927}" combatantId="{00000000-0000-0000-0000-000000000000}" conditions="" done="0" expanded="1" initiative="5" isKnown="0" isShown="1" legendaryCount="-1" monsterClass="Goblin" monsterHP="6" monsterMaxHP="6" monsterName="Goblin#3" monsterType="2" name="" positionX="443.53858921161822" positionY="820.49294605809121" row="-1" sort="8" type="2"/>
+           <battlecombatant _baseID="{074e9e2b-9864-4ff0-af4b-edf2f16599d7}" combatantId="{00000000-0000-0000-0000-000000000000}" conditions="" done="0" expanded="1" initiative="5" isKnown="0" isShown="1" legendaryCount="-1" monsterClass="Goblin" monsterHP="4" monsterMaxHP="4" monsterName="Goblin#4" monsterType="2" name="" positionX="455.46970954356846" positionY="806.48630705394169" row="-1" sort="9" type="2"/>
+           <battlecombatant _baseID="{8f98d4ea-3845-43e5-8537-553989f201b0}" combatantId="{00000000-0000-0000-0000-000000000000}" conditions="" done="0" expanded="1" initiative="18" isKnown="1" isShown="1" legendaryCount="-1" monsterClass="Goblin" monsterHP="9" monsterMaxHP="9" monsterName="Goblin#5" monsterType="2" name="" positionX="510.50041493775944" positionY="817.8323651452281" row="-1" sort="2" type="2"/>
+           <battlecombatant _baseID="{6ba1a298-84e4-4971-9a0f-4c070bcf70c8}" combatantId="{00000000-0000-0000-0000-000000000000}" conditions="" done="0" expanded="1" initiative="21" isKnown="1" isShown="1" legendaryCount="-1" monsterClass="Goblin" monsterHP="5" monsterMaxHP="5" monsterName="Goblin#6" monsterType="2" name="" positionX="521.45643153526976" positionY="833.66390041493798" row="-1" sort="0" type="2"/>
+          </combatants>
+          <effects>
+           <battleeffect _baseID="{3c2950d8-dd47-4fbf-afac-fbb0e87ee322}" active="1" colorA="92" colorB="0" colorG="18" colorR="115" expanded="1" name="unknown" positionX="498.41574068398825" positionY="849.59241968706874" rotation="-142.02141701436756" row="-1" size="20" tip="Burning Hands" type="2" visible="1"/>
+          </effects>
+         </layer>
+        </layer-scene>
+       </battle>
+      </battle-object>
+     </entry-object>
+    </entry-object>
+    <entry-object _baseID="{41f68819-1f96-4643-b236-f5c4f6837203}" animated="0" expanded="1" imageFile="" name="Maps" row="1" scrollSpeed="25" textWidth="100" translated="0">
+     <text-data><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><map playaudio="0" mapRectHeight="192" mapRectX="329" row="0" mapRectY="775" _baseID="{1482558c-86c5-4a17-bd81-3f83698df11a}" expanded="1" filename="Images/LairoftheNecromancer.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" mapRectWidth="329" name="Lair Map">
-      <actions>
-       <action type="4" y="795" erase="1" x="432" width="135" height="135"/>
-       <action r="0" g="0" type="0" a="255" b="0"/>
-       <action type="4" y="828" erase="1" x="462" width="1" height="1"/>
-       <action type="4" y="796" erase="1" x="432" width="135" height="135"/>
-       <action type="1" smooth="1" erase="0" radius="30" brushtype="0">
-        <points>
-         <point y="821" x="464"/>
-        </points>
-       </action>
-       <action type="1" smooth="1" erase="1" radius="30" brushtype="1">
-        <points>
-         <point y="829" x="465"/>
-        </points>
-       </action>
-       <action type="1" smooth="0" erase="1" radius="30" brushtype="1">
-        <points>
-         <point y="827" x="464"/>
-        </points>
-       </action>
-      </actions>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></text-data>
+     <map _baseID="{1482558c-86c5-4a17-bd81-3f83698df11a}" audiotrack="{00000000-0000-0000-0000-000000000000}" cameraRectHeight="1051" cameraRectWidth="799" cameraRectX="0" cameraRectY="0" expanded="1" lineColor="#ffff00" lineType="1" lineWidth="1" mapColor="#000000" mapRectHeight="192" mapRectWidth="329" mapRectX="329" mapRectY="775" mapScale="0" mapSizeHeight="0" mapSizeWidth="0" name="Lair Map" party="{00000000-0000-0000-0000-000000000000}" partyPosX="-1" partyPosY="-1" partyalticon="" playaudio="0" row="0" showMarkers="1" showparty="1">
+      <layer-scene scale="100" selected="1">
+       <layer _baseID="{1482558c-86c5-4a17-bd81-3f83698df11a}" h="1051" imageFile="Images/LairoftheNecromancer.jpg" type="0" w="799" x="0" y="0"/>
+       <layer _baseID="{1482558c-86c5-4a17-bd81-3f83698df11a}" fowColor="#ff000000" h="1051" order="1" type="1" w="799" x="0" y="0">
+        <actions>
+         <action a="255" b="0" g="0" r="0" type="0"/>
+         <action erase="1" height="1" smooth="1" type="4" width="1" x="462" y="828"/>
+         <action erase="1" height="135" smooth="1" type="4" width="135" x="432" y="796"/>
+         <action brushtype="0" erase="0" radius="30" smooth="1" type="1">
+          <point x="464" y="821"/>
+         </action>
+         <action brushtype="1" erase="1" radius="30" smooth="1" type="1">
+          <point x="465" y="829"/>
+         </action>
+         <action brushtype="1" erase="1" radius="30" smooth="0" type="1">
+          <point x="464" y="827"/>
+         </action>
+        </actions>
+       </layer>
+      </layer-scene>
      </map>
-    </text-object>
-   </text-object>
-  </text-object>
-  <text-object row="3" _baseID="{d083c244-f7f3-47aa-9c26-7725da3787d3}" expanded="1" name="World"><![CDATA[]]></text-object>
+    </entry-object>
+   </entry-object>
+  </entry-object>
  </campaign>
 </root>
