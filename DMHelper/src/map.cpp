@@ -9,7 +9,6 @@
 #include "campaign.h"
 #include "audiotrack.h"
 #include "party.h"
-#include "dmhcache.h"
 #include "layerimage.h"
 #include "layervideo.h"
 #include "layerfow.h"
@@ -233,8 +232,8 @@ bool Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
-                              QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
-        qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getName();
+                              QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
+        qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getTreePath();
         return false;
     }
 
@@ -243,8 +242,8 @@ bool Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Valid"),
-                              QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
-        qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getName();
+                              QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
+        qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getTreePath();
         return false;
     }
 

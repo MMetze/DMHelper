@@ -29,6 +29,7 @@ class PublishGLRenderer;
 class PublishGLBattleRenderer;
 class Layer;
 class LayerTokens;
+class LayerDrawEngine;
 
 namespace Ui {
 class BattleFrame;
@@ -123,6 +124,7 @@ public slots:
     void zoomSelect(bool enabled);
     void zoomDelta(int delta);
     void cancelSelect();
+    void ribbonTabChanged();
 
     // Public for connection to battle ribbon
     bool createNewBattle();
@@ -167,9 +169,10 @@ public slots:
     void setHeight(qreal height);
 
     void setFoWEdit(bool enabled);
-    void setFoWSelect(bool enabled);   
+    void setFoWSelect(bool enabled);
 
     void setPointerOn(bool enabled);
+    void setDrawOn(bool enabled);
     void showStatistics();
 
     void layerSelected(int selected);
@@ -211,6 +214,7 @@ signals:
 
     void pointerToggled(bool enabled);
     void pointerFileNameChanged(const QString& filename);
+    void drawToggled(bool enabled);
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
 
@@ -256,6 +260,8 @@ private slots:
     void handleSceneChanged(const QList<QRectF> &region);
     void handleLayersChanged();
     void handleLayerSelected(Layer* layer);
+
+    void handleDrawToggled(bool enabled);
 
     void itemLink();
     void itemUnlink();
@@ -377,6 +383,7 @@ private:
     BattleDialogModel* _model;
     QVBoxLayout* _combatantLayout;
     BattleDialogLogger* _logger;
+    LayerDrawEngine* _drawEngine;
     
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
 

@@ -9,6 +9,12 @@ PresentUpdateDialog::PresentUpdateDialog(const QString& newVersion, const QStrin
     ui(new Ui::PresentUpdateDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
+
+    // Fix parchment background for QTextBrowser viewport in Qt6
+    QPalette parchPal = ui->textBrowser->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->textBrowser->setPalette(parchPal);
 
     QString currentVersion = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
                                                 .arg(DMHelper::DMHELPER_MINOR_VERSION)

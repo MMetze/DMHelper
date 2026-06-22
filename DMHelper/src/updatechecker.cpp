@@ -136,12 +136,10 @@ bool UpdateChecker::runUpdateCheck()
 bool UpdateChecker::handleReplyPayload(const QByteArray& data)
 {
     QDomDocument doc;
-    QString errorMsg;
-    int errorLine;
-    int errorColumn;
-    if(!doc.setContent(data, &errorMsg, &errorLine, &errorColumn))
+    QDomDocument::ParseResult contentResult = doc.setContent(data);
+    if(!contentResult)
     {
-        qDebug() << "[UpdateChecker] ERROR identified reading data: unable to parse network reply XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
+        qDebug() << "[UpdateChecker] ERROR identified reading data: unable to parse network reply XML at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         qDebug() << "[UpdateChecker] Data: " << data;
         return false;
     }

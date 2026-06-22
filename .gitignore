@@ -1,16 +1,19 @@
 #DMHelper ignores
 DMHelper/bin32
 DMHelper/bin64
-DMHelper/build*
+DMHelper/build
 DMHelper/build-32_bit-debug
 DMHelper/build-32_bit-profile
 DMHelper/build-32_bit-release
 DMHelper/build-64_bit-debug
 DMHelper/build-64_bit-profile
 DMHelper/build-64_bit-release
+DMHelper/Desktop_Qt*
+DMHelper/out
 DMHelper/rawdata
 DMHelper/testdata
 DMHelper/release
+DMHelper/src/.vs
 DMHelper/src/DMHelper.pro.user
 DMHelper/src/DMHelper.pro.user*
 DMHelper/working

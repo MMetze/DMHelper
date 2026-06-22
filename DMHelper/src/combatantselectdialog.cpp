@@ -7,6 +7,7 @@ CombatantSelectDialog::CombatantSelectDialog(QList<Combatant*> combatants, bool 
     ui(new Ui::CombatantSelectDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     setCombatantList(combatants, selected);
 }
 

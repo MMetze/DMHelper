@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run DMHelper",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/../out/build/windows-debug/DMHelper.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../out/build/windows-debug",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "C:\\Qt\\6.10.1\\msvc2022_64\\bin;${env:PATH}"
+                }
+            ]
+        }
+    ]
+}

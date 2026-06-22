@@ -6,6 +6,7 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
 #include "monsterclassv2.h"
+#include "party.h"
 #include "encountertext.h"
 #include "map.h"
 #include "bestiary.h"
@@ -114,6 +115,16 @@ void ExportWorker::exportObjectAssets(const CampaignObjectBase* object, QDir& di
             {
                 qDebug() << "[ExportWorker] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIconFile();
                 exportFile(combatant->getIconFile(), directory, element, QString("icon"), false);
+            }
+            break;
+        }
+        case DMHelper::CampaignType_Party:
+        {
+            const Party* party = dynamic_cast<const Party*>(object);
+            if(party)
+            {
+                qDebug() << "[ExportWorker] Exporting party: " << party->getName() << ", icon: " << party->getIconFile();
+                exportFile(party->getIconFile(), directory, element, QString("icon"), false);
             }
             break;
         }

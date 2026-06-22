@@ -11,6 +11,7 @@ MapColorizeDialog::MapColorizeDialog(QImage originalImage, const MapColorizeFilt
     _filter(filter)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     _originalImage = originalImage;
     if(_originalImage.format() != QImage::Format_ARGB32_Premultiplied)

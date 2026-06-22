@@ -24,6 +24,7 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
     _mouseDownPos()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     init();
 
     _combatantLayout = new QVBoxLayout;

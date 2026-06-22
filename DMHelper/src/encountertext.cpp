@@ -252,8 +252,8 @@ void EncounterText::setImageFile(const QString& imageFile)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Image File Not Found"),
-                              QString("The new image file could not be found: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
-        qDebug() << "[EncounterText] setImageFile - New image file not found: " << imageFile << " for entry " << getName();
+                              QString("The new image file could not be found: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
+        qDebug() << "[EncounterText] setImageFile - New image file not found: " << imageFile << " for entry " << getTreePath();
         return;
     }
 
@@ -262,8 +262,8 @@ void EncounterText::setImageFile(const QString& imageFile)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Image File Not Valid"),
-                              QString("The new image isn't a file: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
-        qDebug() << "[EncounterText] setImageFile - Image file not a file: " << imageFile << " for entry " << getName();
+                              QString("The new image isn't a file: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getTreePath());
+        qDebug() << "[EncounterText] setImageFile - Image file not a file: " << imageFile << " for entry " << getTreePath();
         return;
     }
 

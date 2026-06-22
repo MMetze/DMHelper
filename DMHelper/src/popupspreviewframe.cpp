@@ -13,6 +13,11 @@ PopupsPreviewFrame::PopupsPreviewFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Fix parchment background for QScrollArea viewport in Qt6
+    QPalette parchPal = ui->scrollPopups->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->scrollPopups->setPalette(parchPal);
+
     QVBoxLayout* popupsLayout = new QVBoxLayout;
     popupsLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     popupsLayout->setContentsMargins(3, 3, 3, 3);

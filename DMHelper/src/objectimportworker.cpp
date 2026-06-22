@@ -61,17 +61,14 @@ bool ObjectImportWorker::doWork()
 
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);
-    QString contentError;
-    int contentErrorLine = 0;
-    int contentErrorColumn = 0;
-    bool contentResult = doc.setContent(in.readAll(), &contentError, &contentErrorLine, &contentErrorColumn);
+    QDomDocument::ParseResult contentResult = doc.setContent(in.readAll());
 
     file.close();
 
     QCoreApplication::processEvents();
 
     if(!contentResult)
-        return registerImportResult(false, QString("Loading failed: error reading XML (line ") + QString::number(contentErrorLine) + QString(", column ") + QString::number(contentErrorColumn) + QString("): ") + contentError);
+        return registerImportResult(false, QString("Loading failed: error reading XML (line ") + QString::number(contentResult.errorLine) + QString(", column ") + QString::number(contentResult.errorColumn) + QString("): ") + contentResult.errorMessage);
 
     QDomElement rootObject = doc.documentElement();
     if((rootObject.isNull()) || (rootObject.tagName() != "root"))

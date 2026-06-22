@@ -15,6 +15,7 @@ OverlaysEditDialog::OverlaysEditDialog(Campaign& campaign, QWidget *parent) :
     _selectedFrame(nullptr)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     _overlayLayout = new QVBoxLayout;
     _overlayLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);

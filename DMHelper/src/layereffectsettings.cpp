@@ -8,6 +8,7 @@ LayerEffectSettings::LayerEffectSettings(QWidget *parent) :
     _timerId(0)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->btnColorizeColor->setColor(Qt::white);
     ui->btnColorizeColor->setRotationVisible(false);

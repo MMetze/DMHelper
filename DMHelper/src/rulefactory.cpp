@@ -161,16 +161,13 @@ void RuleFactory::readRuleset(const QString& rulesetFile)
 
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+    QDomDocument::ParseResult contentResult = doc.setContent(in.readAll());
 
     file.close();
 
-    if(contentResult == false)
+    if(!contentResult)
     {
-        qDebug() << "[RuleFactory] ERROR: Unable to parse the ruleset file: " << errMsg << errRow << errColumn;
+        qDebug() << "[RuleFactory] ERROR: Unable to parse the ruleset file at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         return;
     }
 

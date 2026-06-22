@@ -14,6 +14,7 @@ SelectCombatantDialog::SelectCombatantDialog(BattleDialogModel& model, BattleDia
     _includeChildren(includeChildren)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     if(thisItem)
         _thisItemList.append(thisItem);
 

@@ -15,7 +15,8 @@ PublishGLRenderer::PublishGLRenderer(QObject *parent) :
     _pointerImage(nullptr),
     _pointerActive(false),
     _pointerPos(),
-    _pointerFile()
+    _pointerFile(),
+    _pointerScaleFactor(1.0)
 {
 }
 
@@ -144,10 +145,12 @@ void PublishGLRenderer::paintPointer(QOpenGLFunctions* functions, const QSize& s
 
 void PublishGLRenderer::setPointerScale(qreal pointerScale)
 {
+    _pointerScaleFactor = pointerScale;
+
     if(!_pointerImage)
         return;
 
-    _pointerImage->setScale(pointerScale);
+    _pointerImage->setScale(_pointerScaleFactor);
 }
 
 void PublishGLRenderer::evaluatePointer()
@@ -155,7 +158,10 @@ void PublishGLRenderer::evaluatePointer()
     if(_pointerActive)
     {
         if(!_pointerImage)
-            _pointerImage = new PublishGLImage(getPointerPixmap().scaled(DMHelper::CURSOR_SIZE * 2, DMHelper::CURSOR_SIZE * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), false);
+        {
+            _pointerImage = new PublishGLImage(getPointerPixmap().scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), false);
+            _pointerImage->setScale(_pointerScaleFactor);
+        }
     }
     else if(_pointerImage)
     {

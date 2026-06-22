@@ -14,6 +14,7 @@ TextTranslateDialog::TextTranslateDialog(const QString& originalText, const QStr
     _backgroundImageScaled()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->edtTarget->setValidator(new QIntValidator(-999999, 999999, this));
     ui->edtRoll->setValidator(new QIntValidator(-999999, 999999, this));

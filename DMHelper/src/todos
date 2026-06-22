@@ -1,375 +1,260 @@
-daggerheart - need HP to count down for now
-new campaign doesn't open the newly selected bestiary
-new entry (PC, maybe anything) should highlight the entry name first
-daggerheart - make initiative entries custom
----> add config to convert a resource number into checkboxes (HP and Stress)
-Daggerheart: show a range-finder with circles of close, near far range
+﻿==============================================================================
+v3.7 BUGS (Highest Priority)
+==============================================================================
 
-Camapign notes - add a text saying how to take quick notes
-Add a Did You Know text to the welcome page with as much text as possible
-Move the grid lock buttons to the battle tools tab
-Remember different grid sized for different external monitors
-
-Bug: Rendering distance is tiny font
-
-DONE daggerheart - implement move zones
-DONE daggerheart - show fear across all published views (move it to a higher level overlay function)
-DAggerheart: show a move circle based on the original position of the character and close range during the spotlight phase
-
-DONE Added an interactive preview dialog for text entries
-DONE Add Overlays for Fear, Counters and Timers as well as audio
-DONE Create "Wizards" for add Map or add Combat rather than multiple questions
-DONE Drag and drop to add a map/combat
-    - add map/battle/media layer
-    - add an object to a battle
-    - add a token to a monster
-    - add an icon to a PC (including enabling multiple tokens for PCs/NPCs
-    DONE Moving the grid size tool also shifts the H and V of the grid
-DONE Enhanced drop downs with completers
-DONE Templates for Daggerheart
-DONE Fear counter in main window for daggerheart campaigns only
-DONE Render fear counter in Battles, top-right corner
-DONE Add a custom ruleset file entry
-DONE Make fear visualization able to be turned off for Daggerheart campaigns
-DONE Add Accept and Cancel buttons to the grid size tool
-DONE Add a "Grid Locked" visualization (text and color difference) to the camera tool
-DONE Snap to grid also valid for size and position of the player's window
-DONE Snap to grid also valid for measuring
-DONE Use DPI from an image to guess the right size of the grid
-DONE Double-click on select map dlg to make a selection
-DONE Selected FOW layer highlighted when editing
-DONE Allow transparency in FoW textures
-DONE Add combatant token type setting to battle options
-
-OTHER: When switching menus, the active tool is deselected
-
-FIXED: Major source of crashes in video playback - stress test looks very good now!
-FIXED: filling an area on FOW
-FIXED: Leaving the map area with the pointer turns it off on the dm view
-FIXED - Zoom to FOW doesn't work (setCameraVisible)
-FIXED Background color isn't saved
-    TESTED Battle
-    TESTED Character
-    TESTED Monster
-    TESTED Text Edit
-    TESTED Map
-FIXED Monsters missing movement circle
-FIXED Next with hidden combatant in another layer does not skip hidden combatant
-FIXED Size view to FOW doesn't work
-FIXED When adding a new video, it doesn't zoom out upon loading
-DONE Error message for importing PC should suggest making it public: bool CharacterImporter::interpretReply(QNetworkReply* reply)
-DONE Skinning a monster with a unique token for a battle
-DONE Override hit dice doesn't work
-DONE Lots of commented code in map and mapframe
-Remove BattleDialogModelMonsterCombatant?
-
-Change of pace: just thinking about what else is needed before I release that Bestiary version
-Need to create a new Bestiary file and make sure it's clean for clean releases.
-Test the Dickens out of replacing other bestiaries, and maybe make sure it creates a backup specifically when it tries an upgrade
-Update the warning message to mention the bestiary
-Prepare a messaging online to the same effect
+- Daggerheart: "dead at zero HP" logic is wrong - needs to connect HP to HP
+  (not just to the death threshold)
+- Publish button reactivation not always working for combats - switching back
+  and forth between combats fails to reactivate the button reliably
+- Bestiary fiddling doesn't work right - both the default bestiary and the
+  user bestiary have issues; new campaign doesn't open the newly selected
+  bestiary after switch
+- Add monster to a location - always places the token at the center of the
+  map instead of at the correct position
+- Cast a spell (Fireball) does nothing. Local spellbook has effects placed at
+  the wrong relative position - check the default spellbook and any new
+  copy/paste behavior
+- VLC stale cache handling - stale VLC cache causes problems; needs proper
+  detection and clearing
 
 
-* Move some options around
-* Add search string to ruleset/campaign specifics
-* Populated icon doesn't show up until changing monsters
-1) There are two ruleset files, the app's one and the user's one (optional)
-2) The user can decide the location for both of them in settings
-3) The app will check at startup and overwrite it's one if the default file with the installation is newer than the app's file
-Should be enough already, compatible with what is already there, and I can fix the current problem you have first, then add the user ruleset file
+==============================================================================
+ACTIVE BUGS
+==============================================================================
 
-Real bugs:
-Copy character doesn't set Hit Points or AC, REactions not copied (Noble), Monster Type goes to Race instead of Class, Speed?
-
-3.4 todos:
-Why does my bestiary have a whole bunch of License entries and the spellbook has none?
-Generic Bestiary
-    Add a repeatable string-based "element" (e.g. multiple icons)
-    Transition from current to new bestiary, item by item
-        "icon" as an element attribute to a sub-element, or "icon filename --> special case sub-elements, add this to characters...
-        stat modifiers as separate items
-        skills as a single string
-        actions, legendary actions, reactions: combine damage_dice and damage_bonus to damage
-    Add optional campaign-specific bestiary, what is a "private" entry in the bestiary? --> Nothing???
-Test:
-** Monsters
-    Add monster
-    Remove monster, first, middle and end of list
-    Edit monster then change monster - does it store and save?
-    Edit monster then close dialog - does it store and save?
-    Ruleset default, new campaign, loaded campaign
-** Default ruleset persists
-** Copy from Monster to Character - does it generally work, check default values (e.g. size)
-** Check does import/export work, for bestiary and for CHARACTERS
-Generic Spellbook
-Generic Conditions
-Update DiceRollDialogCombatants and other places that conditions/effects are relevant
-Expand spells and DiceRollDialogCombatants to automatically place the right damage amounts and saving throw type
-
-Big Rocks
-Templates
-Set scale for table-top screens
-Enhanced Soundboard
-Multiple publish targets?
-Redo documentation and demos
-Many feature and intro videos
-Map Library
-
-Template things to do:
-* Add Combatant dialog
-* Initiative list entries
-    Combatant roll-over frame
-* Conditions
-* "Events" in initiative, such as lair actions
-* Handling legendary actions or other resettable per round enemy resources
-
-Main 3.3.1 Todos:
-Add What's New to the About dialog
-Need a better Help icon, looks stupid. Maybe integrate with a dragon symbol
-DONE - to be tested 1) any time the backup file is bigger than the current file or twice as small, rename it rather than replacing it, might lead to a bit of bloat, but generally the files grow and hence they extra backups would be useful
-DONE - to be tested 2) add a date/timestamp to the backup names that are kept
-DONE - 3) add a "open the backup folder" button
-DONE - 4) add a "open the logs folders" button
-DONE - 5) Combine those all into a "Help" dialog and put the links to the User Guide and Getting Started Guide in there as well
-
-Add a refresh button to files in the options dialog
-DONE - BUG: custom UI files path is wrong
-NOT REPRODUCED BUG: moving an FOW texture crashes the app
-DONE - BUG: New Map (in combat) button doesn't do anything - remove it
-Create new map/combat dialogs
-Update docs
+- Typing in a text entry is very slow
+- Publishing text doesn't scale, animate, or publish correctly
+- Effects highlight player tokens even when the effect is not active, if a
+  token is moved. Moving the effect clears it but it re-activates on the next
+  token move. This leaks information about hidden traps/status effects to
+  players who can see tokens light up unexpectedly
+- Map Markers: only 1/4 of marker visible to players; right-click Edit and
+  Delete don't work; marker cannot be scaled small enough (becomes highly
+  pixelated); text becomes unreadable at appropriate map scale
+- Multiple monster tokens: clicking "Edit current token" always opens only the
+  first image in the list, regardless of which token is selected (e.g. Bandit
+  with multiple token images)
+- Mac only: video playback entirely broken - adding a video (MP4) via the
+  campaign tree shows "not able to read image file"; only images are supported
+- Dropping an image in a battle comes out distorted in Player View but is
+  correct in DM View
+- Spellbook: cannot select created spells to modify them
+- Spellbook: arrows on the right side don't work to cycle through spells
+- Copy character is broken: Hit Points and AC not copied, Reactions not copied
+  (confirmed for Noble), Monster Type mapped to Race instead of Class, Speed
+  possibly missing too
+- Export dialog shows empty entries in the tree
+- Clear Icon button doesn't work
+- Don't auto-save if the filename hasn't been chosen yet
+- Individual entries can hide overlays (e.g. for video spots)
+- New entry (PC, maybe anything) should focus/highlight the entry name field
+  immediately for editing
+- Rendering distance label uses very tiny font
+- Populated icon doesn't show up in bestiary until you change monsters (needs
+  a refresh)
+- CRASH: updating Bestiary from default to a new one while a battle is open
+- CRASH: recording/using cloud effect layers
+- CRASH: changing the bestiary with a campaign open (e.g. effect layers are
+  affected)
+- Effect selection highlight is not shown
+- EncounterTextEdit: Clear does not clear the background
+- Fix image filters to include all images and videos (not just one type)
+- When switching menus, the active tool is deselected unexpectedly
+- Remove then sort in initiative -> crash
+- Scroll zoom also scrolls the view (should only zoom)
+- Movement ring size is not scaled correctly relative to token scale
+- Something is wrong with the DM side of the scrolling text display
 
 
-Performance, Memory usage, Delta install, full uninstall
-QImageReader::setLimit controls and improvements
-Remove then sort --> crash
-Scroll zoom scrolls (shouldn't)
-Middle button moves
+==============================================================================
+DAGGERHEART
+==============================================================================
+
+- HP needs to count down (current implementation is wrong for Daggerheart)
+- Make initiative entries custom: add config to convert a resource number into
+  checkboxes (HP and Stress)
+- Show a range-finder overlay with circles for Close, Near, and Far range
+- Show a move circle during the spotlight phase, based on the character's
+  original position and the Close range radius
 
 
-Lazy load images for Spells & Monsters
-When starting with only one
-Add an add Video Object button or auto-detect videos and images from the "Add Object" button
-Check the tab order in the video object options dialog
-Crashes when recording/using cloud effect layers
-Crashes when changing the bestiary with a campaign open (e.g. effect layers)
+==============================================================================
+PENDING TODOS
+==============================================================================
 
-Messed up video with Effects
-Exporter should copy videos and make them local as well
+Bestiary
+- Create a new clean Bestiary file per release; make sure it's clean on
+  fresh installs
+- Thoroughly test replacing an existing bestiary with a new one; ensure a
+  backup is created specifically when an upgrade is attempted
+- Update the warning message shown during bestiary upgrade to mention the
+  bestiary by name
+- Populated icon doesn't appear until monster is changed - needs a force
+  refresh after load
+- Add search string filter to ruleset/campaign specifics
+- Move some options around in the bestiary UI
 
+Multiple icons for a monster (partially implemented for PCs, still needed
+for monsters)
+- Save and load multiple icons per monster entry
+- Search for multiple icons with same base name automatically
+- Search for multiple icons within a directory by base name
+- Handle multiple icons in bestiary UI, including viewing all
+- Add icon selection to the Add Monster dialog
+- Add option to randomize icon when adding multiple monsters of the same type
 
-Thoughts for templates:
-* Issues for backwards compatibility
-    Convert Notes, Equipment and Spells into HTML CDATA
-    Combine level1 level2 and level3 or class1 class2 class3 into basic strings (on loading!!)
-    Integrate Jack of All Trades into the skills during DnDBeyond
-    Change pact magic and spell slots to be resource entities, move spell slots to a list
-    Added inspiration (==> Importer)
-    Check DnDBeyondID == 0 being the invalid value
-    Fix overall import/export
-    Fix DndBeyond import
-    Fix these: <dmh:attribute type="dmh:integer" name="conditions"/>
-    Change hitdice to a multi-resource
-    Added temporary hp (==> Importer)
-    copy default xml and ui files with resources
-    Implement Character::findKeyForSkillName and CharacteR::getWrittenSkillName
-    Should known string values actually be constants rather than magic numbers?
-    Fix     // HACK
-* How to interpret types:
-    Dice --> string to be interpreted: QString expression("(\\d*)d(\\d+)(\\+|-)*(\\d*)");
-    Expertise (skill value 0, 1, 2) --> list of proficiencies/expertise?
-    <dmh:attribute type="dmh:integer" name="passiveperception"/> --> create this
-* Defaults:
-    Integer = 0
-    String = ""
-    Boolean = 0 (false)
-    Resource = 0,0
+UI / UX
+- Campaign notes - add instructional text explaining how to take quick notes
+- Add a "Did You Know" tip section to the welcome page (populate with as
+  many tips as possible)
+- Move the grid lock buttons to the battle tools tab
+- Remember different grid sizes for different external monitors
+- Add What's New section to the About dialog
+- Need a better Help icon (current one looks bad - consider integrating a
+  dragon symbol)
+- Add a refresh button to the files list in the Options dialog
+- Move some options to more logical locations
+- Replace pseudo-wizard flows with a proper "Add New Item" dialog;
+  clean up mainwindow newbattle function
+- Party alt icon path should be stored as relative, not absolute
+- Save new campaign: default filename should be the campaign name
+- Check and audit volume usage across all audio classes
 
-Things to be mandated for templates: App to check and have default values for the template
-<dmh:attribute type="dmh:string" name="_baseID"/>
-<dmh:attribute type="dmh:integer" name="type"/>
-<dmh:attribute type="dmh:string" name="name"/>
-<dmh:attribute type="dmh:boolean" name="active" default="1"/>
-<dmh:attribute type="dmh:boolean" name="expanded"/>
-<dmh:attribute type="dmh:integer" name="row"/>
-<dmh:attribute type="dmh:string" name="dndBeyondID" default="-1"/>
-<dmh:attribute type="dmh:string" name="icon"/>
-<dmh:attribute type="dmh:integer" name="initiative"/>
-<dmh:attribute type="dmh:string" name="size" default="medium"/>
-<dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
-<dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>
-<dmh:attribute type="dmh:integer" name="speed" default="30"/>
-
-from CampaignObjectBase:
-    element.attribute("expanded", QString::number(0)).toInt());
-    element.attribute("row", QString::number(-1)).toInt();
-    element.attribute("name");
-    element.attribute("base-icon");
-from Combatant
-    element.attribute("armorClass").toInt());
-    element.attribute("hitPoints").toInt());
-    element.attribute("hitDice")));
-    element.attribute("conditions", QString("0")).toInt());
-    element.attribute("initiative", QString("0")).toInt());
-    element.attribute("icon"));
-    element.firstChildElement(QString("attacks"));
-
-Exempted classes (can be removed with Character):
-Character
-CharacterFrame
-ExpertiseDialog
-
-** CLEAN UP DEAD CODE!!!
-
-
-Mappings needed:
-    Stats to modifiers
-    Conditions
-    Size to size factor
-
-
-
-emit itemMoved second parameter
-void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
-All the commented code in battleframe.cpp, layertoken.cpp, and layertoken.h
-Check for // TODO: Layers comments
-
-
-movement circle with release right click accidentally
-
-
+Video / Media
+- Fix Map initialization to differentiate between video and image layers and
+  generate a screenshot thumbnail itself
+- Videos don't work on Mac - fix video playback on macOS (reported by Tharky)
+- Rendering/positioning is wrong on Mac (reported by ongakugainochi)
+- Messed up video rendering when Effect layers are active at the same time
+- Exporter should copy video files locally and update references
+- Add an "Add Video Object" button, or auto-detect videos vs images when
+  using the "Add Object" button
+- Check tab order in the video object options dialog
+- Lazy load images for Spells & Monsters (performance)
+- QImageReader::setLimit controls and improvements
 
 Layers
-* Update order/opacity/visible to hit both player and dm views
-* Add opacity sliders
-* Updates on Layer Dialog applied to both views immediately (token visibility not reflected)
-* Scaling/positioning of layers (images/videos) of different sizes
+- Update order/opacity/visible changes to hit both Player and DM views
+- Add opacity sliders to the layer dialog
+- Updates made in the Layer Dialog should apply to both views immediately
+  (token visibility changes are not currently reflected)
+- Scaling and positioning of layers (images/videos) of different sizes
 
-Multiple icons for a monster
-* Add ability to have multiple icons
-* Add saving/loading of multiple or single icons
-* Add search for multiple icons with same base name
-* Add searching for multiple icons in a directory with base name
-* Add handling of multiple icons in bestiary, including viewing
-* Add selection of icon in add monster dialog
-* Add randomization of icon as an option when adding multiple monsters
+Text / Export
+- EncounterText: complete import/export of extended text capabilities
 
 
-NEXT:
-Fix Map initialization to differentiate videos and get a screenshot itself.
+==============================================================================
+FEATURES (S = Small, M = Medium, L = Large)
+==============================================================================
 
-1. Videos to work (Tharky)
-2. Rendering positioning to work on Mac (ongakugainochi)
-3. init for maps without combat - view tab doesn'T do anything... (Encryptid) - DONE
-4. Players see dead people - Loki - DONE
-5. character death not updated - DONE
-PCs should also be able to be made invisible (* visibility/known of PCs should also impact visibility) - DONE
-DONE (TwistedDM — 04/25/2022) Not sure if this has been mentioned before (I looked but didn't see anything mentioned at least), but the latest release seems to mess with custom selection/activation icons. They display properly in the DM Window, but the player window still shows the default icons.
-DONE (Loki — 05/12/2022) Another totally useless find!  Since the PC's were leveling up, I entered their new XP total as 6500.  When I went back to check them they had all been set to 0.  Entering the value as 6500 worked fine.  Would be nice to have either an error on that field or allow commas.  It doesn't seem to be used anywhere (like auto updating the Proficiency Bonus) so maybe allow both?
-DONE (Loki — 05/03/2022) In 2.3 when adding monsters in combat, you could leave Hit Points blank and not check 'Use Average HP'.  This would add the monster with a simulated HP roll so when adding several monsters they could all have different HP.  In 2.4 it just seems to add them all with the average.
-DONE (nubsie13 — 05/12/2022) Please forgive my ignorance, but is there a way to have the turn countdown bar appear in the initiative tracker on the player window?
-DONE Combatant Frame
-DONE Countdown Timer
-DONE On/off
-DONE Yes/No confirmation on Fill/Clear for FOW
-
-DONE Configuration of:
-   * grid width
-   * grid color
-   * initiative tracker icon size
-   * initiative tracker text size
-Fixed basic Youtube playback - DONE
-
-Options to remove from libvlc: access_output, gui, keystore, logger, lua, text_renderer
-    plus libaccess_srt_plugin.dll, libvnc_plugin.dll
-
-Battle Frame://change to have greyscale and BW FOWs - also, switching back and forth leaves the publish icon not synced!
-
-DONE - Effects smaller than 5ft are not rendered properly.
-Effect selection is not shown
-
-
-EncounterText complete import/export of extended text capabilities
-EncounterTextEdit - clear needs to clear background
-Fix image filters to include all images and videos
-
-CRASH: update Bestiary from default to new after opening a battle
-
-
-
-$ ../libvpx/configure --target=x86_64-win64-vs14 --enable-vp8 --enable-vp9 --disable-examples --disable-docs --enable-static-msvcrt^C
-$ ./ffplay -codec:v libvpx dancer1.webm
-$ ./configure --enable-asm --enable-yasm --arch=x86_64 --target-os=win64 --enable-libvpx --disable-doc --disable-debug --toolchain=msvc --enable-ffplay
+S  Dedicated effect settings dialogs for each effect type (cone, cube, etc.)
+S  Snap to grid option for tokens (position snap as needed, not forced)
+S  Allow manual drag-to-scale of objects (currently only whole-number input)
+S  Select multiple tokens -> right-click -> make all visible/known at once
+   (having a room full of monsters to reveal one by one is painful)
+S  Double-click on a combatant widget centers the map on that combatant
+S  Double-click on an effect token opens the edit dialog for that token
+S  Name layers based on filename only, not the full path
+S  Make the grid button a flat pushbutton that opens its own popup menu
+S  Mac: pinch-to-zoom on trackpad
+S  Mac: standard keyboard shortcuts (Cmd-W to close window, etc.)
+M  Timer overlay: integrate into the Player Window rather than a floating
+   window that causes multi-monitor issues when maximized
+M  Ability to manually reset Combat Statistics; also investigate why they
+   appear to reset on their own randomly
+M  Add ability to place text/overlay annotations on maps (both combat and
+   regular maps) visible in DM View only, for quick notes, room numbers, etc.
+M  Map Markers for Encounters: either add map marker support to encounter
+   view, or surface the existing map markers from the map into the encounter
+M  Show player HP totals on the Player Screen
+M  Undo (Ctrl-Z / Cmd-Z) in the text editor
+M  Undo/redo specifically for FOW drawing (separate from text undo)
+M  Change token size on the fly from the map (Enlarge/Shrink) without going
+   back to a dialog
+M  Swap icon for an individual character token (update icon, or change form)
+M  Distance unit selection (ft / yards / miles) for large-scale maps
+M  Switch between party overview icon and individual player tokens in a battle
+   (toggle initiative display mode)
+M  Lighting-based FOW layers: torch radius or light-source radius defines
+   what is revealed (rather than manually painting fog)
+L  Better text editor: fix issues with pasted line spacing that can't be
+   changed, and fix color picker not applying black when one character is
+   already black
+L  Spell check in the text editor (built-in or OS-level)
+L  Drag-and-drop reordering of special abilities/actions/reactions in the
+   bestiary
 
 
+==============================================================================
+BIG ROCKS (Longer-term)
+==============================================================================
 
-sudo apt-get install libtool automake autoconf autopoint make gettext pkg-config git subversion cmake cvs zip nsis bzip2 yasm ragel ant default-jdk dos2unix gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools gcc g++ python bison wine flex wget gperf curl python3-distutils clang p7zip-full
-git clone --single-branch --branch master https://code.videolan.org/videolan/vlc.git vlc-4.x
-or
-git clone --single-branch --branch 3.0.x https://code.videolan.org/videolan/vlc.git vlc-3.x
-mkdir -p vlc-3.x/build/ && cd vlc-3.x/build/
-sh ../extras/package/win32/build.sh
-
-https://code.videolan.org/videolan/vlc/-/merge_requests/1032
-
-dpkg --add-architecture i386 && apt-get update && apt-get install wine32
-
-
-sudo ../../contrib/bootstrap --host=i686-w64-mingw32 --enable-pdb --disable-libaribcaption
-sudo make fetch
-sudo VLC_TOOLS="../../tools/build" PKG_CONFIG_PATH="" make
-
-contribs are not in <path/to/vlc/root>/contrib/i686-w64-mingw32/, but in In your build root you create a folder where you will build and then build all of them/contrib/i686-w64-mingw32/
-
-cd <build_folder>
-PKG_CONFIG="`which pkg-config`" ../extras/package/win32/configure.sh --host=i686-w64-mingw32 --prefix=/home/vlc-4.x/newbuild --enable-debug --with-contrib=./i686-w64-mingw32 --disable-nls --disable-ncurses CFLAGS="-fdebug-prefix-map='/mnt/c/'='c:/'" CXXFLAGS="-fdebug-prefix-map='/mnt/c/'='c:/'"
-
-
-/home/vlc-4.x/newbuild
-
-
-
-mft.cpp
-
-/*
-hr = attributes->GetUINT32(MF_SA_D3D11_AWARE, &can_d3d11);
-if (SUCCEEDED(hr) && can_d3d11)
-{
-    SetD3D11(p_dec, &devsys11->d3d_dev);
-
-    IMFAttributes *outputAttr = NULL;
-    hr = p_sys->mft->GetOutputStreamAttributes(p_sys->output_stream_id, &outputAttr);
-    if (SUCCEEDED(hr))
-    {
-        hr = outputAttr->SetUINT32(MF_SA_D3D11_BINDFLAGS, D3D11_BIND_SHADER_RESOURCE);
-    }
-}
-*/
-
-dcomp.h
-#undef INTERFACE
-#define INTERFACE IDCompositionVisual2
-DECLARE_INTERFACE_IID_(IDCompositionVisual2, IDCompositionVisual, "E8DE1639-4331-4B26-BC5F-6A321D347A85")
-{
-        /*
-    STDMETHOD(SetOpacityMode)(THIS_ DCOMPOSITION_OPACITY_MODE) PURE;
-    STDMETHOD(SetBackFaceVisibility)(THIS_ DCOMPOSITION_BACKFACE_VISIBILITY) PURE;
-    */
-};
-
-../../extras/package/win32/../../../modules/gui/qt/maininterface/compositor_dcomp_acrylicsurface.cpp:347:66: error: ‘SM_CXPADDEDBORDER’ was not declared in this scope
-  347 |         frameX = GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
-      |                                                                  ^~~~~~~~~~~~~~~~~
-../../extras/package/win32/../../../modules/gui/qt/maininterface/compositor_dcomp_acrylicsurface.cpp:354:70: error: ‘SM_CXPADDEDBORDER’ was not declared in this scope
-  354 |         frameX = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+- Video-based combat objects: videos as first-class objects on the battle
+  map (positioned, scaled, looping), not just background layers
+- Real mini support: locked-scale tokens representing physical miniatures
+  at a 1:1 table scale
+- UI redesign: general overhaul of menus, toolbars, and layout
+- Asset library: central browser for images, videos, and audio assets
+  reusable across campaigns
+- Character/Monster Templates: full generic template system replacing
+  hard-coded Character class
+    * Template backwards compatibility: convert Notes/Equipment/Spells to
+      HTML CDATA; combine level/class fields; move spell slots to resource
+      list; fix DnDBeyond import; implement findKeyForSkillName; replace
+      magic string constants
+    * Add Combatant dialog templates
+    * Initiative list entry templates (rollover frame, conditions, events
+      like lair actions, resettable per-round resources like legendary actions)
+- Set scale for tabletop/physical screen setups
+- Enhanced Soundboard reboot: two distinct modes needed
+    Music mode: behaves like a music player (Spotify-style) - playlist
+      queue with shuffle and repeat (per-song or per-list); one track at
+      a time
+    Ambience mode: multiple simultaneous audio layers mixed together;
+      supports continuous ambient loops (e.g. creaking ship, waves) plus
+      infrequent one-hit sounds triggered manually or on a long timeout
+      (e.g. whale call every few minutes); user controls the mix
+    These are likely best as two separate tabs in the Soundboard panel
+    Video references for effects:
+      Water ring splashes: vecteezy.com/video/1803905
+      Smoke loop: vecteezy.com/video/14196883
+      Shockwave/smoke splash: vecteezy.com/video/23951445
+- Multiple publish targets (more than one player screen)
+- Redo documentation, demos, and intro videos
+- Map Library
 
 
+==============================================================================
+USER GUIDE (All items still outstanding - no updates made yet)
+==============================================================================
 
-/usr/bin/i686-w64-mingw32-ld: /home/vlc-4.x/newbuild/contrib/vulkan-loader/loader/vk_loader_platform.h:374: undefined reference to `InitOnceExecuteOnce'
-/usr/bin/i686-w64-mingw32-ld: /home/vlc-4.x/newbuild/contrib/vulkan-loader/loader/vk_loader_platform.h:374: undefined reference to `InitOnceExecuteOnce'
-/usr/bin/i686-w64-mingw32-ld: /home/vlc-4.x/newbuild/contrib/vulkan-loader/loader/vk_loader_platform.h:374: undefined reference to `InitOnceExecuteOnce'
+pg. 9   Scroll Text no longer exists
+pg. 10  Show Text is no longer a tool option (note: can publish from text
+        entry instead - guide needs updating)
+pg. 10  Translate is now under the Entry ribbon, not the Tools ribbon
+pg. 11  Zoom 1 button does not exist
+pg. 14  Spell Effects - last line says "See more pg x" - missing page number
+        (believed to be pg. 27)
+pg. 16  Text Background button does not exist
+pg. 17  Publish Options (Publish Visible, Publish Zoom) are now under Player
+        Camera View section, not the right-side publish buttons area
+pg. 17  Publish Preview does not exist
+pg. 29  Player Window initiative tracker icons are on the Left, not Right
+pg. 32  Typo: "In Party View you can party can be given a token image"
+pg. 34  Stray "1" in sentence: "and import 1 the character icon as well"
 
 
+==============================================================================
+CODE CLEANUP
+==============================================================================
 
-
-\\wsl.localhost\Ubuntu\home\vlc-4.x\contrib\src\ffmpeg
+- Remove BattleDialogModelMonsterCombatant if no longer needed
+- Clean up all commented-out dead code in battleframe.cpp, layertoken.cpp,
+  layertoken.h, map.cpp, layerfow.cpp
+- Fix emit itemMoved - second parameter missing/wrong
+- Audit BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
+- Search and resolve all remaining // TODO: Layers comments
+- Investigate accidental movement circle trigger on right-click release
+- Refactor backend queries into a class to automate versioning and
+  debug query management

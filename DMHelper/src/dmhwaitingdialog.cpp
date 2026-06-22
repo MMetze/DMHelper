@@ -14,6 +14,7 @@ DMHWaitingDialog::DMHWaitingDialog(const QString& statusString, QWidget *parent)
     _rotation(0.0)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     setWindowFlags(Qt::CustomizeWindowHint);
 
     _backgroundImage.load(":/img/data/dmhelper_waiting_image");

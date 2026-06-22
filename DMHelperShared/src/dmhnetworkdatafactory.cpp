@@ -12,12 +12,10 @@ DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     _dataElement(),
     _data(nullptr)
 {
-    QString errorMsg;
-    int errorLine;
-    int errorColumn;
-    if(!_doc.setContent(data, &errorMsg, &errorLine, &errorColumn))
+    QDomDocument::ParseResult contentResult = _doc.setContent(data);
+    if(!contentResult)
     {
-        qDebug() << "[NetworkDataFactory] ERROR identified reading data: unable to parse network reply XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
+        qDebug() << "[NetworkDataFactory] ERROR identified reading data: unable to parse network reply XML at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         qDebug() << "[NetworkDataFactory] Data: " << data;
         return;
     }

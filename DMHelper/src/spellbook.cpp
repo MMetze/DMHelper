@@ -187,17 +187,13 @@ bool Spellbook::readSpellbook(const QString& targetFilename)
 
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+    QDomDocument::ParseResult contentResult = doc.setContent(in.readAll());
 
     file.close();
 
-    if(contentResult == false)
+    if(!contentResult)
     {
-        qDebug() << "[Spellbook] Error reading spellbook XML content. The XML is probably not valid.";
-        qDebug() << errMsg << errRow << errColumn;
+        qDebug() << "[Spellbook] Error reading spellbook XML content. The XML is probably not valid at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         QMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML is invalid"));
         return false;
     }

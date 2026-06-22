@@ -20,7 +20,7 @@ void Party::inputXML(const QDomElement &element, bool isImport)
 {
     setIcon(element.attribute("icon"));
 
-    CampaignObjectBase::inputXML(element, isImport);
+    EncounterText::inputXML(element, isImport);
 }
 
 void Party::copyValues(const CampaignObjectBase* other)
@@ -100,5 +100,5 @@ void Party::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
     else
         element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
 
-    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+    EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);
 }

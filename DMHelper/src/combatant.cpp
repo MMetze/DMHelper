@@ -621,13 +621,9 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 
     QString iconPath = getIconFileLocal();
     if(iconPath.isEmpty())
-    {
         element.setAttribute("icon", QString(""));
-    }
     else
-    {
         element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
-    }
 
     if(getAttacks().count() > 0)
     {

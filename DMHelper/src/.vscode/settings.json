@@ -1,0 +1,7 @@
+{
+    "C_Cpp.enabled": false
+    "clangd.path": "C:/Qt/Tools/QtCreator/bin/clang/bin/clangd.exe",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/../out/build/windows-debug"
+    ]
+}

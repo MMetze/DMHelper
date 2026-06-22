@@ -11,6 +11,8 @@
 #include "layerframe.h"
 #include "layergrid.h"
 #include "layereffect.h"
+#include "layerparticle.h"
+#include "layerdraw.h"
 #include "ribbonframe.h"
 #include "publishglrenderer.h"
 #include "mapblankdialog.h"
@@ -32,6 +34,7 @@ LayersEditDialog::LayersEditDialog(LayerScene& scene, BattleDialogModel* model, 
     _model(model)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     _layerLayout = new QVBoxLayout;
     _layerLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -99,7 +102,7 @@ void LayersEditDialog::addLayer()
     items << tr("Image") << tr("Video") << tr("Effect Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
-    items << tr("Grid") << tr("Blank") << tr("Cloud Effect");
+    items << tr("Grid") << tr("Blank") << tr("Cloud Effect") << tr("Particle Effect") << tr("Drawing Layer");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -165,6 +168,14 @@ void LayersEditDialog::addLayer()
     else if(selectedItem == tr("Cloud Effect"))
     {
         newLayer = new LayerEffect(QString("Cloud Effect"));
+    }
+    else if(selectedItem == tr("Particle Effect"))
+    {
+        newLayer = new LayerParticle(QString("Particle Effect"));
+    }
+    else if(selectedItem == tr("Drawing Layer"))
+    {
+        newLayer = new LayerDraw(QString("Draw Layer"));
     }
     else
     {

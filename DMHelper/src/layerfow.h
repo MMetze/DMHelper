@@ -4,7 +4,6 @@
 #include "layer.h"
 #include "mapcontent.h"
 #include <QImage>
-#include <QPixmap>
 
 class PublishGLBattleBackground;
 class QGraphicsPixmapItem;

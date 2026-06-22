@@ -12,6 +12,7 @@ TextPublishDialog::TextPublishDialog(QWidget *parent) :
     mouseDownPos()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     connect(ui->btnPublish, SIGNAL(clicked()), this, SLOT(publishTextImage()));
     connect(this, SIGNAL(publishImage(QImage, const QColor&)), this, SLOT(setPreviewImage(QImage, const QColor&)));

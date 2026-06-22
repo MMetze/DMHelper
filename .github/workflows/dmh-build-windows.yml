@@ -3,143 +3,89 @@ name: DMHelper CI Windows Workflow
 on:
   workflow_dispatch:
 
-env:
-  SOURCE_DIR:   ${{ github.workspace }}
-  QT_VERSION: 6.6.0
-  QT_INSTALLER_VERSION: 4.7
-  MSVC_VERSION: 2019
-  INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.exe
-  ZIPARTIFACT: DMHelper-64-bit-release.zip
-
 jobs:
-  build-DMH-win64:
+  build-windows:
+    runs-on: windows-2022
 
-    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
 
     steps:
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        aqtversion: '==3.1.*'
-        version: '6.6.0'
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2019_64'
-        cache: 'true'
-        modules: 'qtmultimedia qtnetworkauth qtimageformats'
-        tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2019_x64 tools_ifw'
-        add-tools-to-path: 'true'
-        archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
-        
-    - name: Check out the DMHelper source tree
-      uses: actions/checkout@v3
-    
-    - name: Print current working dir
-      run: |
-        echo Workspace is: ${{ github.workspace }}
-        ls DMHelper
-        cd DMHelper
-        pwd
-        echo 'runner.workspace === ${{ runner.workspace }}'
-        echo 'github.workspace === ${{ github.workspace }}'
-        ls ${{env.Qt6Dir}}
-        Get-ChildItem -Recurse -Directory
-        # echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator
-        # cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin
-        # Get-ChildItem -Recurse -Directory
-        # echo STOP!
-        # Dosomethingthatbreaks
-        
-    - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url:    http://download.qt.io/official_releases/jom/jom.zip
-        target: ${{ runner.temp }}\
-        
-    - name: Unzip JOM
-      working-directory: ${{ runner.temp }}
-      run:  |
-        7z x jom.zip -ojom
-    
-    - name: Set up Visual Studio shell
-      uses: egor-tensin/vs-shell@v2
-      with:
-        arch: x64
-        
-    - name: Set up environment for build
-      run: |
-        echo "Current environmental path: ${{env.PATH}}"
-        cd DMHelper
-        mkdir bin64
-        mkdir bin64\config
-        mkdir bin64\packages
-        mkdir bin64\packages\com.dmhelper.app
-        mkdir bin64\packages\com.dmhelper.app\meta
-        mkdir bin64\packages\com.dmhelper.app\data
-        mkdir bin64\packages\com.dmhelper.app\data\bestiary
-        mkdir bin64\packages\com.dmhelper.app\data\doc
-        mkdir bin64\packages\com.dmhelper.app\data\pkgconfig
-        mkdir bin64\packages\com.dmhelper.app\data\plugins
-        mkdir bin64\packages\com.dmhelper.app\data\resources
-        mkdir bin64\packages\com.dmhelper.app\data\resources\tables
-        xcopy /s src\installer\* bin64\*
-        Rename-Item -Path "bin64\packages\com.dmhelper.app\meta\installscript64.qs" -NewName "installscript.qs"
-        ls
+      # -------------------------
+      # Checkout repository
+      # -------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Build DMHelper for Windows
-      run: |
-        cd DMHelper
-        mkdir build-64_bit-release
-        cd build-64_bit-release
-        qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
-        ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
-        ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
+      # -------------------------
+      # Install Qt (MSVC 2022)
+      # -------------------------
+      - name: Install Qt 6.10.1 (MSVC 2022)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.10.1
+          arch: win64_msvc2022_64
+          tools: 'tools_vcredist,qt.tools.vcredist_64 tools_vcredist,qt.tools.vcredist_msvc2022_x64 tools_ifw'
+          cache: true
+          modules: 'qtmultimedia qtnetworkauth qtimageformats'
+          add-tools-to-path: 'true'
+          archives: 'qttranslations qttools qtsvg qtbase opengl32sw d3dcompiler_47'
 
-    - name: Copy binary resources
-      run: |
-        cd DMHelper
-        cd build-64_bit-release
-        ls
-        xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
-        xcopy D:\a\DMHelper\Qt\6.6.0\msvc2019_64\bin\Qt6Xml.dll ..\bin64\packages\com.dmhelper.app\data\
-        xcopy ..\src\bin-win64\* ..\bin64\packages\com.dmhelper.app\data\*
-        xcopy /s ..\src\bestiary\* ..\bin64\packages\com.dmhelper.app\data\resources\*
-        xcopy /s ..\src\doc\* ..\bin64\packages\com.dmhelper.app\data\doc\*
-        xcopy /s ..\src\bin-win64\pkgconfig\* ..\bin64\packages\com.dmhelper.app\data\pkgconfig\*
-        xcopy /s ..\src\bin-win64\plugins\* ..\bin64\packages\com.dmhelper.app\data\plugins\*
-        xcopy /s ..\src\resources\* ..\bin64\packages\com.dmhelper.app\data\resources\*
+      # -------------------------
+      # Ensure 7-Zip exists
+      # (Windows runner already has it, but we assert it)
+      # -------------------------
+      - name: Verify 7-Zip
+        run: |
+          Test-Path "C:\Program Files\7-Zip\7z.exe"
+          if (-not (Test-Path "C:\Program Files\7-Zip\7z.exe")) {
+            throw "7-Zip not found"
+          }
 
-    - name: Call Deploy for Qt
-      run: |
-        cd DMHelper
-        cd build-64_bit-release
-        windeployqt --compiler-runtime --no-opengl-sw --no-svg ..\bin64\packages\com.dmhelper.app\data
-        
-    - name: Create the installer
-      run: |
-        cd DMHelper
-        cd bin64
-        ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator -c config\config_win64.xml -p packages --resources config\resources.qrc DMHelper-64-bit-release-Installer
-        cd ..
-        move .\bin64\DMHelper-64-bit-release-Installer.exe .\DMHelper-64-bit-release-Installer.exe
-        
-    - name: Zip the build
-      run:  |
-        cd DMHelper
-        7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
-    
-    - name: Output the workspace directory tree contents
-      run: |
-        Get-ChildItem -Recurse
+      # -------------------------
+      # Check the full file tree
+      # -------------------------
+      - name: Debug Workspace output pre-build
+        working-directory: ${{ runner.workspace }}
+        run: |
+          echo 'runner.workspace === ${{ runner.workspace }}'
+          echo 'github.workspace === ${{ github.workspace }}'
+          echo ${{env.QT_ROOT_DIR}}
+          Get-ChildItem -Recurse -File
 
-    - name: Save the zip file
-      uses: actions/upload-artifact@master
-      with:
-        name: ${{ env.ZIPARTIFACT }}
-        path: ${{ github.workspace }}\DMHelper\${{ env.ZIPARTIFACT }}
+      # -------------------------
+      # Run build & deploy script
+      # -------------------------
+      - name: Build DMHelper (MSVC Release)
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          Get-ChildItem -Recurse -File -Filter "buildanddeploy_msvc64_cmake.ps1"
+          "y" | pwsh -NoProfile -ExecutionPolicy Bypass -File buildanddeploy_msvc64_cmake.ps1
+      
+      # -------------------------
+      # Check the full file tree
+      # -------------------------
+      - name: Debug Workspace output post-build
+        working-directory: ${{ runner.workspace }}
+        run: |
+          Get-ChildItem -Recurse -File
 
-    - name: Save the install file
-      uses: actions/upload-artifact@master
-      with:
-        name: ${{ env.INSTALLERARTIFACT }}
-        path: ${{ github.workspace }}\DMHelper\${{ env.INSTALLERARTIFACT }}
+      # -------------------------
+      # Upload artifacts
+      # -------------------------
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-Windows-Installer
+          path: |
+            DMHelper/DMHelper-64-bit-release-Installer.exe
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Upload ZIP Distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-Windows-Zip
+          path: |
+            DMHelper/DMHelper-64-bit-release.zip
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

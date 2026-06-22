@@ -168,6 +168,15 @@ QString CampaignObjectBase::getName() const
     return objectName();
 }
 
+QString CampaignObjectBase::getTreePath() const
+{
+    const CampaignObjectBase* parentObject = qobject_cast<const CampaignObjectBase*>(parent());
+    if(parentObject)
+        return parentObject->getTreePath() + QString(" > ") + getName();
+    else
+        return getName();
+}
+
 int CampaignObjectBase::getRow() const
 {
     return _row;

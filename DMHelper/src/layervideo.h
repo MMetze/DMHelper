@@ -45,6 +45,8 @@ public:
     virtual bool getPlayAudio() const;
     virtual QImage getScreenshot() const;
 
+    virtual bool isLooping() const;
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene* scene) override;
@@ -64,6 +66,7 @@ public slots:
     virtual void uninitialize() override;
     virtual void playerGLSetUniforms(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
     virtual void setPlayAudio(bool playAudio);
+    virtual void setLooping(bool looping);
 
 signals:
     void updateProjectionMatrix();
@@ -106,6 +109,7 @@ protected:
     // Core contents
     QString _filename;
     bool _playAudio;
+    bool _looping;
     QImage _layerScreenshot;
     QGraphicsScene* _dmScene;
 };

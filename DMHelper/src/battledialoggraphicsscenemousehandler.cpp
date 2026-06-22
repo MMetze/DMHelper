@@ -189,7 +189,7 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mousePressEvent(QGraphicsSce
     _distanceText->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
 
     QFont textFont = _distanceText->font();
-    textFont.setPointSize(10);
+    textFont.setPointSize(16);
     _distanceText->setFont(textFont);
 
     emit distanceItemChanged(_distanceLine, _distanceText);
@@ -291,7 +291,7 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mousePressEvent(QGraphic
         _distanceText->setText(QString::number(_heightDelta, 'f', 1) + QChar::LineFeed + QString("(0)"));
     _distanceText->setBrush(QBrush(_color));
     QFont textFont = _distanceText->font();
-    textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+    textFont.setPointSize(16);
     _distanceText->setFont(textFont);
     _distanceText->setPos(_mouseDownPos + QPointF(5.0, 5.0));
     _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
@@ -379,22 +379,32 @@ BattleDialogGraphicsSceneMouseHandlerRaw::~BattleDialogGraphicsSceneMouseHandler
 
 bool BattleDialogGraphicsSceneMouseHandlerRaw::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    emit rawMouseMove(mouseEvent->scenePos());
-    mouseEvent->accept();
+    if(mouseEvent)
+    {
+        emit rawMouseMove(mouseEvent->scenePos(), mouseEvent->buttons(), mouseEvent->modifiers());
+        mouseEvent->accept();
+    }
+
     return false;
 }
 
 bool BattleDialogGraphicsSceneMouseHandlerRaw::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    emit rawMousePress(mouseEvent->scenePos());
-    mouseEvent->accept();
+    if(mouseEvent)
+    {
+        emit rawMousePress(mouseEvent->scenePos(), mouseEvent->buttons(), mouseEvent->modifiers());
+        mouseEvent->accept();
+    }
     return false;
 }
 
 bool BattleDialogGraphicsSceneMouseHandlerRaw::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    emit rawMouseRelease(mouseEvent->scenePos());
-    mouseEvent->accept();
+    if(mouseEvent)
+    {
+        emit rawMouseRelease(mouseEvent->scenePos(), mouseEvent->buttons(), mouseEvent->modifiers());
+        mouseEvent->accept();
+    }
     return false;
 }
 

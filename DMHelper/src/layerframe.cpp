@@ -45,6 +45,7 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     ui->edtName->installEventFilter(this);
     ui->btnSettings->setVisible(layer.hasSettings());
     ui->btnPlayAudio->setVisible(layer.hasAudio());
+    ui->btnLooping->setVisible(layer.hasAudio());
 
     setLineWidth(5);
     setAutoFillBackground(true);
@@ -69,10 +70,13 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
         if(layerVideo)
         {
             setPlayAudio(layerVideo->getPlayAudio());
+            setLooping(layerVideo->isLooping());
             updateAudioIcon();
             connect(layerVideo, &LayerVideo::screenshotAvailable, this, &LayerFrame::updateLayerData);
             connect(ui->btnPlayAudio, &QAbstractButton::clicked, this, &LayerFrame::handlePlayAudioClicked);
             connect(this, &LayerFrame::playAudioChanged, layerVideo, &LayerVideo::setPlayAudio);
+            connect(ui->btnLooping, &QAbstractButton::clicked, this, &LayerFrame::handleLoopingClicked);
+            connect(this, &LayerFrame::loopingChanged, layerVideo, &LayerVideo::setLooping);
         }
     }
 }
@@ -177,6 +181,12 @@ void LayerFrame::setPlayAudio(bool playAudio)
 {
     if(ui->btnPlayAudio->isChecked() != playAudio)
         ui->btnPlayAudio->setChecked(playAudio);
+}
+
+void LayerFrame::setLooping(bool looping)
+{
+    if(ui->btnLooping->isChecked() != looping)
+        ui->btnLooping->setChecked(looping);
 }
 
 void LayerFrame::setSelected(bool selected)
@@ -304,6 +314,12 @@ void LayerFrame::handlePlayAudioClicked()
     updateAudioIcon();
     emit selectMe(this);
     emit playAudioChanged(ui->btnPlayAudio->isChecked());
+}
+
+void LayerFrame::handleLoopingClicked()
+{
+    emit selectMe(this);
+    emit loopingChanged(ui->btnLooping->isChecked());
 }
 
 void LayerFrame::handleLockClicked()

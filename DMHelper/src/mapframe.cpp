@@ -28,6 +28,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QMessageBox>
 #include <QDebug>
+#include <QtMath>
 
 MapFrame::MapFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -344,7 +345,21 @@ void MapFrame::resizeGrid()
     _gridSizer = new GridSizer(currentScale);
     _gridSizer->setBackgroundColor(QColor(255,255,255,204));
     _scene->addItem(_gridSizer);
-    _gridSizer->setPos(currentScale, currentScale);
+
+    // Position the grid sizer at the first grid-aligned point inside the visible area
+    QRectF visibleRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
+    qreal xPixelOffset = 0.0;
+    qreal yPixelOffset = 0.0;
+    if(gridLayer)
+    {
+        xPixelOffset = currentScale * gridLayer->getConfig().getGridOffsetX() / 100.0;
+        yPixelOffset = currentScale * gridLayer->getConfig().getGridOffsetY() / 100.0;
+    }
+    // Find the first grid line at or past the visible left/top, then add one grid square
+    qreal xPos = xPixelOffset + qCeil((visibleRect.left() - xPixelOffset) / currentScale) * currentScale + currentScale;
+    qreal yPos = yPixelOffset + qCeil((visibleRect.top() - yPixelOffset) / currentScale) * currentScale + currentScale;
+    _gridSizer->setPos(xPos, yPos);
+
     connect(_gridSizer, &GridSizer::accepted, this, &MapFrame::gridSizerAccepted);
     connect(_gridSizer, &GridSizer::rejected, this, &MapFrame::gridSizerRejected);
 }
@@ -512,6 +527,11 @@ void MapFrame::cancelSelect()
     editModeToggled(DMHelper::EditMode_Move);
 }
 
+void MapFrame::ribbonTabChanged()
+{
+    editModeToggled(DMHelper::EditMode_Move);
+}
+
 void MapFrame::setErase(bool enabled)
 {
     _erase = enabled;
@@ -636,6 +656,11 @@ void MapFrame::setPointerFile(const QString& filename)
         setMapCursor();
         emit pointerFileNameChanged(_pointerFile);
     }
+}
+
+void MapFrame::setDrawOn(bool enabled)
+{
+
 }
 
 void MapFrame::setTargetLabelSize(const QSize& targetSize)
@@ -782,6 +807,7 @@ void MapFrame::initializeMap()
     connect(_scene, &MapFrameScene::deleteMarker, this, &MapFrame::deleteMapMarker);
     connect(_scene, &MapFrameScene::centerView, this, &MapFrame::centerWindow);
     connect(_scene, &MapFrameScene::clearFoW, this, &MapFrame::clearFoW);
+    connect(_scene, &MapFrameScene::editFile, this, &MapFrame::editMapFile);
 
     connect(_scene, &MapFrameScene::itemChanged, this, &MapFrame::handleItemChanged);
     connect(_scene, &MapFrameScene::changed, this, &MapFrame::handleSceneChanged);
@@ -1440,7 +1466,7 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         _distanceText = _scene->addSimpleText(QString("0"));
         _distanceText->setBrush(QBrush(_mapSource->getDistanceLineColor()));
         QFont textFont = _distanceText->font();
-        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        textFont.setPointSize(16);
         _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
         _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
@@ -1507,7 +1533,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         _distanceText = _scene->addSimpleText(QString("0"));
         _distanceText->setBrush(QBrush(_mapSource->getDistanceLineColor()));
         QFont textFont = _distanceText->font();
-        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        textFont.setPointSize(16);
         _distanceText->setFont(textFont);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5, 5)));
         _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
@@ -1849,7 +1875,16 @@ void MapFrame::gridSizerAccepted()
     if(!_gridSizer)
         return;
 
-    setPartyScale(_gridSizer->getSize());
+    int intSize = _gridSizer->getSize();
+    int xOffset = static_cast<int>(_gridSizer->x()) % intSize;
+    int yOffset = static_cast<int>(_gridSizer->y()) % intSize;
+
+    setPartyScale(intSize);
+
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    if(gridLayer)
+        gridLayer->setGridScaleAndOffset(intSize, (100 * xOffset) / intSize, (100 * yOffset) / intSize);
+
     gridSizerRejected();
 }
 

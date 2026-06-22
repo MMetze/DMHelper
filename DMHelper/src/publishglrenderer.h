@@ -68,6 +68,7 @@ protected:
     bool _pointerActive;
     QPointF _pointerPos;
     QString _pointerFile;
+    qreal _pointerScaleFactor;
 };
 
 #endif // PUBLISHGLRENDERER_H

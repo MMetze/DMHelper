@@ -18,6 +18,7 @@ BattleDialogEffectSettingsObjectVideo::BattleDialogEffectSettingsObjectVideo(con
     _resizing(false)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->edtName->setText(effect.getTip());
     ui->chkActive->setChecked(effect.getEffectActive());

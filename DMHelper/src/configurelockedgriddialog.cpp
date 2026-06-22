@@ -23,6 +23,7 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     _menu(new QMenu(this))
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     _scene = new QGraphicsScene();
     ui->graphicsView->setScene(_scene);

@@ -10,6 +10,7 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(const BattleDialogModelEf
     _color(effect.getColor())
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->edtName->setText(effect.getTip());
     ui->chkActive->setChecked(effect.getEffectActive());

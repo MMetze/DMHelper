@@ -55,6 +55,7 @@ NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, Ca
     _imageColor()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     connect(ui->edtEntryName, &QLineEdit::textChanged, this, &NewEntryDialog::validateNewEntry);
     connect(ui->edtLinkedFile, &QLineEdit::textChanged, this, &NewEntryDialog::validateNewEntry);
@@ -346,7 +347,7 @@ CampaignObjectBase* NewEntryDialog::createCharacterEntry()
 
         return character;
     }
-    else if (ui->buttonGroupType->checkedButton() == ui->btnCharacterMonster)
+    else if (ui->buttonGroupCharacter->checkedButton() == ui->btnCharacterMonster)
     {
         QString selectedMonster = ui->cmbCharacterMonster->currentText();
         if(selectedMonster.isEmpty())
@@ -368,7 +369,7 @@ CampaignObjectBase* NewEntryDialog::createCharacterEntry()
 
         return character;
     }
-    else if (ui->buttonGroupType->checkedButton() == ui->btnCharacterDnDBeyond)
+    else if (ui->buttonGroupCharacter->checkedButton() == ui->btnCharacterDnDBeyond)
     {
         return nullptr; // Handled in MainWindow with isImportNeeded()
     }
@@ -584,7 +585,55 @@ CampaignObjectBase* NewEntryDialog::createBattleEntry()
 
 void NewEntryDialog::validateNewEntry()
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(isSelectedEntryValid());
+    bool valid = isSelectedEntryValid();
+    QPushButton* okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+    okButton->setEnabled(valid);
+
+    if(valid)
+    {
+        okButton->setToolTip(QString());
+    }
+    else
+    {
+        QStringList missing;
+
+        if(getNewEntryName().isEmpty())
+            missing << tr("Entry name is required");
+
+        if(ui->buttonGroupType->checkedButton() == ui->btnTypeLinked)
+        {
+            if(ui->edtLinkedFile->text().isEmpty())
+                missing << tr("Linked file must be specified");
+        }
+        else if(ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)
+        {
+            if((ui->buttonGroupCharacter->checkedButton() == ui->btnCharacterMonster) && (ui->cmbCharacterMonster->currentText().isEmpty()))
+                missing << tr("Monster must be selected");
+            else if((ui->buttonGroupCharacter->checkedButton() == ui->btnCharacterDnDBeyond) && (ui->edtCharacterDndBeyond->text().isEmpty()))
+                missing << tr("D&D Beyond link is required");
+        }
+        else if(ui->buttonGroupType->checkedButton() == ui->btnTypeMedia)
+        {
+            if(ui->edtMediaFile->text().isEmpty())
+                missing << tr("Media file must be specified");
+            else if(_imageType == DMHelper::FileType_Unknown)
+                missing << tr("Media file type is not recognized");
+        }
+        else if(ui->buttonGroupType->checkedButton() == ui->btnTypeMap)
+        {
+            if(ui->edtMapFile->text().isEmpty())
+                missing << tr("Map file must be specified");
+            else if(_imageType == DMHelper::FileType_Unknown)
+                missing << tr("Map file type is not recognized");
+        }
+        else if(ui->buttonGroupType->checkedButton() == ui->btnTypeCombat)
+        {
+            if(ui->edtCombatFile->text().isEmpty())
+                missing << tr("Combat map must be specified");
+        }
+
+        okButton->setToolTip(missing.join(QStringLiteral("\n")));
+    }
 }
 
 void NewEntryDialog::newPageSelected()
@@ -643,6 +692,7 @@ void NewEntryDialog::newPageSelected()
     }
 
     validateNewEntry();
+    ui->edtEntryName->setFocus();
 }
 
 void NewEntryDialog::readTextFile(const QString& filename)

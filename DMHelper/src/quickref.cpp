@@ -154,16 +154,13 @@ void QuickRef::readQuickRef(const QString& quickRefFile)
 
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+    QDomDocument::ParseResult contentResult = doc.setContent(in.readAll());
 
     file.close();
 
-    if(contentResult == false)
+    if(!contentResult)
     {
-        qDebug() << "[QuickRef] ERROR: Unable to parse the quickref data file: " << errMsg << errRow << errColumn;
+        qDebug() << "[QuickRef] ERROR: Unable to parse the quickref data file at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         return;
     }
 

@@ -7,6 +7,7 @@ MapBlankDialog::MapBlankDialog(QWidget *parent) :
     ui(new Ui::MapBlankDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     ui->btnColor->setRotationVisible(false);
     ui->btnColor->setColor(Qt::white);
 

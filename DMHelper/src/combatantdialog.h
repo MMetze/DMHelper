@@ -69,6 +69,8 @@ private:
     int _iconIndex;
     QString _iconFile;
 
+    static QString s_lastMonsterClass;
+
 };
 
 #endif // COMBATANTDIALOG_H

@@ -42,7 +42,6 @@ private slots:
 private:
     void setRecursiveChecked(QTreeWidgetItem *item, bool checked);
     void setRecursiveParentChecked(QTreeWidgetItem *item);
-    void setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem);
     void checkCharacters();
     void refreshMonsters();
     void recursiveRefreshMonsters(QTreeWidgetItem* widgetItem);

@@ -14,6 +14,8 @@
 #include <QCompleter>
 #include <QDebug>
 
+QString CombatantDialog::s_lastMonsterClass;
+
 CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
@@ -21,6 +23,7 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     _iconFile()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->edtCount->setValidator(new QIntValidator(1, 100, this));
     ui->edtHitPointsLocal->setValidator(new QIntValidator(-10, 1000, this));
@@ -50,6 +53,14 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     completer->setCompletionMode(QCompleter::PopupCompletion);
     ui->cmbMonsterClass->setCompleter(completer);
+
+    // Restore the last used monster class
+    if(!s_lastMonsterClass.isEmpty())
+    {
+        int lastIndex = ui->cmbMonsterClass->findText(s_lastMonsterClass);
+        if(lastIndex >= 0)
+            ui->cmbMonsterClass->setCurrentIndex(lastIndex);
+    }
 
     Layer* currentLayer = layerScene.getPriority(DMHelper::LayerType_Tokens);
     int currentLayerIndex = -1;
@@ -190,6 +201,7 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
 
 void CombatantDialog::accept()
 {
+    s_lastMonsterClass = ui->cmbMonsterClass->currentText();
     QDialog::accept();
 }
 

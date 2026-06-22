@@ -22,6 +22,7 @@ signals:
     void deleteMarker(UndoMarker* marker);
     void centerView(const QPointF& pos);
     void clearFoW();
+    void editFile();
 
 protected slots:
     void handleAddMarker();
@@ -29,6 +30,7 @@ protected slots:
     void handleDeleteMarker();
     void handleCenterView();
     void handleClearFoW();
+    void handleEditFile();
 
 protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent);

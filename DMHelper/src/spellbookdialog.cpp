@@ -24,6 +24,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     _conditionLayout(nullptr)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     connect(ui->btnLeft, SIGNAL(clicked()), this, SLOT(previousSpell()));
     connect(ui->btnRight, SIGNAL(clicked()), this, SLOT(nextSpell()));

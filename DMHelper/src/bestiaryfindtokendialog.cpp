@@ -135,12 +135,10 @@ void BestiaryFindTokenDialog::urlRequestFinished(QNetworkReply *reply)
 #endif
 
     QDomDocument doc;
-    QString errorMsg;
-    int errorLine;
-    int errorColumn;
-    if(!doc.setContent(bytes, &errorMsg, &errorLine, &errorColumn))
+    QDomDocument::ParseResult contentResult = doc.setContent(bytes);
+    if(!contentResult)
     {
-        qDebug() << "[BestiaryFindTokenDialog] ERROR identified reading data: unable to parse network reply XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
+        qDebug() << "[BestiaryFindTokenDialog] ERROR identified reading data: unable to parse network reply XML at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         qDebug() << "[BestiaryFindTokenDialog] Data: " << bytes;
         return;
     }

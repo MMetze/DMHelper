@@ -13,6 +13,13 @@ BattleDialogLogView::BattleDialogLogView(const BattleDialogModel& model, const B
     ui(new Ui::BattleDialogLogView)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
+
+    // Fix parchment background for QTableWidget viewports in Qt6
+    QPalette parchPal;
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->tblParty->setPalette(parchPal);
+    ui->tblEnemies->setPalette(parchPal);
 
     int rounds = 1;
     int totalPartyDamage = 0;

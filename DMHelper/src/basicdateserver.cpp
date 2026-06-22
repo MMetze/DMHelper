@@ -267,16 +267,13 @@ void BasicDateServer::readDateInformation(const QString& calendarFile)
 
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+    QDomDocument::ParseResult contentResult = doc.setContent(in.readAll());
 
     file.close();
 
-    if(contentResult == false)
+    if(!contentResult)
     {
-        qDebug() << "[BasicDateServer] ERROR: Unable to parse the calendar data file: " << errMsg << errRow << errColumn;
+        qDebug() << "[BasicDateServer] ERROR: Unable to parse the calendar data file XML at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         return;
     }
 

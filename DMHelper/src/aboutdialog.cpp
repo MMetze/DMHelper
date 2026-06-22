@@ -9,6 +9,12 @@ AboutDialog::AboutDialog(QWidget *parent) :
     ui(new Ui::AboutDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
+
+    // Fix parchment background for QTextEdit viewport in Qt6
+    QPalette parchPal = ui->edtLicenses->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->edtLicenses->setPalette(parchPal);
 
     QString licenseText;
 

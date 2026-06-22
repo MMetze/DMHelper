@@ -32,6 +32,7 @@ BestiaryPopulateTokensDialog::BestiaryPopulateTokensDialog(const OptionsContaine
     _totalMonsters(0)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->chkFill->setChecked(options.getTokenBackgroundFill());
     ui->btnFillColor->setColor(options.getTokenBackgroundFillColor());
@@ -155,12 +156,10 @@ void BestiaryPopulateTokensDialog::urlRequestFinished(QNetworkReply *reply)
 #endif
 
     QDomDocument doc;
-    QString errorMsg;
-    int errorLine;
-    int errorColumn;
-    if(!doc.setContent(bytes, &errorMsg, &errorLine, &errorColumn))
+    QDomDocument::ParseResult contentResult = doc.setContent(bytes);
+    if(!contentResult)
     {
-        qDebug() << "[BestiaryPopulateTokensDialog] ERROR identified reading data: unable to parse network reply XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
+        qDebug() << "[BestiaryPopulateTokensDialog] ERROR identified reading data: unable to parse network reply XML at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         qDebug() << "[BestiaryPopulateTokensDialog] Data: " << bytes;
         reply->deleteLater();
         return;

@@ -41,6 +41,18 @@ CharacterFrame::CharacterFrame(OptionsContainer* options, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Fix parchment background for QAbstractScrollArea viewports in Qt6
+    QPalette parchPal;
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->scrollArea->setPalette(parchPal);
+    ui->conditionScrollArea->setPalette(parchPal);
+    ui->scrollActions->setPalette(parchPal);
+    ui->scrollArea_2->setPalette(parchPal);
+    ui->edtFeatures->setPalette(parchPal);
+    ui->edtEquipment->setPalette(parchPal);
+    ui->edtSpells->setPalette(parchPal);
+    ui->edtNotes->setPalette(parchPal);
+
     ui->edtArmorClass->setValidator(new QIntValidator(0, 100, this));
     ui->edtInitiative->setValidator(new QIntValidator(-10, 100, this));
     ui->edtPassivePerception->setValidator(new QIntValidator(0, 100, this));

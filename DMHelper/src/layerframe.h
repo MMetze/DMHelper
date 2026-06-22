@@ -31,6 +31,7 @@ public:
     void setWidth(int width);
     void setHeight(int height);
     void setPlayAudio(bool playAudio);
+    void setLooping(bool looping);
     void setSelected(bool selected);
 
     const Layer& getLayer() const;
@@ -50,6 +51,7 @@ signals:
     void positionChanged(const QPoint& position);
     void sizeChanged(const QSize& size);
     void playAudioChanged(bool playAudio);
+    void loopingChanged(bool looping);
 
     void linkedUp(LayerFrame* layerFrame);
     void visibilityChanged(LayerFrame* layerFrame);
@@ -69,6 +71,7 @@ protected slots:
     void handleWidthChanged();
     void handleHeightChanged();
     void handlePlayAudioClicked();
+    void handleLoopingClicked();
     void handleLockClicked();
 
     void updateLayerData();

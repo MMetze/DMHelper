@@ -6,6 +6,7 @@ CharacterImportDialog::CharacterImportDialog(QWidget *parent) :
     ui(new Ui::CharacterImportDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 }
 
 CharacterImportDialog::~CharacterImportDialog()

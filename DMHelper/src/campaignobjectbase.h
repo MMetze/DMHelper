@@ -24,6 +24,7 @@ public:
     virtual int getObjectType() const;
     virtual bool getExpanded() const;
     virtual QString getName() const;
+    QString getTreePath() const;
     virtual int getRow() const;
     virtual bool isTreeVisible() const;
 

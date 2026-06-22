@@ -8,6 +8,7 @@ InitiativeListDialog::InitiativeListDialog(QWidget *parent) :
     _combatantLayout(nullptr)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     _combatantLayout = new QVBoxLayout;
     _combatantLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);

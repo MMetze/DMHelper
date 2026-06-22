@@ -255,6 +255,10 @@ void PublishGLMapRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    // Clear the full viewport to the background color to avoid artifacts outside the scissor region
+    f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     if(!_scissorRect.isEmpty())
     {
         qreal pixelRatio = _targetWidget->devicePixelRatio();
@@ -264,10 +268,6 @@ void PublishGLMapRenderer::paintGL()
                      static_cast<GLsizei>(static_cast<qreal>(_scissorRect.width()) * pixelRatio),
                      static_cast<GLsizei>(static_cast<qreal>(_scissorRect.height()) * pixelRatio));
     }
-
-    // Draw the scene
-    f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set the default render program
 #ifdef DEBUG_MAP_RENDERER
@@ -312,10 +312,10 @@ void PublishGLMapRenderer::paintGL()
         }
     }
 
+    paintPointer(f, sceneSize, _shaderModelMatrixRGB);
+
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
-
-    paintPointer(f, sceneSize, _shaderModelMatrixRGB);
 }
 
 void PublishGLMapRenderer::updateProjectionMatrix()
@@ -446,7 +446,7 @@ void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
     if(line)
     {
         QFont textFont;
-        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        textFont.setPixelSize(qBound(12, static_cast<int>(16.0 * _pointerScaleFactor), 200));
         qreal lineDistance = line->length() * _map->getMapScale() / 1000.0;
         QString distanceText;
         distanceText = QString::number(lineDistance, 'f', 1);
@@ -486,7 +486,7 @@ void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
             painterPath.lineTo(path->points().at(i) - pathRect.topLeft());
 
         QFont textFont;
-        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        textFont.setPixelSize(qBound(12, static_cast<int>(16.0 * _pointerScaleFactor), 200));
         qreal pathDistance = painterPath.length() * _map->getMapScale() / 1000.0;
         QString distanceText;
         distanceText = QString::number(pathDistance, 'f', 1);

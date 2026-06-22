@@ -37,7 +37,7 @@
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout" stretch="20,0,0">
@@ -52,20 +52,23 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+          </property>
           <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustToContents</enum>
+           <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
           </property>
           <property name="dragEnabled">
            <bool>true</bool>
           </property>
           <property name="dragDropMode">
-           <enum>QAbstractItemView::InternalMove</enum>
+           <enum>QAbstractItemView::DragDropMode::InternalMove</enum>
           </property>
           <property name="defaultDropAction">
-           <enum>Qt::MoveAction</enum>
+           <enum>Qt::DropAction::MoveAction</enum>
           </property>
           <property name="textElideMode">
-           <enum>Qt::ElideNone</enum>
+           <enum>Qt::TextElideMode::ElideNone</enum>
           </property>
           <property name="uniformRowHeights">
            <bool>true</bool>
@@ -159,10 +162,10 @@
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
+             <enum>QSizePolicy::Policy::Preferred</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -177,10 +180,10 @@
         <item>
          <widget class="PopupsPreviewFrame" name="framePopups">
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
          </widget>
         </item>
@@ -199,10 +202,10 @@
         </font>
        </property>
        <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
+        <enum>QFrame::Shape::StyledPanel</enum>
        </property>
        <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
+        <enum>QFrame::Shadow::Sunken</enum>
        </property>
        <property name="currentIndex">
         <number>0</number>
@@ -219,7 +222,7 @@
      <x>0</x>
      <y>0</y>
      <width>695</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

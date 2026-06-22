@@ -15,6 +15,7 @@ TokenEditDialog::TokenEditDialog(const QString& tokenFilename, bool backgroundFi
     _mouseDownPos()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     initialize(backgroundFill, backgroundFillColor, transparent, transparentColor, transparentLevel, maskApplied, maskFile, frameApplied, frameFile, zoom, offset, browsable);
     if(_editor)
@@ -31,6 +32,7 @@ TokenEditDialog::TokenEditDialog(const QString& tokenFilename, const OptionsCont
     _mouseDownPos()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     initialize(options.getTokenBackgroundFill(),
                options.getTokenBackgroundFillColor(),

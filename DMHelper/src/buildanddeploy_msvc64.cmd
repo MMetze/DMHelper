@@ -42,7 +42,7 @@ mkdir build-64_bit-release
 cd build-64_bit-release
 call vcvarsall.bat x64
 @echo on
-qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
+qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
 jom.exe /d /f Makefile qmake_all
 jom.exe /d /f Makefile.Release
 goto build_done

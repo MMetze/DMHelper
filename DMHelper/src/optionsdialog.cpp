@@ -17,6 +17,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
     _campaign(campaign)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->cmbInitiativeType->addItem("No Initiative", QVariant(DMHelper::InitiativeType_None));
     ui->cmbInitiativeType->addItem("Icons Only", QVariant(DMHelper::InitiativeType_Image));

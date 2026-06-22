@@ -9,6 +9,7 @@ LayerVideoEffectSettings::LayerVideoEffectSettings(QWidget *parent) :
     _editor(nullptr)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->btnTransparentColor->setRotationVisible(false);
     ui->btnColorizeColor->setRotationVisible(false);

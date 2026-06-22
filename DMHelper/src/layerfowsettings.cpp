@@ -12,6 +12,7 @@ LayerFowSettings::LayerFowSettings(QWidget *parent) :
     _texturePixmap()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     connect(ui->btnColor, &ColorPushButton::colorChanged, this, &LayerFowSettings::handleColorChanged);
     connect(ui->edtTextureFile, &QLineEdit::editingFinished, this, &LayerFowSettings::handleTextureFileChanged);

@@ -76,6 +76,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _date(1, 1, 0),
     _time(0, 0),
     _notes(),
+    _lastMonster(),
     _fearCount(0),
     _ruleset(),
     _batchChanges(false),
@@ -116,6 +117,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     BasicDate inputDate(element.attribute("date", QString("")));
     setDate(inputDate);
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time", QString::number(0)).toInt()));
+
+    setLastMonster(element.attribute("lastMonster"));
 
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
@@ -419,6 +422,11 @@ QTime Campaign::getTime() const
     return _time;
 }
 
+QString Campaign::getLastMonster() const
+{
+    return _lastMonster;
+}
+
 int Campaign::getFearCount() const
 {
     return _fearCount;
@@ -503,6 +511,11 @@ void Campaign::addNote(const QString& note)
     emit dirty();
 }
 
+void Campaign::setLastMonster(const QString& monsterName)
+{
+    _lastMonster = monsterName;
+}
+
 void Campaign::setFearCount(int fearCount)
 {
     if((fearCount < 0) || (fearCount == _fearCount))
@@ -565,6 +578,10 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
     element.setAttribute("calendar", BasicDateServer::Instance() ? BasicDateServer::Instance()->getActiveCalendarName() : QString());
     element.setAttribute("date", getDate().toStringDDMMYYYY());
     element.setAttribute("time", getTime().msecsSinceStartOfDay());
+
+    if(!_lastMonster.isEmpty())
+        element.setAttribute("lastMonster", _lastMonster);
+
     if(_fearCount > 0)
         element.setAttribute("fear", _fearCount);
 

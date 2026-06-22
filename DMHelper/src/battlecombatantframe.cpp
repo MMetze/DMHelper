@@ -16,6 +16,11 @@ BattleCombatantFrame::BattleCombatantFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Fix parchment background for QScrollArea viewport in Qt6
+    QPalette parchPal = ui->conditionScrollArea->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->conditionScrollArea->setPalette(parchPal);
+
     ui->edtName->setEnabled(false);
     ui->frameInfoContents->setEnabled(false);
     ui->frameStatsContents->setEnabled(false);
@@ -31,6 +36,11 @@ BattleCombatantFrame::BattleCombatantFrame(BattleDialogModelCombatant* combatant
     _conditionGrid(nullptr)
 {
     ui->setupUi(this);
+
+    // Fix parchment background for QScrollArea viewport in Qt6
+    QPalette parchPal = ui->conditionScrollArea->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->conditionScrollArea->setPalette(parchPal);
 
     ui->edtName->setEnabled(false);
     ui->frameInfoContents->setEnabled(false);

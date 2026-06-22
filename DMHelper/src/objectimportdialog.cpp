@@ -23,6 +23,7 @@ ObjectImportDialog::ObjectImportDialog(Campaign* campaign, CampaignObjectBase* p
     _waitingDlg(nullptr)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     ui->btnImport->setEnabled(false);
 
     if(!campaignFile.isEmpty())

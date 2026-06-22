@@ -49,6 +49,7 @@ RibbonTabBattleView::RibbonTabBattleView(QWidget *parent) :
     connect(ui->spinLineWidth, SIGNAL(valueChanged(int)), this, SIGNAL(distanceLineWidthChanged(int)));
 
     connect(ui->btnPointer, SIGNAL(clicked(bool)), this, SIGNAL(pointerClicked(bool)));
+    connect(ui->btnDraw, SIGNAL(clicked(bool)), this, SIGNAL(drawClicked(bool)));
 }
 
 RibbonTabBattleView::~RibbonTabBattleView()
@@ -162,6 +163,11 @@ void RibbonTabBattleView::setPointerFile(const QString& filename)
     ui->btnPointer->setIcon(QIcon(scaledPointer));
 }
 
+void RibbonTabBattleView::setDrawOn(bool checked)
+{
+    ui->btnDraw->setChecked(checked);
+}
+
 void RibbonTabBattleView::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
@@ -200,6 +206,8 @@ void RibbonTabBattleView::showEvent(QShowEvent *event)
     setWidgetSize(*ui->btnLineType, squareButtonSize, squareButtonSize);
 
     setStandardButtonSize(*ui->lblPointer, *ui->btnPointer, frameHeight);
+
+    setStandardButtonSize(*ui->lblDraw, *ui->btnDraw, frameHeight);
 
     setLineHeight(*ui->line_1, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);

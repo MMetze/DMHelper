@@ -206,6 +206,10 @@ void PublishGLTextRenderer::paintGL()
         updateProjectionMatrix();
     }
 
+    // Clear the full viewport to the background color to avoid artifacts outside the scissor region
+    f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     if(!_scissorRect.isEmpty())
     {
         qreal pixelRatio = _targetWidget->devicePixelRatio();
@@ -215,10 +219,6 @@ void PublishGLTextRenderer::paintGL()
                      static_cast<GLsizei>(static_cast<qreal>(_scissorRect.width()) * pixelRatio),
                      static_cast<GLsizei>(static_cast<qreal>(_scissorRect.height()) * pixelRatio));
     }
-
-    // Draw the scene:
-    f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGB);
     f->glUseProgram(_shaderProgramRGB);

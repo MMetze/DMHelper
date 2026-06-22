@@ -59,6 +59,7 @@ public:
     BasicDate getDate() const;
     QTime getTime() const;
     QStringList getNotes() const;
+    QString getLastMonster() const;
 
     int getFearCount() const;
 
@@ -79,6 +80,7 @@ public slots:
     void setTime(const QTime& time);
     void setNotes(const QString& notes);
     void addNote(const QString& note);
+    void setLastMonster(const QString& monsterName);
     void setFearCount(int fearCount);
     bool validateCampaignIds();
     bool correctDuplicateIds();
@@ -100,6 +102,7 @@ protected:
     BasicDate _date;
     QTime _time;
     QStringList _notes;
+    QString _lastMonster;
     int _fearCount; // Todo: add ruleset-specific data storage
 
     Ruleset _ruleset;

@@ -6,6 +6,7 @@ HelpDialog::HelpDialog(QWidget *parent)
     , ui(new Ui::HelpDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     connect(ui->btnGettingStarted, &QPushButton::clicked, this, &HelpDialog::openGettingStarted);
     connect(ui->btnUsersGuide, &QPushButton::clicked, this, &HelpDialog::openUsersGuide);

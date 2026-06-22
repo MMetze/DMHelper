@@ -7,15 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>986</width>
-    <height>725</height>
+    <height>726</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>DMHelper - Spellbook</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-color: rgb(50, 50, 50);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_7">
    <property name="spacing">

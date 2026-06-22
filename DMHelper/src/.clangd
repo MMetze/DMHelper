@@ -1,0 +1,33 @@
+CompileFlags:
+  Add:
+    - -std=c++17
+    - -IC:/Qt/6.10.1/msvc2022_64/include
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtCore
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtGui
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtWidgets
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtXml
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtMultimedia
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtMultimediaWidgets
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtOpenGL
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtOpenGLWidgets
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtNetwork
+    - -IC:/Qt/6.10.1/msvc2022_64/include/QtUiTools
+    - -IC:/Qt/6.10.1/msvc2022_64/mkspecs/win32-msvc
+  Remove:
+    - "-external:I*"
+    - "/external:*"  Remove:
+    - "-external:I*"
+    - "/external:*"
+    - "-Zc:__cplusplus"
+    - "/TP"
+    - "/nologo"
+    - "/GR"
+    - "/EHsc"
+    - "/RTC1"
+    - "/W3"
+    - "/FS"
+    - "/Zi"
+    - "/Od"
+    - "/Ob0"
+    - "/MDd"
+  Compiler: clang++

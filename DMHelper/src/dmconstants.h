@@ -50,7 +50,21 @@ namespace DMHelper
         ActionType_Path,
         ActionType_Point,
         ActionType_SetMarker,
-        ActionType_Rect
+        ActionType_Rect,
+        ActionType_Line,
+        ActionType_Ellipse,
+        ActionType_Polygon,
+        ActionType_Text
+    };
+
+    enum DrawToolType
+    {
+        DrawToolType_Path = 0,
+        DrawToolType_Line,
+        DrawToolType_Rect,
+        DrawToolType_Ellipse,
+        DrawToolType_Text,
+        DrawToolType_Eraser
     };
 
     enum CombatantType
@@ -147,7 +161,8 @@ namespace DMHelper
         BattleFrameState_Pointer,
         BattleFrameState_FoWSelect,
         BattleFrameState_FoWEdit,
-        BattleFrameState_MapMove
+        BattleFrameState_MapMove,
+        BattleFrameState_Draw
     };
 
     enum AudioType
@@ -194,6 +209,8 @@ namespace DMHelper
         LayerType_VideoEffect,
         LayerType_Blank,
         LayerType_Effect,
+        LayerType_Draw,
+        LayerType_Particle,
     };
 
     enum OverlayType
@@ -212,7 +229,8 @@ namespace DMHelper
         FileType_Markdown,
         FileType_Image,
         FileType_Video,
-        FileType_Audio
+        FileType_Audio,
+        FileType_Directory
     };
 
     enum TransparentType

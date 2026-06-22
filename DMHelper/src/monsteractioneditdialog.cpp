@@ -9,6 +9,7 @@ MonsterActionEditDialog::MonsterActionEditDialog(const MonsterAction& action, bo
     _action(action)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     ui->edtName->setText(action.getName());
     ui->edtDescription->setPlainText(action.getDescription());

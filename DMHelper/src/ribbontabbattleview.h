@@ -42,6 +42,8 @@ public slots:
     void setPointerOn(bool checked);
     void setPointerFile(const QString& filename);
 
+    void setDrawOn(bool checked);
+
 signals:
     void zoomInClicked();
     void zoomOutClicked();
@@ -64,6 +66,8 @@ signals:
     void distanceLineWidthChanged(int lineWidth);
 
     void pointerClicked(bool checked);
+
+    void drawClicked(bool checked);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

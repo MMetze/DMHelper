@@ -47,6 +47,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _originalSize(),
     _targetSize(targetSize),
     _status(-1),
+    _looping(true),
     _selfRestart(false),
     _deleteOnStop(false),
     _stopStatus(0),
@@ -137,6 +138,11 @@ void VideoPlayer::setPlayingAudio(bool playAudio)
     qDebug() << "[VideoPlayer] Playing audio state set, " << this << ", " << COUNT_CALLBACKS;
 #endif
 
+}
+
+void VideoPlayer::setLooping(bool looping)
+{
+    _looping = looping;
 }
 
 bool VideoPlayer::isError() const
@@ -502,7 +508,8 @@ void VideoPlayer::internalStopCheck(int status)
         _stopStatus = 0;
         libvlc_media_player_release(_vlcPlayer);
         _vlcPlayer = nullptr;
-        startPlayer();
+        if(_looping)
+            startPlayer();
         return;
     }
 

@@ -4,7 +4,6 @@
 #include "dmconstants.h"
 #include "characterv2.h"
 #include "map.h"
-#include "audiotrack.h"
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
@@ -35,6 +34,7 @@ ExportDialog::ExportDialog(Campaign& campaign, const QUuid& selectedItem, QWidge
     _waitingDlg(nullptr)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     connect(ui->treeCampaign, &QTreeWidget::itemClicked, this, &ExportDialog::handleCampaignItemChanged);
     connect(ui->btnExport, &QAbstractButton::clicked, this, &ExportDialog::runExport);
     connect(ui->btnAddMonsters, &QAbstractButton::clicked, this, &ExportDialog::addMonsters);
@@ -84,12 +84,12 @@ ExportDialog::~ExportDialog()
 
 QTreeWidgetItem* ExportDialog::createChildObject(CampaignObjectBase* childObject)
 {
-    if(!childObject)
+    if((!childObject) || (childObject->getObjectType() == DMHelper::CampaignType_Base))
         return nullptr;
 
     QTreeWidgetItem* childItem = new QTreeWidgetItem(QStringList(childObject->objectName()));
     childItem->setData(0, Qt::UserRole, QVariant::fromValue(childObject));
-    setObjectIcon(childObject, childItem);
+    childItem->setIcon(0, childObject->getIcon());
     childItem->setCheckState(0, Qt::Unchecked);
     if(!childItem)
         return nullptr;
@@ -294,57 +294,6 @@ void ExportDialog::setRecursiveParentChecked(QTreeWidgetItem *item)
     item->setCheckState(0, Qt::Checked);
     checkObjectContent(item->data(0, Qt::UserRole).value<CampaignObjectBase*>());
     setRecursiveParentChecked(item->parent());
-}
-
-void ExportDialog::setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem)
-{
-    if((!baseObject) || (!widgetItem))
-        return;
-
-    widgetItem->setIcon(0, baseObject->getIcon());
-
-    /*
-    switch(baseObject->getObjectType())
-    {
-        case DMHelper::CampaignType_Party:
-            widgetItem->setIcon(0, QIcon(":/img/data/icon_contentparty.png"));
-            break;
-        case DMHelper::CampaignType_Combatant:
-            {
-                const Characterv2* character = dynamic_cast<const Characterv2*>(baseObject);
-                bool isPC = ((character) && (character->isInParty()));
-                widgetItem->setIcon(0, isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
-            }
-            break;
-        case DMHelper::CampaignType_Map:
-            widgetItem->setIcon(0, QIcon(":/img/data/icon_contentmap.png"));
-            break;
-        case DMHelper::CampaignType_Text:
-        case DMHelper::CampaignType_LinkedText:
-            widgetItem->setIcon(0, QIcon(":/img/data/icon_contenttextencounter.png"));
-            break;
-        case DMHelper::CampaignType_Battle:
-            widgetItem->setIcon(0, QIcon(":/img/data/icon_contentbattle.png"));
-            break;
-        case DMHelper::CampaignType_ScrollingText:
-            widgetItem->setIcon(0, QIcon(":/img/data/icon_contentscrollingtext.png"));
-            break;
-        case DMHelper::CampaignType_AudioTrack:
-            {
-                QString audioIcon(":/img/data/icon_soundboard.png");
-                const AudioTrack* track = dynamic_cast<const AudioTrack*>(baseObject);
-                if(track)
-                {
-                    if(track->getAudioType() == DMHelper::AudioType_Syrinscape)
-                        audioIcon = QString(":/img/data/icon_syrinscape.png");
-                    else if(track->getAudioType() == DMHelper::AudioType_Youtube)
-                        audioIcon = QString(":/img/data/icon_playerswindow.png");
-                }
-                widgetItem->setIcon(0, QIcon(audioIcon));
-            }
-            break;
-    }
-    */
 }
 
 void ExportDialog::checkCharacters()

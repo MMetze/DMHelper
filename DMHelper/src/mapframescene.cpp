@@ -57,6 +57,11 @@ void MapFrameScene::handleClearFoW()
     emit clearFoW();
 }
 
+void MapFrameScene::handleEditFile()
+{
+    emit editFile();
+}
+
 void MapFrameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if(isMapMovement(mouseEvent))
@@ -140,6 +145,10 @@ void MapFrameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
             }
 
             menu.addSeparator();
+
+            QAction* editFileAction = new QAction(QString("Edit File..."), &menu);
+            connect(editFileAction, SIGNAL(triggered()), this, SLOT(handleEditFile()));
+            menu.addAction(editFileAction);
 
             QAction* centerViewAction = new QAction(QString("Center View"), &menu);
             connect(centerViewAction, SIGNAL(triggered()), this, SLOT(centerView()));

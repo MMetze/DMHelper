@@ -12,6 +12,12 @@ WhatsNewDialog::WhatsNewDialog(const QString& dataFile, const QString& dialogTit
     _backgroundImageScaled()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
+
+    // Fix parchment background for QTextBrowser viewport in Qt6
+    QPalette parchPal = ui->textBrowser->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->textBrowser->setPalette(parchPal);
 
     ui->textBrowser->installEventFilter(this);
 

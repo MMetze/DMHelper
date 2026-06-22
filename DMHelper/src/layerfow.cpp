@@ -16,8 +16,8 @@
 #include <QDebug>
 
 const qreal LAYER_FOW_DM_OPACITY = 0.6;
-const qreal LAYER_FOW_DM_DIP = 0.5;
-const qreal LAYER_FOW_DM_RAISE = 1.3;
+const qreal LAYER_FOW_DM_DIP = 0.3;
+const qreal LAYER_FOW_DM_RAISE = 1.0;
 
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},

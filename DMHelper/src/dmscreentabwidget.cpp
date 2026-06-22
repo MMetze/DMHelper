@@ -17,6 +17,7 @@ DMScreenTabWidget::DMScreenTabWidget(const QString& equipmentFile, QWidget *pare
     ui(new Ui::DMScreenTabWidget)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     readEquipment(equipmentFile);
 }
@@ -41,16 +42,13 @@ void DMScreenTabWidget::readEquipment(const QString& equipmentFile)
 
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+    QDomDocument::ParseResult contentResult = doc.setContent(in.readAll());
 
     file.close();
 
-    if(contentResult == false)
+    if(!contentResult)
     {
-        qDebug() << "[DMScreen] ERROR: Unable to parse the equipment data file: " << errMsg << errRow << errColumn;
+        qDebug() << "[DMScreen] ERROR: Unable to parse the equipment data file at line " << contentResult.errorLine << ", column " << contentResult.errorColumn << ": " << contentResult.errorMessage;
         return;
     }
 

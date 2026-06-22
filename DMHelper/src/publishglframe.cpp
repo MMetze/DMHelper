@@ -65,7 +65,7 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
         if(!renderer)
         {
             _showOverlays = false;
-            renderer = new PublishGLImageRenderer(nullptr, grab().toImage(), _renderer->getBackgroundColor());
+            renderer = new PublishGLImageRenderer(nullptr, grabFramebuffer(), _renderer->getBackgroundColor());
             _showOverlays = true;
         }
 

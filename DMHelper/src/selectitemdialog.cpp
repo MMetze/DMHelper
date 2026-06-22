@@ -6,6 +6,7 @@ SelectItemDialog::SelectItemDialog(const QStringList &items, QWidget *parent) :
     ui(new Ui::SelectItemDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     ui->listWidget->addItems(items);
 }
 

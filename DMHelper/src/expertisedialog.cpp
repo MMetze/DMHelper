@@ -8,6 +8,7 @@ ExpertiseDialog::ExpertiseDialog(Character& character, QWidget *parent) :
     _checkMap()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     _checkMap.insert(ui->chkAcrobatics, Combatant::Skills_acrobatics);
     _checkMap.insert(ui->chkArcana, Combatant::Skills_arcana);

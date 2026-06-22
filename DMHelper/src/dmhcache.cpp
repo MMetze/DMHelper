@@ -8,16 +8,16 @@ DMHCache::DMHCache()
 {
 }
 
-QString DMHCache::getCacheFilePath(const QString& filename, const QString& fileExtension)
+QString DMHCache::getCacheFilePath(const QString& filename, const QString& fileExtension, const QString& subdirectory)
 {
     QString cacheFile = getCacheFileName(filename);
     if(cacheFile.isEmpty())
         return QString();
 
-    return getCachePath() + cacheFile + (fileExtension.isEmpty() ? QString() : (QString(".") + fileExtension));
+    return getCachePath(subdirectory) + cacheFile + (fileExtension.isEmpty() ? QString() : (QString(".") + fileExtension));
 }
 
-void DMHCache::ensureCacheExists()
+void DMHCache::ensureCacheExists(const QString& subdirectory)
 {
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if((standardPath.isEmpty()) || (!QFile::exists(standardPath)))
@@ -26,7 +26,7 @@ void DMHCache::ensureCacheExists()
         return;
     }
 
-    QDir cacheDir(getCachePath());
+    QDir cacheDir(getCachePath(subdirectory));
     if(!cacheDir.exists())
     {
         if(QDir().mkpath(cacheDir.absolutePath()))
@@ -36,9 +36,12 @@ void DMHCache::ensureCacheExists()
     }
 }
 
-QString DMHCache::getCachePath()
+QString DMHCache::getCachePath(const QString& subdirectory)
 {
-    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QString("/cache/");
+    if(!subdirectory.isEmpty())
+        return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QString("/cache/") + subdirectory + QString("/");
+    else
+        return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QString("/cache/");
 }
 
 QString DMHCache::getCacheFileName(const QString& filename)

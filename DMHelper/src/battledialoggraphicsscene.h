@@ -81,9 +81,9 @@ signals:
 
     void pointerMove(const QPointF& pos);
 
-    void battleMousePress(const QPointF& pos);
-    void battleMouseMove(const QPointF& pos);
-    void battleMouseRelease(const QPointF& pos);
+    void battleMousePress(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers);
+    void battleMouseMove(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers);
+    void battleMouseRelease(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers);
 
     void mapMoveToggled();
     void mapMousePress(const QPointF& pos);

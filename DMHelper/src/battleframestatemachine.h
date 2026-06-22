@@ -17,20 +17,6 @@ public:
     // Persistent modes are active until deactivated
     // Transient modes are active until used, then fall back to the previous persistent mode
 
-    /*
-    enum BattleFrameStateType
-    {
-        BattleFrameStateType_CombatantEdit = 0,
-        BattleFrameStateType_ZoomSelect,
-        BattleFrameStateType_CameraSelect,
-        BattleFrameStateType_CameraEdit,
-        BattleFrameStateType_Distance,
-        BattleFrameStateType_Pointer,
-        BattleFrameStateType_FoWSelect,
-        BattleFrameStateType_FoWEdit,
-    };
-    */
-
     void addState(BattleFrameState* state);
 
     BattleFrameState* getCurrentState() const;
@@ -60,9 +46,6 @@ private:
     QList<BattleFrameState*> _stateList;
     int _currentStateIndex;
     int _previousStateIndex;
-
-    //BattleFrameStateType _currentState;
-    //BattleFrameStateType _previousState;
 };
 
 #endif // BATTLEFRAMESTATEMACHINE_H

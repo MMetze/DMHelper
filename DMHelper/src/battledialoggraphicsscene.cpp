@@ -1258,6 +1258,7 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
         switch(_inputMode)
         {
             case DMHelper::BattleFrameState_FoWEdit:
+            case DMHelper::BattleFrameState_Draw:
                 result = &_rawMouseHandler;
                 break;
             case DMHelper::BattleFrameState_Pointer:

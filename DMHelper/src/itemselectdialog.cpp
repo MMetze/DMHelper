@@ -6,6 +6,7 @@ ItemSelectDialog::ItemSelectDialog(QWidget *parent) :
     ui(new Ui::ItemSelectDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 }
 
 ItemSelectDialog::~ItemSelectDialog()

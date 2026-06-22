@@ -17,6 +17,12 @@ CharacterImportHeroForgeDialog::CharacterImportHeroForgeDialog(const QString& to
     _token(token)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
+
+    // Fix parchment background for QScrollArea viewport in Qt6
+    QPalette parchPal = ui->scrollArea->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->scrollArea->setPalette(parchPal);
 
     _iconGrid = new QGridLayout;
     _iconGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);

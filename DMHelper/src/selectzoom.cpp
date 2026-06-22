@@ -12,6 +12,7 @@ SelectZoom::SelectZoom(QImage img, QWidget *parent) :
     _mouseDownPos()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     ui->scrollAreaWidgetContents->installEventFilter(this);
 }
 

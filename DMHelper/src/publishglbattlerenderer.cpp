@@ -7,6 +7,7 @@
 #include "battledialogmodelcombatant.h"
 #include "layer.h"
 #include "layertokens.h"
+#include "layerdraw.h"
 #include "characterv2.h"
 #include "campaign.h"
 #include "dmh_opengl.h"
@@ -168,6 +169,14 @@ void PublishGLBattleRenderer::initializeGL()
         }
     }
 
+    QList<Layer*> drawLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Draw);
+    for(int i = 0; i < drawLayers.count(); ++i)
+    {
+        LayerDraw* drawLayer = dynamic_cast<LayerDraw*>(drawLayers.at(i));
+        if(drawLayer)
+            connect(drawLayer, &LayerDraw::contentChanged, this, &PublishGLRenderer::updateWidget);
+    }
+
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
@@ -310,6 +319,10 @@ void PublishGLBattleRenderer::paintGL()
     DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData(), _projectionMatrix);
     f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
 
+    // Clear the full viewport to the background color to avoid artifacts outside the scissor region
+    f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     if(!_scissorRect.isEmpty())
     {
         qreal pixelRatio = _targetWidget->devicePixelRatio();
@@ -319,10 +332,6 @@ void PublishGLBattleRenderer::paintGL()
                      static_cast<GLsizei>(static_cast<qreal>(_scissorRect.width()) * pixelRatio),
                      static_cast<GLsizei>(static_cast<qreal>(_scissorRect.height()) * pixelRatio));
     }
-
-    // Draw the scene:
-    f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _model->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
@@ -340,13 +349,13 @@ void PublishGLBattleRenderer::paintGL()
         _lineTextImage->paintGL(f, nullptr);
     }
 
+    if(_pointerImage)
+        paintPointer(f, _model->getLayerScene().sceneSize().toSize(), _shaderModelMatrixRGB);
+
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
 
     paintInitiative(f);
-
-    if(_pointerImage)
-        paintPointer(f, _model->getLayerScene().sceneSize().toSize(), _shaderModelMatrixRGB);
 }
 
 void PublishGLBattleRenderer::updateProjectionMatrix()
@@ -1262,7 +1271,8 @@ void PublishGLBattleRenderer::createLineToken()
             _lineTextImage = new PublishGLImage(textImage, false);
 
         QPointF textPos = PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), _lineText->pos());
-        _lineTextImage->setPosition(textPos.x(), textPos.y() - textRect.height());
+        _lineTextImage->setPosition(textPos.x(), textPos.y() - textRect.height() * _pointerScaleFactor);
+        _lineTextImage->setScale(_pointerScaleFactor);
     }
 
     emit updateWidget();
@@ -1279,6 +1289,12 @@ void PublishGLBattleRenderer::layerAdded(Layer* layer)
         if(tokenLayer)
             connect(tokenLayer, &LayerTokens::postCombatantDrawGL, this, &PublishGLBattleRenderer::handleCombatantDrawnGL);
     }
+    else if(layer->getFinalType() == DMHelper::LayerType_Draw)
+    {
+        LayerDraw* drawLayer = dynamic_cast<LayerDraw*>(layer);
+        if(drawLayer)
+            connect(drawLayer, &LayerDraw::contentChanged, this, &PublishGLRenderer::updateWidget);
+    }
 
     layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
     emit updateWidget();
@@ -1294,6 +1310,12 @@ void PublishGLBattleRenderer::layerRemoved(Layer* layer)
         LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
         if(tokenLayer)
             disconnect(tokenLayer, &LayerTokens::postCombatantDrawGL, this, &PublishGLBattleRenderer::handleCombatantDrawnGL);
+    }
+    else if(layer->getFinalType() == DMHelper::LayerType_Draw)
+    {
+        LayerDraw* drawLayer = dynamic_cast<LayerDraw*>(layer);
+        if(drawLayer)
+            disconnect(drawLayer, &LayerDraw::contentChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 

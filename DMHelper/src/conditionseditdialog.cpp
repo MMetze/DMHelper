@@ -10,6 +10,7 @@ ConditionsEditDialog::ConditionsEditDialog(QWidget *parent) :
     ui(new Ui::ConditionsEditDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
     ui->frame->setEnabled(false);
 
     setConditionTooltip(*ui->btnBlinded, Combatant::Condition_Blinded);

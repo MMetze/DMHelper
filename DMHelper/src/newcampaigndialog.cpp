@@ -8,6 +8,7 @@ NewCampaignDialog::NewCampaignDialog(const QString& rulesetName, QWidget *parent
     ui(new Ui::NewCampaignDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     QList<QString> rulesets = RuleFactory::Instance()->getRulesetNames();
     for(const QString& ruleset : rulesets)

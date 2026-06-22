@@ -18,6 +18,7 @@ RibbonTabTools::RibbonTabTools(QWidget *parent) :
     connect(ui->btnSpellbook, SIGNAL(clicked(bool)), this, SIGNAL(spellbookClicked()));
     connect(ui->btnSearch, SIGNAL(clicked(bool)), this, SIGNAL(searchClicked()));
 
+    connect(ui->btnMapManager, SIGNAL(clicked(bool)), this, SIGNAL(mapManagerClicked()));
     connect(ui->btnRollDice, SIGNAL(clicked(bool)), this, SIGNAL(rollDiceClicked()));
     connect(ui->btnRandomMarket, SIGNAL(clicked(bool)), this, SIGNAL(randomMarketClicked()));
     connect(ui->btnTimeDate, SIGNAL(clicked(bool)), this, SIGNAL(calendarClicked()));
@@ -69,6 +70,7 @@ void RibbonTabTools::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblQuickRef, *ui->btnQuickRef, frameHeight);
     setStandardButtonSize(*ui->lblSearch, *ui->btnSearch, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblMapManager, *ui->btnMapManager, frameHeight);
     setStandardButtonSize(*ui->lblRollDice, *ui->btnRollDice, frameHeight);
     setStandardButtonSize(*ui->lblRandomMarket, *ui->btnRandomMarket, frameHeight);
     setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate, frameHeight);

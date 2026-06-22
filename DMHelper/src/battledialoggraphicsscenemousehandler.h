@@ -156,9 +156,9 @@ public:
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
 signals:
-    void rawMousePress(const QPointF& pos);
-    void rawMouseMove(const QPointF& pos);
-    void rawMouseRelease(const QPointF& pos);
+    void rawMousePress(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers);
+    void rawMouseMove(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers);
+    void rawMouseRelease(const QPointF& pos, const Qt::MouseButtons buttons, const Qt::KeyboardModifiers modifiers);
 };
 
 

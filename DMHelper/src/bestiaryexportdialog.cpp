@@ -11,6 +11,12 @@ BestiaryExportDialog::BestiaryExportDialog(QWidget *parent) :
     ui(new Ui::BestiaryExportDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
+
+    // Fix parchment background for QListWidget viewport in Qt6
+    QPalette parchPal = ui->listMonsters->palette();
+    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
+    ui->listMonsters->setPalette(parchPal);
 
     connect(ui->btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
     connect(ui->btnSelectNone, SIGNAL(clicked()), this, SLOT(selectNone()));

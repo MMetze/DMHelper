@@ -7,6 +7,7 @@ SelectStringDialog::SelectStringDialog(QStringList entries, QWidget *parent) :
     _entries()
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_StyledBackground, true);
 
     connect(ui->btnSelectAll, &QAbstractButton::clicked, this, &SelectStringDialog::selectAll);
     connect(ui->btnSelectNone, &QAbstractButton::clicked, this, &SelectStringDialog::selectNone);
