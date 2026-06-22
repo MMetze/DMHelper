@@ -2,12 +2,16 @@
 #define CONDITIONSEDITDIALOG_H
 
 #include <QDialog>
-#include <QLabel>
-#include "combatant.h"
+#include <QHash>
+#include <QStringList>
 
 namespace Ui {
 class ConditionsEditDialog;
 }
+
+class QPushButton;
+class QLabel;
+class QFrame;
 
 class ConditionsEditDialog : public QDialog
 {
@@ -17,20 +21,28 @@ public:
     explicit ConditionsEditDialog(QWidget *parent = nullptr);
     ~ConditionsEditDialog();
 
-    void setConditions(int conditions);
-    int getConditions() const;
-
-protected slots:
-    void setExhausted(bool exhausted);
+    void setConditionList(const QStringList& conditions);
+    QStringList getConditionList() const;
 
 protected:
     virtual void showEvent(QShowEvent *event) override;
 
 private:
-    void setButtonSize(QLabel& label, QPushButton& button, int frameHeight, int buttonWidth);
-    void setConditionTooltip(QPushButton& button, Combatant::Condition condition);
+    struct ConditionEntry
+    {
+        QString id;
+        QString group;
+        QPushButton* button;
+        QLabel* label;
+    };
 
-    Ui::ConditionsEditDialog *ui;
+    void populateConditions();
+    void setConditionTooltip(QPushButton& button, const QString& conditionId);
+
+    Ui::ConditionsEditDialog* ui;
+    QList<ConditionEntry> _entries;
+    QHash<QString, QPushButton*> _groupButtons;
+    QHash<QString, QFrame*> _groupFrames;
 };
 
 #endif // CONDITIONSEDITDIALOG_H

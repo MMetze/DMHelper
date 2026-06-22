@@ -13,13 +13,17 @@
 #include <QPainter>
 #include <QInputDialog>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QRegularExpression>
 #include <QScrollBar>
+#include <QTextFrame>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
 const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
+const int ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL = 100;
+static constexpr int FULL_PERCENT = 100;
+static constexpr qreal HALF_PERCENT_DIVISOR = 200.0;
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -39,7 +43,8 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _rotation(0),
     _textPos(),
     _encounterChangedTimer(0),
-    _updateAnchorTimer(0)
+    _updateAnchorTimer(0),
+    _publishUpdateTimer(0)
 {
     ui->setupUi(this);
 
@@ -56,13 +61,13 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SIGNAL(alignmentChanged(Qt::Alignment)));
     connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
 
-    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(onFormatterChanged()));
+    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(onFormatterChanged()));
 
     ui->textBrowser->installEventFilter(this);
     ui->textFormatter->hide();
@@ -381,7 +386,7 @@ void EncounterTextEdit::hyperlinkClicked()
         if(!(QUrl(newHRef).isValid()))
         {
             qDebug() << "[EncounterTextEdit] Invalid URL detected: " << newHRef;
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("Hyperlink Error"),
                                   QString("The provided hyperlink is not valid: ") + newHRef);
             return;
@@ -398,6 +403,11 @@ void EncounterTextEdit::setTextWidth(int textWidth)
 {
     if(_encounter)
         _encounter->setTextWidth(textWidth);
+}
+
+void EncounterTextEdit::toggleCheckbox()
+{
+    _formatter->toggleCheckbox();
 }
 
 void EncounterTextEdit::setAnimated(bool animated)
@@ -555,7 +565,6 @@ void EncounterTextEdit::updateAnchors()
     if (!_encounter)
         return;
 
-    // Block signals to prevent unwanted textChanged() recursion
     ui->textBrowser->blockSignals(true);
 
     QTextCursor originalCursor = ui->textBrowser->textCursor();
@@ -626,7 +635,6 @@ void EncounterTextEdit::storeEncounter()
     }
 
     connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
-
 }
 
 void EncounterTextEdit::readEncounter()
@@ -724,6 +732,13 @@ void EncounterTextEdit::triggerEncounterChanged()
         killTimer(_encounterChangedTimer);
 
     _encounterChangedTimer = startTimer(ENCOUNTERTEXTEDIT_STORE_INTERVAL);
+
+    if(_isPublishing && _renderer)
+    {
+        if(_publishUpdateTimer)
+            killTimer(_publishUpdateTimer);
+        _publishUpdateTimer = startTimer(ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL);
+    }
 }
 
 void EncounterTextEdit::triggerUpdateAnchor()
@@ -775,12 +790,33 @@ void EncounterTextEdit::timerEvent(QTimerEvent *event)
         _updateAnchorTimer = 0;
         updateAnchors();
     }
+
+    if(event->timerId() == _publishUpdateTimer)
+    {
+        killTimer(_publishUpdateTimer);
+        _publishUpdateTimer = 0;
+        if(_isPublishing && _renderer)
+        {
+            prepareImages();
+            _renderer->setTextImage(_textImage);
+        }
+    }
 }
 
 void EncounterTextEdit::scaleBackgroundImage()
 {
     if(!_backgroundImage.isNull())
         _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
+}
+
+void EncounterTextEdit::onFormatterChanged()
+{
+    if(!_isPublishing || !_renderer)
+        return;
+
+    if(_publishUpdateTimer)
+        killTimer(_publishUpdateTimer);
+    _publishUpdateTimer = startTimer(ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL);
 }
 
 void EncounterTextEdit::prepareImages()
@@ -821,18 +857,26 @@ QImage EncounterTextEdit::getDocumentTextImage(int renderWidth)
     if(doc)
     {
         int oldTextWidth = doc->textWidth();
-        int textPercentage = _encounter ? _encounter->getTextWidth() : 100;
-        int absoluteWidth = renderWidth * textPercentage / 100;
+        int textPercentage = _encounter ? _encounter->getTextWidth() : FULL_PERCENT;
+        qreal margin = renderWidth * (FULL_PERCENT - textPercentage) / HALF_PERCENT_DIVISOR;
 
-        doc->setTextWidth(absoluteWidth);
+        QTextFrame* rootFrame = doc->rootFrame();
+        QTextFrameFormat frameFormat = rootFrame->frameFormat();
+        QTextFrameFormat modifiedFormat = frameFormat;
+        modifiedFormat.setLeftMargin(margin);
+        modifiedFormat.setRightMargin(margin);
+        rootFrame->setFrameFormat(modifiedFormat);
 
-        result = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        doc->setTextWidth(renderWidth);
+
+        result = QImage(renderWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
         result.fill(Qt::transparent);
         QPainter painter;
         painter.begin(&result);
             doc->drawContents(&painter);
         painter.end();
 
+        rootFrame->setFrameFormat(frameFormat);
         doc->setTextWidth(oldTextWidth);
     }
 
@@ -886,5 +930,11 @@ void EncounterTextEdit::cancelTimers()
     {
         killTimer(_updateAnchorTimer);
         _updateAnchorTimer = 0;
+    }
+
+    if(_publishUpdateTimer)
+    {
+        killTimer(_publishUpdateTimer);
+        _publishUpdateTimer = 0;
     }
 }

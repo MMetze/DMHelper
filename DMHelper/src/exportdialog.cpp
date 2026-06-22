@@ -13,13 +13,14 @@
 #include "bestiary.h"
 #include "monsterclassv2.h"
 #include "spellbook.h"
-#include "spell.h"
+#include "spellv2.h"
 #include "selectstringdialog.h"
 #include <QUuid>
 #include <QFileDialog>
 #include <QThread>
 #include <QMessageBox>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 ExportDialog::ExportDialog(Campaign& campaign, const QUuid& selectedItem, QWidget *parent) :
     QDialog(parent),
@@ -189,7 +190,7 @@ void ExportDialog::runExport()
     QString exportFileName(ui->edtExportName->text() + QString(".xml"));
     if((ui->chkCampaignFile->isChecked()) && (exportDir.exists(exportFileName)))
     {
-        QMessageBox::StandardButton result = QMessageBox::question(nullptr,
+        QMessageBox::StandardButton result = DMHMessageBox::question(nullptr,
                                                                    QString("Export file exists"),
                                                                    QString("The target export file ") + exportDir.absoluteFilePath(exportFileName) + QString(" already exists. Do you want to overwrite the existing file?"));
         if(result == QMessageBox::No)
@@ -242,12 +243,12 @@ void ExportDialog::exportFinished(bool success)
 
     if(success)
     {
-        QMessageBox::information(this, QString("DMHelper - Export Data"), QString("Export Completed!"));
+        DMHMessageBox::information(this, QString("DMHelper - Export Data"), QString("Export Completed!"));
         accept();
     }
     else
     {
-        QMessageBox::critical(this, QString("DMHelper - Export Data"), QString("Export Failed!"));
+        DMHMessageBox::critical(this, QString("DMHelper - Export Data"), QString("Export Failed!"));
     }
 }
 
@@ -418,7 +419,7 @@ void ExportDialog::addMonster(MonsterClassv2* monsterClass)
     _monsters.append(monsterClass->getStringValue("name"));
 }
 
-void ExportDialog::addSpell(Spell* spell)
+void ExportDialog::addSpell(Spellv2* spell)
 {
     if((!spell) || (_spells.contains(spell->getName())))
         return;

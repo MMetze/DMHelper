@@ -1,4 +1,4 @@
-﻿#include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "dmversion.h"
 #include "publishwindow.h"
@@ -11,7 +11,6 @@
 #include "characterv2converter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
-#include "characterframe.h"
 #include "charactertemplateframe.h"
 #include "campaign.h"
 #include "combatantfactory.h"
@@ -22,6 +21,8 @@
 #include "mruhandler.h"
 #include "encounterfactory.h"
 #include "monsterfactory.h"
+#include "spellbookfactory.h"
+#include "spellv2.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encounterbattle.h"
@@ -48,6 +49,7 @@
 #include "audiotrackedit.h"
 #include "audiotrack.h"
 #include "basicdateserver.h"
+#include "dmhmessagebox.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
 #endif
@@ -146,7 +148,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _options(nullptr),
     _bestiaryDlg(),
     _spellDlg(),
-    //_audioPlayer(nullptr),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController(nullptr),
 #endif
@@ -183,6 +184,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
 #ifdef Q_OS_MAC
     qDebug() << "[MainWindow]     OS: MacOS";
+#elif defined(Q_OS_LINUX)
+    qDebug() << "[MainWindow]     OS: Linux";
 #else
     qDebug() << "[MainWindow]     OS: Windows";
 #endif
@@ -240,8 +243,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Recovery Mode: " << _recoveryMode;
     _options->setLoading(true);
 
-    //connect(_options, SIGNAL(bestiaryFileNameChanged()), this, SLOT(readBestiary())); --> moved this to the campaign ruleset
-    connect(_options, SIGNAL(spellbookFileNameChanged()), this, SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
 
     // Set the global font
@@ -437,6 +438,7 @@ MainWindow::MainWindow(QWidget *parent) :
     RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
     qDebug() << "[MainWindow] Loading default Bestiary UI frame: " << defaultRuleset._monsterUI;
     MonsterFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+    SpellbookFactory::Instance()->configureFactory(Ruleset(defaultRuleset), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
     //_bestiaryDlg.loadMonsterUITemplate(defaultRuleset._monsterUI);
     connect(Bestiary::Instance(), &Bestiary::changed, &_bestiaryDlg, &BestiaryTemplateDialog::dataChanged);
     connect(Bestiary::Instance(), &Bestiary::bestiaryLoaded, this, &MainWindow::handleBestiaryRead);
@@ -455,16 +457,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_bestiaryDlg, &BestiaryTemplateDialog::publishMonsterImage, this, QOverload<QImage, const QColor&>::of(&MainWindow::dispatchPublishImage));
     connect(&_bestiaryDlg, &BestiaryTemplateDialog::dialogClosed, this, &MainWindow::writeBestiary);
 
-    qDebug() << "[MainWindow] Loading Spellbook";
-#ifndef Q_OS_MAC
-    splash.showMessage(QString("Initializing Spellbook...\n"), Qt::AlignBottom | Qt::AlignHCenter);
-#endif
-    qApp->processEvents();
-    readSpellbook();
     _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
-    qDebug() << "[MainWindow] Spellbook Loaded";
 
-    connect(&_spellDlg, &SpellbookDialog::dialogClosed, this, &MainWindow::writeSpellbook);
+    connect(&_spellDlg, &SpellbookTemplateDialog::dialogClosed, this, &MainWindow::writeSpellbook);
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
@@ -498,6 +493,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(pasteRichChanged(bool)), _options, SLOT(setPasteRich(bool)));
     _ribbonTabText->setPasteRich(_options->getPasteRich());
     connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), _encounterTextEdit, SLOT(hyperlinkClicked()));
+    connect(_ribbonTabText, SIGNAL(checkboxClicked()), _encounterTextEdit, SLOT(toggleCheckbox()));
     connect(_ribbonTabText, SIGNAL(translateTextClicked(bool)), _encounterTextEdit, SLOT(setTranslated(bool)));
     connect(_ribbonTabText, SIGNAL(codeViewClicked(bool)), _encounterTextEdit, SLOT(setCodeView(bool)));
     //translate - both directions, get rid of previous button & link, make dialog bigger, better, apply, clear
@@ -562,6 +558,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
     connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
     connect(_battleFrame, &BattleFrame::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
+    connect(_battleFrame, &BattleFrame::initiativeActiveChanged, _ribbonTabBattle, &RibbonTabBattle::setLairActionsVisible);
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
@@ -571,7 +568,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), _battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), _battleFrame, SLOT(addEffectLine()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectSmokeClicked()), _battleFrame, SLOT(addEffectSmoke()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectFireClicked()), _battleFrame, SLOT(addEffectFire()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectSparksClicked()), _battleFrame, SLOT(addEffectSparks()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectLightClicked()), _battleFrame, SLOT(addEffectLight()));
     connect(_ribbonTabBattle, SIGNAL(duplicateClicked()), _battleFrame, SLOT(duplicateSelection()));
+    connect(_ribbonTabBattle, SIGNAL(lairActionsClicked()), _battleFrame, SLOT(addLairActionsEvent()));
+    connect(_ribbonTabBattle, SIGNAL(addEventClicked()), _battleFrame, SLOT(addInitiativeEvent()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "New Entry")), this);
@@ -609,17 +612,13 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
-    //CharacterFrame* charFrame = new CharacterFrame(_options);
     _characterFrame = new CharacterTemplateFrame(_options);
     _characterFrame->setHeroForgeToken(_options->getHeroForgeToken());
-    //connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
-    //connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
     connect(_options, &OptionsContainer::heroForgeTokenChanged, _characterFrame, &CharacterTemplateFrame::setHeroForgeToken);
     connect(_characterFrame, &CharacterTemplateFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, _characterFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(_characterFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
-    //connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
 
     PartyFrame* partyFrame = new PartyFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
@@ -633,14 +632,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, _mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     _mapFrame->setPointerFile(_options->getPointerFile());
-    //connect(mapFrame, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(_mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _mapFrame, SLOT(targetResized(QSize)));
     connect(_mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
 
     connect(_ribbonTabMap, SIGNAL(editFileClicked()), _mapFrame, SLOT(editMapFile()));
-    // connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
 
     connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), _mapFrame, SLOT(setMapEdit(bool)));
     connect(_mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
@@ -683,8 +680,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
-    //TODO: can this edit frame be completely removed?
-    //connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(audioTrackEdit, &AudioTrackEdit::trackTypeChanged, _ribbonTabAudio, &RibbonTabAudio::setTrackType);
@@ -773,9 +768,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(CampaignObjectFactory::Instance(), &CampaignObjectFactory::objectCreated, ui->framePopups, &PopupsPreviewFrame::trackAdded);
     connect(this, &MainWindow::audioTrackAdded, ui->framePopups, &PopupsPreviewFrame::trackAdded);
-    //_audioPlayer = new AudioPlayer(this);
-    //_audioPlayer->setVolume(_options->getAudioVolume());
-    //connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     /*
@@ -783,10 +775,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
     _networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
-    //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString, QString, QString, QString, QString)), _networkController, SLOT(setNetworkLogin(QString, QString, QString, QString, QString)));
-    // TODO: _battleDlgMgr->setNetworkManager(_networkController);
     */
 #endif
 
@@ -842,6 +832,7 @@ void MainWindow::newCampaign()
         _campaign->getRuleset().setHitPointsCountDown(newCampaignDialog->isHitPointsCountDown());
         CampaignObjectFactory::configureFactories(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
         MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
         _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
@@ -854,6 +845,11 @@ void MainWindow::newCampaign()
         _bestiaryDlg.setMonster(nullptr);
         _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
         Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
+        _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
+        _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
+        Spellbook::Instance()->readSpellbook(_campaign->getRuleset().getSpellbookFile());
+        handleSpellbookRead(_campaign->getRuleset().getSpellbookFile());
 
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
@@ -898,13 +894,13 @@ bool MainWindow::closeCampaign()
 
     if(_dirty)
     {
-        QMessageBox::StandardButton result = QMessageBox::question(this,
+        QMessageBox::StandardButton result = DMHMessageBox::question(this,
                                                                    QString("Save Campaign"),
                                                                    QString("Would you like to save the current campaign before proceeding? Unsaved changes will be lost."),
                                                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if(result == QMessageBox::Cancel)
         {
-            qDebug() << "[MainWindow] Closíng Campaign cancelled";
+            qDebug() << "[MainWindow] Clos�ng Campaign cancelled";
             return false;
         }
 
@@ -917,6 +913,7 @@ bool MainWindow::closeCampaign()
     _campaign->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getStringValue("name") : QString());
 
     writeBestiary();
+    writeSpellbook();
     deleteCampaign();
 
     if(Bestiary::Instance())
@@ -1112,7 +1109,7 @@ void MainWindow::removeCurrentItem()
         return;
     }
 
-    if(QMessageBox::question(this,
+    if(DMHMessageBox::question(this,
                              QString("Confirm Delete"),
                              QString("Are you sure you would like to delete the entry ") + removeObject->getName() + QString("?")) != QMessageBox::Yes)
         return;
@@ -1352,45 +1349,25 @@ void MainWindow::linkActivated(const QUrl & link)
 
 void MainWindow::readSpellbook()
 {
-    qDebug() << "[MainWindow] Requested to read Spellbook";
+    // Retained as a no-op stub; spellbook loading now happens per-campaign
+    // via handleSpellbookRead, mirroring the bestiary pattern.
+}
 
-    if(!Spellbook::Instance())
+void MainWindow::handleSpellbookRead(const QString& spellbookFileName)
+{
+    qDebug() << "[MainWindow] Spellbook reading completed";
+
+    if(spellbookFileName.isEmpty())
     {
-        qDebug() << "[MainWindow] Spellbook instance not found, reading stopped";
-        return;
-    }
-
-    if(Spellbook::Instance()->isDirty())
-    {
-        qDebug() << "[MainWindow] Existing spellbook is unsaved!";
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
-                                                                   QString("Unsaved Spellbook"),
-                                                                   QString("The current spellbook has not been saved. Would you like to save it before loading a new spellbook? If you don't. you may lose spell data!"),
-                                                                   QMessageBox::Yes | QMessageBox::No);
-        if(result == QMessageBox::Yes)
-        {
-            QString spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
-            if(!spellbookFileName.isEmpty())
-            {
-                if(Spellbook::Instance()->writeSpellbook(spellbookFileName))
-                    qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
-                else
-                    qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
-            }
-        }
-    }
-
-    disconnect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
-
-    QString spellbookFileName = _options->getSpellbookFileName();
-    if(!Spellbook::Instance()->readSpellbook(spellbookFileName))
-    {
-        qDebug() << "[MainWindow] ERROR: Spellbook reading failed: " << spellbookFileName;
+        qDebug() << "[MainWindow] No spellbook file, resetting spellbook dialog";
+        _spellDlg.dataChanged();
         return;
     }
 
     // Spellbook file seems ok, make a backup
     _options->backupFile(spellbookFileName);
+
+    disconnect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
     _spellDlg.dataChanged();
     if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
@@ -1400,7 +1377,7 @@ void MainWindow::readSpellbook()
 
     connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
-    qDebug() << "[MainWindow] Spellbook reading complete.";
+    qDebug() << "[MainWindow] Spellbook setup complete.";
 }
 
 void MainWindow::readQuickRef()
@@ -1430,7 +1407,7 @@ void MainWindow::showEvent(QShowEvent * event)
                 firstStartDlg->move((frameGeometry().center() - firstStartDlg->rect().center()) / 2);
                 firstStartDlg->exec(); // Note: delete's itself "later"
 
-                LegalDialog* legalDlg = new LegalDialog();
+                LegalDialog* legalDlg = new LegalDialog(this);
                 legalDlg->exec();
                 _options->setUpdatesEnabled(legalDlg->isUpdatesEnabled());
                 _options->setStatisticsAccepted(legalDlg->isStatisticsAccepted());
@@ -1685,16 +1662,12 @@ void MainWindow::connectBattleView(bool toBattle)
         connect(_battleFrame, &BattleFrame::drawToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDrawOn);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
-        //connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
         connect(_battleFrame, &BattleFrame::distanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
         connect(_battleFrame, &BattleFrame::freeDistanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
         connect(_battleFrame, &BattleFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
-        //connect(_battleFrame, &BattleFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
-        //connect(_battleFrame, &BattleFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
-        //connect(_battleFrame, &BattleFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
 
         // Map
         disconnect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
@@ -1749,16 +1722,12 @@ void MainWindow::connectBattleView(bool toBattle)
         disconnect(_battleFrame, &BattleFrame::drawToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDrawOn);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
-        //disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
         disconnect(_battleFrame, &BattleFrame::distanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
         disconnect(_battleFrame, &BattleFrame::freeDistanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
         disconnect(_battleFrame, &BattleFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
-        //disconnect(_battleFrame, &BattleFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
-        //disconnect(_battleFrame, &BattleFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
-        //disconnect(_battleFrame, &BattleFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
 
         // Map
         connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
@@ -1801,7 +1770,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     _campaign->validateCampaignIds();
     if(!_campaign->isValid())
     {
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
                                                                    QString("An invalid structure has been detected in the open campaign. Saving may corrupt the file and lead to data loss.\n\nIt is strongly recommended to back up your campaign file before saving!\n\nDo you wish to save now?"),
                                                                    QMessageBox::Yes | QMessageBox::No);
@@ -1821,6 +1790,18 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
         _campaignFileName = QFileDialog::getSaveFileName(this, QString("Save Campaign"), defaultFile, QString("XML files (*.xml)"));
         if(_campaignFileName.isEmpty())
             return false;
+    }
+
+    // One-time pre-v3 backup: if the loaded campaign was a pre-v3 file, copy
+    // the on-disk version aside before we overwrite it with the new format. The
+    // canonical "dmh:" key migration is read-only via CombatantTemplateAdapter
+    // alias, but the version stamp itself bumps and older DMHelper builds will
+    // refuse to load the result � the backup gives the user a safety net.
+    if((_campaign->getLoadedMajorVersion() > 0) && (_campaign->getLoadedMajorVersion() < DMHelper::CAMPAIGN_MAJOR_VERSION))
+    {
+        qDebug() << "[MainWindow] Loaded campaign is pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " (was v" << _campaign->getLoadedMajorVersion() << "), writing pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " backup before save.";
+        _options->backupFile(_campaignFileName, QString("pre-v%1").arg(DMHelper::CAMPAIGN_MAJOR_VERSION));
+        _campaign->clearLoadedMajorVersion();
     }
 
     qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
@@ -1875,7 +1856,7 @@ bool MainWindow::doSaveCampaign(QString defaultFile)
     // Optionally save the Spellbook
     if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
     {
-        if(QMessageBox::critical(this,
+        if(DMHMessageBox::critical(this,
                                  QString("Save Spellbook"),
                                  QString("The Spellbook has been changed. Would you like to save it as well?"),
                                  QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
@@ -1961,6 +1942,12 @@ void MainWindow::writeSpellbook()
         return;
     }
 
+    if(!_campaign)
+    {
+        qDebug() << "[MainWindow] No campaign loaded, no reason to write the Spellbook";
+        return;
+    }
+
     if(Spellbook::Instance()->count() <= 0)
     {
         qDebug() << "[MainWindow] Spellbook is empty, no file will be written";
@@ -1973,20 +1960,7 @@ void MainWindow::writeSpellbook()
         return;
     }
 
-    QString spellbookFileName = _options->getSpellbookFileName();
-    if(spellbookFileName.isEmpty())
-    {
-        spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
-        if(spellbookFileName.isEmpty())
-            return;
-
-        _options->setSpellbookFileName(spellbookFileName);
-    }
-
-    if(Spellbook::Instance()->writeSpellbook(spellbookFileName))
-        qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
-    else
-        qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
+    Spellbook::Instance()->writeSpellbook(_campaign->getRuleset().getSpellbookFile());
 }
 
 CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterType, const QString& filename, CampaignObjectBase* targetObject)
@@ -2074,7 +2048,7 @@ void MainWindow::openCampaign(const QString& filename)
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical(this,
+        DMHMessageBox::critical(this,
                               QString("Campaign file open failed"),
                               QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Unable to open campaign file";
@@ -2089,7 +2063,7 @@ void MainWindow::openCampaign(const QString& filename)
 
     if(!contentResult)
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        DMHMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Error reading the campaign file: (line ") + QString::number(contentResult.errorLine) + QString(", column ") + QString::number(contentResult.errorColumn) + QString("): ") + contentResult.errorMessage);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML (line " << contentResult.errorLine << ", column " << contentResult.errorColumn << "): " << contentResult.errorMessage;
         return;
@@ -2098,7 +2072,7 @@ void MainWindow::openCampaign(const QString& filename)
     QDomElement root = doc.documentElement();
     if((root.isNull()) || (root.tagName() != "root"))
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        DMHMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to find the root entry in the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find root entry";
         return;
@@ -2107,7 +2081,7 @@ void MainWindow::openCampaign(const QString& filename)
     QDomElement campaignElement = root.firstChildElement(QString("campaign"));
     if(campaignElement.isNull())
     {
-        QMessageBox::critical(this, QString("Campaign file open failed"),
+        DMHMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to find the campaign entry in the campaign file: ") + filename);
         qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
@@ -2119,7 +2093,7 @@ void MainWindow::openCampaign(const QString& filename)
     if((majorVersion < 2) || ((majorVersion == 2) && (minorVersion < 4)))
     {
         qDebug() << "[Campaign] WARNING: Campaign file is an older format, informing user of character template conversion.";
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                    QString("Campaign file version check"),
                                                                    QString("PLEASE READ: IMPORTANT!") + QChar::LineFeed + QChar::LineFeed +
                                                                        QString("With version 3.6, DMHelper has added more flexible Bestiary data to the already flexible character data and UI template system added to support different game systems in v3.3. In a similar fashion to the changes with characters in v3.3, some of the previously built-in 5E assumptions and math for characters, such as ability modifiers, saving throws and proficiency modifiers are no longer automatically applied.") + QChar::LineFeed + QChar::LineFeed +
@@ -2131,6 +2105,31 @@ void MainWindow::openCampaign(const QString& filename)
         if(result == QMessageBox::No)
         {
             qDebug() << "[Campaign] INFO: User chose not to open campaign file due to version incompatibility: " << majorVersion << "." << minorVersion << ", " << filename;
+            return;
+        }
+    }
+    else if((majorVersion > 0) && (majorVersion < DMHelper::CAMPAIGN_MAJOR_VERSION))
+    {
+        // v2 -> v3 transition: combatant attribute keys are now namespaced
+        // ("dmh:health", "dmh:initiative", etc.). Older campaign files using
+        // the unprefixed pre-v3 names will be upgraded via XML
+        // compatibility-mode conversion (see
+        // CombatantTemplateAdapter::legacyAliasTable). On save the file's
+        // majorVersion attribute will be rewritten to the current value
+        // and older DMHelper builds will no longer open it. doSaveCampaign
+        // takes a pre-v3 backup automatically; warn the user up front so they
+        // know what to expect.
+        qDebug() << "[Campaign] INFO: Loading pre-v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " campaign (v" << majorVersion << "." << minorVersion << "); user notified of one-way upgrade.";
+        QMessageBox::StandardButton result = DMHMessageBox::warning(this,
+                                                                  QString("Campaign file version check"),
+                                                                  QString("This campaign file is from an older version of DM Helper (v%1.%2). It can be opened, but saving will rewrite it in the new v%3 format and older versions of DM Helper will no longer be able to open it.")
+                                                                          .arg(majorVersion).arg(minorVersion).arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
+                                                                      QString("DM Helper will automatically write a pre-v%1 backup of the original file the first time you save, but it is still strongly recommended that you back up your campaign and bestiary files yourself before continuing.").arg(DMHelper::CAMPAIGN_MAJOR_VERSION) + QChar::LineFeed + QChar::LineFeed +
+                                                                      QString("Do you want to continue opening this campaign file?"),
+                                                                  QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[Campaign] INFO: User declined v" << majorVersion << " ? v" << DMHelper::CAMPAIGN_MAJOR_VERSION << " upgrade for: " << filename;
             return;
         }
     }
@@ -2146,9 +2145,17 @@ void MainWindow::openCampaign(const QString& filename)
     MonsterFactory::Instance()->configureFactory(_campaign->getRuleset(),
                                                  campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
                                                  campaignElement.attribute("minorVersion", QString::number(0)).toInt());
+    SpellbookFactory::Instance()->configureFactory(_campaign->getRuleset(),
+                                                   campaignElement.attribute("majorVersion", QString::number(0)).toInt(),
+                                                   campaignElement.attribute("minorVersion", QString::number(0)).toInt());
     _bestiaryDlg.setMonster(nullptr);
     _bestiaryDlg.loadMonsterUITemplate(_campaign->getRuleset().getMonsterUIFile());
     Bestiary::Instance()->readBestiary(_campaign->getRuleset().getBestiaryFile());
+
+    _spellDlg.setSpell(static_cast<Spellv2*>(nullptr));
+    _spellDlg.loadSpellUITemplate(_campaign->getRuleset().getSpellUIFile());
+    Spellbook::Instance()->readSpellbook(_campaign->getRuleset().getSpellbookFile());
+    handleSpellbookRead(_campaign->getRuleset().getSpellbookFile());
 
     Bestiary::Instance()->startBatchProcessing();
     _campaign->inputXML(campaignElement, false);
@@ -2160,13 +2167,13 @@ void MainWindow::openCampaign(const QString& filename)
 
     if(!_campaign->isValid())
     {
-        QMessageBox::StandardButton result = QMessageBox::critical(this,
+        QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
                                                                    QString("The loaded campaign has an invalid structure: there is a high risk of data loss and/or program malfunction! Would you like to continue?"),
                                                                    QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
         {
-            QMessageBox::information(this,
+            DMHMessageBox::information(this,
                                      QString("Invalid Campaign"),
                                      QString("The campaign has not been opened."));
             qDebug() << "[MainWindow] Invalid campaign discarded";
@@ -2195,7 +2202,7 @@ void MainWindow::reloadCampaign()
     if((!_campaign) || (_campaignFileName.isEmpty()))
         return;
 
-    QMessageBox::StandardButton result = QMessageBox::question(this,
+    QMessageBox::StandardButton result = DMHMessageBox::question(this,
                                                                QString("Reload Campaign"),
                                                                QString("You have changed the ruleset for this campaign. To reconfigure it safely, the campaign needs to be closed and reopened:") + QChar::LineFeed + QChar::LineFeed + _campaignFileName + QChar::LineFeed + QChar::LineFeed + QString("Would you like to continue?"),
                                                                QMessageBox::Yes | QMessageBox::Cancel);
@@ -2244,6 +2251,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
         // Configure the factory to be the latest version, so that even if the campaign is loaded with an older version, it will still use the latest monster factory settings.
         MonsterFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
+        SpellbookFactory::Instance()->configureFactory(campaign->getRuleset(), DMHelper::CAMPAIGN_MAJOR_VERSION, DMHelper::CAMPAIGN_MINOR_VERSION);
 
         connect(campaign, &Campaign::nameChanged, [=](CampaignObjectBase* object, const QString& name) {Q_UNUSED(object); setWindowTitle(QString("DMHelper - ") + name + QString("[*]")); });
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
@@ -2435,6 +2443,13 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
         QAction* previewWindowItem = new QAction(QIcon(":/img/data/icon_preview.png"), QString("Preview Item..."));
         connect(previewWindowItem, SIGNAL(triggered()), this, SLOT(previewCurrentTextEntry()));
         contextMenu->addAction(previewWindowItem);
+    }
+
+    if(campaignObject->getObjectType() == DMHelper::CampaignType_Map)
+    {
+        QAction* editFileAction = new QAction(QIcon(":/img/data/icon_edit.png"), QString("Edit File..."), contextMenu);
+        connect(editFileAction, &QAction::triggered, _mapFrame, &MapFrame::editMapFile);
+        contextMenu->addAction(editFileAction);
     }
 
     QAction* importItem = new QAction(QIcon(":/img/data/icon_importitem.png"), QString("Import Item..."));
@@ -2751,7 +2766,7 @@ void MainWindow::exportBestiary()
     if(!Bestiary::Instance())
         return;
 
-    BestiaryExportDialog dlg;
+    BestiaryExportDialog dlg(this);
     dlg.exec();
 }
 
@@ -2856,6 +2871,12 @@ void MainWindow::handleBestiaryRead(const QString& bestiaryFileName, bool conver
 void MainWindow::openSpellbook()
 {
     qDebug() << "[MainWindow] Opening Spellbook";
+    if(!_campaign)
+    {
+        qDebug() << "[MainWindow] No campaign loaded, ignoring Spellbook button";
+        return;
+    }
+
     if(!Spellbook::Instance())
         return;
 
@@ -2889,8 +2910,20 @@ void MainWindow::openMapManager()
 
     qDebug() << "[MainWindow] Opening Map Manager";
 
-    MapManagerDialog* dlg = new MapManagerDialog(*_options);
+    MapManagerDialog* dlg = new MapManagerDialog(*_options, this);
     connect(dlg, &MapManagerDialog::createEntryImage, this, &MainWindow::handleCreateMap);
+    connect(dlg, &MapManagerDialog::addLayerImage, this, &MainWindow::handleAddMapLayer);
+
+    dlg->setCampaignOpen(_campaign != nullptr);
+
+    bool hasLayerScene = false;
+    if(_campaign)
+    {
+        CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+        hasLayerScene = (dynamic_cast<Map*>(currentObject) != nullptr);
+    }
+    dlg->setLayerSceneAvailable(hasLayerScene);
+
     dlg->resize(qMax(dlg->width(), width() * 3 / 4), qMax(dlg->height(), height() * 3 / 4));
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->open();
@@ -2908,11 +2941,36 @@ void MainWindow::handleCreateMap(const QString& mapFile)
     newEncounter(DMHelper::CampaignType_Map, mapFile, currentObject);
 }
 
+void MainWindow::handleAddMapLayer(const QString& mapFile)
+{
+    if((!_campaign) || (mapFile.isEmpty()))
+        return;
+
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    Map* currentMap = dynamic_cast<Map*>(currentObject);
+    if(!currentMap)
+    {
+        DMHMessageBox::warning(this, tr("Add Layer"), tr("Please select a Map entry in the campaign tree to add the layer to."));
+        return;
+    }
+
+    QMimeType mimeType = QMimeDatabase().mimeTypeForFile(mapFile);
+    Layer* newLayer = nullptr;
+
+    if(mimeType.isValid() && mimeType.name().startsWith("video/"))
+        newLayer = new LayerVideo(QString("Map Video: ") + QFileInfo(mapFile).fileName(), mapFile);
+    else
+        newLayer = new LayerImage(QString("Map Image: ") + QFileInfo(mapFile).fileName(), mapFile);
+
+    if(newLayer)
+        currentMap->getLayerScene().appendLayer(newLayer);
+}
+
 void MainWindow::openAboutDialog()
 {
     qDebug() << "[MainWindow] Opening About Box";
 
-    AboutDialog dlg;
+    AboutDialog dlg(this);
     dlg.resize(qMax(dlg.width(), width() * 3 / 4), qMax(dlg.height(), height() * 3 / 4));
     dlg.exec();
 }
@@ -2921,7 +2979,7 @@ void MainWindow::openHelpDialog()
 {
     qDebug() << "[MainWindow] Opening Help Dialog";
 
-    HelpDialog dlg;
+    HelpDialog dlg(this);
     connect(&dlg, &HelpDialog::openGettingStarted, this, &MainWindow::openGettingStarted);
     connect(&dlg, &HelpDialog::openUsersGuide, this, &MainWindow::openUsersGuide);
     connect(&dlg, &HelpDialog::openBackupDirectory, this, &MainWindow::openBackupDirectory);
@@ -2951,7 +3009,7 @@ void MainWindow::openRandomMarkets()
 
 void MainWindow::configureGridLock()
 {
-    ConfigureLockedGridDialog dlg;
+    ConfigureLockedGridDialog dlg(this);
     QScreen* primary = QGuiApplication::primaryScreen();
     if(primary)
         dlg.resize(primary->availableSize().width() * 3 / 4, primary->availableSize().height() * 2 / 3);
@@ -2964,7 +3022,7 @@ void MainWindow::configureGridLock()
 
 QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)
 {
-    QDialog* resultDlg = new QDialog();
+    QDialog* resultDlg = new QDialog(this);
     if(!dlgSize.isNull())
         resultDlg->resize(dlgSize);
 
@@ -2998,12 +3056,10 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
-        _ribbonTabBattle->setLairActions(model->getShowLairActions());
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
-        connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
         Layer* selectedLayer = model->getLayerScene().getSelectedLayer();
         LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));

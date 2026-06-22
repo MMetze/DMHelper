@@ -14,7 +14,8 @@
    <string>Create Random Market</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);
+QFrame{ background: transparent; }</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <item>
@@ -38,6 +39,10 @@
            <width>200</width>
            <height>30</height>
           </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: transparent;
+</string>
          </property>
          <property name="editable">
           <bool>true</bool>
@@ -63,6 +68,10 @@
            <height>30</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background: transparent;
+</string>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -75,10 +84,10 @@
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::Policy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -101,10 +110,10 @@
        <item>
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::Policy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -119,7 +128,7 @@
      <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -134,10 +143,10 @@
        <item>
         <spacer name="horizontalSpacer_3">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::Policy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -156,10 +165,10 @@
           </sizepolicy>
          </property>
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="standardButtons">
-          <set>QDialogButtonBox::Close</set>
+          <set>QDialogButtonBox::StandardButton::Close</set>
          </property>
          <property name="centerButtons">
           <bool>false</bool>
@@ -169,10 +178,10 @@
        <item>
         <spacer name="horizontalSpacer_4">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::Policy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>

@@ -9,7 +9,6 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QPainter>
-#include <QMessageBox>
 
 MapMarkerDialog::MapMarkerDialog(const MapMarker& marker, Map& map, QWidget *parent) :
     QDialog(parent),

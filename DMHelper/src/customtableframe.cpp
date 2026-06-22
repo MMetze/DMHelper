@@ -3,8 +3,8 @@
 #include <QDir>
 #include <QStringList>
 #include <QDomDocument>
-#include <QMessageBox>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *parent) :
     QFrame(parent),
@@ -24,7 +24,6 @@ CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *paren
     ui->hSplitter->setStretchFactor(1, 3);
 
     ui->listWidget->setUniformItemSizes(true);
-    //ui->listEntries->setUniformItemSizes(true);
     ui->listEntries->setWordWrap(true);
     ui->listEntries->setTextElideMode(Qt::ElideNone);
 
@@ -205,7 +204,7 @@ QString CustomTableFrame::getEntryText(const QString& tableName)
 
     if(_usedTables.contains(tableName))
     {
-        QMessageBox::information(nullptr, QString("Looped subtables"), QString("Subtables were found to refer to each other, which would create an infinite loop."));
+        DMHMessageBox::information(nullptr, QString("Looped subtables"), QString("Subtables were found to refer to each other, which would create an infinite loop."));
         return result;
     }
 

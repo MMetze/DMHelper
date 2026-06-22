@@ -20,6 +20,7 @@ OverlayRenderer::OverlayRenderer(Campaign* campaign, QObject* parent) :
 
 OverlayRenderer::~OverlayRenderer()
 {
+    cleanupGL();
 }
 
 Campaign* OverlayRenderer::getCampaign() const
@@ -150,6 +151,22 @@ void OverlayRenderer::initializeGL()
                 overlay->initializeGL();
             }
         }
+    }
+}
+
+void OverlayRenderer::cleanupGL()
+{
+    if((_shaderProgramRGB != 0) && (QOpenGLContext::currentContext()))
+    {
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        if(f)
+        {
+            DMH_DEBUG_OPENGL_glDeleteProgram(_shaderProgramRGB);
+            f->glDeleteProgram(_shaderProgramRGB);
+        }
+        _shaderProgramRGB = 0;
+        _shaderModelMatrixRGB = 0;
+        _shaderProjectionMatrixRGB = 0;
     }
 }
 

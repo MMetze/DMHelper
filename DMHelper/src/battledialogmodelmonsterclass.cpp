@@ -34,6 +34,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
             _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
         else
             _monsterHP = _monsterClass->getIntValue("hit_points");
+        if(_monsterHP > 0)
+            _monsterMaxHP = _monsterHP;
     }
 }
 
@@ -51,6 +53,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClassv2* mon
         _monsterHP = _monsterClass->getDiceValue("hit_dice").roll();
     else
         _monsterHP = _monsterClass->getIntValue("hit_points");
+    if(_monsterHP > 0)
+        _monsterMaxHP = _monsterHP;
 }
 
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
@@ -198,8 +202,6 @@ int BattleDialogModelMonsterClass::getSpeed() const
 
     QRegularExpressionMatch match = QRegularExpression(R"(^\s*(\d+))").match(_monsterClass->getStringValue("speed"));
     return match.hasMatch() ? match.captured(1).toInt() : 0;
-
-    //return _monsterClass->getStringValue("speed").toInt();
 }
 
 int BattleDialogModelMonsterClass::getArmorClass() const
@@ -226,6 +228,9 @@ void BattleDialogModelMonsterClass::setHitPoints(int hitPoints)
     if(_monsterHP != hitPoints)
     {
         _monsterHP = hitPoints;
+        setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
+        if((getMonsterMaxHP() <= 0) && (hitPoints > 0))
+            setMonsterMaxHP(hitPoints);
         emit dataChanged(this);
     }
 }
@@ -277,6 +282,7 @@ void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
     if(_monsterName != monsterName)
     {
         _monsterName = monsterName;
+        setOverride(QString::fromLatin1(DMH_KEY_NAME), monsterName);
         emit dataChanged(this);
     }
 }

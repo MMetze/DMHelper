@@ -85,7 +85,7 @@ void PublishGLBattleVideoRenderer::initializeBackground()
                                            _targetWidget->format(),
                                            true,
                                            false);
-    connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget, Qt::QueuedConnection);
     connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLBattleVideoRenderer::updateProjectionMatrix);
     _videoPlayer->restartPlayer();
 #endif

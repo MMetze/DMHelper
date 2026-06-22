@@ -16,6 +16,7 @@
 #include <QAbstractItemView>
 #include <QCompleter>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     QDialog(parent),
@@ -24,6 +25,7 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     _monster(nullptr)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QScrollArea viewport in Qt6
@@ -186,7 +188,7 @@ void BestiaryTemplateDialog::createNewMonster()
 
         if(Bestiary::Instance()->count() > 0)
         {
-            QMessageBox::StandardButton templateQuestion = QMessageBox::question(this,
+            QMessageBox::StandardButton templateQuestion = DMHMessageBox::question(this,
                                                                                  QString("New Monster"),
                                                                                  QString("Do you want to base this monster on an already existing monster?"));
 
@@ -235,7 +237,7 @@ void BestiaryTemplateDialog::deleteCurrentMonster()
 
     qDebug() << "[BestiaryTemplateDialog] Deleting monster: " << _monster->getStringValue("name");
 
-    QMessageBox::StandardButton confirm = QMessageBox::critical(this,
+    QMessageBox::StandardButton confirm = DMHMessageBox::critical(this,
                                                                 QString("Delete Monster"),
                                                                 QString("Are you sure you want to delete the monster ") + _monster->getStringValue("name"),
                                                                 QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
@@ -414,7 +416,7 @@ void BestiaryTemplateDialog::handleSearchToken()
     if((!_monster) || (!_options))
         return;
 
-    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getStringValue("name"), _searchString, *_options);
+    BestiaryFindTokenDialog* dlg = new BestiaryFindTokenDialog(_monster->getStringValue("name"), _searchString, *_options, this);
     dlg->resize(width() * 9 / 10, height() * 9 / 10);
     if(dlg->exec() == QDialog::Accepted)
     {
@@ -453,7 +455,7 @@ void BestiaryTemplateDialog::handleClearImage()
     }
 
     // Ask if the app should remove the file
-    QMessageBox::StandardButton result = QMessageBox::question(this, tr("Delete Image"), tr("Do you want to also delete the token file from the disk?\n\n") + currentIconPath);
+    QMessageBox::StandardButton result = DMHMessageBox::question(this, tr("Delete Image"), tr("Do you want to also delete the token file from the disk?\n\n") + currentIconPath);
     if(result == QMessageBox::Yes)
     {
         qDebug() << "[BestiaryTemplateDialog] Removing token file for monster: " << _monster->getStringValue("name") << ", " << currentIconPath;
@@ -477,7 +479,7 @@ void BestiaryTemplateDialog::handlePopulateTokens()
     if(!_options)
         return;
 
-    BestiaryPopulateTokensDialog* dlg = new BestiaryPopulateTokensDialog(*_options);
+    BestiaryPopulateTokensDialog* dlg = new BestiaryPopulateTokensDialog(*_options, this);
     dlg->exec();
     dlg->deleteLater();
 

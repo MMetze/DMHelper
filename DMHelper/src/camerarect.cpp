@@ -9,9 +9,11 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneHoverEvent>
+#include <QGraphicsView>
 
-const qreal CAMERA_RECT_BORDER_SIZE = 4.0;
 const int CAMERA_RECT_BORDER_WIDTH = 1;
+static constexpr qreal CAMERA_HANDLE_PIXELS = 8.0;       // visible square edge, in screen pixels
+static constexpr qreal CAMERA_HANDLE_HIT_PIXELS = 12.0;  // hit zone half-extent, in screen pixels
 
 CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked) :
     QGraphicsRectItem (0.0, 0.0, width, height, nullptr),
@@ -26,6 +28,8 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _drawTextRect(nullptr),
     _cameraIconRect(nullptr),
     _cameraIcon(nullptr),
+    _handles{},
+    _editing(false),
     _ratioLocked(ratioLocked),
     _sizeLocked(false),
     _viewport(viewport)
@@ -46,6 +50,8 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _drawTextRect(nullptr),
     _cameraIconRect(nullptr),
     _cameraIcon(nullptr),
+    _handles{},
+    _editing(false),
     _ratioLocked(ratioLocked),
     _sizeLocked(false),
     _viewport(viewport)
@@ -78,6 +84,7 @@ void CameraRect::setCameraRect(const QRectF& rect)
     setPos(rect.topLeft());
     setRect(0.0, 0.0, rect.width(), rect.height());
     _drawItem->setRect(0.0, 0.0, rect.width(), rect.height());
+    layoutHandles();
 
     CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
     if(cameraScene)
@@ -92,6 +99,14 @@ void CameraRect::setCameraSelectable(bool selectable)
     setZValue(selectable ? DMHelper::BattleDialog_Z_Overlay : DMHelper::BattleDialog_Z_Camera);
     if((!selectable) && (_viewport))
         _viewport->unsetCursor();
+
+    _editing = selectable;
+    layoutHandles();
+    for(int i = 0; i < 8; ++i)
+    {
+        if(_handles[i])
+            _handles[i]->setVisible(_editing && !_sizeLocked);
+    }
 }
 
 void CameraRect::setDraw(bool draw)
@@ -226,6 +241,7 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         setPos(rectPos);
         setRect(0.0, 0.0, rectSize.x(), rectSize.y());
         _drawItem->setRect(0.0, 0.0, rectSize.x(), rectSize.y());
+        layoutHandles();
 
         _mouseLastPos = event->scenePos();
     }
@@ -307,31 +323,102 @@ void CameraRect::initialize(QGraphicsScene& scene)
     _cameraIcon->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
     _cameraIcon->setPos(rectSize.width(), 0);
 
+    // Create 8 resize handles (4 corners + 4 edge midpoints), drawn at fixed
+    // screen-pixel size via ItemIgnoresTransformations. Handles are visual
+    // only - they do not absorb mouse events, so the existing CameraRect
+    // mouse handling continues to drive the resize via getRectSection().
+    const qreal half = CAMERA_HANDLE_PIXELS / 2.0;
+    for(int i = 0; i < 8; ++i)
+    {
+        QGraphicsRectItem* handle = new QGraphicsRectItem(-half, -half, CAMERA_HANDLE_PIXELS, CAMERA_HANDLE_PIXELS, _drawItem);
+        handle->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+        handle->setAcceptedMouseButtons(Qt::NoButton);
+        handle->setAcceptHoverEvents(false);
+        handle->setVisible(false);
+        _handles[i] = handle;
+    }
+
     setPublishing(false);
     setCameraRectColor();
+    layoutHandles();
 }
 
 int CameraRect::getRectSection(const QPointF point)
 {
-    if((point.x() < 0) || (point.x() > rect().width()) || (point.y() < 0) || (point.y() > rect().height()))
+    // Convert a fixed pixel hit zone into scene units using the current view
+    // scale so the grab area is constant on screen regardless of zoom.
+    const qreal scale = currentViewScale();
+    const qreal hit = CAMERA_HANDLE_HIT_PIXELS / scale;
+
+    if((point.x() < -hit) || (point.x() > rect().width() + hit) || (point.y() < -hit) || (point.y() > rect().height() + hit))
         return RectSection_None;
 
     int result = 0;
 
-    if(point.x() < CAMERA_RECT_BORDER_SIZE)
+    if(point.x() < hit)
         result |= RectSection_Left;
-    else if(point.x() > rect().width() - CAMERA_RECT_BORDER_SIZE)
+    else if(point.x() > rect().width() - hit)
         result |= RectSection_Right;
 
-    if(point.y() < CAMERA_RECT_BORDER_SIZE)
+    if(point.y() < hit)
         result |= RectSection_Top;
-    else if(point.y() > rect().height() - CAMERA_RECT_BORDER_SIZE)
+    else if(point.y() > rect().height() - hit)
         result |= RectSection_Bottom;
 
     if(result == 0)
+    {
+        // Inside the rect but outside any edge band - middle drag.
+        if((point.x() < 0) || (point.x() > rect().width()) || (point.y() < 0) || (point.y() > rect().height()))
+            return RectSection_None;
         return RectSection_Middle;
+    }
     else
+    {
         return result;
+    }
+}
+
+qreal CameraRect::currentViewScale() const
+{
+    if(scene())
+    {
+        const QList<QGraphicsView*> views = scene()->views();
+        if(!views.isEmpty() && views.first())
+        {
+            const qreal s = views.first()->transform().m11();
+            if(s > 0.0)
+                return s;
+        }
+    }
+    return 1.0;
+}
+
+void CameraRect::layoutHandles()
+{
+    if(!_drawItem)
+        return;
+
+    const QRectF r = _drawItem->rect();
+    const qreal cx = r.left() + r.width() / 2.0;
+    const qreal cy = r.top() + r.height() / 2.0;
+
+    // Order: TL, T, TR, R, BR, B, BL, L
+    const QPointF positions[8] = {
+        QPointF(r.left(),  r.top()),
+        QPointF(cx,        r.top()),
+        QPointF(r.right(), r.top()),
+        QPointF(r.right(), cy),
+        QPointF(r.right(), r.bottom()),
+        QPointF(cx,        r.bottom()),
+        QPointF(r.left(),  r.bottom()),
+        QPointF(r.left(),  cy)
+    };
+
+    for(int i = 0; i < 8; ++i)
+    {
+        if(_handles[i])
+            _handles[i]->setPos(positions[i]);
+    }
 }
 
 void CameraRect::resizeRectangle(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
@@ -440,6 +527,19 @@ void CameraRect::setCameraRectColor()
 
     _cameraIconRect->setVisible(_ratioLocked || _sizeLocked);
     _cameraIcon->setVisible(_ratioLocked || _sizeLocked);
+
+    QPen handlePen(Qt::black);
+    handlePen.setCosmetic(true);
+    handlePen.setWidth(1);
+    QBrush handleBrush(color);
+    for(int i = 0; i < 8; ++i)
+    {
+        if(_handles[i])
+        {
+            _handles[i]->setPen(handlePen);
+            _handles[i]->setBrush(handleBrush);
+        }
+    }
 }
 
 CameraRect::FixedBorderRectItem::FixedBorderRectItem(QGraphicsItem* parent) :

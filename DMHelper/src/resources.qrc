@@ -171,6 +171,7 @@
         <file>data/icon_newparty.png</file>
         <file>data/icon_remove.png</file>
         <file>data/icon_party.png</file>
+        <file>data/icon_brushpolygon.png</file>
         <file>data/character_name.png</file>
         <file>data/character_frame_bottom.png</file>
         <file>data/character_frame_bottomleft.png</file>
@@ -200,6 +201,10 @@
         <file>data/icon_neweffectcube.png</file>
         <file>data/icon_neweffectline.png</file>
         <file>data/icon_neweffectradius.png</file>
+        <file>data/icon_neweffectfire.png</file>
+        <file>data/icon_neweffectlight.png</file>
+        <file>data/icon_neweffectsmoke.png</file>
+        <file>data/icon_neweffectsparks.png</file>
         <file>data/icon_newobject.png</file>
         <file>data/icon_volumeoff.png</file>
         <file>data/icon_volumeon.png</file>

@@ -17,16 +17,17 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Frame</string>
+   <string/>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);
+QFrame{ background: transparent; }</string>
   </property>
   <property name="frameShape">
-   <enum>QFrame::StyledPanel</enum>
+   <enum>QFrame::Shape::StyledPanel</enum>
   </property>
   <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
+   <enum>QFrame::Shadow::Raised</enum>
   </property>
   <widget class="QLabel" name="lblAstrolobe">
    <property name="geometry">
@@ -44,7 +45,7 @@
     </sizepolicy>
    </property>
    <property name="frameShape">
-    <enum>QFrame::NoFrame</enum>
+    <enum>QFrame::Shape::NoFrame</enum>
    </property>
    <property name="text">
     <string/>
@@ -56,7 +57,7 @@
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="lblHandSmall">
@@ -73,7 +74,7 @@
 background-color: rgba(0,0,0,0%);</string>
    </property>
    <property name="frameShape">
-    <enum>QFrame::NoFrame</enum>
+    <enum>QFrame::Shape::NoFrame</enum>
    </property>
    <property name="text">
     <string/>
@@ -85,7 +86,7 @@ background-color: rgba(0,0,0,0%);</string>
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="lblHandLarge">
@@ -105,7 +106,7 @@ background-color: rgba(0,0,0,0%);</string>
 background-color: rgba(0,0,0,0%);</string>
    </property>
    <property name="frameShape">
-    <enum>QFrame::NoFrame</enum>
+    <enum>QFrame::Shape::NoFrame</enum>
    </property>
    <property name="text">
     <string/>
@@ -117,7 +118,7 @@ background-color: rgba(0,0,0,0%);</string>
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
  </widget>

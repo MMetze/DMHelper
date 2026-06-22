@@ -2,6 +2,7 @@
 #define MAPCONTENT_H
 
 #include <QPoint>
+#include <QPolygon>
 #include <QLine>
 #include <QRect>
 #include <QString>
@@ -231,6 +232,30 @@ public:
 
 protected:
     QRect _rect;
+    bool _erase;
+    bool _smooth;
+};
+
+
+
+
+class MapEditPolygon : public MapEdit
+{
+public:
+    MapEditPolygon(const QPolygon& polygon, bool erase, bool smooth);
+    MapEditPolygon(const MapEditPolygon &obj);
+    virtual ~MapEditPolygon() override;
+
+    virtual QPolygon polygon() const;
+    virtual bool erase() const;
+    virtual bool smooth() const;
+
+    virtual void setPolygon(const QPolygon& polygon);
+    virtual void setErase(bool erase);
+    virtual void setSmooth(bool smooth);
+
+protected:
+    QPolygon _polygon;
     bool _erase;
     bool _smooth;
 };

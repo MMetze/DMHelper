@@ -211,7 +211,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Lock the aspect ratio</string>
+        <string>Increase the scale</string>
        </property>
        <property name="text">
         <string/>
@@ -259,7 +259,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Lock the aspect ratio</string>
+        <string>Decrease the scale</string>
        </property>
        <property name="text">
         <string/>
@@ -321,7 +321,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Set the opacity of the layer</string>
+        <string>Set the scale of the layer</string>
        </property>
        <property name="minimum">
         <number>1</number>
@@ -361,7 +361,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>The layer's X position</string>
+        <string>The layer's scale</string>
        </property>
        <property name="text">
         <string>Scale</string>
@@ -433,7 +433,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>The layer's X position</string>
+        <string>The layer's opacity</string>
        </property>
        <property name="text">
         <string>Opacity</string>

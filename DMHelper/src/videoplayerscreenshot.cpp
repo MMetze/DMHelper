@@ -6,7 +6,7 @@
 VideoPlayerScreenshot::VideoPlayerScreenshot(const QString& videoFile, QObject *parent) :
     VideoPlayer{videoFile, QSize(), true, false, parent}
 {
-    connect(this, &VideoPlayer::screenShotAvailable, this, &VideoPlayerScreenshot::handleScreenshot);
+    connect(this, &VideoPlayer::screenShotAvailable, this, &VideoPlayerScreenshot::handleScreenshot, Qt::QueuedConnection);
 }
 
 VideoPlayerScreenshot::~VideoPlayerScreenshot()

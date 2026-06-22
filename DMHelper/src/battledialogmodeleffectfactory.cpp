@@ -6,6 +6,10 @@
 #include "battledialogmodeleffectline.h"
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectobjectvideo.h"
+#include "battledialogmodeleffectsmoke.h"
+#include "battledialogmodeleffectfire.h"
+#include "battledialogmodeleffectsparks.h"
+#include "battledialogmodeleffectlight.h"
 #include <QDomElement>
 #include <QPixmap>
 #include <QDebug>
@@ -40,6 +44,18 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_ObjectVideo:
             result = new BattleDialogModelEffectObjectVideo();
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Smoke:
+            result = new BattleDialogModelEffectSmoke();
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Fire:
+            result = new BattleDialogModelEffectFire();
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Sparks:
+            result = new BattleDialogModelEffectSparks();
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Light:
+            result = new BattleDialogModelEffectLight();
             break;
         default:
             break;
@@ -159,7 +175,11 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectShape(int e
     if((effectType != BattleDialogModelEffect::BattleDialogModelEffect_Radius) &&
        (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Cone) &&
        (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Cube) &&
-       (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Line))
+       (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Line) &&
+       (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Smoke) &&
+       (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Fire) &&
+       (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Sparks) &&
+       (effectType != BattleDialogModelEffect::BattleDialogModelEffect_Light))
         return nullptr;
 
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(effectType);
@@ -171,4 +191,24 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectShape(int e
     }
 
     return effect;
+}
+
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectSmoke(const QPointF& position, int size, const QColor& color)
+{
+    return createEffectShape(BattleDialogModelEffect::BattleDialogModelEffect_Smoke, position, size, color);
+}
+
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectFire(const QPointF& position, int size, const QColor& color)
+{
+    return createEffectShape(BattleDialogModelEffect::BattleDialogModelEffect_Fire, position, size, color);
+}
+
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectSparks(const QPointF& position, int size, const QColor& color)
+{
+    return createEffectShape(BattleDialogModelEffect::BattleDialogModelEffect_Sparks, position, size, color);
+}
+
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectLight(const QPointF& position, int size, const QColor& color)
+{
+    return createEffectShape(BattleDialogModelEffect::BattleDialogModelEffect_Light, position, size, color);
 }

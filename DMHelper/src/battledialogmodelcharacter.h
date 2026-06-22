@@ -3,6 +3,7 @@
 
 #include "battledialogmodelcombatant.h"
 #include "combatant.h"
+#include "scaledpixmap.h"
 #include <QString>
 #include <QPoint>
 
@@ -34,8 +35,8 @@ public:
     virtual int getWisdom() const override;
     virtual int getCharisma() const override;
     virtual int getSkillModifier(Combatant::Skills skill) const override;
-    virtual int getConditions() const override;
-    virtual bool hasCondition(Combatant::Condition condition) const override;
+    virtual QStringList getConditionList() const override;
+    virtual bool hasConditionId(const QString& conditionId) const override;
 
     virtual int getSpeed() const override;
     virtual int getArmorClass() const override;
@@ -47,13 +48,25 @@ public:
     Characterv2* getCharacter() const;
     void setCharacter(Characterv2* character);
 
+    int getIconIndex() const;
+    void setIconIndex(int index);
+    void setIconFile(const QString& iconFile);
+
+signals:
+    void imageChanged(BattleDialogModelCharacter* character);
+
 public slots:
-    virtual void setConditions(int conditions) override;
-    virtual void applyConditions(int conditions) override;
-    virtual void removeConditions(int conditions) override;
+    virtual void setConditionList(const QStringList& conditions) override;
+    virtual void addConditionId(const QString& conditionId) override;
+    virtual void removeConditionId(const QString& conditionId) override;
     virtual void clearConditions() override;
 
 protected:
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+private:
+    int _iconIndex;
+    QString _iconFile;
+    ScaledPixmap* _iconPixmap;
 };
 #endif // BATTLEDIALOGMODELCHARACTER_H

@@ -213,7 +213,7 @@ void SoundboardFrame::addSound()
 
     QString filename = QFileDialog::getOpenFileName(this, QString("Select music file"));
     if(!filename.isEmpty())
-        addTrack(QUrl(filename));
+        addTrack(QUrl::fromLocalFile(filename));
 }
 
 void SoundboardFrame::addYoutube()

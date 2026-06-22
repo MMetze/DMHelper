@@ -58,6 +58,7 @@ signals:
     void alignmentChanged(Qt::Alignment alignment);
     void pasteRichChanged(bool pasteRich);
     void hyperlinkClicked();
+    void checkboxClicked();
 
     // Tools
     void translateTextClicked(bool checked);

@@ -26,7 +26,7 @@ public:
 
     void setSaveDC(int saveDC);
     void setSaveType(const QString& saveType);
-    void setConditions(int conditions);
+    void setConditions(const QStringList& conditions);
     void setDamage(int damage);
     void setDamageDice(const Dice& damageDice);
 
@@ -57,7 +57,7 @@ private:
     void init();
     void createCombatantWidgets();
     void updateConditionLayout();
-    void addCondition(Combatant::Condition condition);
+    void addCondition(const QString& conditionId);
 
     int rollOnce(const Dice& dice, int modifier, QString& resultStr);
     void rollForWidget(BattleCombatantWidget* widget, const Dice& dice, int modifier);
@@ -69,7 +69,7 @@ private:
     QList<BattleDialogModelCombatant*> _combatants;
     QList<int> _modifiers;
     bool _fireAndForget;
-    int _conditions;
+    QStringList _conditions;
     QGridLayout* _conditionGrid;
 
     bool _mouseDown;

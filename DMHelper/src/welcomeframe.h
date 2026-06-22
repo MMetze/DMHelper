@@ -21,6 +21,7 @@ public:
     void setMRUHandler(MRUHandler* mruHandler);
 
 public slots:
+    void openWhatsNew();
     void openUsersGuide();
     void openGettingStarted();
     void openSampleCampaign();

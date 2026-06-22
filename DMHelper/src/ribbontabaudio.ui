@@ -121,7 +121,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Select a map for the battle</string>
+          <string>Play audio</string>
        </property>
        <property name="text">
         <string/>
@@ -176,7 +176,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Select a map for the battle</string>
+          <string>Pause audio</string>
        </property>
        <property name="text">
         <string/>
@@ -231,7 +231,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Select a map for the battle</string>
+          <string>Stop audio</string>
        </property>
        <property name="text">
         <string/>
@@ -314,7 +314,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Refresh the map</string>
+          <string>Repeat audio</string>
        </property>
        <property name="text">
         <string/>
@@ -372,7 +372,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a character to the battle</string>
+          <string>Mute audio</string>
        </property>
        <property name="text">
         <string/>

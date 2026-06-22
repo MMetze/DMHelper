@@ -12,6 +12,7 @@
     #define DMH_DEBUG_OPENGL_FRAME_START() qDebug() << "[DMH_DEBUG_OPENGL] Frame Start (Context: " << QOpenGLContext::currentContext() << ") in " << __FILE__ << ":" << __LINE__;
     #define DMH_DEBUG_OPENGL_PAINTGL() qDebug() << "[DMH_DEBUG_OPENGL] paintGL() (Context: " << QOpenGLContext::currentContext() << ") in " << __FILE__ << ":" << __LINE__;
     #define DMH_DEBUG_OPENGL_glCreateProgram(x, y) qDebug() << "[DMH_DEBUG_OPENGL] glCreateProgram(" << x << ") for " << y << " in " << __FILE__ << ":" << __LINE__;
+    #define DMH_DEBUG_OPENGL_glDeleteProgram(x) qDebug() << "[DMH_DEBUG_OPENGL] glDeleteProgram(" << x << ") in " << __FILE__ << ":" << __LINE__; DMH_DEBUG_OPENGL_Singleton::removeProgram(x);
     #define DMH_DEBUG_OPENGL_glUseProgram(x) qDebug() << "[DMH_DEBUG_OPENGL] glUseProgram(" << x << ") in " << __FILE__ << ":" << __LINE__; DMH_DEBUG_OPENGL_Singleton::setProgram(x);
     #define DMH_DEBUG_OPENGL_glUniformMatrix4fv4(x, y, z, w) qDebug() << "[DMH_DEBUG_OPENGL] glUniformMatrix4fv(" << x << ", " << y << ", " << z << ", " << w << ") in " << __FILE__ << ":" << __LINE__; DMH_DEBUG_OPENGL_Singleton::checkUniform(x);
     #define DMH_DEBUG_OPENGL_glUniformMatrix4fv(x, y, z, w, m) qDebug() << "[DMH_DEBUG_OPENGL] glUniformMatrix4fv(" << x << ", " << y << ", " << z << ", " << w << ") with (" << m.column(3) << "), (" << m.row(0)[0] << ", " << m.row(1)[1] << ", " << m.row(2)[2] << ") in " << __FILE__ << ":" << __LINE__; DMH_DEBUG_OPENGL_Singleton::checkUniform(x);
@@ -52,6 +53,7 @@
     #define DMH_DEBUG_OPENGL_FRAME_START()
     #define DMH_DEBUG_OPENGL_PAINTGL()
     #define DMH_DEBUG_OPENGL_glCreateProgram(x, y)
+    #define DMH_DEBUG_OPENGL_glDeleteProgram(x)
     #define DMH_DEBUG_OPENGL_glUseProgram(x)
     #define DMH_DEBUG_OPENGL_glUniformMatrix4fv4(x, y, z, w)
     #define DMH_DEBUG_OPENGL_glUniformMatrix4fv(x, y, z, w, m)

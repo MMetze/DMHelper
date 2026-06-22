@@ -12,6 +12,7 @@ public:
     virtual ~BattleDialogGraphicsView();
 
 protected:
+    virtual void drawBackground(QPainter *painter, const QRectF &rect) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
 
 };

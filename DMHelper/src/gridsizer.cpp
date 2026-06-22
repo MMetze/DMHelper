@@ -6,6 +6,7 @@
 
 const int GRID_COUNT = 5;
 const qreal MINIMUM_GRID_SIZE = 10.0;
+const qreal GRID_SIZER_NO_MAXIMUM = -1.0;
 
 GridSizer::GridSizer(qreal size, bool showAccept, QGraphicsItem *parent) :
     QGraphicsObject(parent),
@@ -13,6 +14,7 @@ GridSizer::GridSizer(qreal size, bool showAccept, QGraphicsItem *parent) :
     _resizing(false),
     _mouseDownPos(),
     _gridSize(size),
+    _maximumSize(GRID_SIZER_NO_MAXIMUM),
     _penColor(Qt::black),
     _penWidth(1),
     _backgroundColor(Qt::white),
@@ -85,6 +87,8 @@ qreal GridSizer::getHandleSize() const
 void GridSizer::setSize(qreal size)
 {
     qreal newSize = qMax(size, MINIMUM_GRID_SIZE); // Set the size, considering a minimum
+    if(_maximumSize > 0.0)
+        newSize = qMin(newSize, _maximumSize);
 
     if(newSize == _gridSize)
         return; // No change, do not update
@@ -93,6 +97,19 @@ void GridSizer::setSize(qreal size)
 
     prepareGeometryChange();  // Tells the scene the bounding _gridSizerRect will change
     _gridSizerRect.setSize(QSizeF(_gridSize * GRID_COUNT, _gridSize * GRID_COUNT)); // Maintain square aspect ratio
+}
+
+void GridSizer::setMaximumSize(qreal size)
+{
+    if(size <= 0.0)
+    {
+        _maximumSize = GRID_SIZER_NO_MAXIMUM;
+        return;
+    }
+
+    _maximumSize = qMax(size, MINIMUM_GRID_SIZE);
+    if(_gridSize > _maximumSize)
+        setSize(_maximumSize);
 }
 
 bool GridSizer::isInResizeHandle(const QPointF &pos) const

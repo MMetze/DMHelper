@@ -11,6 +11,8 @@
 #include <QDebug>
 
 const int CONFIGURE_GRID_DEFAULT_ANGLE = 50;
+static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
+static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
 
 ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     QDialog(parent),
@@ -60,6 +62,7 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     _gridSizer->setPenWidth(3);
     _gridSizer->setBackgroundColor(QColor(160,160,160,204));
     _scene->addItem(_gridSizer);
+    updateGridSizerMaximumSize();
     _gridSizer->setPos(DMHelper::STARTING_GRID_SCALE, DMHelper::STARTING_GRID_SCALE);
 
     connect(_scene, &QGraphicsScene::changed, this, &ConfigureLockedGridDialog::gridSizerResized);
@@ -88,6 +91,7 @@ void ConfigureLockedGridDialog::resizeEvent(QResizeEvent* event)
         QRect sceneRect(QPoint(), ui->graphicsView->size());
         ui->graphicsView->setSceneRect(sceneRect);
         _grid->setGridShape(sceneRect);
+        updateGridSizerMaximumSize();
         rebuildGrid();
     }
 
@@ -173,4 +177,15 @@ void ConfigureLockedGridDialog::rebuildGrid()
     _grid->rebuildGrid(*_gridConfig);
     if(ui->graphicsView->width() > 0)
         _gridScale = ui->spinGridSize->value();
+}
+
+void ConfigureLockedGridDialog::updateGridSizerMaximumSize()
+{
+    if(!_gridSizer)
+        return;
+
+    const QRectF mapRect = ui->graphicsView->sceneRect();
+    const qreal maximumGridSize = qMin(mapRect.width() * GRID_SIZER_MAX_MAP_RATIO,
+                                       mapRect.height() * GRID_SIZER_MAX_MAP_RATIO) / GRID_SIZER_CELL_COUNT;
+    _gridSizer->setMaximumSize(maximumGridSize);
 }

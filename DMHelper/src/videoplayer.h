@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QRecursiveMutex>
 #include <QImage>
+#include <atomic>
 #include "dmh_vlc.h"
 
 class VideoPlayer : public QObject
@@ -19,6 +20,9 @@ public:
     virtual void setPlayingVideo(bool playVideo);
     virtual bool isPlayingAudio() const;
     virtual void setPlayingAudio(bool playAudio);
+
+    virtual int getVolume() const;
+    virtual void setVolume(int volume);
 
     virtual void setLooping(bool looping);
 
@@ -74,6 +78,7 @@ protected:
     QString _videoFile;
     bool _playVideo;
     bool _playAudio;
+    int _volume;
 
     bool _vlcError;
     libvlc_media_player_t* _vlcPlayer;
@@ -103,7 +108,7 @@ protected:
     bool _newImage;
     QSize _originalSize;
     QSize _targetSize;
-    int _status;
+    std::atomic<int> _status;
     bool _looping;
     bool _selfRestart;
     bool _deleteOnStop;

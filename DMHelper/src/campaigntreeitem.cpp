@@ -39,7 +39,6 @@ CampaignTreeItem::~CampaignTreeItem()
 
 QStandardItem* CampaignTreeItem::clone() const
 {
-    //return QStandardItem::clone();
     CampaignTreeItem* newItem = new CampaignTreeItem(*this);
     return newItem;
 }

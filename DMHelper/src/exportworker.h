@@ -9,7 +9,7 @@ class EncounterBattle;
 class BattleDialogModelEffect;
 class CampaignObjectBase;
 class QTreeWidgetItem;
-class Spell;
+class Spellv2;
 class MonsterClassv2;
 class QDomDocument;
 class QDomElement;
@@ -55,7 +55,7 @@ protected:
     bool _spellsExport;
     QStringList _spellList;
     QStringList _monsterList;
-    QList<Spell*> _exportedSpells;
+    QList<Spellv2*> _exportedSpells;
     QList<MonsterClassv2*> _exportedMonsters;
     QHash<QString, QString> _exportedFiles;
 

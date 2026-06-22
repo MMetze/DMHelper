@@ -26,7 +26,7 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     setAttribute(Qt::WA_StyledBackground, true);
 
     ui->edtCount->setValidator(new QIntValidator(1, 100, this));
-    ui->edtHitPointsLocal->setValidator(new QIntValidator(-10, 1000, this));
+    ui->edtHitPointsLocal->setValidator(new QIntValidator(-999999, 999999, this));
     ui->buttonBox->setStandardButtons(buttons);
 
     connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CombatantDialog::previousIcon);
@@ -40,7 +40,7 @@ CombatantDialog::CombatantDialog(LayerScene& layerScene, QDialogButtonBox::Stand
     connect(ui->edtHitDice, &QLineEdit::editingFinished, this, &CombatantDialog::setHitPointAverageChanged);
 
     connect(ui->chkRandomInitiative, &QAbstractButton::clicked, ui->edtInitiative, &QWidget::setDisabled);
-    ui->edtInitiative->setValidator(new QIntValidator(-100, 1000, this));
+    ui->edtInitiative->setValidator(new QIntValidator(-999999, 999999, this));
 
     ui->edtSize->setValidator(new QDoubleValidator(0.25, 1000.0, 2, this));
     connect(ui->cmbSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CombatantDialog::sizeSelected);
@@ -178,25 +178,6 @@ int CombatantDialog::getIconIndex() const
 QString CombatantDialog::getIconFile() const
 {
     return _iconFile;
-}
-
-void CombatantDialog::writeCombatant(Combatant* combatant)
-{
-    if((!combatant) || (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
-        return;
-
-    Monster* monster = dynamic_cast<Monster*>(combatant);
-    if(!monster)
-        return;
-
-    MonsterClassv2* monsterClass = getMonsterClass();
-    if(monsterClass == nullptr)
-        return;
-
-    monster->setMonsterClass(monsterClass);
-
-    combatant->setName(ui->edtNameLocal->text());
-    combatant->setHitPoints(ui->edtHitPointsLocal->text().toInt());
 }
 
 void CombatantDialog::accept()

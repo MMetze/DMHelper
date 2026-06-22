@@ -13,7 +13,9 @@ Characterv2::Characterv2(const QString& name, QObject *parent) :
     TemplateObject(CombatantFactory::Instance()),
     _dndBeyondID(-1),
     _iconChanged(false),
-    _allValues()
+    _allValues(),
+    _icons(),
+    _scaledPixmaps()
 {
 }
 
@@ -23,6 +25,7 @@ void Characterv2::inputXML(const QDomElement &element, bool isImport)
 
     setDndBeyondID(element.attribute(QString("dndBeyondID"), QString::number(-1)).toInt());
     readXMLValues(element, isImport);
+    readIcons(element, isImport);
 
     Combatant::inputXML(element, isImport);
 
@@ -41,12 +44,17 @@ void Characterv2::copyValues(const CampaignObjectBase* other)
         _allValues.insert(key, otherCharacter->_allValues.value(key));
     }
 
+    _icons = otherCharacter->_icons;
+    _scaledPixmaps = otherCharacter->_scaledPixmaps;
+
     Combatant::copyValues(other);
 }
 
 QIcon Characterv2::getDefaultIcon()
 {
-    if(_iconPixmap.isValid())
+    if(!_scaledPixmaps.isEmpty() && _scaledPixmaps[0].isValid())
+        return QIcon(_scaledPixmaps[0].getPixmap(DMHelper::PixmapSize_Battle).scaled(128,128, Qt::KeepAspectRatio));
+    else if(_iconPixmap.isValid())
         return QIcon(_iconPixmap.getPixmap(DMHelper::PixmapSize_Battle).scaled(128,128, Qt::KeepAspectRatio));
     else
         return isInParty() ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png");
@@ -105,13 +113,197 @@ bool Characterv2::isInParty() const
     return (getParentByType(DMHelper::CampaignType_Party) != nullptr);
 }
 
+QString Characterv2::getIconFile() const
+{
+    if(!_icons.isEmpty())
+        return _icons.at(0);
+    return _icon;
+}
+
+QPixmap Characterv2::getIconPixmap(DMHelper::PixmapSize iconSize)
+{
+    return getIconPixmap(iconSize, 0);
+}
+
+QPixmap Characterv2::getIconPixmap(DMHelper::PixmapSize iconSize, int index)
+{
+    if((index >= 0) && (index < _scaledPixmaps.count()))
+        return _scaledPixmaps[index].getPixmap(iconSize);
+    else if(_iconPixmap.isValid())
+        return _iconPixmap.getPixmap(iconSize);
+    else
+        return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
+}
+
+int Characterv2::getIconCount() const
+{
+    return _icons.count();
+}
+
+QStringList Characterv2::getIconList() const
+{
+    return _icons;
+}
+
+QString Characterv2::getIcon(int index) const
+{
+    if((index < 0) || (index >= _icons.count()))
+        return QString();
+    else
+        return _icons.at(index);
+}
+
 void Characterv2::setIcon(const QString &newIcon)
 {
-    if(newIcon == _icon)
+    if(newIcon.isEmpty())
         return;
 
-    _icon = newIcon;
-    _iconPixmap.setBasePixmap(_icon);
+    if(_icons.isEmpty())
+    {
+        addIcon(newIcon);
+    }
+    else
+    {
+        if(newIcon == _icons.at(0))
+            return;
+
+        ScaledPixmap newPixmap;
+        newPixmap.setBasePixmap(newIcon);
+        _icons[0] = newIcon;
+        _scaledPixmaps[0] = newPixmap;
+
+        _icon = newIcon;
+        _iconPixmap.setBasePixmap(_icon);
+        registerChange();
+
+        if(_batchChanges)
+            _iconChanged = true;
+        else
+            emit iconChanged(this);
+    }
+}
+
+void Characterv2::addIcon(const QString &iconFile)
+{
+    if((iconFile.isEmpty()) || (_icons.contains(iconFile)))
+        return;
+
+    ScaledPixmap newPixmap;
+    if(!newPixmap.setBasePixmap(iconFile))
+    {
+        qDebug() << "[Characterv2] ERROR: Unable to set icon pixmap for character: " << getName() << " - " << iconFile;
+        return;
+    }
+
+    _icons.append(iconFile);
+    _scaledPixmaps.append(newPixmap);
+
+    // Keep base class in sync with first icon
+    if(_icons.count() == 1)
+    {
+        _icon = iconFile;
+        _iconPixmap.setBasePixmap(_icon);
+    }
+
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged(this);
+}
+
+void Characterv2::setIcon(int index, const QString& iconFile)
+{
+    if((index < 0) || (index >= _icons.count()) || (iconFile.isEmpty()))
+        return;
+
+    ScaledPixmap newPixmap;
+    if(!newPixmap.setBasePixmap(iconFile))
+    {
+        qDebug() << "[Characterv2] ERROR: Unable to set icon pixmap for character: " << getName() << " - " << iconFile;
+        return;
+    }
+
+    _icons[index] = iconFile;
+    _scaledPixmaps[index] = newPixmap;
+
+    // Keep base class in sync with first icon
+    if(index == 0)
+    {
+        _icon = iconFile;
+        _iconPixmap.setBasePixmap(_icon);
+    }
+
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged(this);
+}
+
+void Characterv2::removeIcon(int index)
+{
+    if((index < 0) || (index >= _icons.count()))
+        return;
+
+    _icons.removeAt(index);
+    _scaledPixmaps.removeAt(index);
+
+    // Keep base class in sync with first icon
+    if(_icons.isEmpty())
+    {
+        _icon.clear();
+        _iconPixmap = ScaledPixmap();
+    }
+    else if(index == 0)
+    {
+        _icon = _icons.at(0);
+        _iconPixmap.setBasePixmap(_icon);
+    }
+
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged(this);
+}
+
+void Characterv2::removeIcon(const QString& iconFile)
+{
+    removeIcon(_icons.indexOf(iconFile));
+}
+
+void Characterv2::clearIcon()
+{
+    _icons.clear();
+    _scaledPixmaps.clear();
+    _icon.clear();
+    _iconPixmap = ScaledPixmap();
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged(this);
+}
+
+void Characterv2::refreshIconPixmaps()
+{
+    _scaledPixmaps.clear();
+    for(int i = 0; i < _icons.count(); ++i)
+    {
+        ScaledPixmap newPixmap;
+        newPixmap.setBasePixmap(_icons.at(i));
+        _scaledPixmaps.append(newPixmap);
+    }
+
+    // Keep base class in sync
+    if(!_icons.isEmpty())
+        _iconPixmap.setBasePixmap(_icons.at(0));
+
     registerChange();
 
     if(_batchChanges)
@@ -202,13 +394,16 @@ void Characterv2::internalOutputXML(QDomDocument &doc, QDomElement &element, QDi
     element.setAttribute("dndBeyondID", getDndBeyondID());
 
     writeXMLValues(doc, element, targetDirectory, isExport);
+    writeIcons(doc, element, targetDirectory, isExport);
 
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool Characterv2::belongsToObject(QDomElement& element)
 {
-    if((CombatantFactory::Instance()) && (CombatantFactory::Instance()->hasEntry(element.tagName())))
+    if(element.tagName() == QString("icon"))
+        return true;
+    else if((CombatantFactory::Instance()) && (CombatantFactory::Instance()->hasEntry(element.tagName())))
         return true;
     else if((element.tagName() == QString("actions")) || (element.tagName() == QString("spell-data"))) // for backwards compatibility
         return true;
@@ -316,7 +511,7 @@ QVariant Characterv2::getAttributeSpecial(const QString& attribute) const
     else if(attribute == QString("hitDice"))
         value.setValue(getHitDice());
     else if(attribute == QString("conditions"))
-        value = QVariant(getConditions());
+        value = QVariant(getConditionList().join(QStringLiteral(",")));
     else if(attribute == QString("initiative"))
         value = QVariant(getInitiative());
     else if(attribute == QString("icon"))
@@ -344,7 +539,7 @@ QString Characterv2::getAttributeSpecialAsString(const QString& attribute) const
     else if(attribute == QString("hitDice"))
         return getHitDice().toString();
     else if(attribute == QString("conditions"))
-        return QString::number(getConditions());
+        return getConditionList().join(QStringLiteral(","));
     else if(attribute == QString("initiative"))
         return QString::number(getInitiative());
     else if(attribute == QString("icon"))
@@ -356,9 +551,9 @@ QString Characterv2::getAttributeSpecialAsString(const QString& attribute) const
 void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
 {
     if(key == QString("expanded"))
-        return; //qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
+        return;
     else if(key == QString("row"))
-        return; //qDebug() << "[Characterv2] Unexpected Request to set " << key << " to " << value;
+        return;
     else if(key == QString("name"))
         setName(value);
     else if(key == QString("base-icon"))
@@ -370,11 +565,52 @@ void Characterv2::setAttributeSpecial(const QString& key, const QString& value)
     else if(key == QString("hitDice"))
         setHitDice(Dice(value));
     else if(key == QString("conditions"))
-        setConditions(value.toInt()); // TODO: conditions are not well-solved
+    {
+        setConditionList(value.split(QStringLiteral(","), Qt::SkipEmptyParts));
+    }
     else if(key == QString("initiative"))
         setInitiative(value.toInt());
     else if(key == QString("icon"))
         setIcon(value);
     else
         qDebug() << "[Characterv2] ERROR: Attempt to set unknown special attribute " << key << " to " << value;
+}
+
+void Characterv2::readIcons(const QDomElement& element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    // Read multi-icon child elements first
+    QDomElement iconElement = element.firstChildElement("icon");
+    while(!iconElement.isNull())
+    {
+        addIcon(iconElement.attribute("filename"));
+        iconElement = iconElement.nextSiblingElement("icon");
+    }
+
+    // Legacy single-icon attribute — only use if no child icon elements were found
+    if((_icons.isEmpty()) && (element.hasAttribute("icon")) && (!element.attribute("icon").isEmpty()))
+        addIcon(element.attribute("icon"));
+}
+
+void Characterv2::writeIcons(QDomDocument &doc, QDomElement& element, QDir& targetDirectory, bool isExport) const
+{
+    Q_UNUSED(isExport);
+
+    if(_icons.count() <= 1)
+    {
+        // Single icon or no icons — use legacy attribute format (handled by Combatant::internalOutputXML)
+        return;
+    }
+
+    // Multiple icons — write as child elements
+    for(int i = 0; i < _icons.count(); ++i)
+    {
+        if(!_icons.at(i).isEmpty())
+        {
+            QDomElement iconElement = doc.createElement("icon");
+            iconElement.setAttribute("filename", targetDirectory.relativeFilePath(_icons.at(i)));
+            element.appendChild(iconElement);
+        }
+    }
 }

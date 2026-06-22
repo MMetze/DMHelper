@@ -17,6 +17,7 @@ public:
     qreal getHandleSize() const;
 
     void setSize(qreal size);
+    void setMaximumSize(qreal size);
 
     void setPenColor(const QColor &color);
     void setPenWidth(int width);
@@ -41,6 +42,7 @@ private:
     bool _resizing;
     QPointF _mouseDownPos;
     qreal _gridSize;
+    qreal _maximumSize;
 
     QColor _penColor;
     int _penWidth;

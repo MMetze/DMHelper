@@ -2,6 +2,7 @@
 #define VIDEOPLAYERGLVIDEO_H
 
 #include "dmh_vlc.h"
+#include <vlc/libvlc_version.h>
 #include <QObject>
 #include <QSemaphore>
 #include <QMutex>

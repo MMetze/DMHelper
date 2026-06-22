@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QAbstractButton>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 //#define IMPORTER_LOCAL_TEST
 //#define IMPORTER_LOG_AC
@@ -655,7 +656,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 {
     if(!reply)
     {
-        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An unexpected error occured connecting to Dnd Beyond."));
+        DMHMessageBox::critical(nullptr, QString("Character Import Error"), QString("An unexpected error occured connecting to Dnd Beyond."));
         qDebug() << "[CharacterImporter] ERROR: unexpected null pointer in network reply";
         return false;
     }
@@ -663,7 +664,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 #ifndef IMPORTER_LOCAL_TEST
     if(reply->error() != QNetworkReply::NoError)
     {
-        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString() + QChar::LineFeed + QChar::LineFeed + QString("This is a common error if DMHelper cannot access the character. Please check if the character privacy for this character is set to is 'Public'"));
+        DMHMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString() + QChar::LineFeed + QChar::LineFeed + QString("This is a common error if DMHelper cannot access the character. Please check if the character privacy for this character is set to is 'Public'"));
         qDebug() << "[CharacterImporter] ERROR: network reply not ok: " << reply->error();
         qDebug() << "[CharacterImporter] ERROR: " << reply->errorString();
         return false;
@@ -682,7 +683,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QJsonDocument doc = QJsonDocument::fromJson(bytes, &err);
     if(doc.isNull())
     {
-        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("Unable to parse the input string\n") + err.errorString());
+        DMHMessageBox::critical(nullptr, QString("Character Import Error"), QString("Unable to parse the input string\n") + err.errorString());
         qDebug() << "[CharacterImporter] ERROR: " << err.error << " in column " << err.offset;
         qDebug() << "[CharacterImporter] ERROR: " << err.errorString();
         return false;
@@ -1301,7 +1302,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QString avatarUrl = rootObject["avatarUrl"].toString();
     if((isUpdate) && (!avatarUrl.isEmpty()))
     {
-        QMessageBox::StandardButton result = QMessageBox::question(nullptr,
+        QMessageBox::StandardButton result = DMHMessageBox::question(nullptr,
                                                                    QString("Confirm avatar download"),
                                                                    QString("The updated character has an avatar image. Do you want to update the image?"));
         if(result != QMessageBox::Yes)
@@ -1340,14 +1341,14 @@ bool CharacterImporter::interpretImageReply(QNetworkReply* reply)
 {
     if((!_character) || (!reply))
     {
-        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An unexpected error occured connecting to Dnd Beyond."));
+        DMHMessageBox::critical(nullptr, QString("Character Import Error"), QString("An unexpected error occured connecting to Dnd Beyond."));
         qDebug() << "[CharacterImporter] ERROR: unexpected null pointer in network image reply";
         return false;
     }
 
     if(reply->error() != QNetworkReply::NoError)
     {
-        QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
+        DMHMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
         qDebug() << "[CharacterImporter] ERROR: network image reply not ok: " << reply->error();
         qDebug() << "[CharacterImporter] ERROR: " << reply->errorString();
         return false;

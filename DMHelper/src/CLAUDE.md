@@ -7,17 +7,25 @@ Win64 + macOS. All active code is in `DMHelper/src/`. Everything in
 is archived — do not touch.
 
 ## Build
+
+Default: incremental debug build (day-to-day development):
 ```bash
-cmake -S DMHelper/src -B build-64_bit-release -DCMAKE_BUILD_TYPE=Release
-cmake --build build-64_bit-release --config Release
+cmake --build DMHelper/out/build/windows-debug
 ```
 
-**Windows environment:** `cmake` is not on the default PATH. Use the VS
-instance at:
+**Windows environment:** The default VSCode terminal does **not** have MSVC
+compiler paths loaded. Running `cmake --build` in plain PowerShell will fail
+with `fatal error C1083: Cannot open include file: 'type_traits'`.
+
+Always wrap build commands in a `vcvarsall.bat` call:
+```powershell
+cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --build --preset windows-debug 2>&1"
 ```
-C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe
+
+If the build directory does not exist yet, configure first with:
+```powershell
+cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --preset windows-debug 2>&1"
 ```
-Prepend that `bin` directory to `$env:PATH` before running cmake commands.
 
 **IntelliSense errors are unreliable.** The IDE's clangd/IntelliSense uses a
 different Qt configuration than the actual build. Errors like "no type named
@@ -31,6 +39,16 @@ Sources are listed **explicitly** in `CMakeLists.txt` — no globbing. If you
 create a `.cpp`/`.h` pair, you must add both to the source list manually.
 
 ## Conventions — follow existing code, but note these traps
+
+**No magic numbers.** Use named constants (`static constexpr` for scalars,
+`static const` for QColor etc.) at the top of the `.cpp` file for any
+non-trivial literal value. Default property values, timer intervals, buffer
+sizes, vertex layout parameters, preview sizes, gradient stops — all must be
+named. The only exceptions are:
+- Structural zeros/ones with obvious meaning (e.g. `0.0f` for a cleared
+  position, `1` for a boolean attribute default)
+- Values that are part of a well-known algorithm embedded in a string
+  literal (e.g. simplex noise constants inside GLSL shader strings)
 
 **Enums** use `TypeName_ValueName` (e.g. `LayerType_Fow`, `CampaignType_Battle`).
 This is non-obvious — don't drift to `LayerType::Fow` or plain `FOW`.
@@ -94,6 +112,24 @@ Legacy classes remain only for XML file compatibility. New code uses v2 exclusiv
 - `INCLUDE_NETWORK_SUPPORT` — network stack incomplete, gated in `dmconstants.h`
 - `LAYERVIDEO_USE_OPENGL` — GPU video path exists but not production-ready
 
+## UI creation — prefer .ui files
+
+Minimise programmatic UI creation. Dialogs and frames should always derive
+from a `.ui` file designed by the user in Qt Designer. The only exception
+is truly dynamic content whose structure depends on runtime data (e.g.
+populating a grid of condition buttons from the active ruleset). Even then,
+the **shell** (scroll areas, button boxes, static labels, layout structure)
+must come from the `.ui` file — only the data-driven widgets are added in code.
+
+**Never override .ui properties from code.** Layout margins, spacing, size
+policies, stylesheets, and other visual properties that can be set in
+Qt Designer must be set there — not overridden programmatically in the
+constructor or elsewhere. If a .ui property needs changing, tell the user
+which widget and property to adjust in Qt Designer and let them make the
+change. The only acceptable programmatic UI modifications are those driven
+by runtime state (e.g. showing/hiding widgets, updating text, populating
+dynamic lists).
+
 ## Files never to modify
 - `*.ui` — edit in Qt Designer only, never hand-edit XML
 - `*.qrc` — edit manually only with care, never restructure paths
@@ -104,3 +140,4 @@ Legacy classes remain only for XML file compatibility. New code uses v2 exclusiv
 - Commit after each logical file/unit: `agent: <what changed>`
 - After non-trivial changes, run the build command above to verify
 - Keep tasks to one subsystem at a time
+- Before asking permission to run a script or external command, summarize what the command does and why it is needed

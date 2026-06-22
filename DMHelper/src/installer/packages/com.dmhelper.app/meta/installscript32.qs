@@ -19,7 +19,7 @@ Component.prototype.createOperations = function()
         component.addOperation("CreateShortcut", "@TargetDir@/DMHelper.exe", "@StartMenuDir@/DMHelper.lnk",
             "workingDirectory=@TargetDir@", "description=Open DMHelper");
 
-        component.addOperation("CreateShortcut", "@TargetDir@/maintenancetool.exe", "@StartMenuDir@/Uninstall DMHelper.lnk",
+        component.addOperation("CreateShortcut", "@TargetDir@/uninstall.exe", "@StartMenuDir@/Uninstall DMHelper.lnk",
             "workingDirectory=@TargetDir@", "description=Open the DMHelper maintenance tool");
     }
 }

@@ -80,11 +80,11 @@ bool RuleInitiativeGroupMonsters::CompareCombatants(const BattleDialogModelComba
     if((!a)||(!b))
         return false;
 
-    // Sort by initiative first, then combatant type (PCs before Monsters), then dexterity
+    // Sort by initiative first, then combatant type (PCs before Monsters), then initiative modifier
     if(a->getInitiative() == b->getInitiative())
     {
         if(a->getCombatantType() == b->getCombatantType())
-            return a->getDexterity() > b->getDexterity();
+            return RuleInitiative::initiativeModFor(a) > RuleInitiative::initiativeModFor(b);
         else
             return b->getCombatantType() == DMHelper::CombatantType_Monster; // return true if b is a monster ==> a is not
     }

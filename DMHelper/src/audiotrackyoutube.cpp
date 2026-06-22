@@ -2,10 +2,10 @@
 #include "dmconstants.h"
 #include "dmversion.h"
 #include <QUrlQuery>
-#include <QMessageBox>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QIcon>
+#include "dmhmessagebox.h"
 
 const int AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE = 0x01;
 const int AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED = 0x02;
@@ -179,7 +179,7 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
 {
     if(!reply)
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
         QString("DMHelper Audio Error"),
         QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
         qDebug() << "[AudioTrackYoutube] ERROR identified in reply, unexpected null pointer reply received!";
@@ -192,13 +192,13 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
         {
             if(reply->error() == QNetworkReply::HostNotFoundError)
             {
-                QMessageBox::critical(nullptr,
+                DMHMessageBox::critical(nullptr,
                                       QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video. It was not possible to reach the server!"));
             }
             else
             {
-                QMessageBox::critical(nullptr,
+                DMHMessageBox::critical(nullptr,
                                       QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
             }
@@ -328,16 +328,26 @@ void AudioTrackYoutube::playDirectUrl()
     if(isPlaying())
         return;
 
+    // NOTE: YouTube has a known issue on Windows / macOS and is being
+    // addressed on its own branch. This code was reverted to the v3.8.1
+    // form during the Linux-port merge; the #if WIN/MAC guards below are
+    // preserved from that form so the YouTube branch can resolve them in
+    // context. The Linux port bundles VLC 4 on every platform, so both
+    // branches now use the same VLC 4 signatures - the guards exist only
+    // to be revisited by the YouTube branch.
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #else
-    libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
+    libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #endif
+
+    libvlc_media_add_option(vlcMedia, ":network-caching=500");
+    libvlc_media_add_option(vlcMedia, ":no-video");
 
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
 #else
-    _vlcPlayer = libvlc_media_player_new_from_media(vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
 #endif
     if(!_vlcPlayer)
         return;

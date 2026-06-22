@@ -4,7 +4,6 @@
 #include <QMouseEvent>
 #include <QInputDialog>
 #include <QMenu>
-#include <QMessageBox>
 
 TemplateResourceLayout::TemplateResourceLayout(const QString& key, const ResourcePair& value) :
     QHBoxLayout(),
@@ -142,7 +141,11 @@ void TemplateResourceLayout::createCheckboxes()
         QCheckBox* checkBox = new QCheckBox();
         checkBox->setChecked(i < _value.first);
         addWidget(checkBox);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+        connect(checkBox, &QCheckBox::checkStateChanged, this, &TemplateResourceLayout::handleResourceChanged);
+#else
         connect(checkBox, &QCheckBox::stateChanged, this, &TemplateResourceLayout::handleResourceChanged);
+#endif
     }
 }
 

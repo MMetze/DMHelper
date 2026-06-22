@@ -1,15 +1,26 @@
 #include "templateobject.h"
 #include "templatefactory.h"
+#include "templateobjectnotifier.h"
 #include "globalsearch.h"
 #include <QDomElement>
 
 TemplateObject::TemplateObject(TemplateFactory* factory) :
-    _factory(factory)
+    _factory(factory),
+    _notifier(nullptr)
 {
 }
 
 TemplateObject::~TemplateObject()
 {
+    delete _notifier;
+    _notifier = nullptr;
+}
+
+TemplateObjectNotifier* TemplateObject::notifier() const
+{
+    if(!_notifier)
+        _notifier = new TemplateObjectNotifier();
+    return _notifier;
 }
 
 TemplateFactory* TemplateObject::getFactory() const
@@ -27,8 +38,24 @@ bool TemplateObject::matchSearchString(const QString& searchString, QString& res
     if(!_factory)
         return false;
 
-    QHash<QString, DMHAttribute> elementAttributes = _factory->getElements();
+    QHash<QString, DMHAttribute> attributes = _factory->getAttributes();
     QString searchResult;
+    for(auto keyIt = attributes.keyBegin(), end = attributes.keyEnd(); keyIt != end; ++keyIt)
+    {
+        DMHAttribute attribute = attributes.value(*keyIt);
+        if((attribute._type == TemplateFactory::TemplateType_html) || (attribute._type == TemplateFactory::TemplateType_string))
+        {
+            QString value = getStringValue(*keyIt);
+            if(GlobalSearch_Interface::compareStringValue(value, searchString, searchResult))
+            {
+                result = *keyIt + ": " + searchResult;
+                return true;
+            }
+        }
+    }
+
+    QHash<QString, DMHAttribute> elementAttributes = _factory->getElements();
+    searchResult.clear();
     for(auto keyIt = elementAttributes.keyBegin(), end = elementAttributes.keyEnd(); keyIt != end; ++keyIt)
     {
         DMHAttribute attribute = elementAttributes.value(*keyIt);
@@ -194,6 +221,8 @@ void TemplateObject::setValue(const QString& key, const QVariant& value)
 
     valueHash()->insert(key, value);
     declareDirty();
+    if(_notifier)
+        emit _notifier->valueChanged(key);
 }
 
 void TemplateObject::setValue(const QString& key, const QString& value)

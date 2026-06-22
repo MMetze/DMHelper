@@ -7,12 +7,12 @@
 #include <QDir>
 #include <QStringList>
 
-class Spell;
+class Spellv2;
 class Monster;
 class QDomDocument;
 class QDomElement;
 
-typedef QMap<QString, Spell*> SpellbookMap;
+typedef QMap<QString, Spellv2*> SpellbookMap;
 
 class Spellbook : public QObject, public GlobalSearch_Interface
 {
@@ -34,7 +34,7 @@ public:
     bool readSpellbook(const QString& targetFilename);
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, bool isImport);
-    void input_START_CONVERSION(const QDomElement &element);
+    void loadAndConvertSpellbook(const QDomElement &spellbookElement);
 
     QString getVersion() const;
     int getMajorVersion() const;
@@ -50,15 +50,15 @@ public:
 
     bool isDirty();
 
-    Spell* getSpell(const QString& name);
-    Spell* getFirstSpell() const;
-    Spell* getLastSpell() const;
-    Spell* getNextSpell(Spell* spell) const;
-    Spell* getPreviousSpell(Spell* spell) const;
+    Spellv2* getSpell(const QString& name);
+    Spellv2* getFirstSpell() const;
+    Spellv2* getLastSpell() const;
+    Spellv2* getNextSpell(Spellv2* spell) const;
+    Spellv2* getPreviousSpell(Spellv2* spell) const;
 
-    bool insertSpell(Spell* spell);
-    void removeSpell(Spell* spell);
-    void renameSpell(Spell* spell, const QString& newName);
+    bool insertSpell(Spellv2* spell);
+    void removeSpell(Spellv2* spell);
+    void renameSpell(Spellv2* spell, const QString& newName);
 
     void setDirectory(const QDir& directory);
     const QDir& getDirectory() const;
@@ -77,7 +77,7 @@ public slots:
 
 private:
     void showSpellWarning(const QString& spell);
-    QString searchSpell(const Spell* spell, const QString& searchString) const;
+    QString searchSpell(const Spellv2* spell, const QString& searchString) const;
 
     static Spellbook* _instance;
 

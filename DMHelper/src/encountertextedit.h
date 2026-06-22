@@ -54,6 +54,8 @@ public slots:
     void hyperlinkClicked();
     void setTextWidth(int textWidth);
 
+    void toggleCheckbox();
+
     void setAnimated(bool animated);
     void setScrollSpeed(int scrollSpeed);
     void rewind();
@@ -117,6 +119,9 @@ protected slots:
 
     void sceneRectUpdated(const QSize& size);
 
+private slots:
+    void onFormatterChanged();
+
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;
@@ -156,6 +161,7 @@ protected:
 
     int _encounterChangedTimer;
     int _updateAnchorTimer;
+    int _publishUpdateTimer;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

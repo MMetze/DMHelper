@@ -11,7 +11,7 @@
 #include "map.h"
 #include "bestiary.h"
 #include "spellbook.h"
-#include "spell.h"
+#include "spellv2.h"
 #include "dmversion.h"
 #include <QTreeWidgetItem>
 #include <QCryptographicHash>
@@ -248,7 +248,7 @@ void ExportWorker::exportSpell(QDomDocument &doc, QDomElement& spellbookElement,
     if((!Spellbook::Instance()) || (spellName.isEmpty()))
         return;
 
-    Spell* spell = Spellbook::Instance()->getSpell(spellName);
+    Spellv2* spell = Spellbook::Instance()->getSpell(spellName);
     if((!spell) || (_exportedSpells.contains(spell)))
         return;
 

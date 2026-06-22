@@ -25,7 +25,7 @@ public:
     int getResult() const;
 
     void applyDamage(int damage);
-    void applyConditions(int conditions);
+    void applyConditions(const QStringList& conditions);
 
     bool isActive();
 

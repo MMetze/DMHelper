@@ -1,12 +1,23 @@
 name: DMHelper CI macOS Workflow
 
 on:
+  push:
+    branches: [ master, feature/linux-port ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
   build-macos:
-    #runs-on: macos-15  # Apple Silicon runner (recommended)
-    runs-on: macos-15-intel  # Intel Silicon runner (recommended)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch-label: intel
+          - runner: macos-15
+            arch-label: apple-silicon
+    runs-on: ${{ matrix.runner }}
 
     defaults:
       run:
@@ -22,12 +33,11 @@ jobs:
       # -------------------------
       # Install Qt (macOS)
       # -------------------------
-      - name: Install Qt 6.10.1 (macOS)
+      - name: Install Qt 6.10.3 (macOS)
         uses: jurplel/install-qt-action@v4
         with:
-          version: 6.10.1
+          version: 6.10.3
           arch: clang_64
-          tools: tools_ifw
           cache: true
           modules: qtmultimedia qtnetworkauth qtimageformats
           add-tools-to-path: true
@@ -40,7 +50,6 @@ jobs:
         run: |
           echo "QT_ROOT_DIR=$QT_ROOT_DIR"
           which macdeployqt
-          which binarycreator
 
       # -------------------------
       # Debug workspace (pre-build)
@@ -72,6 +81,57 @@ jobs:
           echo "y" | ./buildanddeploy_macos_cmake.sh
 
       # -------------------------
+      # Normalize unsigned bundle signature state
+      # (avoids "app is damaged" from invalid stale signatures)
+      # -------------------------
+      - name: Normalize unsigned app signature
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/DMHelper.app"
+
+          if [ ! -d "$APP" ]; then
+            echo "DMHelper.app not found at $APP"
+            exit 1
+          fi
+
+          /usr/bin/codesign --force --deep --sign - --timestamp=none "$APP"
+          /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP"
+
+      # -------------------------
+      # Gatekeeper assessment (informational for unsigned builds)
+      # -------------------------
+      - name: Check Gatekeeper assessment
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/DMHelper.app"
+          /usr/sbin/spctl -a -vv "$APP" || true
+
+      # -------------------------
+      # Repackage app bundle safely for unsigned distribution
+      # (preserves symlinks and bundle metadata used by Gatekeeper checks)
+      # -------------------------
+      - name: Repackage ZIP and create DMG distributions
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/DMHelper.app"
+
+          if [ ! -d "$APP" ]; then
+            echo "DMHelper.app not found at $APP"
+            exit 1
+          fi
+
+          rm -f DMHelper-macOS-release.zip
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" DMHelper-macOS-release.zip
+
+          rm -f DMHelper-macOS-release.dmg
+          /usr/bin/hdiutil create \
+            -volname "DMHelper" \
+            -srcfolder "$APP" \
+            -ov \
+            -format UDZO \
+            DMHelper-macOS-release.dmg
+
+      # -------------------------
       # Debug workspace (post-build)
       # -------------------------
       - name: Debug Workspace output post-build
@@ -80,20 +140,42 @@ jobs:
           find . -type f
 
       # -------------------------
+      # Smoke-test the built application
+      # -------------------------
+      - name: Smoke-test built application
+        working-directory: ${{ github.workspace }}/DMHelper
+        run: |
+          APP="bin-macos/DMHelper.app"
+          EXE="$APP/Contents/MacOS/DMHelper"
+          if [ ! -f "$EXE" ]; then echo "DMHelper not found at $EXE"; exit 1; fi
+          output=$("$EXE" --smoke-test --skip-opengl 2>&1) || true
+          echo "$output"
+          if echo "$output" | grep -q '"passed"\s*:\s*false'; then
+            echo "Smoke test reported failures"
+            exit 1
+          fi
+          if ! echo "$output" | grep -q '"passed"\s*:\s*true'; then
+            echo "Smoke test did not produce expected JSON output"
+            exit 1
+          fi
+        env:
+          QT_QPA_PLATFORM: offscreen
+
+      # -------------------------
       # Upload artifacts
       # -------------------------
-      - name: Upload Installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: DMHelper-macOS-Installer
-          path: |
-            DMHelper/DMHelper-macOS-Installer.app
-          if-no-files-found: error
-
       - name: Upload ZIP Distribution
         uses: actions/upload-artifact@v4
         with:
-          name: DMHelper-macOS-Zip
+          name: DMHelper-macOS-Zip-${{ matrix.arch-label }}
           path: |
             DMHelper/DMHelper-macOS-release.zip
+          if-no-files-found: error
+
+      - name: Upload DMG Distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: DMHelper-macOS-DMG-${{ matrix.arch-label }}
+          path: |
+            DMHelper/DMHelper-macOS-release.dmg
           if-no-files-found: error

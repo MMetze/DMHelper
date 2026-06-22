@@ -4,6 +4,10 @@
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodelmonsterclass.h"
+#include "battledialogmodelcharacter.h"
+#include "battledialogmodelcombatant.h"
+#include "characterv2.h"
+#include "dmhmessagebox.h"
 #include "monsterclassv2.h"
 #include "unselectedpixmap.h"
 #include "layertokens.h"
@@ -17,6 +21,7 @@
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QDebug>
@@ -65,6 +70,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMousePress, this, &BattleDialogGraphicsScene::battleMousePress);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseMove, this, &BattleDialogGraphicsScene::battleMouseMove);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseRelease, this, &BattleDialogGraphicsScene::battleMouseRelease);
+    connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseDoubleClick, this, &BattleDialogGraphicsScene::battleMouseDoubleClick);
 
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMousePress, this, &BattleDialogGraphicsScene::mapMousePress);
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseMove, this, &BattleDialogGraphicsScene::mapMouseMove);
@@ -106,6 +112,7 @@ void BattleDialogGraphicsScene::createBattleContents()
         if(_pointerPixmap.isNull())
             _pointerPixmap.load(":/img/data/arrow.png");
         _pointerPixmapItem = addPixmap(_pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        _pointerPixmapItem->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
         _pointerPixmapItem->setTransformationMode(Qt::SmoothTransformation);
         QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
         _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
@@ -199,7 +206,7 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
     if(!localView)
         return nullptr;
 
-    QList<QGraphicsItem *> itemList = items(pos, Qt::IntersectsItemShape, Qt::DescendingOrder, localView->transform());
+    QList<QGraphicsItem *> itemList = items(pos, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder, localView->transform());
     if(itemList.count() <= 0)
         return nullptr;
 
@@ -297,6 +304,12 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
     }
     else
     {
+        if(!_mouseDownItem)
+        {
+            _mouseDown = false;
+            return true;
+        }
+
         QGraphicsItem* abstractShape = _mouseDownItem;
         QUuid effectId = BattleDialogModelEffect::getEffectIdFromItem(_mouseDownItem);
 
@@ -532,7 +545,18 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(edtItem, SIGNAL(triggered()), this, SLOT(editItem()));
                 menu.addAction(edtItem);
 
-                QAction* deleteItem = new QAction(QString("Delete Effect..."), &menu);
+                int selectedEffectCount = 0;
+                const QList<QGraphicsItem*> selectedForMenu = selectedItems();
+                if(selectedForMenu.contains(item))
+                {
+                    foreach(QGraphicsItem* selItem, selectedForMenu)
+                    {
+                        if((selItem) && (!BattleDialogModelEffect::getEffectIdFromItem(selItem).isNull()))
+                            ++selectedEffectCount;
+                    }
+                }
+                const QString deleteLabel = (selectedEffectCount > 1) ? QString("Delete Effects...") : QString("Delete Effect...");
+                QAction* deleteItem = new QAction(deleteLabel, &menu);
                 connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
 
@@ -599,6 +623,71 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 
             menu.addSeparator();
 
+            // Determine visibility/known state of relevant combatants for conditional menu items
+            {
+                bool anyVisible = false;
+                bool anyHidden = false;
+                bool anyKnown = false;
+                bool anyUnknown = false;
+
+                QList<QGraphicsItem*> selected = selectedItems();
+                if((selected.count() > 0) && (selected.contains(item)))
+                {
+                    foreach(QGraphicsItem* selItem, selected)
+                    {
+                        UnselectedPixmap* selPix = dynamic_cast<UnselectedPixmap*>(selItem);
+                        if(selPix)
+                        {
+                            BattleDialogModelCombatant* c = dynamic_cast<BattleDialogModelCombatant*>(selPix->getObject());
+                            if(c)
+                            {
+                                if(c->getShown()) anyVisible = true; else anyHidden = true;
+                                if(c->getKnown()) anyKnown = true; else anyUnknown = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    BattleDialogModelCombatant* c = dynamic_cast<BattleDialogModelCombatant*>(object);
+                    if(c)
+                    {
+                        if(c->getShown()) anyVisible = true; else anyHidden = true;
+                        if(c->getKnown()) anyKnown = true; else anyUnknown = true;
+                    }
+                }
+
+                if(anyVisible)
+                {
+                    QAction* hideSelectedItem = new QAction(QString("Mark Invisible"), &menu);
+                    connect(hideSelectedItem, SIGNAL(triggered()), this, SLOT(hideSelectedCombatants()));
+                    menu.addAction(hideSelectedItem);
+                }
+
+                if(anyHidden)
+                {
+                    QAction* unhideSelectedItem = new QAction(QString("Mark Visible"), &menu);
+                    connect(unhideSelectedItem, SIGNAL(triggered()), this, SLOT(unhideSelectedCombatants()));
+                    menu.addAction(unhideSelectedItem);
+                }
+
+                if(anyKnown)
+                {
+                    QAction* unknowSelectedItem = new QAction(QString("Mark Unknown"), &menu);
+                    connect(unknowSelectedItem, SIGNAL(triggered()), this, SLOT(unknowSelectedCombatants()));
+                    menu.addAction(unknowSelectedItem);
+                }
+
+                if(anyUnknown)
+                {
+                    QAction* knowSelectedItem = new QAction(QString("Mark Known"), &menu);
+                    connect(knowSelectedItem, SIGNAL(triggered()), this, SLOT(knowSelectedCombatants()));
+                    menu.addAction(knowSelectedItem);
+                }
+            }
+
+            menu.addSeparator();
+
             if(object)
             {
                 BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(object);
@@ -627,6 +716,83 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                         }
                     }
                 }
+
+                BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(object);
+                if(characterCombatant)
+                {
+                    Characterv2* character = characterCombatant->getCharacter();
+                    if(character)
+                    {
+                        QStringList iconList = character->getIconList();
+                        if(iconList.count() > 0)
+                        {
+                            QMenu* tokenMenu = new QMenu(QString("Select Token..."));
+                            for(int i = 0; i < iconList.count(); ++i)
+                            {
+                                QFileInfo fi(iconList.at(i));
+                                QAction* tokenAction = new QAction(fi.fileName(), tokenMenu);
+                                connect(tokenAction, &QAction::triggered, [this, i, characterCombatant](){this->changeCharacterToken(characterCombatant, i);});
+                                tokenMenu->addAction(tokenAction);
+                            }
+
+                            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+                            connect(customAction, &QAction::triggered, [this, characterCombatant](){this->changeCharacterTokenCustom(characterCombatant);});
+                            tokenMenu->addAction(customAction);
+
+                            menu.addMenu(tokenMenu);
+                            menu.addSeparator();
+                        }
+                    }
+                }
+            }
+
+            // Group/Ungroup actions
+            {
+                BattleDialogModelCombatant* combatantObj = dynamic_cast<BattleDialogModelCombatant*>(object);
+
+                QList<QGraphicsItem*> selectedForGroup = selectedItems();
+                int selectedCombatantCount = 0;
+                if((selectedForGroup.count() > 0) && (selectedForGroup.contains(item)))
+                {
+                    foreach(QGraphicsItem* selItem, selectedForGroup)
+                    {
+                        UnselectedPixmap* selPix = dynamic_cast<UnselectedPixmap*>(selItem);
+                        if(selPix)
+                        {
+                            BattleDialogModelCombatant* c = dynamic_cast<BattleDialogModelCombatant*>(selPix->getObject());
+                            if(c)
+                                ++selectedCombatantCount;
+                        }
+                    }
+                }
+
+                if((selectedCombatantCount >= 1) || (combatantObj != nullptr))
+                {
+                    QAction* groupItem = new QAction(QString("Group Selected..."), &menu);
+                    connect(groupItem, &QAction::triggered, this, [this, item]() {
+                        if(item)
+                        {
+                            clearSelection();
+                            item->setSelected(true);
+                        }
+                        groupSelectedCombatants();
+                    });
+                    menu.addAction(groupItem);
+                }
+
+                if((combatantObj) && (!combatantObj->getGroupId().isNull()))
+                {
+                    QAction* removeFromGroupItem = new QAction(QString("Remove from Group"), &menu);
+                    connect(removeFromGroupItem, SIGNAL(triggered()), this, SLOT(removeFromGroupCombatant()));
+                    menu.addAction(removeFromGroupItem);
+
+                    QAction* ungroupItem = new QAction(QString("Ungroup All"), &menu);
+                    connect(ungroupItem, SIGNAL(triggered()), this, SLOT(ungroupSelectedCombatants()));
+                    menu.addAction(ungroupItem);
+                }
+
+                if((selectedCombatantCount >= 1) || (combatantObj != nullptr) || ((combatantObj) && (!combatantObj->getGroupId().isNull())))
+                    menu.addSeparator();
             }
         }
         else
@@ -652,6 +818,22 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
         connect(addLineItem, SIGNAL(triggered()), this, SIGNAL(addEffectLine()));
         menu.addAction(addLineItem);
+
+        QAction* addSmokeItem = new QAction(QString("Create Smoke Effect"), &menu);
+        connect(addSmokeItem, SIGNAL(triggered()), this, SIGNAL(addEffectSmoke()));
+        menu.addAction(addSmokeItem);
+
+        QAction* addFireItem = new QAction(QString("Create Fire Effect"), &menu);
+        connect(addFireItem, SIGNAL(triggered()), this, SIGNAL(addEffectFire()));
+        menu.addAction(addFireItem);
+
+        QAction* addSparksItem = new QAction(QString("Create Sparks Effect"), &menu);
+        connect(addSparksItem, SIGNAL(triggered()), this, SIGNAL(addEffectSparks()));
+        menu.addAction(addSparksItem);
+
+        QAction* addLightItem = new QAction(QString("Create Light Effect"), &menu);
+        connect(addLightItem, SIGNAL(triggered()), this, SIGNAL(addEffectLight()));
+        menu.addAction(addLightItem);
 
         menu.addSeparator();
 
@@ -826,8 +1008,15 @@ void BattleDialogGraphicsScene::editItem()
             {
                 settings->copyValuesFromSettings(*selectedEffect);
                 LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(_model->getLayerFromEffect(tokenLayers, selectedEffect));
-                selectedEffect->applyEffectValues(*effectItem, tokenLayer->getScale());
-                emit effectChanged(effectItem);
+                if(tokenLayer)
+                {
+                    QGraphicsItem* updatedItem = tokenLayer->getEffectItem(selectedEffect);
+                    emit effectChanged(updatedItem ? updatedItem : effectItem);
+                }
+                else
+                {
+                    emit effectChanged(effectItem);
+                }
             }
         }
     }
@@ -849,44 +1038,84 @@ void BattleDialogGraphicsScene::deleteItem()
         return;
     }
 
-    if(!_contextMenuItem)
+    // Build the candidate item list. A right-click on an item that is NOT part of the
+    // current selection acts on just that item (standard Qt convention); otherwise
+    // operate on all currently selected items. Falls back to the context-menu item if
+    // there is no selection at all (e.g. menu invocation on a non-selectable container).
+    QList<QGraphicsItem*> candidates;
+    const QList<QGraphicsItem*> selected = selectedItems();
+    if((_contextMenuItem) && (!selected.contains(_contextMenuItem)))
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no context menu item known!";
-        return;
+        candidates.append(_contextMenuItem);
+    }
+    else if(!selected.isEmpty())
+    {
+        candidates = selected;
+    }
+    else if(_contextMenuItem)
+    {
+        candidates.append(_contextMenuItem);
     }
 
-    QGraphicsItem* deleteItem = _contextMenuItem;
-    const QList<QGraphicsItem*> deleteChildItems = deleteItem->childItems();
-    for(QGraphicsItem* childItem : deleteChildItems)
+    // Resolve each candidate to its effect, descending into the area child item when
+    // present (matches the legacy single-delete behaviour). Skip non-effect items so a
+    // mixed selection cannot accidentally remove combatants. De-duplicate so a parent
+    // and its area child are not deleted twice.
+    QList<BattleDialogModelEffect*> effectsToDelete;
+    QList<QGraphicsItem*> resolvedItems;
+    foreach(QGraphicsItem* candidate, candidates)
     {
-        if(childItem->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
-            deleteItem = childItem;
-    }
+        if(!candidate)
+            continue;
 
-    if(!deleteItem)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, unexpected error finding the right item to delete!";
-        return;
-    }
-
-    BattleDialogModelEffect* deleteEffect = BattleDialogModelEffect::getEffectFromItem(deleteItem);
-    if(!deleteEffect)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << deleteItem;
-        return;
-    }
-
-    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("Confirm Delete Effect"), QString("Are you sure you wish to delete this effect?"), QMessageBox::Yes | QMessageBox::No);
-    if(result == QMessageBox::Yes)
-    {
-        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
-        if(_mouseDownItem == _contextMenuItem)
+        QGraphicsItem* resolved = candidate;
+        const QList<QGraphicsItem*> childItems = resolved->childItems();
+        for(QGraphicsItem* childItem : childItems)
         {
-            _mouseDown = false;
-            _mouseDownItem = nullptr;
+            if(childItem->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
+                resolved = childItem;
         }
-        _model->removeEffect(deleteEffect);
+
+        BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(resolved);
+        if((effect) && (!effectsToDelete.contains(effect)))
+        {
+            effectsToDelete.append(effect);
+            resolvedItems.append(resolved);
+            if(resolved != candidate)
+                resolvedItems.append(candidate);
+        }
     }
+
+    if(effectsToDelete.isEmpty())
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete effect, no effect items found in selection!";
+        return;
+    }
+
+    const QString prompt = (effectsToDelete.size() == 1)
+        ? QString("Are you sure you wish to delete this effect?")
+        : QString("Are you sure you wish to delete these %1 effects?").arg(effectsToDelete.size());
+    const QString title = (effectsToDelete.size() == 1) ? QString("Confirm Delete Effect") : QString("Confirm Delete Effects");
+    QMessageBox::StandardButton result = DMHMessageBox::question(nullptr, title, prompt, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if(result != QMessageBox::Yes)
+        return;
+
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
+    qDebug() << "[Battle Dialog Scene] confirmed deleting " << effectsToDelete.size() << " effect(s)";
+#endif
+
+    if((_mouseDownItem) && (resolvedItems.contains(_mouseDownItem)))
+    {
+        _mouseDown = false;
+        _mouseDownItem = nullptr;
+    }
+
+    foreach(BattleDialogModelEffect* effect, effectsToDelete)
+    {
+        _model->removeEffect(effect);
+    }
+
+    _contextMenuItem = nullptr;
 }
 
 void BattleDialogGraphicsScene::linkItem()
@@ -968,6 +1197,77 @@ void BattleDialogGraphicsScene::healCombatant()
         emit combatantHeal(combatant);
 }
 
+void BattleDialogGraphicsScene::hideSelectedCombatants()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantHideSelected(combatant);
+}
+
+void BattleDialogGraphicsScene::unhideSelectedCombatants()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantUnhideSelected(combatant);
+}
+
+void BattleDialogGraphicsScene::knowSelectedCombatants()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantKnowSelected(combatant);
+}
+
+void BattleDialogGraphicsScene::unknowSelectedCombatants()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantUnknowSelected(combatant);
+}
+
+void BattleDialogGraphicsScene::groupSelectedCombatants()
+{
+    emit combatantGroupSelected();
+}
+
+void BattleDialogGraphicsScene::ungroupSelectedCombatants()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantUngroupSelected(combatant);
+}
+
+void BattleDialogGraphicsScene::removeFromGroupCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantRemoveFromGroup(combatant);
+}
+
 void BattleDialogGraphicsScene::changeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex)
 {
     if(monster)
@@ -978,6 +1278,18 @@ void BattleDialogGraphicsScene::changeMonsterTokenCustom(BattleDialogModelMonste
 {
     if(monster)
         emit monsterChangeTokenCustom(monster);
+}
+
+void BattleDialogGraphicsScene::changeCharacterToken(BattleDialogModelCharacter* character, int iconIndex)
+{
+    if(character)
+        emit characterChangeToken(character, iconIndex);
+}
+
+void BattleDialogGraphicsScene::changeCharacterTokenCustom(BattleDialogModelCharacter* character)
+{
+    if(character)
+        emit characterChangeTokenCustom(character);
 }
 
 void BattleDialogGraphicsScene::changeEffectLayer()
@@ -1090,6 +1402,31 @@ void BattleDialogGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         emit mapMoveToggled();
     }
 
+    if((keyEvent) && (!keyEvent->isAutoRepeat()) &&
+       ((keyEvent->key() == Qt::Key_Delete) || (keyEvent->key() == Qt::Key_Backspace)))
+    {
+        // Only swallow the event if at least one selected item is an effect; this keeps
+        // combatants and other non-effect items unaffected by the Delete shortcut.
+        bool hasEffectSelected = false;
+        const QList<QGraphicsItem*> selected = selectedItems();
+        foreach(QGraphicsItem* item, selected)
+        {
+            if((item) && (!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
+            {
+                hasEffectSelected = true;
+                break;
+            }
+        }
+
+        if(hasEffectSelected)
+        {
+            _contextMenuItem = nullptr;
+            keyEvent->accept();
+            deleteItem();
+            return;
+        }
+    }
+
     QGraphicsScene::keyPressEvent(keyEvent);
 }
 
@@ -1133,24 +1470,29 @@ void BattleDialogGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 
     if(isMimeDataImage(event->mimeData()))
     {
-        // Create a QMessageBox
         QMessageBox msgBox;
-        msgBox.setText("Do you want to add the image as a layer or a token?");
+        msgBox.setText("Do you want to add the image as a layer, token, or monster?");
         msgBox.setIcon(QMessageBox::Question);
-        msgBox.addButton("Layer", QMessageBox::ActionRole);
-        msgBox.addButton("Token", QMessageBox::ActionRole);
+        QPushButton* layerButton = msgBox.addButton("Layer", QMessageBox::ActionRole);
+        QPushButton* tokenButton = msgBox.addButton("Token", QMessageBox::ActionRole);
+        QPushButton* monsterButton = msgBox.addButton("Monster", QMessageBox::ActionRole);
         msgBox.addButton("Cancel", QMessageBox::RejectRole);
-        int result = msgBox.exec();
+        msgBox.exec();
 
-        if(result == 0)
+        if(msgBox.clickedButton() == layerButton)
         {
             event->acceptProposedAction();
             emit addLayerImageFile(getMimeDataImageFile(event->mimeData()));
         }
-        else if(result == 1)
+        else if(msgBox.clickedButton() == tokenButton)
         {
             event->acceptProposedAction();
             emit addEffectObjectFile(getMimeDataImageFile(event->mimeData()));
+        }
+        else if(msgBox.clickedButton() == monsterButton)
+        {
+            event->acceptProposedAction();
+            emit addMonsterImageFile(getMimeDataImageFile(event->mimeData()), event->scenePos());
         }
         else
         {

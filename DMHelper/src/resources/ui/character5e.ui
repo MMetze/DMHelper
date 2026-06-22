@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>435</width>
+    <width>699</width>
     <height>478</height>
    </rect>
   </property>
@@ -293,7 +293,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <spacer name="horizontalSpacer_13">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -339,7 +339,7 @@ color: rgb(50, 50, 50);</string>
         <string>HP</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
        <property name="dmhValue" stdset="0">
         <string>hitPoints</string>
@@ -376,7 +376,7 @@ color: rgb(50, 50, 50);</string>
         <string>Max HP</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
        <property name="dmhValue" stdset="0">
         <string>maximumHp</string>
@@ -386,7 +386,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -416,7 +416,7 @@ color: rgb(50, 50, 50);</string>
       <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
      <property name="lineWidth">
       <number>-1</number>
@@ -425,7 +425,7 @@ color: rgb(50, 50, 50);</string>
       <number>0</number>
      </property>
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -450,7 +450,7 @@ color: rgb(50, 50, 50);</string>
           <string>STR</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -468,10 +468,16 @@ color: rgb(50, 50, 50);</string>
           <string>+0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>strengthMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(strength-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -491,7 +497,7 @@ color: rgb(50, 50, 50);</string>
             <string>Score</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -506,7 +512,7 @@ color: rgb(50, 50, 50);</string>
             <string>Save</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -531,7 +537,7 @@ color: rgb(50, 50, 50);</string>
             <string>strength</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>strength</string>
@@ -552,7 +558,7 @@ color: rgb(50, 50, 50);</string>
             <string>strength</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>strengthSave</string>
@@ -566,7 +572,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="Line" name="line_2">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -586,7 +592,7 @@ color: rgb(50, 50, 50);</string>
           <string>DEX</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -605,10 +611,16 @@ color: rgb(50, 50, 50);</string>
           <string>+0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>dexterityMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(dexterity-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -628,7 +640,7 @@ color: rgb(50, 50, 50);</string>
             <string>Score</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -643,7 +655,7 @@ color: rgb(50, 50, 50);</string>
             <string>Save</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -668,7 +680,7 @@ color: rgb(50, 50, 50);</string>
             <string>dexterity</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>dexterity</string>
@@ -689,7 +701,7 @@ color: rgb(50, 50, 50);</string>
             <string>dexterity</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>dexteritySave</string>
@@ -703,7 +715,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="Line" name="line_4">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -723,7 +735,7 @@ color: rgb(50, 50, 50);</string>
           <string>CON</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -742,10 +754,16 @@ color: rgb(50, 50, 50);</string>
           <string>+0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>constitutionMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(constitution-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -765,7 +783,7 @@ color: rgb(50, 50, 50);</string>
             <string>Score</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -780,7 +798,7 @@ color: rgb(50, 50, 50);</string>
             <string>Save</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -805,7 +823,7 @@ color: rgb(50, 50, 50);</string>
             <string>constitution</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>constitution</string>
@@ -826,7 +844,7 @@ color: rgb(50, 50, 50);</string>
             <string>constitution</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>constitutionSave</string>
@@ -840,7 +858,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="Line" name="line_5">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -860,7 +878,7 @@ color: rgb(50, 50, 50);</string>
           <string>INT</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -879,10 +897,16 @@ color: rgb(50, 50, 50);</string>
           <string>+0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>intelligenceMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(intelligence-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -902,7 +926,7 @@ color: rgb(50, 50, 50);</string>
             <string>Score</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -917,7 +941,7 @@ color: rgb(50, 50, 50);</string>
             <string>Save</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -942,7 +966,7 @@ color: rgb(50, 50, 50);</string>
             <string>intelligence</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>intelligence</string>
@@ -963,7 +987,7 @@ color: rgb(50, 50, 50);</string>
             <string>intelligence</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>intelligenceSave</string>
@@ -977,7 +1001,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="Line" name="line_6">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -997,7 +1021,7 @@ color: rgb(50, 50, 50);</string>
           <string>WIS</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -1016,10 +1040,16 @@ color: rgb(50, 50, 50);</string>
           <string>+0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>wisdomMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(wisdom-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -1039,7 +1069,7 @@ color: rgb(50, 50, 50);</string>
             <string>Score</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1054,7 +1084,7 @@ color: rgb(50, 50, 50);</string>
             <string>Save</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1079,7 +1109,7 @@ color: rgb(50, 50, 50);</string>
             <string>wisdom</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>wisdom</string>
@@ -1100,7 +1130,7 @@ color: rgb(50, 50, 50);</string>
             <string>wisdom</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>wisdomSave</string>
@@ -1114,7 +1144,7 @@ color: rgb(50, 50, 50);</string>
      <item>
       <widget class="Line" name="line_7">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -1134,7 +1164,7 @@ color: rgb(50, 50, 50);</string>
           <string>CHA</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -1153,10 +1183,16 @@ color: rgb(50, 50, 50);</string>
           <string>+0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>charismaMod</string>
+         </property>
+         <property name="dmhCompute" stdset="0">
+          <string>(charisma-10)/2</string>
+         </property>
+         <property name="dmhFormat" stdset="0">
+          <string>signed</string>
          </property>
         </widget>
        </item>
@@ -1176,7 +1212,7 @@ color: rgb(50, 50, 50);</string>
             <string>Score</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1191,7 +1227,7 @@ color: rgb(50, 50, 50);</string>
             <string>Save</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -1216,7 +1252,7 @@ color: rgb(50, 50, 50);</string>
             <string>charisma</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>charisma</string>
@@ -1237,7 +1273,7 @@ color: rgb(50, 50, 50);</string>
             <string>charisma</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="dmhValue" stdset="0">
             <string>charismaSave</string>
@@ -1268,7 +1304,7 @@ color: rgb(50, 50, 50);</string>
       <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));</string>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
      <property name="lineWidth">
       <number>-1</number>
@@ -1277,7 +1313,7 @@ color: rgb(50, 50, 50);</string>
       <number>0</number>
      </property>
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -1299,8 +1335,11 @@ color: rgb(50, 50, 50);</string>
        </item>
        <item>
         <widget class="QTextEdit" name="txtSpellData">
+         <property name="styleSheet">
+          <string notr="true">background: transparent;</string>
+         </property>
          <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+          <set>Qt::TextInteractionFlag::LinksAccessibleByKeyboard|Qt::TextInteractionFlag::LinksAccessibleByMouse|Qt::TextInteractionFlag::TextBrowserInteraction|Qt::TextInteractionFlag::TextEditable|Qt::TextInteractionFlag::TextEditorInteraction|Qt::TextInteractionFlag::TextSelectableByKeyboard|Qt::TextInteractionFlag::TextSelectableByMouse</set>
          </property>
          <property name="dmhValue" stdset="0">
           <string>spell-data</string>
@@ -1325,6 +1364,9 @@ color: rgb(50, 50, 50);</string>
        </item>
        <item>
         <widget class="QTextEdit" name="txtProficiencies">
+         <property name="styleSheet">
+          <string notr="true">background: transparent;</string>
+         </property>
          <property name="dmhValue" stdset="0">
           <string>proficiencies</string>
          </property>
@@ -1349,10 +1391,10 @@ color: rgb(50, 50, 50);</string>
        <item>
         <widget class="QScrollArea" name="scrollArea">
          <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOn</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
          </property>
          <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
          </property>
          <property name="widgetResizable">
           <bool>true</bool>
@@ -1362,8 +1404,8 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>120</width>
-            <height>455</height>
+            <width>205</width>
+            <height>401</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayout">
@@ -1412,7 +1454,7 @@ color: rgb(50, 50, 50);</string>
               <string>acrobatics</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>acrobatics</string>
@@ -1446,7 +1488,7 @@ color: rgb(50, 50, 50);</string>
               <string>animalHandling</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>animalHandling</string>
@@ -1480,7 +1522,7 @@ color: rgb(50, 50, 50);</string>
               <string>arcana</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>arcana</string>
@@ -1514,7 +1556,7 @@ color: rgb(50, 50, 50);</string>
               <string>athletics</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>athletics</string>
@@ -1548,7 +1590,7 @@ color: rgb(50, 50, 50);</string>
               <string>deception</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>deception</string>
@@ -1582,7 +1624,7 @@ color: rgb(50, 50, 50);</string>
               <string>history</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>history</string>
@@ -1616,7 +1658,7 @@ color: rgb(50, 50, 50);</string>
               <string>insight</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>insight</string>
@@ -1650,7 +1692,7 @@ color: rgb(50, 50, 50);</string>
               <string>intimidation</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>intimidation</string>
@@ -1684,7 +1726,7 @@ color: rgb(50, 50, 50);</string>
               <string>investigation</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>investigation</string>
@@ -1718,7 +1760,7 @@ color: rgb(50, 50, 50);</string>
               <string>medicine</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>medicine</string>
@@ -1752,7 +1794,7 @@ color: rgb(50, 50, 50);</string>
               <string>nature</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>nature</string>
@@ -1786,7 +1828,7 @@ color: rgb(50, 50, 50);</string>
               <string>perception</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>perception</string>
@@ -1820,7 +1862,7 @@ color: rgb(50, 50, 50);</string>
               <string>performance</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>performance</string>
@@ -1854,7 +1896,7 @@ color: rgb(50, 50, 50);</string>
               <string>persuasion</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>persuasion</string>
@@ -1888,7 +1930,7 @@ color: rgb(50, 50, 50);</string>
               <string>religion</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>religion</string>
@@ -1922,7 +1964,7 @@ color: rgb(50, 50, 50);</string>
               <string>sleightOfHand</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>sleightOfHand</string>
@@ -1956,7 +1998,7 @@ color: rgb(50, 50, 50);</string>
               <string>stealth</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>stealth</string>
@@ -1990,7 +2032,7 @@ color: rgb(50, 50, 50);</string>
               <string>survival</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="dmhValue" stdset="0">
               <string>survival</string>
@@ -2037,8 +2079,8 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>134</width>
-            <height>84</height>
+            <width>222</width>
+            <height>93</height>
            </rect>
           </property>
          </widget>
@@ -2062,6 +2104,9 @@ color: rgb(50, 50, 50);</string>
        </item>
        <item>
         <widget class="QTextEdit" name="txtEquipment">
+         <property name="styleSheet">
+          <string notr="true">background: transparent;</string>
+         </property>
          <property name="dmhValue" stdset="0">
           <string>equipment</string>
          </property>
@@ -2085,6 +2130,9 @@ color: rgb(50, 50, 50);</string>
        </item>
        <item>
         <widget class="QTextEdit" name="txtNotes">
+         <property name="styleSheet">
+          <string notr="true">background: transparent;</string>
+         </property>
          <property name="dmhValue" stdset="0">
           <string>notes</string>
          </property>

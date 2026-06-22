@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>DMHelper</Name>
-    <Version>3.8.0</Version>
+    <Version>3.9.0</Version>
     <Title>DMHelper</Title>
     <Publisher>DMHelper</Publisher>
     <WizardStyle>Modern</WizardStyle>
@@ -10,5 +10,7 @@
     <Banner>dmhelper_banner.png</Banner>
     <StartMenuDir>DMHelper</StartMenuDir>
     <TargetDir>@ApplicationsDirX86@/DMHelper</TargetDir>
+    <MaintenanceToolName>uninstaller</MaintenanceToolName>
     <StyleSheet>style.qss</StyleSheet>
+    <ControlScript>controlscript.qs</ControlScript>
 </Installer>

@@ -1,8 +1,10 @@
 #include "publishglbattletoken.h"
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodeleffect.h"
+#include "conditions.h"
 #include "publishglimage.h"
 #include "publishgltokenhighlighteffect.h"
+#include "publishgltokenhighlighthealthbar.h"
 #include "publishgltokenhighlightref.h"
 #include "layertokens.h"
 #include "dmh_opengl.h"
@@ -23,6 +25,8 @@ PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogMo
     _textureSize(),
     _isPC(isPC),
     _highlightList(),
+    _healthBar(nullptr),
+    _healthBarEnabled(false),
     _recreateToken(false)
 {
     if((!QOpenGLContext::currentContext()) || (!_combatant))
@@ -43,8 +47,6 @@ PublishGLBattleToken::~PublishGLBattleToken()
 
 void PublishGLBattleToken::cleanup()
 {
-//    qDebug() << "[PublishGLBattleToken] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
-
     if(QOpenGLContext::currentContext())
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -74,6 +76,7 @@ void PublishGLBattleToken::cleanup()
 
     qDeleteAll(_highlightList);
     _highlightList.clear();
+    _healthBar = nullptr;
 
     PublishGLBattleObject::cleanup();
 }
@@ -252,14 +255,19 @@ void PublishGLBattleToken::createTokenObjects()
         return;
 
     QPixmap pix = _combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
-    if(_combatant->hasCondition(Combatant::Condition_Unconscious))
+    if(_combatant->hasConditionId(QStringLiteral("unconscious")))
     {
         QImage originalImage = pix.toImage();
         QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
         pix = QPixmap::fromImage(grayscaleImage);
     }
-    Combatant::drawConditions(&pix, _combatant->getConditions());
-    QImage textureImage = pix.toImage().convertToFormat(QImage::Format_RGBA8888).mirrored();
+    if(Conditions::activeConditions())
+        Conditions::activeConditions()->drawConditions(&pix, _combatant->getConditionList());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    QImage textureImage = pix.toImage().convertToFormat(QImage::Format_RGBA8888).flipped(Qt::Vertical);
+#else
+    QImage textureImage = pix.toImage().convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+#endif
     _textureSize = textureImage.size();
 
     float vertices[] = {
@@ -309,6 +317,40 @@ void PublishGLBattleToken::createTokenObjects()
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureImage.width(), textureImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, textureImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 
-    // set the initial position matrix
+    if(_healthBarEnabled && _healthBar == nullptr)
+    {
+        _healthBar = new PublishGLTokenHighlightHealthBar(_combatant);
+        _highlightList.append(_healthBar);
+    }
+
+    // set the initial position matrix (also calls setPositionScale on all highlights)
     combatantMoved();
+}
+
+void PublishGLBattleToken::setHealthBarEnabled(bool enabled)
+{
+    _healthBarEnabled = enabled;
+
+    if(enabled && !_healthBar)
+    {
+        _healthBar = new PublishGLTokenHighlightHealthBar(_combatant);
+        _highlightList.append(_healthBar);
+
+        if((_combatant) && (_combatant->getLayer()))
+        {
+            QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
+            qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
+            _healthBar->setPositionScale(newPosition, sizeFactor);
+        }
+
+        emit changed();
+    }
+    else if(!enabled && _healthBar)
+    {
+        _highlightList.removeOne(_healthBar);
+        delete _healthBar;
+        _healthBar = nullptr;
+
+        emit changed();
+    }
 }

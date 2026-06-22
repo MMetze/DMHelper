@@ -6,16 +6,20 @@
 namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 3;
-    const int DMHELPER_MINOR_VERSION = 8;
+    const int DMHELPER_MINOR_VERSION = 9;
     const int DMHELPER_ENGINEERING_VERSION = 0;
 
-    const int CAMPAIGN_MAJOR_VERSION = 2;
-    const int CAMPAIGN_MINOR_VERSION = 4;
+    // Bumping major versions of data files results in straight incompatibility
+    // and rejection of loading older file versions
+    // Minor increases are registered, but not considered incompatible and still loaded
+
+    const int CAMPAIGN_MAJOR_VERSION = 3;
+    const int CAMPAIGN_MINOR_VERSION = 0;
 
     const int BESTIARY_MAJOR_VERSION = 2;
-    const int BESTIARY_MINOR_VERSION = 3;
+    const int BESTIARY_MINOR_VERSION = 4;
 
-    const int SPELLBOOK_MAJOR_VERSION = 1;
+    const int SPELLBOOK_MAJOR_VERSION = 2;
     const int SPELLBOOK_MINOR_VERSION = 0;
 
     const int QUICKREF_MAJOR_VERSION = 1;

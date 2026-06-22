@@ -1,84 +1,131 @@
 name: DMHelper CI Linux Workflow
 
 on:
+  push:
+    branches: [ master, feature/linux-port ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 env:
-  SOURCE_DIR:   ${{ github.workspace }}
+  SOURCE_DIR: ${{ github.workspace }}
   QT_VERSION: 6.6.0
-  QT_INSTALLER_VERSION: 4.7
-  # MSVC_VERSION: 2019
-  # INSTALLERARTIFACT: DMHelper-64-bit-release-Installer.exe
-  # ZIPARTIFACT: DMHelper-64-bit-release.zip
+  APPIMAGE_NAME: DMHelper-x86_64.AppImage
 
 jobs:
   build-DMH-linux:
-
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-dev \
+          libxkbcommon-dev \
+          libxkbcommon-x11-0 \
+          libxcb-xinerama0 \
+          libxcb-cursor0 \
+          libidn12 \
+          squashfs-tools \
+          fuse \
+          libfuse2
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
         aqtversion: '==3.1.*'
-        version: '6.6.0'
+        version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
         modules: 'qtimageformats qtmultimedia qtnetworkauth'
-        tools: 'tools_ifw'
-        archives: 'qttranslations qttools qtsvg qtbase'
-        
-    - name: Check out the DMHelper source tree
-      uses: actions/checkout@v3
-    
-    - name: Print current working dir
-      run: |
-        echo Workspace is: ${{ github.workspace }}
-        ls DMHelper
-        cd DMHelper
-        pwd
-        echo 'runner.workspace === ${{ runner.workspace }}'
-        echo 'github.workspace === ${{ github.workspace }}'
-        ls ${{env.Qt6Dir}}
-        Get-ChildItem -Recurse -Directory
-        # echo ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin\binarycreator
-        # cd ${{ runner.workspace }}\Qt\Tools\QtInstallerFramework\${{ env.QT_INSTALLER_VERSION }}\bin
-        # Get-ChildItem -Recurse -Directory
-        # echo STOP!
-        # Dosomethingthatbreaks
-        
-    - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url:    http://download.qt.io/official_releases/jom/jom.zip
-        target: ${{ runner.temp }}\
-        
-    - name: Unzip JOM
-      working-directory: ${{ runner.temp }}
-      run:  |
-        7z x jom.zip -ojom
-    
-    - name: Build DMHelper for Linux
-      run: |
-        cd DMHelper
-        mkdir build-64_bit-release
-        cd build-64_bit-release
-        qmake.exe ..\src\DMHelper.pro -spec  linux-g++-64 "CONFIG+=qtquickcompiler" 
-        ${{ runner.temp }}\jom\jom.exe /d /f Makefile qmake_all
-        ${{ runner.temp }}\jom\jom.exe /d /f Makefile.Release
-        
-    - name: Zip the build
-      run:  |
-        cd DMHelper
-        7z a -tzip DMHelper-64-bit-release.zip .\bin64\packages\com.dmhelper.app\data\*
-    
-    - name: Output the workspace directory tree contents
-      run: |
-        Get-ChildItem -Recurse
+        archives: 'qttranslations qttools qtsvg qtbase icu'
 
-    - name: Save the zip file
-      uses: actions/upload-artifact@master
+    - name: Check out the DMHelper source tree
+      uses: actions/checkout@v4
+
+    - name: Download and extract VLC 4 snap
+      run: |
+        wget -q https://artifacts.videolan.org/vlc/nightly-snap/20260420-0440/vlc_4.0.0-dev-36688-g3462acc0a9_amd64.snap
+        unsquashfs -q vlc_4.0.0-dev-36688-g3462acc0a9_amd64.snap
+        rm vlc_4.0.0-dev-36688-g3462acc0a9_amd64.snap
+
+    - name: Fix VLC symlinks (git stores them as text files on Windows)
+      run: |
+        cd DMHelper/src/vlclinux
+        rm -f libvlc.so libvlc.so.12 libvlccore.so libvlccore.so.9
+        ln -s libvlc.so.12.0.0 libvlc.so
+        ln -s libvlc.so.12.0.0 libvlc.so.12
+        ln -s libvlccore.so.9.0.0 libvlccore.so
+        ln -s libvlccore.so.9.0.0 libvlccore.so.9
+
+    - name: Build DMHelper
+      run: |
+        cmake -S DMHelper/src -B DMHelper/build-release -DCMAKE_BUILD_TYPE=Release
+        cmake --build DMHelper/build-release --config Release -j$(nproc)
+
+    - name: Prepare AppDir structure
+      run: |
+        mkdir -p AppDir/usr/bin
+        mkdir -p AppDir/usr/lib
+        mkdir -p AppDir/usr/share/applications
+        mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
+        # Copy the built binary
+        cp DMHelper/build-release/DMHelper AppDir/usr/bin/
+
+        # Copy resources, bestiary, and doc directories
+        cp -r DMHelper/src/resources AppDir/usr/bin/resources
+        cp -r DMHelper/src/bestiary AppDir/usr/bin/bestiary
+        cp -r DMHelper/src/doc AppDir/usr/bin/doc
+
+        # Copy VLC 4 libraries from snap (plugins added after linuxdeploy)
+        cp -P squashfs-root/usr/lib/libvlc.so* AppDir/usr/lib/
+        cp -P squashfs-root/usr/lib/libvlccore.so* AppDir/usr/lib/
+
+        # Copy desktop file and icon
+        cp DMHelper/src/data/linux/DMHelper.desktop AppDir/usr/share/applications/
+        cp DMHelper/src/data/linux/DMHelper.desktop AppDir/
+        cp DMHelper/src/data/dmhelper_small.png AppDir/usr/share/icons/hicolor/256x256/apps/DMHelper.png
+        cp DMHelper/src/data/dmhelper_small.png AppDir/DMHelper.png
+
+    - name: Download linuxdeploy
+      run: |
+        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod +x linuxdeploy-x86_64.AppImage
+        chmod +x linuxdeploy-plugin-qt-x86_64.AppImage
+
+    - name: Create AppImage
+      run: |
+        export QMAKE=$(which qmake)
+        export LD_LIBRARY_PATH=AppDir/usr/lib:$LD_LIBRARY_PATH
+        # Run linuxdeploy to bundle Qt libs and plugins (without producing final AppImage yet)
+        ./linuxdeploy-x86_64.AppImage \
+          --appdir AppDir \
+          --plugin qt \
+          --desktop-file AppDir/DMHelper.desktop \
+          --icon-file AppDir/DMHelper.png \
+          --executable AppDir/usr/bin/DMHelper \
+          --library AppDir/usr/lib/libvlc.so.12.0.0 \
+          --library AppDir/usr/lib/libvlccore.so.9.0.0
+
+        # Replace linuxdeploy's AppRun with our custom one that sets VLC_PLUGIN_PATH
+        cp DMHelper/src/data/linux/AppRun.sh AppDir/AppRun
+        chmod +x AppDir/AppRun
+
+        # Copy VLC 4 plugins from snap AFTER linuxdeploy to avoid dependency scanning
+        mkdir -p AppDir/usr/lib/vlc/plugins
+        cp -r squashfs-root/usr/lib/vlc/plugins/* AppDir/usr/lib/vlc/plugins/
+
+        # Build the final AppImage using appimagetool (avoids linuxdeploy re-scanning)
+        wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x appimagetool-x86_64.AppImage
+        ./appimagetool-x86_64.AppImage AppDir DMHelper-x86_64.AppImage
+
+    - name: Upload AppImage artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.ZIPARTIFACT }}
-        path: ${{ github.workspace }}\DMHelper\${{ env.ZIPARTIFACT }}
+        name: ${{ env.APPIMAGE_NAME }}
+        path: DMHelper-x86_64.AppImage

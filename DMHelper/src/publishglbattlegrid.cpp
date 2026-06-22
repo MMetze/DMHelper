@@ -62,11 +62,13 @@ void PublishGLBattleGrid::paintGL(QOpenGLFunctions* functions, const GLfloat* pr
     functions->glUseProgram(_shaderProgram);
     DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData(), getMatrix());
     functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
+    GLint viewport[4];
+    functions->glGetIntegerv(GL_VIEWPORT, viewport);
+    functions->glUniform1f(_shaderLineWidth, qMax(1.0f, static_cast<GLfloat>(_config.getGridPen().widthF())));
+    functions->glUniform2f(_shaderViewportSize, static_cast<GLfloat>(viewport[2]), static_cast<GLfloat>(viewport[3]));
+    DMH_DEBUG_OPENGL_glUniform4f(_shaderGridColor, _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
+    functions->glUniform4f(_shaderGridColor, _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
     e->glBindVertexArray(_VAO);
-    functions->glLineWidth(_config.getGridPen().width());
-    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, functions->glGetUniformLocation(_shaderProgram, "gridColor"), "gridColor");
-    DMH_DEBUG_OPENGL_glUniform4f(functions->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
-    functions->glUniform4f(functions->glGetUniformLocation(_shaderProgram, "gridColor"), _config.getGridPen().color().redF(), _config.getGridPen().color().greenF(), _config.getGridPen().color().blueF(), _opacity);
 
     functions->glDrawElements(GL_LINES, _indices.count(), GL_UNSIGNED_INT, 0);
 }
@@ -150,18 +152,13 @@ void PublishGLBattleGrid::createGridObjectsGL()
         return;
 
     const char *vertexShaderSource = "#version 410 core\n"
-        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
-        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 0) in vec3 aPos;\n"
         "uniform mat4 model;\n"
         "uniform mat4 view;\n"
         "uniform mat4 projection;\n"
-        "uniform vec4 gridColor;\n"
-        "out vec4 ourColor; // output a color to the fragment shader\n"
         "void main()\n"
         "{\n"
-        "   // note that we read the multiplication from right to left\n"
         "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-        "   ourColor = gridColor; // set ourColor to the input color we got from the vertex data\n"
         "}\0";
 
     unsigned int vertexShader;
@@ -179,12 +176,51 @@ void PublishGLBattleGrid::createGridObjectsGL()
         return;
     }
 
-    const char *fragmentShaderSource = "#version 410 core\n"
-        "out vec4 FragColor;\n"
-        "in vec4 ourColor;\n"
+    // Geometry shader: expands each GL_LINES primitive to a screen-pixel-width quad.
+    // glLineWidth > 1 is unsupported in OpenGL 4.1 core profile on most drivers.
+    const char *geometryShaderSource = "#version 410 core\n"
+        "layout(lines) in;\n"
+        "layout(triangle_strip, max_vertices = 4) out;\n"
+        "uniform vec4 gridColor;\n"
+        "uniform float lineWidth;\n"
+        "uniform vec2 viewportSize;\n"
+        "out vec4 gsColor;\n"
         "void main()\n"
         "{\n"
-        "    FragColor = ourColor;\n"
+        "   vec2 p0 = gl_in[0].gl_Position.xy;\n"
+        "   vec2 p1 = gl_in[1].gl_Position.xy;\n"
+        "   vec2 dir = (p1 - p0) * viewportSize * 0.5;\n"
+        "   float len = length(dir);\n"
+        "   if(len < 0.001) return;\n"
+        "   dir = dir / len;\n"
+        "   vec2 perp = vec2(-dir.y, dir.x) * lineWidth / viewportSize;\n"
+        "   gsColor = gridColor;\n"
+        "   gl_Position = vec4(p0 + perp, gl_in[0].gl_Position.z, 1.0); EmitVertex();\n"
+        "   gl_Position = vec4(p0 - perp, gl_in[0].gl_Position.z, 1.0); EmitVertex();\n"
+        "   gl_Position = vec4(p1 + perp, gl_in[1].gl_Position.z, 1.0); EmitVertex();\n"
+        "   gl_Position = vec4(p1 - perp, gl_in[1].gl_Position.z, 1.0); EmitVertex();\n"
+        "   EndPrimitive();\n"
+        "}\0";
+
+    unsigned int geometryShader;
+    geometryShader = f->glCreateShader(GL_GEOMETRY_SHADER);
+    f->glShaderSource(geometryShader, 1, &geometryShaderSource, NULL);
+    f->glCompileShader(geometryShader);
+
+    f->glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+        qDebug() << "[PublishGLBattleGrid] ERROR::SHADER::GEOMETRY::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSource = "#version 410 core\n"
+        "out vec4 FragColor;\n"
+        "in vec4 gsColor;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = gsColor;\n"
         "}\0";
 
     unsigned int fragmentShader;
@@ -204,6 +240,7 @@ void PublishGLBattleGrid::createGridObjectsGL()
     DMH_DEBUG_OPENGL_glCreateProgram(_shaderProgram, "_shaderProgram");
 
     f->glAttachShader(_shaderProgram, vertexShader);
+    f->glAttachShader(_shaderProgram, geometryShader);
     f->glAttachShader(_shaderProgram, fragmentShader);
     f->glLinkProgram(_shaderProgram);
 
@@ -220,9 +257,14 @@ void PublishGLBattleGrid::createGridObjectsGL()
     DMH_DEBUG_OPENGL_glUseProgram(_shaderProgram);
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
+    f->glDeleteShader(geometryShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
     DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderModelMatrix, "model");
+    _shaderGridColor = f->glGetUniformLocation(_shaderProgram, "gridColor");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderGridColor, "gridColor");
+    _shaderLineWidth = f->glGetUniformLocation(_shaderProgram, "lineWidth");
+    _shaderViewportSize = f->glGetUniformLocation(_shaderProgram, "viewportSize");
 #ifdef DEBUG_BATTLE_GRID
     qDebug() << "[PublishGLBattleGrid] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
 #endif
@@ -247,13 +289,18 @@ void PublishGLBattleGrid::rebuildGridGL()
     if(!QOpenGLContext::currentContext())
         return;
 
-    cleanupGridGL();
-
-    // Set up the rendering context, load shaders and other resources, etc.:
+    // Only clean up the geometry objects (VAO/VBO/EBO), not the shader program,
+    // which is created once in createGridObjectsGL() and reused across rebuilds.
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    if(_VAO > 0) { e->glDeleteVertexArrays(1, &_VAO); _VAO = 0; }
+    if(_VBO > 0) { f->glDeleteBuffers(1, &_VBO); _VBO = 0; }
+    if(_EBO > 0) { f->glDeleteBuffers(1, &_EBO); _EBO = 0; }
+    _vertices.clear();
+    _indices.clear();
 
     Grid* tempGrid = new Grid(nullptr, QRect(QPoint(0, 0), _gridSize.toSize()));
     tempGrid->rebuildGrid(_config, 0, this);
@@ -294,6 +341,17 @@ void PublishGLBattleGrid::cleanupGridGL()
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
         QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+
+        if(_shaderProgram > 0)
+        {
+            if(f)
+            {
+                DMH_DEBUG_OPENGL_glDeleteProgram(_shaderProgram);
+                f->glDeleteProgram(_shaderProgram);
+            }
+            _shaderProgram = 0;
+        }
+
         if(_VAO > 0)
         {
             if(e)

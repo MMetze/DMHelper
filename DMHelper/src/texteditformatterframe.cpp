@@ -1,7 +1,7 @@
 #include "texteditformatterframe.h"
 #include <QFontDatabase>
 #include <QTextEdit>
-#include <QDebug>
+#include <QTextBlock>
 
 TextEditFormatterFrame::TextEditFormatterFrame(QWidget *parent) :
     QObject(parent),
@@ -66,6 +66,7 @@ void TextEditFormatterFrame::setFont(const QString& fontFamily)
         format.setFont(formatFont);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontFamilyChanged(fontFamily);
+        _textEdit->setFocus();
     }
 }
 
@@ -80,6 +81,7 @@ void TextEditFormatterFrame::setFontSize(int fontSize)
         format.setFontPointSize(fontSize);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontSizeChanged(fontSize);
+        _textEdit->setFocus();
     }
 }
 
@@ -94,6 +96,7 @@ void TextEditFormatterFrame::setBold(bool bold)
         format.setFontWeight(bold ? QFont::Bold : QFont::Normal);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontBoldChanged(bold);
+        _textEdit->setFocus();
     }
 }
 
@@ -108,6 +111,7 @@ void TextEditFormatterFrame::setItalics(bool italics)
         format.setFontItalic(italics);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontItalicsChanged(italics);
+        _textEdit->setFocus();
     }
 }
 
@@ -122,6 +126,7 @@ void TextEditFormatterFrame::setUnterline(bool underline)
         format.setFontUnderline(underline);
         _textEdit->mergeCurrentCharFormat(format);
         emit fontUnderlineChanged(underline);
+        _textEdit->setFocus();
     }
 }
 
@@ -136,6 +141,7 @@ void TextEditFormatterFrame::setColor(const QColor& color)
         format.setForeground(QBrush(color));
         _textEdit->mergeCurrentCharFormat(format);
         emit colorChanged(color);
+        _textEdit->setFocus();
     }
 }
 
@@ -148,6 +154,55 @@ void TextEditFormatterFrame::setAlignment(Qt::Alignment alignment)
     {
         _textEdit->setAlignment(alignment);
         emit alignmentChanged(alignment);
+        _textEdit->setFocus();
     }
+}
+
+void TextEditFormatterFrame::toggleCheckbox()
+{
+    if(!_textEdit)
+        return;
+
+    static const QChar checkboxUnchecked(0x2610); // ☐
+    static const QChar checkboxChecked(0x2611);   // ☑
+
+    QTextCursor cursor = _textEdit->textCursor();
+    int originalPos = cursor.position();
+
+    cursor.movePosition(QTextCursor::StartOfBlock);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+    QString firstChar = cursor.selectedText();
+
+    if(!firstChar.isEmpty() && (firstChar[0] == checkboxUnchecked || firstChar[0] == checkboxChecked))
+    {
+        // Remove checkbox and trailing space
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+        // Check for trailing space
+        QTextCursor spaceCheck = cursor;
+        spaceCheck.movePosition(QTextCursor::StartOfBlock);
+        spaceCheck.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+        QString twoChars = spaceCheck.selectedText();
+        if(twoChars.length() == 2 && twoChars[1] == QChar(' '))
+            cursor = spaceCheck;
+
+        cursor.removeSelectedText();
+
+        // Adjust cursor position
+        int removed = cursor.position() - (originalPos - twoChars.length());
+        int newPos = qMax(cursor.position(), originalPos - twoChars.length());
+        cursor.setPosition(newPos);
+    }
+    else
+    {
+        // Insert checkbox at block start
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.insertText(QString(checkboxUnchecked) + QChar(' '));
+
+        // Restore cursor position (shifted by 2 inserted chars)
+        cursor.setPosition(originalPos + 2);
+    }
+
+    _textEdit->setTextCursor(cursor);
 }
 

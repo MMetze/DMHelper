@@ -9,8 +9,11 @@
 #include <QRect>
 #include <QPen>
 
+class BattleDialogModelCombatantGroup;
+class BattleDialogModelInitiativeEvent;
 class EncounterBattle;
-class Map;
+#include "map.h"
+#include "layer.h"
 class LayerGrid;
 class GridConfig;
 
@@ -47,6 +50,23 @@ public:
     void removeCombatantFromList(BattleDialogModelCombatant* combatant);
     bool isCombatantInList(Combatant* combatant) const;
 
+    // Initiative events: synthetic combatants (e.g. lair actions) with no
+    // map presence. Owned directly by the model and merged into the
+    // combatant initiative list.
+    QList<BattleDialogModelInitiativeEvent*> getInitiativeEvents() const;
+    void appendInitiativeEvent(BattleDialogModelInitiativeEvent* event);
+    void removeInitiativeEvent(BattleDialogModelInitiativeEvent* event);
+
+    // Group management
+    QList<BattleDialogModelCombatantGroup*> getGroups() const;
+    BattleDialogModelCombatantGroup* getGroup(const QUuid& groupId) const;
+    QList<BattleDialogModelCombatant*> getGroupMembers(const QUuid& groupId) const;
+    BattleDialogModelCombatantGroup* createGroup(const QString& name, const QList<BattleDialogModelCombatant*>& members);
+    void addGroup(BattleDialogModelCombatantGroup* group);
+    void removeGroup(const QUuid& groupId);
+    void ungroupCombatants(const QUuid& groupId);
+    void removeCombatantFromGroup(BattleDialogModelCombatant* combatant);
+
     QList<BattleDialogModelEffect*> getEffectList() const;
     int getEffectCount() const;
     BattleDialogModelEffect* getEffect(int index) const;
@@ -71,7 +91,6 @@ public:
     bool getShowDead() const;
     bool getShowEffects() const;
     bool getShowMovement() const;
-    bool getShowLairActions() const;
     int getCombatantTokenType() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
@@ -89,7 +108,6 @@ public slots:
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
     void setShowMovement(bool showMovement);
-    void setShowLairActions(bool showLairActions);
     void setCombatantTokenType(int combatantTokenType);
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setBackgroundImage(QImage backgroundImage);
@@ -105,7 +123,6 @@ signals:
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
     void showMovementChanged(bool showMovement);
-    void showLairActionsChanged(bool showLairActions);
     void combatantListChanged();
     void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
@@ -116,6 +133,10 @@ signals:
 
     void combatantAdded(BattleDialogModelCombatant* combatant);
     void combatantRemoved(BattleDialogModelCombatant* combatant);
+
+    void groupAdded(const QUuid& groupId);
+    void groupRemoved(const QUuid& groupId);
+    void groupChanged(const QUuid& groupId);
 
 protected slots:
     void mapDestroyed(const QUuid& id);
@@ -139,6 +160,8 @@ private:
     // Note: combatants are owned by the layers, this list is for initiative sorting only
     QList<BattleDialogModelCombatant*> _combatants;
     QList<BattleDialogModelEffect*> _effects;
+    QList<BattleDialogModelCombatantGroup*> _groups;
+    QList<BattleDialogModelInitiativeEvent*> _initiativeEvents;
 
     // Visualization values
     LayerScene _layerScene;
@@ -155,7 +178,6 @@ private:
     bool _showDead;
     bool _showEffects;
     bool _showMovement;
-    bool _showLairActions;
     int _combatantTokenType;
 
     BattleDialogModelCombatant* _activeCombatant;

@@ -1,11 +1,12 @@
 #include "welcomeframe.h"
 #include "ui_welcomeframe.h"
 #include "mruhandler.h"
+#include "whatsnewdialog.h"
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
-#include <QMessageBox>
 #include <QtDebug>
+#include "dmhmessagebox.h"
 
 WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -14,6 +15,8 @@ WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->lblWhatsNew->setCursor(Qt::PointingHandCursor);
+    ui->lblWhatsNew->installEventFilter(this);
     ui->lblUsersGuide->setCursor(Qt::PointingHandCursor);
     ui->lblUsersGuide->installEventFilter(this);
     ui->lblGettingStartedGuide->setCursor(Qt::PointingHandCursor);
@@ -33,6 +36,13 @@ WelcomeFrame::~WelcomeFrame()
 void WelcomeFrame::setMRUHandler(MRUHandler* mruHandler)
 {
     _mruHandler = mruHandler;
+}
+
+void WelcomeFrame::openWhatsNew()
+{
+    WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(QString(":/img/data/whatsnew.txt"), QString("What's New"), this);
+    whatsNewDlg->show();
+    whatsNewDlg->move((frameGeometry().center() - whatsNewDlg->rect().center()) / 2);
 }
 
 void WelcomeFrame::openUsersGuide()
@@ -58,7 +68,7 @@ void WelcomeFrame::openSampleCampaign()
     if(!QFile::exists(filePath))
     {
         qDebug() << "[WelcomeFrame]: unable to open the sample campaign: " << filePath;
-        QMessageBox::critical(this, QString("File Open Error"), QString("The sample campaign file could not be found: ") + filePath);
+        DMHMessageBox::critical(this, QString("File Open Error"), QString("The sample campaign file could not be found: ") + filePath);
         return;
     }
 
@@ -69,7 +79,9 @@ bool WelcomeFrame::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::MouseButtonRelease)
     {
-        if(watched == ui->lblUsersGuide)
+        if(watched == ui->lblWhatsNew)
+            openWhatsNew();
+        else if(watched == ui->lblUsersGuide)
             openUsersGuide();
         else if(watched == ui->lblGettingStartedGuide)
             openGettingStarted();
@@ -113,7 +125,7 @@ void WelcomeFrame::openDoc(const QString& docName)
     if(!QFile::exists(filePath))
     {
         qDebug() << "[WelcomeFrame]: unable to open document: " << filePath;
-        QMessageBox::critical(this, QString("File Open Error"), QString("The requested document could not be found: ") + filePath);
+        DMHMessageBox::critical(this, QString("File Open Error"), QString("The requested document could not be found: ") + filePath);
         return;
     }
 
@@ -134,7 +146,6 @@ void WelcomeFrame::setMRUTexts()
     if(!_mruHandler)
         return;
 
-    // Clear the MRU list
     QLayoutItem *child;
     while((child = ui->groupMRUList->layout()->takeAt(0)) != nullptr)
     {
@@ -142,7 +153,6 @@ void WelcomeFrame::setMRUTexts()
         delete child;
     }
 
-    // Add the MRU list
     if(_mruHandler->getMRUList().isEmpty())
     {
         QLabel* newMRU = new QLabel();

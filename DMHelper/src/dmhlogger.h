@@ -2,6 +2,7 @@
 #define DMHLOGGER_H
 
 #include <QtGlobal>
+#include <QMutex>
 
 class QTextStream;
 class QFile;
@@ -23,6 +24,7 @@ public:
 private:
     QTextStream* _out;
     QFile* _log;
+    QMutex _mutex;
 
     static DMHLogger* _instance;
 };

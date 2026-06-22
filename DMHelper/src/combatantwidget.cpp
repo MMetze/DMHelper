@@ -5,6 +5,20 @@
 #include <QMouseEvent>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QStyle>
+
+namespace
+{
+    // One-shot stylesheet driven by the dynamic "state" property. Set on each
+    // CombatantWidget at construction time so subsequent state changes only
+    // need to repolish the widget rather than re-parse and re-apply a fresh
+    // style string. The empty-state selector keeps the default appearance.
+    static const char* COMBATANT_STATE_STYLESHEET =
+        "CombatantWidget { background-color: none; border-left: 4px solid transparent; padding-left: 4px; border-bottom: 1px solid rgba(0, 0, 0, 40); }"
+        "CombatantWidget[state=\"hover\"] { background-color: rgb(64, 64, 64); border-left: 4px solid rgb(100, 100, 100); }"
+        "CombatantWidget[state=\"active\"] { background-color: rgb(115, 18, 0); border-left: 4px solid rgb(200, 40, 0); }"
+        "CombatantWidget[state=\"selected\"] { background-image: url(); background-color: rgb(196, 196, 196); border-left: 4px solid rgb(80, 80, 80); }";
+}
 
 CombatantWidget::CombatantWidget(QWidget *parent) :
     QFrame(parent),
@@ -18,6 +32,58 @@ CombatantWidget::CombatantWidget(QWidget *parent) :
 {
     setAttribute(Qt::WA_Hover);
     setAutoFillBackground(true);
+    // Install the state-aware stylesheet once. State changes flip a dynamic
+    // property and re-polish the widget, which is dramatically cheaper than
+    // setStyleSheet() (the latter triggers a full unpolish/polish across all
+    // descendants every call).
+    setStyleSheet(QString::fromLatin1(COMBATANT_STATE_STYLESHEET));
+    refreshStateStyle();
+}
+
+void CombatantWidget::refreshStateStyle()
+{
+    QString state;
+    if(_selected)
+        state = QStringLiteral("selected");
+    else if(_active)
+        state = QStringLiteral("active");
+    else if(_hover)
+        state = QStringLiteral("hover");
+
+    const QVariant existing = property("state");
+    if(existing.toString() == state)
+        return;
+
+    setProperty("state", state);
+    if(QStyle* s = style())
+    {
+        s->unpolish(this);
+        s->polish(this);
+    }
+    update();
+}
+
+void CombatantWidget::installEventFilterRecursive(QObject* filterObj)
+{
+    if(!filterObj)
+        return;
+
+    installEventFilter(filterObj);
+    const QObjectList& kids = children();
+    for(QObject* child : kids)
+    {
+        if(QWidget* w = qobject_cast<QWidget*>(child))
+        {
+            w->installEventFilter(filterObj);
+            // Also cover grandchildren (e.g. widgets inside sub-layouts)
+            const QObjectList& grandkids = w->children();
+            for(QObject* gk : grandkids)
+            {
+                if(QWidget* gkw = qobject_cast<QWidget*>(gk))
+                    gkw->installEventFilter(filterObj);
+            }
+        }
+    }
 }
 
 int CombatantWidget::getInitiative() const
@@ -80,7 +146,7 @@ void CombatantWidget::setActive(bool active)
     if(_active != active)
     {
         _active = active;
-        setStyleSheet(getStyleString());
+        refreshStateStyle();
     }
 }
 
@@ -89,7 +155,7 @@ void CombatantWidget::setSelected(bool selected)
     if(_selected != selected)
     {
         _selected = selected;
-        setStyleSheet(getStyleString());
+        refreshStateStyle();
     }
 }
 
@@ -98,13 +164,13 @@ void CombatantWidget::setHover(bool hover)
     if(_hover != hover)
     {
         _hover = hover;
-        setStyleSheet(getStyleString());
+        refreshStateStyle();
     }
 }
 
 void CombatantWidget::showEvent(QShowEvent* event)
 {
-    setStyleSheet(getStyleString());
+    refreshStateStyle();
     QFrame::showEvent(event);
 }
 
@@ -113,25 +179,22 @@ void CombatantWidget::enterEvent(QEnterEvent* event)
     Q_UNUSED(event);
 
     _hover = true;
-    setStyleSheet(getStyleString());
+    refreshStateStyle();
 }
 
 void CombatantWidget::leaveEvent(QEvent* event)
 {
     Q_UNUSED(event);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
     _mouseDown = Qt::NoButton;
     _hover = false;
-    setStyleSheet(getStyleString());
+    refreshStateStyle();
 }
 
 void CombatantWidget::mousePressEvent(QMouseEvent* event)
 {
     Q_UNUSED(event);
 
-    if(event->button() == Qt::LeftButton)
-        setFrameStyle(QFrame::Panel | QFrame::Sunken);
     _mouseDown = event->button();
 }
 
@@ -139,10 +202,6 @@ void CombatantWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     if(_mouseDown == event->button())
     {
-        if(event->button() == Qt::LeftButton)
-        {
-            setFrameStyle(QFrame::Panel | QFrame::Raised);
-        }
         _mouseDown = Qt::NoButton;
     }
 }
@@ -185,14 +244,14 @@ void CombatantWidget::updatePairData(QHBoxLayout* pair, const QString& pairValue
 
 QString CombatantWidget::getStyleString()
 {
-    setLineWidth(5);
+    const QString common = QStringLiteral("padding-left: 4px; border-bottom: 1px solid rgba(0, 0, 0, 40); ");
 
     if(_selected)
-        return QString("CombatantWidget{ background-image: url(); background-color: rgb(196, 196, 196); }");
+        return QStringLiteral("CombatantWidget{ background-image: url(); background-color: rgb(196, 196, 196); border-left: 4px solid rgb(80, 80, 80); ") + common + QStringLiteral("}");
     else if(_active)
-        return QString("CombatantWidget{ background-color: rgb(115, 18, 0); }");
+        return QStringLiteral("CombatantWidget{ background-color: rgb(115, 18, 0); border-left: 4px solid rgb(200, 40, 0); ") + common + QStringLiteral("}");
     else if(_hover)
-        return QString("CombatantWidget{ background-color: rgb(64, 64, 64); }");
+        return QStringLiteral("CombatantWidget{ background-color: rgb(64, 64, 64); border-left: 4px solid rgb(100, 100, 100); ") + common + QStringLiteral("}");
     else
-        return QString("CombatantWidget{ background-color: none; }");
+        return QStringLiteral("CombatantWidget{ background-color: none; border-left: 4px solid transparent; ") + common + QStringLiteral("}");
 }

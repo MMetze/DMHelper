@@ -4,10 +4,11 @@
 #include "campaignobjectframe.h"
 #include <QGraphicsScene>
 #include <QImage>
+#include <QPolygon>
 #include <QRubberBand>
 #include "undofowpath.h"
 #include "videoplayer.h"
-#include "unselectedpixmap.h"
+#include "mappartyiconitem.h"
 
 namespace Ui {
 class MapFrame;
@@ -15,14 +16,15 @@ class MapFrame;
 
 class MapFrameScene;
 class Map;
-class PublishGLRenderer;
+#include "publishglrenderer.h"
+#include "layer.h"
+#include "party.h"
 class PublishGLMapRenderer;
-class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
-class Layer;
 class GridSizer;
+class QGraphicsPolygonItem;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -209,7 +211,7 @@ protected slots:
     void handleActivateMapMarker();
 
     void handleItemChanged(QGraphicsItem* item);
-    void handleSceneChanged(const QList<QRectF> &region);
+    void handlePartyIconMoved(const QPointF& pos);
     void handleMapSceneChanged();
 
 private:
@@ -221,7 +223,7 @@ private:
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
-    UnselectedPixmap* _partyIcon;
+    MapPartyIconItem* _partyIcon;
     CameraRect* _cameraRect;
 
     int _editMode;
@@ -239,6 +241,10 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
     UndoFowPath* _undoPath;
+
+    QPolygon _polygonPoints;
+    QGraphicsPolygonItem* _polygonPreview;
+    QGraphicsLineItem* _polygonPendingLine;
 
     QGraphicsLineItem* _distanceLine;
     MapDraw* _mapItem;

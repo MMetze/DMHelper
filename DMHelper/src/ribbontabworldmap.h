@@ -10,7 +10,7 @@ class RibbonTabWorldMap;
 }
 
 class PublishButtonRibbon;
-class Party;
+#include "party.h"
 class Campaign;
 class QMenu;
 

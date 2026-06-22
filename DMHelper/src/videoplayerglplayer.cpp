@@ -1,5 +1,6 @@
 #include "videoplayerglplayer.h"
 #include "videoplayerglvideo.h"
+#include <vlc/libvlc_version.h>
 #include "dmh_opengl.h"
 #include <QTimerEvent>
 #include <QDebug>
@@ -504,19 +505,13 @@ bool VideoPlayerGLPlayer::startPlayer()
     qDebug() << "[VideoPlayerGLPlayer] Starting video player with " << _videoFile.toUtf8().constData();
 
     // Create a new Media
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcMedia = libvlc_media_new_path(_videoFile.toUtf8().constData());
-#else
-    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), _videoFile.toUtf8().constData());
-#endif
     if (!_vlcMedia)
         return false;
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+    libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
+
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
-#else
-    _vlcPlayer = libvlc_media_player_new_from_media(_vlcMedia);
-#endif
     if(!_vlcPlayer)
         return false;
 
@@ -583,6 +578,17 @@ void VideoPlayerGLPlayer::cleanupPlayer()
 
     if(_vlcPlayer)
     {
+        // Detach all event callbacks before releasing to prevent use-after-free
+        libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
+        if(eventManager)
+        {
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
+            libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
+        }
+
         libvlc_media_player_release(_vlcPlayer);
         _vlcPlayer = nullptr;
     }

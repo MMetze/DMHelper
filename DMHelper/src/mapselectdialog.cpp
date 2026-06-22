@@ -5,7 +5,6 @@
 #include "mapblankdialog.h"
 #include "layerblank.h"
 #include <QBrush>
-#include <QMessageBox>
 
 MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent) :
     QDialog(parent),
@@ -53,7 +52,7 @@ Layer* MapSelectDialog::getBlankLayer() const
     if(!isBlankMap())
         return nullptr;
 
-    MapBlankDialog blankDlg;
+    MapBlankDialog blankDlg(const_cast<MapSelectDialog*>(this));
     int result = blankDlg.exec();
     if(result != QDialog::Accepted)
         return nullptr;

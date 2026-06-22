@@ -14,7 +14,8 @@
    <string>Soundboard</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);
+QFrame{ background: transparent; }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -47,10 +48,10 @@
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
@@ -111,7 +112,7 @@
            <string>New Group</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+           <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
           </property>
          </widget>
         </item>
@@ -132,7 +133,7 @@
          </size>
         </property>
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -179,7 +180,7 @@
            <string>Sound File</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+           <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
           </property>
          </widget>
         </item>
@@ -228,7 +229,7 @@
            <string>Youtube</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+           <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
           </property>
          </widget>
         </item>
@@ -277,7 +278,7 @@
            <string>Syrinscape</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+           <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
           </property>
          </widget>
         </item>
@@ -286,7 +287,7 @@
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -302,7 +303,7 @@
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
@@ -312,7 +313,7 @@
        </sizepolicy>
       </property>
       <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
+       <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
       </property>
       <property name="widgetResizable">
        <bool>true</bool>
@@ -322,7 +323,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>54</width>
+         <width>52</width>
          <height>426</height>
         </rect>
        </property>
@@ -360,7 +361,7 @@
        </font>
       </property>
       <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
+       <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
       </property>
       <property name="headerHidden">
        <bool>true</bool>

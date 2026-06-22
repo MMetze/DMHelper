@@ -4,7 +4,7 @@
 #include <QFileDialog>
 #include <QImageReader>
 #include <QPainter>
-#include <QMessageBox>
+#include "dmhmessagebox.h"
 
 LayerFowSettings::LayerFowSettings(QWidget *parent) :
     QDialog(parent),
@@ -111,7 +111,7 @@ void LayerFowSettings::handleTextureBrowseClicked()
     QImage newImage(filename);
     if(newImage.isNull())
     {
-        QMessageBox::critical(nullptr, QString("Error"), QString("Unable to load texture image from: ") + filename);
+        DMHMessageBox::critical(nullptr, QString("Error"), QString("Unable to load texture image from: ") + filename);
         qDebug() << "[LayerFowSettings] ERROR: Unable to load texture image from: " << filename;
         return;
     }
@@ -141,7 +141,7 @@ void LayerFowSettings::updatePreview()
 
         if(_texturePixmap.isNull())
         {
-            QMessageBox::critical(nullptr, QString("Error"), QString("Unable to load texture image from: ") + ui->edtTextureFile->text());
+            DMHMessageBox::critical(nullptr, QString("Error"), QString("Unable to load texture image from: ") + ui->edtTextureFile->text());
             qDebug() << "[LayerFowSettings] ERROR: Unable to load texture image from: " << ui->edtTextureFile->text();
             return;
         }

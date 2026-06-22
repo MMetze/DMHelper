@@ -577,3 +577,56 @@ void MapEditShape::setSmooth(bool smooth)
 {
     _smooth = smooth;
 }
+
+
+
+
+MapEditPolygon::MapEditPolygon(const QPolygon& polygon, bool erase, bool smooth) :
+    MapEdit(),
+    _polygon(polygon),
+    _erase(erase),
+    _smooth(smooth)
+{
+}
+
+MapEditPolygon::MapEditPolygon(const MapEditPolygon &obj) :
+    MapEdit(obj),
+    _polygon(obj._polygon),
+    _erase(obj._erase),
+    _smooth(obj._smooth)
+{
+}
+
+MapEditPolygon::~MapEditPolygon()
+{
+}
+
+QPolygon MapEditPolygon::polygon() const
+{
+    return _polygon;
+}
+
+bool MapEditPolygon::erase() const
+{
+    return _erase;
+}
+
+bool MapEditPolygon::smooth() const
+{
+    return _smooth;
+}
+
+void MapEditPolygon::setPolygon(const QPolygon& polygon)
+{
+    _polygon = polygon;
+}
+
+void MapEditPolygon::setErase(bool erase)
+{
+    _erase = erase;
+}
+
+void MapEditPolygon::setSmooth(bool smooth)
+{
+    _smooth = smooth;
+}

@@ -374,6 +374,22 @@ void LayerVideo::setLooping(bool looping)
     emit dirty();
 }
 
+void LayerVideo::setVideoFile(const QString& filename)
+{
+    if((filename.isEmpty()) || (_filename == filename))
+        return;
+
+    cleanupDM();
+    cleanupPlayer();
+    clearScreenshot();
+    _layerScreenshot = QImage();
+
+    _filename = filename;
+
+    requestScreenshot();
+    emit dirty();
+}
+
 void LayerVideo::handleScreenshotReady(const QImage& image)
 {
     if((image.isNull()) || (_layerScreenshot == image))
@@ -465,6 +481,7 @@ void LayerVideo::updateImage(const QSize& size)
         _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(scaledImage));
         if(_graphicsItem)
         {
+            _graphicsItem->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
             _graphicsItem->setPos(_position);
             _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
             _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
@@ -502,7 +519,7 @@ void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)
                                              renderer->getTargetWidget()->format(),
                                              true,
                                              false);
-    connect(_videoGLPlayer, &VideoPlayerGLPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
+    connect(_videoGLPlayer, &VideoPlayerGLPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget, Qt::QueuedConnection);
     connect(_videoGLPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, renderer, &PublishGLRenderer::updateProjectionMatrix);
     _videoGLPlayer->restartPlayer();
 #else

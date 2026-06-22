@@ -5,13 +5,15 @@
 #include <QHash>
 
 class BattleDialogModel;
-class BattleDialogModelCombatant;
-class BattleDialogModelEffect;
+#include "battledialogmodelcombatant.h"
+#include "battledialogmodeleffect.h"
 class BattleDialogModelObject;
 class PublishGLBattleToken;
 class PublishGLBattleEffect;
 class QGraphicsPixmapItem;
 class QGraphicsItem;
+class BattleTokenHealthBar;
+class Campaign;
 
 class LayerTokens : public Layer
 {
@@ -101,6 +103,8 @@ protected slots:
     void effectVisibilityChanged(bool showEffects);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
     void linkedObjectMoved(BattleDialogModelObject* object);
+    void healthBarVisibilityChanged(bool visible);
+    void glHealthBarVisibilityChanged(bool show);
 
 protected:
     // Layer Specific Interface
@@ -108,6 +112,8 @@ protected:
 
     // DM Window Methods
     void cleanupDM();
+    void resolveCampaign();
+    void refreshHealthBar(BattleDialogModelCombatant* combatant);
     QGraphicsPixmapItem* createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant);
     QGraphicsItem* createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect);
@@ -150,6 +156,10 @@ protected:
     QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
 
     int _scale;
+
+    // Health bar overlay (DM view)
+    Campaign* _campaign;
+    QHash<BattleDialogModelCombatant*, BattleTokenHealthBar*> _healthBarHash;
 };
 
 #endif // LAYERTOKENS_H

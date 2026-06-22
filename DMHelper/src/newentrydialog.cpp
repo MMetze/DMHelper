@@ -39,6 +39,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, CampaignObjectBase* currentObject, QWidget *parent) :
     QDialog(parent),
@@ -176,7 +177,7 @@ CampaignObjectBase* NewEntryDialog::createNewEntry()
 {
     if(getNewEntryName().isEmpty())
     {
-        QMessageBox::warning(this, tr("Invalid Entry Name"), tr("Please enter a valid name for the new entry."));
+        DMHMessageBox::warning(this, tr("Invalid Entry Name"), tr("Please enter a valid name for the new entry."));
         return nullptr;
     }
 
@@ -304,7 +305,7 @@ CampaignObjectBase* NewEntryDialog::createLinkedEntry()
 {
     if((ui->edtLinkedFile->text().isEmpty()) || (!QFile::exists(ui->edtLinkedFile->text())))
     {
-        QMessageBox::warning(this, tr("Invalid Linked File"), tr("Please enter a valid file name for the linked entry: ") + ui->edtLinkedFile->text());
+        DMHMessageBox::warning(this, tr("Invalid Linked File"), tr("Please enter a valid file name for the linked entry: ") + ui->edtLinkedFile->text());
         return nullptr;
     }
 
@@ -391,6 +392,8 @@ CampaignObjectBase* NewEntryDialog::createMediaEntry()
     else if(_imageType == DMHelper::FileType_Video)
     {
         LayerVideo* videoLayer = new LayerVideo(QString("Media Video: ") + QFileInfo(_primaryImageFile).fileName(), _primaryImageFile);
+        videoLayer->setPlayAudio(ui->btnPlayAudio->isChecked());
+        videoLayer->setLooping(ui->btnLooping->isChecked());
         mediaLayer = videoLayer;
     }
     else
@@ -673,6 +676,10 @@ void NewEntryDialog::newPageSelected()
     {
         loadPrimaryImage(ui->lblMediaPreview, nullptr, ui->lblMediaPreview->width() - 20, ui->lblMediaPreview->height() - 20, QString());
         ui->edtMediaFile->setText(_primaryImageFile);
+
+        bool isMediaVideo = (_imageType == DMHelper::FileType_Video);
+        ui->btnPlayAudio->setEnabled(isMediaVideo);
+        ui->btnLooping->setEnabled(isMediaVideo);
     }
     else if (ui->buttonGroupType->checkedButton() == ui->btnTypeMap)
     {
@@ -706,7 +713,7 @@ void NewEntryDialog::readTextFile(const QString& filename)
         QFile textFile(filename);
         if(!textFile.open(QIODevice::ReadOnly))
         {
-            QMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not able to be opened.") + QChar::LineFeed + QChar::LineFeed + filename);
+            DMHMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not able to be opened.") + QChar::LineFeed + QChar::LineFeed + filename);
             qDebug() << "[NewEntryDialog] ERROR: unabled to open the text file for reading: " << filename;
             return;
         }
@@ -730,7 +737,7 @@ void NewEntryDialog::readTextFile(const QString& filename)
     }
     else
     {
-        QMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not a supported file type for inputing text into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
+        DMHMessageBox::critical(this, QString("Invalid Text File"), QString("The added text file is not a supported file type for inputing text into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
         qDebug() << "[NewEntryDialog] ERROR: trying to add an unsupported file type as a text file: " << filename;
     }
 }
@@ -747,7 +754,7 @@ void NewEntryDialog::setLinkedTextFile(const QString& filename)
     }
     else
     {
-        QMessageBox::critical(this, QString("Invalid Linked File"), QString("The selected file is not a supported file type for linking into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
+        DMHMessageBox::critical(this, QString("Invalid Linked File"), QString("The selected file is not a supported file type for linking into DMHelper. Supported file types are text, HTML and markdown.") + QChar::LineFeed + QChar::LineFeed + filename);
         qDebug() << "[NewEntryDialog] ERROR: trying to add an unsupported file type as a linked file: " << filename;
     }
 }
@@ -779,7 +786,7 @@ void NewEntryDialog::editCharacterIcon()
 
     QImage currentToken(_primaryImageFile.isEmpty() ? QString(":/img/data/portrait.png") : _primaryImageFile);
 
-    TokenEditDialog* dlg = new TokenEditDialog(currentToken, *_options, 1.0, QPoint(), false);
+    TokenEditDialog* dlg = new TokenEditDialog(currentToken, *_options, 1.0, QPoint(), false, this);
     if(dlg->exec() == QDialog::Accepted)
     {
         QImage newToken = dlg->getFinalImage();
@@ -822,7 +829,7 @@ void NewEntryDialog::importHeroForge()
         token = QInputDialog::getText(this, QString("Enter Hero Forge Access Key"), QString("Please enter your Hero Forge Access Key. You can find this in your Hero Forge account information."));
         if(!token.isEmpty())
         {
-            if(QMessageBox::question(this,
+            if(DMHMessageBox::question(this,
                                       QString("Confirm Store Access Key"),
                                       QString("Should DMHelper store your access key for ease of use in the future?") + QChar::LineFeed + QChar::LineFeed + QString("Please note: the Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.")) == QMessageBox::Yes)
             {
@@ -978,7 +985,7 @@ void NewEntryDialog::selectCombatSource()
     {
         _imageColor = Qt::white;
         _imageSize = QSize(400, 300);
-        MapBlankDialog blankDlg;
+        MapBlankDialog blankDlg(this);
         int result = blankDlg.exec();
         if(result == QDialog::Accepted)
         {
@@ -1087,6 +1094,13 @@ void NewEntryDialog::readNewFile(const QString& filename, QLabel* label, int wid
     {
         label->setPixmap(QPixmap(defaultIcon).scaled(width, height, Qt::KeepAspectRatio));
         _imageType = DMHelper::FileType_Unknown;
+    }
+
+    if(label == ui->lblMediaPreview)
+    {
+        bool isMediaVideo = (_imageType == DMHelper::FileType_Video);
+        ui->btnPlayAudio->setEnabled(isMediaVideo);
+        ui->btnLooping->setEnabled(isMediaVideo);
     }
 
     validateNewEntry();

@@ -140,10 +140,8 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseMoveEvent(QGraphicsScen
             position.setX((static_cast<qreal>(static_cast<int>(position.x()) / intGridSize) * gridSize) + gridSize);
             position.setY((static_cast<qreal>(static_cast<int>(position.y()) / intGridSize) * gridSize) + gridSize);
             position += offset;
-            //return mapToParent(mapFromScene(newPos));
         }
     }
-    //line.setP2(mouseEvent->scenePos());
     line.setP2(position);
     _distanceLine->setLine(line);
 
@@ -172,7 +170,6 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mousePressEvent(QGraphicsSce
             textposition.setX((static_cast<qreal>(static_cast<int>(textposition.x()) / intGridSize) * gridSize) + gridSize);
             textposition.setY((static_cast<qreal>(static_cast<int>(textposition.y()) / intGridSize) * gridSize) + gridSize);
             textposition += offset;
-            //return mapToParent(mapFromScene(newPos));
         }
     }
 
@@ -403,6 +400,16 @@ bool BattleDialogGraphicsSceneMouseHandlerRaw::mouseReleaseEvent(QGraphicsSceneM
     if(mouseEvent)
     {
         emit rawMouseRelease(mouseEvent->scenePos(), mouseEvent->buttons(), mouseEvent->modifiers());
+        mouseEvent->accept();
+    }
+    return false;
+}
+
+bool BattleDialogGraphicsSceneMouseHandlerRaw::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    if(mouseEvent)
+    {
+        emit rawMouseDoubleClick();
         mouseEvent->accept();
     }
     return false;

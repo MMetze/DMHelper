@@ -1,0 +1,817 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>DMHelper Ruleset and Template System</title>
+<style>
+ body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; }
+ h1 { font-size: 22pt; }
+ h2 { font-size: 16pt; margin-top: 18pt; }
+ h3 { font-size: 13pt; margin-top: 14pt; }
+ h4 { font-size: 11pt; margin-top: 10pt; }
+ code, pre { font-family: Consolas, "Courier New", monospace; font-size: 10pt; }
+ pre { background: #f4f4f4; border: 1px solid #ddd; padding: 8pt; }
+ table { border-collapse: collapse; }
+ th, td { border: 1px solid #888; padding: 4pt 8pt; vertical-align: top; }
+ th { background: #eee; }
+ blockquote { border-left: 3pt solid #888; padding-left: 8pt; color: #555; }
+</style></head><body>
+<h1 id="dmhelper-ruleset-template-system">DMHelper — Ruleset &amp; Template System</h1>
+<p>A guide for users, campaign authors, and developers who want to understand,
+configure, modify, or extend the rules systems shipped with DMHelper.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-core-concepts">Core Concepts</a></li>
+<li><a href="#3-architecture-classes-and-responsibilities">Architecture: Classes and Responsibilities</a></li>
+<li><a href="#4-how-a-ruleset-is-loaded">How a Ruleset is Loaded</a></li>
+<li><a href="#5-modifying-the-campaign-ruleset">Modifying the Campaign Ruleset</a></li>
+<li><a href="#6-creating-a-new-ruleset">Creating a New Ruleset</a></li>
+<li><a href="#7-modifying-an-existing-ruleset">Modifying an Existing Ruleset</a></li>
+<li><a href="#8-reference-resource-xml-files">Reference: Resource XML Files</a></li>
+<li><a href="#9-reference-resource-ui-files">Reference: Resource UI Files</a></li>
+<li><a href="#10-property-reference-for-ui-files">Property Reference for <code>.ui</code> Files</a></li>
+</ol>
+<hr />
+<h2 id="1-overview">1. Overview</h2>
+<p>DMHelper is a virtual tabletop (VTT) for Dungeon Masters that supports more
+than one role-playing system. The differences between systems — how
+initiative is rolled, how hit points and damage are tracked, what stats a
+character has, what a monster's stat block looks like, which conditions
+exist — are isolated behind a small set of pluggable abstractions
+collectively referred to as the <strong>ruleset and template system</strong>.</p>
+<p>A <em>ruleset</em> is the combination of:</p>
+<ul>
+<li>A pair of <strong>rule strategies</strong> (<code>RuleInitiative</code>, <code>RuleHealth</code>).</li>
+<li>A set of <strong>data templates</strong> that describe the fields a character or
+  monster has (e.g. <code>character5e.xml</code>).</li>
+<li>A set of <strong>UI templates</strong> that describe how to display and edit those
+  fields (e.g. <code>character5e.ui</code>).</li>
+<li>A list of <strong>conditions</strong> for that system (e.g. <code>conditions-5e.xml</code>).</li>
+<li>A set of optional secondary files: spell data, spell UI, lair-action UI,
+  combatant token UI, default bestiary, etc.</li>
+</ul>
+<p>DMHelper currently ships rulesets for D&amp;D 5e (2014), D&amp;D 5e (2024),
+D&amp;D 2e, and Daggerheart, but the system is designed so that new rulesets
+can be added without modifying the core application logic.</p>
+<hr />
+<h2 id="2-core-concepts">2. Core Concepts</h2>
+<h3 id="21-ruleset">2.1 Ruleset</h3>
+<p>A <code>Ruleset</code> is a per-campaign object that wires together the rule
+strategies and the data/UI files used by that campaign. It is created
+when a new campaign is started (from a <em>ruleset template</em>) and then saved
+into the campaign file so the campaign always reopens with the same
+configuration.</p>
+<h3 id="22-ruleset-template">2.2 Ruleset Template</h3>
+<p>A ruleset <em>template</em> is the description of an available ruleset, parsed
+from <a href="../resources/ruleset.xml">resources/ruleset.xml</a> at application
+startup. Templates appear in the dropdown of the <strong>New Campaign</strong> dialog.
+A campaign records the <em>name</em> of the template it was created from, plus
+any per-campaign overrides.</p>
+<h3 id="23-rule-strategies">2.3 Rule Strategies</h3>
+<p>Two pluggable strategies determine system-specific combat behaviour:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RuleInitiative</code></td>
+<td>How initiative is rolled and how combatants are sorted into turn order.</td>
+</tr>
+<tr>
+<td><code>RuleHealth</code></td>
+<td>How hit points / damage / death work, and whether HP counts up or down.</td>
+</tr>
+</tbody>
+</table>
+<p>Each strategy is a small C++ class with a known <em>type string</em> (e.g.
+<code>"5e"</code>, <code>"2e"</code>, <code>"group"</code>, <code>"daggerheart"</code>). The <code>RuleFactory</code> looks up
+the type string and instantiates the correct subclass.</p>
+<h3 id="24-template-object">2.4 Template Object</h3>
+<p>A <code>TemplateObject</code> is the <em>data</em> for a single character, monster, spell,
+or other rule-driven entity. It exposes a generic key / value interface
+(e.g. <code>getStringValue("name")</code>, <code>setIntValue("level", 3)</code>) so that the
+template system can read and write fields without knowing the details of
+each subclass.</p>
+<p><code>Characterv2</code>, <code>MonsterClassv2</code>, <code>Spell</code> and similar classes inherit
+<code>TemplateObject</code>.</p>
+<h3 id="25-template-factory">2.5 Template Factory</h3>
+<p>A <code>TemplateFactory</code> is bound to a single data-template <code>.xml</code> file (such
+as <code>character5e.xml</code>). It knows the schema for that system — which
+fields exist, what their types are, and what their defaults are — and it
+loads the matching <code>.ui</code> file to display them. It also performs the
+binding between widgets and the underlying <code>TemplateObject</code>.</p>
+<h3 id="26-template-frame">2.6 Template Frame</h3>
+<p>A <code>TemplateFrame</code> is the <em>editor</em> — the dialog or widget the user sees
+when they edit a character or monster. The frame owns the loaded UI
+widget tree, listens for user edits, and pushes changes back into its
+<code>TemplateObject</code>.</p>
+<h3 id="27-field-format">2.7 Field Format</h3>
+<p>Fields can carry a <em>display format</em> (<code>dmhFormat</code>) that adds a prefix or
+suffix, applies digit padding, signs the value, and so on. Fields can
+also carry a <em>compute expression</em> (<code>dmhCompute</code>) that derives the value
+from other fields (e.g. ability modifiers from ability scores).
+<code>TemplateFieldFormat</code> parses both kinds of spec.</p>
+<h3 id="28-object-notifier">2.8 Object Notifier</h3>
+<p>Because <code>TemplateObject</code> cannot itself inherit <code>QObject</code> (its concrete
+subclasses already do), each instance owns a small companion object,
+<code>TemplateObjectNotifier</code>, that emits a <code>valueChanged(key)</code> signal when a
+field is mutated. Computed widgets connect to this notifier to refresh
+themselves when one of their input fields changes.</p>
+<h3 id="29-resource-layout">2.9 Resource Layout</h3>
+<p>A <code>TemplateResourceLayout</code> is a horizontal layout that displays a
+"current / maximum" counter — hit points, spell slots, hit dice, bardic
+inspiration uses, and so on. It is generated at runtime from the
+schema's <code>dmh:resource</code> fields and from the optional <code>resource.ui</code> /
+<code>spellSlot.ui</code> widget shells.</p>
+<hr />
+<h2 id="3-architecture-classes-and-responsibilities">3. Architecture: Classes and Responsibilities</h2>
+<h3 id="ruleset-ruleseth"><code>Ruleset</code> — <a href="../ruleset.h">ruleset.h</a></h3>
+<p>The per-campaign ruleset container. Holds:</p>
+<ul>
+<li>The active <code>RuleInitiative</code> and <code>RuleHealth</code> instances.</li>
+<li>Paths to the character data file, character UI file, monster data file,
+  monster UI file, combatant UI file, spell data file, spell UI file,
+  lair-action UI file, default bestiary file, and conditions file.</li>
+<li>The active <code>Conditions</code> set and the original <code>Conditions</code> set
+  (so condition deltas can be calculated on save).</li>
+<li>Combat-related flags: whether the <em>Done</em> checkbox is shown next to each
+  combatant, whether HP counts down, what kind of movement display is in
+  use, and any custom movement ranges.</li>
+</ul>
+<p><code>Ruleset</code> is a <code>CampaignObjectBase</code>, so it is serialised into the campaign
+file as part of the normal save flow. On load it asks <code>RuleFactory</code> for
+the named template and uses it to construct the right strategy objects.</p>
+<h3 id="rulefactory-rulefactoryh"><code>RuleFactory</code> — <a href="../rulefactory.h">rulefactory.h</a></h3>
+<p>Singleton that owns:</p>
+<ul>
+<li>The list of <em>ruleset templates</em> parsed from
+  <a href="../resources/ruleset.xml">resources/ruleset.xml</a> at startup (and from
+  an optional user file).</li>
+<li>The factory methods that map a <em>type string</em> to a concrete
+  <code>RuleInitiative</code> or <code>RuleHealth</code> subclass.</li>
+<li>The list of available initiative and health type names (used to
+  populate dropdowns in the campaign-properties UI).</li>
+</ul>
+<p>To register a new initiative or health strategy you add a <code>case</code> in
+<code>RuleFactory::createRuleInitiative()</code> or <code>createRuleHealth()</code> and a
+matching name in <code>getRuleInitiativeNames()</code> / <code>getRuleHealthNames()</code>.</p>
+<h3 id="conditions-and-condition-files"><code>Conditions</code> and condition files</h3>
+<p><code>Conditions</code> holds the list of status effects (blinded, grappled, on
+fire, in stress, etc.) for a campaign. The base list comes from the
+ruleset template's conditions file
+(<code>conditions-5e.xml</code>, <code>conditions-daggerheart.xml</code>). Per-campaign
+additions and removals are stored as a <em>delta</em> on save and re-applied on
+load, so that user-customised conditions survive without duplicating the
+shipped defaults inside every campaign file.</p>
+<h3 id="templatefactory-templatefactoryh"><code>TemplateFactory</code> — <a href="../templatefactory.h">templatefactory.h</a></h3>
+<p>Each <code>TemplateFactory</code> is bound to a single data-template file (for
+example, the active character template or the active monster template).
+The factory:</p>
+<ul>
+<li>Parses the <code>.xml</code> template into an internal map of field metadata
+  (name, type, default value, list children).</li>
+<li>Loads the matching <code>.ui</code> file via <code>QUiLoader</code>.</li>
+<li>Walks the widget tree and matches widgets to fields using the
+  <code>dmhValue</code> property.</li>
+<li>Reads values from a <code>TemplateObject</code> into widgets, and pushes widget
+  edits back into the object.</li>
+<li>Generates resource widgets at runtime from <code>resource.ui</code> /
+  <code>spellSlot.ui</code> for fields of type <code>dmh:resource</code>.</li>
+</ul>
+<h3 id="templateobject-templateobjecth"><code>TemplateObject</code> — <a href="../templateobject.h">templateobject.h</a></h3>
+<p>The data side of the binding. Provides:</p>
+<ul>
+<li>Typed accessors: <code>getStringValue</code>, <code>getIntValue</code>, <code>getBoolValue</code>,
+  <code>getDiceValue</code>, <code>getResourceValue</code>, <code>getListValue</code>, and matching
+  setters.</li>
+<li>List operations: <code>appendListEntry</code>, <code>insertListEntry</code>,
+  <code>removeListEntry</code>, <code>createListEntry</code>.</li>
+<li>Generic XML I/O via <code>readXMLValues</code> / <code>writeXMLValues</code> that uses the
+  associated <code>TemplateFactory</code> to know which fields exist and how to
+  convert them.</li>
+<li>A virtual hook (<code>isAttributeSpecial</code>, <code>getAttributeSpecial</code>,
+  <code>setAttributeSpecial</code>) so subclasses can intercept reads or writes for
+  computed or non-trivial fields.</li>
+</ul>
+<h3 id="templateframe-templateframeh"><code>TemplateFrame</code> — <a href="../templateframe.h">templateframe.h</a></h3>
+<p>A small bridge object owned by an editor dialog or frame. It exposes:</p>
+<ul>
+<li>The <code>.ui</code> file name to load.</li>
+<li><code>handleEditBoxChange()</code>, <code>handleAddResource()</code>, <code>handleRemoveResource()</code>
+  — entry points called from the templated UI when the user edits a
+  field or adds / removes a resource list entry.</li>
+<li><code>postLoadConfiguration()</code> — called after the UI is loaded so the host
+  can attach buttons, icons, or signal handlers that the <code>.ui</code> file
+  cannot express on its own.</li>
+<li><code>localEventFilter()</code> — for context menus and other event-level work.</li>
+</ul>
+<p>Concrete frames are created for each editor: character editor, bestiary
+(monster) editor, spellbook editor, and the in-battle combatant frame.</p>
+<h3 id="templatefieldformat-templatefieldformath"><code>TemplateFieldFormat</code> — <a href="../templatefieldformat.h">templatefieldformat.h</a></h3>
+<p>Parses two kinds of strings:</p>
+<ul>
+<li><strong>Format specs</strong> (<code>dmhFormat</code>) such as <code>int;0..20;signed;prefix:AC</code>
+  or <code>string;suffix: ft.</code>. The parser produces a <code>FormatSpec</code> and
+  helpers <code>applyFormat</code>, <code>applyFormatInt</code>, <code>stripFormat</code>, and
+  <code>makeValidator</code>.</li>
+<li><strong>Compute expressions</strong> (<code>dmhCompute</code>) such as
+  <code>(dexterity - 10) / 2</code>. The parser produces a <code>ComputeExpr</code> AST that
+  can be evaluated against a <code>TemplateObject</code> and reports the set of
+  field names it references — used to subscribe the widget to the right
+  change notifications.</li>
+</ul>
+<h3 id="templateobjectnotifier-templateobjectnotifierh"><code>TemplateObjectNotifier</code> — <a href="../templateobjectnotifier.h">templateobjectnotifier.h</a></h3>
+<p>A lightweight <code>QObject</code> companion. Each <code>TemplateObject</code> lazily
+constructs one and exposes it via <code>notifier()</code>. Computed widgets
+connect their refresh slot to <code>valueChanged(QString)</code> for each field name
+their compute expression depends on.</p>
+<p>This indirection exists because <code>TemplateObject</code> itself cannot be a
+<code>QObject</code>: its subclasses (e.g. <code>Characterv2</code>, <code>MonsterClassv2</code>) already
+inherit from <code>QObject</code> for their own reasons, and Qt forbids multiple
+inheritance from <code>QObject</code>.</p>
+<h3 id="templateresourcelayout-templateresourcelayouth"><code>TemplateResourceLayout</code> — <a href="../templateresourcelayout.h">templateresourcelayout.h</a></h3>
+<p>A <code>QHBoxLayout</code> subclass that draws a current/maximum counter and emits
+<code>resourceValueChanged</code> (or <code>resourceListValueChanged</code> for list
+resources), <code>addResource</code>, and <code>removeResource</code> signals. The
+<code>TemplateFactory</code> plants one of these layouts wherever the <code>.ui</code> file
+declares a <code>dmhWidget="resource"</code> placeholder.</p>
+<h3 id="rule-strategy-hierarchies">Rule strategy hierarchies</h3>
+<pre><code>RuleInitiative
+ ├── RuleInitiative5e               type: &quot;5e&quot;
+ ├── RuleInitiative2e               type: &quot;2e&quot;
+ ├── RuleInitiativeGroup            type: &quot;group&quot;
+ └── RuleInitiativeGroupMonsters    type: &quot;groupmonsters&quot;
+
+RuleHealth
+ ├── RuleHealth5e                   type: &quot;5e&quot;
+ └── RuleHealthDaggerheart          type: &quot;daggerheart&quot;
+</code></pre>
+<p>Each subclass defines a small number of methods — how to roll, how to
+sort, how to apply damage, whether HP counts up or down, and what
+"dead" / "incapacitated" mean. Adding a new system is largely a matter
+of subclassing one or both of these and registering the subclass with
+the <code>RuleFactory</code>.</p>
+<hr />
+<h2 id="4-how-a-ruleset-is-loaded">4. How a Ruleset is Loaded</h2>
+<h3 id="41-at-application-startup">4.1 At application startup</h3>
+<ol>
+<li><code>RuleFactory::Initialize()</code> runs and parses
+   <a href="../resources/ruleset.xml">resources/ruleset.xml</a> into a list of
+   ruleset templates. If a user-overrides file exists, it is parsed and
+   merged on top.</li>
+<li><code>MonsterFactory</code>, <code>SpellbookFactory</code>, and <code>QuickRef</code> are initialised
+   against the default ruleset, so the bestiary and quick reference are
+   functional even before a campaign is opened.</li>
+</ol>
+<h3 id="42-when-the-user-creates-a-new-campaign">4.2 When the user creates a new campaign</h3>
+<ol>
+<li>The <strong>New Campaign</strong> dialog calls <code>RuleFactory::getRulesetNames()</code>
+   and shows the result in a dropdown.</li>
+<li>When the user picks a ruleset, the dialog reads the matching
+   <code>RulesetTemplate</code> and pre-fills the data file, UI file, and rule type
+   choices. The user can override any of these.</li>
+<li>On <em>OK</em>, a fresh <code>Ruleset</code> is constructed from the template (and any
+   overrides) and attached to the new <code>Campaign</code>. This in turn
+   instantiates the <code>RuleInitiative</code> and <code>RuleHealth</code> objects via
+   <code>RuleFactory</code>.</li>
+</ol>
+<h3 id="43-when-the-user-opens-an-existing-campaign">4.3 When the user opens an existing campaign</h3>
+<ol>
+<li><code>Ruleset::inputXML()</code> is called with the <code>&lt;ruleset&gt;</code> element from the
+   campaign file. It reads the template name and calls
+   <code>RuleFactory::getRulesetTemplate()</code>.</li>
+<li>Any per-campaign overrides on the <code>&lt;ruleset&gt;</code> element (initiative
+   type, health type, file paths, condition deltas) are applied.</li>
+<li>The <code>RuleInitiative</code>, <code>RuleHealth</code>, and <code>Conditions</code> objects are
+   constructed.</li>
+<li>The campaign continues loading, and as characters / monsters are
+   parsed they are bound to the appropriate <code>TemplateFactory</code> so their
+   field values can be read in the right schema.</li>
+</ol>
+<h3 id="44-when-the-user-opens-a-character-or-monster-editor">4.4 When the user opens a character or monster editor</h3>
+<ol>
+<li>The editor instantiates a concrete <code>TemplateFrame</code> (e.g.
+   <code>CharacterTemplateFrame</code>).</li>
+<li>The frame asks <code>TemplateFactory::loadUITemplate()</code> to load the
+   ruleset's <code>.ui</code> file and gets a populated <code>QWidget</code> tree back.</li>
+<li><code>TemplateFactory::populateWidget()</code> walks the tree, reads each
+   widget's <code>dmhValue</code>, fetches the matching value from the
+   <code>TemplateObject</code>, applies any <code>dmhFormat</code> decoration, and writes it
+   into the widget.</li>
+<li>As the user edits, the frame's <code>handleEditBoxChange()</code> (or the
+   resource widget's signals) push values back through the
+   <code>TemplateObject</code>. Any computed widgets refresh themselves via the
+   <code>TemplateObjectNotifier</code>.</li>
+</ol>
+<hr />
+<h2 id="5-modifying-the-campaign-ruleset">5. Modifying the Campaign Ruleset</h2>
+<p>The campaign ruleset can be edited from the campaign properties (or the
+campaign tree). Common operations:</p>
+<h3 id="51-changing-the-initiative-or-health-rule">5.1 Changing the initiative or health rule</h3>
+<p>The dropdowns are populated from
+<code>RuleFactory::getRuleInitiativeNames()</code> and <code>getRuleHealthNames()</code>.
+Selecting a different entry constructs a new strategy object and
+attaches it to the <code>Ruleset</code>. The change is recorded as an attribute on
+the <code>&lt;ruleset&gt;</code> element when the campaign is saved.</p>
+<blockquote>
+<p>Note: changing the health rule mid-campaign does not automatically
+rewrite the existing combatants' hit-point fields. If the new rule
+uses a different attribute (for example, switching between 5e
+<em>count-down</em> HP and Daggerheart's <em>threshold</em> model), existing
+combatants may need their fields adjusted manually.</p>
+</blockquote>
+<h3 id="52-pointing-to-a-different-data-or-ui-file">5.2 Pointing to a different data or UI file</h3>
+<p>Each file path on the <code>Ruleset</code> (character data, character UI, monster
+data, monster UI, combatant UI, spell data, spell UI, lair-action UI,
+bestiary, conditions) can be overridden per-campaign. This is how a
+campaign can pin itself to a customised character sheet without
+modifying the global ruleset definition. Overrides are written into the
+<code>&lt;ruleset&gt;</code> element on save.</p>
+<h3 id="53-adding-or-removing-conditions">5.3 Adding or removing conditions</h3>
+<p>The conditions editor lets the DM add, edit, or hide conditions for the
+current campaign. The base list comes from the ruleset's conditions
+file. Only the <em>delta</em> — additions and per-condition changes — is saved
+inside the campaign. This keeps campaign files small and allows shipped
+conditions to be updated centrally.</p>
+<h3 id="54-combatant-display-flags">5.4 Combatant display flags</h3>
+<p>The campaign can toggle the <em>Done</em> checkbox on combatants and the HP
+count-up/count-down direction. These are stored on the <code>Ruleset</code> and
+respected by the battle UI.</p>
+<hr />
+<h2 id="6-creating-a-new-ruleset">6. Creating a New Ruleset</h2>
+<p>A new ruleset is a combination of new C++ rule strategies (only if your
+system needs initiative or HP behaviour that doesn't already exist),
+new data templates, new UI templates, and a new entry in
+<code>ruleset.xml</code>. The minimum recipe is:</p>
+<h3 id="61-add-rule-strategy-classes-only-if-needed">6.1 Add rule strategy classes (only if needed)</h3>
+<ol>
+<li>Subclass <code>RuleInitiative</code> and / or <code>RuleHealth</code>. Pick a unique type
+   string for each (e.g. <code>"mysystem"</code>).</li>
+<li>Override the pure virtual methods. For initiative this is roll, sort,
+   compare, and <code>newRound</code>. For health this is <code>applyDamage</code>, <code>isDead</code>,
+   <code>isIncapacitated</code>, <code>healthCountsUp</code>, and <code>rollInitial</code>.</li>
+<li>Add the new <code>.cpp</code> and <code>.h</code> files to the explicit source list in
+   <code>CMakeLists.txt</code>. The project does not glob — every file must be
+   listed.</li>
+<li>Register the new types in <code>RuleFactory</code>:
+   - Add a branch to <code>createRuleInitiative()</code> / <code>createRuleHealth()</code>.
+   - Add the type / display-name pair to <code>getRuleInitiativeNames()</code> /
+     <code>getRuleHealthNames()</code>.</li>
+</ol>
+<p>If you can reuse one of the existing strategies (for example, <em>group</em>
+initiative is generic), skip this step and reference the existing type
+string in <code>ruleset.xml</code>.</p>
+<h3 id="62-author-the-data-templates">6.2 Author the data templates</h3>
+<p>Create the system's data templates under <code>resources/</code>:</p>
+<ul>
+<li><code>character-mysystem.xml</code> — character / PC schema.</li>
+<li><code>monster-mysystem.xml</code> — monster / NPC schema.</li>
+<li><code>conditions-mysystem.xml</code> — status effect list.</li>
+<li>Optional: <code>spell-mysystem.xml</code> for spell data.</li>
+</ul>
+<p>Templates use the <code>dmh:</code> element vocabulary:</p>
+<pre><code class="language-xml">&lt;dmh:template&gt;
+    &lt;dmh:attribute type=&quot;dmh:string&quot;   name=&quot;name&quot;/&gt;
+    &lt;dmh:attribute type=&quot;dmh:integer&quot;  name=&quot;level&quot; default=&quot;1&quot;/&gt;
+    &lt;dmh:attribute type=&quot;dmh:boolean&quot;  name=&quot;inspiration&quot;/&gt;
+    &lt;dmh:attribute type=&quot;dmh:resource&quot; name=&quot;hit-points&quot;/&gt;
+    &lt;dmh:attribute type=&quot;dmh:dice&quot;     name=&quot;hit-dice&quot; default=&quot;1d8&quot;/&gt;
+
+    &lt;dmh:element   type=&quot;dmh:html&quot;     name=&quot;notes&quot;/&gt;
+
+    &lt;dmh:element   type=&quot;dmh:list&quot;     name=&quot;spellSlots&quot;&gt;
+        &lt;dmh:attribute type=&quot;dmh:integer&quot;  name=&quot;level&quot;/&gt;
+        &lt;dmh:attribute type=&quot;dmh:resource&quot; name=&quot;slots&quot;/&gt;
+    &lt;/dmh:element&gt;
+&lt;/dmh:template&gt;
+</code></pre>
+<p>Field types:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Stored as</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dmh:string</code></td>
+<td>XML attribute / text</td>
+<td>names, freeform short text</td>
+</tr>
+<tr>
+<td><code>dmh:integer</code></td>
+<td>XML attribute</td>
+<td>numeric stats</td>
+</tr>
+<tr>
+<td><code>dmh:boolean</code></td>
+<td>XML attribute (<code>0</code> / <code>1</code>)</td>
+<td>checkboxes</td>
+</tr>
+<tr>
+<td><code>dmh:resource</code></td>
+<td>XML attribute (<code>current,max</code>)</td>
+<td>HP, slots, uses</td>
+</tr>
+<tr>
+<td><code>dmh:dice</code></td>
+<td>XML attribute (<code>"1d8+2"</code>)</td>
+<td>damage, hit dice</td>
+</tr>
+<tr>
+<td><code>dmh:html</code></td>
+<td>XML element (escaped HTML)</td>
+<td>rich-text fields</td>
+</tr>
+<tr>
+<td><code>dmh:list</code></td>
+<td>repeated XML elements</td>
+<td>lists of structured sub-records</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-author-the-ui-templates-in-qt-designer">6.3 Author the UI templates in Qt Designer</h3>
+<p>Open Qt Designer and build the editor UIs:</p>
+<ul>
+<li><code>resources/ui/character-mysystem.ui</code></li>
+<li><code>resources/ui/monster-mysystem.ui</code></li>
+<li><code>resources/ui/combatant-mysystem.ui</code> — the in-battle token frame.</li>
+</ul>
+<p>For every widget that should be bound to a data field, set the
+<code>dmhValue</code> dynamic property to the field name from your data template.
+For computed or formatted fields, also set <code>dmhFormat</code> and / or
+<code>dmhCompute</code> (see <a href="#10-property-reference-for-ui-files">§10</a>).</p>
+<p>The shell of the UI — scroll areas, layouts, tabs, static labels —
+should always come from the <code>.ui</code> file. Programmatic widget creation
+should be reserved for genuinely runtime-driven content.</p>
+<h3 id="64-register-the-ruleset-in-rulesetxml">6.4 Register the ruleset in <code>ruleset.xml</code></h3>
+<p>Add an entry to <a href="../resources/ruleset.xml">resources/ruleset.xml</a>:</p>
+<pre><code class="language-xml">&lt;ruleset name=&quot;My System&quot;
+         initiative=&quot;mysystem&quot;
+         health=&quot;mysystem&quot;
+         characterdata=&quot;./character-mysystem.xml&quot;
+         characterui=&quot;./ui/character-mysystem.ui&quot;
+         monsterdata=&quot;./monster-mysystem.xml&quot;
+         monsterui=&quot;./ui/monster-mysystem.ui&quot;
+         combatantui=&quot;./ui/combatant-mysystem.ui&quot;
+         conditions=&quot;conditions-mysystem.xml&quot;
+         hitPointsCountDown=&quot;0&quot;
+         combatantDone=&quot;0&quot;/&gt;
+</code></pre>
+<p>The <code>name</code> attribute is what appears in the New Campaign dropdown.</p>
+<h3 id="65-update-the-build">6.5 Update the build</h3>
+<p>Add every new <code>.cpp</code>/<code>.h</code> to the explicit source list in
+<code>CMakeLists.txt</code>. Resource <code>.xml</code> and <code>.ui</code> files must also be added to
+the resource list (typically <code>dmhelper.qrc</code>) so they are bundled with
+the application.</p>
+<h3 id="66-optional-ship-a-starter-bestiary">6.6 Optional: ship a starter bestiary</h3>
+<p>Place a starter monster collection at
+<code>resources/DMHelperBestiary-mysystem.xml</code> and reference it from the new
+ruleset entry's <code>bestiary</code> attribute. This gives users an immediate
+selection of pre-built creatures.</p>
+<hr />
+<h2 id="7-modifying-an-existing-ruleset">7. Modifying an Existing Ruleset</h2>
+<p>Most changes do not require a new ruleset entry. Common modifications:</p>
+<h3 id="71-add-or-rename-a-field">7.1 Add or rename a field</h3>
+<ol>
+<li>Edit the matching data template (e.g. <code>character5e.xml</code>) to add the
+   new <code>&lt;dmh:attribute&gt;</code> or <code>&lt;dmh:element&gt;</code>.</li>
+<li>Open the matching <code>.ui</code> file in Qt Designer and add a widget for
+   the new field. Set the widget's <code>dmhValue</code> property to the field
+   name.</li>
+<li>Existing campaigns will read the new field as the <code>default</code> value
+   declared in the template, and will start saving it once the user
+   edits it.</li>
+</ol>
+<h3 id="72-change-a-computed-value">7.2 Change a computed value</h3>
+<p><code>dmhCompute</code> expressions are plain text on the widget. Open the <code>.ui</code>
+file in Qt Designer and edit the <code>dmhCompute</code> property — no code change
+is required. The expression can reference any other field in the same
+<code>TemplateObject</code>.</p>
+<h3 id="73-change-the-display-format">7.3 Change the display format</h3>
+<p>Edit the widget's <code>dmhFormat</code> property in Qt Designer. For example,
+<code>int;0..20;signed;prefix:AC</code> will display the integer with a sign,
+constrain it to 0..20, and prefix the displayed text with "AC ". The
+underlying stored value is unchanged.</p>
+<h3 id="74-add-or-remove-a-condition">7.4 Add or remove a condition</h3>
+<p>Edit the conditions file for the system
+(e.g. <code>conditions-5e.xml</code>). Each condition has <code>id</code>, <code>title</code>, <code>icon</code>,
+<code>description</code>, and an optional <code>group</code> for related conditions such as
+the five 5e exhaustion levels. Existing campaigns will inherit the
+edited list on next load.</p>
+<h3 id="75-tweak-combat-behaviour">7.5 Tweak combat behaviour</h3>
+<p>Set or change attributes on the ruleset entry in <code>ruleset.xml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>combatantDone</code></td>
+<td>Show a "done" checkbox per combatant.</td>
+</tr>
+<tr>
+<td><code>hitPointsCountDown</code></td>
+<td><code>1</code> for 5e-style countdown, <code>0</code> for count-up systems.</td>
+</tr>
+<tr>
+<td><code>movement</code></td>
+<td><code>distance</code> for a single distance value, or <code>range;short;medium;long</code> for ranged categories.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-reference-resource-xml-files">8. Reference: Resource XML Files</h2>
+<p>All paths are relative to <code>resources/</code>. "Loaded by" lists the principal
+consumer; many of these files are also reachable through the
+<code>Ruleset</code> accessors when a campaign overrides a path.</p>
+<h3 id="rulesetxml"><code>ruleset.xml</code></h3>
+<p>Master registry of available rulesets. Each <code>&lt;ruleset&gt;</code> element
+describes one playable system: its rule strategy types, the paths to
+its data and UI templates, its bestiary, its conditions, its spell
+files, and its combat-display flags.</p>
+<p><em>Loaded by:</em> <code>RuleFactory::Initialize()</code> at application startup. Read
+indirectly by <code>Ruleset::inputXML()</code> when a campaign is opened, via
+<code>RuleFactory::getRulesetTemplate()</code>.</p>
+<h3 id="rulesetxsd"><code>ruleset.xsd</code></h3>
+<p>XML Schema for <code>ruleset.xml</code>. Used as documentation and (where
+available) for validation while editing.</p>
+<h3 id="character5exml"><code>character5e.xml</code></h3>
+<p>Data template for a D&amp;D 5e (2014) player character. Defines the field
+schema used by the 5e character editor.</p>
+<p><em>Loaded by:</em> <code>TemplateFactory</code> bound to characters when the active
+ruleset is <em>DnD 5e 2014</em>. Pointed to from <code>ruleset.xml</code> via
+<code>characterdata</code>.</p>
+<h3 id="character5e-2024xml"><code>character5e-2024.xml</code></h3>
+<p>Data template for a D&amp;D 5e (2024) player character.</p>
+<p><em>Loaded by:</em> the character <code>TemplateFactory</code> when the active ruleset is
+<em>DnD 5e 2024</em>.</p>
+<h3 id="character2exml"><code>character2e.xml</code></h3>
+<p>Data template for an AD&amp;D 2nd Edition character.</p>
+<p><em>Loaded by:</em> the character <code>TemplateFactory</code> when the active ruleset is
+<em>DnD 2e</em>.</p>
+<h3 id="character-daggerheartxml"><code>character-daggerheart.xml</code></h3>
+<p>Data template for a Daggerheart character (hope, stress, evasion,
+domains, ancestries, communities, etc.).</p>
+<p><em>Loaded by:</em> the character <code>TemplateFactory</code> when the active ruleset is
+<em>Daggerheart</em>.</p>
+<h3 id="characterxsd"><code>character.xsd</code></h3>
+<p>Schema describing the <code>dmh:template</code> vocabulary used by all <code>character*</code>
+templates. Reference document for authors.</p>
+<h3 id="monster5exml"><code>monster5e.xml</code></h3>
+<p>Data template for a D&amp;D 5e bestiary entry — armor class, hit points,
+attributes, actions, reactions, legendary actions, etc.</p>
+<p><em>Loaded by:</em> the monster <code>TemplateFactory</code> when the active ruleset is
+<em>DnD 5e 2014</em> or <em>DnD 5e 2024</em> (both reuse the 5e monster schema).</p>
+<h3 id="monster2exml"><code>monster2e.xml</code></h3>
+<p>Data template for a D&amp;D 2e bestiary entry.</p>
+<p><em>Loaded by:</em> the monster <code>TemplateFactory</code> when the active ruleset is
+<em>DnD 2e</em>.</p>
+<h3 id="monster-daggerheartxml"><code>monster-daggerheart.xml</code></h3>
+<p>Data template for a Daggerheart adversary.</p>
+<p><em>Loaded by:</em> the monster <code>TemplateFactory</code> when the active ruleset is
+<em>Daggerheart</em>.</p>
+<h3 id="conditions-5exml"><code>conditions-5e.xml</code></h3>
+<p>The 5e status-effect list (blinded, charmed, deafened, exhaustion 1–5,
+frightened, grappled, incapacitated, invisible, paralysed, petrified,
+poisoned, prone, restrained, stunned, unconscious).</p>
+<p><em>Loaded by:</em> <code>Ruleset::inputXML()</code> via the ruleset template's
+<code>conditions</code> attribute.</p>
+<h3 id="conditions-daggerheartxml"><code>conditions-daggerheart.xml</code></h3>
+<p>The Daggerheart status-effect list.</p>
+<p><em>Loaded by:</em> <code>Ruleset::inputXML()</code> for Daggerheart campaigns.</p>
+<h3 id="equipmentxml-equipmentxsd"><code>equipment.xml</code> / <code>equipment.xsd</code></h3>
+<p>Reference database of magic items used by the shop / loot generator.
+Items declare a category, optional attunement requirement, and
+rarity / probability bands.</p>
+<p><em>Loaded by:</em> the equipment / shop generation subsystem; not tied to any
+specific ruleset.</p>
+<h3 id="shopsxml-shopsxsd"><code>shops.xml</code> / <code>shops.xsd</code></h3>
+<p>Probability tables describing what shops exist in settlements of each
+size (hamlet, village, town, city, metropolis) and what kinds of items
+each shop stocks. Drives random shop generation.</p>
+<p><em>Loaded by:</em> the shop / loot generator.</p>
+<h3 id="spell5exml"><code>spell5e.xml</code></h3>
+<p>Bundled D&amp;D 5e spell reference data (name, school, level, casting time,
+range, components, duration, description). Used as the source pool when
+adding spells to a 5e character.</p>
+<p><em>Loaded by:</em> the spell / spellbook subsystem when a 5e ruleset is
+active.</p>
+<h3 id="spellbookxml"><code>spellbook.xml</code></h3>
+<p>Schema describing the per-character spellbook structure (prepared,
+ritual, list of spells).</p>
+<p><em>Loaded by:</em> the spellbook <code>TemplateFactory</code> when the character editor
+shows the spellbook tab.</p>
+<h3 id="spellbookxsd"><code>spellbook.xsd</code></h3>
+<p>XML Schema for <code>spellbook.xml</code>.</p>
+<h3 id="calendarxml-calendarxsd"><code>calendar.xml</code> / <code>calendar.xsd</code></h3>
+<p>Game-world calendar definitions: weeks, months, leap-year rules, and
+named special days. Drives the in-game date tracker.</p>
+<p><em>Loaded by:</em> the campaign date / calendar subsystem (<code>BasicDate</code>).</p>
+<h3 id="quickref_dataxml-quickref_dataxsd"><code>quickref_data.xml</code> / <code>quickref_data.xsd</code></h3>
+<p>Hierarchical quick-reference content displayed in the in-app reference
+panel — categories such as conditions, actions, common spells, and
+short rules summaries.</p>
+<p><em>Loaded by:</em> <code>QuickRef::Initialize()</code> at application startup.</p>
+<h3 id="tables"><code>tables/</code></h3>
+<p>A directory of additional reference tables used by the random-table
+roller. Each file inside is a self-contained table; new tables can be
+dropped in without code changes.</p>
+<h3 id="dmh_default_framepng-dmh_default_maskpng"><code>dmh_default_frame.png</code>, <code>dmh_default_mask.png</code></h3>
+<p>Default token frame and alpha mask used when no custom frame is set on
+a combatant. Referenced by the combatant rendering path, not by the
+ruleset schema.</p>
+<hr />
+<h2 id="9-reference-resource-ui-files">9. Reference: Resource UI Files</h2>
+<p>All paths are relative to <code>resources/ui/</code>. Each <code>.ui</code> file is a Qt
+Designer XML document loaded with <code>QUiLoader</code>. Widgets in these files
+carry the <code>dmhValue</code>, <code>dmhWidget</code>, <code>dmhFormat</code>, <code>dmhCompute</code>, and
+<code>dmhCondition</code> dynamic properties described in
+<a href="#10-property-reference-for-ui-files">§10</a>.</p>
+<h3 id="character5eui"><code>character5e.ui</code></h3>
+<p>Editor for a D&amp;D 5e (2014) player character. Bound to <code>character5e.xml</code>.</p>
+<p><em>Loaded by:</em> the character editor frame when the active ruleset is
+<em>DnD 5e 2014</em>. Path supplied by <code>Ruleset::getCharacterUIFile()</code>.</p>
+<h3 id="character5e-2024ui"><code>character5e-2024.ui</code></h3>
+<p>Editor for a D&amp;D 5e (2024) player character. Bound to
+<code>character5e-2024.xml</code>.</p>
+<p><em>Loaded by:</em> the character editor when the active ruleset is
+<em>DnD 5e 2024</em>.</p>
+<h3 id="character2eui"><code>character2e.ui</code></h3>
+<p>Editor for an AD&amp;D 2e player character. Bound to <code>character2e.xml</code>.</p>
+<p><em>Loaded by:</em> the character editor when the active ruleset is <em>DnD 2e</em>.</p>
+<h3 id="character-daggerheartui"><code>character-daggerheart.ui</code></h3>
+<p>Editor for a Daggerheart player character. Bound to
+<code>character-daggerheart.xml</code>.</p>
+<p><em>Loaded by:</em> the character editor when the active ruleset is
+<em>Daggerheart</em>.</p>
+<h3 id="monster5eui"><code>monster5e.ui</code></h3>
+<p>Editor for a D&amp;D 5e bestiary entry. Bound to <code>monster5e.xml</code>.</p>
+<p><em>Loaded by:</em> the bestiary editor when the active ruleset is
+<em>DnD 5e 2014</em>. Path supplied by <code>Ruleset::getMonsterUIFile()</code>.</p>
+<h3 id="monster5e-2024ui"><code>monster5e-2024.ui</code></h3>
+<p>Editor for a D&amp;D 5e (2024) bestiary entry. Reuses the 5e monster
+schema.</p>
+<p><em>Loaded by:</em> the bestiary editor when the active ruleset is
+<em>DnD 5e 2024</em>.</p>
+<h3 id="monster2eui"><code>monster2e.ui</code></h3>
+<p>Editor for a D&amp;D 2e bestiary entry. Bound to <code>monster2e.xml</code>.</p>
+<p><em>Loaded by:</em> the bestiary editor when the active ruleset is <em>DnD 2e</em>.</p>
+<h3 id="monster-daggerheartui"><code>monster-daggerheart.ui</code></h3>
+<p>Editor for a Daggerheart adversary. Bound to <code>monster-daggerheart.xml</code>.</p>
+<p><em>Loaded by:</em> the bestiary editor when the active ruleset is
+<em>Daggerheart</em>.</p>
+<h3 id="combatant5eui"><code>combatant5e.ui</code></h3>
+<p>The 5e in-battle combatant frame — the small pop-out shown next to a
+combatant's token during an encounter.</p>
+<p><em>Loaded by:</em> the battle frame's combatant template factory when the
+active ruleset is 5e. Path supplied by <code>Ruleset::getCombatantUIFile()</code>.</p>
+<h3 id="combatant-daggerheartui"><code>combatant-daggerheart.ui</code></h3>
+<p>The Daggerheart in-battle combatant frame.</p>
+<p><em>Loaded by:</em> the battle frame when the active ruleset is <em>Daggerheart</em>.</p>
+<h3 id="conditionui"><code>condition.ui</code></h3>
+<p>Widget for a single condition entry — used inside the conditions
+editor and the condition picker on a combatant.</p>
+<p><em>Loaded by:</em> the conditions editor and combatant condition list.</p>
+<h3 id="actionui"><code>action.ui</code></h3>
+<p>Widget for a single monster action / reaction / legendary action row,
+used inside the bestiary editor's action lists.</p>
+<p><em>Loaded by:</em> the bestiary editor when populating action lists.</p>
+<h3 id="featureui"><code>feature.ui</code></h3>
+<p>Widget for a single character feature / trait / class feature row.</p>
+<p><em>Loaded by:</em> the character editor when populating feature lists.</p>
+<h3 id="experienceui"><code>experience.ui</code></h3>
+<p>Widget for a single experience-point or milestone entry in the
+character XP log.</p>
+<p><em>Loaded by:</em> the character editor's experience tracker.</p>
+<h3 id="resourceui"><code>resource.ui</code></h3>
+<p>Generic shell for a single resource counter (current/maximum). The
+<code>TemplateFactory</code> instantiates this widget once per <code>dmh:resource</code>
+field and wires it up via <code>TemplateResourceLayout</code>.</p>
+<p><em>Loaded by:</em> <code>TemplateFactory::createResourceWidget()</code> whenever a
+resource field is encountered.</p>
+<h3 id="spellslotui"><code>spellSlot.ui</code></h3>
+<p>Specialised resource shell for spell slots, with slot-level decoration
+not present in the generic <code>resource.ui</code>.</p>
+<p><em>Loaded by:</em> <code>TemplateFactory::createResourceWidget()</code> for fields whose
+widget hint is <code>spellSlot</code>.</p>
+<h3 id="spellbook5eui"><code>spellbook5e.ui</code></h3>
+<p>Editor for the 5e spellbook (the per-character list of known and
+prepared spells). Bound to <code>spellbook.xml</code>.</p>
+<p><em>Loaded by:</em> the spellbook editor when the active ruleset has a spell
+UI configured.</p>
+<hr />
+<h2 id="10-property-reference-for-ui-files">10. Property Reference for <code>.ui</code> Files</h2>
+<p>All bindings are expressed as Qt Designer <em>dynamic properties</em> on the
+relevant widget. Add them in Qt Designer's property editor (or, if
+necessary, through the <em>Add Dynamic Property</em> dialog).</p>
+<h3 id="dmhvalue-string"><code>dmhValue</code> <em>(string)</em></h3>
+<p>The data field name in the data template. Required for every widget
+that should be bound. Example: <code>name</code>, <code>armor_class</code>, <code>hit-points</code>.</p>
+<p>For widgets inside a <code>dmh:list</code>, use the field name relative to the
+list entry; the factory resolves the list context automatically based
+on widget parentage.</p>
+<h3 id="dmhwidget-string"><code>dmhWidget</code> <em>(string)</em></h3>
+<p>A widget <em>kind</em> hint. Used when the factory needs to do something
+beyond reading or writing a plain value. The most common value is
+<code>resource</code>, which causes the factory to replace the placeholder with a
+<code>TemplateResourceLayout</code>. <code>spellSlot</code> selects the spell-slot variant of
+the resource shell.</p>
+<h3 id="dmhformat-string"><code>dmhFormat</code> <em>(string)</em></h3>
+<p>A semicolon-separated format spec parsed by <code>TemplateFieldFormat</code>.
+Components include:</p>
+<ul>
+<li><code>int</code> — treat the value as an integer.</li>
+<li><code>string</code> — treat the value as a string.</li>
+<li><code>min..max</code> — clamp / validate to a numeric range.</li>
+<li><code>signed</code> — always show a leading <code>+</code> for positive integers.</li>
+<li><code>pad:N</code> — left-pad an integer to N digits.</li>
+<li><code>prefix:TEXT</code> — prepend <code>TEXT</code> to the displayed value.</li>
+<li><code>suffix:TEXT</code> — append <code>TEXT</code> to the displayed value.</li>
+</ul>
+<p>The format is applied when displaying and stripped before writing back
+to the model, so the user sees <code>AC 15</code> while the underlying value
+remains <code>15</code>.</p>
+<h3 id="dmhcompute-string"><code>dmhCompute</code> <em>(string)</em></h3>
+<p>A simple arithmetic expression that derives the widget's value from
+other fields on the same <code>TemplateObject</code>. Identifiers in the
+expression are field names. Computed widgets are read-only and refresh
+themselves whenever any of their referenced fields changes.</p>
+<p>Example: <code>(dexterity - 10) / 2</code> for a 5e ability modifier.</p>
+<h3 id="dmhcondition-string"><code>dmhCondition</code> <em>(string)</em></h3>
+<p>An optional visibility condition. The widget is shown when the
+condition evaluates true and hidden when it evaluates false. This
+allows a single <code>.ui</code> file to host fields that only apply to a subset
+of subclasses or campaign settings.</p>
+<hr />
+<h2 id="appendix-a-files-you-should-not-hand-edit">Appendix A: Files You Should <em>Not</em> Hand-Edit</h2>
+<ul>
+<li><code>*.ui</code> — always edit in Qt Designer; never edit the XML directly.</li>
+<li><code>*.qrc</code> — only modify with care; do not restructure paths.</li>
+<li>Pre-built binary directories (<code>vlc32/</code>, <code>vlc64/</code>, <code>vlcMac/</code>,
+  <code>bin-win*/</code>, <code>bin-macos/</code>).</li>
+</ul>
+<h2 id="appendix-b-quick-glossary">Appendix B: Quick Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruleset</td>
+<td>The per-campaign bundle of rule strategies, templates, and files.</td>
+</tr>
+<tr>
+<td>Ruleset template</td>
+<td>A <code>&lt;ruleset&gt;</code> entry in <code>ruleset.xml</code>; the recipe for new campaigns.</td>
+</tr>
+<tr>
+<td>Rule strategy</td>
+<td><code>RuleInitiative</code> or <code>RuleHealth</code> subclass.</td>
+</tr>
+<tr>
+<td>Data template</td>
+<td><code>dmh:template</code> <code>.xml</code> file that defines a schema.</td>
+</tr>
+<tr>
+<td>UI template</td>
+<td>A Qt Designer <code>.ui</code> file with <code>dmh*</code> dynamic properties.</td>
+</tr>
+<tr>
+<td>Template factory</td>
+<td>The C++ binder between a data template, a UI template, and a <code>TemplateObject</code>.</td>
+</tr>
+<tr>
+<td>Template frame</td>
+<td>The editor (dialog or widget) hosting a templated UI.</td>
+</tr>
+<tr>
+<td>Template object</td>
+<td>A data row instance — a character, monster, or spell.</td>
+</tr>
+<tr>
+<td>Resource</td>
+<td>A <code>current/maximum</code> paired field, typically with +/- controls.</td>
+</tr>
+<tr>
+<td>Condition</td>
+<td>A status effect such as <em>blinded</em>, <em>grappled</em>, or <em>in stress</em>.</td>
+</tr>
+<tr>
+<td>Condition delta</td>
+<td>The per-campaign difference from the ruleset's default conditions.</td>
+</tr>
+</tbody>
+</table>
+</body></html>

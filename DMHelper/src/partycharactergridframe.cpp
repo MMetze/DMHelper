@@ -2,6 +2,7 @@
 #include "ui_partycharactergridframe.h"
 #include "characterv2.h"
 #include "character.h"
+#include "conditions.h"
 #include "dmconstants.h"
 #include "characterimporter.h"
 
@@ -47,7 +48,8 @@ void PartyCharacterGridFrame::readCharacter()
     ui->edtCha->setText(QString::number(_character.getCharisma()) + " (" + Character::getAbilityModStr(_character.getCharisma()) + ")");
 
     QPixmap iconPixmap = _character.getIconPixmap(DMHelper::PixmapSize_Animate);
-    Combatant::drawConditions(&iconPixmap, _character.getConditions());
+    if(Conditions::activeConditions())
+        Conditions::activeConditions()->drawConditions(&iconPixmap, _character.getConditionList());
     ui->lblIcon->setPixmap(iconPixmap.scaled(88, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     ui->lblIcon->setEnabled(_character.getBoolValue(QString("active")));
 

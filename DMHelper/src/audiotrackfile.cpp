@@ -3,9 +3,9 @@
 #include <QAudioOutput>
 #include <QFile>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QDomElement>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 AudioTrackFile::AudioTrackFile(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent),
@@ -62,7 +62,7 @@ int AudioTrackFile::getTrackStatus() const
 
 bool AudioTrackFile::isPlaying() const
 {
-    return ((_player) && (_player->isPlaying()));
+    return ((_player) && (_player->playbackState() == QMediaPlayer::PlayingState));
 }
 
 bool AudioTrackFile::isRepeat() const
@@ -84,7 +84,7 @@ void AudioTrackFile::play()
 {
     if(_player)
     {
-        if(!_player->isPlaying())
+        if(_player->playbackState() != QMediaPlayer::PlayingState)
             _player->play();
         return;
     }
@@ -92,7 +92,7 @@ void AudioTrackFile::play()
     QString fileString = getUrl().toString();
     if(!QFile::exists(fileString))
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Audio Track File Not Found"),
                               QString("The audio track could not be found: ") + fileString);
         qDebug() << "[AudioTrackFile] Audio track file not found: " << fileString;
@@ -102,7 +102,7 @@ void AudioTrackFile::play()
     QFileInfo fileInfo(fileString);
     if(!fileInfo.isFile())
     {
-        QMessageBox::critical(nullptr,
+        DMHMessageBox::critical(nullptr,
                               QString("DMHelper Audio Track File Not Valid"),
                               QString("The audio track isn't a file: ") + fileString);
         qDebug() << "[AudioTrackFile] Audio track file not a file: " << fileString;
@@ -110,8 +110,7 @@ void AudioTrackFile::play()
     }
 
     fileString = fileInfo.canonicalFilePath();
-    QUrl url = QUrl(fileString);
-    url.setScheme(QString("file"));
+    QUrl url = QUrl::fromLocalFile(fileString);
     _player = new QMediaPlayer(this);
     _player->setLoops(_repeat ? QMediaPlayer::Infinite : 1);
 

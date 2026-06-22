@@ -1,12 +1,12 @@
 #include "characterimportheroforge.h"
 #include "characterimportheroforgedata.h"
-#include <QMessageBox>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
 #include <QUrlQuery>
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QDebug>
+#include "dmhmessagebox.h"
 
 //#define DEBUG_HEROFORGE_IMPORT
 
@@ -64,13 +64,13 @@ void CharacterImportHeroForge::handleRequestFinished(QNetworkReply *reply)
     {
         if(reply->error() == QNetworkReply::HostNotFoundError)
         {
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("DMHelper Hero Forge Import Error"),
                                   QString("A network error was encountered trying to find the requested Heroforge account. It was not possible to reach the server!"));
         }
         else
         {
-            QMessageBox::critical(nullptr,
+            DMHMessageBox::critical(nullptr,
                                   QString("DMHelper Hero Forge Import Error"),
                                   QString("A network error was encountered trying to find the requested Heroforge account:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
         }

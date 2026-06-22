@@ -8,26 +8,33 @@
 #include "battleframemapdrawer.h"
 #include "battleframestatemachine.h"
 
-class BattleDialogModelCombatant;
+#include "characterv2.h"
+#include "battledialogmodelcombatant.h"
+#include "battledialogmodel.h"
+#include "layer.h"
+#include "publishglrenderer.h"
+
+class BattleDialogModelCombatantGroup;
 class CombatantWidget;
+class CombatantGroupWidget;
 class CombatantDialog;
 class QVBoxLayout;
 class EncounterBattle;
-class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
 class GridConfig;
 class GridSizer;
-class Characterv2;
 class Map;
 class QTimer;
+class RuleHealth;
 class CameraRect;
 class BattleCombatantFrame;
+class QGraphicsPolygonItem;
+class QGraphicsRectItem;
+class QGraphicsLineItem;
 class UnselectedPixmap;
 class CombatantRolloverFrame;
-class PublishGLRenderer;
 class PublishGLBattleRenderer;
-class Layer;
 class LayerTokens;
 class LayerDrawEngine;
 
@@ -132,8 +139,11 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
+    void addInitiativeEvent();
+    void addLairActionsEvent();
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
+    void addMonsterImageFile(const QString& filename, const QPointF& position);
     void addEffectObjectVideo();
     void addEffectObjectVideoFile(const QString& filename);
     void addLayerImageFile(const QString& filename);
@@ -143,6 +153,10 @@ public slots:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void addEffectSmoke();
+    void addEffectFire();
+    void addEffectSparks();
+    void addEffectLight();
     void registerEffect(BattleDialogModelEffect* effect);
 
     void duplicateSelection();
@@ -190,6 +204,8 @@ signals:
     void registerRenderer(PublishGLRenderer* renderer);
     void setLayers(QList<Layer*> layers, int selected);
 
+    void initiativeActiveChanged(bool initiativeActive);
+
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
 
@@ -232,16 +248,28 @@ private slots:
     void updateMap();
     void updateRounds();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
+    void handleGroupContextMenu(BattleDialogModelCombatantGroup* group, const QPoint& position);
+    void handleGroupClicked(CombatantGroupWidget* groupWidget);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
     void handleCombatantRemove(BattleDialogModelCombatant* combatant);
     void handleCombatantAdded(BattleDialogModelCombatant* combatant);
     void handleCombatantRemoved(BattleDialogModelCombatant* combatant);
+    void handleCombatantVisibilityChanged(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
+    void handleCombatantHideSelected(BattleDialogModelCombatant* combatant);
+    void handleCombatantUnhideSelected(BattleDialogModelCombatant* combatant);
+    void handleCombatantKnowSelected(BattleDialogModelCombatant* combatant);
+    void handleCombatantUnknowSelected(BattleDialogModelCombatant* combatant);
+    void handleCombatantGroupSelected();
+    void handleCombatantUngroupSelected(BattleDialogModelCombatant* combatant);
+    void handleCombatantRemoveFromGroup(BattleDialogModelCombatant* combatant);
     void handleChangeMonsterToken(BattleDialogModelMonsterClass* monster, int iconIndex);
     void handleChangeMonsterTokenCustom(BattleDialogModelMonsterClass* monster);
+    void handleChangeCharacterToken(BattleDialogModelCharacter* character, int iconIndex);
+    void handleChangeCharacterTokenCustom(BattleDialogModelCharacter* character);
     void handleApplyEffect(QGraphicsItem* effect);
 
     void handleItemChangeLayer(BattleDialogModelObject* battleObject);
@@ -271,6 +299,13 @@ private slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void hideSelectedCombatant();
+    void unhideSelectedCombatant();
+    void knowSelectedCombatant();
+    void unknowSelectedCombatant();
+    void groupSelectedCombatants();
+    void ungroupSelectedCombatants();
+    void removeFromGroup();
     void applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange);
     void setSelectedCombatant(BattleDialogModelCombatant* selected);
     void setUniqueSelection(BattleDialogModelCombatant* selected);
@@ -306,6 +341,13 @@ private slots:
     void setEditMode();
     void setItemsInert(bool inert);
 
+    void handlePolygonChanged(const QPolygonF& polygon);
+    void handlePolygonCancelled();
+    void handlePolygonPendingLineChanged(const QLineF& line);
+
+    void handleSelectRectChanged(const QRectF& rect);
+    void handleSelectRectCancelled();
+
     void removeRollover();
     void clearDoneFlags();
 
@@ -325,6 +367,13 @@ private:
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
     void newRound();
+
+    // Resolve the active ruleset's RuleHealth, or nullptr when no campaign /
+    // ruleset is reachable (e.g. detached unit-test paths). Callers should
+    // fall back to the legacy getHitPoints() <= 0 predicate when this returns
+    // nullptr so behaviour matches the pre-refactor code.
+    RuleHealth* currentRuleHealth() const;
+    bool isCombatantDead(const BattleDialogModelCombatant* combatant) const;
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
@@ -386,6 +435,7 @@ private:
     LayerDrawEngine* _drawEngine;
     
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
+    QMap<QUuid, CombatantGroupWidget*> _groupWidgets;
 
     BattleFrameStateMachine _stateMachine;
 
@@ -394,6 +444,9 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
     CombatantRolloverFrame* _hoverFrame;
+    QWidget* _hoverFrameOwner;
+    bool _dragInProgress;
+    QWidget* _dragLastTarget;
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
@@ -427,6 +480,9 @@ private:
     qreal _gridLockScale;
 
     BattleFrameMapDrawer* _mapDrawer;
+    QGraphicsPolygonItem* _polygonPreview;
+    QGraphicsLineItem* _polygonPendingLine;
+    QGraphicsRectItem* _selectRectPreview;
 
     PublishGLBattleRenderer* _renderer;
 

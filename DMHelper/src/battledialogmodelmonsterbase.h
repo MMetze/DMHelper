@@ -4,6 +4,8 @@
 #include "battledialogmodelcombatant.h"
 #include "combatant.h"
 #include <QString>
+#include <QStringList>
+#include <QHash>
 
 class MonsterClassv2;
 
@@ -35,28 +37,43 @@ public:
     virtual void setMonsterName(const QString& monsterName) = 0;
 
     virtual int getSkillModifier(Combatant::Skills skill) const override;
-    virtual int getConditions() const override;
-    virtual bool hasCondition(Combatant::Condition condition) const override;
+    virtual QStringList getConditionList() const override;
+    virtual bool hasConditionId(const QString& conditionId) const override;
 
     virtual int getLegendaryCount() const;
+
+    int getMonsterMaxHP() const;
+    void setMonsterMaxHP(int monsterMaxHP);
+
+    // Per-instance per-round resource counters (legendary actions + recharge abilities, etc.).
+    // The current value is stored here; the resource definition (max, recharge schedule)
+    // lives on the MonsterClassv2 via getPerRoundResources().
+    int  getResourceCount(const QString& resourceName) const;
+    bool hasResourceCounter(const QString& resourceName) const;
+    QStringList getResourceCounterNames() const;
 
 signals:
     void dataChanged(BattleDialogModelMonsterBase* monsterBase);
     void imageChanged(BattleDialogModelMonsterBase* monsterBase);
+    void resourceCountChanged(BattleDialogModelMonsterBase* monsterBase, const QString& resourceName, int newValue);
 
 public slots:
-    virtual void setConditions(int conditions) override;
-    virtual void applyConditions(int conditions) override;
-    virtual void removeConditions(int conditions) override;
+    virtual void setConditionList(const QStringList& conditions) override;
+    virtual void addConditionId(const QString& conditionId) override;
+    virtual void removeConditionId(const QString& conditionId) override;
     virtual void clearConditions() override;
     virtual void setLegendaryCount(int legendaryCount);
+    void setResourceCount(const QString& resourceName, int count);
+    void resetResources(const QString& scope);
 
 protected:
     // From BattleDialogModelCombatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     int _legendaryCount;
-    int _conditions;
+    int _monsterMaxHP;
+    QStringList _conditionList;
+    QHash<QString, int> _resourceCounters;
 };
 
 #endif // BATTLEDIALOGMODELMONSTERBASE_H

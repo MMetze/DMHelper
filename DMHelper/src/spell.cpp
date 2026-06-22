@@ -1,4 +1,5 @@
 #include "spell.h"
+#include "conditions.h"
 #include "spellbook.h"
 #include "battledialogmodeleffect.h"
 
@@ -21,7 +22,7 @@ Spell::Spell(const QString& name, QObject *parent) :
     _effectColor(115, 18, 0, 64),
     _effectToken(),
     _effectTokenRotation(0),
-    _effectConditions(Combatant::Condition_None),
+    _effectConditionList(),
     _batchChanges(false),
     _changesMade(false)
 {
@@ -46,7 +47,7 @@ Spell::Spell(const QDomElement &element, bool isImport, QObject *parent) :
     _effectColor(115, 18, 0, 64),
     _effectToken(),
     _effectTokenRotation(0),
-    _effectConditions(Combatant::Condition_None),
+    _effectConditionList(),
     _batchChanges(false),
     _changesMade(false)
 {
@@ -100,7 +101,17 @@ void Spell::inputXML(const QDomElement &element, bool isImport)
                               effectElement.attribute("colorG", QString::number(18)).toInt(),
                               effectElement.attribute("colorB", QString::number(0)).toInt(),
                               effectElement.attribute("colorA", QString::number(64)).toInt()));
-        setEffectConditions(effectElement.attribute("conditions", QString("0")).toInt());
+        // Migrate conditions: detect old int format vs new string format
+        QString condStr = effectElement.attribute("conditions", QString());
+        if(!condStr.isEmpty())
+        {
+            bool ok = false;
+            int condInt = condStr.toInt(&ok);
+            if(ok)
+                _effectConditionList = Conditions::migrateFromBitmask(condInt);
+            else
+                _effectConditionList = condStr.split(QStringLiteral(","), Qt::SkipEmptyParts);
+        }
         setEffectToken(effectElement.firstChildElement(QString("token")).text());
         setEffectTokenRotation(effectElement.attribute("tokenRotation", QString("0")).toInt());
     }
@@ -186,7 +197,7 @@ QDomElement Spell::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
     effectElement.setAttribute("colorG", getEffectColor().green());
     effectElement.setAttribute("colorB", getEffectColor().blue());
     effectElement.setAttribute("colorA", getEffectColor().alpha());
-    effectElement.setAttribute("conditions", getEffectConditions());
+    effectElement.setAttribute("conditions", _effectConditionList.isEmpty() ? QString("0") : _effectConditionList.join(QStringLiteral(",")));
     effectElement.setAttribute("tokenRotation", getEffectTokenRotation());
     //outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : getEffectToken());
     outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : targetDirectory.relativeFilePath(getEffectToken()));
@@ -237,7 +248,7 @@ void Spell::cloneSpell(Spell& other)
     _effectColor = other._effectColor;
     _effectToken = other._effectToken;
     _effectTokenRotation = other._effectTokenRotation;
-    _effectConditions = other._effectConditions;
+    _effectConditionList = other._effectConditionList;
 
     endBatchChanges();
 }
@@ -352,14 +363,14 @@ int Spell::getEffectTokenRotation() const
     return _effectTokenRotation;
 }
 
-int Spell::getEffectConditions() const
+QStringList Spell::getEffectConditionList() const
 {
-    return _effectConditions;
+    return _effectConditionList;
 }
 
-bool Spell::hasEffectCondition(Combatant::Condition condition) const
+bool Spell::hasEffectCondition(const QString& conditionId) const
 {
-    return ((_effectConditions & condition) != 0);
+    return _effectConditionList.contains(conditionId);
 }
 
 void Spell::setName(const QString& name)
@@ -528,38 +539,28 @@ void Spell::setEffectTokenRotation(int effectTokenRotation)
     registerChange();
 }
 
-void Spell::setEffectConditions(int conditions)
+void Spell::setEffectConditionList(const QStringList& conditions)
 {
-    if(_effectConditions == conditions)
-        return;
-
-    _effectConditions = conditions;
-    registerChange();
-}
-
-void Spell::applyEffectConditions(int conditions)
-{
-    if((_effectConditions & conditions) != conditions)
+    if(_effectConditionList != conditions)
     {
-        _effectConditions |= conditions;
+        _effectConditionList = conditions;
         registerChange();
     }
 }
 
-void Spell::addEffectCondition(Combatant::Condition condition)
+void Spell::addEffectCondition(const QString& conditionId)
 {
-    if(!hasEffectCondition(condition))
+    if(!conditionId.isEmpty() && !_effectConditionList.contains(conditionId))
     {
-        _effectConditions |= condition;
+        _effectConditionList.append(conditionId);
         registerChange();
     }
 }
 
-void Spell::removeEffectCondition(Combatant::Condition condition)
+void Spell::removeEffectCondition(const QString& conditionId)
 {
-    if(hasEffectCondition(condition))
+    if(!conditionId.isEmpty() && _effectConditionList.removeOne(conditionId))
     {
-        _effectConditions &= ~condition;
         registerChange();
     }
 }

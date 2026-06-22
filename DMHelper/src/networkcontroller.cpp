@@ -1,4 +1,5 @@
 #include "networkcontroller.h"
+#include "dmhmessagebox.h"
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 
@@ -10,7 +11,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
-#include <QMessageBox>
 
 // Uncomment this define to output payload data to a local file "_dmhpayload.txt"
 //#define DMH_NETWORK_CONTROLLER_LOCAL_PAYLOAD
@@ -147,7 +147,7 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
         return;
 
     if((username.isEmpty()) || (password.isEmpty()) || (sessionID.isEmpty()))
-        QMessageBox::warning(nullptr, QString("DMHelper Network Connection"), QString("Warning: The network client publishing is enabled, but username, password and/or session ID are not set. Network publishing will not work unless these values are correct."));
+        DMHMessageBox::warning(nullptr, QString("DMHelper Network Connection"), QString("Warning: The network client publishing is enabled, but username, password and/or session ID are not set. Network publishing will not work unless these values are correct."));
 
     DMHLogon logon(urlString, username, password, sessionID);
     _networkManager->setLogon(logon);

@@ -6,6 +6,7 @@
 #include <QDir>
 
 class RuleInitiative;
+class RuleHealth;
 
 class RuleFactory : public QObject
 {
@@ -20,6 +21,10 @@ public:
     static RuleInitiative* createRuleInitiative(const QString& ruleInitiativeType, QObject *parent = nullptr);
     static QString getRuleInitiativeDefault();
     static QStringList getRuleInitiativeNames();
+
+    static RuleHealth* createRuleHealth(const QString& ruleHealthType, QObject *parent = nullptr);
+    static QString getRuleHealthDefault();
+    static QStringList getRuleHealthNames();
 
     static const char* DEFAULT_RULESET_NAME;
 
@@ -52,11 +57,20 @@ public:
         RulesetTemplate() :
             _name(),
             _initiative(),
+            _health(),
             _characterData(),
             _characterUI(),
             _monsterData(),
             _monsterUI(),
             _bestiary(),
+            _spellbook(),
+            _spellData(),
+            _spellUI(),
+            _combatantUI(),
+            _combatantFrameUI(),
+            _combatantFrameData(),
+            _lairActionUI(),
+            _conditionsFile(),
             _rulesetDir(),
             _combatantDone(false),
             _hitPointsCountDown(true),
@@ -66,7 +80,8 @@ public:
         RulesetTemplate(const QString& name, const QString& initiative, const QString& characterData,
                         const QString& characterUI, const QString& monsterData, const QString& monsterUI,
                         const QString& bestiary, QDir _rulesetDir, const QString& movement,
-                        bool combatantDone = false, bool hitPointsCountDown = true) :
+                        bool combatantDone = false, bool hitPointsCountDown = true,
+                        const QString& conditionsFile = QString()) :
             _name(name),
             _initiative(initiative),
             _characterData(characterData),
@@ -74,6 +89,7 @@ public:
             _monsterData(monsterData),
             _monsterUI(monsterUI),
             _bestiary(bestiary),
+            _conditionsFile(conditionsFile),
             _rulesetDir(_rulesetDir),
             _combatantDone(combatantDone),
             _hitPointsCountDown(hitPointsCountDown),
@@ -82,11 +98,20 @@ public:
 
         QString _name;
         QString _initiative;
+        QString _health;
         QString _characterData;
         QString _characterUI;
         QString _monsterData;
         QString _monsterUI;
         QString _bestiary;
+        QString _spellbook;
+        QString _spellData;
+        QString _spellUI;
+        QString _combatantUI;
+        QString _combatantFrameUI;
+        QString _combatantFrameData;
+        QString _lairActionUI;
+        QString _conditionsFile;
         QDir _rulesetDir;
         bool _combatantDone;
         bool _hitPointsCountDown;

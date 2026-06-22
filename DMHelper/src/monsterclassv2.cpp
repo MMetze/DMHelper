@@ -124,6 +124,48 @@ void MonsterClassv2::cloneMonster(MonsterClassv2& other)
 
 }
 
+const char* MonsterClassv2::PER_ROUND_RESOURCES_KEY = "perRoundResources";
+
+QList<PerRoundResource> MonsterClassv2::getPerRoundResources() const
+{
+    QList<PerRoundResource> result;
+    const QList<QVariant> raw = getListValue(QString::fromLatin1(PER_ROUND_RESOURCES_KEY));
+    for(const QVariant& entry : raw)
+        result.append(PerRoundResource::fromHash(entry.toHash()));
+    return result;
+}
+
+PerRoundResource MonsterClassv2::getPerRoundResource(const QString& name) const
+{
+    const QList<QVariant> raw = getListValue(QString::fromLatin1(PER_ROUND_RESOURCES_KEY));
+    for(const QVariant& entry : raw)
+    {
+        const QHash<QString, QVariant> hash = entry.toHash();
+        if(hash.value(QString::fromLatin1(PerRoundResource::KEY_NAME)).toString() == name)
+            return PerRoundResource::fromHash(hash);
+    }
+    return PerRoundResource();
+}
+
+void MonsterClassv2::setPerRoundResources(const QList<PerRoundResource>& resources)
+{
+    QList<QVariant> raw;
+    for(const PerRoundResource& resource : resources)
+        raw.append(resource.toHash());
+
+    if(_allValues.value(QString::fromLatin1(PER_ROUND_RESOURCES_KEY)).toList() == raw)
+        return;
+
+    _allValues.insert(QString::fromLatin1(PER_ROUND_RESOURCES_KEY), raw);
+    registerChange();
+}
+
+void MonsterClassv2::appendPerRoundResource(const PerRoundResource& resource)
+{
+    appendListEntry(QString::fromLatin1(PER_ROUND_RESOURCES_KEY), resource.toHash());
+    registerChange();
+}
+
 int MonsterClassv2::convertSizeToCategory(const QString& monsterSize)
 {
     if(QString::compare(monsterSize, QString("Tiny"), Qt::CaseInsensitive) == 0)

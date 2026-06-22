@@ -6,7 +6,7 @@
 #include "dmconstants.h"
 #include "campaignobjectbase.h"
 
-class Layer;
+#include "layer.h"
 class QGraphicsScene;
 class PublishGLRenderer;
 class PublishGLScene;

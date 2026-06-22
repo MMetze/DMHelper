@@ -1,5 +1,6 @@
 #include "videoplayerglscreenshot.h"
 #include "videoplayerglvideo.h"
+#include <vlc/libvlc_version.h>
 #include "dmhcache.h"
 #include <QImage>
 #include <QImageReader>
@@ -183,22 +184,16 @@ bool VideoPlayerGLScreenshot::startPlayer()
 #ifdef Q_OS_WIN
     localizedVideoFile.replace("/", "\\\\");
 #endif
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcMedia = libvlc_media_new_path(localizedVideoFile.toUtf8().constData());
-#else
-    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), localizedVideoFile.toUtf8().constData());
-#endif
     if(!_vlcMedia)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to open video file!";
         return false;
     }
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+    libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
+
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
-#else
-    _vlcPlayer = libvlc_media_player_new_from_media(_vlcMedia);
-#endif
     if(!_vlcPlayer)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to start media player";

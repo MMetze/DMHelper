@@ -22,6 +22,7 @@ public:
     Campaign* getCampaign() const;
 
     virtual void initializeGL();
+    virtual void cleanupGL();
     virtual void resizeGL(int w, int h);
     virtual void paintGL();
 

@@ -3,7 +3,7 @@
 
 #include <QFrame>
 
-class BattleDialogModelCombatant;
+#include "battledialogmodelcombatant.h"
 class QHBoxLayout;
 class QLabel;
 class QLineEdit;
@@ -27,6 +27,8 @@ public:
     virtual void setShowDone(bool showDone) = 0;
 
     virtual void disconnectInternals() = 0;
+
+    void installEventFilterRecursive(QObject* filterObj);
 
 signals:
 
@@ -60,6 +62,11 @@ protected:
     virtual QHBoxLayout* createPairLayout(const QString& pairName, const QString& pairValue);
     virtual void updatePairData(QHBoxLayout* pair, const QString& pairValue);
     virtual QString getStyleString();
+
+    // Update the dynamic "state" property and re-polish so the one-shot
+    // stylesheet picks up the new active/selected/hover state. Cheap; safe
+    // to call frequently.
+    void refreshStateStyle();
 
     // Data
     Qt::MouseButton _mouseDown;
