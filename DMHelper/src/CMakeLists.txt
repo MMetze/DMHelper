@@ -104,6 +104,7 @@ set(DMHELPER_SOURCES
     audiotrackyoutube.cpp
     basicdate.cpp
     basicdateserver.cpp
+    battlecombatantframe.cpp
     battlecombatantwidget.cpp
     battledialogeffectsettings.cpp
     battledialogeffectsettingsbase.cpp
@@ -460,6 +461,7 @@ set(DMHELPER_HEADERS
     audiotrackyoutube.h
     basicdate.h
     basicdateserver.h
+    battlecombatantframe.h
     battlecombatantwidget.h
     battledialogeffectsettings.h
     battledialogeffectsettingsbase.h
@@ -791,6 +793,7 @@ set(DMHELPER_FORMS
     aboutdialog.ui
     audioplaybackframe.ui
     audiotrackedit.ui
+    battlecombatantframe.ui
     battlecombatantwidget.ui
     battledialogeffectsettings.ui
     battledialogeffectsettingsfire.ui
