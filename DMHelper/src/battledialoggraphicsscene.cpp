@@ -770,11 +770,9 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 {
                     QAction* groupItem = new QAction(QString("Group Selected..."), &menu);
                     connect(groupItem, &QAction::triggered, this, [this, item]() {
-                        if(item)
-                        {
-                            clearSelection();
+                        if((selectedItems().isEmpty()) && (item))
                             item->setSelected(true);
-                        }
+
                         groupSelectedCombatants();
                     });
                     menu.addAction(groupItem);
