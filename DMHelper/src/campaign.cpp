@@ -19,6 +19,14 @@
 #include <QHash>
 #include <QDebug>
 
+static int sanitizeTokenHealthBarMode(int mode)
+{
+    if((mode < DMHelper::TokenHealthBarMode_Off) || (mode > DMHelper::TokenHealthBarMode_BothViews))
+        return DMHelper::TokenHealthBarMode_Off;
+
+    return mode;
+}
+
 /*
  * XML strategy
  *
@@ -79,7 +87,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _notes(),
     _lastMonster(),
     _fearCount(0),
-    _showTokenHealthBars(false),
+    _tokenHealthBarMode(DMHelper::TokenHealthBarMode_Off),
     _ruleset(),
     _batchChanges(false),
     _changesMade(false),
@@ -132,7 +140,14 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
     // TODO: Remove special case for Daggerheart and add campaign-specific data storage(?)
     _fearCount = element.attribute("fear", QString::number(0)).toInt();
-    _showTokenHealthBars = element.attribute("showTokenHealthBars", QString::number(0)).toInt() != 0;
+    int tokenHealthBarMode = element.attribute("showTokenHealthBarsMode", QString::number(-1)).toInt();
+    if(tokenHealthBarMode < 0)
+    {
+        // Backward compatibility with legacy bool campaign attribute.
+        bool legacyShowTokenHealthBars = element.attribute("showTokenHealthBars", QString::number(0)).toInt() != 0;
+        tokenHealthBarMode = legacyShowTokenHealthBars ? DMHelper::TokenHealthBarMode_BothViews : DMHelper::TokenHealthBarMode_Off;
+    }
+    _tokenHealthBarMode = sanitizeTokenHealthBarMode(tokenHealthBarMode);
 
     // Load the bulk of the campaign contents
     CampaignObjectBase::inputXML(element, isImport);
@@ -431,9 +446,14 @@ int Campaign::getFearCount() const
     return _fearCount;
 }
 
+int Campaign::getTokenHealthBarMode() const
+{
+    return _tokenHealthBarMode;
+}
+
 bool Campaign::getShowTokenHealthBars() const
 {
-    return _showTokenHealthBars;
+    return _tokenHealthBarMode == DMHelper::TokenHealthBarMode_BothViews;
 }
 
 Ruleset& Campaign::getRuleset()
@@ -530,14 +550,21 @@ void Campaign::setFearCount(int fearCount)
     emit dirty();
 }
 
-void Campaign::setShowTokenHealthBars(bool show)
+void Campaign::setTokenHealthBarMode(int mode)
 {
-    if(show == _showTokenHealthBars)
+    mode = sanitizeTokenHealthBarMode(mode);
+    if(mode == _tokenHealthBarMode)
         return;
 
-    _showTokenHealthBars = show;
-    emit showTokenHealthBarsChanged(_showTokenHealthBars);
+    _tokenHealthBarMode = mode;
+    emit tokenHealthBarModeChanged(_tokenHealthBarMode);
+    emit showTokenHealthBarsChanged(_tokenHealthBarMode == DMHelper::TokenHealthBarMode_BothViews);
     emit dirty();
+}
+
+void Campaign::setShowTokenHealthBars(bool show)
+{
+    setTokenHealthBarMode(show ? DMHelper::TokenHealthBarMode_BothViews : DMHelper::TokenHealthBarMode_Off);
 }
 
 bool Campaign::validateCampaignIds()
@@ -599,7 +626,11 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
     if(_fearCount > 0)
         element.setAttribute("fear", _fearCount);
 
-    if(_showTokenHealthBars)
+    if(_tokenHealthBarMode != DMHelper::TokenHealthBarMode_Off)
+        element.setAttribute("showTokenHealthBarsMode", _tokenHealthBarMode);
+
+    // Backward compatibility for older DMHelper versions.
+    if(_tokenHealthBarMode == DMHelper::TokenHealthBarMode_BothViews)
         element.setAttribute("showTokenHealthBars", 1);
 
     if(_notes.count() > 0)
