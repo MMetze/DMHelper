@@ -2142,18 +2142,72 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                             int index;
                             stream >> index;
 
-                            QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
-                            int currentIndex = _combatantLayout->indexOf(draggedWidget);
-
-                            // Only reorder ungrouped combatants in the main layout
-                            if(currentIndex >= 0 && currentIndex != index)
+                            BattleDialogModelCombatant* draggedCombatant = _model->getCombatant(index);
+                            if(draggedCombatant)
                             {
-                                _model->moveCombatant(index, currentIndex);
+                                const QPoint posInScrollArea = dropEvent->position().toPoint();
+                                const QPoint globalPos = ui->scrollArea->mapToGlobal(posInScrollArea);
+                                const QPoint posInContents = ui->scrollAreaWidgetContents->mapFromGlobal(globalPos);
+
+                                QWidget* targetWidget = findCombatantWidgetFromPosition(posInContents);
+                                CombatantGroupWidget* targetGroupWidget = dynamic_cast<CombatantGroupWidget*>(targetWidget);
+
+                                const QUuid sourceGroupId = draggedCombatant->getGroupId();
+
+                                if(targetGroupWidget)
+                                {
+                                    const QUuid targetGroupId = targetGroupWidget->getGroupId();
+                                    if((!targetGroupId.isNull()) && (targetGroupId != sourceGroupId))
+                                    {
+                                        if(!sourceGroupId.isNull())
+                                            _model->removeCombatantFromGroup(draggedCombatant);
+
+                                        draggedCombatant->setGroupId(targetGroupId);
+                                        _model->sortCombatantsBySortValue();
+                                        recreateCombatantWidgets();
+                                    }
+                                    else
+                                    {
+                                        reorderCombatantWidgets();
+                                    }
+                                }
+                                else
+                                {
+                                    bool membershipChanged = false;
+                                    if(!sourceGroupId.isNull())
+                                    {
+                                        _model->removeCombatantFromGroup(draggedCombatant);
+                                        membershipChanged = true;
+                                    }
+
+                                    int fromModelIndex = _model->getCombatantIndex(draggedCombatant);
+                                    int toModelIndex = -1;
+
+                                    CombatantWidget* targetCombatantWidget = dynamic_cast<CombatantWidget*>(targetWidget);
+                                    if((targetCombatantWidget) && (targetCombatantWidget->getCombatant()))
+                                        toModelIndex = _model->getCombatantIndex(targetCombatantWidget->getCombatant());
+
+                                    if((fromModelIndex >= 0) && (toModelIndex >= 0) && (fromModelIndex != toModelIndex))
+                                        _model->moveCombatant(fromModelIndex, toModelIndex);
+                                    else
+                                    {
+                                        QWidget* draggedWidget = _combatantWidgets.value(draggedCombatant);
+                                        int currentIndex = _combatantLayout->indexOf(draggedWidget);
+                                        if((currentIndex >= 0) && (currentIndex != index))
+                                            _model->moveCombatant(index, currentIndex);
+                                    }
+
+                                    if(membershipChanged)
+                                        recreateCombatantWidgets();
+                                    else
+                                        reorderCombatantWidgets();
+                                }
                             }
                         }
+                        dropEvent->accept();
+                        _dragLastTarget = nullptr;
+                        return true;
                     }
-                    _dragLastTarget = nullptr;
-                    reorderCombatantWidgets();
                 }
             }
         }
