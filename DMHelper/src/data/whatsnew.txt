@@ -9,56 +9,22 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.9</h2>
+<h2>What's New: Version 3.10</h2>
 
-<h3>
-OK, this one is huge. No really, major stuff. Don't read the rest, go check it out <i>RIGHT NOW</i>! You can re-open this <i>What's New</i> dialog from the Welcome Screen to read the rest:
-</h3>
+<h3>New Features:</h3>
 <ul>
-<li> <b>MAJOR improvement in Fog of War editing performance!</b> And all other DM View activities. Smooooooooth...
-</ul>
-<p>
-<p>
-OK, back again? Good - did you like it? Then jump on Patreon, it took quite a lot of tokens to figure that one out!
-<p>
-So, now on with all the news; and there's a lot of hot new toys to play with this time!
-
-<h3>New v3.9 Features:</h3>
-<ul>
-<li> <b>Polygon FoW Drawing</b> to erase/fill in any manner of crazy shapes
-<li> <b>Anmiated Effects</b> <i>Fire</i>, <i>Smoke</i>, <i>Glowing Lights</i> and <i>Sparks</i>
-<li> <b>Multiple tokens for PCs</b> to support portraits, were-beasts, druid transformations or cool character evolutions
-<li> <b>Grouping of initiative monsters</b> - hide them, show them, all with a single click!
-<li> <b>Visualization of known/unknown and visible/invisible status for DMs</b> so you don't forget to show your beasties
-<li> <b>Improved Camera rectangle sizing</b> saves a lot of time with easier boxes to grab and resize
-<li> <b>Health Bars</b> on all your tokens (if you want them) 
-<li> <b>Custom Initiative events</b> to support lair events, or anything else that may happen in combat
-<li> <b>Customizable Conditions</b> in case you don't like the usual ones
-<li> <b>Customizable Spellbooks</b> for any system you want to play...
-<li> <b>Customizable Health and Initiative rules</b> ...even if they're really different 
-<li> <b>Customizable per-field display formatting and arithmetic computed fields</b> to make those character sheets more helpful
-<li> <b>Delete multiple effects at once</b> because this should have always been possible
-<li> <b>Show/hide and know/unknown multiple combatants at once</b> because ditto
-</ul>
-<p>
-...  and, finally, by popular demand and beloved community support ...
-<p>
-<ul>
-<li> Linux support!
-<li> MacOS support for Apple chips (and Intel chips)
+<li> added a right-click "Edit Conditions" for any combatants in an initiative order or tokens on a battle map. It should also work for multiple selections
+<li> health bar don't rotate with tokens
+<li> health bars can be Off, DM only or DM & Player
+<li> Fixed issues with combatant group creation
+<li> drag and drop to add/remove combatants from groups
 </ul>
 
 <p>
 
 <h3>Fixes and Other Improvements:</h3>
 <ul>
-<li> Expanded limits on min/max HP
-<li> Fixed bug on audio settings for repeating videos
-<li> Videos loop by default, and this can now be toggled in the layer settings
-<li> Performance improvements on text entry editing
-<li> The FoW editing cursor is the right size on first load as well
-<li> Activating the grid sizer causes all visible grid layers to be temporarily hidden
-<li> The grid sizer is positioned more consistently
+<li> 
 </ul>
 
 <p>
