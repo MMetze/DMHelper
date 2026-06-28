@@ -259,6 +259,7 @@ private slots:
     void handleCombatantVisibilityChanged(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
+    void handleCombatantEditConditions(BattleDialogModelCombatant* combatant);
     void handleCombatantHideSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantUnhideSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantKnowSelected(BattleDialogModelCombatant* combatant);
@@ -299,6 +300,7 @@ private slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void editSelectedCombatantConditions();
     void hideSelectedCombatant();
     void unhideSelectedCombatant();
     void knowSelectedCombatant();
@@ -384,6 +386,8 @@ private:
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
     void removeSingleCombatant(BattleDialogModelCombatant* combatant);
+    QList<BattleDialogModelCombatant*> getContextMenuCombatants(BattleDialogModelCombatant* combatant) const;
+    void editCombatantConditions(const QList<BattleDialogModelCombatant*>& combatants);
 
     bool validateTokenLayerExists();
     void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);

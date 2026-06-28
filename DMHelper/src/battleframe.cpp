@@ -45,6 +45,7 @@
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
+#include "conditionseditdialog.h"
 #include "ruleinitiative.h"
 #include "ruleinitiativenone.h"
 #include "rulehealth.h"
@@ -266,6 +267,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantEditConditions(BattleDialogModelCombatant*)), this, SLOT(handleCombatantEditConditions(BattleDialogModelCombatant*)));
     connect(_scene, &BattleDialogGraphicsScene::combatantHideSelected, this, &BattleFrame::handleCombatantHideSelected);
     connect(_scene, &BattleDialogGraphicsScene::combatantUnhideSelected, this, &BattleFrame::handleCombatantUnhideSelected);
     connect(_scene, &BattleDialogGraphicsScene::combatantKnowSelected, this, &BattleFrame::handleCombatantKnowSelected);
@@ -2433,6 +2435,10 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     connect(healItem, SIGNAL(triggered()), this, SLOT(healCombatant()));
     contextMenu->addAction(healItem);
 
+    QAction* editConditionsItem = new QAction(QString("Edit Conditions..."), contextMenu);
+    connect(editConditionsItem, SIGNAL(triggered()), this, SLOT(editSelectedCombatantConditions()));
+    contextMenu->addAction(editConditionsItem);
+
     contextMenu->addSeparator();
 
     // Determine visibility/known state of relevant combatants for conditional menu items
@@ -2802,6 +2808,14 @@ void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
             applyCombatantHPChange(getCombatantFromItem(graphicsItem), heal);
         }
     }
+}
+
+void BattleFrame::handleCombatantEditConditions(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    editCombatantConditions(getContextMenuCombatants(combatant));
 }
 
 void BattleFrame::handleCombatantHideSelected(BattleDialogModelCombatant* combatant)
@@ -3433,6 +3447,11 @@ void BattleFrame::healCombatant()
     handleCombatantHeal(_contextMenuCombatant);
 }
 
+void BattleFrame::editSelectedCombatantConditions()
+{
+    handleCombatantEditConditions(_contextMenuCombatant);
+}
+
 void BattleFrame::hideSelectedCombatant()
 {
     handleCombatantHideSelected(_contextMenuCombatant);
@@ -3530,6 +3549,55 @@ void BattleFrame::removeFromGroup()
 
     _model->removeCombatantFromGroup(_contextMenuCombatant);
     recreateCombatantWidgets();
+}
+
+QList<BattleDialogModelCombatant*> BattleFrame::getContextMenuCombatants(BattleDialogModelCombatant* combatant) const
+{
+    QList<BattleDialogModelCombatant*> combatants;
+    if((!_scene) || (!combatant))
+        return combatants;
+
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    if((selected.count() == 0) || (!currentItem) || (!selected.contains(currentItem)))
+    {
+        combatants.append(combatant);
+        return combatants;
+    }
+
+    foreach(QGraphicsItem* graphicsItem, selected)
+    {
+        BattleDialogModelCombatant* selectedCombatant = getCombatantFromItem(graphicsItem);
+        if((selectedCombatant) && (!combatants.contains(selectedCombatant)))
+            combatants.append(selectedCombatant);
+    }
+
+    if(combatants.isEmpty())
+        combatants.append(combatant);
+
+    return combatants;
+}
+
+void BattleFrame::editCombatantConditions(const QList<BattleDialogModelCombatant*>& combatants)
+{
+    if(combatants.isEmpty())
+        return;
+
+    ConditionsEditDialog dlg(this);
+    dlg.setConditionList(combatants.first()->getConditionList());
+    if(dlg.exec() != QDialog::Accepted)
+        return;
+
+    const QStringList conditionList = dlg.getConditionList();
+    foreach(BattleDialogModelCombatant* combatant, combatants)
+    {
+        if(!combatant)
+            continue;
+
+        combatant->setConditionList(conditionList);
+        updateCombatantIcon(combatant);
+        updateCombatantWidget(combatant);
+    }
 }
 
 void BattleFrame::applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange)

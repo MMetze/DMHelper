@@ -621,6 +621,10 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             connect(healItem, SIGNAL(triggered()), this, SLOT(healCombatant()));
             menu.addAction(healItem);
 
+            QAction* editConditionsItem = new QAction(QString("Edit Conditions..."), &menu);
+            connect(editConditionsItem, SIGNAL(triggered()), this, SLOT(editCombatantConditions()));
+            menu.addAction(editConditionsItem);
+
             menu.addSeparator();
 
             // Determine visibility/known state of relevant combatants for conditional menu items
@@ -1193,6 +1197,17 @@ void BattleDialogGraphicsScene::healCombatant()
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantHeal(combatant);
+}
+
+void BattleDialogGraphicsScene::editCombatantConditions()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantEditConditions(combatant);
 }
 
 void BattleDialogGraphicsScene::hideSelectedCombatants()
