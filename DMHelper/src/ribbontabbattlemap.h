@@ -40,6 +40,8 @@ public slots:
     void setSelectFoW(bool checked);
 
 signals:
+    void editFileClicked();
+    void colorizeClicked();
     void reloadMapClicked();
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);

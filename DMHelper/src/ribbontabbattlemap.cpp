@@ -17,6 +17,8 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->btnEditFile, SIGNAL(clicked()), this, SIGNAL(editFileClicked()));
+    connect(ui->btnColorize, SIGNAL(clicked(bool)), this, SIGNAL(colorizeClicked()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)), this, SIGNAL(reloadMapClicked()));
 
     ui->btnGrid->setMenu(_menu);
@@ -178,6 +180,8 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
 
     int frameHeight = height();
 
+    setStandardButtonSize(*ui->lblEditFile, *ui->btnEditFile, frameHeight);
+    setStandardButtonSize(*ui->lblColorize, *ui->btnColorize, frameHeight);
     setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap, frameHeight);
     setLineHeight(*ui->line_6, frameHeight);
 

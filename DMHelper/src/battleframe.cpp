@@ -46,6 +46,7 @@
 #include "layervideo.h"
 #include "layerdraw.h"
 #include "layerreference.h"
+#include "mapcolorizedialog.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
@@ -1230,6 +1231,72 @@ void BattleFrame::reloadMap()
 {
     if(_model)
         _model->setBackgroundImage(QImage());
+
+    updateMap();
+}
+
+void BattleFrame::colorize()
+{
+    if(!_model)
+        return;
+
+    LayerScene& layerScene = _model->getLayerScene();
+    Layer* selectedLayer = layerScene.getSelectedLayer();
+
+    LayerImage* imageLayer = nullptr;
+    if((selectedLayer) && (selectedLayer->getFinalType() == DMHelper::LayerType_Image))
+        imageLayer = dynamic_cast<LayerImage*>(selectedLayer->getFinalLayer());
+    if(!imageLayer)
+        imageLayer = dynamic_cast<LayerImage*>(layerScene.getPriority(DMHelper::LayerType_Image));
+    if(!imageLayer)
+        return;
+
+    MapColorizeDialog dlg(imageLayer->getImageUnfiltered(), imageLayer->getFilter());
+    dlg.resize(width() / 2, height() / 2);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        imageLayer->setFilter(dlg.getFilter());
+        imageLayer->setApplyFilter(dlg.getFilter().isValid());
+    }
+}
+
+void BattleFrame::editMapFile()
+{
+    if(!_model)
+        return;
+
+    LayerScene& layerScene = _model->getLayerScene();
+    Layer* selectedLayer = layerScene.getSelectedLayer();
+
+    LayerImage* imageLayer = nullptr;
+    LayerVideo* videoLayer = nullptr;
+
+    if(selectedLayer)
+    {
+        if(selectedLayer->getFinalType() == DMHelper::LayerType_Image)
+            imageLayer = dynamic_cast<LayerImage*>(selectedLayer->getFinalLayer());
+        else if(selectedLayer->getFinalType() == DMHelper::LayerType_Video)
+            videoLayer = dynamic_cast<LayerVideo*>(selectedLayer->getFinalLayer());
+    }
+
+    if((!imageLayer) && (!videoLayer))
+    {
+        imageLayer = dynamic_cast<LayerImage*>(layerScene.getPriority(DMHelper::LayerType_Image));
+        if(!imageLayer)
+            videoLayer = dynamic_cast<LayerVideo*>(layerScene.getPriority(DMHelper::LayerType_Video));
+    }
+
+    if((!imageLayer) && (!videoLayer))
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map File..."));
+    if(filename.isEmpty())
+        return;
+
+    if(imageLayer)
+        imageLayer->setFileName(filename);
+    else
+        videoLayer->setVideoFile(filename);
 
     updateMap();
 }

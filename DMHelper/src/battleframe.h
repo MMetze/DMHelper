@@ -138,6 +138,8 @@ public slots:
     // Public for connection to battle ribbon
     bool createNewBattle();
     void reloadMap();
+    void colorize();
+    void editMapFile();
     void addMonsters();
     void addCharacter();
     void addNPC();

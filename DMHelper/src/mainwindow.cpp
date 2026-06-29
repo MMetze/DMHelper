@@ -581,6 +581,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(nextShortcut, SIGNAL(activated()), this, SLOT(newTextEncounter()));
 
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
+    connect(_ribbonTabBattleMap, SIGNAL(editFileClicked()), _battleFrame, SLOT(editMapFile()));
+    connect(_ribbonTabBattleMap, SIGNAL(colorizeClicked()), _battleFrame, SLOT(colorize()));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridResizeClicked, _battleFrame, &BattleFrame::resizeGrid);
@@ -608,7 +610,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbon, &QTabWidget::currentChanged, _battleFrame, &BattleFrame::ribbonTabChanged);
 
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Battle,
-                                                      DMHelper::CampaignType_BattleContent}), _battleFrame);
+                                                      DMHelper::CampaignType_BattleContent,
+                                                      DMHelper::CampaignType_Map}), _battleFrame);
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
@@ -629,8 +632,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_Map
     _mapFrame = new MapFrame;
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, _mapFrame);
-    qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     _mapFrame->setPointerFile(_options->getPointerFile());
     connect(_mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
@@ -1977,10 +1978,8 @@ CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterTyp
     if(newEntry)
     {
         addNewObjectToTarget(newEntry, targetObject);
-        if(dlg.getEntryType() == DMHelper::CampaignType_Battle)
+        if((dlg.getEntryType() == DMHelper::CampaignType_Battle) || (dlg.getEntryType() == DMHelper::CampaignType_Map))
             _battleFrame->resizeGrid();
-        else if(dlg.getEntryType() == DMHelper::CampaignType_Map)
-            _mapFrame->resizeGrid();
 
         return newEntry;
     }
@@ -3132,22 +3131,13 @@ void MainWindow::setRibbonToType(int objectType)
     {
         case DMHelper::CampaignType_Battle:
         case DMHelper::CampaignType_BattleContent:
+        case DMHelper::CampaignType_Map:
             _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs map and reuse
             connectBattleView(true);
             _ribbon->enableTab(_ribbonTabBattleMap);
             _ribbon->enableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabText);
-            _ribbon->disableTab(_ribbonTabAudio);
-            break;
-        case DMHelper::CampaignType_Map:
-            _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs battle and reuse
-            connectBattleView(false);
-            _ribbon->enableTab(_ribbonTabMap);
-            _ribbon->enableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabBattleMap);
-            _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
