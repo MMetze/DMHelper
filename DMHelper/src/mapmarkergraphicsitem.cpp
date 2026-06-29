@@ -1,5 +1,4 @@
 #include "mapmarkergraphicsitem.h"
-#include "mapframe.h"
 #include "scaledpixmap.h"
 #include "mapcolorizefilter.h"
 #include "undomarker.h"

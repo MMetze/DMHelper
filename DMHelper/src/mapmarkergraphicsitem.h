@@ -7,7 +7,6 @@
 #include <QGraphicsSimpleTextItem>
 
 class QGraphicsScene;
-class MapFrame;
 class MapMarkerGraphicsPixmapItem;
 class MapMarkerGraphicsSimpleTextItem;
 class UndoMarker;

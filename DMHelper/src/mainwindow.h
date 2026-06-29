@@ -40,11 +40,9 @@ class RibbonTabBattleView;
 class RibbonTabBattle;
 class RibbonTabText;
 class BattleDialogModel;
-class RibbonTabMap;
 class RibbonTabWorldMap;
 class RibbonTabAudio;
 class BattleFrame;
-class MapFrame;
 class CharacterTemplateFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
@@ -276,12 +274,10 @@ private:
     RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabText* _ribbonTabText;
-    RibbonTabMap* _ribbonTabMap;
     RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 
     BattleFrame* _battleFrame;
-    MapFrame* _mapFrame;
     CharacterTemplateFrame* _characterFrame;
 };
 

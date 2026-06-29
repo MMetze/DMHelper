@@ -268,8 +268,6 @@ set(DMHELPER_SOURCES
     mapcolorizefilter.cpp
     mapcontent.cpp
     mapfactory.cpp
-    mapframe.cpp
-    mapframescene.cpp
     mapmanagerdialog.cpp
     mapmarkerdialog.cpp
     mapmarkergraphicsitem.cpp
@@ -332,7 +330,6 @@ set(DMHELPER_SOURCES
     publishglframe.cpp
     publishglimage.cpp
     publishglimagerenderer.cpp
-    publishglmaprenderer.cpp
     publishglobject.cpp
     publishglrect.cpp
     publishglrenderer.cpp
@@ -356,7 +353,6 @@ set(DMHELPER_SOURCES
     ribbontabbattleview.cpp
     ribbontabcampaign.cpp
     ribbontabfile.cpp
-    ribbontabmap.cpp
     ribbontabtext.cpp
     ribbontabtools.cpp
     ribbontabworldmap.cpp
@@ -625,8 +621,6 @@ set(DMHELPER_HEADERS
     mapcolorizefilter.h
     mapcontent.h
     mapfactory.h
-    mapframe.h
-    mapframescene.h
     mapmanagerdialog.h
     mapmarker.h
     mapmarkerdialog.h
@@ -690,7 +684,6 @@ set(DMHELPER_HEADERS
     publishglframe.h
     publishglimage.h
     publishglimagerenderer.h
-    publishglmaprenderer.h
     publishglobject.h
     publishglrect.h
     publishglrenderer.h
@@ -714,7 +707,6 @@ set(DMHELPER_HEADERS
     ribbontabbattleview.h
     ribbontabcampaign.h
     ribbontabfile.h
-    ribbontabmap.h
     ribbontabtext.h
     ribbontabtools.h
     ribbontabworldmap.h
@@ -845,7 +837,6 @@ set(DMHELPER_FORMS
     mainwindow.ui
     mapblankdialog.ui
     mapcolorizedialog.ui
-    mapframe.ui
     mapmanagerdialog.ui
     mapmarkerdialog.ui
     mapselectdialog.ui
@@ -874,7 +865,6 @@ set(DMHELPER_FORMS
     ribbontabbattleview.ui
     ribbontabcampaign.ui
     ribbontabfile.ui
-    ribbontabmap.ui
     ribbontabtext.ui
     ribbontabtools.ui
     ribbontabworldmap.ui
