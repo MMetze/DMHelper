@@ -560,6 +560,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
     connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), _battleFrame, SLOT(addEffectObject()));
     connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), _battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(showPartyClicked(bool)), _battleFrame, SLOT(setShowParty(bool)));
+    connect(_ribbonTabBattle, SIGNAL(showMarkersClicked(bool)), _battleFrame, SLOT(setShowMarkers(bool)));
+    connect(_ribbonTabBattle, SIGNAL(addMarkerClicked()), _battleFrame, SLOT(addNewMarker()));
+    connect(_battleFrame, SIGNAL(showPartyChanged(bool)), _ribbonTabBattle, SLOT(setShowParty(bool)));
+    connect(_battleFrame, SIGNAL(showMarkersChanged(bool)), _ribbonTabBattle, SLOT(setShowMarkers(bool)));
     connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), _battleFrame, SLOT(addEffectRadius()));
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), _battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
@@ -2941,6 +2946,13 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
+        _ribbonTabBattle->setShowParty(model->getShowParty());
+        _ribbonTabBattle->setShowMarkers(model->getShowMarkers());
+        connect(_ribbonTabBattle, &RibbonTabBattle::showPartyClicked, _battleFrame, &BattleFrame::setShowParty, Qt::UniqueConnection);
+        connect(_ribbonTabBattle, &RibbonTabBattle::showMarkersClicked, _battleFrame, &BattleFrame::setShowMarkers, Qt::UniqueConnection);
+        connect(_ribbonTabBattle, &RibbonTabBattle::addMarkerClicked, _battleFrame, &BattleFrame::addNewMarker, Qt::UniqueConnection);
+        connect(_battleFrame, &BattleFrame::showPartyChanged, _ribbonTabBattle, &RibbonTabBattle::setShowParty, Qt::UniqueConnection);
+        connect(_battleFrame, &BattleFrame::showMarkersChanged, _ribbonTabBattle, &RibbonTabBattle::setShowMarkers, Qt::UniqueConnection);
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));

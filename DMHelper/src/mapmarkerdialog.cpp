@@ -10,7 +10,7 @@
 #include <QFileDialog>
 #include <QPainter>
 
-MapMarkerDialog::MapMarkerDialog(const MapMarker& marker, Map& map, QWidget *parent) :
+MapMarkerDialog::MapMarkerDialog(const MapMarker& marker, Campaign& campaign, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MapMarkerDialog),
     _menu(new QMenu(this)),
@@ -63,7 +63,7 @@ MapMarkerDialog::MapMarkerDialog(const MapMarker& marker, Map& map, QWidget *par
     if(!populateIconList())
         defaultAction->trigger();
 
-    populateCombo(marker.getEncounter(), map);
+    populateCombo(marker.getEncounter(), campaign);
 }
 
 MapMarkerDialog::~MapMarkerDialog()
@@ -236,13 +236,9 @@ bool MapMarkerDialog::populateIconList()
     return defaultFound;
 }
 
-void MapMarkerDialog::populateCombo(const QUuid& encounter, Map& map)
+void MapMarkerDialog::populateCombo(const QUuid& encounter, Campaign& campaign)
 {
-    Campaign* campaign = dynamic_cast<Campaign*>(map.getParentByType(DMHelper::CampaignType_Campaign));
-    if(!campaign)
-        return;
-
-    QList<CampaignObjectBase*> childList = campaign->getChildObjects();
+    QList<CampaignObjectBase*> childList = campaign.getChildObjects();
     for(CampaignObjectBase* childObject : childList)
     {
         addChildEntry(childObject, 0, encounter);

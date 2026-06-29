@@ -4,7 +4,10 @@
 #include <QDialog>
 #include <QUuid>
 #include <QMenu>
-#include "map.h"
+#include "mapcontent.h"
+
+class Campaign;
+class CampaignObjectBase;
 
 namespace Ui {
 class MapMarkerDialog;
@@ -17,7 +20,7 @@ class MapMarkerDialog : public QDialog
 public:
     static const int MAPMARKERDIALOG_DELETE = -1;
 
-    explicit MapMarkerDialog(const MapMarker& marker, Map& map, QWidget *parent = nullptr);
+    explicit MapMarkerDialog(const MapMarker& marker, Campaign& campaign, QWidget *parent = nullptr);
     virtual ~MapMarkerDialog() override;
 
 
@@ -47,7 +50,7 @@ private:
 
     bool setColoredIcon(const QString& iconFile);
     bool populateIconList();
-    void populateCombo(const QUuid& encounter, Map& map);
+    void populateCombo(const QUuid& encounter, Campaign& campaign);
     void addChildEntry(CampaignObjectBase* object, int depth, const QUuid& encounter);
     QIcon objectIcon(CampaignObjectBase* object);
 

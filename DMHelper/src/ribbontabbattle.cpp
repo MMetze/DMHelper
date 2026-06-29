@@ -8,6 +8,9 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->btnShowParty, SIGNAL(clicked(bool)), this, SIGNAL(showPartyClicked(bool)));
+    connect(ui->btnShowMarkers, SIGNAL(clicked(bool)), this, SIGNAL(showMarkersClicked(bool)));
+    connect(ui->btnAddMarker, SIGNAL(clicked()), this, SIGNAL(addMarkerClicked()));
     connect(ui->btnAddCharacter, SIGNAL(clicked(bool)), this, SIGNAL(addCharacterClicked()));
     connect(ui->btnAddMonsters, SIGNAL(clicked(bool)), this, SIGNAL(addMonsterClicked()));
     connect(ui->btnAddNPC, SIGNAL(clicked(bool)), this, SIGNAL(addNPCClicked()));
@@ -64,6 +67,18 @@ RibbonTabBattle::~RibbonTabBattle()
 PublishButtonRibbon* RibbonTabBattle::getPublishRibbon()
 {
     return ui->framePublish;
+}
+
+void RibbonTabBattle::setShowParty(bool showParty)
+{
+    if(ui->btnShowParty->isChecked() != showParty)
+        ui->btnShowParty->setChecked(showParty);
+}
+
+void RibbonTabBattle::setShowMarkers(bool showMarkers)
+{
+    if(ui->btnShowMarkers->isChecked() != showMarkers)
+        ui->btnShowMarkers->setChecked(showMarkers);
 }
 
 void RibbonTabBattle::setShowLiving(bool checked)

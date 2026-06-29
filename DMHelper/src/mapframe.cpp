@@ -2,6 +2,7 @@
 #include "ui_mapframe.h"
 #include "mapframescene.h"
 #include "dmconstants.h"
+#include "campaign.h"
 #include "map.h"
 #include "mapmarkergraphicsitem.h"
 #include "undofowfill.h"
@@ -36,6 +37,7 @@
 
 static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
 static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
+static constexpr qreal MAP_MARKER_SCALE_FACTOR = 0.04;
 
 MapFrame::MapFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -400,7 +402,11 @@ void MapFrame::addMarker(const QPointF& markerPosition)
     if((!_scene) || (!_mapSource))
         return;
 
-    MapMarkerDialog dlg(MapMarker(), *_mapSource, this);
+    Campaign* campaign = dynamic_cast<Campaign*>(_mapSource->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    MapMarkerDialog dlg(MapMarker(), *campaign, this);
     dlg.resize(width() / 2, height() / 2);
     dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
     if(dlg.exec() == QDialog::Accepted)
@@ -408,7 +414,7 @@ void MapFrame::addMarker(const QPointF& markerPosition)
         MapMarker marker = dlg.getMarker();
         marker.setPosition(markerPosition.toPoint());
         UndoMarker* undoMarker = new UndoMarker(marker);
-        undoMarker->createMarkerItem(_scene, 0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
+        undoMarker->createMarkerItem(_scene, MAP_MARKER_SCALE_FACTOR * static_cast<qreal>(_mapSource->getPartyScale()));
         _mapSource->addMarker(undoMarker);
         emit dirty();
         setShowMarkers(true);
@@ -420,7 +426,11 @@ void MapFrame::editMapMarker(UndoMarker* marker)
     if((!_mapSource) || (!marker))
         return;
 
-    MapMarkerDialog dlg(marker->getMarker(), *_mapSource, this);
+    Campaign* campaign = dynamic_cast<Campaign*>(_mapSource->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    MapMarkerDialog dlg(marker->getMarker(), *campaign, this);
     dlg.resize(width() / 2, height() / 2);
     dlg.move(ui->graphicsView->mapFromScene(marker->getMarker().getPosition()) + mapToGlobal(ui->graphicsView->pos()));
     int result = dlg.exec();

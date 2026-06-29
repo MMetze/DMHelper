@@ -18,6 +18,9 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
+    void setShowParty(bool showParty);
+    void setShowMarkers(bool showMarkers);
+
     void setShowLiving(bool checked);
     void setShowDead(bool checked);
     void setShowEffects(bool checked);
@@ -25,6 +28,10 @@ public slots:
     void setLairActionsVisible(bool visible);
 
 signals:
+    void showPartyClicked(bool showParty);
+    void showMarkersClicked(bool showMarkers);
+    void addMarkerClicked();
+
     void addCharacterClicked();
     void addMonsterClicked();
     void addNPCClicked();

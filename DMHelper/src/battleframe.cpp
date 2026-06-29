@@ -15,6 +15,7 @@
 #include "bestiary.h"
 #include "characterv2.h"
 #include "mapselectdialog.h"
+#include "mapmarkerdialog.h"
 #include "combatantdialog.h"
 #include "unselectedpixmap.h"
 #include "battledialogmodel.h"
@@ -99,6 +100,18 @@ const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
 static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
 static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
+static constexpr qreal BATTLE_MARKER_SCALE_FACTOR = 0.04;
+
+static void connectBattleMarkerSignals(UndoMarker* marker, BattleFrame* frame, BattleDialogModel* model)
+{
+    if((!marker) || (!frame) || (!model))
+        return;
+
+    QObject::connect(marker, SIGNAL(mapMarkerMoved(UndoMarker*)), frame, SLOT(handleMarkerMoved(UndoMarker*)));
+    QObject::connect(marker, SIGNAL(mapMarkerMoved(UndoMarker*)), model, SIGNAL(dirty()));
+    QObject::connect(marker, SIGNAL(mapMarkerEdited(UndoMarker*)), frame, SLOT(editMapMarker(UndoMarker*)));
+    QObject::connect(marker, SIGNAL(unselectParty(bool)), frame, SLOT(setPartySelected(bool)));
+}
 
 // Fallback combatant-row UI used when the active ruleset does not specify one
 // via Ruleset::getCombatantUIFile() (i.e. the ruleset.xml has no
@@ -4300,6 +4313,122 @@ void BattleFrame::setModel(BattleDialogModel* model)
     emit modelChanged(_model);
 }
 
+void BattleFrame::setShowParty(bool showParty)
+{
+    if(!_model)
+        return;
+
+    _model->setShowParty(showParty);
+    checkPartyUpdate();
+    emit showPartyChanged(_model->getShowParty());
+}
+
+void BattleFrame::setShowMarkers(bool showMarkers)
+{
+    if(!_model)
+        return;
+
+    _model->setShowMarkers(showMarkers);
+    _model->cleanupMarkers();
+
+    if(showMarkers)
+    {
+        _model->initializeMarkers(_scene);
+        foreach(UndoMarker* marker, _model->getMarkers())
+            connectBattleMarkerSignals(marker, this, _model);
+    }
+
+    emit showMarkersChanged(_model->getShowMarkers());
+    emit markerChanged();
+}
+
+void BattleFrame::setPartySelected(bool selected)
+{
+    if(_partyIcon)
+        _partyIcon->setSelected(selected);
+}
+
+void BattleFrame::addNewMarker()
+{
+    QRect viewportRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
+    QPoint centerPos = viewportRect.topLeft() + QPoint(viewportRect.width() / 2, viewportRect.height() / 2);
+    addMarker(centerPos);
+}
+
+void BattleFrame::addMarker(const QPointF& markerPosition)
+{
+    if((!_scene) || (!_model) || (!_battle))
+        return;
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    MapMarkerDialog dlg(MapMarker(), *campaign, this);
+    dlg.resize(width() / 2, height() / 2);
+    dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        MapMarker marker = dlg.getMarker();
+        marker.setPosition(markerPosition.toPoint());
+
+        UndoMarker* undoMarker = new UndoMarker(marker);
+        _model->addMarker(undoMarker);
+        if(_model->getShowMarkers())
+        {
+            undoMarker->createMarkerItem(_scene, BATTLE_MARKER_SCALE_FACTOR * static_cast<qreal>(_model->getPartyScale()));
+            connectBattleMarkerSignals(undoMarker, this, _model);
+        }
+
+        emit markerChanged();
+        if(!_model->getShowMarkers())
+            setShowMarkers(true);
+    }
+}
+
+void BattleFrame::editMapMarker(UndoMarker* marker)
+{
+    if((!_model) || (!marker) || (!_battle))
+        return;
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return;
+
+    MapMarkerDialog dlg(marker->getMarker(), *campaign, this);
+    dlg.resize(width() / 2, height() / 2);
+    dlg.move(ui->graphicsView->mapFromScene(marker->getMarker().getPosition()) + mapToGlobal(ui->graphicsView->pos()));
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        marker->setMarker(dlg.getMarker());
+        emit markerChanged();
+        emit _model->dirty();
+    }
+    else if(result == MapMarkerDialog::MAPMARKERDIALOG_DELETE)
+    {
+        deleteMapMarker(marker);
+    }
+}
+
+void BattleFrame::deleteMapMarker(UndoMarker* marker)
+{
+    if((!_model) || (!marker))
+        return;
+
+    QMessageBox::StandardButton deleteConfirm = DMHMessageBox::question(this,
+                                                                      QString("Delete Marker"),
+                                                                      QString("Are you sure that you want to delete this marker?"));
+
+    if(deleteConfirm == QMessageBox::Yes)
+    {
+        if(marker->getMarkerItem())
+            marker->getMarkerItem()->setVisible(false);
+        _model->removeMarker(marker);
+        emit markerChanged();
+    }
+}
+
 Map* BattleFrame::selectRelatedMap()
 {
     if(!_battle)
@@ -5456,10 +5585,7 @@ void BattleFrame::createSceneContents()
         foreach(UndoMarker* marker, _model->getMarkers())
         {
             if(marker)
-            {
-                connect(marker, &UndoMarker::mapMarkerMoved, this, &BattleFrame::handleMarkerMoved);
-                connect(marker, &UndoMarker::mapMarkerMoved, _model, &BattleDialogModel::dirty);
-            }
+                connectBattleMarkerSignals(marker, this, _model);
         }
     }
 
@@ -5514,6 +5640,8 @@ void BattleFrame::handleMarkerMoved(UndoMarker* marker)
 
     if(marker->getMarkerItem())
         marker->getMarker().setPosition(marker->getMarkerItem()->pos().toPoint());
+
+    emit markerChanged();
 }
 
 void BattleFrame::resizeBattleMap()

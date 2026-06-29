@@ -127,6 +127,14 @@ public slots:
     void setCountdownFrame(const QString& countdownFrame);
     void createCountdownFrame();
 
+    void setShowParty(bool showParty);
+    void setShowMarkers(bool showMarkers);
+    void setPartySelected(bool selected);
+    void addNewMarker();
+    void addMarker(const QPointF& markerPosition);
+    void editMapMarker(UndoMarker* marker);
+    void deleteMapMarker(UndoMarker* marker);
+
     void zoomIn();
     void zoomOut();
     void zoomFit();
@@ -225,6 +233,10 @@ signals:
     void distanceToggled(bool enabled);
     void freeDistanceToggled(bool enabled);
     void distanceChanged(const QString&);
+
+    void showPartyChanged(bool showParty);
+    void showMarkersChanged(bool showMarkers);
+    void markerChanged();
 
     void mapMoveToggled();
 
