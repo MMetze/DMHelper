@@ -6,7 +6,7 @@
 namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 3;
-    const int DMHELPER_MINOR_VERSION = 9;
+    const int DMHELPER_MINOR_VERSION = 99;
     const int DMHELPER_ENGINEERING_VERSION = 1;
 
     // Bumping major versions of data files results in straight incompatibility
