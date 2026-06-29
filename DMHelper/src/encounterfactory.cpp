@@ -73,6 +73,11 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     {
         return new EncounterBattle();
     }
+    else if((element.tagName() == QString("map")) || (element.tagName() == QString("media")))
+    {
+        // Legacy maps are loaded as token-free battles for backwards compatibility
+        return new EncounterBattle();
+    }
     else if(element.tagName() == QString("scrolling-object")) // for backwards-compatibility only, see entry-object
     {
         return new EncounterText();

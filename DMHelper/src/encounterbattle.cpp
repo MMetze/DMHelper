@@ -157,6 +157,14 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
     QDomElement rootBattleElement = element.firstChildElement("battle");
     if(rootBattleElement.isNull())
     {
+        // Legacy map/media entries store model data on the entry element itself
+        if((element.tagName() == QString("map")) || (element.tagName() == QString("media")))
+        {
+            _battleModel = new BattleDialogModel(this);
+            _battleModel->inputXML(element, isImport);
+            return;
+        }
+
         _battleModel = createNewBattle(QPointF(0.0, 0.0));
         return;
     }
@@ -184,6 +192,8 @@ bool EncounterBattle::belongsToObject(QDomElement& element)
 {
     if((element.tagName() == QString("combatants")) || (element.tagName() == QString("waves")) || (element.tagName() == QString("battle")))
         return true;
+    else if((element.tagName() == QString("markers")) || (element.tagName() == QString("layer-scene")) || (element.tagName() == QString("actions")))
+        return true; // legacy map content consumed during conversion
     else
         return EncounterText::belongsToObject(element);
 }

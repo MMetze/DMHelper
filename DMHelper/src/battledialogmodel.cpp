@@ -33,7 +33,16 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _combatantTokenType(DMHelper::CombatantTokenType_CharactersAndMonsters),
     _activeCombatant(nullptr),
     _logger(),
-    _backgroundImage()
+    _backgroundImage(),
+    _partyId(),
+    _partyAltIcon(),
+    _partyIconPos(-1, -1),
+    _showParty(true),
+    _showMarkers(true),
+    _markerList(),
+    _lineType(Qt::SolidLine),
+    _lineColor(Qt::yellow),
+    _lineWidth(1)
 {
     if(_encounter)
         connect(this, &BattleDialogModel::dirty, _encounter, &EncounterBattle::dirty);
@@ -47,6 +56,7 @@ BattleDialogModel::~BattleDialogModel()
     qDeleteAll(_effects);
     qDeleteAll(_groups);
     qDeleteAll(_initiativeEvents);
+    qDeleteAll(_markerList);
     _layerScene.clearLayers();
 }
 
@@ -61,6 +71,10 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
                          element.attribute("cameraRectY", QString::number(0.0)).toDouble(),
                          element.attribute("cameraRectWidth", QString::number(0.0)).toDouble(),
                          element.attribute("cameraRectHeight", QString::number(0.0)).toDouble());
+    _mapRect = QRect(element.attribute("mapRectX", QString::number(0)).toInt(),
+                     element.attribute("mapRectY", QString::number(0)).toInt(),
+                     element.attribute("mapRectWidth", QString::number(0)).toInt(),
+                     element.attribute("mapRectHeight", QString::number(0)).toInt());
     // TODO: Layers - need this as backwards compability
     int gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
     _layerScene.setScale(gridScale);
@@ -69,6 +83,32 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showDead = static_cast<bool>(element.attribute("showDead", QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects", QString::number(1)).toInt());
     _showMovement = static_cast<bool>(element.attribute("showMovement", QString::number(1)).toInt());
+
+    // Map-derived content: party tracking, markers and distance tools
+    _lineType = element.attribute("lineType", QString::number(Qt::SolidLine)).toInt();
+    _lineColor = QColor(element.attribute("lineColor", QColor(Qt::yellow).name()));
+    _lineWidth = element.attribute("lineWidth", QString::number(1)).toInt();
+    _partyId = parseIdString(element.attribute("party"));
+    _partyAltIcon = element.attribute("partyalticon");
+    _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
+                           element.attribute("partyPosY", QString::number(-1)).toInt());
+    _showParty = static_cast<bool>(element.attribute("showparty", QString::number(1)).toInt());
+    _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
+
+    qDeleteAll(_markerList);
+    _markerList.clear();
+    QDomElement markersElement = element.firstChildElement(QString("markers"));
+    if(!markersElement.isNull())
+    {
+        QDomElement markerElement = markersElement.firstChildElement(QString("marker"));
+        while(!markerElement.isNull())
+        {
+            UndoMarker* newMarker = new UndoMarker(MapMarker());
+            newMarker->inputXML(markerElement, isImport);
+            _markerList.append(newMarker);
+            markerElement = markerElement.nextSiblingElement(QString("marker"));
+        }
+    }
 
     // Backwards compatibility: legacy battles persisted a showLairActions flag.
     // Convert it to a synthetic "Lair Actions" initiative event at init 20.
@@ -839,6 +879,143 @@ const LayerScene& BattleDialogModel::getLayerScene() const
     return _layerScene;
 }
 
+QUuid BattleDialogModel::getPartyId() const
+{
+    return _partyId;
+}
+
+QString BattleDialogModel::getPartyAltIcon() const
+{
+    return _partyAltIcon;
+}
+
+QPoint BattleDialogModel::getPartyIconPos() const
+{
+    return _partyIconPos;
+}
+
+bool BattleDialogModel::getShowParty() const
+{
+    return _showParty;
+}
+
+bool BattleDialogModel::getShowMarkers() const
+{
+    return _showMarkers;
+}
+
+QList<UndoMarker*> BattleDialogModel::getMarkers() const
+{
+    return _markerList;
+}
+
+int BattleDialogModel::getMarkerCount() const
+{
+    return _markerList.count();
+}
+
+int BattleDialogModel::getDistanceLineType() const
+{
+    return _lineType;
+}
+
+QColor BattleDialogModel::getDistanceLineColor() const
+{
+    return _lineColor;
+}
+
+int BattleDialogModel::getDistanceLineWidth() const
+{
+    return _lineWidth;
+}
+
+void BattleDialogModel::setPartyId(const QUuid& partyId)
+{
+    if(_partyId != partyId)
+    {
+        _partyId = partyId;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setPartyAltIcon(const QString& partyAltIcon)
+{
+    if(_partyAltIcon != partyAltIcon)
+    {
+        _partyAltIcon = partyAltIcon;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setPartyIconPos(const QPoint& pos)
+{
+    if(_partyIconPos != pos)
+    {
+        _partyIconPos = pos;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setShowParty(bool showParty)
+{
+    if(_showParty != showParty)
+    {
+        _showParty = showParty;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setShowMarkers(bool showMarkers)
+{
+    if(_showMarkers != showMarkers)
+    {
+        _showMarkers = showMarkers;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::addMarker(UndoMarker* marker)
+{
+    if(marker)
+    {
+        _markerList.append(marker);
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::removeMarker(UndoMarker* marker)
+{
+    if(_markerList.removeOne(marker))
+        emit dirty();
+}
+
+void BattleDialogModel::setDistanceLineType(int lineType)
+{
+    if(_lineType != lineType)
+    {
+        _lineType = lineType;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setDistanceLineColor(const QColor& color)
+{
+    if(_lineColor != color)
+    {
+        _lineColor = color;
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setDistanceLineWidth(int lineWidth)
+{
+    if(_lineWidth != lineWidth)
+    {
+        _lineWidth = lineWidth;
+        emit dirty();
+    }
+}
+
 void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
 {
     if(_map == map)
@@ -1072,7 +1249,12 @@ void BattleDialogModel::handleScaleChanged(Layer* layer)
 
     LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(nearestLayer);
     if(gridLayer)
+    {
+        // Keep the model's fallback scale in sync with the active grid so that
+        // removing the last grid layer retains its scale as the default.
+        _layerScene.setScale(gridLayer->getConfig().getGridScale());
         emit gridScaleChanged(gridLayer->getConfig());
+    }
 }
 
 void BattleDialogModel::resetCombatantSortValues()
@@ -1110,6 +1292,32 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("showEffects", _showEffects);
     element.setAttribute("showMovement", _showMovement);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
+
+    // Map-derived content: party tracking, markers and distance tools
+    element.setAttribute("lineType", _lineType);
+    element.setAttribute("lineColor", _lineColor.name());
+    element.setAttribute("lineWidth", _lineWidth);
+    element.setAttribute("party", _partyId.toString());
+    element.setAttribute("partyalticon", _partyAltIcon);
+    element.setAttribute("partyPosX", _partyIconPos.x());
+    element.setAttribute("partyPosY", _partyIconPos.y());
+    element.setAttribute("showparty", _showParty);
+    element.setAttribute("showMarkers", _showMarkers);
+
+    if(_markerList.count() > 0)
+    {
+        QDomElement markersElement = doc.createElement("markers");
+        for(UndoMarker* marker : _markerList)
+        {
+            if(marker)
+            {
+                QDomElement markerElement = doc.createElement("marker");
+                marker->outputXML(doc, markerElement, targetDirectory, isExport);
+                markersElement.appendChild(markerElement);
+            }
+        }
+        element.appendChild(markersElement);
+    }
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
 

@@ -96,6 +96,19 @@ public:
     BattleDialogModelCombatant* getActiveCombatant() const;
     QImage getBackgroundImage() const;
 
+    // Map-derived content: party tracking, markers and distance tools, ported
+    // from the legacy Map type so a token-free battle behaves like a map.
+    QUuid getPartyId() const;
+    QString getPartyAltIcon() const;
+    QPoint getPartyIconPos() const;
+    bool getShowParty() const;
+    bool getShowMarkers() const;
+    QList<UndoMarker*> getMarkers() const;
+    int getMarkerCount() const;
+    int getDistanceLineType() const;
+    QColor getDistanceLineColor() const;
+    int getDistanceLineWidth() const;
+
     LayerScene& getLayerScene();
     const LayerScene& getLayerScene() const;
 
@@ -113,6 +126,17 @@ public slots:
     void setBackgroundImage(QImage backgroundImage);
     void sortCombatants();
     void sortCombatantsBySortValue();
+
+    void setPartyId(const QUuid& partyId);
+    void setPartyAltIcon(const QString& partyAltIcon);
+    void setPartyIconPos(const QPoint& pos);
+    void setShowParty(bool showParty);
+    void setShowMarkers(bool showMarkers);
+    void addMarker(UndoMarker* marker);
+    void removeMarker(UndoMarker* marker);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineWidth(int lineWidth);
 
 signals:
     void mapChanged(Map* map);
@@ -185,6 +209,17 @@ private:
     BattleDialogLogger _logger;
 
     QImage _backgroundImage;
+
+    // Map-derived content ported from the legacy Map type
+    QUuid _partyId;
+    QString _partyAltIcon;
+    QPoint _partyIconPos;
+    bool _showParty;
+    bool _showMarkers;
+    QList<UndoMarker*> _markerList;
+    int _lineType;
+    QColor _lineColor;
+    int _lineWidth;
 };
 
 #endif // BATTLEDIALOGMODEL_H
