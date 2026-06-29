@@ -12,6 +12,10 @@
 class BattleDialogModelCombatantGroup;
 class BattleDialogModelInitiativeEvent;
 class EncounterBattle;
+class Party;
+class UndoMarker;
+class QGraphicsScene;
+class QPixmap;
 #include "map.h"
 #include "layer.h"
 class LayerGrid;
@@ -105,6 +109,11 @@ public:
     bool getShowMarkers() const;
     QList<UndoMarker*> getMarkers() const;
     int getMarkerCount() const;
+    Party* getParty() const;
+    QPixmap getPartyPixmap() const;
+    int getPartyScale() const;
+    void initializeMarkers(QGraphicsScene* scene);
+    void cleanupMarkers();
     int getDistanceLineType() const;
     QColor getDistanceLineColor() const;
     int getDistanceLineWidth() const;

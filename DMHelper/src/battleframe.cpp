@@ -29,6 +29,10 @@
 #include "battledialogmodelcombatantgroup.h"
 #include "itemselectdialog.h"
 #include "camerarect.h"
+#include "mappartyiconitem.h"
+#include "undomarker.h"
+#include "mapmarkergraphicsitem.h"
+#include "party.h"
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
 #include "combatantrolloverframe.h"
@@ -163,6 +167,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _selectedScale(1.0),
     _movementPixmap(nullptr),
     _cameraRect(nullptr),
+    _partyIcon(nullptr),
     _publishRectValue(),
     _includeHeight(false),
     _pitchHeight(0.0),
@@ -1832,16 +1837,22 @@ void BattleFrame::setDistanceScale(int scale)
 
 void BattleFrame::setDistanceLineColor(const QColor& color)
 {
+    if(_model)
+        _model->setDistanceLineColor(color);
     _scene->setDistanceLineColor(color);
 }
 
 void BattleFrame::setDistanceLineType(int lineType)
 {
+    if(_model)
+        _model->setDistanceLineType(lineType);
     _scene->setDistanceLineType(lineType);
 }
 
 void BattleFrame::setDistanceLineWidth(int lineWidth)
 {
+    if(_model)
+        _model->setDistanceLineWidth(lineWidth);
     _scene->setDistanceLineWidth(lineWidth);
 }
 
@@ -4168,6 +4179,9 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
         _model->setCombatantTokenType(_combatantTokenType);
+        _scene->setDistanceLineColor(_model->getDistanceLineColor());
+        _scene->setDistanceLineType(_model->getDistanceLineType());
+        _scene->setDistanceLineWidth(_model->getDistanceLineWidth());
         setBattleMap();
         recreateCombatantWidgets();
 
@@ -5258,6 +5272,11 @@ void BattleFrame::cleanupBattleMap()
     }
 
     // Clean up the old map
+    if((_model) && (_partyIcon))
+        _model->setPartyIconPos(_partyIcon->pos().toPoint());
+    if(_model)
+        _model->cleanupMarkers();
+    delete _partyIcon; _partyIcon = nullptr;
     _scene->clearBattleContents();
     delete _activePixmap; _activePixmap = nullptr;
     delete _cameraRect; _cameraRect = nullptr;
@@ -5363,7 +5382,71 @@ void BattleFrame::createSceneContents()
         }
     }
 
+    checkPartyUpdate();
+    if(_model->getShowMarkers())
+    {
+        _model->initializeMarkers(_scene);
+        foreach(UndoMarker* marker, _model->getMarkers())
+        {
+            if(marker)
+            {
+                connect(marker, &UndoMarker::mapMarkerMoved, this, &BattleFrame::handleMarkerMoved);
+                connect(marker, &UndoMarker::mapMarkerMoved, _model, &BattleDialogModel::dirty);
+            }
+        }
+    }
+
     updateHighlights();
+}
+
+void BattleFrame::checkPartyUpdate()
+{
+    if((!_model) || (!_scene))
+        return;
+
+    if((!_model->getShowParty()) ||
+       ((!_model->getParty()) && (_model->getPartyAltIcon().isEmpty())))
+    {
+        delete _partyIcon;
+        _partyIcon = nullptr;
+        return;
+    }
+
+    QPixmap partyPixmap = _model->getPartyPixmap();
+    if(partyPixmap.isNull())
+        return;
+
+    if(!_partyIcon)
+    {
+        _partyIcon = new MapPartyIconItem();
+        _scene->addItem(_partyIcon);
+        connect(_partyIcon, &MapPartyIconItem::positionChanged, this, &BattleFrame::handlePartyIconMoved);
+        if((_model->getPartyIconPos().x() == -1) && (_model->getPartyIconPos().y() == -1))
+            _model->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
+        _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
+        _partyIcon->setFlag(QGraphicsItem::ItemIsSelectable, true);
+        _partyIcon->setPos(_model->getPartyIconPos());
+        _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
+    }
+
+    qreal scaleFactor = (static_cast<qreal>(_model->getPartyScale() - 2)) / static_cast<qreal>(qMax(partyPixmap.width(), partyPixmap.height()));
+    _partyIcon->setScale(scaleFactor);
+    _partyIcon->setPixmap(partyPixmap);
+}
+
+void BattleFrame::handlePartyIconMoved(const QPointF& pos)
+{
+    if(_model)
+        _model->setPartyIconPos(pos.toPoint());
+}
+
+void BattleFrame::handleMarkerMoved(UndoMarker* marker)
+{
+    if((!_model) || (!marker))
+        return;
+
+    if(marker->getMarkerItem())
+        marker->getMarker().setPosition(marker->getMarkerItem()->pos().toPoint());
 }
 
 void BattleFrame::resizeBattleMap()

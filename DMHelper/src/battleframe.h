@@ -29,6 +29,8 @@ class QTimer;
 class RuleHealth;
 class CameraRect;
 class BattleCombatantFrame;
+class MapPartyIconItem;
+class UndoMarker;
 class QGraphicsPolygonItem;
 class QGraphicsRectItem;
 class QGraphicsLineItem;
@@ -247,6 +249,9 @@ private slots:
     void updateCombatantVisibility();
     void updateMap();
     void updateRounds();
+    void checkPartyUpdate();
+    void handlePartyIconMoved(const QPointF& pos);
+    void handleMarkerMoved(UndoMarker* marker);
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleGroupContextMenu(BattleDialogModelCombatantGroup* group, const QPoint& position);
     void handleGroupClicked(CombatantGroupWidget* groupWidget);
@@ -461,6 +466,7 @@ private:
     qreal _selectedScale;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;
+    MapPartyIconItem* _partyIcon;
     QRectF _publishRectValue;
     bool _includeHeight;
     qreal _pitchHeight;

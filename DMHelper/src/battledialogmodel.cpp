@@ -10,7 +10,11 @@
 #include "layerreference.h"
 #include "encounterbattle.h"
 #include "ruleinitiative.h"
+#include "party.h"
+#include "undomarker.h"
 #include <QDebug>
+
+static constexpr qreal MARKER_SCALE_FACTOR = 0.04;
 
 BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
@@ -912,6 +916,62 @@ QList<UndoMarker*> BattleDialogModel::getMarkers() const
 int BattleDialogModel::getMarkerCount() const
 {
     return _markerList.count();
+}
+
+Party* BattleDialogModel::getParty() const
+{
+    const Campaign* campaign = dynamic_cast<const Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return nullptr;
+
+    return const_cast<Party*>(dynamic_cast<const Party*>(campaign->getObjectById(_partyId)));
+}
+
+QPixmap BattleDialogModel::getPartyPixmap() const
+{
+    QPixmap partyPixmap;
+
+    Party* party = getParty();
+    if(party)
+    {
+        partyPixmap = party->getIconPixmap(DMHelper::PixmapSize_Battle);
+    }
+    else
+    {
+        if(partyPixmap.load(_partyAltIcon))
+            partyPixmap = partyPixmap.scaled(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0],
+                                             DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][1],
+                                             Qt::KeepAspectRatio,
+                                             Qt::SmoothTransformation);
+    }
+
+    return partyPixmap;
+}
+
+int BattleDialogModel::getPartyScale() const
+{
+    return getGridScale();
+}
+
+void BattleDialogModel::initializeMarkers(QGraphicsScene* scene)
+{
+    if(!scene)
+        return;
+
+    foreach(UndoMarker* marker, _markerList)
+    {
+        if(marker)
+            marker->createMarkerItem(scene, MARKER_SCALE_FACTOR * static_cast<qreal>(getPartyScale()));
+    }
+}
+
+void BattleDialogModel::cleanupMarkers()
+{
+    foreach(UndoMarker* marker, _markerList)
+    {
+        if(marker)
+            marker->cleanupMarkerItem();
+    }
 }
 
 int BattleDialogModel::getDistanceLineType() const
