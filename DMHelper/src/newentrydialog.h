@@ -14,6 +14,8 @@ class CampaignObjectBase;
 class QLabel;
 class VideoPlayerScreenshot;
 class Map;
+class Layer;
+class EncounterBattle;
 
 class NewEntryDialog : public QDialog
 {
@@ -43,6 +45,7 @@ protected:
     CampaignObjectBase* createMediaEntry();
     CampaignObjectBase* createMapEntry();
     CampaignObjectBase* createBattleEntry();
+    EncounterBattle* createTokenFreeBattle(Layer* mediaLayer, bool addFow);
 
 protected slots:
     void validateNewEntry();

@@ -401,17 +401,14 @@ CampaignObjectBase* NewEntryDialog::createMediaEntry()
         return nullptr;
     }
 
-    Map* mediaMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, getNewEntryName(), false));
-    if(!mediaMap)
-    {
-        delete mediaLayer;
+    EncounterBattle* mediaBattle = createTokenFreeBattle(mediaLayer, false);
+    if(!mediaBattle)
         return nullptr;
-    }
 
-    mediaMap->getLayerScene().appendLayer(mediaLayer);
-    mediaMap->getLayerScene().setScale(_gridSizeGuess);
+    mediaBattle->getBattleDialogModel()->getLayerScene().setScale(_gridSizeGuess);
+    mediaBattle->getBattleDialogModel()->setMapRect(mediaBattle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
 
-    return mediaMap;
+    return mediaBattle;
 }
 
 CampaignObjectBase* NewEntryDialog::createMapEntry()
@@ -435,24 +432,42 @@ CampaignObjectBase* NewEntryDialog::createMapEntry()
         return nullptr;
     }
 
-    Map* mediaMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, getNewEntryName(), false));
-    if(!mediaMap)
+    EncounterBattle* mapBattle = createTokenFreeBattle(mediaLayer, ui->chkMapFow->isChecked());
+    if(!mapBattle)
+        return nullptr;
+
+    mapBattle->getBattleDialogModel()->getLayerScene().setScale(_gridSizeGuess);
+    mapBattle->getBattleDialogModel()->setMapRect(mapBattle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
+
+    return mapBattle;
+}
+
+EncounterBattle* NewEntryDialog::createTokenFreeBattle(Layer* mediaLayer, bool addFow)
+{
+    EncounterBattle* battle = dynamic_cast<EncounterBattle*>(EncounterFactory().createObject(DMHelper::CampaignType_Battle, -1, getNewEntryName(), false));
+    if(!battle)
     {
         delete mediaLayer;
         return nullptr;
     }
 
-    mediaMap->getLayerScene().appendLayer(mediaLayer);
-
-    if(ui->chkMapFow->isChecked())
+    battle->createBattleDialogModel();
+    if(!battle->getBattleDialogModel())
     {
-        LayerFow* fowLayer = new LayerFow(QString("FoW"));
-        mediaMap->getLayerScene().appendLayer(fowLayer);
+        delete mediaLayer;
+        delete battle;
+        return nullptr;
     }
 
-    mediaMap->getLayerScene().setScale(_gridSizeGuess);
+    battle->getBattleDialogModel()->getLayerScene().appendLayer(mediaLayer);
 
-    return mediaMap;
+    if(addFow)
+    {
+        LayerFow* fowLayer = new LayerFow(QString("FoW"));
+        battle->getBattleDialogModel()->getLayerScene().appendLayer(fowLayer);
+    }
+
+    return battle;
 }
 
 CampaignObjectBase* NewEntryDialog::createBattleEntry()
@@ -477,7 +492,14 @@ CampaignObjectBase* NewEntryDialog::createBattleEntry()
         _referenceMap->initialize();
         _gridSizeGuess = _referenceMap->getLayerScene().getScale();
         battle->getBattleDialogModel()->getLayerScene().setScale(_gridSizeGuess);
-        //bool hasGrid = _referenceMap->getLayerScene().layerCount(DMHelper::LayerType_Grid) > 0;
+
+        // Ask whether to reference the source map's layers (shared, live) or
+        // to take an independent copy of them.
+        QMessageBox::StandardButton copyOrReference = DMHMessageBox::question(this,
+                                                          tr("Copy or Reference Map"),
+                                                          tr("Do you want to make an independent copy of the source map's layers?\n\n"
+                                                             "Yes: copy the layers into this battle.\nNo: reference the original (shared) layers."));
+        bool copyLayers = (copyOrReference == QMessageBox::Yes);
 
         // Create a grid after the first image layer, a monster token layer before the FoW
         for(int i = 0; i < _referenceMap->getLayerScene().layerCount(); ++i)
@@ -491,7 +513,10 @@ CampaignObjectBase* NewEntryDialog::createBattleEntry()
                     battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
                 }
 
-                battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(_referenceMap, layer, layer->getOrder()));
+                if(copyLayers)
+                    battle->getBattleDialogModel()->getLayerScene().appendLayer(layer->clone());
+                else
+                    battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(_referenceMap, layer, layer->getOrder()));
             }
         }
     }
