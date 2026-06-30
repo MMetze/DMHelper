@@ -183,6 +183,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _movementPixmap(nullptr),
     _cameraRect(nullptr),
     _partyIcon(nullptr),
+    _trackedParty(nullptr),
     _publishRectValue(),
     _includeHeight(false),
     _pitchHeight(0.0),
@@ -4367,8 +4368,23 @@ void BattleFrame::setParty(Party* party)
     if(!_model)
         return;
 
+    if(_trackedParty)
+    {
+        disconnect(_trackedParty, &Party::dirty, this, &BattleFrame::handleTrackedPartyDirty);
+        disconnect(_trackedParty, &Party::CampaignObjectBase::campaignObjectDestroyed, this, &BattleFrame::handleTrackedPartyDestroyed);
+    }
+
+    _trackedParty = party;
+    if(_trackedParty)
+    {
+        connect(_trackedParty, &Party::dirty, this, &BattleFrame::handleTrackedPartyDirty, Qt::UniqueConnection);
+        connect(_trackedParty, &Party::CampaignObjectBase::campaignObjectDestroyed, this, &BattleFrame::handleTrackedPartyDestroyed, Qt::UniqueConnection);
+    }
+
     _model->setPartyId(party ? party->getID() : QUuid());
     checkPartyUpdate();
+    if(_renderer)
+        _renderer->partyTokenChanged();
     emit partyChanged(party);
 }
 
@@ -4377,8 +4393,17 @@ void BattleFrame::setPartyIcon(const QString& partyIcon)
     if(!_model)
         return;
 
+    if(_trackedParty)
+    {
+        disconnect(_trackedParty, &Party::dirty, this, &BattleFrame::handleTrackedPartyDirty);
+        disconnect(_trackedParty, &Party::CampaignObjectBase::campaignObjectDestroyed, this, &BattleFrame::handleTrackedPartyDestroyed);
+        _trackedParty = nullptr;
+    }
+
     _model->setPartyAltIcon(partyIcon);
     checkPartyUpdate();
+    if(_renderer)
+        _renderer->partyTokenChanged();
     emit partyIconChanged(_model->getPartyAltIcon());
 }
 
@@ -5692,6 +5717,29 @@ void BattleFrame::checkPartyUpdate()
     qreal scaleFactor = (static_cast<qreal>(_model->getPartyScale() - 2)) / static_cast<qreal>(qMax(partyPixmap.width(), partyPixmap.height()));
     _partyIcon->setScale(scaleFactor);
     _partyIcon->setPixmap(partyPixmap);
+}
+
+void BattleFrame::handleTrackedPartyDirty()
+{
+    if((!_model) || (!_trackedParty))
+        return;
+
+    if(_model->getPartyId() != _trackedParty->getID())
+        return;
+
+    checkPartyUpdate();
+    if(_renderer)
+        _renderer->partyTokenChanged();
+    emit partyChanged(_trackedParty);
+}
+
+void BattleFrame::handleTrackedPartyDestroyed()
+{
+    _trackedParty = nullptr;
+    checkPartyUpdate();
+    if(_renderer)
+        _renderer->partyTokenChanged();
+    emit partyChanged(nullptr);
 }
 
 void BattleFrame::handlePartyIconMoved(const QPointF& pos)

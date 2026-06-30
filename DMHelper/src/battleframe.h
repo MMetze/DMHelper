@@ -270,6 +270,8 @@ private slots:
     void updateMap();
     void updateRounds();
     void checkPartyUpdate();
+    void handleTrackedPartyDirty();
+    void handleTrackedPartyDestroyed();
     void handlePartyIconMoved(const QPointF& pos);
     void handleMarkerMoved(UndoMarker* marker);
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
@@ -487,6 +489,7 @@ private:
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;
     MapPartyIconItem* _partyIcon;
+    Party* _trackedParty;
     QRectF _publishRectValue;
     bool _includeHeight;
     qreal _pitchHeight;

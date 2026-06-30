@@ -991,8 +991,9 @@ int BattleDialogModel::getDistanceLineWidth() const
 
 void BattleDialogModel::setPartyId(const QUuid& partyId)
 {
-    if(_partyId != partyId)
+    if((_partyId != partyId) || (!_partyAltIcon.isEmpty()))
     {
+        _partyAltIcon = QString();
         _partyId = partyId;
         emit dirty();
     }
@@ -1000,8 +1001,9 @@ void BattleDialogModel::setPartyId(const QUuid& partyId)
 
 void BattleDialogModel::setPartyAltIcon(const QString& partyAltIcon)
 {
-    if(_partyAltIcon != partyAltIcon)
+    if((_partyAltIcon != partyAltIcon) || (!_partyId.isNull()))
     {
+        _partyId = QUuid();
         _partyAltIcon = partyAltIcon;
         emit dirty();
     }

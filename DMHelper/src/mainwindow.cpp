@@ -2947,8 +2947,18 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
-        _ribbonTabBattle->setParty(model->getParty());
-        _ribbonTabBattle->setPartyIcon(model->getPartyAltIcon());
+
+        Party* activeParty = model->getParty();
+        if(activeParty)
+        {
+            _ribbonTabBattle->setParty(activeParty);
+        }
+        else
+        {
+            _ribbonTabBattle->setParty(nullptr);
+            _ribbonTabBattle->setPartyIcon(model->getPartyAltIcon());
+        }
+
         _ribbonTabBattle->setShowParty(model->getShowParty());
         _ribbonTabBattle->setShowMarkers(model->getShowMarkers());
         connect(_ribbonTabBattle, &RibbonTabBattle::partySelected, _battleFrame, &BattleFrame::setParty, Qt::UniqueConnection);

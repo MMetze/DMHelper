@@ -77,6 +77,7 @@ protected slots:
 private:
     Ui::RibbonTabBattle *ui;
     QMenu* _partyMenu;
+    Party* _activeParty;
 };
 
 class RibbonTabBattle_PartyAction : public QAction

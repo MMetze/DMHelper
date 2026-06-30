@@ -4,23 +4,26 @@
 #include <QMenu>
 #include <QFileDialog>
 
+static const char* const DEFAULT_PARTY_TOKEN_ICON_FILE = ":/img/data/icon_contentparty.png";
+
 RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     RibbonFrame(parent),
     ui(new Ui::RibbonTabBattle),
-    _partyMenu(new QMenu(this))
+    _partyMenu(new QMenu(this)),
+    _activeParty(nullptr)
 {
     ui->setupUi(this);
 
     connect(ui->btnShowParty, SIGNAL(clicked(bool)), this, SIGNAL(showPartyClicked(bool)));
     ui->btnShowParty->setMenu(_partyMenu);
     RibbonTabBattle_PartyAction* defaultAction = new RibbonTabBattle_PartyAction(nullptr, RibbonTabBattle_PartyAction::PartyActionType_Default);
-    defaultAction->setIcon(QIcon(":/img/data/icon_contentparty.png"));
-    defaultAction->setText(QString("Default Icon"));
+    defaultAction->setIcon(QIcon(DEFAULT_PARTY_TOKEN_ICON_FILE));
+    defaultAction->setText(QString("Default Token"));
     _partyMenu->addAction(defaultAction);
     selectPartyAction(defaultAction);
 
     RibbonTabBattle_PartyAction* chooseAction = new RibbonTabBattle_PartyAction(nullptr, RibbonTabBattle_PartyAction::PartyActionType_Select);
-    chooseAction->setText(QString("Choose icon..."));
+    chooseAction->setText(QString("Choose Token..."));
     _partyMenu->addAction(chooseAction);
 
     _partyMenu->addSeparator();
@@ -89,7 +92,13 @@ PublishButtonRibbon* RibbonTabBattle::getPublishRibbon()
 void RibbonTabBattle::setParty(Party* party)
 {
     if(!party)
+    {
+        _activeParty = nullptr;
+        setPartyButtonIcon(QIcon(DEFAULT_PARTY_TOKEN_ICON_FILE));
         return;
+    }
+
+    _activeParty = party;
 
     QList<QAction*> actionList = _partyMenu->actions();
     for(QAction* action : actionList)
@@ -106,7 +115,12 @@ void RibbonTabBattle::setParty(Party* party)
 
 void RibbonTabBattle::setPartyIcon(const QString& partyIcon)
 {
-    if(!partyIcon.isEmpty())
+    if(partyIcon.isEmpty())
+    {
+        if(!_activeParty)
+            setPartyButtonIcon(QIcon(DEFAULT_PARTY_TOKEN_ICON_FILE));
+    }
+    else
         setPartyButtonIcon(QIcon(partyIcon));
 }
 
@@ -206,16 +220,24 @@ void RibbonTabBattle::selectPartyAction(QAction* action)
     switch(partyAction->getPartyType())
     {
         case RibbonTabBattle_PartyAction::PartyActionType_Party:
-            emit partySelected(partyAction->getParty());
+            if((partyAction->getParty()) && (partyAction->getParty() != _activeParty))
+            {
+                _activeParty = partyAction->getParty();
+                emit partySelected(partyAction->getParty());
+            }
             break;
         case RibbonTabBattle_PartyAction::PartyActionType_Default:
-            emit partyIconSelected(QString(":/img/data/icon_contentparty.png"));
+            _activeParty = nullptr;
+            emit partyIconSelected(QString(DEFAULT_PARTY_TOKEN_ICON_FILE));
             break;
         case RibbonTabBattle_PartyAction::PartyActionType_Select:
         {
             QString iconFile = QFileDialog::getOpenFileName(nullptr, QString("Select party token image file"));
             if(!iconFile.isEmpty())
+            {
+                _activeParty = nullptr;
                 emit partyIconSelected(iconFile);
+            }
             break;
         }
         default:

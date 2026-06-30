@@ -710,7 +710,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Show Party</string>
+        <string>Party</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>

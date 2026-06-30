@@ -65,6 +65,7 @@ public slots:
     void setCountdownFrame(const QString& countdownFrame);
     void setShowCountdown(bool showCountdown);
     void setCountdownValues(qreal countdown, const QColor& countdownColor);
+    void partyTokenChanged();
 
 protected:
     // Background overrides
@@ -73,6 +74,7 @@ protected:
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
     virtual void updateBackground();
+    void updatePartyToken();
 
     virtual void updateSelectionTokens();
     void updateTokens();
@@ -150,10 +152,12 @@ protected:
     QGraphicsSimpleTextItem* _lineText;
     PublishGLImage* _lineImage;
     PublishGLImage* _lineTextImage;
+    PublishGLImage* _partyToken;
 
     bool _updateSelectionTokens;
     bool _updateInitiative;
     bool _updateTokens;
+    bool _updatePartyToken;
     bool _recreateContent;
 };
 

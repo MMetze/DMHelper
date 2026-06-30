@@ -23,6 +23,7 @@
 // #define DEBUG_BATTLE_RENDERER
 
 const int MOVEMENT_TOKEN_SIZE = 512;
+static constexpr int PARTY_SCALE_OFFSET = 2;
 
 PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObject *parent) :
     PublishGLRenderer(parent),
@@ -74,9 +75,11 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _lineText(nullptr),
     _lineImage(nullptr),
     _lineTextImage(nullptr),
+    _partyToken(nullptr),
     _updateSelectionTokens(false),
     _updateInitiative(false),
     _updateTokens(false),
+    _updatePartyToken(false),
     _recreateContent(false)
 {
     if(_model)
@@ -234,6 +237,7 @@ void PublishGLBattleRenderer::initializeGL()
     connect(_model, &BattleDialogModel::showAliveChanged, this, &PublishGLBattleRenderer::updateWidget);
     connect(_model, &BattleDialogModel::showDeadChanged, this, &PublishGLBattleRenderer::updateWidget);
     connect(_model, &BattleDialogModel::showEffectsChanged, this, &PublishGLBattleRenderer::updateWidget);
+    connect(_model, SIGNAL(dirty()), this, SLOT(partyTokenChanged()));
 
     _initialized = true;
 }
@@ -252,6 +256,7 @@ void PublishGLBattleRenderer::cleanupGL()
     disconnect(_model, &BattleDialogModel::showAliveChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::showDeadChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::showEffectsChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, SIGNAL(dirty()), this, SLOT(partyTokenChanged()));
 
     cleanupContents();
 
@@ -313,6 +318,9 @@ void PublishGLBattleRenderer::paintGL()
 
         if(_updateTokens)
             updateTokens();
+
+        if(_updatePartyToken)
+            updatePartyToken();
     }
 
     evaluatePointer();
@@ -343,6 +351,13 @@ void PublishGLBattleRenderer::paintGL()
     }
 
     _model->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
+
+    if(_partyToken)
+    {
+        DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _partyToken->getMatrixData(), _partyToken->getMatrix());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _partyToken->getMatrixData());
+        _partyToken->paintGL(f, nullptr);
+    }
 
     if(_lineImage)
     {
@@ -563,8 +578,50 @@ void PublishGLBattleRenderer::setCountdownValues(qreal countdown, const QColor& 
     emit updateWidget();
 }
 
+void PublishGLBattleRenderer::partyTokenChanged()
+{
+    _updatePartyToken = true;
+    emit updateWidget();
+}
+
 void PublishGLBattleRenderer::updateBackground()
 {
+}
+
+void PublishGLBattleRenderer::updatePartyToken()
+{
+    if(!_model)
+        return;
+
+    if((!_model->getShowParty()) || ((!_model->getParty()) && (_model->getPartyAltIcon().isEmpty())))
+    {
+        delete _partyToken;
+        _partyToken = nullptr;
+        _updatePartyToken = false;
+        return;
+    }
+
+    QPixmap partyPixmap = _model->getPartyPixmap();
+    if(partyPixmap.isNull())
+    {
+        _updatePartyToken = false;
+        return;
+    }
+
+    if(!_partyToken)
+        _partyToken = new PublishGLImage(partyPixmap.toImage());
+    else
+        _partyToken->updateImage(partyPixmap.toImage());
+
+    QPoint partyPosition = _model->getPartyIconPos();
+    if((partyPosition.x() == -1) && (partyPosition.y() == -1))
+        partyPosition = QPoint(static_cast<int>(_scene.getSceneRect().width() / 2.0), static_cast<int>(_scene.getSceneRect().height() / 2.0));
+
+    QPointF worldPosition = PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), partyPosition);
+    qreal scaleFactor = (static_cast<qreal>(_model->getPartyScale() - PARTY_SCALE_OFFSET)) / static_cast<qreal>(qMax(partyPixmap.width(), partyPixmap.height()));
+    _partyToken->setPositionScale(worldPosition, static_cast<float>(scaleFactor));
+
+    _updatePartyToken = false;
 }
 
 void PublishGLBattleRenderer::updateSelectionTokens()
@@ -654,6 +711,7 @@ void PublishGLBattleRenderer::createContents()
     updateSelectionTokens();
     createLineToken();
     updateTokens();
+    updatePartyToken();
 
     // Todo: move this into updateInitiative to avoid calling createContents when the init type is changed
     QFontMetrics fm(qApp->font());
@@ -719,6 +777,7 @@ void PublishGLBattleRenderer::cleanupContents()
     delete _movementToken; _movementToken = nullptr;
     delete _lineImage; _lineImage = nullptr;
     delete _lineTextImage; _lineTextImage = nullptr;
+    delete _partyToken; _partyToken = nullptr;
 
     qDeleteAll(_combatantTokens); _combatantTokens.clear();
     qDeleteAll(_combatantNames); _combatantNames.clear();
