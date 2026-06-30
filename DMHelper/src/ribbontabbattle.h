@@ -2,10 +2,14 @@
 #define RIBBONTABBATTLE_H
 
 #include "ribbonframe.h"
+#include <QAction>
 
 namespace Ui {
 class RibbonTabBattle;
 }
+
+class Party;
+class QMenu;
 
 class RibbonTabBattle : public RibbonFrame
 {
@@ -18,6 +22,11 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
+    void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
+    void registerPartyIcon(Party* party);
+    void removePartyIcon(Party* party);
+    void clearPartyIcons();
     void setShowParty(bool showParty);
     void setShowMarkers(bool showMarkers);
 
@@ -28,6 +37,9 @@ public slots:
     void setLairActionsVisible(bool visible);
 
 signals:
+    void partySelected(Party* party);
+    void partyIconSelected(const QString& partyIcon);
+
     void showPartyClicked(bool showParty);
     void showMarkersClicked(bool showMarkers);
     void addMarkerClicked();
@@ -58,10 +70,41 @@ protected:
     virtual void showEvent(QShowEvent *event) override;
 
 protected slots:
+    void selectPartyAction(QAction* action);
+    void setPartyButtonIcon(const QIcon &icon);
     void selectEffectAction(QAction* action);
 
 private:
     Ui::RibbonTabBattle *ui;
+    QMenu* _partyMenu;
+};
+
+class RibbonTabBattle_PartyAction : public QAction
+{
+    Q_OBJECT
+
+public:
+    enum PartyActionType
+    {
+        PartyActionType_Invalid = -1,
+        PartyActionType_Party = 0,
+        PartyActionType_Default,
+        PartyActionType_Select
+    };
+
+    explicit RibbonTabBattle_PartyAction(Party* party, int partyType = PartyActionType_Party, QObject *parent = nullptr);
+    virtual ~RibbonTabBattle_PartyAction() override;
+
+    Party* getParty() const;
+    int getPartyType() const;
+
+public slots:
+    void updateParty();
+    void partyDestroyed();
+
+protected:
+    Party* _party;
+    int _partyType;
 };
 
 #endif // RIBBONTABBATTLE_H

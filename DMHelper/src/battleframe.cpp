@@ -101,6 +101,7 @@ const qreal COUNTDOWN_TIMER = 0.05;
 static constexpr qreal GRID_SIZER_MAX_MAP_RATIO = 0.5;
 static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
 static constexpr qreal BATTLE_MARKER_SCALE_FACTOR = 0.04;
+static const char* const DEFAULT_PARTY_ICON_FILE = ":/img/data/icon_contentparty.png";
 
 static void connectBattleMarkerSignals(UndoMarker* marker, BattleFrame* frame, BattleDialogModel* model)
 {
@@ -4350,9 +4351,43 @@ void BattleFrame::setShowParty(bool showParty)
     if(!_model)
         return;
 
+    if((showParty) && (!_model->getParty()) && (_model->getPartyAltIcon().isEmpty()))
+    {
+        _model->setPartyAltIcon(QString(DEFAULT_PARTY_ICON_FILE));
+        emit partyIconChanged(_model->getPartyAltIcon());
+    }
+
     _model->setShowParty(showParty);
     checkPartyUpdate();
     emit showPartyChanged(_model->getShowParty());
+}
+
+void BattleFrame::setParty(Party* party)
+{
+    if(!_model)
+        return;
+
+    _model->setPartyId(party ? party->getID() : QUuid());
+    checkPartyUpdate();
+    emit partyChanged(party);
+}
+
+void BattleFrame::setPartyIcon(const QString& partyIcon)
+{
+    if(!_model)
+        return;
+
+    _model->setPartyAltIcon(partyIcon);
+    checkPartyUpdate();
+    emit partyIconChanged(_model->getPartyAltIcon());
+}
+
+void BattleFrame::setPartyScale(int partyScale)
+{
+    setGridScale(partyScale);
+
+    if(_model)
+        emit partyScaleChanged(_model->getPartyScale());
 }
 
 void BattleFrame::setShowMarkers(bool showMarkers)

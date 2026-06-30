@@ -38,6 +38,7 @@ class CombatantRolloverFrame;
 class PublishGLBattleRenderer;
 class LayerTokens;
 class LayerDrawEngine;
+class Party;
 
 namespace Ui {
 class BattleFrame;
@@ -127,6 +128,9 @@ public slots:
     void createCountdownFrame();
 
     void setShowParty(bool showParty);
+    void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
+    void setPartyScale(int partyScale);
     void setShowMarkers(bool showMarkers);
     void setPartySelected(bool selected);
     void addNewMarker();
@@ -234,6 +238,9 @@ signals:
     void distanceChanged(const QString&);
 
     void showPartyChanged(bool showParty);
+    void partyChanged(Party* party);
+    void partyIconChanged(const QString& partyIcon);
+    void partyScaleChanged(int partyScale);
     void showMarkersChanged(bool showMarkers);
     void markerChanged();
 

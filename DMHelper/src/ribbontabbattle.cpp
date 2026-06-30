@@ -1,14 +1,31 @@
 #include "ribbontabbattle.h"
 #include "ui_ribbontabbattle.h"
+#include "party.h"
 #include <QMenu>
+#include <QFileDialog>
 
 RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     RibbonFrame(parent),
-    ui(new Ui::RibbonTabBattle)
+    ui(new Ui::RibbonTabBattle),
+    _partyMenu(new QMenu(this))
 {
     ui->setupUi(this);
 
     connect(ui->btnShowParty, SIGNAL(clicked(bool)), this, SIGNAL(showPartyClicked(bool)));
+    ui->btnShowParty->setMenu(_partyMenu);
+    RibbonTabBattle_PartyAction* defaultAction = new RibbonTabBattle_PartyAction(nullptr, RibbonTabBattle_PartyAction::PartyActionType_Default);
+    defaultAction->setIcon(QIcon(":/img/data/icon_contentparty.png"));
+    defaultAction->setText(QString("Default Icon"));
+    _partyMenu->addAction(defaultAction);
+    selectPartyAction(defaultAction);
+
+    RibbonTabBattle_PartyAction* chooseAction = new RibbonTabBattle_PartyAction(nullptr, RibbonTabBattle_PartyAction::PartyActionType_Select);
+    chooseAction->setText(QString("Choose icon..."));
+    _partyMenu->addAction(chooseAction);
+
+    _partyMenu->addSeparator();
+    connect(_partyMenu, &QMenu::triggered, this, &RibbonTabBattle::selectPartyAction);
+
     connect(ui->btnShowMarkers, SIGNAL(clicked(bool)), this, SIGNAL(showMarkersClicked(bool)));
     connect(ui->btnAddMarker, SIGNAL(clicked()), this, SIGNAL(addMarkerClicked()));
     connect(ui->btnAddCharacter, SIGNAL(clicked(bool)), this, SIGNAL(addCharacterClicked()));
@@ -69,6 +86,73 @@ PublishButtonRibbon* RibbonTabBattle::getPublishRibbon()
     return ui->framePublish;
 }
 
+void RibbonTabBattle::setParty(Party* party)
+{
+    if(!party)
+        return;
+
+    QList<QAction*> actionList = _partyMenu->actions();
+    for(QAction* action : actionList)
+    {
+        RibbonTabBattle_PartyAction* partyAction = dynamic_cast<RibbonTabBattle_PartyAction*>(action);
+        if((partyAction) && (partyAction->getParty() == party))
+        {
+            if(!partyAction->icon().isNull())
+                setPartyButtonIcon(partyAction->icon());
+            return;
+        }
+    }
+}
+
+void RibbonTabBattle::setPartyIcon(const QString& partyIcon)
+{
+    if(!partyIcon.isEmpty())
+        setPartyButtonIcon(QIcon(partyIcon));
+}
+
+void RibbonTabBattle::registerPartyIcon(Party* party)
+{
+    if((!party) || (!_partyMenu))
+        return;
+
+    QList<QAction*> actionList = _partyMenu->actions();
+    for(QAction* action : actionList)
+    {
+        RibbonTabBattle_PartyAction* partyAction = dynamic_cast<RibbonTabBattle_PartyAction*>(action);
+        if((partyAction) && (partyAction->getParty() == party))
+        {
+            partyAction->updateParty();
+            return;
+        }
+    }
+
+    QAction* newAction = new RibbonTabBattle_PartyAction(party);
+    _partyMenu->addAction(newAction);
+    if((_partyMenu->actions().count() <= 4) && (!newAction->icon().isNull()))
+        setPartyButtonIcon(newAction->icon());
+}
+
+void RibbonTabBattle::removePartyIcon(Party* party)
+{
+    QList<QAction*> actionList = _partyMenu->actions();
+    for(QAction* action : actionList)
+    {
+        RibbonTabBattle_PartyAction* partyAction = dynamic_cast<RibbonTabBattle_PartyAction*>(action);
+        if((partyAction) && (partyAction->getParty() == party))
+        {
+            _partyMenu->removeAction(partyAction);
+            return;
+        }
+    }
+}
+
+void RibbonTabBattle::clearPartyIcons()
+{
+    QList<QAction*> actionList = _partyMenu->actions();
+    while(actionList.count() > 3)
+        delete actionList.takeAt(3);
+}
+
 void RibbonTabBattle::setShowParty(bool showParty)
 {
     if(ui->btnShowParty->isChecked() != showParty)
@@ -107,6 +191,43 @@ void RibbonTabBattle::setLairActionsVisible(bool visible)
     ui->lblLairActions->setVisible(visible);
 }
 
+void RibbonTabBattle::selectPartyAction(QAction* action)
+{
+    if(!action)
+        return;
+
+    if(!action->icon().isNull())
+        setPartyButtonIcon(action->icon());
+
+    RibbonTabBattle_PartyAction* partyAction = dynamic_cast<RibbonTabBattle_PartyAction*>(action);
+    if(!partyAction)
+        return;
+
+    switch(partyAction->getPartyType())
+    {
+        case RibbonTabBattle_PartyAction::PartyActionType_Party:
+            emit partySelected(partyAction->getParty());
+            break;
+        case RibbonTabBattle_PartyAction::PartyActionType_Default:
+            emit partyIconSelected(QString(":/img/data/icon_contentparty.png"));
+            break;
+        case RibbonTabBattle_PartyAction::PartyActionType_Select:
+        {
+            QString iconFile = QFileDialog::getOpenFileName(nullptr, QString("Select party token image file"));
+            if(!iconFile.isEmpty())
+                emit partyIconSelected(iconFile);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void RibbonTabBattle::setPartyButtonIcon(const QIcon &icon)
+{
+    ui->btnShowParty->setIcon(icon);
+}
+
 void RibbonTabBattle::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
@@ -142,4 +263,45 @@ void RibbonTabBattle::selectEffectAction(QAction* action)
     ui->btnEffects->setDefaultAction(action);
     ui->btnEffects->setIcon(action->icon());
     ui->btnEffects->setToolTip(action->text());
+}
+
+RibbonTabBattle_PartyAction::RibbonTabBattle_PartyAction(Party* party, int partyType, QObject *parent) :
+    QAction(parent),
+    _party(party),
+    _partyType(partyType)
+{
+    updateParty();
+    if(_party)
+    {
+        connect(_party, &Party::dirty, this, &RibbonTabBattle_PartyAction::updateParty);
+        connect(_party, &Party::CampaignObjectBase::campaignObjectDestroyed, this, &RibbonTabBattle_PartyAction::partyDestroyed);
+    }
+}
+
+RibbonTabBattle_PartyAction::~RibbonTabBattle_PartyAction()
+{
+}
+
+Party* RibbonTabBattle_PartyAction::getParty() const
+{
+    return _party;
+}
+
+int RibbonTabBattle_PartyAction::getPartyType() const
+{
+    return _partyType;
+}
+
+void RibbonTabBattle_PartyAction::updateParty()
+{
+    if(_party)
+    {
+        setIcon(QIcon(_party->getIconPixmap(DMHelper::PixmapSize_Battle)));
+        setText(_party->getName());
+    }
+}
+
+void RibbonTabBattle_PartyAction::partyDestroyed()
+{
+    _party = nullptr;
 }

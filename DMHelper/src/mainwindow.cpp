@@ -558,9 +558,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
     connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), _battleFrame, SLOT(addEffectObject()));
     connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), _battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(partySelected(Party*)), _battleFrame, SLOT(setParty(Party*)));
+    connect(_ribbonTabBattle, SIGNAL(partyIconSelected(const QString&)), _battleFrame, SLOT(setPartyIcon(const QString&)));
     connect(_ribbonTabBattle, SIGNAL(showPartyClicked(bool)), _battleFrame, SLOT(setShowParty(bool)));
     connect(_ribbonTabBattle, SIGNAL(showMarkersClicked(bool)), _battleFrame, SLOT(setShowMarkers(bool)));
     connect(_ribbonTabBattle, SIGNAL(addMarkerClicked()), _battleFrame, SLOT(addNewMarker()));
+    connect(_battleFrame, SIGNAL(partyChanged(Party*)), _ribbonTabBattle, SLOT(setParty(Party*)));
+    connect(_battleFrame, SIGNAL(partyIconChanged(const QString&)), _ribbonTabBattle, SLOT(setPartyIcon(const QString&)));
     connect(_battleFrame, SIGNAL(showPartyChanged(bool)), _ribbonTabBattle, SLOT(setShowParty(bool)));
     connect(_battleFrame, SIGNAL(showMarkersChanged(bool)), _ribbonTabBattle, SLOT(setShowMarkers(bool)));
     connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), _battleFrame, SLOT(addEffectRadius()));
@@ -962,6 +966,8 @@ void MainWindow::importItem()
 void MainWindow::newParty()
 {
     Party* newParty = dynamic_cast<Party*>(newEncounter(DMHelper::CampaignType_Party));
+    if(newParty)
+        _ribbonTabBattle->registerPartyIcon(newParty);
 }
 
 void MainWindow::newTextEncounter()
@@ -2141,6 +2147,10 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
 
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
+        _ribbonTabBattle->clearPartyIcons();
+        QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);
+        for(CampaignObjectBase* party : parties)
+            _ribbonTabBattle->registerPartyIcon(dynamic_cast<Party*>(party));
     }
     else
     {
@@ -2152,6 +2162,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         setRibbonToType(DMHelper::CampaignType_WelcomeScreen);
         _ribbon->setCurrentIndex(0); // Shift to the File tab
         _ribbonTabCampaign->setAddPCButton(false);
+        _ribbonTabBattle->clearPartyIcons();
 
         // Reset the monster UI to the default
         //RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
@@ -2936,11 +2947,17 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
+        _ribbonTabBattle->setParty(model->getParty());
+        _ribbonTabBattle->setPartyIcon(model->getPartyAltIcon());
         _ribbonTabBattle->setShowParty(model->getShowParty());
         _ribbonTabBattle->setShowMarkers(model->getShowMarkers());
+        connect(_ribbonTabBattle, &RibbonTabBattle::partySelected, _battleFrame, &BattleFrame::setParty, Qt::UniqueConnection);
+        connect(_ribbonTabBattle, &RibbonTabBattle::partyIconSelected, _battleFrame, &BattleFrame::setPartyIcon, Qt::UniqueConnection);
         connect(_ribbonTabBattle, &RibbonTabBattle::showPartyClicked, _battleFrame, &BattleFrame::setShowParty, Qt::UniqueConnection);
         connect(_ribbonTabBattle, &RibbonTabBattle::showMarkersClicked, _battleFrame, &BattleFrame::setShowMarkers, Qt::UniqueConnection);
         connect(_ribbonTabBattle, &RibbonTabBattle::addMarkerClicked, _battleFrame, &BattleFrame::addNewMarker, Qt::UniqueConnection);
+        connect(_battleFrame, &BattleFrame::partyChanged, _ribbonTabBattle, &RibbonTabBattle::setParty, Qt::UniqueConnection);
+        connect(_battleFrame, &BattleFrame::partyIconChanged, _ribbonTabBattle, &RibbonTabBattle::setPartyIcon, Qt::UniqueConnection);
         connect(_battleFrame, &BattleFrame::showPartyChanged, _ribbonTabBattle, &RibbonTabBattle::setShowParty, Qt::UniqueConnection);
         connect(_battleFrame, &BattleFrame::showMarkersChanged, _ribbonTabBattle, &RibbonTabBattle::setShowMarkers, Qt::UniqueConnection);
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
