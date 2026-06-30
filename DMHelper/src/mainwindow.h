@@ -40,7 +40,6 @@ class RibbonTabBattleView;
 class RibbonTabBattle;
 class RibbonTabText;
 class BattleDialogModel;
-class RibbonTabWorldMap;
 class RibbonTabAudio;
 class BattleFrame;
 class CharacterTemplateFrame;
@@ -274,7 +273,6 @@ private:
     RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabText* _ribbonTabText;
-    RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 
     BattleFrame* _battleFrame;

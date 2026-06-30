@@ -71,7 +71,6 @@
 #include "ribbontabbattleview.h"
 #include "ribbontabbattle.h"
 #include "ribbontabtext.h"
-#include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "dmhcache.h"
 #include "dmh_vlc.h"
@@ -165,7 +164,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabBattleView(nullptr),
     _ribbonTabBattle(nullptr),
     _ribbonTabText(nullptr),
-    _ribbonTabWorldMap(nullptr),
     _ribbonTabAudio(nullptr),
     _battleFrame(nullptr),
     _characterFrame(nullptr)
@@ -964,8 +962,6 @@ void MainWindow::importItem()
 void MainWindow::newParty()
 {
     Party* newParty = dynamic_cast<Party*>(newEncounter(DMHelper::CampaignType_Party));
-    if(newParty)
-        _ribbonTabWorldMap->registerPartyIcon(newParty);
 }
 
 void MainWindow::newTextEncounter()
@@ -1573,8 +1569,6 @@ void MainWindow::setupRibbonBar()
     _ribbonTabBattle->hide();
     _ribbonTabText = new RibbonTabText(this);
     _ribbonTabText->hide();
-    _ribbonTabWorldMap = new RibbonTabWorldMap(this);
-    _ribbonTabWorldMap->hide();
     _ribbonTabAudio = new RibbonTabAudio(this);
     _ribbonTabAudio->hide();
 
@@ -2147,9 +2141,6 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
 
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
-        QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);
-        for(CampaignObjectBase* party : parties)
-            _ribbonTabWorldMap->registerPartyIcon(dynamic_cast<Party*>(party));
     }
     else
     {
@@ -2161,7 +2152,6 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         setRibbonToType(DMHelper::CampaignType_WelcomeScreen);
         _ribbon->setCurrentIndex(0); // Shift to the File tab
         _ribbonTabCampaign->setAddPCButton(false);
-        _ribbonTabWorldMap->clearPartyIcons();
 
         // Reset the monster UI to the default
         //RuleFactory::RulesetTemplate defaultRuleset = RuleFactory::Instance()->getRulesetTemplate(_options->getLastRuleset());
@@ -3034,7 +3024,6 @@ void MainWindow::setRibbonToType(int objectType)
             connectBattleView(true);
             _ribbon->enableTab(_ribbonTabBattleMap);
             _ribbon->enableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
@@ -3045,7 +3034,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_AudioTrack:
@@ -3053,7 +3041,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabText);
             break;
         case DMHelper::CampaignType_Party:
@@ -3065,7 +3052,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;

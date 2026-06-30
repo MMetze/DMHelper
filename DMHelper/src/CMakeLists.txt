@@ -355,7 +355,6 @@ set(DMHELPER_SOURCES
     ribbontabfile.cpp
     ribbontabtext.cpp
     ribbontabtools.cpp
-    ribbontabworldmap.cpp
     rulefactory.cpp
     rulehealth.cpp
     rulehealth5e.cpp
@@ -709,7 +708,6 @@ set(DMHELPER_HEADERS
     ribbontabfile.h
     ribbontabtext.h
     ribbontabtools.h
-    ribbontabworldmap.h
     rulefactory.h
     rulehealth.h
     rulehealth5e.h
@@ -867,7 +865,6 @@ set(DMHELPER_FORMS
     ribbontabfile.ui
     ribbontabtext.ui
     ribbontabtools.ui
-    ribbontabworldmap.ui
     selectcombatantdialog.ui
     selectitemdialog.ui
     selectstringdialog.ui
