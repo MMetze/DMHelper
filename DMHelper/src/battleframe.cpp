@@ -1184,29 +1184,61 @@ bool BattleFrame::createNewBattle()
 
     qDebug() << "[Battle Frame] Selecting a new map...";
 
-    Map* battleMap = selectRelatedMap();
-    if(battleMap)
+    CampaignObjectBase* sourceObject = selectRelatedMap();
+    if(sourceObject)
     {
-        battleMap->initialize();
+        Map* sourceMap = dynamic_cast<Map*>(sourceObject);
+        EncounterBattle* sourceBattle = dynamic_cast<EncounterBattle*>(sourceObject);
+        BattleDialogModel* sourceModel = sourceBattle ? sourceBattle->getBattleDialogModel() : nullptr;
 
-        // Create a grid after the first image layer, a monster token layer before the FoW
-        for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
+        if(sourceMap)
         {
-            Layer* layer = battleMap->getLayerScene().layerAt(i);
-            if(layer)
+            sourceMap->initialize();
+
+            // Create a grid after the first image layer, a monster token layer before the FoW
+            for(int i = 0; i < sourceMap->getLayerScene().layerCount(); ++i)
             {
-                if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                Layer* layer = sourceMap->getLayerScene().layerAt(i);
+                if(layer)
                 {
-                    monsterTokens = new LayerTokens(_battle->getBattleDialogModel(), QString("Monster tokens"));
-                    _battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                    if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                    {
+                        monsterTokens = new LayerTokens(_battle->getBattleDialogModel(), QString("Monster tokens"));
+                        _battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                    }
+
+                    _battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(sourceObject, layer, layer->getOrder()));
+
+                    if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                    {
+                        gridLayer = new LayerGrid(QString("Grid"));
+                        _battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                    }
                 }
-
-                _battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
-
-                if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+            }
+        }
+        else if(sourceModel)
+        {
+            // Import from a token-free battle in the same way as from a legacy map.
+            LayerScene& sourceScene = sourceModel->getLayerScene();
+            for(int i = 0; i < sourceScene.layerCount(); ++i)
+            {
+                Layer* layer = sourceScene.layerAt(i);
+                if(layer)
                 {
-                     gridLayer = new LayerGrid(QString("Grid"));
-                     _battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                    if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                    {
+                        monsterTokens = new LayerTokens(_battle->getBattleDialogModel(), QString("Monster tokens"));
+                        _battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                    }
+
+                    _battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(sourceObject, layer, layer->getOrder()));
+
+                    if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                    {
+                        gridLayer = new LayerGrid(QString("Grid"));
+                        _battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                    }
                 }
             }
         }
@@ -1237,7 +1269,7 @@ bool BattleFrame::createNewBattle()
     // Select the monster layer as a default to add monsters
     _battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
 
-    return battleMap != nullptr;
+    return sourceObject != nullptr;
 }
 
 void BattleFrame::reloadMap()
@@ -4429,7 +4461,7 @@ void BattleFrame::deleteMapMarker(UndoMarker* marker)
     }
 }
 
-Map* BattleFrame::selectRelatedMap()
+CampaignObjectBase* BattleFrame::selectRelatedMap()
 {
     if(!_battle)
         return nullptr;
@@ -4442,12 +4474,12 @@ Map* BattleFrame::selectRelatedMap()
     if(!parentObject)
         return nullptr;
 
-    MapSelectDialog mapSelectDlg(*campaign, _battle->getID());
+    MapSelectDialog mapSelectDlg(*campaign, _battle->getID(), true, this);
     connect(&mapSelectDlg, &MapSelectDialog::mapCreated, this, &BattleFrame::mapCreated);
     if(mapSelectDlg.exec() != QDialog::Accepted)
         return nullptr;
     else
-        return mapSelectDlg.getSelectedMap();
+        return mapSelectDlg.getSelectedObject();
 }
 
 void BattleFrame::selectAddCharacter(QList<Characterv2*> characters, const QString& title, const QString& label)

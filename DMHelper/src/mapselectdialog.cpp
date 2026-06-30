@@ -2,16 +2,30 @@
 #include "ui_mapselectdialog.h"
 #include "map.h"
 #include "campaign.h"
+#include "encounterbattle.h"
+#include "battledialogmodel.h"
 #include "mapblankdialog.h"
 #include "layerblank.h"
 #include <QBrush>
+#include <QPainter>
 
-MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent) :
+static bool isMapLikeBattleObject(CampaignObjectBase* object)
+{
+    if((!object) || (object->getObjectType() != DMHelper::CampaignType_Battle))
+        return false;
+
+    EncounterBattle* battle = dynamic_cast<EncounterBattle*>(object);
+    BattleDialogModel* model = battle ? battle->getBattleDialogModel() : nullptr;
+    return (model) && (model->getCombatantCount() == 0);
+}
+
+MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, bool includeMapLikeBattles, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MapSelectDialog),
     _currentItem(nullptr),
     _createBlankMap(nullptr),
     _loadNewMap(nullptr),
+    _includeMapLikeBattles(includeMapLikeBattles),
     _blankMap(nullptr)
 {
     ui->setupUi(this);
@@ -29,16 +43,22 @@ MapSelectDialog::~MapSelectDialog()
 bool MapSelectDialog::isMapSelected() const
 {
     QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
-    return ((currentItem) && (currentItem != _createBlankMap) && (currentItem != _loadNewMap));
+    return ((currentItem) && (currentItem != _createBlankMap) && (currentItem != _loadNewMap) &&
+            (currentItem->data(0, Qt::UserRole).value<CampaignObjectBase*>() != nullptr));
 }
 
-Map* MapSelectDialog::getSelectedMap() const
+CampaignObjectBase* MapSelectDialog::getSelectedObject() const
 {
     QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
     if(!currentItem)
         return nullptr;
 
-    return currentItem->data(0, Qt::UserRole).value<Map*>();
+    return currentItem->data(0, Qt::UserRole).value<CampaignObjectBase*>();
+}
+
+Map* MapSelectDialog::getSelectedMap() const
+{
+    return dynamic_cast<Map*>(getSelectedObject());
 }
 
 bool MapSelectDialog::isBlankMap() const
@@ -101,14 +121,28 @@ void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetIte
     }
     else
     {
-        // Read the data from the selected map
-        Map* map = current->data(0, Qt::UserRole).value<Map*>();
+        CampaignObjectBase* selectedObject = current->data(0, Qt::UserRole).value<CampaignObjectBase*>();
+        Map* map = dynamic_cast<Map*>(selectedObject);
         if(map)
         {
             if(!map->isInitialized())
                 map->initialize();
 
             image = map->getPreviewImage();
+        }
+        else if(selectedObject)
+        {
+            image = QImage(400, 300, QImage::Format_ARGB32);
+            image.fill(Qt::white);
+
+            QPainter painter(&image);
+            QPixmap objectIcon = selectedObject->getIcon().pixmap(96, 96);
+            if(!objectIcon.isNull())
+            {
+                QPoint iconPos((image.width() - objectIcon.width()) / 2,
+                               (image.height() - objectIcon.height()) / 2);
+                painter.drawPixmap(iconPos, objectIcon);
+            }
         }
     }
 
@@ -140,7 +174,7 @@ void MapSelectDialog::setupSelectTree(Campaign& campaign, const QUuid& currentId
     if(_currentItem)
     {
         // Is the parent a map?
-        if((_currentItem->parent()) && (_currentItem->parent()->data(0, Qt::UserRole).value<Map*>() != nullptr))
+        if((_currentItem->parent()) && (_currentItem->parent()->data(0, Qt::UserRole).value<CampaignObjectBase*>() != nullptr))
         {
             ui->lstMaps->setCurrentItem(_currentItem->parent());
             return;
@@ -149,7 +183,7 @@ void MapSelectDialog::setupSelectTree(Campaign& campaign, const QUuid& currentId
         // Is there a child map?
         for(int i = 0; i < _currentItem->childCount(); ++i)
         {
-            if((_currentItem->child(i)) && (_currentItem->child(i)->data(0, Qt::UserRole).value<Map*>() != nullptr))
+            if((_currentItem->child(i)) && (_currentItem->child(i)->data(0, Qt::UserRole).value<CampaignObjectBase*>() != nullptr))
             {
                 ui->lstMaps->setCurrentItem(_currentItem->child(i));
                 return;
@@ -166,15 +200,20 @@ bool MapSelectDialog::insertObject(CampaignObjectBase* object, QTreeWidgetItem* 
     if((!object) || (!parentItem))
         return false;
 
-    bool hasMap = false;
+    bool hasSelectionCandidate = false;
 
     QTreeWidgetItem* newItem = new QTreeWidgetItem();
     newItem->setText(0, object->getName());
     decorateItem(newItem, object);
     if(object->getObjectType() == DMHelper::CampaignType_Map)
     {
-        hasMap = true;
-        newItem->setData(0, Qt::UserRole, QVariant::fromValue(dynamic_cast<Map*>(object)));
+        hasSelectionCandidate = true;
+        newItem->setData(0, Qt::UserRole, QVariant::fromValue(dynamic_cast<CampaignObjectBase*>(object)));
+    }
+    else if((_includeMapLikeBattles) && isMapLikeBattleObject(object))
+    {
+        hasSelectionCandidate = true;
+        newItem->setData(0, Qt::UserRole, QVariant::fromValue(dynamic_cast<CampaignObjectBase*>(object)));
     }
     else
     {
@@ -183,7 +222,7 @@ bool MapSelectDialog::insertObject(CampaignObjectBase* object, QTreeWidgetItem* 
 
     if(object->getID() == currentId)
     {
-        hasMap = true;
+        hasSelectionCandidate = true;
         _currentItem = newItem;
         _currentItem->setData(0, Qt::UserRole + 1, QVariant::fromValue(dynamic_cast<CampaignObjectBase*>(object)));
     }
@@ -192,15 +231,15 @@ bool MapSelectDialog::insertObject(CampaignObjectBase* object, QTreeWidgetItem* 
     for(CampaignObjectBase* childObject : childObjects)
     {
         if(insertObject(childObject, newItem, currentId))
-            hasMap = true;
+            hasSelectionCandidate = true;
     }
 
-    if(hasMap)
+    if(hasSelectionCandidate)
         parentItem->addChild(newItem);
     else
         delete newItem;
 
-    return hasMap;
+    return hasSelectionCandidate;
 }
 
 void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* object)

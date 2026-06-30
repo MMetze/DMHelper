@@ -19,10 +19,11 @@ class MapSelectDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent = nullptr);
+    explicit MapSelectDialog(Campaign& campaign, const QUuid& currentId, bool includeMapLikeBattles = false, QWidget *parent = nullptr);
     ~MapSelectDialog();
 
     bool isMapSelected() const;
+    CampaignObjectBase* getSelectedObject() const;
     Map* getSelectedMap() const;
     bool isBlankMap() const;
     Layer* getBlankLayer() const;
@@ -49,6 +50,7 @@ protected:
     QTreeWidgetItem* _currentItem;
     QTreeWidgetItem* _createBlankMap;
     QTreeWidgetItem* _loadNewMap;
+    bool _includeMapLikeBattles;
     Map* _blankMap;
 };
 

@@ -24,7 +24,6 @@ class BattleDialogLogger;
 class Grid;
 class GridConfig;
 class GridSizer;
-class Map;
 class QTimer;
 class RuleHealth;
 class CameraRect;
@@ -356,7 +355,7 @@ private slots:
     void gridSizerRejected();
 
     void setModel(BattleDialogModel* model);
-    Map* selectRelatedMap();
+    CampaignObjectBase* selectRelatedMap();
     void selectAddCharacter(QList<Characterv2*> characters, const QString& title, const QString& label);
 
     void setEditMode();
