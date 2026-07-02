@@ -688,7 +688,7 @@ void OptionsDialog::setCharacterDataFile(const QString& characterDataFile)
 {
     QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm Character Data Format Change"),
-                                                               QString("You are about to chnage the path for the character data definition of a campaign. This will result in a loss of any data that is not reflected in the new template!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QString("You are about to change the path for the character data definition of a campaign. This will result in a loss of any data that is not reflected in the new template!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);
 
     if(result != QMessageBox::Yes)
@@ -741,7 +741,7 @@ void OptionsDialog::setMonsterDataFile(const QString& monsterDataFile)
 {
     QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm Monster Data Format Change"),
-                                                               QString("You are about to chnage the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QString("You are about to change the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);
 
     if(result != QMessageBox::Yes)

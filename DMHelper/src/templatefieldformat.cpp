@@ -118,6 +118,23 @@ FormatSpec parseFormat(const QString& spec)
             if((ok) && (n > 0))
                 result.padDigits = n;
         }
+        else if(keyword == QStringLiteral("resource"))
+        {
+            if(body == QStringLiteral("current"))
+                result.resourceMode = FormatSpec::ResourceMode_Current;
+            else if(body == QStringLiteral("max"))
+                result.resourceMode = FormatSpec::ResourceMode_Max;
+            else
+                result.resourceMode = FormatSpec::ResourceMode_Both;
+        }
+        else if(keyword == QStringLiteral("resourcecurrent"))
+        {
+            result.resourceMode = FormatSpec::ResourceMode_Current;
+        }
+        else if(keyword == QStringLiteral("resourcemax"))
+        {
+            result.resourceMode = FormatSpec::ResourceMode_Max;
+        }
         else
         {
             qDebug() << "[TemplateFieldFormat] WARNING: Unknown format keyword:" << keyword << "in spec:" << spec;

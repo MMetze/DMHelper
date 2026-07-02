@@ -1,6 +1,42 @@
 #include "battledialogmodelcombatant.h"
 #include <QDomElement>
 
+namespace
+{
+    static const char* OVERRIDE_ELEMENT = "override";
+    static const char* OVERRIDE_ATTR_KEY = "key";
+    static const char* OVERRIDE_ATTR_VALUE = "value";
+
+    bool overrideKeyUsesBool(const QString& key)
+    {
+        return (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_SHOWN))
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_DONE));
+    }
+
+    bool overrideKeyUsesDouble(const QString& key)
+    {
+        return key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED);
+    }
+
+    bool overrideKeyUsesInt(const QString& key)
+    {
+        return (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH));
+    }
+
+    QVariant overrideValueFromString(const QString& key, const QString& value)
+    {
+        if(overrideKeyUsesBool(key))
+            return QVariant((value == QLatin1String("1")) || (value.toLower() == QLatin1String("true")));
+        if(overrideKeyUsesDouble(key))
+            return QVariant(value.toDouble());
+        if(overrideKeyUsesInt(key))
+            return QVariant(value.toInt());
+        return QVariant(value);
+    }
+}
+
 const char* BattleDialogModelCombatant::DMH_KEY_NAME                = "name";
 const char* BattleDialogModelCombatant::DMH_KEY_INITIATIVE          = "dmh:initiative";
 const char* BattleDialogModelCombatant::DMH_KEY_MOVED               = "dmh:moved";
@@ -72,6 +108,20 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
 
     QString groupIdStr = element.attribute("groupId");
     _groupId = groupIdStr.isEmpty() ? QUuid() : QUuid(groupIdStr);
+
+    _overrides.clear();
+    QDomElement overrideElement = element.firstChildElement(QString::fromLatin1(OVERRIDE_ELEMENT));
+    while(!overrideElement.isNull())
+    {
+        const QString key = overrideElement.attribute(QString::fromLatin1(OVERRIDE_ATTR_KEY));
+        if(!key.isEmpty())
+        {
+            const QString value = overrideElement.attribute(QString::fromLatin1(OVERRIDE_ATTR_VALUE));
+            _overrides.insert(key, overrideValueFromString(key, value));
+        }
+
+        overrideElement = overrideElement.nextSiblingElement(QString::fromLatin1(OVERRIDE_ELEMENT));
+    }
 }
 
 void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
@@ -128,9 +178,8 @@ void BattleDialogModelCombatant::setInitiative(int initiative)
     if(_initiative != initiative)
     {
         _initiative = initiative;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_INITIATIVE), initiative);
+        setOverride(QString::fromLatin1(DMH_KEY_INITIATIVE), initiative);
         emit initiativeChanged(this);
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_INITIATIVE));
     }
 }
 
@@ -193,9 +242,8 @@ void BattleDialogModelCombatant::setMoved(qreal moved)
     if(_moved != moved)
     {
         _moved = moved;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_MOVED), moved);
+        setOverride(QString::fromLatin1(DMH_KEY_MOVED), moved);
         emit moveUpdated();
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_MOVED));
     }
 }
 
@@ -204,9 +252,8 @@ void BattleDialogModelCombatant::incrementMoved(qreal moved)
     if(moved != 0.0)
     {
         _moved += moved;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_MOVED), _moved);
+        setOverride(QString::fromLatin1(DMH_KEY_MOVED), _moved);
         emit moveUpdated();
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_MOVED));
     }
 }
 
@@ -215,9 +262,8 @@ void BattleDialogModelCombatant::resetMoved()
     if(_moved != 0)
     {
         _moved = 0;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_MOVED), _moved);
+        setOverride(QString::fromLatin1(DMH_KEY_MOVED), _moved);
         emit moveUpdated();
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_MOVED));
     }
 }
 
@@ -242,12 +288,16 @@ void BattleDialogModelCombatant::setOverride(const QString& key, const QVariant&
 
     _overrides.insert(key, value);
     emit overrideChanged(this, key);
+    emit dirty();
 }
 
 void BattleDialogModelCombatant::clearOverride(const QString& key)
 {
     if(_overrides.remove(key))
+    {
         emit overrideChanged(this, key);
+        emit dirty();
+    }
 }
 
 QStringList BattleDialogModelCombatant::overrideKeys() const
@@ -260,9 +310,8 @@ void BattleDialogModelCombatant::setShown(bool isShown)
     if(_isShown != isShown)
     {
         _isShown = isShown;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_IS_SHOWN), isShown);
+        setOverride(QString::fromLatin1(DMH_KEY_IS_SHOWN), isShown);
         emit visibilityChanged();
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_IS_SHOWN));
     }
 }
 
@@ -271,9 +320,8 @@ void BattleDialogModelCombatant::setKnown(bool isKnown)
     if(_isKnown != isKnown)
     {
         _isKnown = isKnown;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_IS_KNOWN), isKnown);
+        setOverride(QString::fromLatin1(DMH_KEY_IS_KNOWN), isKnown);
         emit visibilityChanged();
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_IS_KNOWN));
     }
 }
 
@@ -291,9 +339,8 @@ void BattleDialogModelCombatant::setDone(bool isDone)
     if(_isDone != isDone)
     {
         _isDone = isDone;
-        _overrides.insert(QString::fromLatin1(DMH_KEY_IS_DONE), isDone);
+        setOverride(QString::fromLatin1(DMH_KEY_IS_DONE), isDone);
         emit combatantDoneChanged(this);
-        emit overrideChanged(this, QString::fromLatin1(DMH_KEY_IS_DONE));
     }
 }
 
@@ -314,6 +361,14 @@ void BattleDialogModelCombatant::internalOutputXML(QDomDocument &doc, QDomElemen
 
     if(!_groupId.isNull())
         element.setAttribute("groupId", _groupId.toString());
+
+    for(auto it = _overrides.constBegin(); it != _overrides.constEnd(); ++it)
+    {
+        QDomElement overrideElement = doc.createElement(QString::fromLatin1(OVERRIDE_ELEMENT));
+        overrideElement.setAttribute(QString::fromLatin1(OVERRIDE_ATTR_KEY), it.key());
+        overrideElement.setAttribute(QString::fromLatin1(OVERRIDE_ATTR_VALUE), it.value().toString());
+        element.appendChild(overrideElement);
+    }
 
     BattleDialogModelObject::internalOutputXML(doc, element, targetDirectory, isExport);
 }

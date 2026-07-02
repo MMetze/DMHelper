@@ -126,6 +126,12 @@ QString OptionsContainer::getTablesDirectory() const
 
 QString OptionsContainer::getDefaultRulesetFileName()
 {
+#ifdef QT_DEBUG
+    const QString appRulesetFile = getAppFile(QString("ruleset.xml"));
+    if(QFileInfo::exists(appRulesetFile))
+        return appRulesetFile;
+#endif
+
     return getStandardFile(QString("ruleset.xml"));
 }
 

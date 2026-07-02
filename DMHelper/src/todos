@@ -2,9 +2,11 @@
 Rename monster - selection weirdness
 Removing monster in a group --- crash
 switching from video to combat --- crash
-Check boxes in initiative are invisible in group only
-Monster list boxes white
-Marking stress changes it for all monsters and the bestiary!
+DONE Check boxes in initiative are invisible in group only
+DONE Monster list boxes white
+DONE Marking stress changes it for all monsters and the bestiary!
+Monster rollover gray text instead of black
+Add click to open details of the rolled over feature
 
 ==============================================================================
 v3.7 BUGS (Highest Priority)
