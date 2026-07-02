@@ -195,7 +195,7 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
         if(!hashEntry.value("desc").isNull())
             item->setData(ROLLOVER_LISTITEM_DESCRIPTION, hashEntry.value("desc").toString());
         else
-            item->setFlags(Qt::NoItemFlags);
+            item->setFlags(Qt::ItemIsEnabled);
 
         ui->listActions->addItem(item);
     }
@@ -237,7 +237,7 @@ void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)
             if(!hashEntry.value("desc").isNull())
                 item->setData(ROLLOVER_LISTITEM_DESCRIPTION, hashEntry.value("desc").toString());
             else
-                item->setFlags(Qt::NoItemFlags);
+                item->setFlags(Qt::ItemIsEnabled);
 
             ui->listActions->addItem(item);
         }
@@ -258,7 +258,7 @@ void CombatantRolloverFrame::addActionList(const QList<MonsterAction>& actionLis
         if(!action.getDescription().isEmpty())
             item->setData(ROLLOVER_LISTITEM_DESCRIPTION, action.getDescription());
         else
-            item->setFlags(Qt::NoItemFlags);
+            item->setFlags(Qt::ItemIsEnabled);
 
         ui->listActions->addItem(item);
     }
@@ -281,7 +281,7 @@ void CombatantRolloverFrame::addSectionTitle(const QString& sectionTitle)
         return;
 
     QListWidgetItem* actionTitle = new QListWidgetItem(sectionTitle);
-    actionTitle->setFlags(Qt::NoItemFlags);
+    actionTitle->setFlags(Qt::ItemIsEnabled);
     QFont titleFont = actionTitle->font();
     titleFont.setWeight(QFont::Bold);
     if(titleFont.pointSize() > 0)
