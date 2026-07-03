@@ -2006,8 +2006,14 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             else if(event->type() == QEvent::MouseButtonRelease)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-                if(mouseEvent->button() == Qt::LeftButton)
+                if((mouseEvent->button() == Qt::LeftButton) && (_mouseDown))
                 {
+                    // The BattleFrame filter is installed on the row widget and
+                    // its children, so one physical click can surface here more
+                    // than once during bubbling. Only the first release paired
+                    // with an active press should trigger row-click behaviour.
+                    _mouseDown = false;
+
                     BattleDialogModelCombatant* selected = _combatantWidgets.key(widget, nullptr);
                     if(mouseEvent->modifiers().testFlag(Qt::ShiftModifier) ||
                        mouseEvent->modifiers().testFlag(Qt::ControlModifier) ||
@@ -2042,7 +2048,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         }
                     }
                 }
-                _mouseDown = false;
             }
         }
         else
