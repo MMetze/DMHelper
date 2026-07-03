@@ -5,8 +5,9 @@ switching from video to combat --- crash
 DONE Check boxes in initiative are invisible in group only
 DONE Monster list boxes white
 DONE Marking stress changes it for all monsters and the bestiary!
-Monster rollover gray text instead of black
-Add click to open details of the rolled over feature
+DONE Monster rollover gray text instead of black
+DONE Add click to open details of the rolled over feature
+Release handling in the initiative row is currently duplicated because the event filter is installed recursively across child widgets, and cleanup should dedupe click actions without breaking drag bookkeeping.
 
 ==============================================================================
 v3.7 BUGS (Highest Priority)

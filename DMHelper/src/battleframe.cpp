@@ -2019,11 +2019,10 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     // Toggle rollover on single-click (only when not finishing a drag)
                     if((!_dragInProgress) && (_combatantLayout) && (widget->getCombatant()))
                     {
-                        const bool sameWidget = (_hoverFrame && (_hoverFrameOwner == widget));
                         if(_hoverFrame)
                             removeRollover();
 
-                        if(!sameWidget)
+                        if((!_hoverFrame) || (_hoverFrameOwner != widget))
                         {
                             CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
                             if(newFrame->isEmpty())

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>378</width>
-    <height>262</height>
+    <width>382</width>
+    <height>108</height>
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -257,9 +257,9 @@
         <property name="frameShadow">
          <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <property name="spacing">
-          <number>3</number>
+          <number>0</number>
          </property>
          <property name="leftMargin">
           <number>0</number>
@@ -278,14 +278,13 @@
            <property name="styleSheet">
             <string notr="true">background-color: transparent;</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <property name="spacing">
-            <number>0</number>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-          </layout>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
