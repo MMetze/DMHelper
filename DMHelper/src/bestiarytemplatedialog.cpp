@@ -282,6 +282,7 @@ void BestiaryTemplateDialog::nextMonster()
 
 void BestiaryTemplateDialog::dataChanged()
 {
+    QString selectedMonster = _monster ? _monster->getStringValue("name") : QString();
     QString previousMonster = ui->cmbSearch->currentText();
 
     setMonster(nullptr);
@@ -295,6 +296,17 @@ void BestiaryTemplateDialog::dataChanged()
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
 
     connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+
+    if(!selectedMonster.isEmpty())
+    {
+        int index = ui->cmbSearch->findText(selectedMonster);
+        if(index >= 0)
+        {
+            ui->cmbSearch->setCurrentIndex(index);
+            setMonster(selectedMonster);
+            return;
+        }
+    }
 
     if(!previousMonster.isEmpty())
     {

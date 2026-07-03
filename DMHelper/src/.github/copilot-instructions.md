@@ -6,14 +6,12 @@ All active code is in `DMHelper/src/`. Folders `DMHelper-Backend/`, `DMHelperCli
 `DMHelperShared/`, and `DMHelperTest/` are archived — never touch them.
 
 ## Build
-Always wrap cmake in a `vcvarsall.bat` call — plain PowerShell does not have MSVC paths.
-```powershell
-cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --build --preset windows-debug 2>&1"
-```
-If the build directory is missing, run configure first with the same wrapper:
-```powershell
-cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --preset windows-debug 2>&1"
-```
+Use the CMake Tools extension directly for configure/build/test tasks.
+- Build with `Build_CMakeTools`
+- Configure with the same CMake preset flow if the build tree is missing
+- Run tests with `RunCtest_CMakeTools`
+
+Do not use manual `cmake` terminal commands for routine builds in this workspace.
 
 IntelliSense errors in `.cpp` files are unreliable false positives — verify correctness via the actual cmake build.
 
