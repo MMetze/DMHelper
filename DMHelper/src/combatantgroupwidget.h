@@ -4,6 +4,7 @@
 #include <QFrame>
 #include <QUuid>
 #include <QList>
+#include <QPointer>
 
 namespace Ui {
 class CombatantGroupWidget;
@@ -60,7 +61,7 @@ private slots:
 private:
     Ui::CombatantGroupWidget *ui;
     BattleDialogModelCombatantGroup* _group;
-    QList<CombatantWidget*> _memberWidgets;
+    QList<QPointer<CombatantWidget>> _memberWidgets;
     bool _updatingCheckboxes;
     bool _active = false;
 };

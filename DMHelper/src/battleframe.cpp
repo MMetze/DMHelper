@@ -2728,17 +2728,29 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
     // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
     QList<QGraphicsItem*> selected = _scene->selectedItems();
     QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    QList<BattleDialogModelCombatant*> combatantsToRemove;
     if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
     {
-        removeSingleCombatant(combatant);
+        combatantsToRemove.append(combatant);
     }
     else
     {
         foreach(QGraphicsItem* graphicsItem, selected)
         {
-            removeSingleCombatant(getCombatantFromItem(graphicsItem));
+            BattleDialogModelCombatant* selectedCombatant = getCombatantFromItem(graphicsItem);
+            if((selectedCombatant) && (!combatantsToRemove.contains(selectedCombatant)))
+                combatantsToRemove.append(selectedCombatant);
         }
     }
+
+    if(combatantsToRemove.isEmpty())
+        return;
+
+    for(BattleDialogModelCombatant* selectedCombatant : std::as_const(combatantsToRemove))
+        removeSingleCombatant(selectedCombatant);
+
+    // Rebuild after batch removal so grouped and ungrouped initiative rows stay in sync.
+    recreateCombatantWidgets();
 }
 
 void BattleFrame::handleCombatantAdded(BattleDialogModelCombatant* combatant)
@@ -5140,17 +5152,26 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
             next();
     }
 
-    // Find the index of the removed item
-    int index = _model->getCombatantList().indexOf(combatant);
-
-    // Delete the widget for the combatant
-    _combatantWidgets.remove(combatant);
-    QLayoutItem *child = _combatantLayout->takeAt(index);
-    if(child != nullptr)
+    // Remove and delete the combatant widget immediately so grouped checkbox
+    // aggregation never sees a stale widget whose model has already been deleted.
+    CombatantWidget* widget = _combatantWidgets.take(combatant);
+    if(widget)
     {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
-        child->widget()->deleteLater();
-        delete child;
+        for(CombatantGroupWidget* groupWidget : _groupWidgets)
+        {
+            if(groupWidget)
+                groupWidget->removeMemberWidget(widget);
+        }
+
+        const int layoutIndex = _combatantLayout ? _combatantLayout->indexOf(widget) : -1;
+        if((layoutIndex >= 0) && (_combatantLayout))
+        {
+            QLayoutItem* child = _combatantLayout->takeAt(layoutIndex);
+            delete child;
+        }
+
+        widget->disconnectInternals();
+        widget->deleteLater();
     }
 
     _model->removeCombatant(combatant);

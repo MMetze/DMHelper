@@ -793,6 +793,12 @@ MainWindow::~MainWindow()
 {
     deleteCampaign();
 
+    if(Bestiary::Instance())
+    {
+        disconnect(Bestiary::Instance(), nullptr, &_bestiaryDlg, nullptr);
+        disconnect(Bestiary::Instance(), nullptr, this, nullptr);
+    }
+
     delete ui;
 
     CampaignObjectFactory::Shutdown(); //CombatantFactory::Shutdown(); is handled by the CampaignObjectFactory
