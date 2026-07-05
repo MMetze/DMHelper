@@ -262,6 +262,9 @@
      </item>
      <item>
       <widget class="QTextEdit" name="txtDescription">
+       <property name="styleSheet">
+        <string notr="true">background: transparent;</string>
+       </property>
        <property name="markdown">
         <string/>
        </property>
