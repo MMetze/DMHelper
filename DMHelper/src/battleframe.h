@@ -385,7 +385,7 @@ private:
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
-    void removeSingleCombatant(BattleDialogModelCombatant* combatant);
+    void removeSingleCombatant(BattleDialogModelCombatant* combatant, bool updateActiveCombatant = true);
     QList<BattleDialogModelCombatant*> getContextMenuCombatants(BattleDialogModelCombatant* combatant) const;
     void editCombatantConditions(const QList<BattleDialogModelCombatant*>& combatants);
 

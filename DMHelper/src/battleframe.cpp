@@ -2746,11 +2746,31 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
     if(combatantsToRemove.isEmpty())
         return;
 
-    for(BattleDialogModelCombatant* selectedCombatant : std::as_const(combatantsToRemove))
-        removeSingleCombatant(selectedCombatant);
+    const bool isBatchRemoval = combatantsToRemove.count() > 1;
+    BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
+    if((isBatchRemoval) && (activeCombatant) && (combatantsToRemove.contains(activeCombatant)))
+    {
+        BattleDialogModelCombatant* nextActiveCombatant = nullptr;
+        if(_model->getCombatantCount() > combatantsToRemove.count())
+        {
+            nextActiveCombatant = getNextCombatant(activeCombatant);
+            int remainingAttempts = _model->getCombatantCount();
+            while((nextActiveCombatant) &&
+                  (combatantsToRemove.contains(nextActiveCombatant)) &&
+                  (--remainingAttempts > 0))
+            {
+                nextActiveCombatant = getNextCombatant(nextActiveCombatant);
+            }
+        }
 
-    // Rebuild after batch removal so grouped and ungrouped initiative rows stay in sync.
-    recreateCombatantWidgets();
+        if((!nextActiveCombatant) || (combatantsToRemove.contains(nextActiveCombatant)))
+            _model->setActiveCombatant(nullptr);
+        else
+            setActiveCombatant(nextActiveCombatant);
+    }
+
+    for(BattleDialogModelCombatant* selectedCombatant : std::as_const(combatantsToRemove))
+        removeSingleCombatant(selectedCombatant, !isBatchRemoval);
 }
 
 void BattleFrame::handleCombatantAdded(BattleDialogModelCombatant* combatant)
@@ -5136,7 +5156,7 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     return nextCombatant;
 }
 
-void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
+void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant, bool updateActiveCombatant)
 {
     if((!_model) || (!combatant))
         return;
@@ -5144,7 +5164,7 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
     qDebug() << "[Battle Frame] removing combatant " << combatant->getName();
 
     // Check the active combatant highlight
-    if(combatant == _model->getActiveCombatant())
+    if((updateActiveCombatant) && (combatant == _model->getActiveCombatant()))
     {
         if(_model->getCombatantCount() <= 1)
             _model->setActiveCombatant(nullptr);
@@ -5152,26 +5172,17 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
             next();
     }
 
-    // Remove and delete the combatant widget immediately so grouped checkbox
-    // aggregation never sees a stale widget whose model has already been deleted.
-    CombatantWidget* widget = _combatantWidgets.take(combatant);
-    if(widget)
+    // Find the index of the removed item
+    int index = _model->getCombatantList().indexOf(combatant);
+
+    // Delete the widget for the combatant
+    _combatantWidgets.remove(combatant);
+    QLayoutItem *child = _combatantLayout->takeAt(index);
+    if(child != nullptr)
     {
-        for(CombatantGroupWidget* groupWidget : _groupWidgets)
-        {
-            if(groupWidget)
-                groupWidget->removeMemberWidget(widget);
-        }
-
-        const int layoutIndex = _combatantLayout ? _combatantLayout->indexOf(widget) : -1;
-        if((layoutIndex >= 0) && (_combatantLayout))
-        {
-            QLayoutItem* child = _combatantLayout->takeAt(layoutIndex);
-            delete child;
-        }
-
-        widget->disconnectInternals();
-        widget->deleteLater();
+        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
+        child->widget()->deleteLater();
+        delete child;
     }
 
     _model->removeCombatant(combatant);
