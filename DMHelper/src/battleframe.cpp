@@ -107,6 +107,7 @@ static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
 // for the in-battle combatant row that BattleFrame is responsible for
 // rendering.
 static const char* const DEFAULT_COMBATANT_UI_FILE = "./ui/combatant5e.ui";
+static const char* const LAIR_ACTIONS_EVENT_NAME = "Lair Actions";
 
 static void applyCombatantVisualState(QGraphicsItem* item, BattleDialogModelCombatant* combatant)
 {
@@ -1345,13 +1346,43 @@ void BattleFrame::addInitiativeEvent()
 
 void BattleFrame::addLairActionsEvent()
 {
+    setLairActionsEventEnabled(true);
+}
+
+void BattleFrame::setLairActionsEventEnabled(bool enabled)
+{
     if(!_model)
         return;
 
-    BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString("Lair Actions"), 20, _model);
-    _model->appendInitiativeEvent(event);
-    _model->sortCombatants();
-    recreateCombatantWidgets();
+    bool changed = false;
+    QList<BattleDialogModelInitiativeEvent*> initiativeEvents = _model->getInitiativeEvents();
+    if(enabled)
+    {
+        if(!hasLairActionsEvent())
+        {
+            BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString::fromLatin1(LAIR_ACTIONS_EVENT_NAME), 20, _model);
+            _model->appendInitiativeEvent(event);
+            changed = true;
+        }
+    }
+    else
+    {
+        for(BattleDialogModelInitiativeEvent* event : std::as_const(initiativeEvents))
+        {
+            if((event) && (event->getName() == QString::fromLatin1(LAIR_ACTIONS_EVENT_NAME)))
+            {
+                removeSingleCombatant(event, false);
+                changed = true;
+            }
+        }
+    }
+
+    if(changed)
+    {
+        _model->sortCombatants();
+        recreateCombatantWidgets();
+        emitLairActionsState();
+    }
 }
 
 void BattleFrame::addEffectObject()
@@ -2855,8 +2886,18 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
             setActiveCombatant(nextActiveCombatant);
     }
 
+    bool removedInitiativeEvent = false;
     for(BattleDialogModelCombatant* selectedCombatant : std::as_const(combatantsToRemove))
+    {
+        if(selectedCombatant && (selectedCombatant->getCombatantType() == DMHelper::CombatantType_InitiativeEvent))
+            removedInitiativeEvent = true;
         removeSingleCombatant(selectedCombatant, !isBatchRemoval);
+    }
+
+    if(removedInitiativeEvent)
+        recreateCombatantWidgets();
+
+    emitLairActionsState();
 }
 
 void BattleFrame::handleCombatantAdded(BattleDialogModelCombatant* combatant)
@@ -4225,6 +4266,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         disconnect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::emitLairActionsState);
         disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
@@ -4283,6 +4325,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         connect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::emitLairActionsState);
         connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         connect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
@@ -4328,6 +4371,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
             }
         }
 
+        emitLairActionsState();
+
         emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
 
         if(!_logger)
@@ -4338,6 +4383,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         }
     }
 
+    emitLairActionsState();
     emit modelChanged(_model);
 }
 
@@ -4729,7 +4775,10 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
         {
             BattleDialogModelInitiativeEvent* event = dynamic_cast<BattleDialogModelInitiativeEvent*>(combatant);
             if(event)
+            {
                 newWidget = new InitiativeEventWidget(event, ui->scrollAreaWidgetContents);
+                connect(newWidget, &InitiativeEventWidget::contextMenu, this, &BattleFrame::handleContextMenu);
+            }
             break;
         }
         default:
@@ -5258,6 +5307,26 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant, b
             next();
     }
 
+    if(BattleDialogModelInitiativeEvent* initiativeEvent = dynamic_cast<BattleDialogModelInitiativeEvent*>(combatant))
+    {
+        CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
+        _combatantWidgets.remove(combatant);
+
+        if(widget)
+        {
+            const int widgetIndex = _combatantLayout ? _combatantLayout->indexOf(widget) : -1;
+            if((_combatantLayout) && (widgetIndex >= 0))
+            {
+                QLayoutItem* layoutItem = _combatantLayout->takeAt(widgetIndex);
+                delete layoutItem;
+            }
+            widget->deleteLater();
+        }
+
+        _model->removeInitiativeEvent(initiativeEvent);
+        return;
+    }
+
     // Find the index of the removed item
     int index = _model->getCombatantList().indexOf(combatant);
 
@@ -5272,6 +5341,26 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant, b
     }
 
     _model->removeCombatant(combatant);
+}
+
+bool BattleFrame::hasLairActionsEvent() const
+{
+    if(!_model)
+        return false;
+
+    QList<BattleDialogModelInitiativeEvent*> initiativeEvents = _model->getInitiativeEvents();
+    for(BattleDialogModelInitiativeEvent* event : std::as_const(initiativeEvents))
+    {
+        if((event) && (event->getName() == QString::fromLatin1(LAIR_ACTIONS_EVENT_NAME)))
+            return true;
+    }
+
+    return false;
+}
+
+void BattleFrame::emitLairActionsState()
+{
+    emit lairActionsEnabledChanged(hasLairActionsEvent());
 }
 
 bool BattleFrame::validateTokenLayerExists()

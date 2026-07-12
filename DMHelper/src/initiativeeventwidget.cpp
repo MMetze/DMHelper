@@ -2,6 +2,8 @@
 #include "ui_initiativeeventwidget.h"
 #include "battledialogmodelinitiativeevent.h"
 #include <QIntValidator>
+#include <QContextMenuEvent>
+#include <QEvent>
 
 InitiativeEventWidget::InitiativeEventWidget(BattleDialogModelInitiativeEvent* event, QWidget* parent) :
     CombatantWidget(parent),
@@ -22,6 +24,11 @@ InitiativeEventWidget::InitiativeEventWidget(BattleDialogModelInitiativeEvent* e
     connect(ui->chkActive, &QCheckBox::toggled, this, &InitiativeEventWidget::handleActiveToggled);
     connect(ui->edtInitiative, &QLineEdit::editingFinished, this, &InitiativeEventWidget::handleInitiativeEdited);
     connect(ui->edtName, &QLineEdit::editingFinished, this, &InitiativeEventWidget::handleNameEdited);
+
+    // Route right-clicks from child editors/checkbox to the battle row menu.
+    ui->chkActive->installEventFilter(this);
+    ui->edtInitiative->installEventFilter(this);
+    ui->edtName->installEventFilter(this);
 
     if(_event)
         connect(_event, &BattleDialogModelCombatant::initiativeChanged, this, &InitiativeEventWidget::handleCombatantInitiativeChanged);
@@ -96,4 +103,29 @@ void InitiativeEventWidget::handleCombatantInitiativeChanged()
 {
     if(_event)
         ui->edtInitiative->setText(QString::number(_event->getInitiative()));
+}
+
+void InitiativeEventWidget::contextMenuEvent(QContextMenuEvent* event)
+{
+    if((event) && (_event))
+    {
+        emit contextMenu(_event, event->globalPos());
+        event->accept();
+        return;
+    }
+
+    CombatantWidget::contextMenuEvent(event);
+}
+
+bool InitiativeEventWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    if((event) && (event->type() == QEvent::ContextMenu) && (_event) &&
+       ((watched == ui->chkActive) || (watched == ui->edtInitiative) || (watched == ui->edtName)))
+    {
+        QContextMenuEvent* menuEvent = static_cast<QContextMenuEvent*>(event);
+        emit contextMenu(_event, menuEvent->globalPos());
+        return true;
+    }
+
+    return CombatantWidget::eventFilter(watched, event);
 }
