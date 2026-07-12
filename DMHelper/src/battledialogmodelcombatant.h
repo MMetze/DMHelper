@@ -80,6 +80,13 @@ public:
     void        clearOverride(const QString& key);
     QStringList overrideKeys() const;
 
+    QString getSelectedMovementMode() const;
+    void setSelectedMovementMode(const QString& mode);
+    void clearSelectedMovementMode();
+    int getCustomMovementSpeedFt() const;
+    void setCustomMovementSpeedFt(int speedFt);
+    void clearCustomMovementSpeedFt();
+
     // Canonical key names. The dmh: prefix is reserved for engine-owned
     // attributes so they can never collide with a ruleset-defined key.
     static const char* DMH_KEY_NAME;
@@ -91,6 +98,8 @@ public:
     static const char* DMH_KEY_HEALTH;
     static const char* DMH_KEY_CONDITIONS;
     static const char* DMH_KEY_PER_ROUND_RESOURCES;
+    static const char* DMH_KEY_SELECTED_MOVEMENT_MODE;
+    static const char* DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT;
 
 public slots:
     virtual void setShown(bool isShown);

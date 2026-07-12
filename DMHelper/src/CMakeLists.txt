@@ -275,6 +275,7 @@ set(DMHELPER_SOURCES
     mapmarkergraphicsitem.cpp
     mappartyiconitem.cpp
     mapselectdialog.cpp
+    movementmodehelper.cpp
     monster.cpp
     monsteraction.cpp
     monsteractioneditdialog.cpp
@@ -633,6 +634,7 @@ set(DMHELPER_HEADERS
     mapmarkergraphicsitem.h
     mappartyiconitem.h
     mapselectdialog.h
+    movementmodehelper.h
     monster.h
     monsteraction.h
     monsteractioneditdialog.h

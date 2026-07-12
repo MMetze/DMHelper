@@ -49,15 +49,16 @@
 #include "ruleinitiative.h"
 #include "ruleinitiativenone.h"
 #include "rulehealth.h"
-#include "spellbook.h"
 #include "gridsizer.h"
 #include "layerdrawengine.h"
 #include "conditions.h"
+#include "movementmodehelper.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QDrag>
 #include <QMimeData>
 #include <QGraphicsPixmapItem>
@@ -80,6 +81,7 @@
 #include <QImageReader>
 #include <QMimeDatabase>
 #include <QMimeType>
+#include <QSet>
 #include <qforeach.h>
 #include "dmhmessagebox.h"
 
@@ -2442,6 +2444,90 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     QAction* editConditionsItem = new QAction(QString("Edit Conditions..."), contextMenu);
     connect(editConditionsItem, SIGNAL(triggered()), this, SLOT(editSelectedCombatantConditions()));
     contextMenu->addAction(editConditionsItem);
+
+    Campaign* campaign = _battle ? dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign)) : nullptr;
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Distance))
+    {
+        const QList<BattleDialogModelCombatant*> movementTargets = getContextMenuCombatants(_contextMenuCombatant);
+        const QList<MovementModeHelper::MovementModeValue> commonModes = MovementModeHelper::intersectMovementModes(movementTargets);
+        if(!movementTargets.isEmpty())
+        {
+            QMenu* movementMenu = contextMenu->addMenu(QStringLiteral("Movement Mode"));
+
+            QActionGroup* movementGroup = new QActionGroup(movementMenu);
+            movementGroup->setExclusive(true);
+
+            bool sameMode = true;
+            QString checkedMode;
+            for(int i = 0; i < movementTargets.count(); ++i)
+            {
+                BattleDialogModelCombatant* target = movementTargets.at(i);
+                const QString effectiveMode = MovementModeHelper::effectiveMovementModeKey(target, MovementModeHelper::getMovementModes(target));
+                if(i == 0)
+                    checkedMode = effectiveMode;
+                else if(effectiveMode != checkedMode)
+                    sameMode = false;
+            }
+
+            for(const MovementModeHelper::MovementModeValue& mode : commonModes)
+            {
+                QAction* modeAction = new QAction(QStringLiteral("%1 (%2 ft.)").arg(mode.label).arg(mode.speedFt), movementMenu);
+                modeAction->setCheckable(true);
+                modeAction->setChecked(sameMode && (checkedMode == mode.key));
+                movementGroup->addAction(modeAction);
+                connect(modeAction, &QAction::triggered, this, [movementTargets, selectedKey = mode.key]() {
+                    for(BattleDialogModelCombatant* target : movementTargets)
+                    {
+                        if(!target)
+                            continue;
+
+                        const QList<MovementModeHelper::MovementModeValue> targetModes = MovementModeHelper::getMovementModes(target);
+                        if(MovementModeHelper::hasMovementMode(targetModes, selectedKey))
+                        {
+                            target->setSelectedMovementMode(selectedKey);
+                            target->clearCustomMovementSpeedFt();
+                        }
+                    }
+                });
+                movementMenu->addAction(modeAction);
+            }
+
+            if(!commonModes.isEmpty())
+                movementMenu->addSeparator();
+
+            QAction* customAction = new QAction(QStringLiteral("Custom..."), movementMenu);
+            connect(customAction, &QAction::triggered, this, [this, movementTargets]() {
+                if(movementTargets.isEmpty())
+                    return;
+
+                int initialValue = movementTargets.first()->getCustomMovementSpeedFt();
+                if(initialValue <= 0)
+                    initialValue = qMax(MovementModeHelper::CustomMovementMinSpeed, MovementModeHelper::effectiveMovementSpeedFt(movementTargets.first()));
+
+                bool ok = false;
+                const int customSpeed = QInputDialog::getInt(this,
+                                                             QStringLiteral("Custom Movement Speed"),
+                                                             QStringLiteral("Movement speed (ft.):"),
+                                                             initialValue,
+                                                             MovementModeHelper::CustomMovementMinSpeed,
+                                                             MovementModeHelper::CustomMovementMaxSpeed,
+                                                             1,
+                                                             &ok);
+                if(!ok)
+                    return;
+
+                for(BattleDialogModelCombatant* target : movementTargets)
+                {
+                    if(!target)
+                        continue;
+
+                    target->setCustomMovementSpeedFt(customSpeed);
+                    target->setSelectedMovementMode(QStringLiteral("custom"));
+                }
+            });
+            movementMenu->addAction(customAction);
+        }
+    }
 
     contextMenu->addSeparator();
 
@@ -5686,6 +5772,8 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
 
 void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed)
 {
+    Q_UNUSED(speed);
+
     if((!combatant) || (!item) || (!_model))
         return;
 
@@ -5727,7 +5815,16 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
     }
     else
     {
-        int speedSquares = 2 * (speed / 5) + 1;
+        const QList<MovementModeHelper::MovementModeValue> modes = MovementModeHelper::getMovementModes(combatant);
+        const QString selectedMode = combatant->getSelectedMovementMode().trimmed().toLower();
+        const QString effectiveMode = MovementModeHelper::effectiveMovementModeKey(combatant, modes);
+        if(selectedMode != effectiveMode)
+            combatant->setSelectedMovementMode(effectiveMode);
+        if(effectiveMode != QStringLiteral("custom"))
+            combatant->clearCustomMovementSpeedFt();
+
+        const int effectiveSpeed = MovementModeHelper::effectiveMovementSpeedFt(combatant);
+        int speedSquares = 2 * (effectiveSpeed / 5) + 1;
         _moveRadius = tokenLayer->getScale() * speedSquares;
         if(_moveRadius <= tokenLayer->getScale())
             return;

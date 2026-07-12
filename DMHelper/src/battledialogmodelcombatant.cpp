@@ -22,7 +22,8 @@ namespace
     bool overrideKeyUsesInt(const QString& key)
     {
         return (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
-            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH));
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT));
     }
 
     QVariant overrideValueFromString(const QString& key, const QString& value)
@@ -46,6 +47,8 @@ const char* BattleDialogModelCombatant::DMH_KEY_IS_DONE             = "dmh:isDon
 const char* BattleDialogModelCombatant::DMH_KEY_HEALTH              = "dmh:health";
 const char* BattleDialogModelCombatant::DMH_KEY_CONDITIONS          = "dmh:conditions";
 const char* BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES = "dmh:perRoundResources";
+const char* BattleDialogModelCombatant::DMH_KEY_SELECTED_MOVEMENT_MODE = "dmh:selectedMovementMode";
+const char* BattleDialogModelCombatant::DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT = "dmh:customMovementSpeedFt";
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
     BattleDialogModelObject(QPointF(), 0.0, name, parent),
@@ -303,6 +306,48 @@ void BattleDialogModelCombatant::clearOverride(const QString& key)
 QStringList BattleDialogModelCombatant::overrideKeys() const
 {
     return _overrides.keys();
+}
+
+QString BattleDialogModelCombatant::getSelectedMovementMode() const
+{
+    return getOverride(QString::fromLatin1(DMH_KEY_SELECTED_MOVEMENT_MODE)).toString();
+}
+
+void BattleDialogModelCombatant::setSelectedMovementMode(const QString& mode)
+{
+    if(mode.trimmed().isEmpty())
+    {
+        clearSelectedMovementMode();
+        return;
+    }
+
+    setOverride(QString::fromLatin1(DMH_KEY_SELECTED_MOVEMENT_MODE), mode.trimmed().toLower());
+}
+
+void BattleDialogModelCombatant::clearSelectedMovementMode()
+{
+    clearOverride(QString::fromLatin1(DMH_KEY_SELECTED_MOVEMENT_MODE));
+}
+
+int BattleDialogModelCombatant::getCustomMovementSpeedFt() const
+{
+    return getOverride(QString::fromLatin1(DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT)).toInt();
+}
+
+void BattleDialogModelCombatant::setCustomMovementSpeedFt(int speedFt)
+{
+    if(speedFt <= 0)
+    {
+        clearCustomMovementSpeedFt();
+        return;
+    }
+
+    setOverride(QString::fromLatin1(DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT), speedFt);
+}
+
+void BattleDialogModelCombatant::clearCustomMovementSpeedFt()
+{
+    clearOverride(QString::fromLatin1(DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT));
 }
 
 void BattleDialogModelCombatant::setShown(bool isShown)

@@ -9,6 +9,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QDebug>
+#include <QRegularExpression>
 
 Combatant::Combatant(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
@@ -160,6 +161,48 @@ QPixmap Combatant::getIconPixmap(DMHelper::PixmapSize iconSize)
 QColor Combatant::getBackgroundColor() const
 {
     return _backgroundColor;
+}
+
+int Combatant::extractWalkSpeed(const QString& movementText)
+{
+    static const QRegularExpression FIRST_NUMBER_RE(QStringLiteral("(\\d+)"));
+
+    if(movementText.trimmed().isEmpty())
+        return 0;
+
+    const QStringList segments = movementText.split(',', Qt::SkipEmptyParts);
+    if(segments.isEmpty())
+    {
+        const QRegularExpressionMatch fallbackMatch = FIRST_NUMBER_RE.match(movementText);
+        return fallbackMatch.hasMatch() ? fallbackMatch.captured(1).toInt() : 0;
+    }
+
+    bool firstFound = false;
+    int firstSpeed = 0;
+
+    for(const QString& segment : segments)
+    {
+        const QString trimmed = segment.trimmed();
+        if(trimmed.isEmpty())
+            continue;
+
+        const QRegularExpressionMatch numberMatch = FIRST_NUMBER_RE.match(trimmed);
+        if(!numberMatch.hasMatch())
+            continue;
+
+        const int speed = numberMatch.captured(1).toInt();
+        if(!firstFound)
+        {
+            firstFound = true;
+            firstSpeed = speed;
+        }
+
+        const QString prefix = trimmed.left(numberMatch.capturedStart(1)).trimmed().toLower();
+        if(prefix.isEmpty() || (prefix == QStringLiteral("walk")) || (prefix == QStringLiteral("walking")))
+            return speed;
+    }
+
+    return firstFound ? firstSpeed : 0;
 }
 
 int Combatant::getAbilityValue(Ability ability) const
