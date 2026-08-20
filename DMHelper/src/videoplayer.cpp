@@ -25,8 +25,15 @@ unsigned playerFormatCallback(void **opaque, char *chroma,
 void playerCleanupCallback(void *opaque);
 void playerExitEventCallback(void *opaque);
 void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const char *fmt, va_list args);
-void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
+void playerStateChangedCallback(void *opaque, libvlc_state_t state);
 void playerAudioPlayCallback(void *data, const void *samples, unsigned count, int64_t pts);
+
+// cbs struct has static storage duration and carries no per-instance state; the opaque pointer supplies the instance
+static const libvlc_media_player_cbs s_videoPlayerCbs = []() {
+    libvlc_media_player_cbs cbs{};
+    cbs.on_state_changed = &playerStateChangedCallback;
+    return cbs;
+}();
 
 
 VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, QObject *parent) :
@@ -80,17 +87,6 @@ VideoPlayer::~VideoPlayer()
 
     if(_vlcPlayer)
     {
-        // Detach all event callbacks before stopping to prevent use-after-free
-        libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-        if(eventManager)
-        {
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
-        }
-
         // Stop playback and null out video callbacks so VLC thread stops calling into this object
         libvlc_media_player_stop_async(_vlcPlayer);
         libvlc_video_set_callbacks(_vlcPlayer, nullptr, nullptr, nullptr, nullptr);
@@ -416,55 +412,46 @@ void VideoPlayer::exitEventCallback()
 #endif
 }
 
-void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
+void VideoPlayer::eventCallback(libvlc_state_t state)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Event callback called. p_event: " << p_event << ", " << this << ", " << COUNT_CALLBACKS;
+    qDebug() << "[VideoPlayer] Event callback called. state: " << state << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if(p_event)
+    switch(state)
     {
-        switch(p_event->type)
-        {
-            case libvlc_MediaPlayerOpening:
+        case libvlc_Opening:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: OPENING = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: OPENING = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoOpening();
-                break;
-            case libvlc_MediaPlayerBuffering:
+            emit videoOpening();
+            break;
+        case libvlc_Playing:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: BUFFERING = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: PLAYING = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoBuffering();
-                break;
-            case libvlc_MediaPlayerPlaying:
+            emit videoPlaying();
+            break;
+        case libvlc_Paused:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: PLAYING = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: PAUSED = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoPlaying();
-                break;
-            case libvlc_MediaPlayerPaused:
+            emit videoPaused();
+            break;
+        case libvlc_Stopped:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: PAUSED = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: STOPPED = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoPaused();
-                break;
-            case libvlc_MediaPlayerStopped:
+            emit videoStopped();
+            break;
+        default:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: STOPPED = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] UNEXPECTED Video event received:  " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoStopped();
-                break;
-            default:
-#ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] UNEXPECTED Video event received:  " << p_event->type << ", " << COUNT_CALLBACKS;
-#endif
-                break;
-        };
+            break;
+    };
 
-        _status = p_event->type;
-    }
+    _status = state;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Event callback completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -667,22 +654,12 @@ bool VideoPlayer::startPlayer()
 
     libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
 
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia, &s_videoPlayerCbs, static_cast<void*>(this));
     if(!_vlcPlayer)
         return false;
 
     libvlc_media_release(_vlcMedia);
     _vlcMedia = nullptr;
-
-    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-    if(eventManager)
-    {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
-    }
 
     libvlc_video_set_callbacks(_vlcPlayer,
                                playerLockCallback,
@@ -761,8 +738,7 @@ void VideoPlayer::cleanupBuffers()
 
 bool VideoPlayer::isPlaying() const
 {
-    bool result = ((_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying));
+    bool result = (_status == libvlc_Playing);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is playing status: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -773,7 +749,7 @@ bool VideoPlayer::isPlaying() const
 
 bool VideoPlayer::isPaused() const
 {
-    bool result = (_status == libvlc_MediaPlayerPaused);
+    bool result = (_status == libvlc_Paused);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is paused status: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -784,10 +760,9 @@ bool VideoPlayer::isPaused() const
 
 bool VideoPlayer::isProcessing() const
 {
-    bool result = ((_status == libvlc_MediaPlayerOpening) ||
-                   (_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying) ||
-                   (_status == libvlc_MediaPlayerPaused));
+    bool result = ((_status == libvlc_Opening) ||
+                   (_status == libvlc_Playing) ||
+                   (_status == libvlc_Paused));
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is processing status: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -798,11 +773,10 @@ bool VideoPlayer::isProcessing() const
 
 bool VideoPlayer::isStatusValid() const
 {
-    bool result = ((_status == libvlc_MediaPlayerOpening) ||
-                   (_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying) ||
-                   (_status == libvlc_MediaPlayerPaused) ||
-                   (_status == libvlc_MediaPlayerStopped));
+    bool result = ((_status == libvlc_Opening) ||
+                   (_status == libvlc_Playing) ||
+                   (_status == libvlc_Paused) ||
+                   (_status == libvlc_Stopped));
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is status valid: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -1041,18 +1015,19 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 
 /**
  * Callback function notification
- * \param p_event the event triggering the callback
+ * \param opaque the VideoPlayer instance passed at player creation
+ * \param state the new player state
  */
-void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
+void playerStateChangedCallback(void *opaque, libvlc_state_t state)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerEventCallback: " << p_data << ", " << COUNT_CALLBACKS++;
+    qDebug() << "[VideoPlayer] playerStateChangedCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
-    if(!p_data)
+    if(!opaque)
         return;
 
-    VideoPlayer* player = static_cast<VideoPlayer*>(p_data);
-    player->eventCallback(p_event);
+    VideoPlayer* player = static_cast<VideoPlayer*>(opaque);
+    player->eventCallback(state);
 }
 
 void playerAudioPlayCallback(void *data, const void *samples, unsigned count, int64_t pts)

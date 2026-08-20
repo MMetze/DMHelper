@@ -12,6 +12,13 @@ const int stopConfirmed = 0x02;
 const int stopComplete = stopCallComplete | stopConfirmed;
 const int INVALID_TRACK_ID = -99999;
 
+// cbs struct has static storage duration and carries no per-instance state; the opaque pointer supplies the instance
+static const libvlc_media_player_cbs s_videoPlayerGLPlayerCbs = []() {
+    libvlc_media_player_cbs cbs{};
+    cbs.on_state_changed = &VideoPlayerGLPlayer::onStateChanged;
+    return cbs;
+}();
+
 //need to restartplayer somewhere
 //need to handle resizing in the inverse manner - resize comes from video, triggers creation of VB objects, then rendering
 
@@ -313,38 +320,35 @@ void VideoPlayerGLPlayer::cleanupVBObjects()
 }
 
 
-void VideoPlayerGLPlayer::playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
+void VideoPlayerGLPlayer::onStateChanged(void *opaque, libvlc_state_t state)
 {
-    if((!p_event) || (!p_data))
+    if(!opaque)
         return;
 
-    VideoPlayerGLPlayer* that = static_cast<VideoPlayerGLPlayer*>(p_data);
+    VideoPlayerGLPlayer* that = static_cast<VideoPlayerGLPlayer*>(opaque);
     if(!that)
         return;
 
-    switch(p_event->type)
+    switch(state)
     {
-        case libvlc_MediaPlayerOpening:
-            qDebug() << "[VideoPlayerGLPlayer] Video event received: OPENING = " << p_event->type;
+        case libvlc_Opening:
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: OPENING = " << state;
             break;
-        case libvlc_MediaPlayerBuffering:
-            qDebug() << "[VideoPlayerGLPlayer] Video event received: BUFFERING = " << p_event->type;
+        case libvlc_Playing:
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: PLAYING = " << state;
             break;
-        case libvlc_MediaPlayerPlaying:
-            qDebug() << "[VideoPlayerGLPlayer] Video event received: PLAYING = " << p_event->type;
+        case libvlc_Paused:
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: PAUSED = " << state;
             break;
-        case libvlc_MediaPlayerPaused:
-            qDebug() << "[VideoPlayerGLPlayer] Video event received: PAUSED = " << p_event->type;
-            break;
-        case libvlc_MediaPlayerStopped:
-            qDebug() << "[VideoPlayerGLPlayer] Video event received: STOPPED = " << p_event->type;
+        case libvlc_Stopped:
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: STOPPED = " << state;
             break;
         default:
-            qDebug() << "[VideoPlayerGLPlayer] ERROR: Unhandled video event received:  " << p_event->type;
+            qDebug() << "[VideoPlayerGLPlayer] ERROR: Unhandled video event received:  " << state;
             break;
     };
 
-    that->_status = p_event->type;
+    that->_status = state;
 }
 
 void VideoPlayerGLPlayer::stopThenDelete()
@@ -419,7 +423,7 @@ void VideoPlayerGLPlayer::videoAvailable()
 
 void VideoPlayerGLPlayer::timerEvent(QTimerEvent *event)
 {
-    if((_status == libvlc_MediaPlayerOpening) || (_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
+    if((_status == libvlc_Opening) || (_status == libvlc_Playing))
         return;
 
     cleanupPlayer();
@@ -511,24 +515,12 @@ bool VideoPlayerGLPlayer::startPlayer()
 
     libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
 
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia, &s_videoPlayerGLPlayerCbs, static_cast<void*>(this));
     if(!_vlcPlayer)
         return false;
 
     // TODO: Layers
     libvlc_audio_set_volume(_vlcPlayer, 0);
-
-    // Set up event callbacks
-    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-    if(eventManager)
-    {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
-//        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopping, playerEventCallback, static_cast<void*>(this));
-    }
 
     bool callbackResult = libvlc_video_set_output_callbacks(_vlcPlayer,
                                                             libvlc_video_engine_opengl,
@@ -578,17 +570,6 @@ void VideoPlayerGLPlayer::cleanupPlayer()
 
     if(_vlcPlayer)
     {
-        // Detach all event callbacks before releasing to prevent use-after-free
-        libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-        if(eventManager)
-        {
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
-        }
-
         libvlc_media_player_release(_vlcPlayer);
         _vlcPlayer = nullptr;
     }
@@ -618,7 +599,7 @@ void VideoPlayerGLPlayer::internalAudioCheck(int newStatus)
 {
     if((_playAudio) ||
        (_originalTrack != INVALID_TRACK_ID) ||
-       (newStatus != libvlc_MediaPlayerPlaying) ||
+       (newStatus != libvlc_Playing) ||
        (!_vlcPlayer))
         return;
 
@@ -636,8 +617,7 @@ void VideoPlayerGLPlayer::internalAudioCheck(int newStatus)
 
 bool VideoPlayerGLPlayer::isPlaying() const
 {
-    bool result = ((_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying));
+    bool result = (_status == libvlc_Playing);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Getting is playing status: " << result;
@@ -648,7 +628,7 @@ bool VideoPlayerGLPlayer::isPlaying() const
 
 bool VideoPlayerGLPlayer::isPaused() const
 {
-    bool result = (_status == libvlc_MediaPlayerPaused);
+    bool result = (_status == libvlc_Paused);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Getting is paused status: " << result;
@@ -659,10 +639,9 @@ bool VideoPlayerGLPlayer::isPaused() const
 
 bool VideoPlayerGLPlayer::isProcessing() const
 {
-    bool result = ((_status == libvlc_MediaPlayerOpening) ||
-                   (_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying) ||
-                   (_status == libvlc_MediaPlayerPaused));
+    bool result = ((_status == libvlc_Opening) ||
+                   (_status == libvlc_Playing) ||
+                   (_status == libvlc_Paused));
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Getting is processing status: " << result;
@@ -673,11 +652,10 @@ bool VideoPlayerGLPlayer::isProcessing() const
 
 bool VideoPlayerGLPlayer::isStatusValid() const
 {
-    bool result = ((_status == libvlc_MediaPlayerOpening) ||
-                   (_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying) ||
-                   (_status == libvlc_MediaPlayerPaused) ||
-                   (_status == libvlc_MediaPlayerStopped));
+    bool result = ((_status == libvlc_Opening) ||
+                   (_status == libvlc_Playing) ||
+                   (_status == libvlc_Paused) ||
+                   (_status == libvlc_Stopped));
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Getting is status valid: " << result;

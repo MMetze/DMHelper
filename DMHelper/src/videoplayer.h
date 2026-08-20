@@ -40,12 +40,11 @@ public:
     virtual unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
     virtual void cleanupCallback();
     virtual void exitEventCallback();
-    virtual void eventCallback(const struct libvlc_event_t *p_event);
+    virtual void eventCallback(libvlc_state_t state);
 
 signals:
     void videoOpening();
     void videoPlaying();
-    void videoBuffering();
     void videoPaused();
     void videoStopped();
 

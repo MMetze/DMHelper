@@ -42,12 +42,11 @@ public:
     void createVBObjects();
     void cleanupVBObjects();
 
-    static void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
+    static void onStateChanged(void *opaque, libvlc_state_t state);
 
 signals:
     void videoOpening();
     void videoPlaying();
-    void videoBuffering();
     void videoPaused();
     void videoStopped();
 
