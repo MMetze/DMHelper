@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
+# macOS: force x86_64 until native arm64 VLC libraries are bundled.
+# The libvlc in vlcMac/ and bin-macos/ is x86_64-only; Apple Silicon runs
+# this build via Rosetta 2. Must be set before project(). Overridable via
+# -DCMAKE_OSX_ARCHITECTURES for a future arm64 build.
+if (CMAKE_HOST_APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS target architectures")
+endif()
+
 project(DMHelper LANGUAGES CXX)
 
 # -------------------------------------------------

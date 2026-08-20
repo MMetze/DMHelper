@@ -15,8 +15,11 @@ jobs:
         include:
           - runner: macos-15-intel
             arch-label: intel
-          - runner: macos-15
-            arch-label: apple-silicon
+          # apple-silicon leg disabled: bundled libvlc is x86_64-only, so no
+          # native arm64 build is possible yet. Re-enable once arm64 VLC
+          # libraries are added (see src/vlcMac and src/bin-macos).
+          # - runner: macos-15
+          #   arch-label: apple-silicon
     runs-on: ${{ matrix.runner }}
 
     defaults:
