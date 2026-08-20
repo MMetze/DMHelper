@@ -5,6 +5,10 @@
 #include "layertokens.h"
 #include "dmh_opengl.h"
 
+static const int BYTES_PER_PIXEL_RGBA = 4;
+// Effect world size divisor from the legacy pixmap-based sizing (size 5 = one battle pixmap unit)
+static const int EFFECT_TOKEN_SIZE_DIVISOR = 5;
+
 // Here are the various shader programs that we will use
 extern const char *vertexShaderSourceBase;
 extern const char *vertexShaderSourceColorize;
@@ -30,7 +34,9 @@ PublishGLBattleEffectVideo::PublishGLBattleEffectVideo(PublishGLScene* scene, Ba
 {
     if(effect)
     {
-        _videoPlayer = new VideoPlayer(effect->getImageFile(), QSize(), true, effect->isPlayAudio());
+        // Decode at token size: VLC scales during decode, avoiding native-resolution decode + per-frame CPU rescaling
+        _playerSize = getTargetPlayerSize();
+        _videoPlayer = new VideoPlayer(effect->getImageFile(), _playerSize, true, effect->isPlayAudio());
         connect(_videoPlayer, &VideoPlayer::frameAvailable, this, &PublishGLBattleEffectVideo::updateWidget, Qt::QueuedConnection);
         _videoPlayer->restartPlayer();
     }
@@ -68,7 +74,7 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
 
     createShadersGL();
 
-    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
+    int effectSize = getTargetPlayerSize().width(); // Primary dimension
 
     if((!_videoPlayer->lockMutex()))
     {
@@ -83,7 +89,8 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
         return;
     }
     QImage imageCopy = videoPlayerImage->copy();
-    QImage effectImage = imageCopy.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+    // Frames are decoded at (or near) token size and already RGBA8888; rescale only on decode-size mismatch
+    QImage effectImage = (imageCopy.width() == effectSize) ? imageCopy.convertToFormat(QImage::Format_RGBA8888) : imageCopy.scaledToWidth(effectSize, Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
     _videoPlayer->clearNewImage();
     _videoPlayer->unlockMutex();
 
@@ -134,7 +141,7 @@ void PublishGLBattleEffectVideo::prepareObjectsGL()
 
     // load and generate the background texture
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
+    // No glGenerateMipmap: MIN filter is GL_LINEAR, mipmaps are never sampled
 
     PublishGLBattleEffect::effectMoved();
 }
@@ -166,6 +173,14 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
         _recreateEffect = false;
         cleanup();
         prepareObjectsGL();
+
+        // Effect size changed: re-scale the decode target; the player restart happens asynchronously off the GL path
+        const QSize newTargetSize = getTargetPlayerSize();
+        if(newTargetSize != _playerSize)
+        {
+            _playerSize = newTargetSize;
+            _videoPlayer->targetResized(newTargetSize);
+        }
     }
     else if((!_VAO) || (!_shaderProgramRGBA))
     {
@@ -216,12 +231,18 @@ void PublishGLBattleEffectVideo::paintGL(QOpenGLFunctions* functions, const GLfl
         {
             qDebug() << "[PublishGLBattleEffectVideo] ERROR: Video player image is null!";
         }
+        else if(videoPlayerImage->size() == _textureSize)
+        {
+            // Fast path: frame decoded at texture size; upload in place from the padded-pitch buffer with no CPU copies
+            functions->glPixelStorei(GL_UNPACK_ROW_LENGTH, videoPlayerImage->bytesPerLine() / BYTES_PER_PIXEL_RGBA);
+            functions->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _textureSize.width(), _textureSize.height(), GL_RGBA, GL_UNSIGNED_BYTE, videoPlayerImage->constBits());
+            functions->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        }
         else
         {
-            QImage imageCopy = videoPlayerImage->copy();
-            QImage effectImage = imageCopy.scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
+            // Fallback: decode size differs from the texture (portrait sources, size-change transition)
+            QImage effectImage = videoPlayerImage->copy().scaledToWidth(_textureSize.width(), Qt::FastTransformation).convertToFormat(QImage::Format_RGBA8888);
             functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize.width(), _textureSize.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
-            functions->glGenerateMipmap(GL_TEXTURE_2D);
         }
         _videoPlayer->clearNewImage();
         _videoPlayer->unlockMutex();
@@ -238,6 +259,15 @@ bool PublishGLBattleEffectVideo::hasCustomShaders() const
 BattleDialogModelEffectObjectVideo* PublishGLBattleEffectVideo::getEffectVideo() const
 {
     return dynamic_cast<BattleDialogModelEffectObjectVideo*>(_effect);
+}
+
+QSize PublishGLBattleEffectVideo::getTargetPlayerSize() const
+{
+    if(!_effect)
+        return QSize();
+
+    const int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / EFFECT_TOKEN_SIZE_DIVISOR;
+    return QSize(effectSize, effectSize);
 }
 
 void PublishGLBattleEffectVideo::createShadersGL()

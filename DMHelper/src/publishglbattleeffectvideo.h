@@ -27,6 +27,7 @@ signals:
 protected:
     void createShadersGL();
     void cleanupShadersGL();
+    QSize getTargetPlayerSize() const;
     const char* getVertexShaderSource(BattleDialogModelEffectObjectVideo* effectVideo);
     const char* getFragmentShaderSource(BattleDialogModelEffectObjectVideo* effectVideo);
 
