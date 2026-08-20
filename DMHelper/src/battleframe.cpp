@@ -4238,6 +4238,13 @@ void BattleFrame::gridSizerAccepted()
     int intSize = _gridSizer->getSize();
     int xOffset = static_cast<int>(_gridSizer->x()) % intSize;
     int yOffset = static_cast<int>(_gridSizer->y()) % intSize;
+
+    if(!_model)
+    {
+        gridSizerRejected();
+        return;
+    }
+
     setGridScale(intSize, (100 * xOffset) / intSize, (100 * yOffset) / intSize);
     gridSizerRejected();
 }
@@ -4247,9 +4254,15 @@ void BattleFrame::gridSizerRejected()
     if(!_gridSizer)
         return;
 
-    const QList<Layer*> gridLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Grid);
-    for(Layer* layer : gridLayers)
-        layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
+    if(_model)
+    {
+        const QList<Layer*> gridLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+        for(Layer* layer : gridLayers)
+            layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
+    }
+
+    if(_scene)
+        _scene->removeItem(_gridSizer);
 
     _gridSizer->deleteLater();
     _gridSizer = nullptr;
