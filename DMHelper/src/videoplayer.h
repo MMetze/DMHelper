@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMutex>
 #include <QImage>
+#include <QElapsedTimer>
 #include <atomic>
 #include "dmh_vlc.h"
 
@@ -34,6 +35,14 @@ public:
     virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
     virtual void clearNewImage();
+
+    // Perf stats: cumulative since object creation, incremented from VLC threads
+    unsigned int getStatFramesDecoded() const;
+    unsigned int getStatFramesDropped() const;
+    qint64 getStatDecodeIntervalAccumNs() const;
+    unsigned int getStatDecodeIntervalCount() const;
+    // Returns the max decode interval since the last call and resets it (windowed max)
+    qint64 takeStatDecodeIntervalMaxNs();
 
     virtual void* lockCallback(void **planes);
     virtual void unlockCallback(void *picture, void *const *planes);
@@ -120,6 +129,12 @@ protected:
     int _stopStatus;
     std::atomic<int> _frameCount;
     int _originalTrack;
+    std::atomic<unsigned int> _statFramesDecoded;
+    std::atomic<unsigned int> _statFramesDropped;
+    QElapsedTimer _statDecodeIntervalTimer; // touched only on VLC's display thread
+    std::atomic<qint64> _statDecodeIntervalAccumNs;
+    std::atomic<unsigned int> _statDecodeIntervalCount;
+    std::atomic<qint64> _statDecodeIntervalMaxNs;
 };
 
 #endif // VIDEOPLAYER_H

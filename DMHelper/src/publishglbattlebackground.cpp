@@ -249,7 +249,11 @@ void PublishGLBattleBackground::loadTexture(const QImage& image)
         glBackgroundImage = glBackgroundImage.mirrored(false, true);
 #endif
     }
+    // Stride-safe upload: pitch-padded sources (video decode buffers) have bytesPerLine > width*4.
+    // For tightly packed sources the row length equals the width, leaving behaviour unchanged.
+    f->glPixelStorei(GL_UNPACK_ROW_LENGTH, glBackgroundImage.bytesPerLine() / BYTES_PER_PIXEL_RGBA);
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    f->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     if(isMipmapMinFilter(_textureParam))
         f->glGenerateMipmap(GL_TEXTURE_2D);
 }

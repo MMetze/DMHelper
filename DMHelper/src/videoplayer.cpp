@@ -65,7 +65,13 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _deleteOnStop(false),
     _stopStatus(0),
     _frameCount(0),
-    _originalTrack(INVALID_TRACK_ID)
+    _originalTrack(INVALID_TRACK_ID),
+    _statFramesDecoded(0),
+    _statFramesDropped(0),
+    _statDecodeIntervalTimer(),
+    _statDecodeIntervalAccumNs(0),
+    _statDecodeIntervalCount(0),
+    _statDecodeIntervalMaxNs(0)
 {
     _buffers[0] = nullptr;
     _buffers[1] = nullptr;
@@ -255,6 +261,31 @@ void VideoPlayer::clearNewImage()
     _newImage = false;
 }
 
+unsigned int VideoPlayer::getStatFramesDecoded() const
+{
+    return _statFramesDecoded;
+}
+
+unsigned int VideoPlayer::getStatFramesDropped() const
+{
+    return _statFramesDropped;
+}
+
+qint64 VideoPlayer::getStatDecodeIntervalAccumNs() const
+{
+    return _statDecodeIntervalAccumNs;
+}
+
+unsigned int VideoPlayer::getStatDecodeIntervalCount() const
+{
+    return _statDecodeIntervalCount;
+}
+
+qint64 VideoPlayer::takeStatDecodeIntervalMaxNs()
+{
+    return _statDecodeIntervalMaxNs.exchange(0);
+}
+
 void* VideoPlayer::lockCallback(void **planes)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -291,6 +322,8 @@ void* VideoPlayer::lockCallback(void **planes)
     qDebug() << "[VideoPlayer] Lock callback failing forward, frame will be dropped" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
+    ++_statFramesDropped;
+
     // Fail forward: decode into the fallback buffer; the null token tells unlockCallback to drop the frame
     *planes = _fallbackBuffer ? _fallbackBuffer->getNativeBuffer() : nullptr;
     return nullptr;
@@ -310,7 +343,10 @@ void VideoPlayer::unlockCallback(void *picture, void *const *planes)
 
     // Drop the frame rather than stall the decode thread on contention
     if(!_mutex->tryLock(VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS))
+    {
+        ++_statFramesDropped;
         return;
+    }
 
     if(_buffers[_idxWrite] == static_cast<VideoPlayerImageBuffer*>(picture))
     {
@@ -327,6 +363,19 @@ void VideoPlayer::unlockCallback(void *picture, void *const *planes)
 void VideoPlayer::displayCallback(void *picture)
 {
     Q_UNUSED(picture);
+
+    ++_statFramesDecoded;
+
+    // Delivery jitter on VLC's own clock: distinguishes uneven decode from late GUI-thread presentation
+    if(_statDecodeIntervalTimer.isValid())
+    {
+        const qint64 intervalNs = _statDecodeIntervalTimer.nsecsElapsed();
+        _statDecodeIntervalAccumNs += intervalNs;
+        ++_statDecodeIntervalCount;
+        qint64 prevMax = _statDecodeIntervalMaxNs.load();
+        while((intervalNs > prevMax) && (!_statDecodeIntervalMaxNs.compare_exchange_weak(prevMax, intervalNs))) {}
+    }
+    _statDecodeIntervalTimer.start();
 
     if(++_frameCount == VIDEOPLAYER_SCREENSHOT_FRAME)
         emit screenShotAvailable();
@@ -359,7 +408,9 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
     qDebug() << "[VideoPlayer] Format Callback with chroma: " << QString(chroma) << ", width: " << *width << ", height: " << *height << ", pitches: " << *pitches << ", lines: " << *lines << ", " << this;
 #endif
 
-    memcpy(chroma, "BGRA", sizeof("BGRA") - 1);
+    // RGBA matches QImage::Format_RGBA8888, so the GL upload path needs no CPU swizzle;
+    // VLC performs the conversion on its worker thread at unchanged cost
+    memcpy(chroma, "RGBA", sizeof("RGBA") - 1);
 
     _originalSize = QSize(static_cast<int>(*width), static_cast<int>(*height));
     QSize scaledTarget = _originalSize;
@@ -849,7 +900,7 @@ VideoPlayer::VideoPlayerImageBuffer::VideoPlayerImageBuffer(unsigned int width, 
         return;
 
     _nativeBuffer = reinterpret_cast<uchar*>((reinterpret_cast<size_t>(_nativeBufferNotAligned) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(static_cast<size_t>(VIDEOPLAYER_BUFFER_ALIGNMENT) - 1));
-    _imgFrame = new QImage(_nativeBuffer, static_cast<int>(width), static_cast<int>(height), static_cast<int>(pitch), QImage::Format_ARGB32);
+    _imgFrame = new QImage(_nativeBuffer, static_cast<int>(width), static_cast<int>(height), static_cast<int>(pitch), QImage::Format_RGBA8888);
 }
 
 VideoPlayer::VideoPlayerImageBuffer::~VideoPlayerImageBuffer()
