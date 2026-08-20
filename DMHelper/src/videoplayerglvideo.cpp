@@ -131,7 +131,7 @@ bool VideoPlayerGLVideo::resizeRenderTextures(void* data,
 
     that->_buffers[that->_idxRender]->bind();
 
-    render_cfg->opengl_format = GL_RGBA;
+    // render_cfg->opengl_format = GL_RGBA; Removed due to libvlc v4 header incompability
     render_cfg->full_range    = true;
     render_cfg->colorspace    = libvlc_video_colorspace_BT709;
     render_cfg->primaries     = libvlc_video_primaries_BT709;
