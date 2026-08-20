@@ -14,7 +14,8 @@ const int VIDEOPLAYER_STOP_CONFIRMED = 0x04;
 const int VIDEOPLAYER_STOP_COMPLETE = VIDEOPLAYER_STOP_CALL_STARTED | VIDEOPLAYER_STOP_CALL_COMPLETE | VIDEOPLAYER_STOP_CONFIRMED;
 const int INVALID_TRACK_ID = -99999;
 const int VIDEOPLAYER_SCREENSHOT_FRAME = 3;
-const size_t VIDEOPLAYER_BUFFER_ALIGNMENT = 32;
+const unsigned int VIDEOPLAYER_BUFFER_ALIGNMENT = 32;
+const int VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS = 2;
 
 // libvlc callback static functions
 void * playerLockCallback(void *opaque, void **planes);
@@ -51,8 +52,10 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _nativeHeight(0),
     _mutex(new QMutex()),
     _buffers(),
-    _idxRender(0),
-    _idxDisplay(1),
+    _fallbackBuffer(nullptr),
+    _idxWrite(0),
+    _idxReady(1),
+    _idxDisplay(2),
     _newImage(false),
     _originalSize(),
     _targetSize(targetSize),
@@ -66,6 +69,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
 {
     _buffers[0] = nullptr;
     _buffers[1] = nullptr;
+    _buffers[2] = nullptr;
 
     connect(this, &VideoPlayer::videoStopped, this, &VideoPlayer::handleVideoStopped, Qt::QueuedConnection);
 
@@ -195,31 +199,31 @@ bool VideoPlayer::isError() const
 
 bool VideoPlayer::lockMutex()
 {
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Locking mutex: " << _mutex << ", " << this << ", " << COUNT_CALLBACKS;
-#endif
-
-    return (_mutex) ? _mutex->tryLock(1000) : false;
+    // Compatibility no-op: getLockedImage() synchronizes internally and the display buffer is consumer-exclusive
+    return true;
 }
 
 void VideoPlayer::unlockMutex()
 {
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Unlocking mutex: " << _mutex << ", " << this << ", " << COUNT_CALLBACKS;
-#endif
-
-    if(_mutex)
-        _mutex->unlock();
+    // Compatibility no-op, see lockMutex()
 }
 
-QImage* VideoPlayer::getLockedImage() const
+QImage* VideoPlayer::getLockedImage()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Returning locking image. Playing state: " << _status << ", display index: " << _idxDisplay << ", render index: " << _idxRender << ", display buffer: " << _buffers[_idxDisplay] << ", " << this << ", " << COUNT_CALLBACKS;
+    qDebug() << "[VideoPlayer] Returning image. Playing state: " << _status << ", display index: " << _idxDisplay << ", ready index: " << _idxReady << ", write index: " << _idxWrite << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if(!isPlaying())
+    if((!isPlaying()) || (!_mutex))
         return nullptr;
+
+    QMutexLocker locker(_mutex);
+
+    if(_newImage)
+    {
+        std::swap(_idxDisplay, _idxReady);
+        _newImage = false;
+    }
 
     return _buffers[_idxDisplay] ? _buffers[_idxDisplay]->getFrame() : nullptr;
 }
@@ -257,22 +261,8 @@ void* VideoPlayer::lockCallback(void **planes)
     qDebug() << "[VideoPlayer] Lock callback called" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if((!_mutex) || (!planes))
+    if(!planes)
         return nullptr;
-
-    //_mutex->lock();
-    if(!_mutex->tryLock(1000))
-    {
-#ifdef VIDEO_DEBUG_MESSAGES
-        qDebug() << "[VideoPlayer] ERROR: Lock callback unable to lock mutex!";
-#endif
-        return nullptr;
-    }
-
-    if((planes) && (_buffers[_idxRender]) && (_buffers[_idxRender]->getNativeBuffer()))
-    {
-        *planes = _buffers[_idxRender]->getNativeBuffer();
-    }
 
     const char * errmsg = libvlc_errmsg();
     if(errmsg)
@@ -283,32 +273,50 @@ void* VideoPlayer::lockCallback(void **planes)
         libvlc_clearerr();
     }
 
+    // This callback cannot fail: *planes must always point at writable memory or VLC will corrupt memory.
+    // The lock is only needed to synchronize the buffer pointer read with (re)allocation; the write buffer
+    // itself is decoder-exclusive.
+    if((_mutex) && (_mutex->tryLock(VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS)))
+    {
+        VideoPlayerImageBuffer* writeBuffer = _buffers[_idxWrite];
+        _mutex->unlock();
+        if((writeBuffer) && (writeBuffer->getNativeBuffer()))
+        {
+            *planes = writeBuffer->getNativeBuffer();
+            return writeBuffer;
+        }
+    }
+
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Lock completed" << ", " << this << ", " << COUNT_CALLBACKS;
+    qDebug() << "[VideoPlayer] Lock callback failing forward, frame will be dropped" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
+    // Fail forward: decode into the fallback buffer; the null token tells unlockCallback to drop the frame
+    *planes = _fallbackBuffer ? _fallbackBuffer->getNativeBuffer() : nullptr;
     return nullptr;
 }
 
 void VideoPlayer::unlockCallback(void *picture, void *const *planes)
 {
-    Q_UNUSED(picture);
     Q_UNUSED(planes);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Unlock callback called. New Image: " << _newImage << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if(!_mutex)
+    // A null token means lockCallback failed forward into the fallback buffer - drop the frame
+    if((!picture) || (!_mutex))
         return;
 
-    if((!_buffers[0]) || (!_buffers[1]) || (_nativeWidth == 0) || (_nativeHeight == 0))
-    {
-        _mutex->unlock();
+    // Drop the frame rather than stall the decode thread on contention
+    if(!_mutex->tryLock(VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS))
         return;
+
+    if(_buffers[_idxWrite] == static_cast<VideoPlayerImageBuffer*>(picture))
+    {
+        std::swap(_idxWrite, _idxReady);
+        _newImage = true;
     }
-    std::swap(_idxRender, _idxDisplay);
-    _newImage = true;
     _mutex->unlock();
 
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -344,7 +352,7 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
 
     QMutexLocker locker(_mutex);
 
-    if((_buffers[0]) || (_buffers[1]))
+    if((_buffers[0]) || (_buffers[1]) || (_buffers[2]))
         return 0;
 
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -365,21 +373,34 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
 
     _nativeWidth = *width;
     _nativeHeight = *height;
-    *pitches = (*width) * 4;
-    *lines = *height;
 
-    _buffers[0] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight);
-    _buffers[1] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight);
-    if((!_buffers[0]->isValid()) || (!_buffers[1]->isValid()))
+    // Pad pitch and line count to the alignment: VLC's optimized converters may write full vectors per scanline
+    const unsigned int bufferPitch = ((_nativeWidth * 4) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(VIDEOPLAYER_BUFFER_ALIGNMENT - 1);
+    const unsigned int bufferLines = (_nativeHeight + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(VIDEOPLAYER_BUFFER_ALIGNMENT - 1);
+    *pitches = bufferPitch;
+    *lines = bufferLines;
+
+    delete _fallbackBuffer;
+    _fallbackBuffer = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    _buffers[0] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    _buffers[1] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    _buffers[2] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    if((!_fallbackBuffer->isValid()) || (!_buffers[0]->isValid()) || (!_buffers[1]->isValid()) || (!_buffers[2]->isValid()))
     {
+        delete _fallbackBuffer;
+        _fallbackBuffer = nullptr;
         delete _buffers[0];
         _buffers[0] = nullptr;
         delete _buffers[1];
         _buffers[1] = nullptr;
+        delete _buffers[2];
+        _buffers[2] = nullptr;
         return 0;
     }
-    _idxRender = 0;
-    _idxDisplay = 1;
+    _idxWrite = 0;
+    _idxReady = 1;
+    _idxDisplay = 2;
+    _newImage = false;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Format callback completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -401,7 +422,9 @@ void VideoPlayer::cleanupCallback()
 #endif
         libvlc_clearerr();
     }
-    cleanupBuffers();
+
+    // Marshal to the object's thread so buffer deletion can never race a consumer copying the display frame
+    QMetaObject::invokeMethod(this, &VideoPlayer::cleanupBuffers, Qt::QueuedConnection);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Cleanup callback completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -755,6 +778,10 @@ void VideoPlayer::cleanupBuffers()
     _buffers[0] = nullptr;
     delete _buffers[1];
     _buffers[1] = nullptr;
+    delete _buffers[2];
+    _buffers[2] = nullptr;
+    delete _fallbackBuffer;
+    _fallbackBuffer = nullptr;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Buffer cleanup completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -811,18 +838,18 @@ bool VideoPlayer::isStatusValid() const
     return result;
 }
 
-VideoPlayer::VideoPlayerImageBuffer::VideoPlayerImageBuffer(unsigned int width, unsigned int height) :
+VideoPlayer::VideoPlayerImageBuffer::VideoPlayerImageBuffer(unsigned int width, unsigned int height, unsigned int pitch, unsigned int lines) :
     _nativeBufferNotAligned(nullptr),
     _nativeBuffer(nullptr),
     _imgFrame(nullptr)
 {
-    const size_t bufferSize = (static_cast<size_t>(width) * static_cast<size_t>(height) * 4) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1;
+    const size_t bufferSize = (static_cast<size_t>(pitch) * static_cast<size_t>(lines)) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1;
     _nativeBufferNotAligned = static_cast<uchar*>(malloc(bufferSize));
     if(!_nativeBufferNotAligned)
         return;
 
-    _nativeBuffer = reinterpret_cast<uchar*>((reinterpret_cast<size_t>(_nativeBufferNotAligned) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(VIDEOPLAYER_BUFFER_ALIGNMENT - 1));
-    _imgFrame = new QImage(_nativeBuffer, static_cast<int>(width), static_cast<int>(height), QImage::Format_ARGB32);
+    _nativeBuffer = reinterpret_cast<uchar*>((reinterpret_cast<size_t>(_nativeBufferNotAligned) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(static_cast<size_t>(VIDEOPLAYER_BUFFER_ALIGNMENT) - 1));
+    _imgFrame = new QImage(_nativeBuffer, static_cast<int>(width), static_cast<int>(height), static_cast<int>(pitch), QImage::Format_ARGB32);
 }
 
 VideoPlayer::VideoPlayerImageBuffer::~VideoPlayerImageBuffer()

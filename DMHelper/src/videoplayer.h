@@ -27,9 +27,10 @@ public:
     virtual void setLooping(bool looping);
 
     virtual bool isError() const;
+    // lockMutex/unlockMutex are compatibility no-ops: getLockedImage() synchronizes internally
     virtual bool lockMutex();
     virtual void unlockMutex();
-    virtual QImage* getLockedImage() const;
+    virtual QImage* getLockedImage();
     virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
     virtual void clearNewImage();
@@ -43,6 +44,7 @@ public:
     virtual void eventCallback(libvlc_state_t state);
 
 signals:
+    // All signals are emitted from VLC's internal threads: receivers must use queued (or cross-thread auto) connections, never Qt::DirectConnection
     void videoOpening();
     void videoPlaying();
     void videoPaused();
@@ -86,7 +88,7 @@ protected:
     class VideoPlayerImageBuffer
     {
     public:
-        VideoPlayerImageBuffer(unsigned int width, unsigned int height);
+        VideoPlayerImageBuffer(unsigned int width, unsigned int height, unsigned int pitch, unsigned int lines);
         ~VideoPlayerImageBuffer();
 
         uchar* getNativeBuffer();
@@ -102,8 +104,11 @@ protected:
     unsigned int _nativeWidth;
     unsigned int _nativeHeight;
     QMutex* _mutex;
-    class VideoPlayerImageBuffer *_buffers[2];
-    size_t _idxRender;
+    // Triple buffering: write is decoder-exclusive, display is consumer-exclusive, ready holds the latest complete frame
+    class VideoPlayerImageBuffer *_buffers[3];
+    VideoPlayerImageBuffer* _fallbackBuffer;
+    size_t _idxWrite;
+    size_t _idxReady;
     size_t _idxDisplay;
     std::atomic<bool> _newImage;
     QSize _originalSize;
