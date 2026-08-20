@@ -2,7 +2,7 @@
 #define VIDEOPLAYER_H
 
 #include <QObject>
-#include <QRecursiveMutex>
+#include <QMutex>
 #include <QImage>
 #include <atomic>
 #include "dmh_vlc.h"
@@ -91,6 +91,7 @@ protected:
 
         uchar* getNativeBuffer();
         QImage* getFrame();
+        bool isValid() const;
 
     private:
         uchar* _nativeBufferNotAligned;
@@ -104,7 +105,7 @@ protected:
     class VideoPlayerImageBuffer *_buffers[2];
     size_t _idxRender;
     size_t _idxDisplay;
-    bool _newImage;
+    std::atomic<bool> _newImage;
     QSize _originalSize;
     QSize _targetSize;
     std::atomic<int> _status;
@@ -112,7 +113,7 @@ protected:
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;
-    int _frameCount;
+    std::atomic<int> _frameCount;
     int _originalTrack;
 };
 

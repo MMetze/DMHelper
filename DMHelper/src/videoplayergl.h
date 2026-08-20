@@ -5,6 +5,8 @@
 #include <QSurfaceFormat>
 #include <QSize>
 
+class QOpenGLContext;
+
 class VideoPlayerGL : public QObject
 {
     Q_OBJECT
