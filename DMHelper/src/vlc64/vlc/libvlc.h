@@ -75,6 +75,7 @@ extern "C" {
 /** This structure is opaque. It represents a libvlc instance */
 typedef struct libvlc_instance_t libvlc_instance_t;
 
+/** Represents a time value in microseconds */
 typedef int64_t libvlc_time_t;
 
 /** \defgroup libvlc_error LibVLC error handling
@@ -264,67 +265,6 @@ LIBVLC_API const char * libvlc_get_changeset(void);
  * \param ptr the pointer
  */
 LIBVLC_API void libvlc_free( void *ptr );
-
-/** \defgroup libvlc_event LibVLC asynchronous events
- * LibVLC emits asynchronous events.
- *
- * Several LibVLC objects (such @ref libvlc_instance_t as
- * @ref libvlc_media_player_t) generate events asynchronously. Each of them
- * provides @ref libvlc_event_manager_t event manager. You can subscribe to
- * events with libvlc_event_attach() and unsubscribe with
- * libvlc_event_detach().
- * @{
- */
-
-/**
- * Event manager that belongs to a libvlc object, and from whom events can
- * be received.
- */
-typedef struct libvlc_event_manager_t libvlc_event_manager_t;
-
-struct libvlc_event_t;
-
-/**
- * Type of a LibVLC event.
- */
-typedef int libvlc_event_type_t;
-
-/**
- * Callback function notification
- * \param p_event the event triggering the callback
- */
-typedef void ( *libvlc_callback_t )( const struct libvlc_event_t *p_event, void *p_data );
-
-/**
- * Register for an event notification.
- *
- * \param p_event_manager the event manager to which you want to attach to.
- *        Generally it is obtained by vlc_my_object_event_manager() where
- *        my_object is the object you want to listen to.
- * \param i_event_type the desired event to which we want to listen
- * \param f_callback the function to call when i_event_type occurs
- * \param user_data user provided data to carry with the event
- * \return 0 on success, ENOMEM on error
- */
-LIBVLC_API int libvlc_event_attach( libvlc_event_manager_t *p_event_manager,
-                                        libvlc_event_type_t i_event_type,
-                                        libvlc_callback_t f_callback,
-                                        void *user_data );
-
-/**
- * Unregister an event notification.
- *
- * \param p_event_manager the event manager
- * \param i_event_type the desired event to which we want to unregister
- * \param f_callback the function to call when i_event_type occurs
- * \param p_user_data user provided data to carry with the event
- */
-LIBVLC_API void libvlc_event_detach( libvlc_event_manager_t *p_event_manager,
-                                         libvlc_event_type_t i_event_type,
-                                         libvlc_callback_t f_callback,
-                                         void *p_user_data );
-
-/** @} */
 
 /** \defgroup libvlc_log LibVLC logging
  * libvlc_log_* functions provide access to the LibVLC messages log.
@@ -524,7 +464,7 @@ libvlc_module_description_t *libvlc_video_filter_list_get( libvlc_instance_t *p_
  * \note On systems that support it, the POSIX monotonic clock is used.
  */
 LIBVLC_API
-int64_t libvlc_clock(void);
+libvlc_time_t libvlc_clock(void);
 
 /**
  * Return the delay (in microseconds) until a certain timestamp.
@@ -532,7 +472,7 @@ int64_t libvlc_clock(void);
  * \return negative if timestamp is in the past,
  * positive if it is in the future
  */
-static inline int64_t libvlc_delay(int64_t pts)
+static inline libvlc_time_t libvlc_delay(libvlc_time_t pts)
 {
     return pts - libvlc_clock();
 }

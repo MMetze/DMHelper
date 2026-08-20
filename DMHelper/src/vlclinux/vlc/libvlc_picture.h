@@ -35,6 +35,8 @@ typedef enum libvlc_picture_type_t
     libvlc_picture_Argb,
     libvlc_picture_Png,
     libvlc_picture_Jpg,
+    libvlc_picture_WebP,
+    libvlc_picture_Rgba,
 } libvlc_picture_type_t;
 
 /**
@@ -42,8 +44,9 @@ typedef enum libvlc_picture_type_t
  *
  * \see libvlc_picture_release()
  * \param pic A picture object
+ * \return the same object
  */
-LIBVLC_API void
+LIBVLC_API libvlc_picture_t *
 libvlc_picture_retain( libvlc_picture_t* pic );
 
 /**
@@ -91,7 +94,8 @@ libvlc_picture_type( const libvlc_picture_t* pic );
 
 /**
  * Returns the image stride, ie. the number of bytes per line.
- * This can only be called on images of type libvlc_picture_Argb
+ * This can only be called on images of type libvlc_picture_Argb or
+ * libvlc_picture_Rgba
  *
  * \param pic A picture object
  */
@@ -115,7 +119,7 @@ LIBVLC_API unsigned int
 libvlc_picture_get_height( const libvlc_picture_t* pic );
 
 /**
- * Returns the time at which this picture was generated, in milliseconds
+ * Returns the time at which this picture was generated, in microseconds (us)
  * \param pic A picture object
  */
 LIBVLC_API libvlc_time_t
@@ -128,6 +132,10 @@ LIBVLC_API size_t libvlc_picture_list_count( const libvlc_picture_list_t* list )
 
 /**
  * Returns the picture at the provided index.
+ *
+ * The returned picture is a weak reference of libvlc_picture_t* owned by the
+ * list. It must not be released and remains valid only as long as the list is
+ * alive.
  *
  * If the index is out of bound, the result is undefined.
  */

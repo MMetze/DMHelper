@@ -25,6 +25,8 @@
 #ifndef VLC_LIBVLC_MEDIA_TRACK_H
 #define VLC_LIBVLC_MEDIA_TRACK_H 1
 
+# include "libvlc_video.h"
+
 # ifdef __cplusplus
 extern "C" {
 # else
@@ -53,26 +55,6 @@ typedef struct libvlc_audio_track_t
     unsigned    i_rate;
 } libvlc_audio_track_t;
 
-typedef enum libvlc_video_orient_t
-{
-    libvlc_video_orient_top_left,       /**< Normal. Top line represents top, left column left. */
-    libvlc_video_orient_top_right,      /**< Flipped horizontally */
-    libvlc_video_orient_bottom_left,    /**< Flipped vertically */
-    libvlc_video_orient_bottom_right,   /**< Rotated 180 degrees */
-    libvlc_video_orient_left_top,       /**< Transposed */
-    libvlc_video_orient_left_bottom,    /**< Rotated 90 degrees clockwise (or 270 anti-clockwise) */
-    libvlc_video_orient_right_top,      /**< Rotated 90 degrees anti-clockwise */
-    libvlc_video_orient_right_bottom    /**< Anti-transposed */
-} libvlc_video_orient_t;
-
-typedef enum libvlc_video_projection_t
-{
-    libvlc_video_projection_rectangular,
-    libvlc_video_projection_equirectangular, /**< 360 spherical */
-
-    libvlc_video_projection_cubemap_layout_standard = 0x100,
-} libvlc_video_projection_t;
-
 /**
  * Viewpoint
  *
@@ -85,17 +67,6 @@ typedef struct libvlc_video_viewpoint_t
     float f_roll;          /**< view point roll in degrees ]-180;180] */
     float f_field_of_view; /**< field of view in degrees ]0;180[ (default 80.)*/
 } libvlc_video_viewpoint_t;
-
-typedef enum libvlc_video_multiview_t
-{
-    libvlc_video_multiview_2d,                  /**< No stereoscopy: 2D picture. */
-    libvlc_video_multiview_stereo_sbs,          /**< Side-by-side */
-    libvlc_video_multiview_stereo_tb,           /**< Top-bottom */
-    libvlc_video_multiview_stereo_row,          /**< Row sequential */
-    libvlc_video_multiview_stereo_col,          /**< Column sequential */
-    libvlc_video_multiview_stereo_frame,        /**< Frame sequential */
-    libvlc_video_multiview_stereo_checkerboard, /**< Checkerboard pattern */
-} libvlc_video_multiview_t;
 
 typedef struct libvlc_video_track_t
 {
@@ -129,23 +100,21 @@ typedef struct libvlc_media_track_t
     int         i_profile;
     int         i_level;
 
-    union {
+    union libvlc_media_track_data {
         libvlc_audio_track_t *audio;
         libvlc_video_track_t *video;
         libvlc_subtitle_track_t *subtitle;
-    };
+    } u;
 
     unsigned int i_bitrate;
     char *psz_language;
     char *psz_description;
 
     /** String identifier of track, can be used to save the track preference
-     * from an other LibVLC run, only valid when the track is fetch from a
-     * media_player */
+     * from an other LibVLC run */
     const char *psz_id;
     /** A string identifier is stable when it is certified to be the same
-     * across different playback instances for the same track, only valid when
-     * the track is fetch from a media_player */
+     * across different playback instances for the same track. */
     bool id_stable;
     /** Name of the track, only valid when the track is fetch from a
      * media_player */
@@ -215,7 +184,7 @@ libvlc_media_tracklist_delete( libvlc_media_tracklist_t *list );
  * \return the same track, need to be released with libvlc_media_track_release()
  */
 LIBVLC_API libvlc_media_track_t *
-libvlc_media_track_hold( libvlc_media_track_t *track );
+libvlc_media_track_retain( libvlc_media_track_t *track );
 
 /**
  * Release a single track
@@ -226,7 +195,7 @@ libvlc_media_track_hold( libvlc_media_track_t *track );
  * libvlc_media_tracklist_delete().
  *
  * \note You only need to release tracks previously held with
- * libvlc_media_track_hold() or returned by
+ * libvlc_media_track_retain() or returned by
  * libvlc_media_player_get_selected_track() and
  * libvlc_media_player_get_track_from_id()
  *
