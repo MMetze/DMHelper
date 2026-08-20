@@ -1,25 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-# =========================
-# Arguments
-# =========================
-
 SKIP_BUILD=0
 if [[ "$1" == "--skip-build" ]]; then
     SKIP_BUILD=1
 fi
 
-# =========================
-# Bootstrap / Root
-# =========================
-
 SCRIPT_ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_ROOT"
-
-# =========================
-# Configuration
-# =========================
 
 QT_VERSION="6.10.3"
 
@@ -34,16 +22,12 @@ else
 fi
 
 SRC_DIR="$SCRIPT_ROOT/src"
-BUILD_DIR="$SCRIPT_ROOT/build-macos-release"
-BIN_DIR="$SCRIPT_ROOT/bin-macos"
+BUILD_DIR="$SCRIPT_ROOT/build-macos64-release"
+BIN_DIR="$SCRIPT_ROOT/bin-macos64"
 
 QT_BIN_DIR="$QT_DIR/bin"
 MACDEPLOYQT="$QT_BIN_DIR/macdeployqt"
 QT6_CMAKE_DIR="$QT_DIR/lib/cmake/Qt6"
-
-# =========================
-# Helpers
-# =========================
 
 section() {
     echo ""
@@ -59,22 +43,13 @@ assert_exists() {
     fi
 }
 
-# =========================
-# Confirmation
-# =========================
-
 read -p "Completely rebuild and redeploy DMHelper (macOS)? (y/n) " CONFIRM
 if [[ "$CONFIRM" != "y" ]]; then
     echo "Aborted."
     exit 0
 fi
 
-# =========================
-# Tool checks
-# =========================
-
 section "Checking build tools"
-
 assert_exists "$(xcode-select -p)" "Xcode Command Line Tools"
 assert_exists "$QT_DIR" "Qt directory"
 assert_exists "$QT6_CMAKE_DIR" "Qt6 CMake config"
@@ -83,14 +58,8 @@ assert_exists "$MACDEPLOYQT" "macdeployqt"
 export CMAKE_PREFIX_PATH="$QT_DIR"
 export Qt6_DIR="$QT6_CMAKE_DIR"
 
-# =========================
-# Prepare output directories
-# =========================
-
 section "Preparing output directories"
-
 rm -rf "$BIN_DIR"
-
 mkdir -p \
     "$BIN_DIR/DMHelper.app/Contents" \
     "$BIN_DIR/DMHelper.app/Contents/Frameworks" \
@@ -98,89 +67,43 @@ mkdir -p \
     "$BIN_DIR/DMHelper.app/Contents/Frameworks/plugins" \
     "$BIN_DIR/DMHelper.app/Contents/Resources"
 
-# =========================
-# Build
-# =========================
-
 if [[ "$SKIP_BUILD" -eq 0 ]]; then
     section "Configuring and building DMHelper (macOS)"
-
     rm -rf "$BUILD_DIR"
     mkdir "$BUILD_DIR"
-
     cmake \
         -S "$SRC_DIR" \
         -B "$BUILD_DIR" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DDMH_MACOS_ARCH=x64 \
         -G "Xcode"
-
     cmake --build "$BUILD_DIR" --config Release
 else
     section "Skipping build (using existing binaries)"
 fi
 
-# =========================
-# Copy build artifacts
-# =========================
-
 section "Copying build artifacts"
-
 APP_PATH="$BUILD_DIR/Release/DMHelper.app"
 assert_exists "$APP_PATH" "DMHelper.app"
-
-cp -R "$APP_PATH" \
-    "$BIN_DIR/"
-
-cp -R "$SRC_DIR/bin-macos/Info.plist" \
-    "$BIN_DIR/DMHelper.app/Contents/"
-
-cp -R "$SRC_DIR/bin-macos/pkgconfig/"* \
-    "$BIN_DIR/DMHelper.app/Contents/Frameworks/pkgconfig"
-
-cp -R "$SRC_DIR/bin-macos/vlc/plugins/"* \
-    "$BIN_DIR/DMHelper.app/Contents/Frameworks/plugins"
-
-# Copy VLC dylibs into the app bundle's Frameworks directory
-cp -R "$SRC_DIR/bin-macos/"libvlc*.dylib \
-    "$BIN_DIR/DMHelper.app/Contents/Frameworks/"
-
-# =========================
-# Qt deployment
-# =========================
+cp -R "$APP_PATH" "$BIN_DIR/"
+cp -R "$SRC_DIR/bin-macos64/Info.plist" "$BIN_DIR/DMHelper.app/Contents/"
+cp -R "$SRC_DIR/bin-macos64/pkgconfig/"* "$BIN_DIR/DMHelper.app/Contents/Frameworks/pkgconfig"
+cp -R "$SRC_DIR/bin-macos64/vlc/plugins/"* "$BIN_DIR/DMHelper.app/Contents/Frameworks/plugins"
+cp -R "$SRC_DIR/bin-macos64/"libvlc*.dylib "$BIN_DIR/DMHelper.app/Contents/Frameworks/"
 
 section "Running macdeployqt"
-
-"$MACDEPLOYQT" \
-    "$BIN_DIR/DMHelper.app" \
-    -always-overwrite \
-    -verbose=1
-
-# =========================
-# Copy resources into the app bundle
-# (must be after macdeployqt so they are not overwritten)
-# =========================
+"$MACDEPLOYQT" "$BIN_DIR/DMHelper.app" -always-overwrite -verbose=1
 
 section "Copying resources into app bundle"
-
 RESOURCES_DIR="$BIN_DIR/DMHelper.app/Contents/Resources"
-
-cp -R "$SRC_DIR/bestiary/"*  "$RESOURCES_DIR/"
+cp -R "$SRC_DIR/bestiary/"* "$RESOURCES_DIR/"
 cp -R "$SRC_DIR/resources/"* "$RESOURCES_DIR/"
-cp -R "$SRC_DIR/doc/"*       "$RESOURCES_DIR/"
-cp "$SRC_DIR/bin-macos/DMHelper.icns" "$RESOURCES_DIR/"
-
-# =========================
-# Create ZIP
-# =========================
+cp -R "$SRC_DIR/doc/"* "$RESOURCES_DIR/"
+cp "$SRC_DIR/bin-macos64/DMHelper.icns" "$RESOURCES_DIR/"
 
 section "Creating ZIP distribution"
-
 cd "$BIN_DIR"
-zip -r "$SCRIPT_ROOT/DMHelper-macOS-release.zip" DMHelper.app
-
-# =========================
-# Done
-# =========================
+zip -r "$SCRIPT_ROOT/DMHelper-macOS-x64-release.zip" DMHelper.app
 
 echo ""
-echo "Build completed successfully (macOS)"
+echo "Build completed successfully (macOS x64)"

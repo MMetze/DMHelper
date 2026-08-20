@@ -1,0 +1,6 @@
+*.dylib -text
+*.icns  -text
+*.dll   -text
+*.lib   -text
+*.a     -text
+*.dat   -text

@@ -21,7 +21,7 @@ Sources are listed **explicitly** in `CMakeLists.txt` — no globbing. Every new
 ## Files Never to Modify
 - `*.ui` — Qt Designer only; never hand-edit the XML
 - `*.qrc` — manual edits only; never restructure paths
-- `vlc32/`, `vlc64/`, `vlcMac/`, `bin-win*/`, `bin-macos/` — pre-built binaries
+- `vlc32/`, `vlc64/`, `vlcMac64/`, `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/` — pre-built binaries
 
 ## Signals
 - `dirty()` = unsaved data changed. `changed()` = visual-only redraw.

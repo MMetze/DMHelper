@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
-# macOS: force x86_64 until native arm64 VLC libraries are bundled.
-# The libvlc in vlcMac/ and bin-macos/ is x86_64-only; Apple Silicon runs
-# this build via Rosetta 2. Must be set before project(). Overridable via
-# -DCMAKE_OSX_ARCHITECTURES for a future arm64 build.
 if (CMAKE_HOST_APPLE)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS target architectures")
+    set(DMH_MACOS_ARCH "" CACHE STRING "macOS VLC architecture (x64 or arm64)")
+    if (DMH_MACOS_ARCH STREQUAL "x64")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    elseif (DMH_MACOS_ARCH STREQUAL "arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+    endif()
 endif()
 
 project(DMHelper LANGUAGES CXX)
@@ -1013,6 +1014,15 @@ if (WIN32)
 elseif (APPLE)
     message(STATUS "Configuring macOS build")
 
+    if (DMH_MACOS_ARCH STREQUAL "arm64" OR
+        (DMH_MACOS_ARCH STREQUAL "" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64"))
+        set(_dmh_macos_vlc_dir vlcMacArm)
+        message(STATUS "Using arm64 VLC")
+    else()
+        set(_dmh_macos_vlc_dir vlcMac64)
+        message(STATUS "Using x64 VLC")
+    endif()
+
     target_compile_options(DMHelper PRIVATE
         $<$<CONFIG:Debug>:-g>
         $<$<CONFIG:Release>:-O2>
@@ -1020,8 +1030,8 @@ elseif (APPLE)
 
     target_compile_definitions(DMHelper PRIVATE NDEBUG)
 
-    target_include_directories(DMHelper PRIVATE vlcMac)
-    target_link_directories(DMHelper PRIVATE vlcMac)
+    target_include_directories(DMHelper PRIVATE "${_dmh_macos_vlc_dir}")
+    target_link_directories(DMHelper PRIVATE "${_dmh_macos_vlc_dir}")
     target_link_libraries(DMHelper PRIVATE vlc)
 
     set_target_properties(DMHelper PROPERTIES

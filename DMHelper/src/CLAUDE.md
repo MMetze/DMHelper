@@ -123,7 +123,7 @@ dynamic lists).
 ## Files never to modify
 - `*.ui` — edit in Qt Designer only, never hand-edit XML
 - `*.qrc` — edit manually only with care, never restructure paths
-- `vlc32/`, `vlc64/`, `vlcMac/`, `bin-win*/`, `bin-macos/` — pre-built binaries
+- `vlc32/`, `vlc64/`, `vlcMac64/`, `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/` — pre-built binaries
 
 ## Agent workflow
 - Branch: `agent/work` — never commit directly to `main`
