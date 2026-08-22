@@ -8,6 +8,7 @@
 #include "party.h"
 #include "characterv2.h"
 #include "characterimporter.h"
+#include "characterimportdialog.h"
 #include "characterv2converter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
@@ -1994,7 +1995,7 @@ CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterTyp
     else
     {
         if((dlg.isImportNeeded()) && (!dlg.getImportString().isEmpty()))
-            importCharacter(dlg.getImportString());
+            importCharacter(CharacterImportDialog::getCharacterIdFromUrl(dlg.getImportString()));
     }
 
     return nullptr;
