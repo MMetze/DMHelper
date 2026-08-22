@@ -76,6 +76,7 @@ private slots:
     void onCombatantMoveUpdated();
     void onCombatantVisibilityChanged();
     void onCombatantDoneChanged();
+    void onCombatantOverrideChanged(BattleDialogModelCombatant* combatant, const QString& key);
     void onMonsterDataChanged();
     void onMonsterResourceCountChanged(BattleDialogModelMonsterBase* monster, const QString& resourceName, int newValue);
     void onInnerValueChanged(const QString& innerKey);
@@ -83,6 +84,9 @@ private slots:
 private:
     void wireModelToNotifier();
     bool isModelKey(const QString& key) const;
+    bool isResourceKey(const QString& key) const;
+    QString resourceStorageString(const QString& key) const;
+    QString normalizeResourceStorageString(const QString& key, const QString& value) const;
     BattleDialogModelMonsterBase* monsterBase() const;
     BattleDialogModelCharacter* characterModel() const;
     MonsterClassv2* monsterClass() const;

@@ -103,8 +103,8 @@ protected slots:
     void effectVisibilityChanged(bool showEffects);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
     void linkedObjectMoved(BattleDialogModelObject* object);
-    void healthBarVisibilityChanged(bool visible);
-    void glHealthBarVisibilityChanged(bool show);
+    void healthBarVisibilityChanged(int mode);
+    void glHealthBarVisibilityChanged(int mode);
 
 protected:
     // Layer Specific Interface

@@ -702,7 +702,8 @@ vlc_player_GetPosition(vlc_player_t *player);
  * a starting position.
  *
  * @param player locked player instance
- * @param position position in the range [0.f;1.f]
+ * @param position position in the range [0;1] (VLC_PLAYER_WHENCE_ABSOLUTE)
+ * or [-1;1] (VLC_PLAYER_WHENCE_RELATIVE)
  * @param speed precise of fast
  * @param whence absolute or relative
  */
@@ -2490,7 +2491,7 @@ vlc_player_aout_GetVolume(vlc_player_t *player);
  * functions.
  *
  * @note A successful call will trigger the
- * vlc_player_vout_cbs.on_volume_changed event.
+ * vlc_player_aout_cbs.on_volume_changed event.
  *
  * @param player player instance
  * @param volume volume in the range [0;2.f]
@@ -3338,9 +3339,13 @@ struct vlc_player_cbs
 
     /**
      * Called when the next frame, following a call to
-     * `vlc_player_NextVideoFrame()`, is displayed.
+     * `vlc_player_NextVideoFrame()`, is about to be displayed.
      *
      * @see vlc_player_NextVideoFrame()
+     *
+     * @note This event is sent just before the frame is sent to the video
+     * output, use vlc_player_AddTimer() if you need to know exactly when the
+     * frame is displayed.
      *
      * @param player locked player instance
      * @param status 0 in case of success, -EAGAIN on first call (paused),
@@ -3350,19 +3355,23 @@ struct vlc_player_cbs
     void (*on_next_frame_status)(vlc_player_t *player, int status, void *data);
 
     /**
-    * Called when the previous frame, following a call to
-    * `vlc_player_PreviousVideoFrame()`, is displayed.
-    *
-    * @see vlc_player_PreviousVideoFrame()
-    *
-    * @param player locked player instance
-    * @param status 0 in case of success,
-    * -EAGAIN on first call (paused) or on first frame,
-    * -EBUSY in case of video error,
-    * -ENOTSUP if can't pause/seek/pace,
-    * -EINVAL in case of invalid state,
-    * -ERANGE if the player could not seek back
-    */
+     * Called when the previous frame, following a call to
+     * `vlc_player_PreviousVideoFrame()`, is about to displayed.
+     *
+     * @see vlc_player_PreviousVideoFrame()
+     *
+     * @note This event is sent just before the frame is sent to the video
+     * output, use vlc_player_AddTimer() if you need to know exactly when the
+     * frame is displayed.
+     *
+     * @param player locked player instance
+     * @param status 0 in case of success,
+     * -EAGAIN on first call (paused) or on first frame,
+     * -EBUSY in case of video error,
+     * -ENOTSUP if can't pause/seek/pace,
+     * -EINVAL in case of invalid state,
+     * -ERANGE if the player could not seek back
+     */
     void (*on_prev_frame_status)(vlc_player_t *player, int status, void *data);
 };
 

@@ -8,6 +8,8 @@ class InitiativeEventWidget;
 }
 
 class BattleDialogModelInitiativeEvent;
+class QContextMenuEvent;
+class QEvent;
 
 class InitiativeEventWidget : public CombatantWidget
 {
@@ -33,6 +35,10 @@ protected slots:
     void handleInitiativeEdited();
     void handleNameEdited();
     void handleCombatantInitiativeChanged();
+
+protected:
+    virtual void contextMenuEvent(QContextMenuEvent* event) override;
+    virtual bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
     Ui::InitiativeEventWidget* ui;

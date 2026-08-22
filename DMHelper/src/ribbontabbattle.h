@@ -23,6 +23,7 @@ public slots:
     void setShowEffects(bool checked);
     void setShowMovement(bool checked);
     void setLairActionsVisible(bool visible);
+    void setLairActionsChecked(bool checked);
 
 signals:
     void addCharacterClicked();
@@ -43,7 +44,7 @@ signals:
     void showDeadClicked(bool checked);
     void showEffectsClicked(bool checked);
     void showMovementClicked(bool checked);
-    void lairActionsClicked();
+    void lairActionsClicked(bool checked);
     void addEventClicked();
     void statisticsClicked();
 

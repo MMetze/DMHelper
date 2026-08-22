@@ -21,7 +21,7 @@ PresentUpdateDialog::PresentUpdateDialog(const QString& newVersion, const QStrin
                                                 .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
     ui->lblCurrentVersion->setText(currentVersion);
     ui->lblNewVersion->setText(newVersion);
-    ui->textBrowser->setHtml(releaseNotes);
+    ui->textBrowser->setMarkdown(releaseNotes);
 
     ui->lblWebsiteLink->setCursor(Qt::PointingHandCursor);
 

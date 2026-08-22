@@ -141,6 +141,7 @@ public slots:
     void addNPC();
     void addInitiativeEvent();
     void addLairActionsEvent();
+    void setLairActionsEventEnabled(bool enabled);
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
     void addMonsterImageFile(const QString& filename, const QPointF& position);
@@ -205,6 +206,7 @@ signals:
     void setLayers(QList<Layer*> layers, int selected);
 
     void initiativeActiveChanged(bool initiativeActive);
+    void lairActionsEnabledChanged(bool enabled);
 
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
@@ -259,6 +261,7 @@ private slots:
     void handleCombatantVisibilityChanged(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
+    void handleCombatantEditConditions(BattleDialogModelCombatant* combatant);
     void handleCombatantHideSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantUnhideSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantKnowSelected(BattleDialogModelCombatant* combatant);
@@ -299,6 +302,7 @@ private slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void editSelectedCombatantConditions();
     void hideSelectedCombatant();
     void unhideSelectedCombatant();
     void knowSelectedCombatant();
@@ -381,9 +385,13 @@ private:
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsItem* item) const;
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item) const;
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
+    bool hasLairActionsEvent() const;
+    void emitLairActionsState();
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
-    void removeSingleCombatant(BattleDialogModelCombatant* combatant);
+    void removeSingleCombatant(BattleDialogModelCombatant* combatant, bool updateActiveCombatant = true);
+    QList<BattleDialogModelCombatant*> getContextMenuCombatants(BattleDialogModelCombatant* combatant) const;
+    void editCombatantConditions(const QList<BattleDialogModelCombatant*>& combatants);
 
     bool validateTokenLayerExists();
     void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);

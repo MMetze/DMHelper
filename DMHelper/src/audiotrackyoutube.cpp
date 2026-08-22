@@ -11,7 +11,14 @@ const int AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE = 0x01;
 const int AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED = 0x02;
 const int AUDIOTRACKYOUTUBE_STOPCOMPLETE = AUDIOTRACKYOUTUBE_STOPCALLCOMPLETE | AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED;
 
-void youtubeEventCallback(const struct libvlc_event_t *p_event, void *p_data);
+void youtubeEventCallback(void *opaque, libvlc_state_t state);
+
+// cbs struct has static storage duration and carries no per-instance state; the opaque pointer supplies the instance
+static const libvlc_media_player_cbs s_audioTrackYoutubeCbs = []() {
+    libvlc_media_player_cbs cbs{};
+    cbs.on_state_changed = &youtubeEventCallback;
+    return cbs;
+}();
 
 AudioTrackYoutube::AudioTrackYoutube(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent),
@@ -66,16 +73,13 @@ int AudioTrackYoutube::getAudioType() const
     return DMHelper::AudioType_Youtube;
 }
 
-void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
+void AudioTrackYoutube::eventCallback(libvlc_state_t state)
 {
-    if(!p_event)
-        return;
-
-    if(p_event->type == libvlc_MediaPlayerStopped)
+    if(state == libvlc_Stopped)
     {
         internalStopCheck(AUDIOTRACKYOUTUBE_STOPCALLCONFIRMED);
     }
-    if(p_event->type == libvlc_MediaPlayerPlaying)
+    if(state == libvlc_Playing)
     {
         libvlc_time_t length_full = libvlc_media_player_get_length(_vlcPlayer);
         emit trackLengthChanged(length_full / 1000);
@@ -345,22 +349,12 @@ void AudioTrackYoutube::playDirectUrl()
     libvlc_media_add_option(vlcMedia, ":no-video");
 
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia, &s_audioTrackYoutubeCbs, static_cast<void*>(this));
 #else
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia, &s_audioTrackYoutubeCbs, static_cast<void*>(this));
 #endif
     if(!_vlcPlayer)
         return;
-
-    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-    if(eventManager)
-    {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, youtubeEventCallback, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, youtubeEventCallback, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, youtubeEventCallback, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, youtubeEventCallback, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, youtubeEventCallback, this);
-    }
 
     // Start playback
     _stopStatus = 0;
@@ -414,13 +408,14 @@ QString AudioTrackYoutube::extractYoutubeIDFromUrl()
 
 /**
  * Callback function notification
- * \param p_event the event triggering the callback
+ * \param opaque the AudioTrackYoutube instance passed at player creation
+ * \param state the new player state
  */
-void youtubeEventCallback(const struct libvlc_event_t *p_event, void *p_data)
+void youtubeEventCallback(void *opaque, libvlc_state_t state)
 {
-    if(!p_data)
+    if(!opaque)
         return;
 
-    AudioTrackYoutube* player = static_cast<AudioTrackYoutube*>(p_data);
-    player->eventCallback(p_event);
+    AudioTrackYoutube* player = static_cast<AudioTrackYoutube*>(opaque);
+    player->eventCallback(state);
 }

@@ -6,15 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>378</width>
-    <height>262</height>
+    <width>382</width>
+    <height>108</height>
    </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Frame</string>
-  </property>
-  <property name="styleSheet">
-   <string notr="true">background-color: transparent;</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -35,10 +29,10 @@
    <item row="0" column="0">
     <widget class="QFrame" name="frameInfo">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_9">
       <property name="leftMargin">
@@ -258,14 +252,14 @@
       <item row="1" column="1">
        <widget class="QFrame" name="frameInfoContents">
         <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <property name="spacing">
-          <number>3</number>
+          <number>0</number>
          </property>
          <property name="leftMargin">
           <number>0</number>
@@ -284,14 +278,13 @@
            <property name="styleSheet">
             <string notr="true">background-color: transparent;</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <property name="spacing">
-            <number>0</number>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-          </layout>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

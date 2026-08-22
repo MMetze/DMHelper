@@ -323,7 +323,7 @@
           <string>stress</string>
          </property>
          <property name="dmhFormat" stdset="0">
-          <string>int</string>
+          <string>resource:current</string>
          </property>
         </widget>
        </item>

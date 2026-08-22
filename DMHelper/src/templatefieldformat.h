@@ -26,16 +26,25 @@ class TemplateObject;
 // ---------------------------------------------------------------------------
 struct FormatSpec
 {
+    enum ResourceMode
+    {
+        ResourceMode_None = 0,
+        ResourceMode_Both,
+        ResourceMode_Current,
+        ResourceMode_Max
+    };
+
     bool isInt = false;
     bool isSigned = false;
     bool hasRange = false;
     int rangeMin = 0;
     int rangeMax = 0;
     int padDigits = 0;
+    ResourceMode resourceMode = ResourceMode_None;
     QString prefix;
     QString suffix;
 
-    bool isEmpty() const { return !isInt && !isSigned && padDigits == 0 && prefix.isEmpty() && suffix.isEmpty(); }
+    bool isEmpty() const { return !isInt && !isSigned && padDigits == 0 && resourceMode == ResourceMode_None && prefix.isEmpty() && suffix.isEmpty(); }
 };
 
 namespace TemplateFieldFormat

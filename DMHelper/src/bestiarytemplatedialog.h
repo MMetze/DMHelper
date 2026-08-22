@@ -2,6 +2,7 @@
 #define BESTIARYTEMPLATEDIALOG_H
 
 #include <QDialog>
+#include <QPointer>
 #include "templateframe.h"
 #include "bestiaryfindtokendialog.h"
 
@@ -89,7 +90,7 @@ private:
     QWidget *_uiWidget;
 
     OptionsContainer* _options;
-    MonsterClassv2* _monster;
+    QPointer<MonsterClassv2> _monster;
     int _currentToken;
     bool _edit;
     bool _mouseDown;

@@ -34,7 +34,7 @@
 #ifndef VLC_LIBVLC_H
 #define VLC_LIBVLC_H 1
 
-#if defined (_WIN32) && defined (DLL_EXPORT)
+#if (defined (_WIN32) || defined (__OS2__)) && defined (LIBVLC_DLL_EXPORT)
 # define LIBVLC_API __declspec(dllexport)
 #elif defined (__GNUC__) && (__GNUC__ >= 4)
 # define LIBVLC_API __attribute__((visibility("default")))
@@ -42,7 +42,7 @@
 # define LIBVLC_API
 #endif
 
-#ifdef __LIBVLC__
+#ifdef LIBVLC_INTERNAL_
 /* Avoid unhelpful warnings from libvlc with our deprecated APIs */
 #   define LIBVLC_DEPRECATED
 #elif defined(__GNUC__) && \
@@ -75,6 +75,7 @@ extern "C" {
 /** This structure is opaque. It represents a libvlc instance */
 typedef struct libvlc_instance_t libvlc_instance_t;
 
+/** Represents a time value in microseconds */
 typedef int64_t libvlc_time_t;
 
 /** \defgroup libvlc_error LibVLC error handling
@@ -181,38 +182,26 @@ LIBVLC_API void libvlc_release( libvlc_instance_t *p_instance );
  * The initial reference count is 1 after libvlc_new() returns.
  *
  * \param p_instance the instance to reference
+ * \return the same object
  */
-LIBVLC_API void libvlc_retain( libvlc_instance_t *p_instance );
+LIBVLC_API libvlc_instance_t *libvlc_retain( libvlc_instance_t *p_instance );
 
 /**
- * Try to start a user interface for the libvlc instance.
+ * Get the ABI version of the libvlc library.
  *
- * \param p_instance the instance
- * \param name interface name, or NULL for default
- * \return 0 on success, -1 on error.
+ * This is different than the VLC version, which is the version of the whole
+ * VLC package. The value is the same as LIBVLC_ABI_VERSION_INT used when
+ * compiling.
+ *
+ * \return a value with the following mask in hexadecimal
+ *  0xFF000000: major VLC version, similar to VLC major version,
+ *  0x00FF0000: major ABI version, incremented incompatible changes are added,
+ *  0x0000FF00: minor ABI version, incremented when new functions are added
+ *  0x000000FF: micro ABI version, incremented with new release/builds
+ *
+ * \note This the same value as the .so version but cross platform.
  */
-LIBVLC_API
-int libvlc_add_intf( libvlc_instance_t *p_instance, const char *name );
-
-/**
- * Registers a callback for the LibVLC exit event. This is mostly useful if
- * the VLC playlist and/or at least one interface are started with
- * libvlc_playlist_play() or libvlc_add_intf() respectively.
- * Typically, this function will wake up your application main loop (from
- * another thread).
- *
- * \note This function should be called before the playlist or interface are
- * started. Otherwise, there is a small race condition: the exit event could
- * be raised before the handler is registered.
- *
- * \param p_instance LibVLC instance
- * \param cb callback to invoke when LibVLC wants to exit,
- *           or NULL to disable the exit handler (as by default)
- * \param opaque data pointer for the callback
- */
-LIBVLC_API
-void libvlc_set_exit_handler( libvlc_instance_t *p_instance,
-                              void (*cb) (void *), void *opaque );
+LIBVLC_API int libvlc_abi_version(void);
 
 /**
  * Sets the application name. LibVLC passes this as the user agent string
@@ -276,67 +265,6 @@ LIBVLC_API const char * libvlc_get_changeset(void);
  * \param ptr the pointer
  */
 LIBVLC_API void libvlc_free( void *ptr );
-
-/** \defgroup libvlc_event LibVLC asynchronous events
- * LibVLC emits asynchronous events.
- *
- * Several LibVLC objects (such @ref libvlc_instance_t as
- * @ref libvlc_media_player_t) generate events asynchronously. Each of them
- * provides @ref libvlc_event_manager_t event manager. You can subscribe to
- * events with libvlc_event_attach() and unsubscribe with
- * libvlc_event_detach().
- * @{
- */
-
-/**
- * Event manager that belongs to a libvlc object, and from whom events can
- * be received.
- */
-typedef struct libvlc_event_manager_t libvlc_event_manager_t;
-
-struct libvlc_event_t;
-
-/**
- * Type of a LibVLC event.
- */
-typedef int libvlc_event_type_t;
-
-/**
- * Callback function notification
- * \param p_event the event triggering the callback
- */
-typedef void ( *libvlc_callback_t )( const struct libvlc_event_t *p_event, void *p_data );
-
-/**
- * Register for an event notification.
- *
- * \param p_event_manager the event manager to which you want to attach to.
- *        Generally it is obtained by vlc_my_object_event_manager() where
- *        my_object is the object you want to listen to.
- * \param i_event_type the desired event to which we want to listen
- * \param f_callback the function to call when i_event_type occurs
- * \param user_data user provided data to carry with the event
- * \return 0 on success, ENOMEM on error
- */
-LIBVLC_API int libvlc_event_attach( libvlc_event_manager_t *p_event_manager,
-                                        libvlc_event_type_t i_event_type,
-                                        libvlc_callback_t f_callback,
-                                        void *user_data );
-
-/**
- * Unregister an event notification.
- *
- * \param p_event_manager the event manager
- * \param i_event_type the desired event to which we want to unregister
- * \param f_callback the function to call when i_event_type occurs
- * \param p_user_data user provided data to carry with the event
- */
-LIBVLC_API void libvlc_event_detach( libvlc_event_manager_t *p_event_manager,
-                                         libvlc_event_type_t i_event_type,
-                                         libvlc_callback_t f_callback,
-                                         void *p_user_data );
-
-/** @} */
 
 /** \defgroup libvlc_log LibVLC logging
  * libvlc_log_* functions provide access to the LibVLC messages log.
@@ -480,6 +408,7 @@ typedef struct libvlc_module_description_t
     char *psz_shortname;
     char *psz_longname;
     char *psz_help;
+    char *psz_help_html;
     struct libvlc_module_description_t *p_next;
 } libvlc_module_description_t;
 
@@ -535,7 +464,7 @@ libvlc_module_description_t *libvlc_video_filter_list_get( libvlc_instance_t *p_
  * \note On systems that support it, the POSIX monotonic clock is used.
  */
 LIBVLC_API
-int64_t libvlc_clock(void);
+libvlc_time_t libvlc_clock(void);
 
 /**
  * Return the delay (in microseconds) until a certain timestamp.
@@ -543,7 +472,7 @@ int64_t libvlc_clock(void);
  * \return negative if timestamp is in the past,
  * positive if it is in the future
  */
-static inline int64_t libvlc_delay(int64_t pts)
+static inline libvlc_time_t libvlc_delay(libvlc_time_t pts)
 {
     return pts - libvlc_clock();
 }

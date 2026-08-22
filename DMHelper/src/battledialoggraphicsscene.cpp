@@ -1,18 +1,21 @@
 #include "battledialoggraphicsscene.h"
-#include "battledialogeffectsettings.h"
+#include "battledialogeffectsettingsbase.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectfactory.h"
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelcombatant.h"
+#include "campaign.h"
 #include "characterv2.h"
-#include "dmhmessagebox.h"
 #include "monsterclassv2.h"
+#include "movementmodehelper.h"
+#include "dmhmessagebox.h"
 #include "unselectedpixmap.h"
 #include "layertokens.h"
 #include "layergrid.h"
 #include <QMenu>
+#include <QActionGroup>
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
 #include <QGraphicsItem>
@@ -33,6 +36,7 @@
 
 // Uncomment this to log all mouse movement actions
 //#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+
 
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     CameraScene(parent),
@@ -621,6 +625,115 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             connect(healItem, SIGNAL(triggered()), this, SLOT(healCombatant()));
             menu.addAction(healItem);
 
+            QAction* editConditionsItem = new QAction(QString("Edit Conditions..."), &menu);
+            connect(editConditionsItem, SIGNAL(triggered()), this, SLOT(editCombatantConditions()));
+            menu.addAction(editConditionsItem);
+
+            Campaign* campaign = _model ? dynamic_cast<Campaign*>(_model->getParentByType(DMHelper::CampaignType_Campaign)) : nullptr;
+            if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Distance))
+            {
+                QList<BattleDialogModelCombatant*> movementTargets;
+                QList<QGraphicsItem*> selectedForMovement = selectedItems();
+                if((selectedForMovement.count() > 0) && (selectedForMovement.contains(item)))
+                {
+                    foreach(QGraphicsItem* selItem, selectedForMovement)
+                    {
+                        UnselectedPixmap* selPix = dynamic_cast<UnselectedPixmap*>(selItem);
+                        if(selPix)
+                        {
+                            BattleDialogModelCombatant* c = dynamic_cast<BattleDialogModelCombatant*>(selPix->getObject());
+                            if((c) && (!movementTargets.contains(c)))
+                                movementTargets.append(c);
+                        }
+                    }
+                }
+                else
+                {
+                    BattleDialogModelCombatant* c = dynamic_cast<BattleDialogModelCombatant*>(object);
+                    if(c)
+                        movementTargets.append(c);
+                }
+
+                if(!movementTargets.isEmpty())
+                {
+                    QMenu* movementMenu = menu.addMenu(QStringLiteral("Movement Mode"));
+                    QActionGroup* movementGroup = new QActionGroup(movementMenu);
+                    movementGroup->setExclusive(true);
+
+                    const QList<MovementModeHelper::MovementModeValue> commonModes = MovementModeHelper::intersectMovementModes(movementTargets);
+
+                    bool sameMode = true;
+                    QString checkedMode;
+                    for(int i = 0; i < movementTargets.count(); ++i)
+                    {
+                        BattleDialogModelCombatant* target = movementTargets.at(i);
+                        const QString effectiveMode = MovementModeHelper::effectiveMovementModeKey(target, MovementModeHelper::getMovementModes(target));
+                        if(i == 0)
+                            checkedMode = effectiveMode;
+                        else if(effectiveMode != checkedMode)
+                            sameMode = false;
+                    }
+
+                    for(const MovementModeHelper::MovementModeValue& mode : commonModes)
+                    {
+                        QAction* modeAction = new QAction(QStringLiteral("%1 (%2 ft.)").arg(mode.label).arg(mode.speedFt), movementMenu);
+                        modeAction->setCheckable(true);
+                        modeAction->setChecked(sameMode && (checkedMode == mode.key));
+                        movementGroup->addAction(modeAction);
+                        connect(modeAction, &QAction::triggered, this, [movementTargets, selectedKey = mode.key]() {
+                            for(BattleDialogModelCombatant* target : movementTargets)
+                            {
+                                if(!target)
+                                    continue;
+
+                                const QList<MovementModeHelper::MovementModeValue> targetModes = MovementModeHelper::getMovementModes(target);
+                                if(MovementModeHelper::hasMovementMode(targetModes, selectedKey))
+                                {
+                                    target->setSelectedMovementMode(selectedKey);
+                                    target->clearCustomMovementSpeedFt();
+                                }
+                            }
+                        });
+                        movementMenu->addAction(modeAction);
+                    }
+
+                    if(!commonModes.isEmpty())
+                        movementMenu->addSeparator();
+
+                    QAction* customAction = new QAction(QStringLiteral("Custom..."), movementMenu);
+                    connect(customAction, &QAction::triggered, this, [this, movementTargets]() {
+                        if(movementTargets.isEmpty())
+                            return;
+
+                        int initialValue = movementTargets.first()->getCustomMovementSpeedFt();
+                        if(initialValue <= 0)
+                            initialValue = qMax(MovementModeHelper::CustomMovementMinSpeed, MovementModeHelper::effectiveMovementSpeedFt(movementTargets.first()));
+
+                        bool ok = false;
+                        const int customSpeed = QInputDialog::getInt(views().constFirst(),
+                                                                     QStringLiteral("Custom Movement Speed"),
+                                                                     QStringLiteral("Movement speed (ft.):"),
+                                                                     initialValue,
+                                                                     MovementModeHelper::CustomMovementMinSpeed,
+                                                                     MovementModeHelper::CustomMovementMaxSpeed,
+                                                                     1,
+                                                                     &ok);
+                        if(!ok)
+                            return;
+
+                        for(BattleDialogModelCombatant* target : movementTargets)
+                        {
+                            if(!target)
+                                continue;
+
+                            target->setCustomMovementSpeedFt(customSpeed);
+                            target->setSelectedMovementMode(QStringLiteral("custom"));
+                        }
+                    });
+                    movementMenu->addAction(customAction);
+                }
+            }
+
             menu.addSeparator();
 
             // Determine visibility/known state of relevant combatants for conditional menu items
@@ -770,11 +883,9 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 {
                     QAction* groupItem = new QAction(QString("Group Selected..."), &menu);
                     connect(groupItem, &QAction::triggered, this, [this, item]() {
-                        if(item)
-                        {
-                            clearSelection();
+                        if((selectedItems().isEmpty()) && (item))
                             item->setSelected(true);
-                        }
+
                         groupSelectedCombatants();
                     });
                     menu.addAction(groupItem);
@@ -1195,6 +1306,17 @@ void BattleDialogGraphicsScene::healCombatant()
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantHeal(combatant);
+}
+
+void BattleDialogGraphicsScene::editCombatantConditions()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
+    if(combatant)
+        emit combatantEditConditions(combatant);
 }
 
 void BattleDialogGraphicsScene::hideSelectedCombatants()

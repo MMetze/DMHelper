@@ -31,7 +31,7 @@ public slots:
     void displayCallback(void *picture);
     unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
     void cleanupCallback();
-    void eventCallback(const struct libvlc_event_t *p_event);
+    void eventCallback(libvlc_state_t state);
 
 private:
     void cleanup();

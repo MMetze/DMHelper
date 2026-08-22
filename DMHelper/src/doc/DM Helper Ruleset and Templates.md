@@ -902,8 +902,8 @@ of subclasses or campaign settings.
 
 - `*.ui` — always edit in Qt Designer; never edit the XML directly.
 - `*.qrc` — only modify with care; do not restructure paths.
-- Pre-built binary directories (`vlc32/`, `vlc64/`, `vlcMac/`,
-  `bin-win*/`, `bin-macos/`).
+- Pre-built binary directories (`vlc32/`, `vlc64/`, `vlcMac64/`,
+  `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/`).
 
 ## Appendix B: Quick Glossary
 

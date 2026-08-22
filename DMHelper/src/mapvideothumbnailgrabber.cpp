@@ -44,12 +44,19 @@ static void thumbCleanupCallback(void *opaque)
         grabber->cleanupCallback();
 }
 
-static void thumbEventCallback(const struct libvlc_event_t *p_event, void *p_data)
+static void thumbEventCallback(void *opaque, libvlc_state_t state)
 {
-    MapVideoThumbnailGrabber* grabber = static_cast<MapVideoThumbnailGrabber*>(p_data);
+    MapVideoThumbnailGrabber* grabber = static_cast<MapVideoThumbnailGrabber*>(opaque);
     if(grabber)
-        grabber->eventCallback(p_event);
+        grabber->eventCallback(state);
 }
+
+// cbs struct has static storage duration and carries no per-instance state; the opaque pointer supplies the instance
+static const libvlc_media_player_cbs s_mapVideoThumbnailGrabberCbs = []() {
+    libvlc_media_player_cbs cbs{};
+    cbs.on_state_changed = &thumbEventCallback;
+    return cbs;
+}();
 
 MapVideoThumbnailGrabber::MapVideoThumbnailGrabber(const QString& videoFile, const QString& cacheFile, int thumbnailSize, QObject *parent) :
     QObject(parent),
@@ -106,7 +113,7 @@ void MapVideoThumbnailGrabber::start()
     libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
     libvlc_media_add_option(_vlcMedia, ":no-audio");
 
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia, &s_mapVideoThumbnailGrabberCbs, static_cast<void*>(this));
     if(!_vlcPlayer)
     {
         qDebug() << "[MapVideoThumbnailGrabber] Failed to create VLC player for: " << _videoFile;
@@ -119,12 +126,6 @@ void MapVideoThumbnailGrabber::start()
 
     libvlc_media_release(_vlcMedia);
     _vlcMedia = nullptr;
-
-    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-    if(eventManager)
-    {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, thumbEventCallback, static_cast<void*>(this));
-    }
 
     libvlc_video_set_callbacks(_vlcPlayer,
                                thumbLockCallback,
@@ -241,12 +242,9 @@ void MapVideoThumbnailGrabber::cleanupCallback()
     _nativeHeight = 0;
 }
 
-void MapVideoThumbnailGrabber::eventCallback(const struct libvlc_event_t *p_event)
+void MapVideoThumbnailGrabber::eventCallback(libvlc_state_t state)
 {
-    if(!p_event)
-        return;
-
-    if(p_event->type == libvlc_MediaPlayerStopped)
+    if(state == libvlc_Stopped)
     {
         QMetaObject::invokeMethod(this, &MapVideoThumbnailGrabber::handleStopped, Qt::QueuedConnection);
     }
@@ -256,12 +254,6 @@ void MapVideoThumbnailGrabber::cleanup()
 {
     if(_vlcPlayer)
     {
-        libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-        if(eventManager)
-        {
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, thumbEventCallback, static_cast<void*>(this));
-        }
-
         libvlc_video_set_callbacks(_vlcPlayer, nullptr, nullptr, nullptr, nullptr);
         libvlc_media_player_release(_vlcPlayer);
         _vlcPlayer = nullptr;

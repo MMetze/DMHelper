@@ -119,7 +119,7 @@ LIBVLC_API unsigned int
 libvlc_picture_get_height( const libvlc_picture_t* pic );
 
 /**
- * Returns the time at which this picture was generated, in milliseconds
+ * Returns the time at which this picture was generated, in microseconds (us)
  * \param pic A picture object
  */
 LIBVLC_API libvlc_time_t
@@ -132,6 +132,10 @@ LIBVLC_API size_t libvlc_picture_list_count( const libvlc_picture_list_t* list )
 
 /**
  * Returns the picture at the provided index.
+ *
+ * The returned picture is a weak reference of libvlc_picture_t* owned by the
+ * list. It must not be released and remains valid only as long as the list is
+ * alive.
  *
  * If the index is out of bound, the result is undefined.
  */

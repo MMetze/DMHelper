@@ -11,6 +11,13 @@
 
 const int SCREENSHOT_USE_FRAME = VIDEO_BUFFER_COUNT + 1;
 
+// cbs struct has static storage duration and carries no per-instance state; the opaque pointer supplies the instance
+static const libvlc_media_player_cbs s_videoPlayerGLScreenshotCbs = []() {
+    libvlc_media_player_cbs cbs{};
+    cbs.on_state_changed = &VideoPlayerGLScreenshot::onStateChanged;
+    return cbs;
+}();
+
 VideoPlayerGLScreenshot::VideoPlayerGLScreenshot(const QString& videoFile, QObject *parent) :
     VideoPlayerGL(parent),
     _videoFile(videoFile),
@@ -75,38 +82,35 @@ void VideoPlayerGLScreenshot::registerNewFrame()
     }
 }
 
-void VideoPlayerGLScreenshot::playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
+void VideoPlayerGLScreenshot::onStateChanged(void *opaque, libvlc_state_t state)
 {
-    if((!p_event) || (!p_data))
+    if(!opaque)
         return;
 
-    VideoPlayerGLScreenshot* that = static_cast<VideoPlayerGLScreenshot*>(p_data);
+    VideoPlayerGLScreenshot* that = static_cast<VideoPlayerGLScreenshot*>(opaque);
     if(!that)
         return;
 
-    switch(p_event->type)
+    switch(state)
     {
-        case libvlc_MediaPlayerOpening:
-            qDebug() << "[VideoPlayerGLScreenshot] Video event received: OPENING = " << p_event->type;
+        case libvlc_Opening:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: OPENING = " << state;
             break;
-        case libvlc_MediaPlayerBuffering:
-            qDebug() << "[VideoPlayerGLScreenshot] Video event received: BUFFERING = " << p_event->type;
+        case libvlc_Playing:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PLAYING = " << state;
             break;
-        case libvlc_MediaPlayerPlaying:
-            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PLAYING = " << p_event->type;
+        case libvlc_Paused:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PAUSED = " << state;
             break;
-        case libvlc_MediaPlayerPaused:
-            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PAUSED = " << p_event->type;
-            break;
-        case libvlc_MediaPlayerStopped:
-            qDebug() << "[VideoPlayerGLScreenshot] Video event received: STOPPED = " << p_event->type;
+        case libvlc_Stopped:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: STOPPED = " << state;
             break;
         default:
-            qDebug() << "[VideoPlayerGLScreenshot] UNEXPECTED Video event received:  " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] UNEXPECTED Video event received:  " << state;
             break;
     };
 
-    that->_status = p_event->type;
+    that->_status = state;
 }
 
 void VideoPlayerGLScreenshot::videoAvailable()
@@ -137,7 +141,7 @@ void VideoPlayerGLScreenshot::videoAvailable()
 
 void VideoPlayerGLScreenshot::timerEvent(QTimerEvent *event)
 {
-    if((_status == libvlc_MediaPlayerOpening) || (_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
+    if((_status == libvlc_Opening) || (_status == libvlc_Playing))
         return;
 
     killTimer(event->timerId());
@@ -193,22 +197,11 @@ bool VideoPlayerGLScreenshot::startPlayer()
 
     libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
 
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia, &s_videoPlayerGLScreenshotCbs, static_cast<void*>(this));
     if(!_vlcPlayer)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to start media player";
         return false;
-    }
-
-    // Set up event callbacks
-    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-    if(eventManager)
-    {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
     }
 
     qDebug() << "[VideoPlayerGLScreenshot] Playback started to get screenshot for " << localizedVideoFile;

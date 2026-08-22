@@ -194,6 +194,13 @@ namespace DMHelper
         CombatantTokenType_CharactersAndMonsters
     };
 
+    enum TokenHealthBarMode
+    {
+        TokenHealthBarMode_Off = 0,
+        TokenHealthBarMode_DMViewOnly,
+        TokenHealthBarMode_BothViews
+    };
+
     enum MovementType
     {
         MovementType_None = 0,

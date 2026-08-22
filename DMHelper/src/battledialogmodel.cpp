@@ -70,10 +70,6 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showEffects = static_cast<bool>(element.attribute("showEffects", QString::number(1)).toInt());
     _showMovement = static_cast<bool>(element.attribute("showMovement", QString::number(1)).toInt());
 
-    // Backwards compatibility: legacy battles persisted a showLairActions flag.
-    // Convert it to a synthetic "Lair Actions" initiative event at init 20.
-    const bool legacyShowLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
-
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 
     // Read combatant groups
@@ -107,23 +103,6 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             appendInitiativeEvent(event);
             eventElement = eventElement.nextSiblingElement("initiativeevent");
         }
-    }
-
-    // Migrate legacy showLairActions flag → synthetic "Lair Actions" event at
-    // initiative 20. Skip if such an event was already loaded above.
-    if(legacyShowLairActions)
-    {
-        bool alreadyHasLairActions = false;
-        for(BattleDialogModelInitiativeEvent* event : std::as_const(_initiativeEvents))
-        {
-            if((event) && (event->getName() == QStringLiteral("Lair Actions")))
-            {
-                alreadyHasLairActions = true;
-                break;
-            }
-        }
-        if(!alreadyHasLairActions)
-            appendInitiativeEvent(new BattleDialogModelInitiativeEvent(QStringLiteral("Lair Actions"), 20, this));
     }
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));

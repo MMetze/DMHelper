@@ -25,6 +25,14 @@ void Characterv2::inputXML(const QDomElement &element, bool isImport)
 
     setDndBeyondID(element.attribute(QString("dndBeyondID"), QString::number(-1)).toInt());
     readXMLValues(element, isImport);
+
+    const QString movementValue = _allValues.value(QStringLiteral("movement")).toString().trimmed();
+    const QString speedValue = _allValues.value(QStringLiteral("speed")).toString().trimmed();
+    if(movementValue.isEmpty() && !speedValue.isEmpty())
+        _allValues.insert(QStringLiteral("movement"), speedValue);
+    if(speedValue.isEmpty() && !movementValue.isEmpty())
+        _allValues.insert(QStringLiteral("speed"), movementValue);
+
     readIcons(element, isImport);
 
     Combatant::inputXML(element, isImport);
@@ -111,6 +119,15 @@ void Characterv2::setDndBeyondID(int id)
 bool Characterv2::isInParty() const
 {
     return (getParentByType(DMHelper::CampaignType_Party) != nullptr);
+}
+
+QString Characterv2::getMovementString() const
+{
+    const QString movementValue = getValueAsString(QStringLiteral("movement")).trimmed();
+    if(!movementValue.isEmpty())
+        return movementValue;
+
+    return getValueAsString(QStringLiteral("speed")).trimmed();
 }
 
 QString Characterv2::getIconFile() const
@@ -314,7 +331,12 @@ void Characterv2::refreshIconPixmaps()
 
 int Characterv2::getSpeed() const
 {
-    return getIntValue(QString("speed"));
+    const QString movementValue = getMovementString();
+    const int parsedMovement = Combatant::extractWalkSpeed(movementValue);
+    if(parsedMovement > 0)
+        return parsedMovement;
+
+    return getIntValue(QStringLiteral("speed"));
 }
 
 int Characterv2::getStrength() const
@@ -380,11 +402,15 @@ void Characterv2::copyMonsterValues(MonsterClassv2& monster)
     if((attributeHash.contains("race")) && (monster.hasValue("name")))
         setValue("race", monster.getValueAsString("name"));
 
-    if((attributeHash.contains("speed")) && (monster.hasValue("speed")))
-        setValue("speed", monster.getValueAsString("speed").left(monster.getValueAsString("speed").indexOf(" ")).toInt());
+    if(monster.hasValue("speed"))
+    {
+        const QString movementString = monster.getValueAsString("speed");
+        if(attributeHash.contains("movement"))
+            setValue("movement", movementString);
 
-    if((attributeHash.contains("movement")) && (monster.hasValue("speed")))
-        setValue("movement", monster.getValueAsString("speed"));
+        if(attributeHash.contains("speed"))
+            setValue("speed", movementString);
+    }
 
     endBatchChanges();
 }

@@ -15,8 +15,16 @@ jobs:
         include:
           - runner: macos-15-intel
             arch-label: intel
+            build-script: buildanddeploy_macos64_cmake.sh
+            bin-dir: bin-macos64
+            zip-name: DMHelper-macOS-x64-release.zip
+            dmg-name: DMHelper-macOS-x64-release.dmg
           - runner: macos-15
             arch-label: apple-silicon
+            build-script: buildanddeploy_macosarm_cmake.sh
+            bin-dir: bin-macosarm
+            zip-name: DMHelper-macOS-arm64-release.zip
+            dmg-name: DMHelper-macOS-arm64-release.dmg
     runs-on: ${{ matrix.runner }}
 
     defaults:
@@ -67,8 +75,8 @@ jobs:
       - name: Make build script executable
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          chmod +x buildanddeploy_macos_cmake.sh
-          ls -l buildanddeploy_macos_cmake.sh
+          chmod +x "${{ matrix.build-script }}"
+          ls -l "${{ matrix.build-script }}"
 
       # -------------------------
       # Run build & deploy script
@@ -78,7 +86,7 @@ jobs:
         env:
           QT_ROOT_DIR: ${{ env.QT_ROOT_DIR }}
         run: |
-          echo "y" | ./buildanddeploy_macos_cmake.sh
+          echo "y" | "./${{ matrix.build-script }}"
 
       # -------------------------
       # Normalize unsigned bundle signature state
@@ -87,7 +95,7 @@ jobs:
       - name: Normalize unsigned app signature
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/DMHelper.app"
+          APP="${{ matrix.bin-dir }}/DMHelper.app"
 
           if [ ! -d "$APP" ]; then
             echo "DMHelper.app not found at $APP"
@@ -103,7 +111,7 @@ jobs:
       - name: Check Gatekeeper assessment
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/DMHelper.app"
+          APP="${{ matrix.bin-dir }}/DMHelper.app"
           /usr/sbin/spctl -a -vv "$APP" || true
 
       # -------------------------
@@ -113,23 +121,23 @@ jobs:
       - name: Repackage ZIP and create DMG distributions
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/DMHelper.app"
+          APP="${{ matrix.bin-dir }}/DMHelper.app"
 
           if [ ! -d "$APP" ]; then
             echo "DMHelper.app not found at $APP"
             exit 1
           fi
 
-          rm -f DMHelper-macOS-release.zip
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" DMHelper-macOS-release.zip
+          rm -f "${{ matrix.zip-name }}"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" "${{ matrix.zip-name }}"
 
-          rm -f DMHelper-macOS-release.dmg
+          rm -f "${{ matrix.dmg-name }}"
           /usr/bin/hdiutil create \
             -volname "DMHelper" \
             -srcfolder "$APP" \
             -ov \
             -format UDZO \
-            DMHelper-macOS-release.dmg
+            "${{ matrix.dmg-name }}"
 
       # -------------------------
       # Debug workspace (post-build)
@@ -145,7 +153,7 @@ jobs:
       - name: Smoke-test built application
         working-directory: ${{ github.workspace }}/DMHelper
         run: |
-          APP="bin-macos/DMHelper.app"
+          APP="${{ matrix.bin-dir }}/DMHelper.app"
           EXE="$APP/Contents/MacOS/DMHelper"
           if [ ! -f "$EXE" ]; then echo "DMHelper not found at $EXE"; exit 1; fi
           output=$("$EXE" --smoke-test --skip-opengl 2>&1) || true
@@ -169,7 +177,7 @@ jobs:
         with:
           name: DMHelper-macOS-Zip-${{ matrix.arch-label }}
           path: |
-            DMHelper/DMHelper-macOS-release.zip
+            DMHelper/${{ matrix.zip-name }}
           if-no-files-found: error
 
       - name: Upload DMG Distribution
@@ -177,5 +185,5 @@ jobs:
         with:
           name: DMHelper-macOS-DMG-${{ matrix.arch-label }}
           path: |
-            DMHelper/DMHelper-macOS-release.dmg
+            DMHelper/${{ matrix.dmg-name }}
           if-no-files-found: error

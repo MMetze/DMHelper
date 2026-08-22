@@ -8,6 +8,7 @@
 #include "party.h"
 #include "characterv2.h"
 #include "characterimporter.h"
+#include "characterimportdialog.h"
 #include "characterv2converter.h"
 #include "objectimportdialog.h"
 #include "partyframe.h"
@@ -559,6 +560,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
     connect(_battleFrame, &BattleFrame::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
     connect(_battleFrame, &BattleFrame::initiativeActiveChanged, _ribbonTabBattle, &RibbonTabBattle::setLairActionsVisible);
+    connect(_battleFrame, &BattleFrame::lairActionsEnabledChanged, _ribbonTabBattle, &RibbonTabBattle::setLairActionsChecked);
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
@@ -573,7 +575,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addEffectSparksClicked()), _battleFrame, SLOT(addEffectSparks()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLightClicked()), _battleFrame, SLOT(addEffectLight()));
     connect(_ribbonTabBattle, SIGNAL(duplicateClicked()), _battleFrame, SLOT(duplicateSelection()));
-    connect(_ribbonTabBattle, SIGNAL(lairActionsClicked()), _battleFrame, SLOT(addLairActionsEvent()));
+    connect(_ribbonTabBattle, &RibbonTabBattle::lairActionsClicked, _battleFrame, &BattleFrame::setLairActionsEventEnabled);
     connect(_ribbonTabBattle, SIGNAL(addEventClicked()), _battleFrame, SLOT(addInitiativeEvent()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);
@@ -792,6 +794,12 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     deleteCampaign();
+
+    if(Bestiary::Instance())
+    {
+        disconnect(Bestiary::Instance(), nullptr, &_bestiaryDlg, nullptr);
+        disconnect(Bestiary::Instance(), nullptr, this, nullptr);
+    }
 
     delete ui;
 
@@ -1987,7 +1995,7 @@ CampaignObjectBase* MainWindow::newEncounter(DMHelper::CampaignType encounterTyp
     else
     {
         if((dlg.isImportNeeded()) && (!dlg.getImportString().isEmpty()))
-            importCharacter(dlg.getImportString());
+            importCharacter(CharacterImportDialog::getCharacterIdFromUrl(dlg.getImportString()));
     }
 
     return nullptr;

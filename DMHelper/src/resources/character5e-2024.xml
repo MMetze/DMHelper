@@ -11,7 +11,8 @@
     <dmh:attribute type="dmh:string" name="size" default="medium"/>
     <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
     <dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>
-    <dmh:attribute type="dmh:integer" name="speed" default="30"/>
+    <dmh:attribute type="dmh:string" name="speed" default="30 ft."/>
+    <dmh:attribute type="dmh:string" name="movement" default="30 ft."/>
     <dmh:attribute type="dmh:integer" name="conditions"/>
 
     <dmh:attribute type="dmh:integer" name="strength" default="10"/>
@@ -35,7 +36,6 @@
 
     <dmh:attribute type="dmh:string" name="species"/>
     <dmh:attribute type="dmh:string" name="subspecies"/>
-    <dmh:attribute type="dmh:string" name="movement"/>
     <dmh:attribute type="dmh:string" name="class"/>
     <dmh:attribute type="dmh:string" name="level"/>
     <dmh:attribute type="dmh:string" name="experience"/>

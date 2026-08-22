@@ -2,8 +2,9 @@
 #define VIDEOPLAYER_H
 
 #include <QObject>
-#include <QRecursiveMutex>
+#include <QMutex>
 #include <QImage>
+#include <QElapsedTimer>
 #include <atomic>
 #include "dmh_vlc.h"
 
@@ -27,12 +28,21 @@ public:
     virtual void setLooping(bool looping);
 
     virtual bool isError() const;
+    // lockMutex/unlockMutex are compatibility no-ops: getLockedImage() synchronizes internally
     virtual bool lockMutex();
     virtual void unlockMutex();
-    virtual QImage* getLockedImage() const;
+    virtual QImage* getLockedImage();
     virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
     virtual void clearNewImage();
+
+    // Perf stats: cumulative since object creation, incremented from VLC threads
+    unsigned int getStatFramesDecoded() const;
+    unsigned int getStatFramesDropped() const;
+    qint64 getStatDecodeIntervalAccumNs() const;
+    unsigned int getStatDecodeIntervalCount() const;
+    // Returns the max decode interval since the last call and resets it (windowed max)
+    qint64 takeStatDecodeIntervalMaxNs();
 
     virtual void* lockCallback(void **planes);
     virtual void unlockCallback(void *picture, void *const *planes);
@@ -40,12 +50,12 @@ public:
     virtual unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
     virtual void cleanupCallback();
     virtual void exitEventCallback();
-    virtual void eventCallback(const struct libvlc_event_t *p_event);
+    virtual void eventCallback(libvlc_state_t state);
 
 signals:
+    // All signals are emitted from VLC's internal threads: receivers must use queued (or cross-thread auto) connections, never Qt::DirectConnection
     void videoOpening();
     void videoPlaying();
-    void videoBuffering();
     void videoPaused();
     void videoStopped();
 
@@ -87,11 +97,12 @@ protected:
     class VideoPlayerImageBuffer
     {
     public:
-        VideoPlayerImageBuffer(unsigned int width, unsigned int height);
+        VideoPlayerImageBuffer(unsigned int width, unsigned int height, unsigned int pitch, unsigned int lines);
         ~VideoPlayerImageBuffer();
 
         uchar* getNativeBuffer();
         QImage* getFrame();
+        bool isValid() const;
 
     private:
         uchar* _nativeBufferNotAligned;
@@ -102,10 +113,13 @@ protected:
     unsigned int _nativeWidth;
     unsigned int _nativeHeight;
     QMutex* _mutex;
-    class VideoPlayerImageBuffer *_buffers[2];
-    size_t _idxRender;
+    // Triple buffering: write is decoder-exclusive, display is consumer-exclusive, ready holds the latest complete frame
+    class VideoPlayerImageBuffer *_buffers[3];
+    VideoPlayerImageBuffer* _fallbackBuffer;
+    size_t _idxWrite;
+    size_t _idxReady;
     size_t _idxDisplay;
-    bool _newImage;
+    std::atomic<bool> _newImage;
     QSize _originalSize;
     QSize _targetSize;
     std::atomic<int> _status;
@@ -113,8 +127,14 @@ protected:
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;
-    int _frameCount;
+    std::atomic<int> _frameCount;
     int _originalTrack;
+    std::atomic<unsigned int> _statFramesDecoded;
+    std::atomic<unsigned int> _statFramesDropped;
+    QElapsedTimer _statDecodeIntervalTimer; // touched only on VLC's display thread
+    std::atomic<qint64> _statDecodeIntervalAccumNs;
+    std::atomic<unsigned int> _statDecodeIntervalCount;
+    std::atomic<qint64> _statDecodeIntervalMaxNs;
 };
 
 #endif // VIDEOPLAYER_H

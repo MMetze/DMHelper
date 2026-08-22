@@ -113,7 +113,7 @@ void BestiaryTemplateDialog::loadMonsterUITemplate(const QString& templateFile)
 
 MonsterClassv2* BestiaryTemplateDialog::getMonster() const
 {
-    return _monster;
+    return _monster.data();
 }
 
 void BestiaryTemplateDialog::setOptions(OptionsContainer* options)
@@ -282,19 +282,33 @@ void BestiaryTemplateDialog::nextMonster()
 
 void BestiaryTemplateDialog::dataChanged()
 {
+    QString selectedMonster = _monster ? _monster->getStringValue("name") : QString();
     QString previousMonster = ui->cmbSearch->currentText();
 
     setMonster(nullptr);
     disconnect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
     ui->cmbSearch->clear();
 
-    QList<QString> monsterList = Bestiary::Instance()->getMonsterList();
+    Bestiary* bestiary = Bestiary::Instance();
+    QList<QString> monsterList = bestiary ? bestiary->getMonsterList() : QList<QString>();
+    if(!monsterList.isEmpty())
+        ui->cmbSearch->addItems(monsterList);
+
+    connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+
     if(monsterList.isEmpty())
         return;
 
-    ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
-
-    connect(ui->cmbSearch, &QComboBox::textActivated, this, static_cast<void (BestiaryTemplateDialog::*)(const QString&)>(&BestiaryTemplateDialog::setMonster));
+    if(!selectedMonster.isEmpty())
+    {
+        int index = ui->cmbSearch->findText(selectedMonster);
+        if(index >= 0)
+        {
+            ui->cmbSearch->setCurrentIndex(index);
+            setMonster(selectedMonster);
+            return;
+        }
+    }
 
     if(!previousMonster.isEmpty())
     {

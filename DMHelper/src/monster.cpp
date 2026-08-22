@@ -86,12 +86,14 @@ int Monster::getCombatantType() const
     return DMHelper::CombatantType_Monster;
 }
 
+QString Monster::getMovementString() const
+{
+    return _monsterClass ? _monsterClass->getStringValue(QStringLiteral("speed")) : QString();
+}
+
 int Monster::getSpeed() const
 {
-    if(_monsterClass)
-        return _monsterClass->getStringValue("speed").toInt();
-    else
-        return 0;
+    return Combatant::extractWalkSpeed(getMovementString());
 }
 
 int Monster::getArmorClass() const

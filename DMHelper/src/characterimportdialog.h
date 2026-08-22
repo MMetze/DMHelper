@@ -16,6 +16,7 @@ public:
     ~CharacterImportDialog();
 
     QString getCharacterId();
+    static QString getCharacterIdFromUrl(const QString& url);
 
 private:
     Ui::CharacterImportDialog *ui;
