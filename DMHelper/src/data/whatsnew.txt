@@ -13,21 +13,22 @@
 
 <h3>New Features:</h3>
 <ul>
-<li> Select a movement speed category for multiple movement types
-<li> added a right-click "Edit Conditions" for any combatants in an initiative order or tokens on a battle map. It should also work for multiple selections
-<li> health bars don't rotate with tokens
-<li> health bars can be Off, DM only or DM & Player
-<li> Fixed issues with combatant group creation
-<li> drag and drop to add/remove combatants from groups
-Damaging/healing characters reflects in the initiative list
-Improved event add/remove and default Lair Actions behaviour
+<li> Major performance improvements in video playback, fixed it completely for MacOS
+<li> Added direct support for Apple silicon 
+<li> Movement speed categories are respected for combatants with multiple movement types (e.g. flying, walking, burrowing, etc)
 </ul>
 
 <p>
 
 <h3>Fixes and Other Improvements:</h3>
 <ul>
-<li> 
+<li> Fixed a variety of behavior issues with combatant group creation
+<li> Drag and drop to add/remove combatants from groups
+<li> Added a right-click "Edit Conditions" for any combatants in an initiative order or tokens on a battle map. It should also work for multiple selections
+<li> Health bars can be Off, DM only or DM & Player
+<li> Health bars don't rotate with tokens
+<li> Damaging/healing characters reflects in the initiative list
+<li> Improved event add/remove and default Lair Actions behaviour
 </ul>
 
 <p>
