@@ -249,17 +249,18 @@ void PublishGLBattleEffect::effectMoved()
         return;
 
     qreal scaleFactorX, scaleFactorY;
+    qreal layerScale = static_cast<qreal>(_effect->getLayer()->getScale());
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object)
     {
-        scaleFactorX = static_cast<qreal>(_effect->getLayer()->getScale()-2) * (static_cast<qreal>(effect->getWidth()) / 5.0) / _textureSize.width();
-        scaleFactorY = static_cast<qreal>(_effect->getLayer()->getScale()-2) * (static_cast<qreal>(effect->getSize()) / 5.0) / _textureSize.height();
+        scaleFactorX = layerScale * (static_cast<qreal>(effect->getWidth()) / 5.0) / _textureSize.width();
+        scaleFactorY = layerScale * (static_cast<qreal>(effect->getSize()) / 5.0) / _textureSize.height();
     }
     else
     {
         qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
         if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
             sizeFactor *= 2.0; // Convert radius to diameter
-        scaleFactorX = static_cast<qreal>(_effect->getLayer()->getScale()-2) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+        scaleFactorX = layerScale * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
         scaleFactorY = scaleFactorX;
     }
 

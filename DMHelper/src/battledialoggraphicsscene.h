@@ -172,6 +172,8 @@ protected:
     bool isMimeDataImage(const QMimeData* mimeData) const;
     QString getMimeDataImageFile(const QMimeData* mimeData) const;
 
+    void applyEffectRotation(BattleDialogModelEffect* effect, QGraphicsItem* item);
+
 //    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);

@@ -1122,16 +1122,30 @@ void BattleDialogGraphicsScene::editItem()
                 if(tokenLayer)
                 {
                     QGraphicsItem* updatedItem = tokenLayer->getEffectItem(selectedEffect);
+                    applyEffectRotation(selectedEffect, updatedItem ? updatedItem : effectItem);
                     emit effectChanged(updatedItem ? updatedItem : effectItem);
                 }
                 else
                 {
+                    applyEffectRotation(selectedEffect, effectItem);
                     emit effectChanged(effectItem);
                 }
             }
         }
     }
     settings->deleteLater();
+}
+
+// Rotation changes alone don't recreate the effect item, so the new angle must be pushed to it directly
+void BattleDialogGraphicsScene::applyEffectRotation(BattleDialogModelEffect* effect, QGraphicsItem* item)
+{
+    if((!effect) || (!item))
+        return;
+
+    if(effect->hasEffectTransform())
+        effect->updateTransform(item);
+    else
+        item->setRotation(effect->getRotation());
 }
 
 void BattleDialogGraphicsScene::rollItem()
