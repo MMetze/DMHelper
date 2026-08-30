@@ -40,7 +40,7 @@ jobs:
         target: 'desktop'
         arch: 'gcc_64'
         modules: 'qtimageformats qtmultimedia qtnetworkauth'
-        archives: 'qttranslations qttools qtsvg qtbase icu'
+        archives: 'qttranslations qttools qtsvg qtbase icu qtwayland'
 
     - name: Check out the DMHelper source tree
       uses: actions/checkout@v4
@@ -101,6 +101,9 @@ jobs:
       run: |
         export QMAKE=$(which qmake)
         export LD_LIBRARY_PATH=AppDir/usr/lib:$LD_LIBRARY_PATH
+        # linuxdeploy-plugin-qt only deploys platforms/libqxcb.so unless told
+        # otherwise, which leaves the AppImage unable to run natively on Wayland.
+        export EXTRA_PLATFORM_PLUGINS="libqwayland-generic.so;libqwayland-egl.so"
         # Run linuxdeploy to bundle Qt libs and plugins (without producing final AppImage yet)
         ./linuxdeploy-x86_64.AppImage \
           --appdir AppDir \
@@ -110,6 +113,18 @@ jobs:
           --executable AppDir/usr/bin/DMHelper \
           --library AppDir/usr/lib/libvlc.so.12.0.0 \
           --library AppDir/usr/lib/libvlccore.so.9.0.0
+
+        # The qt plugin deploys wayland-decoration-client and wayland-shell-integration
+        # alongside the wayland platform plugins, but not the client-side graphics
+        # integration that libqwayland-egl.so needs. Copy it in and resolve its
+        # dependencies with a second linuxdeploy pass.
+        QT_PLUGINS_DIR=$(qmake -query QT_INSTALL_PLUGINS)
+        if [ -d "$QT_PLUGINS_DIR/wayland-graphics-integration-client" ]; then
+          cp -r "$QT_PLUGINS_DIR/wayland-graphics-integration-client" AppDir/usr/plugins/
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --deploy-deps-only=AppDir/usr/plugins/wayland-graphics-integration-client
+        fi
 
         # Replace linuxdeploy's AppRun with our custom one that sets VLC_PLUGIN_PATH.
         # linuxdeploy leaves AppRun as a *symlink* to usr/bin/DMHelper, so a plain
