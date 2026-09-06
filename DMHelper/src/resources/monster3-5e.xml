@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="monster3-5e.xsd">
+
+    <dmh:attribute type="dmh:boolean" name="private"/>
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:string" name="speed" default="30 ft"/>
+    <dmh:attribute type="dmh:integer" name="armor_class" default="10"/>
+    <dmh:attribute type="dmh:dice" name="hit_dice" default="1d8"/>
+    <dmh:attribute type="dmh:integer" name="hit_points" default="4"/>
+    <dmh:element type="dmh:string" name="icon"/>
+
+    <dmh:attribute type="dmh:string" name="altname"/>
+    <dmh:attribute type="dmh:string" name="family"/>
+    <dmh:attribute type="dmh:string" name="type" default="Animal"/>
+    <dmh:attribute type="dmh:string" name="descriptor"/>
+
+    <dmh:attribute type="dmh:string" name="dmh:initiativeMod"/>
+    <dmh:attribute type="dmh:string" name="base_attack" default="+0"/>
+    <dmh:attribute type="dmh:string" name="grapple"/>
+    <dmh:attribute type="dmh:string" name="attack"/>
+    <dmh:attribute type="dmh:string" name="full_attack"/>
+    <dmh:attribute type="dmh:string" name="space" default="5 ft."/>
+    <dmh:attribute type="dmh:string" name="reach" default="5 ft."/>
+
+    <dmh:attribute type="dmh:string" name="special_attacks"/>
+    <dmh:attribute type="dmh:string" name="special_qualities"/>
+    <dmh:attribute type="dmh:string" name="saves"/>
+    <dmh:attribute type="dmh:string" name="skills"/>
+    <dmh:attribute type="dmh:string" name="feats"/>
+    <dmh:attribute type="dmh:string" name="bonus_feats"/>
+    <dmh:attribute type="dmh:string" name="epic_feats"/>
+
+    <dmh:attribute type="dmh:integer" name="strength" default="10"/>
+    <dmh:attribute type="dmh:integer" name="dexterity" default="10"/>
+    <dmh:attribute type="dmh:integer" name="constitution" default="10"/>
+    <dmh:attribute type="dmh:integer" name="intelligence" default="10"/>
+    <dmh:attribute type="dmh:integer" name="wisdom" default="10"/>
+    <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
+
+    <dmh:attribute type="dmh:string" name="environment"/>
+    <dmh:attribute type="dmh:string" name="organization"/>
+    <dmh:attribute type="dmh:string" name="challenge_rating" default="1"/>
+    <dmh:attribute type="dmh:string" name="treasure" default="Standard"/>
+    <dmh:attribute type="dmh:string" name="alignment" default="Neutral"/>
+    <dmh:attribute type="dmh:string" name="advancement"/>
+    <dmh:attribute type="dmh:string" name="level_adjustment"/>
+    <dmh:attribute type="dmh:string" name="special_abilities"/>
+
+</dmh:template>

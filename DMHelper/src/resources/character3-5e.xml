@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmh:template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="character.xsd">
+    <dmh:attribute type="dmh:string" name="_baseID"/>
+    <dmh:attribute type="dmh:integer" name="type"/>
+    <dmh:attribute type="dmh:string" name="name"/>
+    <dmh:attribute type="dmh:boolean" name="active" default="1"/>
+    <dmh:attribute type="dmh:boolean" name="expanded"/>
+    <dmh:attribute type="dmh:integer" name="row"/>
+    <dmh:attribute type="dmh:string" name="dndBeyondID" default="-1"/>
+    <dmh:attribute type="dmh:string" name="icon"/>
+    <dmh:attribute type="dmh:string" name="size" default="medium"/>
+    <dmh:attribute type="dmh:integer" name="armorClass" default="10"/>
+    <dmh:attribute type="dmh:integer" name="hitPoints" default="1"/>
+    <dmh:attribute type="dmh:string" name="speed" default="30 ft."/>
+    <dmh:attribute type="dmh:string" name="movement" default="30 ft."/>
+    <dmh:attribute type="dmh:integer" name="dmh:initiativeMod"/>
+    <dmh:attribute type="dmh:integer" name="conditions"/>
+
+    <dmh:attribute type="dmh:integer" name="strength" default="10"/>
+    <dmh:attribute type="dmh:integer" name="strengthMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="dexterity" default="10"/>
+    <dmh:attribute type="dmh:integer" name="dexterityMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="constitution" default="10"/>
+    <dmh:attribute type="dmh:integer" name="constitutionMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="intelligence" default="10"/>
+    <dmh:attribute type="dmh:integer" name="intelligenceMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="wisdom" default="10"/>
+    <dmh:attribute type="dmh:integer" name="wisdomMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
+    <dmh:attribute type="dmh:integer" name="charismaMod" default="0"/>
+    <dmh:attribute type="dmh:integer" name="fortitudeSave"/>
+    <dmh:attribute type="dmh:integer" name="reflexSave"/>
+    <dmh:attribute type="dmh:integer" name="willSave"/>
+
+    <dmh:attribute type="dmh:integer" name="grapple"/>
+    <dmh:attribute type="dmh:integer" name="touchArmorClass" default="10"/>
+    <dmh:attribute type="dmh:integer" name="flatFootedArmorClass" default="10"/>
+
+    <dmh:attribute type="dmh:string" name="race"/>
+    <dmh:attribute type="dmh:string" name="class"/>
+    <dmh:attribute type="dmh:string" name="level"/>
+    <dmh:attribute type="dmh:string" name="experience"/>
+    <dmh:attribute type="dmh:string" name="maximumHp" default="1"/>
+    <dmh:attribute type="dmh:string" name="tempHp"/>
+    <dmh:attribute type="dmh:string" name="player"/>
+    <dmh:attribute type="dmh:string" name="gender"/>
+    <dmh:attribute type="dmh:string" name="height"/>
+    <dmh:attribute type="dmh:string" name="weight"/>
+    <dmh:attribute type="dmh:string" name="looks"/>
+    <dmh:attribute type="dmh:string" name="alignment"/>
+    <dmh:attribute type="dmh:string" name="religion"/>
+    <dmh:attribute type="dmh:string" name="background"/>
+    <dmh:attribute type="dmh:string" name="money"/>
+    <dmh:attribute type="dmh:string" name="languages"/>
+
+    <dmh:attribute type="dmh:integer" name="appraise"/>
+    <dmh:attribute type="dmh:integer" name="autohypnosis"/>
+    <dmh:attribute type="dmh:integer" name="balance"/>
+    <dmh:attribute type="dmh:integer" name="bluff"/>
+    <dmh:attribute type="dmh:integer" name="climb"/>
+    <dmh:attribute type="dmh:integer" name="concentration"/>
+    <dmh:attribute type="dmh:integer" name="craft"/>
+    <dmh:attribute type="dmh:integer" name="decipher_script"/>
+    <dmh:attribute type="dmh:integer" name="diplomacy"/>
+    <dmh:attribute type="dmh:integer" name="disable_device"/>
+    <dmh:attribute type="dmh:integer" name="disguise"/>
+    <dmh:attribute type="dmh:integer" name="escape_artist"/>
+    <dmh:attribute type="dmh:integer" name="forgery"/>
+    <dmh:attribute type="dmh:integer" name="gather_information"/>
+    <dmh:attribute type="dmh:integer" name="handle_animal"/>
+    <dmh:attribute type="dmh:integer" name="heal"/>
+    <dmh:attribute type="dmh:integer" name="hide"/>
+    <dmh:attribute type="dmh:integer" name="jump"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_arcana"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_arch_eng"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_dungeoneering"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_geography"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_history"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_local"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_nature"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_nobility_royalty"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_the_planes"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_psionics"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_religion"/>
+    <dmh:attribute type="dmh:integer" name="knowledge_other"/>
+    <dmh:attribute type="dmh:integer" name="listen"/>
+    <dmh:attribute type="dmh:integer" name="move_silently"/>
+    <dmh:attribute type="dmh:integer" name="open_lock"/>
+    <dmh:attribute type="dmh:integer" name="perform_act"/>
+    <dmh:attribute type="dmh:integer" name="perform_comedy"/>
+    <dmh:attribute type="dmh:integer" name="perform_dance"/>
+    <dmh:attribute type="dmh:integer" name="perform_keyboard"/>
+    <dmh:attribute type="dmh:integer" name="perform_oratory"/>
+    <dmh:attribute type="dmh:integer" name="perform_percussion"/>
+    <dmh:attribute type="dmh:integer" name="perform_string_instrument"/>
+    <dmh:attribute type="dmh:integer" name="perform_wind_instrument"/>
+    <dmh:attribute type="dmh:integer" name="perform_sing"/>
+    <dmh:attribute type="dmh:integer" name="perform_other"/>
+    <dmh:attribute type="dmh:integer" name="profession"/>
+    <dmh:attribute type="dmh:integer" name="psicraft"/>
+    <dmh:attribute type="dmh:integer" name="ride"/>
+    <dmh:attribute type="dmh:integer" name="search"/>
+    <dmh:attribute type="dmh:integer" name="sense_motive"/>
+    <dmh:attribute type="dmh:integer" name="sleight_of_hand"/>
+    <dmh:attribute type="dmh:integer" name="spellcraft"/>
+    <dmh:attribute type="dmh:integer" name="spot"/>
+    <dmh:attribute type="dmh:integer" name="survival"/>
+    <dmh:attribute type="dmh:integer" name="swim"/>
+    <dmh:attribute type="dmh:integer" name="tumble"/>
+    <dmh:attribute type="dmh:integer" name="use_magic_device"/>
+    <dmh:attribute type="dmh:integer" name="use_psionic_device"/>
+    <dmh:attribute type="dmh:integer" name="use_rope"/>
+    
+    <dmh:element type="dmh:html" name="spells"/>
+    <dmh:element type="dmh:html" name="feats"/>
+    <dmh:element type="dmh:html" name="equipment"/>
+    <dmh:element type="dmh:html" name="notes"/>
+
+</dmh:template>
+
+
+
+Appraise
+Autohypnosis
+Balance
+Bluff
+Climb
+Concentration
+Craft
+Decipher Script
+Diplomacy
+Disable Device
+Disguise
+Escape Artist
+Forgery
+Gather Information
+Handle Animal
+Heal
+Hide
+Jump
+Knowledge (Arcana)
+Knowledge (Arch/Eng)
+Knowledge (Dungeoneering)
+Knowledge (Geography)
+Knowledge (History)
+Knowledge (Local)
+Knowledge (Nature)
+Knowledge (Nobility/Royalty)
+Knowledge (The Planes)
+Knowledge (Psionics)
+Knowledge (Religion)
+Knowledge (Other)
+Listen
+Move Silently
+Open Lock
+Perform (Act)
+Perform (Comedy)
+Perform (Dance)
+Perform (Keyboard)
+Perform (Oratory)
+Perform (Percussion)
+Perform (String Instrument)
+Perform (Wind Instrument)
+Perform (Sing)
+Perform (Other)
+Profession
+Psicraft
+Ride
+Search
+Sense Motive
+Sleight Of Hand
+Spellcraft
+Spot
+Survival
+Swim
+Tumble
+Use Magic Device
+Use Psionic Device
+Use Rope
