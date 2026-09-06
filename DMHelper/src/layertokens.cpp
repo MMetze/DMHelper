@@ -463,6 +463,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
                 effectToken = new PublishGLBattleEffect(_glScene, effect);
             }
             effectToken->prepareObjectsGL();
+            connect(effectToken, &PublishGLBattleObject::changed, renderer, &PublishGLRenderer::updateWidget);
             _effectTokenHash.insert(effect, effectToken);
         }
     }
@@ -852,9 +853,9 @@ void LayerTokens::effectReady(BattleDialogModelEffect* effect)
         return;
 
     effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
-    effectIcon->setVisible(getLayerVisibleDM());
+    effectIcon->setVisible(getLayerVisibleDM() && _model->getShowEffects());
     effectIcon->setOpacity(_opacityReference);
-    effectIcon->setPos(effect->getPosition());
+    effectIcon->setPos(effect->getPosition() + _position);
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
@@ -994,11 +995,10 @@ void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
             _effectIconHash.remove(keyEffect);
         }
 
-        if(_layerScene->getDMScene())
-            createEffectIcon(_layerScene->getDMScene(), effect);
+        effectReady(effect);
     }
 
-    // Remove current effect markers from all combatants
+        // Remove current effect markers from all combatants
     QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
     for(int i = 0; i < tokenLayers.count(); ++i)
     {
