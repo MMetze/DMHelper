@@ -44,9 +44,11 @@ protected:
     int _shaderTime;
     int _shaderColor;
     int _shaderSize;
+    int _shaderSeed;
 
     QBasicTimer _animationTimer;
     qint64 _milliseconds;
+    float _seed;
 };
 
 #endif // PUBLISHGLBATTLEEFFECTANIMATED_H

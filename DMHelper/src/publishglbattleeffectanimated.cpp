@@ -5,8 +5,10 @@
 #include "dmh_opengl.h"
 #include <QOpenGLContext>
 #include <QTimerEvent>
+#include <QRandomGenerator>
 
 static constexpr int ANIMATION_TIMER_INTERVAL_MS = 30;
+static constexpr float EFFECT_SEED_RANGE = 1000.0f;
 static constexpr float MS_TO_SECONDS = 1000.0f;
 static constexpr int SHADER_LOG_BUFFER_SIZE = 512;
 static constexpr float CAMERA_Z_DISTANCE = 500.f;
@@ -27,8 +29,10 @@ PublishGLBattleEffectAnimated::PublishGLBattleEffectAnimated(PublishGLScene* sce
     _shaderTime(0),
     _shaderColor(0),
     _shaderSize(0),
+    _shaderSeed(0),
     _animationTimer(),
-    _milliseconds(0)
+    _milliseconds(0),
+    _seed(static_cast<float>(QRandomGenerator::global()->generateDouble()) * EFFECT_SEED_RANGE)
 {
 }
 
@@ -98,6 +102,7 @@ void PublishGLBattleEffectAnimated::paintGL(QOpenGLFunctions* functions, const G
 
     float timeSeconds = static_cast<float>(_milliseconds) / MS_TO_SECONDS;
     functions->glUniform1f(_shaderTime, timeSeconds);
+    functions->glUniform1f(_shaderSeed, _seed);
 
     QColor c = _effect->getColor();
     functions->glUniform4f(_shaderColor, c.redF(), c.greenF(), c.blueF(), c.alphaF());
@@ -195,6 +200,8 @@ void PublishGLBattleEffectAnimated::createShadersGL()
     DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderAlpha, "alpha");
     _shaderTime = f->glGetUniformLocation(_shaderProgram, "u_time");
     DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderTime, "u_time");
+    _shaderSeed = f->glGetUniformLocation(_shaderProgram, "u_seed");
+    DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderSeed, "u_seed");
     _shaderColor = f->glGetUniformLocation(_shaderProgram, "u_color");
     DMH_DEBUG_OPENGL_Singleton::registerUniform(_shaderProgram, _shaderColor, "u_color");
     _shaderSize = f->glGetUniformLocation(_shaderProgram, "u_size");
@@ -232,6 +239,7 @@ void PublishGLBattleEffectAnimated::cleanupShadersGL()
     _shaderTime = 0;
     _shaderColor = 0;
     _shaderSize = 0;
+    _shaderSeed = 0;
 }
 
 void PublishGLBattleEffectAnimated::createQuadGL()
