@@ -22,6 +22,7 @@
 const int ENCOUNTERTEXTEDIT_STORE_INTERVAL = 3000;
 const int ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL = 500;
 const int ENCOUNTERTEXTEDIT_PUBLISH_INTERVAL = 100;
+const int ENCOUNTERTEXTEDIT_SCROLL_RESTORE_INTERVAL = 0;
 static constexpr int FULL_PERCENT = 100;
 static constexpr qreal HALF_PERCENT_DIVISOR = 200.0;
 
@@ -39,12 +40,16 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _isDMPlayer(false),
     _isPublishing(false),
     _isCodeView(false),
+    _storingEncounter(false),
     _targetSize(),
     _rotation(0),
     _textPos(),
+    _scrollPositions(),
+    _pendingScrollPos(0),
     _encounterChangedTimer(0),
     _updateAnchorTimer(0),
-    _publishUpdateTimer(0)
+    _publishUpdateTimer(0),
+    _restoreScrollTimer(0)
 {
     ui->setupUi(this);
 
@@ -190,6 +195,8 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
     if(_encounter)
     {
+        storeScrollPosition();
+
         if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
         {
             EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
@@ -215,6 +222,9 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
 QString EncounterTextEdit::toHtml() const
 {
+    if(!_encounter)
+        return QString();
+
     if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
     {
         return ui->textBrowser->toHtml();
@@ -227,9 +237,9 @@ QString EncounterTextEdit::toHtml() const
             if((_isCodeView) || (linkedText->getFileType() == DMHelper::FileType_Text))
                 return ui->textBrowser->toPlainText();
             else if(linkedText->getFileType() == DMHelper::FileType_HTML)
-                ui->textBrowser->toHtml();
+                return ui->textBrowser->toHtml();
             else if(linkedText->getFileType() == DMHelper::FileType_Markdown)
-                ui->textBrowser->toMarkdown();
+                return ui->textBrowser->toMarkdown();
         }
     }
 
@@ -301,6 +311,9 @@ void EncounterTextEdit::setHtml()
         return;
     }
 
+    QScrollBar* scrollBar = ui->textBrowser->verticalScrollBar();
+    int previousScrollPos = scrollBar ? scrollBar->value() : 0;
+
     if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
     {
         if(_encounter->getTranslated())
@@ -325,6 +338,7 @@ void EncounterTextEdit::setHtml()
     }
 
     updateAnchors();
+    queueScrollRestore(previousScrollPos);
 }
 
 void EncounterTextEdit::setFont(const QString& fontFamily)
@@ -617,10 +631,13 @@ void EncounterTextEdit::updateAnchors()
 
 void EncounterTextEdit::storeEncounter()
 {
-    if(!_encounter)
+    if((!_encounter) || (_storingEncounter))
         return;
 
-    disconnect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
+    // Blocks the textChanged handlers from reloading (and scrolling) the browser while we write back to the object
+    _storingEncounter = true;
+
+    storeScrollPosition();
 
     if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
     {
@@ -631,15 +648,18 @@ void EncounterTextEdit::storeEncounter()
     }
     else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
     {
-        _encounter->setText(toHtml());
+        // Never overwrite the linked file with an empty string unless the entry really is empty
+        QString newText = toHtml();
+        if((!newText.isEmpty()) || (ui->textBrowser->document()->isEmpty()))
+            _encounter->setText(newText);
     }
 
-    connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::readEncounter);
+    _storingEncounter = false;
 }
 
 void EncounterTextEdit::readEncounter()
 {
-    if(!_encounter)
+    if((!_encounter) || (_storingEncounter))
         return;
 
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
@@ -669,13 +689,14 @@ void EncounterTextEdit::readEncounter()
     setAnimated(_encounter->getAnimated());
     setTranslated(_encounter->getTranslated());
     setHtml();
+    queueScrollRestore(_scrollPositions.value(_encounter->getID(), 0));
 
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
 }
 
 void EncounterTextEdit::updateEncounter()
 {
-    if(!_encounter)
+    if((!_encounter) || (_storingEncounter))
         return;
 
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(triggerEncounterChanged()));
@@ -749,6 +770,19 @@ void EncounterTextEdit::triggerUpdateAnchor()
     _updateAnchorTimer = startTimer(ENCOUNTERTEXTEDIT_ANCHOR_UPDATE_INTERVAL);
 }
 
+void EncounterTextEdit::storeScrollPosition()
+{
+    QScrollBar* scrollBar = ui->textBrowser->verticalScrollBar();
+    if((!_encounter) || (!scrollBar))
+        return;
+
+    int scrollPos = scrollBar->value();
+    if(scrollPos > 0)
+        _scrollPositions.insert(_encounter->getID(), scrollPos);
+    else
+        _scrollPositions.remove(_encounter->getID());
+}
+
 void EncounterTextEdit::sceneRectUpdated(const QSize& size)
 {
     if(size == _targetSize)
@@ -800,6 +834,13 @@ void EncounterTextEdit::timerEvent(QTimerEvent *event)
             prepareImages();
             _renderer->setTextImage(_textImage);
         }
+    }
+
+    if(event->timerId() == _restoreScrollTimer)
+    {
+        killTimer(_restoreScrollTimer);
+        _restoreScrollTimer = 0;
+        applyScrollPosition();
     }
 }
 
@@ -918,6 +959,30 @@ int EncounterTextEdit::getRotatedTargetWidth()
     return (_rotation % 180 == 0) ? _targetSize.width() : _targetSize.height();
 }
 
+void EncounterTextEdit::queueScrollRestore(int scrollPos)
+{
+    _pendingScrollPos = scrollPos;
+    if(_pendingScrollPos <= 0)
+        return;
+
+    // Applied twice: immediately, and again once the document has been laid out and the scroll bar range is final
+    applyScrollPosition();
+
+    if(_restoreScrollTimer)
+        killTimer(_restoreScrollTimer);
+
+    _restoreScrollTimer = startTimer(ENCOUNTERTEXTEDIT_SCROLL_RESTORE_INTERVAL);
+}
+
+void EncounterTextEdit::applyScrollPosition()
+{
+    QScrollBar* scrollBar = ui->textBrowser->verticalScrollBar();
+    if((_pendingScrollPos <= 0) || (!scrollBar))
+        return;
+
+    scrollBar->setValue(qMin(_pendingScrollPos, scrollBar->maximum()));
+}
+
 void EncounterTextEdit::cancelTimers()
 {
     if(_encounterChangedTimer)
@@ -937,4 +1002,12 @@ void EncounterTextEdit::cancelTimers()
         killTimer(_publishUpdateTimer);
         _publishUpdateTimer = 0;
     }
+
+    if(_restoreScrollTimer)
+    {
+        killTimer(_restoreScrollTimer);
+        _restoreScrollTimer = 0;
+    }
+
+    _pendingScrollPos = 0;
 }

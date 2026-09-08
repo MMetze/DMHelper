@@ -2618,6 +2618,67 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
         }
     }
 
+    // Rename and token actions
+    {
+        BattleDialogModelMonsterBase* monsterBase = dynamic_cast<BattleDialogModelMonsterBase*>(_contextMenuCombatant);
+        BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(_contextMenuCombatant);
+        BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(_contextMenuCombatant);
+
+        if((monsterBase) || (monster) || (characterCombatant))
+            contextMenu->addSeparator();
+
+        if(monsterBase)
+        {
+            QAction* renameItem = new QAction(QString("Rename..."), contextMenu);
+            connect(renameItem, &QAction::triggered, this, [this, monsterBase]() {
+                bool ok = false;
+                QString newName = QInputDialog::getText(this, tr("Rename Combatant"), tr("Combatant name:"), QLineEdit::Normal, monsterBase->getName(), &ok);
+                if((ok) && (!newName.isEmpty()))
+                    monsterBase->setMonsterName(newName);
+            });
+            contextMenu->addAction(renameItem);
+        }
+
+        if((monster) && (monster->getMonsterClass()))
+        {
+            // Parented to the menu - QMenu::addMenu(QMenu*) does not take ownership
+            QMenu* tokenMenu = new QMenu(QString("Select Token..."), contextMenu);
+
+            QStringList iconList = monster->getMonsterClass()->getIconList();
+            for(int i = 0; i < iconList.count(); ++i)
+            {
+                QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
+                connect(tokenAction, &QAction::triggered, this, [this, i, monster](){handleChangeMonsterToken(monster, i);});
+                tokenMenu->addAction(tokenAction);
+            }
+
+            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+            connect(customAction, &QAction::triggered, this, [this, monster](){handleChangeMonsterTokenCustom(monster);});
+            tokenMenu->addAction(customAction);
+
+            contextMenu->addMenu(tokenMenu);
+        }
+
+        if((characterCombatant) && (characterCombatant->getCharacter()))
+        {
+            QMenu* tokenMenu = new QMenu(QString("Select Token..."), contextMenu);
+
+            QStringList iconList = characterCombatant->getCharacter()->getIconList();
+            for(int i = 0; i < iconList.count(); ++i)
+            {
+                QAction* tokenAction = new QAction(QFileInfo(iconList.at(i)).fileName(), tokenMenu);
+                connect(tokenAction, &QAction::triggered, this, [this, i, characterCombatant](){handleChangeCharacterToken(characterCombatant, i);});
+                tokenMenu->addAction(tokenAction);
+            }
+
+            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+            connect(customAction, &QAction::triggered, this, [this, characterCombatant](){handleChangeCharacterTokenCustom(characterCombatant);});
+            tokenMenu->addAction(customAction);
+
+            contextMenu->addMenu(tokenMenu);
+        }
+    }
+
     // Group/Ungroup actions
     contextMenu->addSeparator();
 

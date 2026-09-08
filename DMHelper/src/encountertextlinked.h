@@ -24,7 +24,7 @@ public:
     virtual QString getMetadata() const;
 
 public slots:
-    // Text
+    // Text. Writes through to the linked file; deliberately does not emit dirty() because the text is not stored in the campaign XML.
     virtual void setText(const QString& newText) override;
 
     // Linked File
@@ -37,8 +37,14 @@ protected slots:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual void readLinkedFile();
+    virtual void handleFileChanged(const QString& path);
 
 protected:
+    virtual void timerEvent(QTimerEvent* event) override;
+
+    void writeLinkedFile();
+    void rearmWatcher();
+
     virtual void createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual void extractTextNode(const QDomElement &element, bool isImport) override;
 
@@ -49,6 +55,8 @@ protected:
     QFileSystemWatcher* _watcher;
     int _fileType;
     QString _metadata;
+    int _reloadTimer;
+    int _reloadRetries;
 };
 
 #endif // ENCOUNTERTEXTLINKED_H

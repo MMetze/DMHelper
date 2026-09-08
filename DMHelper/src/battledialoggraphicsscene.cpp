@@ -809,24 +809,23 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                     MonsterClassv2* monsterClass = monster->getMonsterClass();
                     if(monsterClass)
                     {
+                        // Parented to the menu - QMenu::addMenu(QMenu*) does not take ownership
+                        QMenu* tokenMenu = new QMenu(QString("Select Token..."), &menu);
+
                         QStringList iconList = monsterClass->getIconList();
-                        if(iconList.count() > 0)
+                        for(int i = 0; i < iconList.count(); ++i)
                         {
-                            QMenu* tokenMenu = new QMenu(QString("Select Token..."));
-                            for(int i = 0; i < iconList.count(); ++i)
-                            {
-                                QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
-                                connect(tokenAction, &QAction::triggered, [this, i, monster](){this->changeMonsterToken(monster, i);});
-                                tokenMenu->addAction(tokenAction);
-                            }
-
-                            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
-                            connect(customAction, &QAction::triggered, [this, monster](){this->changeMonsterTokenCustom(monster);});
-                            tokenMenu->addAction(customAction);
-
-                            menu.addMenu(tokenMenu);
-                            menu.addSeparator();
+                            QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
+                            connect(tokenAction, &QAction::triggered, [this, i, monster](){this->changeMonsterToken(monster, i);});
+                            tokenMenu->addAction(tokenAction);
                         }
+
+                        QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+                        connect(customAction, &QAction::triggered, [this, monster](){this->changeMonsterTokenCustom(monster);});
+                        tokenMenu->addAction(customAction);
+
+                        menu.addMenu(tokenMenu);
+                        menu.addSeparator();
                     }
                 }
 
@@ -836,25 +835,23 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                     Characterv2* character = characterCombatant->getCharacter();
                     if(character)
                     {
+                        QMenu* tokenMenu = new QMenu(QString("Select Token..."), &menu);
+
                         QStringList iconList = character->getIconList();
-                        if(iconList.count() > 0)
+                        for(int i = 0; i < iconList.count(); ++i)
                         {
-                            QMenu* tokenMenu = new QMenu(QString("Select Token..."));
-                            for(int i = 0; i < iconList.count(); ++i)
-                            {
-                                QFileInfo fi(iconList.at(i));
-                                QAction* tokenAction = new QAction(fi.fileName(), tokenMenu);
-                                connect(tokenAction, &QAction::triggered, [this, i, characterCombatant](){this->changeCharacterToken(characterCombatant, i);});
-                                tokenMenu->addAction(tokenAction);
-                            }
-
-                            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
-                            connect(customAction, &QAction::triggered, [this, characterCombatant](){this->changeCharacterTokenCustom(characterCombatant);});
-                            tokenMenu->addAction(customAction);
-
-                            menu.addMenu(tokenMenu);
-                            menu.addSeparator();
+                            QFileInfo fi(iconList.at(i));
+                            QAction* tokenAction = new QAction(fi.fileName(), tokenMenu);
+                            connect(tokenAction, &QAction::triggered, [this, i, characterCombatant](){this->changeCharacterToken(characterCombatant, i);});
+                            tokenMenu->addAction(tokenAction);
                         }
+
+                        QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+                        connect(customAction, &QAction::triggered, [this, characterCombatant](){this->changeCharacterTokenCustom(characterCombatant);});
+                        tokenMenu->addAction(customAction);
+
+                        menu.addMenu(tokenMenu);
+                        menu.addSeparator();
                     }
                 }
             }
