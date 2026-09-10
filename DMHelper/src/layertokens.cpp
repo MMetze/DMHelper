@@ -59,6 +59,7 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _effectIconHash(),
     _effectTokenHash(),
     _scale(DMHelper::STARTING_GRID_SCALE),
+    _appliedOrder(order),
     _campaign(nullptr),
     _healthBarHash()
 {
@@ -211,6 +212,9 @@ Layer* LayerTokens::clone() const
 
 void LayerTokens::applyOrder(int order)
 {
+    // A LayerReference applies its own order here, which differs from this layer's _order
+    _appliedOrder = order;
+
     qreal combatantOrder = getIconOrder(DMHelper::CampaignType_BattleContentCombatant, order);
     foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
@@ -687,7 +691,7 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
         if(!combatantItem)
             return;
 
-        combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, getOrder()));
+        combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, _appliedOrder));
         combatantItem->setVisible(getLayerVisibleDM());
         combatantItem->setOpacity(combatant->getShown() ? _opacityReference : _opacityReference * 0.5);
 
@@ -852,10 +856,14 @@ void LayerTokens::effectReady(BattleDialogModelEffect* effect)
     if(!effectIcon)
         return;
 
-    effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
+    effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, _appliedOrder));
     effectIcon->setVisible(getLayerVisibleDM() && _model->getShowEffects());
     effectIcon->setOpacity(_opacityReference);
     effectIcon->setPos(effect->getPosition() + _position);
+
+    qDebug() << "[LayerTokens] effect icon ready in" << _name << "order=" << _appliedOrder << "(_order=" << _order << ") z=" << effectIcon->zValue()
+             << "gridScale=" << _scale << "itemScale=" << effectIcon->scale() << "size=" << effect->getSize()
+             << "pos=" << effectIcon->pos() << "visible=" << effectIcon->isVisible();
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)

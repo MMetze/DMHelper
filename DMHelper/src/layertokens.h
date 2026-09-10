@@ -156,6 +156,7 @@ protected:
     QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
 
     int _scale;
+    int _appliedOrder;
 
     // Health bar overlay (DM view)
     Campaign* _campaign;
