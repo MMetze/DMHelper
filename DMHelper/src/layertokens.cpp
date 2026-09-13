@@ -860,10 +860,6 @@ void LayerTokens::effectReady(BattleDialogModelEffect* effect)
     effectIcon->setVisible(getLayerVisibleDM() && _model->getShowEffects());
     effectIcon->setOpacity(_opacityReference);
     effectIcon->setPos(effect->getPosition() + _position);
-
-    qDebug() << "[LayerTokens] effect icon ready in" << _name << "order=" << _appliedOrder << "(_order=" << _order << ") z=" << effectIcon->zValue()
-             << "gridScale=" << _scale << "itemScale=" << effectIcon->scale() << "size=" << effect->getSize()
-             << "pos=" << effectIcon->pos() << "visible=" << effectIcon->isVisible();
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
