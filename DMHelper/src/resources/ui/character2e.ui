@@ -685,7 +685,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QLineEdit" name="strength_4">
+        <widget class="QLineEdit" name="wisdom">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -713,7 +713,7 @@ color: rgb(50, 50, 50);</string>
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>strength</string>
+          <string>wisdom</string>
          </property>
         </widget>
        </item>
@@ -793,7 +793,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="strength_2">
+        <widget class="QLineEdit" name="dexterity">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -821,7 +821,7 @@ color: rgb(50, 50, 50);</string>
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>strength</string>
+          <string>dexterity</string>
          </property>
         </widget>
        </item>
@@ -1451,7 +1451,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item row="2" column="3">
-        <widget class="QLineEdit" name="strengthMod_7">
+        <widget class="QLineEdit" name="dexterityReactionAdjustment">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -1553,7 +1553,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QLineEdit" name="strength_5">
+        <widget class="QLineEdit" name="intelligence">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -1581,7 +1581,7 @@ color: rgb(50, 50, 50);</string>
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>strength</string>
+          <string>intelligence</string>
          </property>
         </widget>
        </item>
@@ -1607,7 +1607,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="strength_6">
+        <widget class="QLineEdit" name="constitution">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -1635,7 +1635,7 @@ color: rgb(50, 50, 50);</string>
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>strength</string>
+          <string>constitution</string>
          </property>
         </widget>
        </item>
@@ -1976,7 +1976,7 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item row="9" column="1">
-        <widget class="QLineEdit" name="strength_3">
+        <widget class="QLineEdit" name="charisma">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -2004,7 +2004,7 @@ color: rgb(50, 50, 50);</string>
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>strength</string>
+          <string>charisma</string>
          </property>
         </widget>
        </item>

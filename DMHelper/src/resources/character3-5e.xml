@@ -28,10 +28,12 @@
     <dmh:attribute type="dmh:integer" name="wisdomMod" default="0"/>
     <dmh:attribute type="dmh:integer" name="charisma" default="10"/>
     <dmh:attribute type="dmh:integer" name="charismaMod" default="0"/>
+    
     <dmh:attribute type="dmh:integer" name="fortitudeSave"/>
     <dmh:attribute type="dmh:integer" name="reflexSave"/>
     <dmh:attribute type="dmh:integer" name="willSave"/>
 
+    <dmh:attribute type="dmh:integer" name="baseAttack"/>
     <dmh:attribute type="dmh:integer" name="grapple"/>
     <dmh:attribute type="dmh:integer" name="touchArmorClass" default="10"/>
     <dmh:attribute type="dmh:integer" name="flatFootedArmorClass" default="10"/>
@@ -41,7 +43,6 @@
     <dmh:attribute type="dmh:string" name="level"/>
     <dmh:attribute type="dmh:string" name="experience"/>
     <dmh:attribute type="dmh:string" name="maximumHp" default="1"/>
-    <dmh:attribute type="dmh:string" name="tempHp"/>
     <dmh:attribute type="dmh:string" name="player"/>
     <dmh:attribute type="dmh:string" name="gender"/>
     <dmh:attribute type="dmh:string" name="height"/>
@@ -70,6 +71,7 @@
     <dmh:attribute type="dmh:integer" name="handle_animal"/>
     <dmh:attribute type="dmh:integer" name="heal"/>
     <dmh:attribute type="dmh:integer" name="hide"/>
+    <dmh:attribute type="dmh:integer" name="intimidate"/>
     <dmh:attribute type="dmh:integer" name="jump"/>
     <dmh:attribute type="dmh:integer" name="knowledge_arcana"/>
     <dmh:attribute type="dmh:integer" name="knowledge_arch_eng"/>
@@ -111,7 +113,9 @@
     <dmh:attribute type="dmh:integer" name="use_psionic_device"/>
     <dmh:attribute type="dmh:integer" name="use_rope"/>
     
+    <dmh:element type="dmh:html" name="combat_options"/>
     <dmh:element type="dmh:html" name="spells"/>
+    <dmh:element type="dmh:html" name="features"/>
     <dmh:element type="dmh:html" name="feats"/>
     <dmh:element type="dmh:html" name="equipment"/>
     <dmh:element type="dmh:html" name="notes"/>
