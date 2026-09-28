@@ -82,7 +82,7 @@ private:
     QPointer<QScrollArea> _conditionStrip;
     QPointer<QScrollArea> _resourceStrip;
 
-    BattleDialogModelCombatant* _combatant;
+    QPointer<BattleDialogModelCombatant> _combatant;
     CombatantTemplateAdapter* _adapter;
     CombatantWidgetBase* _base;
     QPointer<QWidget> _uiWidget;

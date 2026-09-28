@@ -2,6 +2,7 @@
 #define INITIATIVEEVENTWIDGET_H
 
 #include "combatantwidget.h"
+#include <QPointer>
 
 namespace Ui {
 class InitiativeEventWidget;
@@ -42,7 +43,7 @@ protected:
 
 private:
     Ui::InitiativeEventWidget* ui;
-    BattleDialogModelInitiativeEvent* _event;
+    QPointer<BattleDialogModelInitiativeEvent> _event;
 };
 
 #endif // INITIATIVEEVENTWIDGET_H

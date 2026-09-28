@@ -321,11 +321,12 @@ BattleFrame::~BattleFrame()
         delete child;
     }
     
-    QMapIterator<BattleDialogModelCombatant*, CombatantWidget*> i(_combatantWidgets);
+    QMapIterator<BattleDialogModelCombatant*, QPointer<CombatantWidget>> i(_combatantWidgets);
     while(i.hasNext())
     {
         i.next();
-        i.value()->deleteLater();
+        if(i.value())
+            i.value()->deleteLater();
     }
     _combatantWidgets.clear();
 
@@ -534,9 +535,6 @@ void BattleFrame::recreateCombatantWidgets()
     qDebug() << "[Battle Frame] recreating combatant widgets";
     clearCombatantWidgets();
     buildCombatantWidgets();
-    // Reorder once after rebuild to ensure group rows are repopulated in
-    // initiative order and remain visible after group membership changes.
-    reorderCombatantWidgets();
     qDebug() << "[Battle Frame] combatant widgets recreated";
 }
 
@@ -2006,7 +2004,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                     if((mouseEvent->globalPosition().toPoint() - _mouseDownPos).manhattanLength() > QApplication::startDragDistance())
                     {
-                        BattleDialogModelCombatant* combatant = _combatantWidgets.key(widget, nullptr);
+                        BattleDialogModelCombatant* combatant = widget->getCombatant();
                         if(combatant)
                         {
                             int index = _model->getCombatantList().indexOf(combatant);
@@ -2047,7 +2045,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     // with an active press should trigger row-click behaviour.
                     _mouseDown = false;
 
-                    BattleDialogModelCombatant* selected = _combatantWidgets.key(widget, nullptr);
+                    BattleDialogModelCombatant* selected = widget->getCombatant();
                     if(mouseEvent->modifiers().testFlag(Qt::ShiftModifier) ||
                        mouseEvent->modifiers().testFlag(Qt::ControlModifier) ||
                        mouseEvent->modifiers().testFlag(Qt::AltModifier))
@@ -2947,16 +2945,16 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
             setActiveCombatant(nextActiveCombatant);
     }
 
-    bool removedInitiativeEvent = false;
     for(BattleDialogModelCombatant* selectedCombatant : std::as_const(combatantsToRemove))
     {
-        if(selectedCombatant && (selectedCombatant->getCombatantType() == DMHelper::CombatantType_InitiativeEvent))
-            removedInitiativeEvent = true;
         removeSingleCombatant(selectedCombatant, !isBatchRemoval);
     }
 
-    if(removedInitiativeEvent)
-        recreateCombatantWidgets();
+    // Rebuild the tracker after every removal, not just initiative events:
+    // removing a grouped combatant can leave the group widget referencing a
+    // stale/empty group, and the model list index used elsewhere for lookups
+    // shifts after any removal.
+    recreateCombatantWidgets();
 
     emitLairActionsState();
 }
@@ -4212,7 +4210,7 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
     }
 
     // Hide group widgets if all members are hidden
-    QMapIterator<QUuid, CombatantGroupWidget*> git(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> git(_groupWidgets);
     while(git.hasNext())
     {
         git.next();
@@ -4224,7 +4222,7 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
         QList<CombatantWidget*> members = groupWidget->getMemberWidgets();
         for(CombatantWidget* member : members)
         {
-            if(member && member->isVisible())
+            if(member && shouldShowCombatant(member->getCombatant(), aliveVisible, deadVisible))
             {
                 anyMemberVisible = true;
                 break;
@@ -4240,11 +4238,7 @@ void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* comba
     if((!_model) || (!combatant))
         return;
 
-    bool visible = ((!isCombatantDead(combatant)) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
-
-    LayerTokens* tokensLayer = combatant->getLayer();
-    if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
-        visible = false;
+    const bool visible = shouldShowCombatant(combatant, aliveVisible, deadVisible);
 
     QWidget* widget = _combatantWidgets.value(combatant);
     if(widget)
@@ -4881,7 +4875,7 @@ void BattleFrame::clearCombatantWidgets()
 
     // Remove member widgets from group widgets before clearing
     // (so they aren't double-deleted via the group's layout)
-    QMapIterator<QUuid, CombatantGroupWidget*> git(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> git(_groupWidgets);
     while(git.hasNext())
     {
         git.next();
@@ -5002,9 +4996,9 @@ void BattleFrame::buildCombatantWidgets()
 
     setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
     if(_model->getActiveCombatant())
-        setActiveCombatant(_model->getActiveCombatant());
+        setActiveCombatant(_model->getActiveCombatant(), false);
     else
-        setActiveCombatant(getFirstLivingCombatant());
+        setActiveCombatant(getFirstLivingCombatant(), false);
 }
 
 void BattleFrame::reorderCombatantWidgets()
@@ -5026,7 +5020,7 @@ void BattleFrame::reorderCombatantWidgets()
     }
 
     // Remove member widgets from group widgets
-    QMapIterator<QUuid, CombatantGroupWidget*> git(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> git(_groupWidgets);
     while(git.hasNext())
     {
         git.next();
@@ -5071,7 +5065,7 @@ void BattleFrame::reorderCombatantWidgets()
     }
 
     // Ensure member widgets are visible after reparenting into groups
-    QMapIterator<QUuid, CombatantGroupWidget*> groupIt(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> groupIt(_groupWidgets);
     while(groupIt.hasNext())
     {
         groupIt.next();
@@ -5086,7 +5080,7 @@ void BattleFrame::reorderCombatantWidgets()
     }
 }
 
-void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
+void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active, bool expandActiveGroup)
 {
     if(!_model)
     {
@@ -5121,7 +5115,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         combatantWidget->setActive(true);
 
         // Auto-expand collapsed group if active combatant is inside
-        if(active && !active->getGroupId().isNull())
+        if(expandActiveGroup && active && !active->getGroupId().isNull())
         {
             CombatantGroupWidget* groupWidget = _groupWidgets.value(active->getGroupId());
             if(groupWidget)
@@ -5299,27 +5293,13 @@ CombatantWidget* BattleFrame::getWidgetFromCombatant(BattleDialogModelCombatant*
     if(!combatant)
         return nullptr;
 
-    // Look up directly via the combatant -> widget map. The previous
-    // implementation indexed `_combatantLayout` by the combatant's position
-    // in `_model->getCombatantList()`, but those two index spaces don't
-    // line up when groups are present: `_combatantLayout` only holds the
-    // top-level rows (ungrouped combatants + one CombatantGroupWidget per
-    // group), while the combatant list contains every group member as a
-    // separate entry. Stepping with "next" would therefore return the wrong
-    // widget once the iterator passed a group, causing the active highlight
-    // to land on the wrong row and the group widget itself to appear active
-    // when no member was actually current.
-    return _combatantWidgets.value(combatant, nullptr);
-    // Look up directly via the combatant -> widget map. The previous
-    // implementation indexed `_combatantLayout` by the combatant's position
-    // in `_model->getCombatantList()`, but those two index spaces don't
-    // line up when groups are present: `_combatantLayout` only holds the
-    // top-level rows (ungrouped combatants + one CombatantGroupWidget per
-    // group), while the combatant list contains every group member as a
-    // separate entry. Stepping with "next" would therefore return the wrong
-    // widget once the iterator passed a group, causing the active highlight
-    // to land on the wrong row and the group widget itself to appear active
-    // when no member was actually current.
+    // Look up directly via the combatant -> widget map. Indexing
+    // `_combatantLayout` by the combatant's position in
+    // `_model->getCombatantList()` doesn't work: those two index spaces
+    // don't line up when groups are present, since `_combatantLayout` only
+    // holds the top-level rows (ungrouped combatants + one
+    // CombatantGroupWidget per group) while the combatant list contains
+    // every group member as a separate entry.
     return _combatantWidgets.value(combatant, nullptr);
 }
 
@@ -5346,7 +5326,11 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
 
     int nextCombatantIndex = _model->getCombatantList().indexOf(combatant);
 
-    if(_combatantLayout->count() <= 1)
+    // Guard on the flat combatant count, not _combatantLayout->count(): the
+    // layout is group-compressed (one row per group, not per member), so an
+    // all-grouped encounter would otherwise report <= 1 top-level row and
+    // "next" would never advance even with several combatants present.
+    if(_model->getCombatantCount() <= 1)
         return nullptr;
 
     BattleDialogModelCombatant* nextCombatant = nullptr;
@@ -5363,6 +5347,29 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
              ((nextCombatant->getLayer()) && (!nextCombatant->getLayer()->getLayerVisibleDM()))); // skip hidden combatants
 
     return nextCombatant;
+}
+
+void BattleFrame::detachAndDeleteCombatantWidget(BattleDialogModelCombatant* combatant)
+{
+    CombatantWidget* widget = _combatantWidgets.take(combatant);
+    if(!widget)
+        return;
+
+    const QUuid groupId = combatant ? combatant->getGroupId() : QUuid();
+    CombatantGroupWidget* groupWidget = groupId.isNull() ? nullptr : _groupWidgets.value(groupId, nullptr);
+    if(groupWidget)
+    {
+        groupWidget->removeMemberWidget(widget);
+    }
+    else if(_combatantLayout)
+    {
+        const int widgetIndex = _combatantLayout->indexOf(widget);
+        if(widgetIndex >= 0)
+            delete _combatantLayout->takeAt(widgetIndex);
+    }
+
+    qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(widget);
+    widget->deleteLater();
 }
 
 void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant, bool updateActiveCombatant)
@@ -5383,37 +5390,13 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant, b
 
     if(BattleDialogModelInitiativeEvent* initiativeEvent = dynamic_cast<BattleDialogModelInitiativeEvent*>(combatant))
     {
-        CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
-        _combatantWidgets.remove(combatant);
-
-        if(widget)
-        {
-            const int widgetIndex = _combatantLayout ? _combatantLayout->indexOf(widget) : -1;
-            if((_combatantLayout) && (widgetIndex >= 0))
-            {
-                QLayoutItem* layoutItem = _combatantLayout->takeAt(widgetIndex);
-                delete layoutItem;
-            }
-            widget->deleteLater();
-        }
-
+        detachAndDeleteCombatantWidget(combatant);
         _model->removeInitiativeEvent(initiativeEvent);
         return;
     }
 
-    // Find the index of the removed item
-    int index = _model->getCombatantList().indexOf(combatant);
-
-    // Delete the widget for the combatant
-    _combatantWidgets.remove(combatant);
-    QLayoutItem *child = _combatantLayout->takeAt(index);
-    if(child != nullptr)
-    {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
-        child->widget()->deleteLater();
-        delete child;
-    }
-
+    detachAndDeleteCombatantWidget(combatant);
+    _model->removeCombatantFromGroup(combatant);
     _model->removeCombatant(combatant);
 }
 
@@ -5502,7 +5485,7 @@ void BattleFrame::clearBattleFrame()
     removeRollover();
 
     // Clean up the list of combatant widgets
-    QMapIterator<BattleDialogModelCombatant*, CombatantWidget*> i(_combatantWidgets);
+    QMapIterator<BattleDialogModelCombatant*, QPointer<CombatantWidget>> i(_combatantWidgets);
     while(i.hasNext())
     {
         i.next();
@@ -6178,4 +6161,19 @@ bool BattleFrame::isCombatantDead(const BattleDialogModelCombatant* combatant) c
 
     // Pre-RuleHealth fallback: behaviour matches the original 5e-only check.
     return combatant->getHitPoints() <= 0;
+}
+
+bool BattleFrame::shouldShowCombatant(const BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible) const
+{
+    if(!combatant)
+        return false;
+
+    bool visible = ((!isCombatantDead(combatant)) ||
+                    (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+
+    LayerTokens* tokensLayer = combatant->getLayer();
+    if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
+        visible = false;
+
+    return visible;
 }
