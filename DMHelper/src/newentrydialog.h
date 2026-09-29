@@ -83,10 +83,11 @@ protected slots:
 
     // Helper functions
     bool isSelectedEntryValid();
+    void suggestEntryName(const QString& suggestedName);
 
     void readNewFile(const QString& filename, QLabel* label, int width, int height, const QString& defaultIcon);
     void selectNewPrimaryImage(QLabel* label, QPushButton* button, int width, int height, const QString& query, const QString& defaultIcon);
-    void setNewPrimaryImage(const QString& newPrimaryImage, QLabel* label, QPushButton* button, int width, int height, const QString& defaultIcon);
+    void setNewPrimaryImage(const QString& newPrimaryImage, QLabel* label, QPushButton* button, int width, int height, const QString& defaultIcon, bool guessName = true);
     void loadPrimaryImage(QLabel* label, QPushButton* button, int width, int height, const QString& defaultIcon);
 
     void handleScreenshotReady(const QImage& image);

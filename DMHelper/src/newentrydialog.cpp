@@ -89,6 +89,7 @@ NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, Ca
     connect(ui->btnCharacterEditIcon, &QPushButton::clicked, this, &NewEntryDialog::editCharacterIcon);
     connect(ui->cmbCharacterMonster, &QComboBox::currentTextChanged, this, &NewEntryDialog::loadMonsterIcon);
     connect(ui->cmbCharacterMonster, &QComboBox::currentTextChanged, this, [this]() {ui->btnCharacterMonster->setChecked(true);});
+    connect(ui->cmbCharacterMonster, &QComboBox::textActivated, this, [this](const QString& monsterName) {suggestEntryName(monsterName);});
     connect(ui->edtCharacterDndBeyond, &QLineEdit::textChanged, this, [this]() {ui->btnCharacterDnDBeyond->setChecked(true);});
     ui->btnCharacterIcon->installEventFilter(this);
 
@@ -736,6 +737,8 @@ void NewEntryDialog::readTextFile(const QString& filename)
         }
 
         ui->textBrowserEntry->setHtml(inputString);
+
+        suggestEntryName(fileInfo.completeBaseName());
     }
     else
     {
@@ -753,6 +756,8 @@ void NewEntryDialog::setLinkedTextFile(const QString& filename)
     if((fileInfo.suffix() == QString("txt")) || (fileInfo.suffix() == QString("htm")) || (fileInfo.suffix() == QString("html")) || (fileInfo.suffix() == QString("md")))
     {
         ui->edtLinkedFile->setText(filename);
+
+        suggestEntryName(fileInfo.completeBaseName());
     }
     else
     {
@@ -810,7 +815,7 @@ void NewEntryDialog::editCharacterIcon()
         QString finalTokenPath = tokenDir.absoluteFilePath(tokenFile);
         newToken.save(finalTokenPath);
 
-        setNewPrimaryImage(finalTokenPath, nullptr, ui->btnCharacterIcon, 180, 260, QString(":/img/data/portrait.png"));
+        setNewPrimaryImage(finalTokenPath, nullptr, ui->btnCharacterIcon, 180, 260, QString(":/img/data/portrait.png"), false);
 
         if(dlg->getEditor())
             dlg->getEditor()->applyEditorToOptions(*_options);
@@ -886,7 +891,7 @@ void NewEntryDialog::loadMonsterIcon()
     if(!monsterClass)
         return;
 
-    setNewPrimaryImage(monsterClass->getIcon(), nullptr, ui->btnCharacterIcon, 180, 260, QString(":/img/data/portrait.png"));
+    setNewPrimaryImage(monsterClass->getIcon(), nullptr, ui->btnCharacterIcon, 180, 260, QString(":/img/data/portrait.png"), false);
 }
 
 void NewEntryDialog::readMediaFile(const QString& mediaFile)
@@ -897,6 +902,8 @@ void NewEntryDialog::readMediaFile(const QString& mediaFile)
     if(ui->edtMediaFile->text() != mediaFile)
         ui->edtMediaFile->setText(mediaFile.trimmed());
     readNewFile(mediaFile.trimmed(), ui->lblMediaPreview, ui->lblMediaPreview->width() - 20, ui->lblMediaPreview->height() - 20, QString(":/img/data/icon_media.png"));
+
+    suggestEntryName(QFileInfo(mediaFile.trimmed()).completeBaseName());
 }
 
 void NewEntryDialog::readMediaFileFromEdit()
@@ -917,6 +924,8 @@ void NewEntryDialog::readMapFile(const QString& mapFile)
     if(ui->edtMapFile->text() != mapFile)
         ui->edtMapFile->setText(mapFile);
     readNewFile(mapFile.trimmed(), ui->lblMapPreview, ui->lblMapPreview->width() - 20, ui->lblMapPreview->height() - 20, QString(":/img/data/icon_map.png"));
+
+    suggestEntryName(QFileInfo(mapFile.trimmed()).completeBaseName());
 }
 
 void NewEntryDialog::readMapFileFromEdit()
@@ -942,6 +951,8 @@ void NewEntryDialog::readCombatFile(const QString& combatFile)
 
     readNewFile(combatFile.trimmed(), ui->lblCombatPreview, ui->lblCombatPreview->width() - 20, ui->lblCombatPreview->height() - 20, QString(":/img/data/icon_combat.png"));
     ui->edtCombatGrid->setText(QString::number(_gridSizeGuess));
+
+    suggestEntryName(QFileInfo(combatFile.trimmed()).completeBaseName());
 }
 
 void NewEntryDialog::readCombatFileFromEdit()
@@ -974,6 +985,8 @@ void NewEntryDialog::selectCombatSource()
         ui->edtCombatFile->setText(QString("Map: ") + _referenceMap->getName());
         ui->edtCombatFile->setReadOnly(true);
         ui->btnCombatBrowse->setEnabled(false);
+
+        suggestEntryName(_referenceMap->getName());
 
         readNewFile(_referenceMap->getFileName(), ui->lblCombatPreview, ui->lblCombatPreview->width() - 20, ui->lblCombatPreview->height() - 20, QString(":/img/data/icon_combat.png"));
 
@@ -1068,6 +1081,15 @@ bool NewEntryDialog::isSelectedEntryValid()
     return true;
 }
 
+void NewEntryDialog::suggestEntryName(const QString& suggestedName)
+{
+    QString trimmedName = suggestedName.trimmed();
+    if((trimmedName.isEmpty()) || (!ui->edtEntryName->text().trimmed().isEmpty()))
+        return;
+
+    ui->edtEntryName->setText(trimmedName);
+}
+
 void NewEntryDialog::readNewFile(const QString& filename, QLabel* label, int width, int height, const QString& defaultIcon)
 {
     if((filename == _primaryImageFile) && (!label))
@@ -1113,7 +1135,7 @@ void NewEntryDialog::selectNewPrimaryImage(QLabel* label, QPushButton* button, i
     setNewPrimaryImage(QFileDialog::getOpenFileName(this, query), label, button, width, height, defaultIcon);
 }
 
-void NewEntryDialog::setNewPrimaryImage(const QString& newPrimaryImage, QLabel* label, QPushButton* button, int width, int height, const QString& defaultIcon)
+void NewEntryDialog::setNewPrimaryImage(const QString& newPrimaryImage, QLabel* label, QPushButton* button, int width, int height, const QString& defaultIcon, bool guessName)
 {
     _primaryImageFile = QString();
     _imageType = DMHelper::FileType_Unknown;
@@ -1146,6 +1168,10 @@ void NewEntryDialog::setNewPrimaryImage(const QString& newPrimaryImage, QLabel* 
 
     if(button)
         button->setIcon(QIcon(newPrimaryImagePixmap));
+
+    if((guessName) && (!_primaryImageFile.isEmpty()) &&
+       ((ui->buttonGroupType->checkedButton() == ui->btnTypeParty) || (ui->buttonGroupType->checkedButton() == ui->btnTypeCharacter)))
+        suggestEntryName(QFileInfo(_primaryImageFile).completeBaseName());
 
     validateNewEntry();
 }
