@@ -38,6 +38,125 @@ const char* TemplateFactory::TEMPLATE_CONDITION = "dmhCondition";
 const char* TemplateFactory::TEMPLATE_DICE_MAXIMUM = "dmhDiceMaximum";
 const char* TemplateFactory::TEMPLATE_DICE_AVERAGE = "dmhDiceAverage";
 
+namespace
+{
+    bool parseResourcePair(const QString& value, int& current, int& maximum)
+    {
+        const QString trimmed = value.trimmed();
+        if(trimmed.isEmpty())
+            return false;
+
+        const QChar separator = trimmed.contains(QLatin1Char('/')) ? QLatin1Char('/') : QLatin1Char(',');
+        const QStringList parts = trimmed.split(separator);
+        if(parts.size() == 1)
+        {
+            bool ok = false;
+            const int single = parts.at(0).trimmed().toInt(&ok);
+            if(!ok)
+                return false;
+            current = 0;
+            maximum = single;
+            return true;
+        }
+        if(parts.size() < 2)
+            return false;
+
+        bool okCurrent = false;
+        bool okMaximum = false;
+        const int parsedCurrent = parts.at(0).trimmed().toInt(&okCurrent);
+        const int parsedMaximum = parts.at(1).trimmed().toInt(&okMaximum);
+        if((!okCurrent) || (!okMaximum))
+            return false;
+
+        current = parsedCurrent;
+        maximum = parsedMaximum;
+        return true;
+    }
+
+    QString resourceToDisplayString(const QString& value)
+    {
+        int current = 0;
+        int maximum = 0;
+        if(!parseResourcePair(value, current, maximum))
+            return QString();
+
+        return QString::number(current) + QStringLiteral("/") + QString::number(maximum);
+    }
+
+    QString resourceToStorageString(const QString& value)
+    {
+        const QString trimmed = value.trimmed();
+        if(trimmed.isEmpty())
+            return QString();
+
+        const QChar separator = trimmed.contains(QLatin1Char('/')) ? QLatin1Char('/') : QLatin1Char(',');
+        const QStringList parts = trimmed.split(separator);
+        if(parts.size() == 1)
+            return parts.at(0).trimmed();
+        if(parts.size() >= 2)
+            return parts.at(0).trimmed() + QStringLiteral(",") + parts.at(1).trimmed();
+
+        return trimmed;
+    }
+
+    bool isResourceKeyForBinding(TemplateObject* source, QHash<QString, DMHAttribute>* hashAttributes, const QString& key)
+    {
+        if(hashAttributes && hashAttributes->contains(key))
+            return hashAttributes->value(key)._type == TemplateFactory::TemplateType_resource;
+
+        if(source && source->getFactory() && source->getFactory()->hasAttribute(key))
+            return source->getFactory()->getAttribute(key)._type == TemplateFactory::TemplateType_resource;
+
+        return false;
+    }
+
+    QString resourceDisplayWithMode(const QString& storageValue, const FormatSpec& spec)
+    {
+        int current = 0;
+        int maximum = 0;
+        if(!parseResourcePair(storageValue, current, maximum))
+            return QString();
+
+        switch(spec.resourceMode)
+        {
+        case FormatSpec::ResourceMode_Current:
+            return QString::number(current);
+        case FormatSpec::ResourceMode_Max:
+            return QString::number(maximum);
+        case FormatSpec::ResourceMode_Both:
+        case FormatSpec::ResourceMode_None:
+        default:
+            return QString::number(current) + QStringLiteral("/") + QString::number(maximum);
+        }
+    }
+
+    QString resourceEditToStorageString(const QString& editedValue, const QString& baseStorageValue, const FormatSpec& spec)
+    {
+        int baseCurrent = 0;
+        int baseMaximum = 0;
+        parseResourcePair(baseStorageValue, baseCurrent, baseMaximum);
+
+        if((spec.resourceMode == FormatSpec::ResourceMode_Both) || (spec.resourceMode == FormatSpec::ResourceMode_None))
+        {
+            int editedCurrent = baseCurrent;
+            int editedMaximum = baseMaximum;
+            if(parseResourcePair(editedValue, editedCurrent, editedMaximum))
+                return QString::number(editedCurrent) + QStringLiteral(",") + QString::number(editedMaximum);
+            return resourceToStorageString(editedValue);
+        }
+
+        bool ok = false;
+        const int editedSingle = editedValue.trimmed().toInt(&ok);
+        if(!ok)
+            return resourceToStorageString(baseStorageValue);
+
+        if(spec.resourceMode == FormatSpec::ResourceMode_Current)
+            return QString::number(editedSingle) + QStringLiteral(",") + QString::number(baseMaximum);
+
+        return QString::number(baseCurrent) + QStringLiteral(",") + QString::number(editedSingle);
+    }
+}
+
 const char* TemplateFactory::TEMPLATEVALUES[TEMPLATETYPE_COUNT] =
     {
         "dmh:template",     // TemplateType_template
@@ -84,6 +203,17 @@ QVariant TemplateFactory::convertStringToVariant(const QString& value, TemplateT
     case TemplateFactory::TemplateType_resource:
     {
         QStringList resourceList = value.split(",");
+        if(resourceList.size() == 1)
+        {
+            // Compatibility mode for old files that stored resources as a
+            // single integer value. Interpret that value as max and keep
+            // current at 0; next save will normalize to "current,max".
+            const int maximum = resourceList.at(0).trimmed().toInt();
+            QVariant resourceResult;
+            resourceResult.setValue(ResourcePair(0, maximum));
+            return resourceResult;
+        }
+
         if(resourceList.size() != 2)
         {
             qDebug() << "[TemplateFactory] WARNING: Trying to convert the value: " << value << " to a resource pair, but it is not in the correct format";
@@ -91,7 +221,7 @@ QVariant TemplateFactory::convertStringToVariant(const QString& value, TemplateT
         }
 
         QVariant resourceResult;
-        resourceResult.setValue(ResourcePair(resourceList.at(0).toInt(), resourceList.at(1).toInt()));
+        resourceResult.setValue(ResourcePair(resourceList.at(0).trimmed().toInt(), resourceList.at(1).trimmed().toInt()));
         return resourceResult;
     }
     default:
@@ -114,7 +244,23 @@ QString TemplateFactory::convertVariantToString(const QVariant& value, TemplateT
         return value.value<Dice>().toString();
     case TemplateFactory::TemplateType_resource:
     {
-        ResourcePair resourcePair = value.value<ResourcePair>();
+        ResourcePair resourcePair;
+        if(value.canConvert<ResourcePair>())
+        {
+            resourcePair = value.value<ResourcePair>();
+        }
+        else if(value.canConvert<int>())
+        {
+            // Compatibility mode for old in-memory values represented as
+            // a single integer max resource value.
+            resourcePair = ResourcePair(0, value.toInt());
+        }
+        else if(value.canConvert<QString>())
+        {
+            const QVariant parsed = convertStringToVariant(value.toString(), TemplateFactory::TemplateType_resource);
+            if(parsed.canConvert<ResourcePair>())
+                resourcePair = parsed.value<ResourcePair>();
+        }
         return QString::number(resourcePair.first) + QString(",") + QString::number(resourcePair.second);
     }
     default:
@@ -386,6 +532,7 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
 
         if(!keyString.isEmpty())
         {
+            const bool isResourceKey = isResourceKeyForBinding(source, hashAttributes, keyString);
             QString valueString;
             if(hash)
             {
@@ -402,25 +549,35 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
             if(valueString.isEmpty())
                 valueString = getDefaultValue(keyString);
 
-            lineEdit->setText(TemplateFieldFormat::applyFormat(valueString, parsedFormat));
+            const QString displayValue = isResourceKey ? resourceDisplayWithMode(valueString, parsedFormat) : TemplateFieldFormat::applyFormat(valueString, parsedFormat);
+            lineEdit->setText(displayValue);
             lineEdit->setCursorPosition(0);
 
-            if(QValidator* validator = TemplateFieldFormat::makeValidator(parsedFormat, lineEdit))
-                lineEdit->setValidator(validator);
+            if(!isResourceKey)
+            {
+                if(QValidator* validator = TemplateFieldFormat::makeValidator(parsedFormat, lineEdit))
+                    lineEdit->setValidator(validator);
+            }
+            else
+            {
+                lineEdit->setValidator(nullptr);
+            }
 
             // Integer fields get arrow-key / +/- nudge support so the user can
             // bump values up and down by one without retyping or reaching for
             // the mouse. The handler is parented to the line edit so its
             // lifetime tracks the widget; only attach once per widget.
-            if((parsedFormat.isInt) && (!lineEdit->findChild<IntFieldKeyHandler*>(QString(), Qt::FindDirectChildrenOnly)))
+            if((!isResourceKey) && (parsedFormat.isInt) && (!lineEdit->findChild<IntFieldKeyHandler*>(QString(), Qt::FindDirectChildrenOnly)))
                 new IntFieldKeyHandler(lineEdit, parsedFormat);
 
             if(_lineConnections.contains(lineEdit))
                 disconnect(_lineConnections[lineEdit]);
 
             auto connection = connect(lineEdit, &QLineEdit::editingFinished, lineEdit,
-                [lineEdit, templateFrame, source, parsedFormat]() {
-                    const QString stripped = TemplateFieldFormat::stripFormat(lineEdit->text(), parsedFormat);
+                [lineEdit, templateFrame, source, parsedFormat, isResourceKey, keyString]() {
+                    const QString stripped = isResourceKey
+                        ? resourceEditToStorageString(lineEdit->text(), source->getValueAsString(keyString), parsedFormat)
+                        : TemplateFieldFormat::stripFormat(lineEdit->text(), parsedFormat);
                     templateFrame->handleEditBoxChange(lineEdit, source, stripped);
                 });
             _lineConnections[lineEdit] = connection;
@@ -432,11 +589,11 @@ void TemplateFactory::populateWidget(QWidget* widget, TemplateObject* source, Te
                 if(_reverseConnections.contains(lineEdit))
                     disconnect(_reverseConnections[lineEdit]);
                 auto reverseConn = connect(source->notifier(), &TemplateObjectNotifier::valueChanged, lineEdit,
-                    [lineEdit, source, keyString, parsedFormat](const QString& changedKey) {
+                    [lineEdit, source, keyString, parsedFormat, isResourceKey](const QString& changedKey) {
                         if(changedKey != keyString)
                             return;
                         const QString fresh = source->getValueAsString(keyString);
-                        const QString formatted = TemplateFieldFormat::applyFormat(fresh, parsedFormat);
+                        const QString formatted = isResourceKey ? resourceDisplayWithMode(fresh, parsedFormat) : TemplateFieldFormat::applyFormat(fresh, parsedFormat);
                         if(lineEdit->text() == formatted)
                             return;
                         QSignalBlocker block(lineEdit);

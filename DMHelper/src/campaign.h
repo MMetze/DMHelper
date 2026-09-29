@@ -62,6 +62,7 @@ public:
     QString getLastMonster() const;
 
     int getFearCount() const;
+    int getTokenHealthBarMode() const;
     bool getShowTokenHealthBars() const;
 
     Ruleset& getRuleset();
@@ -81,6 +82,7 @@ signals:
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
     void fearChanged(int fearCount);
+    void tokenHealthBarModeChanged(int mode);
     void overlaysChanged();
     void showTokenHealthBarsChanged(bool show);
 
@@ -91,6 +93,7 @@ public slots:
     void addNote(const QString& note);
     void setLastMonster(const QString& monsterName);
     void setFearCount(int fearCount);
+    void setTokenHealthBarMode(int mode);
     void setShowTokenHealthBars(bool show);
     bool validateCampaignIds();
     bool correctDuplicateIds();
@@ -114,7 +117,7 @@ protected:
     QStringList _notes;
     QString _lastMonster;
     int _fearCount; // Todo: add ruleset-specific data storage
-    bool _showTokenHealthBars;
+    int _tokenHealthBarMode;
 
     Ruleset _ruleset;
 

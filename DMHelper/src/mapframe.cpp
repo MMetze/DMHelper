@@ -994,6 +994,13 @@ void MapFrame::cleanupSelectionItems()
     if(!_scene)
         return;
 
+    if(_gridSizer)
+    {
+        _scene->removeItem(_gridSizer);
+        _gridSizer->deleteLater();
+        _gridSizer = nullptr;
+    }
+
     if(_distanceLine)
     {
         _scene->removeItem(_distanceLine);
@@ -2059,7 +2066,10 @@ void MapFrame::gridSizerAccepted()
 
     setPartyScale(intSize);
 
-    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+    LayerGrid* gridLayer = nullptr;
+    if(_mapSource)
+        gridLayer = dynamic_cast<LayerGrid*>(_mapSource->getLayerScene().getNearest(_mapSource->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
+
     if(gridLayer)
         gridLayer->setGridScaleAndOffset(intSize, (100 * xOffset) / intSize, (100 * yOffset) / intSize);
 
@@ -2071,9 +2081,15 @@ void MapFrame::gridSizerRejected()
     if(!_gridSizer)
         return;
 
-    const QList<Layer*> gridLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Grid);
-    for(Layer* layer : gridLayers)
-        layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
+    if(_mapSource)
+    {
+        const QList<Layer*> gridLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+        for(Layer* layer : gridLayers)
+            layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
+    }
+
+    if(_scene)
+        _scene->removeItem(_gridSizer);
 
     _gridSizer->deleteLater();
     _gridSizer = nullptr;

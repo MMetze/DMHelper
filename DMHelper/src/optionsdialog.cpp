@@ -30,6 +30,13 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
     ui->cmbCombatantTokenType->addItem("Characters Only", QVariant(DMHelper::CombatantTokenType_CharactersOnly));
     ui->cmbCombatantTokenType->addItem("Characters and Monsters", QVariant(DMHelper::CombatantTokenType_CharactersAndMonsters));
 
+    ui->cmbHealthBar->addItem("Off (default)", QVariant(DMHelper::TokenHealthBarMode_Off));
+    ui->cmbHealthBar->addItem("DM View only", QVariant(DMHelper::TokenHealthBarMode_DMViewOnly));
+    ui->cmbHealthBar->addItem("DM and Player Views", QVariant(DMHelper::TokenHealthBarMode_BothViews));
+    ui->cmbHealthBar->setItemData(0, "No token health bars shown in either view.", Qt::ToolTipRole);
+    ui->cmbHealthBar->setItemData(1, "Show token health bars in the DM view only.", Qt::ToolTipRole);
+    ui->cmbHealthBar->setItemData(2, "Show token health bars in both DM and Player views.", Qt::ToolTipRole);
+
     ui->edtInitiativeScale->setValidator(new QDoubleValidator(0.1, 10.0, 2));
 
     if(_options)
@@ -106,7 +113,9 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, Campaign* campaign, QWid
 
             ui->edtMovement->setText(_campaign->getRuleset().getMovementString());
             ui->chkCombatantDone->setChecked(_campaign->getRuleset().getCombatantDoneCheckbox());
-            ui->chkShowTokenHealthBars->setChecked(_campaign->getShowTokenHealthBars());
+            int healthBarModeIndex = ui->cmbHealthBar->findData(_campaign->getTokenHealthBarMode());
+            if(healthBarModeIndex >= 0)
+                ui->cmbHealthBar->setCurrentIndex(healthBarModeIndex);
             ui->chkHitPointsCoundDown->setChecked(_campaign->getRuleset().getHitPointsCoundDown());
             ui->edtCharacterData->setText(_campaign->getRuleset().getCharacterDataFile());
             ui->edtCharacterUI->setText(_campaign->getRuleset().getCharacterUIFile());
@@ -225,7 +234,7 @@ void OptionsDialog::applyCampaignChanges()
     _campaign->getRuleset().startBatchProcessing();
     _campaign->getRuleset().setRuleInitiative(ui->cmbInitiative->currentData().toString());
     _campaign->getRuleset().setCombatantDoneCheckbox(ui->chkCombatantDone->isChecked());
-    _campaign->setShowTokenHealthBars(ui->chkShowTokenHealthBars->isChecked());
+    _campaign->setTokenHealthBarMode(ui->cmbHealthBar->currentData().toInt());
     _campaign->getRuleset().setHitPointsCountDown(ui->chkHitPointsCoundDown ->isChecked());
     _campaign->getRuleset().setCharacterDataFile(ui->edtCharacterData->text());
     _campaign->getRuleset().setCharacterUIFile(ui->edtCharacterUI->text());
@@ -679,7 +688,7 @@ void OptionsDialog::setCharacterDataFile(const QString& characterDataFile)
 {
     QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm Character Data Format Change"),
-                                                               QString("You are about to chnage the path for the character data definition of a campaign. This will result in a loss of any data that is not reflected in the new template!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QString("You are about to change the path for the character data definition of a campaign. This will result in a loss of any data that is not reflected in the new template!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);
 
     if(result != QMessageBox::Yes)
@@ -732,7 +741,7 @@ void OptionsDialog::setMonsterDataFile(const QString& monsterDataFile)
 {
     QMessageBox::StandardButton result = DMHMessageBox::critical(this,
                                                                QString("Confirm Monster Data Format Change"),
-                                                               QString("You are about to chnage the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QString("You are about to change the path for the monster data file. This will result in a loss of any monster data that is not reflected in the new file!") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure you want to do this?"),
                                                                QMessageBox::Yes | QMessageBox::No);
 
     if(result != QMessageBox::Yes)

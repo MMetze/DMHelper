@@ -2,6 +2,7 @@
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodelmonsterbase.h"
 #include "battledialogmodelcharacter.h"
+#include "templatefactory.h"
 #include "monsterclassv2.h"
 #include "characterv2.h"
 #include "perroundresource.h"
@@ -9,6 +10,42 @@
 #include "templateobjectnotifier.h"
 #include <QStringList>
 #include <QHash>
+
+namespace
+{
+    bool parseResourcePair(const QString& value, int& current, int& maximum)
+    {
+        const QString trimmed = value.trimmed();
+        if(trimmed.isEmpty())
+            return false;
+
+        const QChar separator = trimmed.contains(QLatin1Char('/')) ? QLatin1Char('/') : QLatin1Char(',');
+        const QStringList parts = trimmed.split(separator);
+        if(parts.size() == 1)
+        {
+            bool ok = false;
+            const int single = parts.at(0).trimmed().toInt(&ok);
+            if(!ok)
+                return false;
+            current = 0;
+            maximum = single;
+            return true;
+        }
+        if(parts.size() < 2)
+            return false;
+
+        bool okCurrent = false;
+        bool okMaximum = false;
+        const int parsedCurrent = parts.at(0).trimmed().toInt(&okCurrent);
+        const int parsedMaximum = parts.at(1).trimmed().toInt(&okMaximum);
+        if((!okCurrent) || (!okMaximum))
+            return false;
+
+        current = parsedCurrent;
+        maximum = parsedMaximum;
+        return true;
+    }
+}
 
 const char* CombatantTemplateAdapter::CONDITION_KEY_ID        = "conditionId";
 const char* CombatantTemplateAdapter::RESOURCE_KEY_NAME       = "name";
@@ -110,6 +147,16 @@ QString CombatantTemplateAdapter::getStringValue(const QString& key) const
         return _combatant->getDone() ? QStringLiteral("1") : QStringLiteral("0");
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
         return QString::number(_combatant->getHitPoints());
+    if(isResourceKey(k))
+    {
+        return resourceStorageString(k);
+    }
+    if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES))
+    {
+        if(TemplateObject* inner = getInner())
+            return inner->getValueAsString(k);
+        return QString();
+    }
     // Armor class is read-only and lives entirely on the underlying class /
     // character sheet; there is no canonical dmh: key for it.
     if(key == QLatin1String("armorClass"))
@@ -126,6 +173,11 @@ int CombatantTemplateAdapter::getIntValue(const QString& key) const
         return 0;
 
     const QString k = canonicalKey(key);
+    if(isResourceKey(k))
+    {
+        const QString resourceValue = getStringValue(k);
+        return resourceValue.section(QLatin1Char(','), 0, 0).trimmed().toInt();
+    }
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
         return _combatant->getInitiative();
     if(k == QLatin1String(BattleDialogModelCombatant::DMH_KEY_MOVED))
@@ -252,6 +304,11 @@ void CombatantTemplateAdapter::setValue(const QString& key, const QString& value
         _combatant->setHitPoints(value.toInt());
         return;
     }
+    if(isResourceKey(k))
+    {
+        _combatant->setOverride(k, normalizeResourceStorageString(k, value));
+        return;
+    }
 
     if(TemplateObject* inner = getInner())
         inner->setValue(k, value);
@@ -322,6 +379,7 @@ void CombatantTemplateAdapter::wireModelToNotifier()
         connect(_combatant, &BattleDialogModelCombatant::moveUpdated,          this, &CombatantTemplateAdapter::onCombatantMoveUpdated);
         connect(_combatant, &BattleDialogModelCombatant::visibilityChanged,    this, &CombatantTemplateAdapter::onCombatantVisibilityChanged);
         connect(_combatant, &BattleDialogModelCombatant::combatantDoneChanged, this, &CombatantTemplateAdapter::onCombatantDoneChanged);
+        connect(_combatant, &BattleDialogModelCombatant::overrideChanged,      this, &CombatantTemplateAdapter::onCombatantOverrideChanged);
     }
 
     if(BattleDialogModelMonsterBase* mb = monsterBase())
@@ -367,6 +425,12 @@ void CombatantTemplateAdapter::onCombatantDoneChanged()
     emit notifier()->valueChanged(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_IS_DONE));
 }
 
+void CombatantTemplateAdapter::onCombatantOverrideChanged(BattleDialogModelCombatant* combatant, const QString& key)
+{
+    Q_UNUSED(combatant);
+    emit notifier()->valueChanged(key);
+}
+
 void CombatantTemplateAdapter::onMonsterDataChanged()
 {
     // dataChanged is a coarse "something on the model changed" signal. Emit
@@ -407,9 +471,70 @@ bool CombatantTemplateAdapter::isModelKey(const QString& key) const
         || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_KNOWN))
         || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_IS_DONE))
         || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
+        || isResourceKey(key)
         || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CONDITIONS))
         || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES))
         || (key == QLatin1String("armorClass"));
+}
+
+bool CombatantTemplateAdapter::isResourceKey(const QString& key) const
+{
+    TemplateObject* inner = getInner();
+    if((!inner) || (!inner->getFactory()) || (!inner->getFactory()->hasAttribute(key)))
+    {
+        const QString templateKey = key.startsWith(QStringLiteral("dmh:")) ? key.mid(4) : key;
+        if((templateKey.isEmpty()) || (!inner->getFactory()->hasAttribute(templateKey)))
+            return false;
+
+        return inner->getFactory()->getAttribute(templateKey)._type == TemplateFactory::TemplateType_resource;
+    }
+
+    return inner->getFactory()->getAttribute(key)._type == TemplateFactory::TemplateType_resource;
+}
+
+QString CombatantTemplateAdapter::resourceStorageString(const QString& key) const
+{
+    TemplateObject* inner = getInner();
+    if(!inner)
+        return QString();
+
+    const QString templateKey = key.startsWith(QStringLiteral("dmh:")) ? key.mid(4) : key;
+    const ResourcePair basePair = inner->getResourceValue(templateKey);
+
+    if(_combatant && _combatant->hasOverride(key))
+    {
+        const QString overrideString = _combatant->getOverride(key).toString();
+        int overrideCurrent = 0;
+        int overrideMaximum = 0;
+        if(parseResourcePair(overrideString, overrideCurrent, overrideMaximum))
+            return QString::number(overrideCurrent) + QStringLiteral(",") + QString::number(overrideMaximum);
+
+        bool ok = false;
+        const int overrideCurrentOnly = overrideString.toInt(&ok);
+        if(ok)
+            return QString::number(overrideCurrentOnly) + QStringLiteral(",") + QString::number(basePair.second);
+    }
+
+    return QString::number(basePair.first) + QStringLiteral(",") + QString::number(basePair.second);
+}
+
+QString CombatantTemplateAdapter::normalizeResourceStorageString(const QString& key, const QString& value) const
+{
+    TemplateObject* inner = getInner();
+    const QString templateKey = key.startsWith(QStringLiteral("dmh:")) ? key.mid(4) : key;
+    const ResourcePair basePair = inner ? inner->getResourceValue(templateKey) : ResourcePair();
+
+    int current = 0;
+    int maximum = 0;
+    if(parseResourcePair(value, current, maximum))
+        return QString::number(current) + QStringLiteral(",") + QString::number(maximum);
+
+    bool ok = false;
+    const int singleValue = value.trimmed().toInt(&ok);
+    if(ok)
+        return QString::number(singleValue) + QStringLiteral(",") + QString::number(basePair.second);
+
+    return QString::number(basePair.first) + QStringLiteral(",") + QString::number(basePair.second);
 }
 
 BattleDialogModelMonsterBase* CombatantTemplateAdapter::monsterBase() const

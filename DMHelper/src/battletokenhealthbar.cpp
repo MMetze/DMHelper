@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QStyleOptionGraphicsItem>
+#include <QtMath>
 
 static constexpr qreal BAR_HEIGHT_FRACTION = 0.10;        // bar height as fraction of token height
 static constexpr qreal BAR_OVERHANG_FRACTION = 0.10;      // horizontal overhang past each token edge (fraction of token width)
@@ -11,11 +12,18 @@ static constexpr qreal BAR_GAP_FRACTION = 0.02;           // gap between token b
 static constexpr qreal BAR_CORNER_FRACTION = 0.45;        // corner radius as fraction of bar height
 static constexpr qreal BAR_SHADOW_OFFSET_FRACTION = 0.25; // shadow offset as fraction of bar height
 static constexpr qreal BAR_BORDER_WIDTH_FRACTION = 0.12;  // border pen width as fraction of bar height
+static constexpr qreal RADIANS_TO_DEGREES = 57.29577951308232;
 
 static const QColor BAR_BACKGROUND_COLOR(180, 30, 30);
 static const QColor BAR_FOREGROUND_COLOR(40, 200, 60);
 static const QColor BAR_BORDER_COLOR(20, 20, 20);
 static const QColor BAR_SHADOW_COLOR(0, 0, 0, 120);
+
+static qreal getSceneRotationDegrees(const QTransform& transform)
+{
+    // Extract rotation from the transformed local X axis.
+    return qAtan2(transform.m12(), transform.m11()) * RADIANS_TO_DEGREES;
+}
 
 BattleTokenHealthBar::BattleTokenHealthBar(BattleDialogModelCombatant* combatant, QGraphicsItem* parent) :
     QGraphicsObject(parent),
@@ -77,6 +85,15 @@ void BattleTokenHealthBar::paint(QPainter* painter, const QStyleOptionGraphicsIt
 
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
+
+    const qreal parentSceneRotation = getSceneRotationDegrees(p->sceneTransform());
+    if(!qFuzzyIsNull(parentSceneRotation))
+    {
+        const QPointF tokenCenter = parentBounds.center();
+        painter->translate(tokenCenter);
+        painter->rotate(-parentSceneRotation);
+        painter->translate(-tokenCenter);
+    }
 
     // Shadow
     const QRectF shadowRect = barRect.translated(shadowOffset, shadowOffset);

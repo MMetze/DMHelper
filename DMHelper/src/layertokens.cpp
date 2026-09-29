@@ -37,6 +37,16 @@
 #include <QtGlobal>
 #include <QDebug>
 
+static bool showHealthBarInDM(int mode)
+{
+    return mode == DMHelper::TokenHealthBarMode_DMViewOnly || mode == DMHelper::TokenHealthBarMode_BothViews;
+}
+
+static bool showHealthBarInPlayer(int mode)
+{
+    return mode == DMHelper::TokenHealthBarMode_BothViews;
+}
+
 LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int order, QObject *parent) :
     Layer{name, order, parent},
     _glScene(nullptr),
@@ -49,6 +59,7 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _effectIconHash(),
     _effectTokenHash(),
     _scale(DMHelper::STARTING_GRID_SCALE),
+    _appliedOrder(order),
     _campaign(nullptr),
     _healthBarHash()
 {
@@ -201,6 +212,9 @@ Layer* LayerTokens::clone() const
 
 void LayerTokens::applyOrder(int order)
 {
+    // A LayerReference applies its own order here, which differs from this layer's _order
+    _appliedOrder = order;
+
     qreal combatantOrder = getIconOrder(DMHelper::CampaignType_BattleContentCombatant, order);
     foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
@@ -360,7 +374,7 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
     resolveCampaign();
     if(_campaign)
     {
-        connect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::healthBarVisibilityChanged);
+        connect(_campaign, &Campaign::tokenHealthBarModeChanged, this, &LayerTokens::healthBarVisibilityChanged);
 
         // Create health bars for combatants loaded from XML (whose pixmap items were just created above)
         for(int i = 0; i < _combatants.count(); ++i)
@@ -371,7 +385,7 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
             {
                 BattleTokenHealthBar* healthBar = new BattleTokenHealthBar(combatant, pixmapItem);
                 _healthBarHash.insert(combatant, healthBar);
-                healthBar->setVisible(_campaign->getShowTokenHealthBars());
+                healthBar->setVisible(showHealthBarInDM(_campaign->getTokenHealthBarMode()));
                 refreshHealthBar(combatant);
             }
         }
@@ -453,6 +467,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
                 effectToken = new PublishGLBattleEffect(_glScene, effect);
             }
             effectToken->prepareObjectsGL();
+            connect(effectToken, &PublishGLBattleObject::changed, renderer, &PublishGLRenderer::updateWidget);
             _effectTokenHash.insert(effect, effectToken);
         }
     }
@@ -462,7 +477,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
     resolveCampaign();
     if(_campaign)
     {
-        bool showHealthBars = _campaign->getShowTokenHealthBars();
+        bool showHealthBars = showHealthBarInPlayer(_campaign->getTokenHealthBarMode());
         QHashIterator<BattleDialogModelCombatant*, PublishGLBattleToken*> i(_combatantTokenHash);
         while(i.hasNext())
         {
@@ -470,7 +485,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
             if(i.value())
                 i.value()->setHealthBarEnabled(showHealthBars);
         }
-        connect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::glHealthBarVisibilityChanged, Qt::QueuedConnection);
+        connect(_campaign, &Campaign::tokenHealthBarModeChanged, this, &LayerTokens::glHealthBarVisibilityChanged, Qt::QueuedConnection);
     }
 
     Layer::playerGLInitialize(renderer, scene);
@@ -479,7 +494,7 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
 void LayerTokens::playerGLUninitialize()
 {
     if(_campaign)
-        disconnect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::glHealthBarVisibilityChanged);
+        disconnect(_campaign, &Campaign::tokenHealthBarModeChanged, this, &LayerTokens::glHealthBarVisibilityChanged);
 
     _playerInitialized = false;
     cleanupPlayer();
@@ -676,14 +691,14 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
         if(!combatantItem)
             return;
 
-        combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, getOrder()));
+        combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, _appliedOrder));
         combatantItem->setVisible(getLayerVisibleDM());
         combatantItem->setOpacity(combatant->getShown() ? _opacityReference : _opacityReference * 0.5);
 
         // Create health bar for this combatant
         BattleTokenHealthBar* healthBar = new BattleTokenHealthBar(combatant, combatantItem);
         _healthBarHash.insert(combatant, healthBar);
-        healthBar->setVisible(_campaign ? _campaign->getShowTokenHealthBars() : false);
+        healthBar->setVisible(_campaign ? showHealthBarInDM(_campaign->getTokenHealthBarMode()) : false);
         refreshHealthBar(combatant);
     }
 }
@@ -841,10 +856,10 @@ void LayerTokens::effectReady(BattleDialogModelEffect* effect)
     if(!effectIcon)
         return;
 
-    effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
-    effectIcon->setVisible(getLayerVisibleDM());
+    effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, _appliedOrder));
+    effectIcon->setVisible(getLayerVisibleDM() && _model->getShowEffects());
     effectIcon->setOpacity(_opacityReference);
-    effectIcon->setPos(effect->getPosition());
+    effectIcon->setPos(effect->getPosition() + _position);
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
@@ -984,11 +999,10 @@ void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
             _effectIconHash.remove(keyEffect);
         }
 
-        if(_layerScene->getDMScene())
-            createEffectIcon(_layerScene->getDMScene(), effect);
+        effectReady(effect);
     }
 
-    // Remove current effect markers from all combatants
+        // Remove current effect markers from all combatants
     QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
     for(int i = 0; i < tokenLayers.count(); ++i)
     {
@@ -1133,7 +1147,7 @@ void LayerTokens::cleanupDM()
 
     if(_campaign)
     {
-        disconnect(_campaign, &Campaign::showTokenHealthBarsChanged, this, &LayerTokens::healthBarVisibilityChanged);
+        disconnect(_campaign, &Campaign::tokenHealthBarModeChanged, this, &LayerTokens::healthBarVisibilityChanged);
         _campaign = nullptr;
     }
 
@@ -1557,8 +1571,9 @@ void LayerTokens::refreshHealthBar(BattleDialogModelCombatant* combatant)
         bar->update();
 }
 
-void LayerTokens::healthBarVisibilityChanged(bool visible)
+void LayerTokens::healthBarVisibilityChanged(int mode)
 {
+    bool visible = showHealthBarInDM(mode);
     QHashIterator<BattleDialogModelCombatant*, BattleTokenHealthBar*> i(_healthBarHash);
     while(i.hasNext())
     {
@@ -1568,8 +1583,9 @@ void LayerTokens::healthBarVisibilityChanged(bool visible)
     }
 }
 
-void LayerTokens::glHealthBarVisibilityChanged(bool show)
+void LayerTokens::glHealthBarVisibilityChanged(int mode)
 {
+    bool show = showHealthBarInPlayer(mode);
     QHashIterator<BattleDialogModelCombatant*, PublishGLBattleToken*> i(_combatantTokenHash);
     while(i.hasNext())
     {

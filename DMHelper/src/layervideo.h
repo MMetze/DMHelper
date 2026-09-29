@@ -6,6 +6,15 @@
 
 //#define LAYERVIDEO_USE_OPENGL
 
+// Perf statistics for the CPU upload path; reported as a periodic qDebug line from playerGLPaint
+#ifndef LAYERVIDEO_USE_OPENGL
+#define LAYERVIDEO_PERF_STATS
+#endif
+
+#ifdef LAYERVIDEO_PERF_STATS
+#include <QElapsedTimer>
+#endif
+
 class QGraphicsPixmapItem;
 
 #ifdef LAYERVIDEO_USE_OPENGL
@@ -92,6 +101,11 @@ protected:
     void cleanupPlayerObject();
     void cleanupPlayer();
 
+#ifdef LAYERVIDEO_PERF_STATS
+    void recordUploadStat(qint64 uploadNs);
+    void reportStatsIfDue();
+#endif
+
     // DM Window Members
     QGraphicsPixmapItem* _graphicsItem;
 
@@ -106,6 +120,22 @@ protected:
     QSize _playerSize;
 #endif
     PublishGLScene* _scene;
+
+#ifdef LAYERVIDEO_PERF_STATS
+    QElapsedTimer _statReportTimer;
+    QElapsedTimer _statIntervalTimer;
+    quint64 _statUploadCount = 0;
+    qint64 _statUploadAccumNs = 0;
+    qint64 _statUploadMaxNs = 0;
+    quint64 _statIntervalCount = 0;
+    qint64 _statIntervalAccumNs = 0;
+    qint64 _statIntervalMinNs = 0;
+    qint64 _statIntervalMaxNs = 0;
+    unsigned int _statLastDecoded = 0;
+    unsigned int _statLastDropped = 0;
+    qint64 _statLastDecodeAccumNs = 0;
+    unsigned int _statLastDecodeCount = 0;
+#endif
 
     // Core contents
     QString _filename;

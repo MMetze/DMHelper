@@ -16,7 +16,12 @@ CharacterImportDialog::~CharacterImportDialog()
 
 QString CharacterImportDialog::getCharacterId()
 {
-    QStringList list = ui->edtUrl->text().split(QString("/"));
+    return getCharacterIdFromUrl(ui->edtUrl->text());
+}
+
+QString CharacterImportDialog::getCharacterIdFromUrl(const QString& url)
+{
+    QStringList list = url.split(QString("/"));
     for(int i = 0; i < list.count(); ++i)
     {
         bool ok = false;
@@ -27,3 +32,4 @@ QString CharacterImportDialog::getCharacterId()
 
     return QString();
 }
+

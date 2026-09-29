@@ -18,7 +18,7 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnShowDead, SIGNAL(clicked(bool)), this, SIGNAL(showDeadClicked(bool)));
     connect(ui->btnShowEffects, SIGNAL(clicked(bool)), this, SIGNAL(showEffectsClicked(bool)));
     connect(ui->btnShowMovement, SIGNAL(clicked(bool)), this, SIGNAL(showMovementClicked(bool)));
-    connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked()));
+    connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked(bool)));
     connect(ui->btnAddEvent, SIGNAL(clicked(bool)), this, SIGNAL(addEventClicked()));
     connect(ui->btnStatistics, SIGNAL(clicked(bool)), this, SIGNAL(statisticsClicked()));
 
@@ -90,6 +90,11 @@ void RibbonTabBattle::setLairActionsVisible(bool visible)
 {
     ui->btnLairActions->setVisible(visible);
     ui->lblLairActions->setVisible(visible);
+}
+
+void RibbonTabBattle::setLairActionsChecked(bool checked)
+{
+    ui->btnLairActions->setChecked(checked);
 }
 
 void RibbonTabBattle::showEvent(QShowEvent *event)

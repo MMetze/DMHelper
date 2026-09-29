@@ -11,8 +11,8 @@
     
     <dmh:attribute type="dmh:integer" name="difficulty" default="10"/>
     <dmh:attribute type="dmh:string" name="thresholds"/>
-    <dmh:attribute type="dmh:integer" name="hit_points"/>
-    <dmh:attribute type="dmh:integer" name="stress"/>
+    <dmh:attribute type="dmh:resource" name="hit_points"/>
+    <dmh:attribute type="dmh:resource" name="stress"/>
     <dmh:attribute type="dmh:integer" name="attack"/>
     <dmh:attribute type="dmh:string" name="standard_attack"/>
     <dmh:attribute type="dmh:string" name="experience"/>

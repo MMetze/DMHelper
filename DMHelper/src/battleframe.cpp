@@ -45,18 +45,20 @@
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
 #include "dicerolldialogcombatants.h"
+#include "conditionseditdialog.h"
 #include "ruleinitiative.h"
 #include "ruleinitiativenone.h"
 #include "rulehealth.h"
-#include "spellbook.h"
 #include "gridsizer.h"
 #include "layerdrawengine.h"
 #include "conditions.h"
+#include "movementmodehelper.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QDrag>
 #include <QMimeData>
 #include <QGraphicsPixmapItem>
@@ -79,6 +81,7 @@
 #include <QImageReader>
 #include <QMimeDatabase>
 #include <QMimeType>
+#include <QSet>
 #include <qforeach.h>
 #include "dmhmessagebox.h"
 
@@ -104,6 +107,7 @@ static constexpr qreal GRID_SIZER_CELL_COUNT = 5.0;
 // for the in-battle combatant row that BattleFrame is responsible for
 // rendering.
 static const char* const DEFAULT_COMBATANT_UI_FILE = "./ui/combatant5e.ui";
+static const char* const LAIR_ACTIONS_EVENT_NAME = "Lair Actions";
 
 static void applyCombatantVisualState(QGraphicsItem* item, BattleDialogModelCombatant* combatant)
 {
@@ -266,6 +270,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantEditConditions(BattleDialogModelCombatant*)), this, SLOT(handleCombatantEditConditions(BattleDialogModelCombatant*)));
     connect(_scene, &BattleDialogGraphicsScene::combatantHideSelected, this, &BattleFrame::handleCombatantHideSelected);
     connect(_scene, &BattleDialogGraphicsScene::combatantUnhideSelected, this, &BattleFrame::handleCombatantUnhideSelected);
     connect(_scene, &BattleDialogGraphicsScene::combatantKnowSelected, this, &BattleFrame::handleCombatantKnowSelected);
@@ -316,11 +321,12 @@ BattleFrame::~BattleFrame()
         delete child;
     }
     
-    QMapIterator<BattleDialogModelCombatant*, CombatantWidget*> i(_combatantWidgets);
+    QMapIterator<BattleDialogModelCombatant*, QPointer<CombatantWidget>> i(_combatantWidgets);
     while(i.hasNext())
     {
         i.next();
-        i.value()->deleteLater();
+        if(i.value())
+            i.value()->deleteLater();
     }
     _combatantWidgets.clear();
 
@@ -529,9 +535,6 @@ void BattleFrame::recreateCombatantWidgets()
     qDebug() << "[Battle Frame] recreating combatant widgets";
     clearCombatantWidgets();
     buildCombatantWidgets();
-    // Reorder once after rebuild to ensure group rows are repopulated in
-    // initiative order and remain visible after group membership changes.
-    reorderCombatantWidgets();
     qDebug() << "[Battle Frame] combatant widgets recreated";
 }
 
@@ -1341,13 +1344,43 @@ void BattleFrame::addInitiativeEvent()
 
 void BattleFrame::addLairActionsEvent()
 {
+    setLairActionsEventEnabled(true);
+}
+
+void BattleFrame::setLairActionsEventEnabled(bool enabled)
+{
     if(!_model)
         return;
 
-    BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString("Lair Actions"), 20, _model);
-    _model->appendInitiativeEvent(event);
-    _model->sortCombatants();
-    recreateCombatantWidgets();
+    bool changed = false;
+    QList<BattleDialogModelInitiativeEvent*> initiativeEvents = _model->getInitiativeEvents();
+    if(enabled)
+    {
+        if(!hasLairActionsEvent())
+        {
+            BattleDialogModelInitiativeEvent* event = new BattleDialogModelInitiativeEvent(QString::fromLatin1(LAIR_ACTIONS_EVENT_NAME), 20, _model);
+            _model->appendInitiativeEvent(event);
+            changed = true;
+        }
+    }
+    else
+    {
+        for(BattleDialogModelInitiativeEvent* event : std::as_const(initiativeEvents))
+        {
+            if((event) && (event->getName() == QString::fromLatin1(LAIR_ACTIONS_EVENT_NAME)))
+            {
+                removeSingleCombatant(event, false);
+                changed = true;
+            }
+        }
+    }
+
+    if(changed)
+    {
+        _model->sortCombatants();
+        recreateCombatantWidgets();
+        emitLairActionsState();
+    }
 }
 
 void BattleFrame::addEffectObject()
@@ -1971,7 +2004,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                     if((mouseEvent->globalPosition().toPoint() - _mouseDownPos).manhattanLength() > QApplication::startDragDistance())
                     {
-                        BattleDialogModelCombatant* combatant = _combatantWidgets.key(widget, nullptr);
+                        BattleDialogModelCombatant* combatant = widget->getCombatant();
                         if(combatant)
                         {
                             int index = _model->getCombatantList().indexOf(combatant);
@@ -2004,9 +2037,15 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             else if(event->type() == QEvent::MouseButtonRelease)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-                if(mouseEvent->button() == Qt::LeftButton)
+                if((mouseEvent->button() == Qt::LeftButton) && (_mouseDown))
                 {
-                    BattleDialogModelCombatant* selected = _combatantWidgets.key(widget, nullptr);
+                    // The BattleFrame filter is installed on the row widget and
+                    // its children, so one physical click can surface here more
+                    // than once during bubbling. Only the first release paired
+                    // with an active press should trigger row-click behaviour.
+                    _mouseDown = false;
+
+                    BattleDialogModelCombatant* selected = widget->getCombatant();
                     if(mouseEvent->modifiers().testFlag(Qt::ShiftModifier) ||
                        mouseEvent->modifiers().testFlag(Qt::ControlModifier) ||
                        mouseEvent->modifiers().testFlag(Qt::AltModifier))
@@ -2017,11 +2056,10 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     // Toggle rollover on single-click (only when not finishing a drag)
                     if((!_dragInProgress) && (_combatantLayout) && (widget->getCombatant()))
                     {
-                        const bool sameWidget = (_hoverFrame && (_hoverFrameOwner == widget));
                         if(_hoverFrame)
                             removeRollover();
 
-                        if(!sameWidget)
+                        if((!_hoverFrame) || (_hoverFrameOwner != widget))
                         {
                             CombatantRolloverFrame* newFrame = new CombatantRolloverFrame(widget, this);
                             if(newFrame->isEmpty())
@@ -2041,7 +2079,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         }
                     }
                 }
-                _mouseDown = false;
             }
         }
         else
@@ -2142,18 +2179,72 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                             int index;
                             stream >> index;
 
-                            QWidget* draggedWidget = _combatantWidgets.value(_model->getCombatant(index));
-                            int currentIndex = _combatantLayout->indexOf(draggedWidget);
-
-                            // Only reorder ungrouped combatants in the main layout
-                            if(currentIndex >= 0 && currentIndex != index)
+                            BattleDialogModelCombatant* draggedCombatant = _model->getCombatant(index);
+                            if(draggedCombatant)
                             {
-                                _model->moveCombatant(index, currentIndex);
+                                const QPoint posInScrollArea = dropEvent->position().toPoint();
+                                const QPoint globalPos = ui->scrollArea->mapToGlobal(posInScrollArea);
+                                const QPoint posInContents = ui->scrollAreaWidgetContents->mapFromGlobal(globalPos);
+
+                                QWidget* targetWidget = findCombatantWidgetFromPosition(posInContents);
+                                CombatantGroupWidget* targetGroupWidget = dynamic_cast<CombatantGroupWidget*>(targetWidget);
+
+                                const QUuid sourceGroupId = draggedCombatant->getGroupId();
+
+                                if(targetGroupWidget)
+                                {
+                                    const QUuid targetGroupId = targetGroupWidget->getGroupId();
+                                    if((!targetGroupId.isNull()) && (targetGroupId != sourceGroupId))
+                                    {
+                                        if(!sourceGroupId.isNull())
+                                            _model->removeCombatantFromGroup(draggedCombatant);
+
+                                        draggedCombatant->setGroupId(targetGroupId);
+                                        _model->sortCombatantsBySortValue();
+                                        recreateCombatantWidgets();
+                                    }
+                                    else
+                                    {
+                                        reorderCombatantWidgets();
+                                    }
+                                }
+                                else
+                                {
+                                    bool membershipChanged = false;
+                                    if(!sourceGroupId.isNull())
+                                    {
+                                        _model->removeCombatantFromGroup(draggedCombatant);
+                                        membershipChanged = true;
+                                    }
+
+                                    int fromModelIndex = _model->getCombatantIndex(draggedCombatant);
+                                    int toModelIndex = -1;
+
+                                    CombatantWidget* targetCombatantWidget = dynamic_cast<CombatantWidget*>(targetWidget);
+                                    if((targetCombatantWidget) && (targetCombatantWidget->getCombatant()))
+                                        toModelIndex = _model->getCombatantIndex(targetCombatantWidget->getCombatant());
+
+                                    if((fromModelIndex >= 0) && (toModelIndex >= 0) && (fromModelIndex != toModelIndex))
+                                        _model->moveCombatant(fromModelIndex, toModelIndex);
+                                    else
+                                    {
+                                        QWidget* draggedWidget = _combatantWidgets.value(draggedCombatant);
+                                        int currentIndex = _combatantLayout->indexOf(draggedWidget);
+                                        if((currentIndex >= 0) && (currentIndex != index))
+                                            _model->moveCombatant(index, currentIndex);
+                                    }
+
+                                    if(membershipChanged)
+                                        recreateCombatantWidgets();
+                                    else
+                                        reorderCombatantWidgets();
+                                }
                             }
                         }
+                        dropEvent->accept();
+                        _dragLastTarget = nullptr;
+                        return true;
                     }
-                    _dragLastTarget = nullptr;
-                    reorderCombatantWidgets();
                 }
             }
         }
@@ -2379,6 +2470,94 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     connect(healItem, SIGNAL(triggered()), this, SLOT(healCombatant()));
     contextMenu->addAction(healItem);
 
+    QAction* editConditionsItem = new QAction(QString("Edit Conditions..."), contextMenu);
+    connect(editConditionsItem, SIGNAL(triggered()), this, SLOT(editSelectedCombatantConditions()));
+    contextMenu->addAction(editConditionsItem);
+
+    Campaign* campaign = _battle ? dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign)) : nullptr;
+    if((campaign) && (campaign->getRuleset().getMovementType() == DMHelper::MovementType_Distance))
+    {
+        const QList<BattleDialogModelCombatant*> movementTargets = getContextMenuCombatants(_contextMenuCombatant);
+        const QList<MovementModeHelper::MovementModeValue> commonModes = MovementModeHelper::intersectMovementModes(movementTargets);
+        if(!movementTargets.isEmpty())
+        {
+            QMenu* movementMenu = contextMenu->addMenu(QStringLiteral("Movement Mode"));
+
+            QActionGroup* movementGroup = new QActionGroup(movementMenu);
+            movementGroup->setExclusive(true);
+
+            bool sameMode = true;
+            QString checkedMode;
+            for(int i = 0; i < movementTargets.count(); ++i)
+            {
+                BattleDialogModelCombatant* target = movementTargets.at(i);
+                const QString effectiveMode = MovementModeHelper::effectiveMovementModeKey(target, MovementModeHelper::getMovementModes(target));
+                if(i == 0)
+                    checkedMode = effectiveMode;
+                else if(effectiveMode != checkedMode)
+                    sameMode = false;
+            }
+
+            for(const MovementModeHelper::MovementModeValue& mode : commonModes)
+            {
+                QAction* modeAction = new QAction(QStringLiteral("%1 (%2 ft.)").arg(mode.label).arg(mode.speedFt), movementMenu);
+                modeAction->setCheckable(true);
+                modeAction->setChecked(sameMode && (checkedMode == mode.key));
+                movementGroup->addAction(modeAction);
+                connect(modeAction, &QAction::triggered, this, [movementTargets, selectedKey = mode.key]() {
+                    for(BattleDialogModelCombatant* target : movementTargets)
+                    {
+                        if(!target)
+                            continue;
+
+                        const QList<MovementModeHelper::MovementModeValue> targetModes = MovementModeHelper::getMovementModes(target);
+                        if(MovementModeHelper::hasMovementMode(targetModes, selectedKey))
+                        {
+                            target->setSelectedMovementMode(selectedKey);
+                            target->clearCustomMovementSpeedFt();
+                        }
+                    }
+                });
+                movementMenu->addAction(modeAction);
+            }
+
+            if(!commonModes.isEmpty())
+                movementMenu->addSeparator();
+
+            QAction* customAction = new QAction(QStringLiteral("Custom..."), movementMenu);
+            connect(customAction, &QAction::triggered, this, [this, movementTargets]() {
+                if(movementTargets.isEmpty())
+                    return;
+
+                int initialValue = movementTargets.first()->getCustomMovementSpeedFt();
+                if(initialValue <= 0)
+                    initialValue = qMax(MovementModeHelper::CustomMovementMinSpeed, MovementModeHelper::effectiveMovementSpeedFt(movementTargets.first()));
+
+                bool ok = false;
+                const int customSpeed = QInputDialog::getInt(this,
+                                                             QStringLiteral("Custom Movement Speed"),
+                                                             QStringLiteral("Movement speed (ft.):"),
+                                                             initialValue,
+                                                             MovementModeHelper::CustomMovementMinSpeed,
+                                                             MovementModeHelper::CustomMovementMaxSpeed,
+                                                             1,
+                                                             &ok);
+                if(!ok)
+                    return;
+
+                for(BattleDialogModelCombatant* target : movementTargets)
+                {
+                    if(!target)
+                        continue;
+
+                    target->setCustomMovementSpeedFt(customSpeed);
+                    target->setSelectedMovementMode(QStringLiteral("custom"));
+                }
+            });
+            movementMenu->addAction(customAction);
+        }
+    }
+
     contextMenu->addSeparator();
 
     // Determine visibility/known state of relevant combatants for conditional menu items
@@ -2434,6 +2613,67 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
             QAction* knowSelectedItem = new QAction(QString("Mark Known"), contextMenu);
             connect(knowSelectedItem, SIGNAL(triggered()), this, SLOT(knowSelectedCombatant()));
             contextMenu->addAction(knowSelectedItem);
+        }
+    }
+
+    // Rename and token actions
+    {
+        BattleDialogModelMonsterBase* monsterBase = dynamic_cast<BattleDialogModelMonsterBase*>(_contextMenuCombatant);
+        BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(_contextMenuCombatant);
+        BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(_contextMenuCombatant);
+
+        if((monsterBase) || (monster) || (characterCombatant))
+            contextMenu->addSeparator();
+
+        if(monsterBase)
+        {
+            QAction* renameItem = new QAction(QString("Rename..."), contextMenu);
+            connect(renameItem, &QAction::triggered, this, [this, monsterBase]() {
+                bool ok = false;
+                QString newName = QInputDialog::getText(this, tr("Rename Combatant"), tr("Combatant name:"), QLineEdit::Normal, monsterBase->getName(), &ok);
+                if((ok) && (!newName.isEmpty()))
+                    monsterBase->setMonsterName(newName);
+            });
+            contextMenu->addAction(renameItem);
+        }
+
+        if((monster) && (monster->getMonsterClass()))
+        {
+            // Parented to the menu - QMenu::addMenu(QMenu*) does not take ownership
+            QMenu* tokenMenu = new QMenu(QString("Select Token..."), contextMenu);
+
+            QStringList iconList = monster->getMonsterClass()->getIconList();
+            for(int i = 0; i < iconList.count(); ++i)
+            {
+                QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
+                connect(tokenAction, &QAction::triggered, this, [this, i, monster](){handleChangeMonsterToken(monster, i);});
+                tokenMenu->addAction(tokenAction);
+            }
+
+            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+            connect(customAction, &QAction::triggered, this, [this, monster](){handleChangeMonsterTokenCustom(monster);});
+            tokenMenu->addAction(customAction);
+
+            contextMenu->addMenu(tokenMenu);
+        }
+
+        if((characterCombatant) && (characterCombatant->getCharacter()))
+        {
+            QMenu* tokenMenu = new QMenu(QString("Select Token..."), contextMenu);
+
+            QStringList iconList = characterCombatant->getCharacter()->getIconList();
+            for(int i = 0; i < iconList.count(); ++i)
+            {
+                QAction* tokenAction = new QAction(QFileInfo(iconList.at(i)).fileName(), tokenMenu);
+                connect(tokenAction, &QAction::triggered, this, [this, i, characterCombatant](){handleChangeCharacterToken(characterCombatant, i);});
+                tokenMenu->addAction(tokenAction);
+            }
+
+            QAction* customAction = new QAction(QString("Custom..."), tokenMenu);
+            connect(customAction, &QAction::triggered, this, [this, characterCombatant](){handleChangeCharacterTokenCustom(characterCombatant);});
+            tokenMenu->addAction(customAction);
+
+            contextMenu->addMenu(tokenMenu);
         }
     }
 
@@ -2664,17 +2904,59 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
     // if there is no selection or the mouse click was on a different icon than the selection, ignore the selection
     QList<QGraphicsItem*> selected = _scene->selectedItems();
     QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    QList<BattleDialogModelCombatant*> combatantsToRemove;
     if((selected.count() == 0) || ((currentItem) && (!selected.contains(currentItem))))
     {
-        removeSingleCombatant(combatant);
+        combatantsToRemove.append(combatant);
     }
     else
     {
         foreach(QGraphicsItem* graphicsItem, selected)
         {
-            removeSingleCombatant(getCombatantFromItem(graphicsItem));
+            BattleDialogModelCombatant* selectedCombatant = getCombatantFromItem(graphicsItem);
+            if((selectedCombatant) && (!combatantsToRemove.contains(selectedCombatant)))
+                combatantsToRemove.append(selectedCombatant);
         }
     }
+
+    if(combatantsToRemove.isEmpty())
+        return;
+
+    const bool isBatchRemoval = combatantsToRemove.count() > 1;
+    BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
+    if((isBatchRemoval) && (activeCombatant) && (combatantsToRemove.contains(activeCombatant)))
+    {
+        BattleDialogModelCombatant* nextActiveCombatant = nullptr;
+        if(_model->getCombatantCount() > combatantsToRemove.count())
+        {
+            nextActiveCombatant = getNextCombatant(activeCombatant);
+            int remainingAttempts = _model->getCombatantCount();
+            while((nextActiveCombatant) &&
+                  (combatantsToRemove.contains(nextActiveCombatant)) &&
+                  (--remainingAttempts > 0))
+            {
+                nextActiveCombatant = getNextCombatant(nextActiveCombatant);
+            }
+        }
+
+        if((!nextActiveCombatant) || (combatantsToRemove.contains(nextActiveCombatant)))
+            _model->setActiveCombatant(nullptr);
+        else
+            setActiveCombatant(nextActiveCombatant);
+    }
+
+    for(BattleDialogModelCombatant* selectedCombatant : std::as_const(combatantsToRemove))
+    {
+        removeSingleCombatant(selectedCombatant, !isBatchRemoval);
+    }
+
+    // Rebuild the tracker after every removal, not just initiative events:
+    // removing a grouped combatant can leave the group widget referencing a
+    // stale/empty group, and the model list index used elsewhere for lookups
+    // shifts after any removal.
+    recreateCombatantWidgets();
+
+    emitLairActionsState();
 }
 
 void BattleFrame::handleCombatantAdded(BattleDialogModelCombatant* combatant)
@@ -2748,6 +3030,14 @@ void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
             applyCombatantHPChange(getCombatantFromItem(graphicsItem), heal);
         }
     }
+}
+
+void BattleFrame::handleCombatantEditConditions(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    editCombatantConditions(getContextMenuCombatants(combatant));
 }
 
 void BattleFrame::handleCombatantHideSelected(BattleDialogModelCombatant* combatant)
@@ -3379,6 +3669,11 @@ void BattleFrame::healCombatant()
     handleCombatantHeal(_contextMenuCombatant);
 }
 
+void BattleFrame::editSelectedCombatantConditions()
+{
+    handleCombatantEditConditions(_contextMenuCombatant);
+}
+
 void BattleFrame::hideSelectedCombatant()
 {
     handleCombatantHideSelected(_contextMenuCombatant);
@@ -3476,6 +3771,55 @@ void BattleFrame::removeFromGroup()
 
     _model->removeCombatantFromGroup(_contextMenuCombatant);
     recreateCombatantWidgets();
+}
+
+QList<BattleDialogModelCombatant*> BattleFrame::getContextMenuCombatants(BattleDialogModelCombatant* combatant) const
+{
+    QList<BattleDialogModelCombatant*> combatants;
+    if((!_scene) || (!combatant))
+        return combatants;
+
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    QGraphicsItem* currentItem = getItemFromCombatant(combatant);
+    if((selected.count() == 0) || (!currentItem) || (!selected.contains(currentItem)))
+    {
+        combatants.append(combatant);
+        return combatants;
+    }
+
+    foreach(QGraphicsItem* graphicsItem, selected)
+    {
+        BattleDialogModelCombatant* selectedCombatant = getCombatantFromItem(graphicsItem);
+        if((selectedCombatant) && (!combatants.contains(selectedCombatant)))
+            combatants.append(selectedCombatant);
+    }
+
+    if(combatants.isEmpty())
+        combatants.append(combatant);
+
+    return combatants;
+}
+
+void BattleFrame::editCombatantConditions(const QList<BattleDialogModelCombatant*>& combatants)
+{
+    if(combatants.isEmpty())
+        return;
+
+    ConditionsEditDialog dlg(this);
+    dlg.setConditionList(combatants.first()->getConditionList());
+    if(dlg.exec() != QDialog::Accepted)
+        return;
+
+    const QStringList conditionList = dlg.getConditionList();
+    foreach(BattleDialogModelCombatant* combatant, combatants)
+    {
+        if(!combatant)
+            continue;
+
+        combatant->setConditionList(conditionList);
+        updateCombatantIcon(combatant);
+        updateCombatantWidget(combatant);
+    }
 }
 
 void BattleFrame::applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange)
@@ -3866,7 +4210,7 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
     }
 
     // Hide group widgets if all members are hidden
-    QMapIterator<QUuid, CombatantGroupWidget*> git(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> git(_groupWidgets);
     while(git.hasNext())
     {
         git.next();
@@ -3878,7 +4222,7 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
         QList<CombatantWidget*> members = groupWidget->getMemberWidgets();
         for(CombatantWidget* member : members)
         {
-            if(member && member->isVisible())
+            if(member && shouldShowCombatant(member->getCombatant(), aliveVisible, deadVisible))
             {
                 anyMemberVisible = true;
                 break;
@@ -3894,11 +4238,7 @@ void BattleFrame::setSingleCombatantVisibility(BattleDialogModelCombatant* comba
     if((!_model) || (!combatant))
         return;
 
-    bool visible = ((!isCombatantDead(combatant)) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
-
-    LayerTokens* tokensLayer = combatant->getLayer();
-    if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
-        visible = false;
+    const bool visible = shouldShowCombatant(combatant, aliveVisible, deadVisible);
 
     QWidget* widget = _combatantWidgets.value(combatant);
     if(widget)
@@ -3953,6 +4293,13 @@ void BattleFrame::gridSizerAccepted()
     int intSize = _gridSizer->getSize();
     int xOffset = static_cast<int>(_gridSizer->x()) % intSize;
     int yOffset = static_cast<int>(_gridSizer->y()) % intSize;
+
+    if(!_model)
+    {
+        gridSizerRejected();
+        return;
+    }
+
     setGridScale(intSize, (100 * xOffset) / intSize, (100 * yOffset) / intSize);
     gridSizerRejected();
 }
@@ -3962,9 +4309,15 @@ void BattleFrame::gridSizerRejected()
     if(!_gridSizer)
         return;
 
-    const QList<Layer*> gridLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Grid);
-    for(Layer* layer : gridLayers)
-        layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
+    if(_model)
+    {
+        const QList<Layer*> gridLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Grid);
+        for(Layer* layer : gridLayers)
+            layer->applyLayerVisibleDM(layer->getLayerVisibleDM());
+    }
+
+    if(_scene)
+        _scene->removeItem(_gridSizer);
 
     _gridSizer->deleteLater();
     _gridSizer = nullptr;
@@ -3981,6 +4334,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         disconnect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::emitLairActionsState);
         disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
@@ -4039,6 +4393,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
         connect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
+        connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::emitLairActionsState);
         connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridConfigChanged);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         connect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
@@ -4084,6 +4439,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
             }
         }
 
+        emitLairActionsState();
+
         emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
 
         if(!_logger)
@@ -4094,6 +4451,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         }
     }
 
+    emitLairActionsState();
     emit modelChanged(_model);
 }
 
@@ -4485,7 +4843,10 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
         {
             BattleDialogModelInitiativeEvent* event = dynamic_cast<BattleDialogModelInitiativeEvent*>(combatant);
             if(event)
+            {
                 newWidget = new InitiativeEventWidget(event, ui->scrollAreaWidgetContents);
+                connect(newWidget, &InitiativeEventWidget::contextMenu, this, &BattleFrame::handleContextMenu);
+            }
             break;
         }
         default:
@@ -4514,7 +4875,7 @@ void BattleFrame::clearCombatantWidgets()
 
     // Remove member widgets from group widgets before clearing
     // (so they aren't double-deleted via the group's layout)
-    QMapIterator<QUuid, CombatantGroupWidget*> git(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> git(_groupWidgets);
     while(git.hasNext())
     {
         git.next();
@@ -4635,9 +4996,9 @@ void BattleFrame::buildCombatantWidgets()
 
     setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
     if(_model->getActiveCombatant())
-        setActiveCombatant(_model->getActiveCombatant());
+        setActiveCombatant(_model->getActiveCombatant(), false);
     else
-        setActiveCombatant(getFirstLivingCombatant());
+        setActiveCombatant(getFirstLivingCombatant(), false);
 }
 
 void BattleFrame::reorderCombatantWidgets()
@@ -4659,7 +5020,7 @@ void BattleFrame::reorderCombatantWidgets()
     }
 
     // Remove member widgets from group widgets
-    QMapIterator<QUuid, CombatantGroupWidget*> git(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> git(_groupWidgets);
     while(git.hasNext())
     {
         git.next();
@@ -4704,7 +5065,7 @@ void BattleFrame::reorderCombatantWidgets()
     }
 
     // Ensure member widgets are visible after reparenting into groups
-    QMapIterator<QUuid, CombatantGroupWidget*> groupIt(_groupWidgets);
+    QMapIterator<QUuid, QPointer<CombatantGroupWidget>> groupIt(_groupWidgets);
     while(groupIt.hasNext())
     {
         groupIt.next();
@@ -4719,7 +5080,7 @@ void BattleFrame::reorderCombatantWidgets()
     }
 }
 
-void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
+void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active, bool expandActiveGroup)
 {
     if(!_model)
     {
@@ -4754,7 +5115,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         combatantWidget->setActive(true);
 
         // Auto-expand collapsed group if active combatant is inside
-        if(active && !active->getGroupId().isNull())
+        if(expandActiveGroup && active && !active->getGroupId().isNull())
         {
             CombatantGroupWidget* groupWidget = _groupWidgets.value(active->getGroupId());
             if(groupWidget)
@@ -4932,27 +5293,13 @@ CombatantWidget* BattleFrame::getWidgetFromCombatant(BattleDialogModelCombatant*
     if(!combatant)
         return nullptr;
 
-    // Look up directly via the combatant -> widget map. The previous
-    // implementation indexed `_combatantLayout` by the combatant's position
-    // in `_model->getCombatantList()`, but those two index spaces don't
-    // line up when groups are present: `_combatantLayout` only holds the
-    // top-level rows (ungrouped combatants + one CombatantGroupWidget per
-    // group), while the combatant list contains every group member as a
-    // separate entry. Stepping with "next" would therefore return the wrong
-    // widget once the iterator passed a group, causing the active highlight
-    // to land on the wrong row and the group widget itself to appear active
-    // when no member was actually current.
-    return _combatantWidgets.value(combatant, nullptr);
-    // Look up directly via the combatant -> widget map. The previous
-    // implementation indexed `_combatantLayout` by the combatant's position
-    // in `_model->getCombatantList()`, but those two index spaces don't
-    // line up when groups are present: `_combatantLayout` only holds the
-    // top-level rows (ungrouped combatants + one CombatantGroupWidget per
-    // group), while the combatant list contains every group member as a
-    // separate entry. Stepping with "next" would therefore return the wrong
-    // widget once the iterator passed a group, causing the active highlight
-    // to land on the wrong row and the group widget itself to appear active
-    // when no member was actually current.
+    // Look up directly via the combatant -> widget map. Indexing
+    // `_combatantLayout` by the combatant's position in
+    // `_model->getCombatantList()` doesn't work: those two index spaces
+    // don't line up when groups are present, since `_combatantLayout` only
+    // holds the top-level rows (ungrouped combatants + one
+    // CombatantGroupWidget per group) while the combatant list contains
+    // every group member as a separate entry.
     return _combatantWidgets.value(combatant, nullptr);
 }
 
@@ -4979,7 +5326,11 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
 
     int nextCombatantIndex = _model->getCombatantList().indexOf(combatant);
 
-    if(_combatantLayout->count() <= 1)
+    // Guard on the flat combatant count, not _combatantLayout->count(): the
+    // layout is group-compressed (one row per group, not per member), so an
+    // all-grouped encounter would otherwise report <= 1 top-level row and
+    // "next" would never advance even with several combatants present.
+    if(_model->getCombatantCount() <= 1)
         return nullptr;
 
     BattleDialogModelCombatant* nextCombatant = nullptr;
@@ -4998,7 +5349,30 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     return nextCombatant;
 }
 
-void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
+void BattleFrame::detachAndDeleteCombatantWidget(BattleDialogModelCombatant* combatant)
+{
+    CombatantWidget* widget = _combatantWidgets.take(combatant);
+    if(!widget)
+        return;
+
+    const QUuid groupId = combatant ? combatant->getGroupId() : QUuid();
+    CombatantGroupWidget* groupWidget = groupId.isNull() ? nullptr : _groupWidgets.value(groupId, nullptr);
+    if(groupWidget)
+    {
+        groupWidget->removeMemberWidget(widget);
+    }
+    else if(_combatantLayout)
+    {
+        const int widgetIndex = _combatantLayout->indexOf(widget);
+        if(widgetIndex >= 0)
+            delete _combatantLayout->takeAt(widgetIndex);
+    }
+
+    qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(widget);
+    widget->deleteLater();
+}
+
+void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant, bool updateActiveCombatant)
 {
     if((!_model) || (!combatant))
         return;
@@ -5006,7 +5380,7 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
     qDebug() << "[Battle Frame] removing combatant " << combatant->getName();
 
     // Check the active combatant highlight
-    if(combatant == _model->getActiveCombatant())
+    if((updateActiveCombatant) && (combatant == _model->getActiveCombatant()))
     {
         if(_model->getCombatantCount() <= 1)
             _model->setActiveCombatant(nullptr);
@@ -5014,20 +5388,36 @@ void BattleFrame::removeSingleCombatant(BattleDialogModelCombatant* combatant)
             next();
     }
 
-    // Find the index of the removed item
-    int index = _model->getCombatantList().indexOf(combatant);
-
-    // Delete the widget for the combatant
-    _combatantWidgets.remove(combatant);
-    QLayoutItem *child = _combatantLayout->takeAt(index);
-    if(child != nullptr)
+    if(BattleDialogModelInitiativeEvent* initiativeEvent = dynamic_cast<BattleDialogModelInitiativeEvent*>(combatant))
     {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
-        child->widget()->deleteLater();
-        delete child;
+        detachAndDeleteCombatantWidget(combatant);
+        _model->removeInitiativeEvent(initiativeEvent);
+        return;
     }
 
+    detachAndDeleteCombatantWidget(combatant);
+    _model->removeCombatantFromGroup(combatant);
     _model->removeCombatant(combatant);
+}
+
+bool BattleFrame::hasLairActionsEvent() const
+{
+    if(!_model)
+        return false;
+
+    QList<BattleDialogModelInitiativeEvent*> initiativeEvents = _model->getInitiativeEvents();
+    for(BattleDialogModelInitiativeEvent* event : std::as_const(initiativeEvents))
+    {
+        if((event) && (event->getName() == QString::fromLatin1(LAIR_ACTIONS_EVENT_NAME)))
+            return true;
+    }
+
+    return false;
+}
+
+void BattleFrame::emitLairActionsState()
+{
+    emit lairActionsEnabledChanged(hasLairActionsEvent());
 }
 
 bool BattleFrame::validateTokenLayerExists()
@@ -5095,7 +5485,7 @@ void BattleFrame::clearBattleFrame()
     removeRollover();
 
     // Clean up the list of combatant widgets
-    QMapIterator<BattleDialogModelCombatant*, CombatantWidget*> i(_combatantWidgets);
+    QMapIterator<BattleDialogModelCombatant*, QPointer<CombatantWidget>> i(_combatantWidgets);
     while(i.hasNext())
     {
         i.next();
@@ -5528,6 +5918,8 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
 
 void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed)
 {
+    Q_UNUSED(speed);
+
     if((!combatant) || (!item) || (!_model))
         return;
 
@@ -5569,7 +5961,16 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
     }
     else
     {
-        int speedSquares = 2 * (speed / 5) + 1;
+        const QList<MovementModeHelper::MovementModeValue> modes = MovementModeHelper::getMovementModes(combatant);
+        const QString selectedMode = combatant->getSelectedMovementMode().trimmed().toLower();
+        const QString effectiveMode = MovementModeHelper::effectiveMovementModeKey(combatant, modes);
+        if(selectedMode != effectiveMode)
+            combatant->setSelectedMovementMode(effectiveMode);
+        if(effectiveMode != QStringLiteral("custom"))
+            combatant->clearCustomMovementSpeedFt();
+
+        const int effectiveSpeed = MovementModeHelper::effectiveMovementSpeedFt(combatant);
+        int speedSquares = 2 * (effectiveSpeed / 5) + 1;
         _moveRadius = tokenLayer->getScale() * speedSquares;
         if(_moveRadius <= tokenLayer->getScale())
             return;
@@ -5760,4 +6161,19 @@ bool BattleFrame::isCombatantDead(const BattleDialogModelCombatant* combatant) c
 
     // Pre-RuleHealth fallback: behaviour matches the original 5e-only check.
     return combatant->getHitPoints() <= 0;
+}
+
+bool BattleFrame::shouldShowCombatant(const BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible) const
+{
+    if(!combatant)
+        return false;
+
+    bool visible = ((!isCombatantDead(combatant)) ||
+                    (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+
+    LayerTokens* tokensLayer = combatant->getLayer();
+    if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
+        visible = false;
+
+    return visible;
 }

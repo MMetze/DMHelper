@@ -40,6 +40,7 @@ public:
 
     virtual bool isInParty() const;
 
+    QString getMovementString() const;
     virtual int getSpeed() const override;
 
     virtual int getStrength() const override;

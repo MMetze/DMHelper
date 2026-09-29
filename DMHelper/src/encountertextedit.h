@@ -6,6 +6,8 @@
 #include "videoplayer.h"
 #include "layer.h"
 #include <QElapsedTimer>
+#include <QHash>
+#include <QUuid>
 
 namespace Ui {
 class EncounterTextEdit;
@@ -117,6 +119,8 @@ protected slots:
     void triggerEncounterChanged();
     void triggerUpdateAnchor();
 
+    void storeScrollPosition();
+
     void sceneRectUpdated(const QSize& size);
 
 private slots:
@@ -136,6 +140,9 @@ protected:
     QSize getRotatedTargetSize();
     int getRotatedTargetWidth();
 
+    void queueScrollRestore(int scrollPos);
+    void applyScrollPosition();
+
     void cancelTimers();
 
     Ui::EncounterTextEdit *ui;
@@ -153,15 +160,20 @@ protected:
     bool _isDMPlayer;
     bool _isPublishing;
     bool _isCodeView;
+    bool _storingEncounter;
 
     QSize _targetSize;
     int _rotation;
 
     QPointF _textPos;
 
+    QHash<QUuid, int> _scrollPositions;
+    int _pendingScrollPos;
+
     int _encounterChangedTimer;
     int _updateAnchorTimer;
     int _publishUpdateTimer;
+    int _restoreScrollTimer;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

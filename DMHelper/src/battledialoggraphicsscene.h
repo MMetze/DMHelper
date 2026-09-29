@@ -112,6 +112,7 @@ signals:
     void combatantRemove(BattleDialogModelCombatant* combatant);
     void combatantDamage(BattleDialogModelCombatant* combatant);
     void combatantHeal(BattleDialogModelCombatant* combatant);
+    void combatantEditConditions(BattleDialogModelCombatant* combatant);
     void combatantHideSelected(BattleDialogModelCombatant* combatant);
     void combatantUnhideSelected(BattleDialogModelCombatant* combatant);
     void combatantKnowSelected(BattleDialogModelCombatant* combatant);
@@ -139,6 +140,7 @@ protected slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void editCombatantConditions();
     void hideSelectedCombatants();
     void unhideSelectedCombatants();
     void knowSelectedCombatants();
@@ -169,6 +171,8 @@ protected:
 
     bool isMimeDataImage(const QMimeData* mimeData) const;
     QString getMimeDataImageFile(const QMimeData* mimeData) const;
+
+    void applyEffectRotation(BattleDialogModelEffect* effect, QGraphicsItem* item);
 
 //    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 

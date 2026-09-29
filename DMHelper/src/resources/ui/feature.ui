@@ -63,6 +63,9 @@ color: rgb(50, 50, 50);</string>
    </item>
    <item>
     <widget class="QTextEdit" name="txtDescription">
+     <property name="styleSheet">
+      <string notr="true">background-color: transparent;</string>
+     </property>
      <property name="markdown">
       <string>description
 

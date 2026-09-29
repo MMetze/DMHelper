@@ -291,7 +291,11 @@ void BattleDialogModelCharacter::setHitPoints(int hitPoints)
 {
     if(_combatant)
     {
-        _combatant->setHitPoints(hitPoints);
+        if(_combatant->getHitPoints() != hitPoints)
+        {
+            _combatant->setHitPoints(hitPoints);
+            setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
+        }
     }
     else
     {

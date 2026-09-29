@@ -126,6 +126,8 @@ public slots:
 
 protected:
 
+    static int extractWalkSpeed(const QString& movementText);
+
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;

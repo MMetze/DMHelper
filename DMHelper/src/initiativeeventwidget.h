@@ -2,12 +2,15 @@
 #define INITIATIVEEVENTWIDGET_H
 
 #include "combatantwidget.h"
+#include <QPointer>
 
 namespace Ui {
 class InitiativeEventWidget;
 }
 
 class BattleDialogModelInitiativeEvent;
+class QContextMenuEvent;
+class QEvent;
 
 class InitiativeEventWidget : public CombatantWidget
 {
@@ -34,9 +37,13 @@ protected slots:
     void handleNameEdited();
     void handleCombatantInitiativeChanged();
 
+protected:
+    virtual void contextMenuEvent(QContextMenuEvent* event) override;
+    virtual bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     Ui::InitiativeEventWidget* ui;
-    BattleDialogModelInitiativeEvent* _event;
+    QPointer<BattleDialogModelInitiativeEvent> _event;
 };
 
 #endif // INITIATIVEEVENTWIDGET_H

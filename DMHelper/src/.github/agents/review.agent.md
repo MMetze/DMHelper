@@ -161,7 +161,7 @@ For every chunk you review, run these checks. Each is binary.
 ### 7. Forbidden Folders
 - [ ] No changes touching `DMHelper-Backend/`, `DMHelperClient/`,
       `DMHelperShared/`, `DMHelperTest/`, `vlc32/`, `vlc64/`,
-      `vlcMac/`, `bin-win*/`, `bin-macos/`. Violation: `Critical`.
+      `vlcMac64/`, `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/`. Violation: `Critical`.
 
 ### 8. Disabled Feature Flags
 - [ ] `INCLUDE_NETWORK_SUPPORT` and `LAYERVIDEO_USE_OPENGL` not

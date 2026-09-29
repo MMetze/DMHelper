@@ -1,26 +1,33 @@
 #include "encountertextlinked.h"
 #include "dmconstants.h"
 #include <QDir>
+#include <QFile>
 #include <QFileSystemWatcher>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QTimerEvent>
 #include <QDebug>
+
+// A single external save usually arrives as several notifications, and the file is briefly absent mid-replace
+static constexpr int ENCOUNTERTEXTLINKED_RELOAD_INTERVAL = 250;
+static constexpr int ENCOUNTERTEXTLINKED_MAX_RELOAD_RETRIES = 20;
 
 EncounterTextLinked::EncounterTextLinked(const QString& encounterName, QObject *parent) :
     EncounterText{encounterName, parent},
     _linkedFile(),
     _watcher(nullptr),
     _fileType(DMHelper::FileType_Unknown),
-    _metadata()
+    _metadata(),
+    _reloadTimer(0),
+    _reloadRetries(0)
 {
 }
 
 void EncounterTextLinked::inputXML(const QDomElement &element, bool isImport)
 {
-    // TODO: markdown - read the linked file
-    //extractTextNode(element, isImport);
     _linkedFile = element.attribute("linkedFile");
 
+    // EncounterText::inputXML calls extractTextNode, which reads the linked file set above
     EncounterText::inputXML(element, isImport);
 }
 
@@ -57,9 +64,14 @@ QString EncounterTextLinked::getMetadata() const
 
 void EncounterTextLinked::setText(const QString& newText)
 {
-    Q_UNUSED(newText);
-    qDebug() << "[EncounterTextLinked] ERROR: Attempting to directly set the text of a linked entry!";
-    return;
+    if(_text == newText)
+        return;
+
+    _text = newText;
+    writeLinkedFile();
+
+    // No dirty() - the text lives in the linked file, not in the campaign XML
+    emit textChanged(_text);
 }
 
 void EncounterTextLinked::setLinkedFile(const QString& filename)
@@ -85,15 +97,71 @@ void EncounterTextLinked::setWatcher(bool enable)
             return;
 
         _watcher = new QFileSystemWatcher(this);
-        connect(_watcher, &QFileSystemWatcher::fileChanged, this, &EncounterTextLinked::readLinkedFile);
+        connect(_watcher, &QFileSystemWatcher::fileChanged, this, &EncounterTextLinked::handleFileChanged);
         if(!getLinkedFile().isEmpty())
+        {
             _watcher->addPath(getLinkedFile());
+            // Picks up any external change made while this entry was not being watched
+            readLinkedFile();
+        }
     }
     else
     {
+        if(_reloadTimer)
+        {
+            killTimer(_reloadTimer);
+            _reloadTimer = 0;
+        }
+
         delete _watcher;
         _watcher = nullptr;
     }
+}
+
+void EncounterTextLinked::handleFileChanged(const QString& path)
+{
+    Q_UNUSED(path);
+
+    rearmWatcher();
+
+    _reloadRetries = 0;
+    if(_reloadTimer)
+        killTimer(_reloadTimer);
+
+    _reloadTimer = startTimer(ENCOUNTERTEXTLINKED_RELOAD_INTERVAL);
+}
+
+void EncounterTextLinked::rearmWatcher()
+{
+    // Editors that save by writing a temp file and renaming over the original drop the path from the watch list
+    if((!_watcher) || (_linkedFile.isEmpty()) || (_watcher->files().contains(_linkedFile)))
+        return;
+
+    if(QFile::exists(_linkedFile))
+        _watcher->addPath(_linkedFile);
+}
+
+void EncounterTextLinked::timerEvent(QTimerEvent* event)
+{
+    if((!event) || (event->timerId() != _reloadTimer))
+    {
+        EncounterText::timerEvent(event);
+        return;
+    }
+
+    killTimer(_reloadTimer);
+    _reloadTimer = 0;
+
+    // Still mid-replace: wait for the rename to land rather than reading a missing or partial file
+    if((!_linkedFile.isEmpty()) && (!QFile::exists(_linkedFile)) && (_reloadRetries < ENCOUNTERTEXTLINKED_MAX_RELOAD_RETRIES))
+    {
+        ++_reloadRetries;
+        _reloadTimer = startTimer(ENCOUNTERTEXTLINKED_RELOAD_INTERVAL);
+        return;
+    }
+
+    rearmWatcher();
+    readLinkedFile();
 }
 
 QDomElement EncounterTextLinked::createOutputXML(QDomDocument &doc)
@@ -111,8 +179,6 @@ void EncounterTextLinked::readLinkedFile()
 {
     if(_linkedFile.isEmpty())
         return;
-
-    _metadata.clear();
 
     QFile extFile(_linkedFile);
     QFileInfo fileInfo(extFile);
@@ -137,23 +203,28 @@ void EncounterTextLinked::readLinkedFile()
 
     QTextStream in(&extFile);
     in.setEncoding(QStringConverter::Utf8);
-    QString inputString;
-    QString line;
-    while(in.readLineInto(&line))
-        inputString += QChar::LineFeed + line;
+    QString inputString = in.readAll();
+    extFile.close();
 
-    EncounterText::setText(extractMetadata(inputString));
+    _metadata.clear();
+    QString newText = extractMetadata(inputString);
+
+    // Suppresses the file system watcher notification triggered by our own write-through
+    if(_text == newText)
+        return;
+
+    // No dirty() - reading from disk never changes the campaign XML
+    _text = newText;
+    emit textChanged(_text);
 }
 
-void EncounterTextLinked::createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+void EncounterTextLinked::writeLinkedFile()
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(element);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
+    if((_linkedFile.isEmpty()) || (_fileType == DMHelper::FileType_Unknown))
+        return;
 
-    QFile mdFile(getLinkedFile());
-    if(!mdFile.open(QIODevice::WriteOnly))
+    QFile linkedFile(_linkedFile);
+    if(!linkedFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
         qDebug() << "[EncounterTextLinked] ERROR: unabled to open the linked file for writing: " << getLinkedFile();
         return;
@@ -165,8 +236,20 @@ void EncounterTextLinked::createTextNode(QDomDocument &doc, QDomElement &element
     else
         outputString = _text;
 
-    mdFile.write(outputString.toUtf8());
-    mdFile.close();
+    linkedFile.write(outputString.toUtf8());
+    linkedFile.close();
+
+    rearmWatcher();
+}
+
+void EncounterTextLinked::createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(doc);
+    Q_UNUSED(element);
+    Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
+
+    writeLinkedFile();
 }
 
 void EncounterTextLinked::extractTextNode(const QDomElement &element, bool isImport)
@@ -182,7 +265,8 @@ QString EncounterTextLinked::extractMetadata(const QString& inputString)
     if(_fileType != DMHelper::FileType_Markdown)
         return inputString;
 
-    static QRegularExpression re(QString("---((\\s|.)*)---((\\s|.)*)"));
+    // Front matter only: anchored at the start and non-greedy so that horizontal rules in the body aren't consumed
+    static QRegularExpression re(QString("\\A---((?:\\s|.)*?)---((?:\\s|.)*)"));
     QRegularExpressionMatch reMatch = re.match(inputString);
     if(!reMatch.hasMatch())
         return inputString;
@@ -190,7 +274,7 @@ QString EncounterTextLinked::extractMetadata(const QString& inputString)
     _metadata = reMatch.captured(1);
     parseMetadata();
 
-    return reMatch.captured(3);
+    return reMatch.captured(2);
 }
 
 void EncounterTextLinked::parseMetadata()

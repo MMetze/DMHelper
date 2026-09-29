@@ -19,7 +19,7 @@ public:
     virtual QIcon getDefaultIcon() override;
 
     virtual int getAudioType() const override;
-    virtual void eventCallback(const struct libvlc_event_t *p_event);
+    virtual void eventCallback(libvlc_state_t state);
 
     virtual int getTrackStatus() const override;
     virtual bool isPlaying() const override;

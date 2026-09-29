@@ -195,16 +195,31 @@ ResourcePair TemplateObject::getResourceValue(const QString& key) const
         const QHash<QString, QVariant>* hash = valueHash();
         if(hash->contains(key))
         {
-            return hash->value(key, QVariant()).value<ResourcePair>();
+            const QVariant storedValue = hash->value(key, QVariant());
+            if(storedValue.canConvert<ResourcePair>())
+                return storedValue.value<ResourcePair>();
+
+            // Compatibility mode for older files / values where resource
+            // fields were represented as a single integer maximum.
+            if(storedValue.canConvert<int>())
+                return ResourcePair(0, storedValue.toInt());
+
+            if(storedValue.canConvert<QString>())
+            {
+                const QVariant parsed = TemplateFactory::convertStringToVariant(storedValue.toString(), TemplateFactory::TemplateType_resource);
+                if(parsed.canConvert<ResourcePair>())
+                    return parsed.value<ResourcePair>();
+            }
+
+            return ResourcePair();
         }
         else
         {
             QString value = _factory->getAttribute(key)._default;
-            QStringList resourceString = value.split(QString(","));
-            if(resourceString.size() == 2)
-                return ResourcePair(resourceString.at(0).toInt(), resourceString.at(1).toInt());
-            else
-                return ResourcePair();
+            const QVariant parsed = TemplateFactory::convertStringToVariant(value, TemplateFactory::TemplateType_resource);
+            if(parsed.canConvert<ResourcePair>())
+                return parsed.value<ResourcePair>();
+            return ResourcePair();
         }
     }
 }
@@ -258,13 +273,9 @@ void TemplateObject::setValue(const QString& key, const QString& value)
     }
     case TemplateFactory::TemplateType_resource:
     {
-        QStringList resourceString = value.split(QString(","));
-        if(resourceString.size() == 2)
-        {
-            QVariant newValue;
-            newValue.setValue(ResourcePair(resourceString.at(0).toInt(), resourceString.at(1).toInt()));
+        QVariant newValue = TemplateFactory::convertStringToVariant(value, TemplateFactory::TemplateType_resource);
+        if(!newValue.isNull())
             setValue(key, newValue);
-        }
         else
             qDebug() << "[Characterv2] WARNING: Resource attribute missing values: " << key << " with type " << attribute._type << ": " << value;
         break;

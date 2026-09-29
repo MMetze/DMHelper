@@ -25,6 +25,7 @@ public:
     virtual Combatant* clone() const override;
 
     virtual int getCombatantType() const override;
+    QString getMovementString() const;
     virtual int getSpeed() const override;
     virtual int getArmorClass() const override;
     virtual Dice getHitDice() const override;

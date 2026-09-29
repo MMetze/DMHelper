@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
+if (CMAKE_HOST_APPLE)
+    set(DMH_MACOS_ARCH "" CACHE STRING "macOS VLC architecture (x64 or arm64)")
+    if (DMH_MACOS_ARCH STREQUAL "x64")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    elseif (DMH_MACOS_ARCH STREQUAL "arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+    endif()
+endif()
+
 project(DMHelper LANGUAGES CXX)
 
 # -------------------------------------------------
@@ -275,6 +284,7 @@ set(DMHELPER_SOURCES
     mapmarkergraphicsitem.cpp
     mappartyiconitem.cpp
     mapselectdialog.cpp
+    movementmodehelper.cpp
     monster.cpp
     monsteraction.cpp
     monsteractioneditdialog.cpp
@@ -633,6 +643,7 @@ set(DMHELPER_HEADERS
     mapmarkergraphicsitem.h
     mappartyiconitem.h
     mapselectdialog.h
+    movementmodehelper.h
     monster.h
     monsteraction.h
     monsteractioneditdialog.h
@@ -1003,6 +1014,15 @@ if (WIN32)
 elseif (APPLE)
     message(STATUS "Configuring macOS build")
 
+    if (DMH_MACOS_ARCH STREQUAL "arm64" OR
+        (DMH_MACOS_ARCH STREQUAL "" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64"))
+        set(_dmh_macos_vlc_dir vlcMacArm)
+        message(STATUS "Using arm64 VLC")
+    else()
+        set(_dmh_macos_vlc_dir vlcMac64)
+        message(STATUS "Using x64 VLC")
+    endif()
+
     target_compile_options(DMHelper PRIVATE
         $<$<CONFIG:Debug>:-g>
         $<$<CONFIG:Release>:-O2>
@@ -1010,8 +1030,8 @@ elseif (APPLE)
 
     target_compile_definitions(DMHelper PRIVATE NDEBUG)
 
-    target_include_directories(DMHelper PRIVATE vlcMac)
-    target_link_directories(DMHelper PRIVATE vlcMac)
+    target_include_directories(DMHelper PRIVATE "${_dmh_macos_vlc_dir}")
+    target_link_directories(DMHelper PRIVATE "${_dmh_macos_vlc_dir}")
     target_link_libraries(DMHelper PRIVATE vlc)
 
     set_target_properties(DMHelper PROPERTIES

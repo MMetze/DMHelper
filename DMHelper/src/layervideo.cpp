@@ -16,6 +16,11 @@
 #include <QOpenGLWidget>
 #include <QDebug>
 
+#ifdef LAYERVIDEO_PERF_STATS
+static const int LAYERVIDEO_STATS_REPORT_INTERVAL_MS = 5000;
+static const qint64 LAYERVIDEO_NSECS_PER_MSEC = 1000000;
+#endif
+
 LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
@@ -254,6 +259,10 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     DMH_DEBUG_OPENGL_glUseProgram(_shaderProgramRGBA);
     functions->glUseProgram(_shaderProgramRGBA);
 
+#ifdef LAYERVIDEO_PERF_STATS
+    reportStatsIfDue();
+#endif
+
     if(!_videoObject)
     {
         if((!_videoPlayer->isNewImage()) && (getScreenshot().isNull()))
@@ -264,11 +273,20 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
             {
-                QImage imageCopy = playerImage->copy();
-                _videoObject = new PublishGLBattleBackground(nullptr, imageCopy, GL_NEAREST);
+#ifdef LAYERVIDEO_PERF_STATS
+                QElapsedTimer uploadTimer;
+                uploadTimer.start();
+#endif
+                // The display buffer is consumer-exclusive under the triple-buffer scheme (write/ready/display),
+                // so the GL upload reads it directly without a defensive copy. Frames are already Format_RGBA8888
+                // and top-down, so the FOW fast-path flags skip the convert and CPU-flip copies.
+                _videoObject = new PublishGLBattleBackground(nullptr, *playerImage, GL_NEAREST, true, false);
                 QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
                 _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
                 _videoObject->setTargetSize(_size);
+#ifdef LAYERVIDEO_PERF_STATS
+                recordUploadStat(uploadTimer.nsecsElapsed());
+#endif
             }
             _videoPlayer->clearNewImage();
             _videoPlayer->unlockMutex();
@@ -281,8 +299,19 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
             QImage* playerImage = _videoPlayer->getLockedImage();
             if(playerImage)
             {
-                QImage imageCopy = playerImage->copy();
-                _videoObject->updateImage(imageCopy);
+#ifdef LAYERVIDEO_PERF_STATS
+                QElapsedTimer uploadTimer;
+                uploadTimer.start();
+#endif
+                // Size changes (player restart / new media) must reallocate the texture; the steady state
+                // sub-uploads in place to avoid a per-frame glTexImage2D reallocation
+                if(_videoObject->getSize() != playerImage->size())
+                    _videoObject->updateImage(*playerImage);
+                else
+                    _videoObject->updateImageRegion(*playerImage, QRect(QPoint(0, 0), playerImage->size()));
+#ifdef LAYERVIDEO_PERF_STATS
+                recordUploadStat(uploadTimer.nsecsElapsed());
+#endif
             }
             _videoPlayer->clearNewImage();
             _videoPlayer->unlockMutex();
@@ -563,3 +592,77 @@ void LayerVideo::cleanupPlayer()
 
     _scene = nullptr;
 }
+
+#ifdef LAYERVIDEO_PERF_STATS
+void LayerVideo::recordUploadStat(qint64 uploadNs)
+{
+    ++_statUploadCount;
+    _statUploadAccumNs += uploadNs;
+    if(uploadNs > _statUploadMaxNs)
+        _statUploadMaxNs = uploadNs;
+
+    if(_statIntervalTimer.isValid())
+    {
+        qint64 intervalNs = _statIntervalTimer.nsecsElapsed();
+        ++_statIntervalCount;
+        _statIntervalAccumNs += intervalNs;
+        if((_statIntervalMinNs == 0) || (intervalNs < _statIntervalMinNs))
+            _statIntervalMinNs = intervalNs;
+        if(intervalNs > _statIntervalMaxNs)
+            _statIntervalMaxNs = intervalNs;
+    }
+    _statIntervalTimer.start();
+}
+
+void LayerVideo::reportStatsIfDue()
+{
+    if(!_statReportTimer.isValid())
+    {
+        _statReportTimer.start();
+        return;
+    }
+
+    if(_statReportTimer.elapsed() < LAYERVIDEO_STATS_REPORT_INTERVAL_MS)
+        return;
+
+    const unsigned int decoded = _videoPlayer ? _videoPlayer->getStatFramesDecoded() : 0;
+    const unsigned int dropped = _videoPlayer ? _videoPlayer->getStatFramesDropped() : 0;
+    const qint64 decodeAccumNs = _videoPlayer ? _videoPlayer->getStatDecodeIntervalAccumNs() : 0;
+    const unsigned int decodeCount = _videoPlayer ? _videoPlayer->getStatDecodeIntervalCount() : 0;
+    const qint64 decodeMaxNs = _videoPlayer ? _videoPlayer->takeStatDecodeIntervalMaxNs() : 0;
+    // A restarted player resets its counters, so guard against negative deltas
+    const unsigned int decodedDelta = (decoded >= _statLastDecoded) ? decoded - _statLastDecoded : decoded;
+    const unsigned int droppedDelta = (dropped >= _statLastDropped) ? dropped - _statLastDropped : dropped;
+    const qint64 decodeAccumDeltaNs = (decodeAccumNs >= _statLastDecodeAccumNs) ? decodeAccumNs - _statLastDecodeAccumNs : decodeAccumNs;
+    const unsigned int decodeCountDelta = (decodeCount >= _statLastDecodeCount) ? decodeCount - _statLastDecodeCount : decodeCount;
+    _statLastDecoded = decoded;
+    _statLastDropped = dropped;
+    _statLastDecodeAccumNs = decodeAccumNs;
+    _statLastDecodeCount = decodeCount;
+
+    const double avgUploadMs = (_statUploadCount > 0) ? static_cast<double>(_statUploadAccumNs) / static_cast<double>(_statUploadCount) / LAYERVIDEO_NSECS_PER_MSEC : 0.0;
+    const double maxUploadMs = static_cast<double>(_statUploadMaxNs) / LAYERVIDEO_NSECS_PER_MSEC;
+    const double minIntervalMs = static_cast<double>(_statIntervalMinNs) / LAYERVIDEO_NSECS_PER_MSEC;
+    const double avgIntervalMs = (_statIntervalCount > 0) ? static_cast<double>(_statIntervalAccumNs) / static_cast<double>(_statIntervalCount) / LAYERVIDEO_NSECS_PER_MSEC : 0.0;
+    const double maxIntervalMs = static_cast<double>(_statIntervalMaxNs) / LAYERVIDEO_NSECS_PER_MSEC;
+    const double avgDecodeIntervalMs = (decodeCountDelta > 0) ? static_cast<double>(decodeAccumDeltaNs) / static_cast<double>(decodeCountDelta) / LAYERVIDEO_NSECS_PER_MSEC : 0.0;
+    const double maxDecodeIntervalMs = static_cast<double>(decodeMaxNs) / LAYERVIDEO_NSECS_PER_MSEC;
+
+    qDebug() << "[LayerVideo] perf:" << getName()
+             << "decoded:" << decodedDelta
+             << "uploaded:" << _statUploadCount
+             << "dropped:" << droppedDelta
+             << "upload ms avg/max:" << avgUploadMs << "/" << maxUploadMs
+             << "interval ms min/avg/max:" << minIntervalMs << "/" << avgIntervalMs << "/" << maxIntervalMs
+             << "decode interval ms avg/max:" << avgDecodeIntervalMs << "/" << maxDecodeIntervalMs;
+
+    _statUploadCount = 0;
+    _statUploadAccumNs = 0;
+    _statUploadMaxNs = 0;
+    _statIntervalCount = 0;
+    _statIntervalAccumNs = 0;
+    _statIntervalMinNs = 0;
+    _statIntervalMaxNs = 0;
+    _statReportTimer.start();
+}
+#endif

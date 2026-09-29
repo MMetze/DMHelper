@@ -103,8 +103,8 @@ protected slots:
     void effectVisibilityChanged(bool showEffects);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
     void linkedObjectMoved(BattleDialogModelObject* object);
-    void healthBarVisibilityChanged(bool visible);
-    void glHealthBarVisibilityChanged(bool show);
+    void healthBarVisibilityChanged(int mode);
+    void glHealthBarVisibilityChanged(int mode);
 
 protected:
     // Layer Specific Interface
@@ -156,6 +156,7 @@ protected:
     QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
 
     int _scale;
+    int _appliedOrder;
 
     // Health bar overlay (DM view)
     Campaign* _campaign;

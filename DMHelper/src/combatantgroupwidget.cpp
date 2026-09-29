@@ -86,7 +86,13 @@ void CombatantGroupWidget::removeMemberWidget(CombatantWidget* widget)
 
 QList<CombatantWidget*> CombatantGroupWidget::getMemberWidgets() const
 {
-    return _memberWidgets;
+    QList<CombatantWidget*> members;
+    for(const QPointer<CombatantWidget>& member : _memberWidgets)
+    {
+        if(member)
+            members.append(member.data());
+    }
+    return members;
 }
 
 void CombatantGroupWidget::setCollapsed(bool collapsed)
@@ -125,25 +131,37 @@ void CombatantGroupWidget::setActive(bool active)
 
 void CombatantGroupWidget::updateMasterCheckboxes()
 {
-    if(_memberWidgets.isEmpty())
-        return;
-
     _updatingCheckboxes = true;
 
     int shownCount = 0;
     int knownCount = 0;
+    int total = 0;
 
-    for(CombatantWidget* widget : _memberWidgets)
+    // Drop any deleted members and only aggregate live widgets.
+    for(int i = _memberWidgets.count() - 1; i >= 0; --i)
     {
+        if(!_memberWidgets[i])
+            _memberWidgets.removeAt(i);
+    }
+
+    for(const QPointer<CombatantWidget>& member : _memberWidgets)
+    {
+        CombatantWidget* widget = member.data();
+        if(!widget)
+            continue;
+
+        ++total;
         if(widget->isShown())
             ++shownCount;
         if(widget->isKnown())
             ++knownCount;
     }
 
-    int total = _memberWidgets.count();
-    ui->chkVisible->setChecked(shownCount > total / 2);
-    ui->chkKnown->setChecked(knownCount > total / 2);
+    if(total > 0)
+    {
+        ui->chkVisible->setChecked(shownCount > total / 2);
+        ui->chkKnown->setChecked(knownCount > total / 2);
+    }
 
     _updatingCheckboxes = false;
 }
@@ -241,9 +259,10 @@ void CombatantGroupWidget::paintEvent(QPaintEvent* event)
     CombatantWidget* lastVisible = nullptr;
     for(int i = _memberWidgets.count() - 1; i >= 0; --i)
     {
-        if(_memberWidgets[i]->isVisible())
+        CombatantWidget* member = _memberWidgets[i].data();
+        if((member) && (member->isVisible()))
         {
-            lastVisible = _memberWidgets[i];
+            lastVisible = member;
             break;
         }
     }
@@ -259,8 +278,12 @@ void CombatantGroupWidget::paintEvent(QPaintEvent* event)
 
     // Draw horizontal ticks to each visible member
     int tickRight = ui->contentWidget->mapTo(this, QPoint(0, 0)).x() + ui->contentLayout->contentsMargins().left() - 2;
-    for(CombatantWidget* member : _memberWidgets)
+    for(const QPointer<CombatantWidget>& memberPtr : _memberWidgets)
     {
+        CombatantWidget* member = memberPtr.data();
+        if(!member)
+            continue;
+
         if(!member->isVisible())
             continue;
 
@@ -296,8 +319,12 @@ void CombatantGroupWidget::handleVisibleClicked(bool checked)
     if(_updatingCheckboxes)
         return;
 
-    for(CombatantWidget* widget : _memberWidgets)
+    for(const QPointer<CombatantWidget>& member : _memberWidgets)
     {
+        CombatantWidget* widget = member.data();
+        if(!widget)
+            continue;
+
         BattleDialogModelCombatant* combatant = widget->getCombatant();
         if(combatant)
             combatant->setShown(checked);
@@ -309,8 +336,12 @@ void CombatantGroupWidget::handleKnownClicked(bool checked)
     if(_updatingCheckboxes)
         return;
 
-    for(CombatantWidget* widget : _memberWidgets)
+    for(const QPointer<CombatantWidget>& member : _memberWidgets)
     {
+        CombatantWidget* widget = member.data();
+        if(!widget)
+            continue;
+
         BattleDialogModelCombatant* combatant = widget->getCombatant();
         if(combatant)
             combatant->setKnown(checked);

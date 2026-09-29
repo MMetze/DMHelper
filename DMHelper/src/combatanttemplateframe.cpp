@@ -134,9 +134,9 @@ void CombatantTemplateFrame::disconnectInternals()
     if(_combatant)
         disconnect(_combatant, nullptr, this, nullptr);
 
-    if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant))
+    if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant.data()))
         disconnect(mb, nullptr, this, nullptr);
-    if(BattleDialogModelCharacter* cm = dynamic_cast<BattleDialogModelCharacter*>(_combatant))
+    if(BattleDialogModelCharacter* cm = dynamic_cast<BattleDialogModelCharacter*>(_combatant.data()))
         disconnect(cm, nullptr, this, nullptr);
 }
 
@@ -480,7 +480,7 @@ void CombatantTemplateFrame::applyResourceDecorations()
         return;
 
     QList<QFrame*> resourceFrames = scrollArea->widget()->findChildren<QFrame*>(QString(), Qt::FindDirectChildrenOnly);
-    BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant);
+    BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant.data());
     MonsterClassv2* mc = mb ? mb->getMonsterClass() : nullptr;
     if(!mc)
         return;
@@ -519,7 +519,7 @@ void CombatantTemplateFrame::wireResourceButtons(QWidget* resourceWidget, int in
     if((!resourceWidget) || (!_combatant))
         return;
 
-    BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant);
+    BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant.data());
     if(!mb)
         return;
 
@@ -604,13 +604,13 @@ void CombatantTemplateFrame::connectModelSignals()
         updateData();
     });
 
-    if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant))
+    if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant.data()))
     {
         connect(mb, &BattleDialogModelMonsterBase::dataChanged,           this, &CombatantTemplateFrame::updateData);
         connect(mb, &BattleDialogModelMonsterBase::imageChanged,          this, &CombatantTemplateFrame::handleMonsterImageChanged);
         connect(mb, &BattleDialogModelMonsterBase::resourceCountChanged,  this, &CombatantTemplateFrame::handleResourceCountChanged);
     }
-    else if(BattleDialogModelCharacter* cm = dynamic_cast<BattleDialogModelCharacter*>(_combatant))
+    else if(BattleDialogModelCharacter* cm = dynamic_cast<BattleDialogModelCharacter*>(_combatant.data()))
     {
         connect(cm, &BattleDialogModelCharacter::imageChanged, this, &CombatantTemplateFrame::handleCharacterImageChanged);
     }
@@ -621,12 +621,12 @@ void CombatantTemplateFrame::emitDoubleClickSignal()
     if(!_combatant)
         return;
 
-    if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant))
+    if(BattleDialogModelMonsterBase* mb = dynamic_cast<BattleDialogModelMonsterBase*>(_combatant.data()))
     {
         if(MonsterClassv2* mc = mb->getMonsterClass())
             emit clicked(mc->getStringValue(QStringLiteral("name")));
     }
-    else if(BattleDialogModelCharacter* cm = dynamic_cast<BattleDialogModelCharacter*>(_combatant))
+    else if(BattleDialogModelCharacter* cm = dynamic_cast<BattleDialogModelCharacter*>(_combatant.data()))
     {
         if(Characterv2* c = cm->getCharacter())
             emit clickedCharacter(c->getID());

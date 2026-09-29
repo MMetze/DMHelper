@@ -88,6 +88,8 @@ NewEntryDialog::NewEntryDialog(Campaign* campaign, OptionsContainer* options, Ca
     connect(ui->btnCharacterIcon, &QPushButton::clicked, this, &NewEntryDialog::selectCharacterIcon);
     connect(ui->btnCharacterEditIcon, &QPushButton::clicked, this, &NewEntryDialog::editCharacterIcon);
     connect(ui->cmbCharacterMonster, &QComboBox::currentTextChanged, this, &NewEntryDialog::loadMonsterIcon);
+    connect(ui->cmbCharacterMonster, &QComboBox::currentTextChanged, this, [this]() {ui->btnCharacterMonster->setChecked(true);});
+    connect(ui->edtCharacterDndBeyond, &QLineEdit::textChanged, this, [this]() {ui->btnCharacterDnDBeyond->setChecked(true);});
     ui->btnCharacterIcon->installEventFilter(this);
 
     // Media Page

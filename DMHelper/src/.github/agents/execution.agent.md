@@ -159,7 +159,7 @@ memory. Top hazards — a violation in any of these is automatically
 | Magic numbers       | Named `static constexpr` / `static const` at top of `.cpp` for non-trivial literals. Exceptions: structural 0/1, GLSL string constants. |
 | Source registration | New `.cpp`/`.h` pair → add to `CMakeLists.txt` in the same edit pass. List the `CMakeLists.txt` in `files_touched`. The `CMakeLists.txt` must be in `files_to_modify` — if not, raise `MISSING_FILE_IN_PLAN`. |
 | `.ui` / `.qrc`      | Never hand-edit. See `UI_CHANGE_REQUIRED` above. |
-| Forbidden folders   | Never touch `DMHelper-Backend/`, `DMHelperClient/`, `DMHelperShared/`, `DMHelperTest/`, `vlc32/`, `vlc64/`, `vlcMac/`, `bin-win*/`, `bin-macos/`. |
+| Forbidden folders   | Never touch `DMHelper-Backend/`, `DMHelperClient/`, `DMHelperShared/`, `DMHelperTest/`, `vlc32/`, `vlc64/`, `vlcMac64/`, `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/`. |
 | Disabled flags      | Never enable `INCLUDE_NETWORK_SUPPORT` or `LAYERVIDEO_USE_OPENGL`. A plan that requires it → `CONSTRAINT_CONFLICT`. |
 
 ## Build Verification

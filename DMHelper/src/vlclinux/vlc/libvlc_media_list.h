@@ -23,6 +23,8 @@
 #ifndef LIBVLC_MEDIA_LIST_H
 #define LIBVLC_MEDIA_LIST_H 1
 
+typedef struct libvlc_media_t libvlc_media_t;
+
 # ifdef __cplusplus
 extern "C" {
 # endif
@@ -56,8 +58,9 @@ LIBVLC_API void
  * Retain reference to a media list
  *
  * \param p_ml a media list created with libvlc_media_list_new()
+ * \return the same object
  */
-LIBVLC_API void
+LIBVLC_API libvlc_media_list_t *
     libvlc_media_list_retain( libvlc_media_list_t *p_ml );
 
 /**
@@ -177,16 +180,6 @@ LIBVLC_API void
  */
 LIBVLC_API void
     libvlc_media_list_unlock( libvlc_media_list_t *p_ml );
-
-/**
- * Get libvlc_event_manager from this media list instance.
- * The p_event_manager is immutable, so you don't have to hold the lock
- *
- * \param p_ml a media list instance
- * \return libvlc_event_manager
- */
-LIBVLC_API libvlc_event_manager_t *
-    libvlc_media_list_event_manager( libvlc_media_list_t *p_ml );
 
 /** @} media_list */
 

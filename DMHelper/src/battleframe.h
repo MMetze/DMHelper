@@ -3,6 +3,7 @@
 
 #include "campaignobjectframe.h"
 #include <QMap>
+#include <QPointer>
 #include <QUuid>
 #include "battledialoggraphicsscene.h"
 #include "battleframemapdrawer.h"
@@ -141,6 +142,7 @@ public slots:
     void addNPC();
     void addInitiativeEvent();
     void addLairActionsEvent();
+    void setLairActionsEventEnabled(bool enabled);
     void addEffectObject();
     void addEffectObjectFile(const QString& filename);
     void addMonsterImageFile(const QString& filename, const QPointF& position);
@@ -205,6 +207,7 @@ signals:
     void setLayers(QList<Layer*> layers, int selected);
 
     void initiativeActiveChanged(bool initiativeActive);
+    void lairActionsEnabledChanged(bool enabled);
 
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
@@ -259,6 +262,7 @@ private slots:
     void handleCombatantVisibilityChanged(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
+    void handleCombatantEditConditions(BattleDialogModelCombatant* combatant);
     void handleCombatantHideSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantUnhideSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantKnowSelected(BattleDialogModelCombatant* combatant);
@@ -299,6 +303,7 @@ private slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+    void editSelectedCombatantConditions();
     void hideSelectedCombatant();
     void unhideSelectedCombatant();
     void knowSelectedCombatant();
@@ -363,7 +368,7 @@ private:
     void clearCombatantWidgets();
     void buildCombatantWidgets();
     void reorderCombatantWidgets();
-    void setActiveCombatant(BattleDialogModelCombatant* active);
+    void setActiveCombatant(BattleDialogModelCombatant* active, bool expandActiveGroup = true);
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
     void newRound();
@@ -374,6 +379,7 @@ private:
     // nullptr so behaviour matches the pre-refactor code.
     RuleHealth* currentRuleHealth() const;
     bool isCombatantDead(const BattleDialogModelCombatant* combatant) const;
+    bool shouldShowCombatant(const BattleDialogModelCombatant* combatant, bool aliveVisible, bool deadVisible) const;
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
     QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
@@ -381,9 +387,14 @@ private:
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsItem* item) const;
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item) const;
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
+    bool hasLairActionsEvent() const;
+    void emitLairActionsState();
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
-    void removeSingleCombatant(BattleDialogModelCombatant* combatant);
+    void detachAndDeleteCombatantWidget(BattleDialogModelCombatant* combatant);
+    void removeSingleCombatant(BattleDialogModelCombatant* combatant, bool updateActiveCombatant = true);
+    QList<BattleDialogModelCombatant*> getContextMenuCombatants(BattleDialogModelCombatant* combatant) const;
+    void editCombatantConditions(const QList<BattleDialogModelCombatant*>& combatants);
 
     bool validateTokenLayerExists();
     void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);
@@ -434,8 +445,8 @@ private:
     BattleDialogLogger* _logger;
     LayerDrawEngine* _drawEngine;
     
-    QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
-    QMap<QUuid, CombatantGroupWidget*> _groupWidgets;
+    QMap<BattleDialogModelCombatant*, QPointer<CombatantWidget>> _combatantWidgets;
+    QMap<QUuid, QPointer<CombatantGroupWidget>> _groupWidgets;
 
     BattleFrameStateMachine _stateMachine;
 

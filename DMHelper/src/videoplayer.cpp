@@ -13,6 +13,9 @@ const int VIDEOPLAYER_STOP_CALL_COMPLETE = 0x02;
 const int VIDEOPLAYER_STOP_CONFIRMED = 0x04;
 const int VIDEOPLAYER_STOP_COMPLETE = VIDEOPLAYER_STOP_CALL_STARTED | VIDEOPLAYER_STOP_CALL_COMPLETE | VIDEOPLAYER_STOP_CONFIRMED;
 const int INVALID_TRACK_ID = -99999;
+const int VIDEOPLAYER_SCREENSHOT_FRAME = 3;
+const unsigned int VIDEOPLAYER_BUFFER_ALIGNMENT = 32;
+const int VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS = 2;
 
 // libvlc callback static functions
 void * playerLockCallback(void *opaque, void **planes);
@@ -25,8 +28,15 @@ unsigned playerFormatCallback(void **opaque, char *chroma,
 void playerCleanupCallback(void *opaque);
 void playerExitEventCallback(void *opaque);
 void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const char *fmt, va_list args);
-void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
+void playerStateChangedCallback(void *opaque, libvlc_state_t state);
 void playerAudioPlayCallback(void *data, const void *samples, unsigned count, int64_t pts);
+
+// cbs struct has static storage duration and carries no per-instance state; the opaque pointer supplies the instance
+static const libvlc_media_player_cbs s_videoPlayerCbs = []() {
+    libvlc_media_player_cbs cbs{};
+    cbs.on_state_changed = &playerStateChangedCallback;
+    return cbs;
+}();
 
 
 VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, QObject *parent) :
@@ -42,8 +52,10 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _nativeHeight(0),
     _mutex(new QMutex()),
     _buffers(),
-    _idxRender(0),
-    _idxDisplay(1),
+    _fallbackBuffer(nullptr),
+    _idxWrite(0),
+    _idxReady(1),
+    _idxDisplay(2),
     _newImage(false),
     _originalSize(),
     _targetSize(targetSize),
@@ -53,15 +65,22 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _deleteOnStop(false),
     _stopStatus(0),
     _frameCount(0),
-    _originalTrack(INVALID_TRACK_ID)
+    _originalTrack(INVALID_TRACK_ID),
+    _statFramesDecoded(0),
+    _statFramesDropped(0),
+    _statDecodeIntervalTimer(),
+    _statDecodeIntervalAccumNs(0),
+    _statDecodeIntervalCount(0),
+    _statDecodeIntervalMaxNs(0)
 {
     _buffers[0] = nullptr;
     _buffers[1] = nullptr;
+    _buffers[2] = nullptr;
 
     connect(this, &VideoPlayer::videoStopped, this, &VideoPlayer::handleVideoStopped, Qt::QueuedConnection);
 
 #ifdef Q_OS_WIN
-    _videoFile.replace("/", "\\\\");
+    _videoFile.replace("/", "\\");
 #endif
     _vlcError = !VideoPlayer::initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -80,24 +99,18 @@ VideoPlayer::~VideoPlayer()
 
     if(_vlcPlayer)
     {
-        // Detach all event callbacks before stopping to prevent use-after-free
-        libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-        if(eventManager)
-        {
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-            libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
-        }
-
-        // Stop playback and null out video callbacks so VLC thread stops calling into this object
         libvlc_media_player_stop_async(_vlcPlayer);
-        libvlc_video_set_callbacks(_vlcPlayer, nullptr, nullptr, nullptr, nullptr);
 
-        // Release blocks until internal VLC threads finish
+        // Release is the synchronization point: it blocks until VLC's internal threads have
+        // finished, so no callbacks into this object can occur after it returns
         libvlc_media_player_release(_vlcPlayer);
         _vlcPlayer = nullptr;
+    }
+
+    if(_vlcMedia)
+    {
+        libvlc_media_release(_vlcMedia);
+        _vlcMedia = nullptr;
     }
 
     VideoPlayer::cleanupBuffers();
@@ -192,31 +205,31 @@ bool VideoPlayer::isError() const
 
 bool VideoPlayer::lockMutex()
 {
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Locking mutex: " << _mutex << ", " << this << ", " << COUNT_CALLBACKS;
-#endif
-
-    return (_mutex) ? _mutex->tryLock(1000) : false;
+    // Compatibility no-op: getLockedImage() synchronizes internally and the display buffer is consumer-exclusive
+    return true;
 }
 
 void VideoPlayer::unlockMutex()
 {
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Unlocking mutex: " << _mutex << ", " << this << ", " << COUNT_CALLBACKS;
-#endif
-
-    if(_mutex)
-        _mutex->unlock();
+    // Compatibility no-op, see lockMutex()
 }
 
-QImage* VideoPlayer::getLockedImage() const
+QImage* VideoPlayer::getLockedImage()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Returning locking image. Playing state: " << _status << ", display index: " << _idxDisplay << ", render index: " << _idxRender << ", display buffer: " << _buffers[_idxDisplay] << ", " << this << ", " << COUNT_CALLBACKS;
+    qDebug() << "[VideoPlayer] Returning image. Playing state: " << _status << ", display index: " << _idxDisplay << ", ready index: " << _idxReady << ", write index: " << _idxWrite << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if(!isPlaying())
+    if((!isPlaying()) || (!_mutex))
         return nullptr;
+
+    QMutexLocker locker(_mutex);
+
+    if(_newImage)
+    {
+        std::swap(_idxDisplay, _idxReady);
+        _newImage = false;
+    }
 
     return _buffers[_idxDisplay] ? _buffers[_idxDisplay]->getFrame() : nullptr;
 }
@@ -248,28 +261,39 @@ void VideoPlayer::clearNewImage()
     _newImage = false;
 }
 
+unsigned int VideoPlayer::getStatFramesDecoded() const
+{
+    return _statFramesDecoded;
+}
+
+unsigned int VideoPlayer::getStatFramesDropped() const
+{
+    return _statFramesDropped;
+}
+
+qint64 VideoPlayer::getStatDecodeIntervalAccumNs() const
+{
+    return _statDecodeIntervalAccumNs;
+}
+
+unsigned int VideoPlayer::getStatDecodeIntervalCount() const
+{
+    return _statDecodeIntervalCount;
+}
+
+qint64 VideoPlayer::takeStatDecodeIntervalMaxNs()
+{
+    return _statDecodeIntervalMaxNs.exchange(0);
+}
+
 void* VideoPlayer::lockCallback(void **planes)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Lock callback called" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if((!_mutex) || (!planes))
+    if(!planes)
         return nullptr;
-
-    //_mutex->lock();
-    if(!_mutex->tryLock(1000))
-    {
-#ifdef VIDEO_DEBUG_MESSAGES
-        qDebug() << "[VideoPlayer] ERROR: Lock callback unable to lock mutex!";
-#endif
-        return nullptr;
-    }
-
-    if((planes) && (_buffers[_idxRender]) && (_buffers[_idxRender]->getNativeBuffer()))
-    {
-        *planes = _buffers[_idxRender]->getNativeBuffer();
-    }
 
     const char * errmsg = libvlc_errmsg();
     if(errmsg)
@@ -280,32 +304,55 @@ void* VideoPlayer::lockCallback(void **planes)
         libvlc_clearerr();
     }
 
+    // This callback cannot fail: *planes must always point at writable memory or VLC will corrupt memory.
+    // The lock is only needed to synchronize the buffer pointer read with (re)allocation; the write buffer
+    // itself is decoder-exclusive.
+    if((_mutex) && (_mutex->tryLock(VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS)))
+    {
+        VideoPlayerImageBuffer* writeBuffer = _buffers[_idxWrite];
+        _mutex->unlock();
+        if((writeBuffer) && (writeBuffer->getNativeBuffer()))
+        {
+            *planes = writeBuffer->getNativeBuffer();
+            return writeBuffer;
+        }
+    }
+
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Lock completed" << ", " << this << ", " << COUNT_CALLBACKS;
+    qDebug() << "[VideoPlayer] Lock callback failing forward, frame will be dropped" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
+    ++_statFramesDropped;
+
+    // Fail forward: decode into the fallback buffer; the null token tells unlockCallback to drop the frame
+    *planes = _fallbackBuffer ? _fallbackBuffer->getNativeBuffer() : nullptr;
     return nullptr;
 }
 
 void VideoPlayer::unlockCallback(void *picture, void *const *planes)
 {
-    Q_UNUSED(picture);
     Q_UNUSED(planes);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Unlock callback called. New Image: " << _newImage << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if(!_mutex)
+    // A null token means lockCallback failed forward into the fallback buffer - drop the frame
+    if((!picture) || (!_mutex))
         return;
 
-    if((!_buffers[0]) || (!_buffers[1]) || (_nativeWidth == 0) || (_nativeHeight == 0))
+    // Drop the frame rather than stall the decode thread on contention
+    if(!_mutex->tryLock(VIDEOPLAYER_DECODE_LOCK_TIMEOUT_MS))
     {
-        _mutex->unlock();
+        ++_statFramesDropped;
         return;
     }
-    std::swap(_idxRender, _idxDisplay);
-    _newImage = true;
+
+    if(_buffers[_idxWrite] == static_cast<VideoPlayerImageBuffer*>(picture))
+    {
+        std::swap(_idxWrite, _idxReady);
+        _newImage = true;
+    }
     _mutex->unlock();
 
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -317,7 +364,20 @@ void VideoPlayer::displayCallback(void *picture)
 {
     Q_UNUSED(picture);
 
-    if(++_frameCount == 3)
+    ++_statFramesDecoded;
+
+    // Delivery jitter on VLC's own clock: distinguishes uneven decode from late GUI-thread presentation
+    if(_statDecodeIntervalTimer.isValid())
+    {
+        const qint64 intervalNs = _statDecodeIntervalTimer.nsecsElapsed();
+        _statDecodeIntervalAccumNs += intervalNs;
+        ++_statDecodeIntervalCount;
+        qint64 prevMax = _statDecodeIntervalMaxNs.load();
+        while((intervalNs > prevMax) && (!_statDecodeIntervalMaxNs.compare_exchange_weak(prevMax, intervalNs))) {}
+    }
+    _statDecodeIntervalTimer.start();
+
+    if(++_frameCount == VIDEOPLAYER_SCREENSHOT_FRAME)
         emit screenShotAvailable();
 
     emit frameAvailable();
@@ -339,16 +399,18 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
     if(!_mutex)
         return 0;
 
-    if((_buffers[0]) || (_buffers[1]))
-        return 0;
-
     QMutexLocker locker(_mutex);
+
+    if((_buffers[0]) || (_buffers[1]) || (_buffers[2]))
+        return 0;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Format Callback with chroma: " << QString(chroma) << ", width: " << *width << ", height: " << *height << ", pitches: " << *pitches << ", lines: " << *lines << ", " << this;
 #endif
 
-    memcpy(chroma, "BGRA", sizeof("BGRA") - 1);
+    // RGBA matches QImage::Format_RGBA8888, so the GL upload path needs no CPU swizzle;
+    // VLC performs the conversion on its worker thread at unchanged cost
+    memcpy(chroma, "RGBA", sizeof("RGBA") - 1);
 
     _originalSize = QSize(static_cast<int>(*width), static_cast<int>(*height));
     QSize scaledTarget = _originalSize;
@@ -362,13 +424,34 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
 
     _nativeWidth = *width;
     _nativeHeight = *height;
-    *pitches = (*width) * 4;
-    *lines = *height;
 
-    _buffers[0] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight);
-    _buffers[1] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight);
-    _idxRender = 0;
-    _idxDisplay = 1;
+    // Pad pitch and line count to the alignment: VLC's optimized converters may write full vectors per scanline
+    const unsigned int bufferPitch = ((_nativeWidth * 4) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(VIDEOPLAYER_BUFFER_ALIGNMENT - 1);
+    const unsigned int bufferLines = (_nativeHeight + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(VIDEOPLAYER_BUFFER_ALIGNMENT - 1);
+    *pitches = bufferPitch;
+    *lines = bufferLines;
+
+    delete _fallbackBuffer;
+    _fallbackBuffer = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    _buffers[0] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    _buffers[1] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    _buffers[2] = new VideoPlayerImageBuffer(_nativeWidth, _nativeHeight, bufferPitch, bufferLines);
+    if((!_fallbackBuffer->isValid()) || (!_buffers[0]->isValid()) || (!_buffers[1]->isValid()) || (!_buffers[2]->isValid()))
+    {
+        delete _fallbackBuffer;
+        _fallbackBuffer = nullptr;
+        delete _buffers[0];
+        _buffers[0] = nullptr;
+        delete _buffers[1];
+        _buffers[1] = nullptr;
+        delete _buffers[2];
+        _buffers[2] = nullptr;
+        return 0;
+    }
+    _idxWrite = 0;
+    _idxReady = 1;
+    _idxDisplay = 2;
+    _newImage = false;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Format callback completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -390,7 +473,9 @@ void VideoPlayer::cleanupCallback()
 #endif
         libvlc_clearerr();
     }
-    cleanupBuffers();
+
+    // Marshal to the object's thread so buffer deletion can never race a consumer copying the display frame
+    QMetaObject::invokeMethod(this, &VideoPlayer::cleanupBuffers, Qt::QueuedConnection);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Cleanup callback completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -416,55 +501,46 @@ void VideoPlayer::exitEventCallback()
 #endif
 }
 
-void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
+void VideoPlayer::eventCallback(libvlc_state_t state)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Event callback called. p_event: " << p_event << ", " << this << ", " << COUNT_CALLBACKS;
+    qDebug() << "[VideoPlayer] Event callback called. state: " << state << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
 
-    if(p_event)
+    switch(state)
     {
-        switch(p_event->type)
-        {
-            case libvlc_MediaPlayerOpening:
+        case libvlc_Opening:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: OPENING = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: OPENING = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoOpening();
-                break;
-            case libvlc_MediaPlayerBuffering:
+            emit videoOpening();
+            break;
+        case libvlc_Playing:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: BUFFERING = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: PLAYING = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoBuffering();
-                break;
-            case libvlc_MediaPlayerPlaying:
+            emit videoPlaying();
+            break;
+        case libvlc_Paused:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: PLAYING = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: PAUSED = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoPlaying();
-                break;
-            case libvlc_MediaPlayerPaused:
+            emit videoPaused();
+            break;
+        case libvlc_Stopped:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: PAUSED = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] Video event received: STOPPED = " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoPaused();
-                break;
-            case libvlc_MediaPlayerStopped:
+            emit videoStopped();
+            break;
+        default:
 #ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] Video event received: STOPPED = " << p_event->type << ", " << COUNT_CALLBACKS;
+            qDebug() << "[VideoPlayer] UNEXPECTED Video event received:  " << state << ", " << COUNT_CALLBACKS;
 #endif
-                emit videoStopped();
-                break;
-            default:
-#ifdef VIDEO_DEBUG_MESSAGES
-                qDebug() << "[VideoPlayer] UNEXPECTED Video event received:  " << p_event->type << ", " << COUNT_CALLBACKS;
-#endif
-                break;
-        };
+            break;
+    };
 
-        _status = p_event->type;
-    }
+    _status = state;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Event callback completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -549,10 +625,17 @@ void VideoPlayer::internalStopCheck(int status)
         qDebug() << "[VideoPlayer] Internal Stop Check: Video ended, restarting playback" << ", " << this << ", " << COUNT_CALLBACKS;
 #endif
         _stopStatus = 0;
-        if(_playAudio)
-            _volume = libvlc_audio_get_volume(_vlcPlayer);
-        libvlc_media_player_release(_vlcPlayer);
-        _vlcPlayer = nullptr;
+        if(_vlcPlayer)
+        {
+            if(_playAudio)
+            {
+                int currentVolume = libvlc_audio_get_volume(_vlcPlayer);
+                if(currentVolume >= 0)
+                    _volume = currentVolume;
+            }
+            libvlc_media_player_release(_vlcPlayer);
+            _vlcPlayer = nullptr;
+        }
         if(_looping)
             startPlayer();
         return;
@@ -667,22 +750,16 @@ bool VideoPlayer::startPlayer()
 
     libvlc_media_add_option(_vlcMedia, ":avcodec-threads=0");
 
-    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia, &s_videoPlayerCbs, static_cast<void*>(this));
     if(!_vlcPlayer)
+    {
+        libvlc_media_release(_vlcMedia);
+        _vlcMedia = nullptr;
         return false;
+    }
 
     libvlc_media_release(_vlcMedia);
     _vlcMedia = nullptr;
-
-    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
-    if(eventManager)
-    {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
-    }
 
     libvlc_video_set_callbacks(_vlcPlayer,
                                playerLockCallback,
@@ -742,16 +819,20 @@ void VideoPlayer::cleanupBuffers()
     if(!_mutex)
         return;
 
+    QMutexLocker locker(_mutex);
+
     _newImage = false;
     _frameCount = 0;
     _originalSize = QSize();
-
-    QMutexLocker locker(_mutex);
 
     delete _buffers[0];
     _buffers[0] = nullptr;
     delete _buffers[1];
     _buffers[1] = nullptr;
+    delete _buffers[2];
+    _buffers[2] = nullptr;
+    delete _fallbackBuffer;
+    _fallbackBuffer = nullptr;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Buffer cleanup completed" << ", " << this << ", " << COUNT_CALLBACKS;
@@ -761,8 +842,7 @@ void VideoPlayer::cleanupBuffers()
 
 bool VideoPlayer::isPlaying() const
 {
-    bool result = ((_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying));
+    bool result = (_status == libvlc_Playing);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is playing status: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -773,7 +853,7 @@ bool VideoPlayer::isPlaying() const
 
 bool VideoPlayer::isPaused() const
 {
-    bool result = (_status == libvlc_MediaPlayerPaused);
+    bool result = (_status == libvlc_Paused);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is paused status: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -784,10 +864,9 @@ bool VideoPlayer::isPaused() const
 
 bool VideoPlayer::isProcessing() const
 {
-    bool result = ((_status == libvlc_MediaPlayerOpening) ||
-                   (_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying) ||
-                   (_status == libvlc_MediaPlayerPaused));
+    bool result = ((_status == libvlc_Opening) ||
+                   (_status == libvlc_Playing) ||
+                   (_status == libvlc_Paused));
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is processing status: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -798,11 +877,10 @@ bool VideoPlayer::isProcessing() const
 
 bool VideoPlayer::isStatusValid() const
 {
-    bool result = ((_status == libvlc_MediaPlayerOpening) ||
-                   (_status == libvlc_MediaPlayerBuffering) ||
-                   (_status == libvlc_MediaPlayerPlaying) ||
-                   (_status == libvlc_MediaPlayerPaused) ||
-                   (_status == libvlc_MediaPlayerStopped));
+    bool result = ((_status == libvlc_Opening) ||
+                   (_status == libvlc_Playing) ||
+                   (_status == libvlc_Paused) ||
+                   (_status == libvlc_Stopped));
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Getting is status valid: " << result << ", " << this << ", " << COUNT_CALLBACKS;
@@ -811,14 +889,18 @@ bool VideoPlayer::isStatusValid() const
     return result;
 }
 
-VideoPlayer::VideoPlayerImageBuffer::VideoPlayerImageBuffer(unsigned int width, unsigned int height) :
+VideoPlayer::VideoPlayerImageBuffer::VideoPlayerImageBuffer(unsigned int width, unsigned int height, unsigned int pitch, unsigned int lines) :
     _nativeBufferNotAligned(nullptr),
     _nativeBuffer(nullptr),
     _imgFrame(nullptr)
 {
-    _nativeBufferNotAligned = static_cast<uchar*>(malloc((width * height * 4) + 31));
-    _nativeBuffer = reinterpret_cast<uchar*>((size_t(_nativeBufferNotAligned)+31) & static_cast<unsigned long long>(~31));
-    _imgFrame = new QImage(_nativeBuffer, static_cast<int>(width), static_cast<int>(height), QImage::Format_ARGB32);
+    const size_t bufferSize = (static_cast<size_t>(pitch) * static_cast<size_t>(lines)) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1;
+    _nativeBufferNotAligned = static_cast<uchar*>(malloc(bufferSize));
+    if(!_nativeBufferNotAligned)
+        return;
+
+    _nativeBuffer = reinterpret_cast<uchar*>((reinterpret_cast<size_t>(_nativeBufferNotAligned) + VIDEOPLAYER_BUFFER_ALIGNMENT - 1) & ~(static_cast<size_t>(VIDEOPLAYER_BUFFER_ALIGNMENT) - 1));
+    _imgFrame = new QImage(_nativeBuffer, static_cast<int>(width), static_cast<int>(height), static_cast<int>(pitch), QImage::Format_RGBA8888);
 }
 
 VideoPlayer::VideoPlayerImageBuffer::~VideoPlayerImageBuffer()
@@ -835,6 +917,11 @@ VideoPlayer::VideoPlayerImageBuffer::~VideoPlayerImageBuffer()
 uchar* VideoPlayer::VideoPlayerImageBuffer::getNativeBuffer()
 {
     return _nativeBuffer;
+}
+
+bool VideoPlayer::VideoPlayerImageBuffer::isValid() const
+{
+    return (_nativeBuffer != nullptr) && (_imgFrame != nullptr);
 }
 
 QImage* VideoPlayer::VideoPlayerImageBuffer::getFrame()
@@ -1041,18 +1128,19 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 
 /**
  * Callback function notification
- * \param p_event the event triggering the callback
+ * \param opaque the VideoPlayer instance passed at player creation
+ * \param state the new player state
  */
-void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
+void playerStateChangedCallback(void *opaque, libvlc_state_t state)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] playerEventCallback: " << p_data << ", " << COUNT_CALLBACKS++;
+    qDebug() << "[VideoPlayer] playerStateChangedCallback: " << opaque << ", " << COUNT_CALLBACKS++;
 #endif
-    if(!p_data)
+    if(!opaque)
         return;
 
-    VideoPlayer* player = static_cast<VideoPlayer*>(p_data);
-    player->eventCallback(p_event);
+    VideoPlayer* player = static_cast<VideoPlayer*>(opaque);
+    player->eventCallback(state);
 }
 
 void playerAudioPlayCallback(void *data, const void *samples, unsigned count, int64_t pts)

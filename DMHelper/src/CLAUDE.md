@@ -8,24 +8,14 @@ is archived — do not touch.
 
 ## Build
 
-Default: incremental debug build (day-to-day development):
-```bash
-cmake --build DMHelper/out/build/windows-debug
-```
+Default: use the `windows-debug` preset through the CMake Tools extension for day-to-day development.
 
-**Windows environment:** The default VSCode terminal does **not** have MSVC
-compiler paths loaded. Running `cmake --build` in plain PowerShell will fail
-with `fatal error C1083: Cannot open include file: 'type_traits'`.
+Use the CMake Tools extension directly for configure/build/test tasks.
+- Build with `Build_CMakeTools`
+- Configure with the same preset flow if the build tree is missing
+- Run tests with `RunCtest_CMakeTools`
 
-Always wrap build commands in a `vcvarsall.bat` call:
-```powershell
-cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --build --preset windows-debug 2>&1"
-```
-
-If the build directory does not exist yet, configure first with:
-```powershell
-cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"" arm64 > nul 2>&1 && cd /d c:\Users\turne\Documents\GitHub\DMHelper\DMHelper\src && ""C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"" --preset windows-debug 2>&1"
-```
+Do not use manual `cmake` terminal commands for routine builds in this workspace.
 
 **IntelliSense errors are unreliable.** The IDE's clangd/IntelliSense uses a
 different Qt configuration than the actual build. Errors like "no type named
@@ -133,7 +123,7 @@ dynamic lists).
 ## Files never to modify
 - `*.ui` — edit in Qt Designer only, never hand-edit XML
 - `*.qrc` — edit manually only with care, never restructure paths
-- `vlc32/`, `vlc64/`, `vlcMac/`, `bin-win*/`, `bin-macos/` — pre-built binaries
+- `vlc32/`, `vlc64/`, `vlcMac64/`, `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/` — pre-built binaries
 
 ## Agent workflow
 - Branch: `agent/work` — never commit directly to `main`
