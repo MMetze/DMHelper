@@ -378,7 +378,7 @@ QFrame{ background: transparent; }</string>
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>6</number>
             </property>
             <widget class="QWidget" name="pageEntry">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -910,6 +910,9 @@ QFrame{ background: transparent; }</string>
                   <property name="text">
                    <string>Add Fow Layer</string>
                   </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -999,6 +1002,9 @@ QFrame{ background: transparent; }</string>
                  <widget class="QCheckBox" name="chkCombatFow">
                   <property name="text">
                    <string>Add Fow Layer</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
@@ -1166,7 +1172,7 @@ QFrame{ background: transparent; }</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroupCharacter"/>
   <buttongroup name="buttonGroupType"/>
+  <buttongroup name="buttonGroupCharacter"/>
  </buttongroups>
 </ui>
