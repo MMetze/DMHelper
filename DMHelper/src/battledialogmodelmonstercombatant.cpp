@@ -78,6 +78,10 @@ qreal BattleDialogModelMonsterCombatant::getSizeFactor() const
 
 int BattleDialogModelMonsterCombatant::getSizeCategory() const
 {
+    const int sizeOverride = getSizeCategoryOverride();
+    if(sizeOverride != DMHelper::CombatantSize_Unknown)
+        return sizeOverride;
+
     if(_monsterSize > DMHelper::CombatantSize_Unknown)
         return _monsterSize;
 

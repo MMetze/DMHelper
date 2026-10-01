@@ -103,6 +103,10 @@ BattleDialogModelCombatant* BattleDialogModelMonsterClass::clone() const
 
 qreal BattleDialogModelMonsterClass::getSizeFactor() const
 {
+    const int sizeOverride = getSizeCategoryOverride();
+    if(sizeOverride != DMHelper::CombatantSize_Unknown)
+        return MonsterClassv2::convertSizeCategoryToScaleFactor(sizeOverride);
+
     if(_monsterSize > 0.0)
         return _monsterSize;
 
@@ -117,6 +121,10 @@ qreal BattleDialogModelMonsterClass::getSizeFactor() const
 
 int BattleDialogModelMonsterClass::getSizeCategory() const
 {
+    const int sizeOverride = getSizeCategoryOverride();
+    if(sizeOverride != DMHelper::CombatantSize_Unknown)
+        return sizeOverride;
+
     if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSizeCategory!";

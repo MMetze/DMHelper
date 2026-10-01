@@ -47,6 +47,10 @@ public:
     virtual qreal getSizeFactor() const = 0;
     virtual int getSizeCategory() const = 0;    
 
+    // Returns CombatantSize_Unknown when no per-encounter size override is set
+    int getSizeCategoryOverride() const;
+    void setSizeCategoryOverride(int sizeCategory);
+
     Combatant* getCombatant() const;
 
     virtual int getStrength() const = 0;
@@ -100,6 +104,7 @@ public:
     static const char* DMH_KEY_PER_ROUND_RESOURCES;
     static const char* DMH_KEY_SELECTED_MOVEMENT_MODE;
     static const char* DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT;
+    static const char* DMH_KEY_SIZE_CATEGORY;
 
 public slots:
     virtual void setShown(bool isShown);

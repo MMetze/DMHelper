@@ -664,6 +664,7 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     connect(combatant, &BattleDialogModelCombatant::dirty, this, &LayerTokens::dirty);
     connect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
     connect(combatant, &BattleDialogModelCombatant::conditionsChanged, this, &LayerTokens::combatantConditionChanged);
+    connect(combatant, &BattleDialogModelCombatant::overrideChanged, this, &LayerTokens::combatantOverrideChanged);
     connect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
 
     // Wire HP-change signal for health bar refresh
@@ -712,6 +713,7 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
     disconnect(combatant, &BattleDialogModelCombatant::dirty, this, &LayerTokens::dirty);
     disconnect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
     disconnect(combatant, &BattleDialogModelCombatant::conditionsChanged, this, &LayerTokens::combatantConditionChanged);
+    disconnect(combatant, &BattleDialogModelCombatant::overrideChanged, this, &LayerTokens::combatantOverrideChanged);
     disconnect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
 
     // Disconnect HP-change signal
@@ -964,6 +966,22 @@ void LayerTokens::combatantConditionChanged(BattleDialogModelCombatant* combatan
     item->setPixmap(pix);
     item->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
     applyCombatantTooltip(item, combatant);
+}
+
+void LayerTokens::combatantOverrideChanged(BattleDialogModelCombatant* combatant, const QString& key)
+{
+    if((!combatant) || (key != QLatin1String(BattleDialogModelCombatant::DMH_KEY_SIZE_CATEGORY)))
+        return;
+
+    QGraphicsPixmapItem* item = _combatantIconHash.value(combatant);
+    if(!item)
+        return;
+
+    const QPixmap pix = item->pixmap();
+    if(pix.isNull())
+        return;
+
+    item->setScale((static_cast<qreal>(_scale-2)) * combatant->getSizeFactor() / static_cast<qreal>(qMax(pix.width(), pix.height())));
 }
 
 void LayerTokens::aliveVisibilityChanged(bool showAlive)

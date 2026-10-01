@@ -1,4 +1,5 @@
 #include "battledialogmodelcombatant.h"
+#include "dmconstants.h"
 #include <QDomElement>
 
 namespace
@@ -23,7 +24,8 @@ namespace
     {
         return (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_INITIATIVE))
             || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH))
-            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT));
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT))
+            || (key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_SIZE_CATEGORY));
     }
 
     QVariant overrideValueFromString(const QString& key, const QString& value)
@@ -49,6 +51,7 @@ const char* BattleDialogModelCombatant::DMH_KEY_CONDITIONS          = "dmh:condi
 const char* BattleDialogModelCombatant::DMH_KEY_PER_ROUND_RESOURCES = "dmh:perRoundResources";
 const char* BattleDialogModelCombatant::DMH_KEY_SELECTED_MOVEMENT_MODE = "dmh:selectedMovementMode";
 const char* BattleDialogModelCombatant::DMH_KEY_CUSTOM_MOVEMENT_SPEED_FT = "dmh:customMovementSpeedFt";
+const char* BattleDialogModelCombatant::DMH_KEY_SIZE_CATEGORY       = "dmh:sizeCategory";
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
     BattleDialogModelObject(QPointF(), 0.0, name, parent),
@@ -207,6 +210,33 @@ void BattleDialogModelCombatant::setGroupId(const QUuid& groupId)
     {
         _groupId = groupId;
     }
+}
+
+int BattleDialogModelCombatant::getSizeCategoryOverride() const
+{
+    const QString key = QString::fromLatin1(DMH_KEY_SIZE_CATEGORY);
+    if(!hasOverride(key))
+        return DMHelper::CombatantSize_Unknown;
+
+    const int sizeCategory = getOverride(key).toInt();
+    if((sizeCategory < DMHelper::CombatantSize_Tiny) || (sizeCategory > DMHelper::CombatantSize_Colossal))
+        return DMHelper::CombatantSize_Unknown;
+
+    return sizeCategory;
+}
+
+void BattleDialogModelCombatant::setSizeCategoryOverride(int sizeCategory)
+{
+    if(getSizeCategoryOverride() == sizeCategory)
+        return;
+
+    if((sizeCategory < DMHelper::CombatantSize_Tiny) || (sizeCategory > DMHelper::CombatantSize_Colossal))
+        clearOverride(QString::fromLatin1(DMH_KEY_SIZE_CATEGORY));
+    else
+        setOverride(QString::fromLatin1(DMH_KEY_SIZE_CATEGORY), sizeCategory);
+
+    // Size is part of the token geometry, so listeners tracking position/rotation must refresh
+    emit objectMoved(this);
 }
 
 Combatant* BattleDialogModelCombatant::getCombatant() const

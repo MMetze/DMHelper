@@ -734,6 +734,55 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 }
             }
 
+            {
+                QList<BattleDialogModelCombatant*> sizeTargets;
+                const QList<QGraphicsItem*> selectedForSize = selectedItems();
+                if(selectedForSize.contains(item))
+                {
+                    for(QGraphicsItem* selItem : selectedForSize)
+                    {
+                        UnselectedPixmap* selPix = dynamic_cast<UnselectedPixmap*>(selItem);
+                        BattleDialogModelCombatant* c = selPix ? dynamic_cast<BattleDialogModelCombatant*>(selPix->getObject()) : nullptr;
+                        if((c) && (c->getCombatantType() != DMHelper::CombatantType_InitiativeEvent) && (!sizeTargets.contains(c)))
+                            sizeTargets.append(c);
+                    }
+                }
+                else
+                {
+                    BattleDialogModelCombatant* c = dynamic_cast<BattleDialogModelCombatant*>(object);
+                    if((c) && (c->getCombatantType() != DMHelper::CombatantType_InitiativeEvent))
+                        sizeTargets.append(c);
+                }
+
+                if(!sizeTargets.isEmpty())
+                {
+                    QMenu* sizeMenu = menu.addMenu(QStringLiteral("Size"));
+                    QActionGroup* sizeGroup = new QActionGroup(sizeMenu);
+                    sizeGroup->setExclusive(true);
+
+                    const int currentSize = sizeTargets.first()->getSizeCategory();
+                    bool sameSize = true;
+                    for(BattleDialogModelCombatant* target : sizeTargets)
+                    {
+                        if(target->getSizeCategory() != currentSize)
+                            sameSize = false;
+                    }
+
+                    for(int sizeCategory = DMHelper::CombatantSize_Tiny; sizeCategory <= DMHelper::CombatantSize_Colossal; ++sizeCategory)
+                    {
+                        QAction* sizeAction = new QAction(MonsterClassv2::convertCategoryToSize(sizeCategory), sizeMenu);
+                        sizeAction->setCheckable(true);
+                        sizeAction->setChecked(sameSize && (currentSize == sizeCategory));
+                        sizeGroup->addAction(sizeAction);
+                        connect(sizeAction, &QAction::triggered, this, [sizeTargets, sizeCategory]() {
+                            for(BattleDialogModelCombatant* target : sizeTargets)
+                                target->setSizeCategoryOverride(sizeCategory);
+                        });
+                        sizeMenu->addAction(sizeAction);
+                    }
+                }
+            }
+
             menu.addSeparator();
 
             // Determine visibility/known state of relevant combatants for conditional menu items
