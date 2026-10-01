@@ -1,5 +1,6 @@
 #include "characterimportheroforgedialog.h"
 #include "ui_characterimportheroforgedialog.h"
+#include "dmhtheme.h"
 #include "characterimportheroforge.h"
 #include "characterimportheroforgedata.h"
 #include "dmhwaitingdialog.h"
@@ -20,9 +21,7 @@ CharacterImportHeroForgeDialog::CharacterImportHeroForgeDialog(const QString& to
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QScrollArea viewport in Qt6
-    QPalette parchPal = ui->scrollArea->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->scrollArea->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->scrollArea);
 
     _iconGrid = new QGridLayout;
     _iconGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);

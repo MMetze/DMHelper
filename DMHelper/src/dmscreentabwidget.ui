@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>TabWidget</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <property name="currentIndex">
    <number>0</number>
   </property>

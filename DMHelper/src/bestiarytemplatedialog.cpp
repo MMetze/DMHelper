@@ -1,5 +1,6 @@
 #include "bestiarytemplatedialog.h"
 #include "ui_bestiarytemplatedialog.h"
+#include "dmhtheme.h"
 #include "monsterclassv2.h"
 #include "monsterfactory.h"
 #include "bestiary.h"
@@ -29,9 +30,7 @@ BestiaryTemplateDialog::BestiaryTemplateDialog(QWidget *parent) :
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QScrollArea viewport in Qt6
-    QPalette parchPal = ui->scrollArea->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->scrollArea->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->scrollArea);
 
     connect(ui->btnLeft, &QPushButton::clicked, this, &BestiaryTemplateDialog::previousMonster);
     connect(ui->btnRight, &QPushButton::clicked, this, &BestiaryTemplateDialog::nextMonster);

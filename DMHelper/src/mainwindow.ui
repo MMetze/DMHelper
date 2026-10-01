@@ -26,13 +26,7 @@
    <iconset resource="resources.qrc">
     <normaloff>:/img/data/dmhelper_opaque.png</normaloff>:/img/data/dmhelper_opaque.png</iconset>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <widget class="QWidget" name="centralWidget">
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
@@ -51,9 +45,6 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
           </property>
           <property name="sizeAdjustPolicy">
            <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
@@ -200,9 +191,6 @@
         <font>
          <pointsize>9</pointsize>
         </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
        </property>
        <property name="frameShape">
         <enum>QFrame::Shape::StyledPanel</enum>

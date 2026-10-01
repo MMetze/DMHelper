@@ -31,9 +31,6 @@
   <property name="windowTitle">
    <string>View</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_18">
    <property name="spacing">
     <number>3</number>
@@ -964,9 +961,6 @@
          </property>
          <property name="toolTip">
           <string>The distance between two points</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>

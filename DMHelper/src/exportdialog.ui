@@ -16,9 +16,6 @@
   <property name="windowTitle">
    <string>DMHelper - Export Data</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,5,0">
    <item>
     <widget class="QGroupBox" name="grpEntries">

@@ -1,5 +1,6 @@
 #include "battledialoglogview.h"
 #include "ui_battledialoglogview.h"
+#include "dmhtheme.h"
 #include "battledialoglogger.h"
 #include "battledialogmodel.h"
 #include "battledialogevent.h"
@@ -16,10 +17,8 @@ BattleDialogLogView::BattleDialogLogView(const BattleDialogModel& model, const B
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QTableWidget viewports in Qt6
-    QPalette parchPal;
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->tblParty->setPalette(parchPal);
-    ui->tblEnemies->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->tblParty);
+    DMHTheme::setParchmentBase(ui->tblEnemies);
 
     int rounds = 1;
     int totalPartyDamage = 0;

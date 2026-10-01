@@ -24,9 +24,6 @@
   <property name="windowTitle">
    <string/>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <property name="title" stdset="0">
    <string>Sound Effects</string>
   </property>

@@ -25,9 +25,6 @@
   <property name="windowTitle">
    <string>Combat</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>3</number>

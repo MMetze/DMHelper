@@ -1,5 +1,6 @@
 #include "bestiaryexportdialog.h"
 #include "ui_bestiaryexportdialog.h"
+#include "dmhtheme.h"
 #include "bestiary.h"
 #include "monsterclassv2.h"
 #include <QFileDialog>
@@ -14,9 +15,7 @@ BestiaryExportDialog::BestiaryExportDialog(QWidget *parent) :
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QListWidget viewport in Qt6
-    QPalette parchPal = ui->listMonsters->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->listMonsters->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->listMonsters);
 
     connect(ui->btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
     connect(ui->btnSelectNone, SIGNAL(clicked()), this, SLOT(selectNone()));

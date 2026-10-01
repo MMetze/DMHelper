@@ -1,0 +1,14 @@
+; DMHelper Light theme colours. Format: name = colour (#rrggbb, #aarrggbb, an SVG colour name or "transparent").
+; Every name can be used as @name in modern.qss and base.qss. Copy this file to the theme folder to override values.
+window = #f4efe6
+surface = #fbf8f2
+surfaceHover = #ece5d8
+border = #d3c7b1
+text = #2b2620
+textMuted = #786e60
+accent = #9c6b1f
+accentSoft = #ecd9b2
+onAccent = #ffffff
+iconPlate = transparent
+iconPlateChecked = #ecd9b2
+scrollHandle = #c8bca6

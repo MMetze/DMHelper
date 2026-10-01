@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QDebug>
 #include "dmhmessagebox.h"
+#include "dmhtheme.h"
 
 // TODO: consider copy of MRU functionality
 
@@ -30,6 +31,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _rulesetFileName(),
     _showAnimations(false),
     _autoSave(true),
+    _uiTheme(DMHTheme::ThemeType_Classic),
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
     _logicalDPI(0.0),
@@ -158,6 +160,11 @@ bool OptionsContainer::getShowAnimations() const
 bool OptionsContainer::getAutoSave() const
 {
     return _autoSave;
+}
+
+int OptionsContainer::getUiTheme() const
+{
+    return _uiTheme;
 }
 
 QString OptionsContainer::getFontFamily() const
@@ -492,6 +499,7 @@ void OptionsContainer::readSettings()
 
     setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
     setAutoSave(settings.value("autoSave", QVariant(true)).toBool());
+    setUiTheme(settings.value("uiTheme", QVariant(DMHTheme::ThemeType_Classic)).toInt());
     setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
 
     //12*96/72 = 16 Pixels
@@ -588,6 +596,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("ruleset", getUserRulesetFileName());
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("autoSave", getAutoSave());
+    settings.setValue("uiTheme", getUiTheme());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
     settings.setValue("pasteRich", getPasteRich());
@@ -1082,6 +1091,18 @@ void OptionsContainer::setAutoSave(bool autoSave)
     }
 }
 
+void OptionsContainer::setUiTheme(int uiTheme)
+{
+    if((uiTheme < DMHTheme::ThemeType_Classic) || (uiTheme >= DMHTheme::ThemeType_Count))
+        uiTheme = DMHTheme::ThemeType_Classic;
+
+    if(_uiTheme != uiTheme)
+    {
+        _uiTheme = uiTheme;
+        emit uiThemeChanged(_uiTheme);
+    }
+}
+
 void OptionsContainer::setFontFamily(const QString& fontFamily)
 {
     if(_fontFamily != fontFamily)
@@ -1532,6 +1553,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setLastRuleset(other->_lastRuleset);
         setShowAnimations(other->_showAnimations);
         setAutoSave(other->_autoSave);
+        setUiTheme(other->_uiTheme);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);

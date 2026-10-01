@@ -88,7 +88,7 @@ void PublishButtonFrame::handleToggle(bool checked)
     }
     else
     {
-        ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
+        ui->btnPublish->setStyleSheet(QString("QPushButton {font-weight: bold; }"));
         ui->btnPublish->setText(QString("Publish"));
     }
 }

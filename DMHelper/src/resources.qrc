@@ -75,6 +75,11 @@
         <file>data/icon_clock.png</file>
         <file>data/icon_screen.png</file>
         <file>data/parchmentdark.png</file>
+        <file>data/theme/classic.qss</file>
+        <file>data/theme/modern.qss</file>
+        <file>data/theme/base.qss</file>
+        <file>data/theme/light.colors</file>
+        <file>data/theme/dark.colors</file>
         <file>data/align-center.png</file>
         <file>data/align-left.png</file>
         <file>data/align-right.png</file>

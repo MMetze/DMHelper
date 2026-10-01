@@ -19,9 +19,6 @@
   <property name="windowTitle">
    <string/>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <property name="frameShape">
    <enum>QFrame::Panel</enum>
   </property>

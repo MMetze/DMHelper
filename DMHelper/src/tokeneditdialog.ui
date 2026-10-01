@@ -19,9 +19,6 @@
   <property name="windowTitle">
    <string>Token Editor</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
@@ -49,10 +46,6 @@
               <width>0</width>
               <height>0</height>
              </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
             </property>
             <property name="frameShape">
              <enum>QFrame::Shape::Box</enum>
@@ -308,9 +301,6 @@ QFrame{ background: transparent; }</string>
               <width>40</width>
               <height>16777215</height>
              </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true"/>
             </property>
             <property name="text">
              <string>...</string>

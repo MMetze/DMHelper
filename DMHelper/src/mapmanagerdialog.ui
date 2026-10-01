@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>DMHelper Map Manager</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1">
@@ -88,9 +85,6 @@
        </item>
        <item>
         <widget class="QTreeView" name="treeView">
-         <property name="styleSheet">
-          <string notr="true">background: transparent;</string>
-         </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
          </property>
@@ -197,9 +191,6 @@
      </item>
      <item>
       <widget class="QFrame" name="frame">
-       <property name="styleSheet">
-        <string notr="true">background: transparent;</string>
-       </property>
        <property name="frameShape">
         <enum>QFrame::Shape::StyledPanel</enum>
        </property>
@@ -209,9 +200,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="4,1,0">
         <item>
          <widget class="QLabel" name="lblPreview">
-          <property name="styleSheet">
-           <string notr="true">background: transparent;</string>
-          </property>
           <property name="frameShape">
            <enum>QFrame::Shape::Box</enum>
           </property>
@@ -230,9 +218,6 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background: transparent;</string>
           </property>
          </widget>
         </item>

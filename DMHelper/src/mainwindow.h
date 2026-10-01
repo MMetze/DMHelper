@@ -189,6 +189,8 @@ protected slots:
 
     void handleAutoSaveExpired();
     void handleAutoSaveChanged();
+    void applyUiTheme();
+    void handleColorSchemeChanged();
     void handleAnimationStarted();
 
     void previewCurrentTextEntry();
@@ -225,6 +227,8 @@ protected slots:
     void setRibbonToType(int objectType);
 
 private:
+    void watchUserThemeFiles();
+
     Ui::MainWindow *ui;
 
     PublishWindow* _pubWindow;

@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Dice Rolling</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="10,1">
    <property name="spacing">
     <number>3</number>

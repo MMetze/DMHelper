@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>DMHelper - Bestiary</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,5">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">

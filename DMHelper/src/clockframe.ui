@@ -19,10 +19,6 @@
   <property name="windowTitle">
    <string/>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
-  </property>
   <property name="frameShape">
    <enum>QFrame::Shape::StyledPanel</enum>
   </property>
@@ -69,10 +65,6 @@ QFrame{ background: transparent; }</string>
      <height>16</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">background-image:none;
-background-color: rgba(0,0,0,0%);</string>
-   </property>
    <property name="frameShape">
     <enum>QFrame::Shape::NoFrame</enum>
    </property>
@@ -100,10 +92,6 @@ background-color: rgba(0,0,0,0%);</string>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-image:none;
-background-color: rgba(0,0,0,0%);</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::Shape::NoFrame</enum>

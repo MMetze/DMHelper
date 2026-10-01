@@ -91,6 +91,9 @@
 #include "overlayrenderer.h"
 #include "overlayfear.h"
 #include "overlayseditdialog.h"
+#include "dmhtheme.h"
+#include <QFileSystemWatcher>
+#include <QStyleHints>
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -124,6 +127,7 @@
 #endif
 
 const int AUTOSAVE_TIMER_INTERVAL = 60000; // 1 minute
+const int THEME_RELOAD_DELAY = 300; // ms, coalesces the burst of change signals from a single save
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -253,6 +257,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
     qApp->setFont(f);
 
+    // Before setupUi so widgets are polished once with the final style
+    DMHTheme::setUserThemeDirectory(_options->getStandardDirectory(QStringLiteral("theme")));
+    DMHTheme::apply(static_cast<DMHTheme::ThemeType>(_options->getUiTheme()));
+    watchUserThemeFiles();
+
     connect(_options, &OptionsContainer::autoSaveChanged, this, &MainWindow::handleAutoSaveChanged);
     connect(this, &MainWindow::campaignLoaded, this, &MainWindow::handleAutoSaveChanged);
 
@@ -277,9 +286,11 @@ MainWindow::MainWindow(QWidget *parent) :
     // Fix CampaignTree parchment background for Qt6: QTreeView uses QPalette::Base
     // for its viewport background, not the widget stylesheet background-image.
     ui->treeView->setStyleSheet(QString());
-    QPalette treePal = ui->treeView->palette();
-    treePal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->treeView->setPalette(treePal);
+    DMHTheme::setParchmentBase(ui->treeView);
+    connect(_options, &OptionsContainer::uiThemeChanged, this, &MainWindow::applyUiTheme);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, &MainWindow::handleColorSchemeChanged);
+#endif
 
     if(screen)
     {
@@ -2693,6 +2704,59 @@ void MainWindow::handleAutoSaveChanged()
         if(_autoSaveTimer)
             _autoSaveTimer->stop();
     }
+}
+
+void MainWindow::applyUiTheme()
+{
+    // Applying ThemeType_System unsets the colour scheme, which can re-enter via colorSchemeChanged
+    static bool applying = false;
+    if(applying)
+        return;
+
+    applying = true;
+    DMHTheme::apply(static_cast<DMHTheme::ThemeType>(_options->getUiTheme()));
+    applying = false;
+}
+
+void MainWindow::handleColorSchemeChanged()
+{
+    if(_options->getUiTheme() == DMHTheme::ThemeType_System)
+        applyUiTheme();
+}
+
+void MainWindow::watchUserThemeFiles()
+{
+    const QString themeDirectory = DMHTheme::userThemeDirectory();
+    if(themeDirectory.isEmpty())
+        return;
+
+    QFileSystemWatcher* watcher = new QFileSystemWatcher(this);
+    QTimer* reloadTimer = new QTimer(this);
+    reloadTimer->setSingleShot(true);
+    reloadTimer->setInterval(THEME_RELOAD_DELAY);
+    connect(reloadTimer, &QTimer::timeout, this, &MainWindow::applyUiTheme);
+
+    // Editors often save by replacing the file, which drops it from the watcher, so re-add on every change
+    auto watchFiles = [watcher, themeDirectory]()
+    {
+        const QDir dir(themeDirectory);
+        for(const QString& fileName : DMHTheme::themeFileNames())
+        {
+            const QString filePath = dir.filePath(fileName);
+            if(QFile::exists(filePath) && !watcher->files().contains(filePath))
+                watcher->addPath(filePath);
+        }
+    };
+    auto handleChange = [watchFiles, reloadTimer]()
+    {
+        watchFiles();
+        reloadTimer->start();
+    };
+
+    watcher->addPath(themeDirectory);
+    watchFiles();
+    connect(watcher, &QFileSystemWatcher::directoryChanged, this, handleChange);
+    connect(watcher, &QFileSystemWatcher::fileChanged, this, handleChange);
 }
 
 void MainWindow::handleAnimationStarted()

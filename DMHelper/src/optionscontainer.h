@@ -33,6 +33,7 @@ public:
     QString getLastRuleset() const;
     bool getShowAnimations() const;
     bool getAutoSave() const;
+    int getUiTheme() const;
 
     // Font settings
     QString getFontFamily() const;
@@ -110,6 +111,7 @@ signals:
     void rulesetFileNameChanged(const QString& filename);
     void showAnimationsChanged(bool showAnimations);
     void autoSaveChanged(bool autoSave);
+    void uiThemeChanged(int uiTheme);
 
     // Font settings
     void fontFamilyChanged(const QString& fontFamily);
@@ -197,6 +199,7 @@ public slots:
     void setLastRuleset(const QString& lastRuleset);
     void setShowAnimations(bool showAnimations);
     void setAutoSave(bool autoSave);
+    void setUiTheme(int uiTheme);
 
     // Font settings
     void setFontFamily(const QString& fontFamily);
@@ -283,6 +286,7 @@ private:
     QString _rulesetFileName;
     bool _showAnimations;
     bool _autoSave;
+    int _uiTheme;
 
     // Font settings
     QString _fontFamily;

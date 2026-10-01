@@ -1,5 +1,6 @@
 #include "battlecombatantwidget.h"
 #include "ui_battlecombatantwidget.h"
+#include "dmhtheme.h"
 #include "rulehealth.h"
 #include "battledialogmodel.h"
 #include <QIntValidator>
@@ -17,9 +18,7 @@ BattleCombatantWidget::BattleCombatantWidget(BattleDialogModelCombatant* combata
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QTextEdit viewport in Qt6
-    QPalette parchPal = ui->edtResult->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->edtResult->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->edtResult);
 
     QValidator* valHitPoints = new QIntValidator(-999999, 999999, this);
     ui->edtHP->setValidator(valHitPoints);

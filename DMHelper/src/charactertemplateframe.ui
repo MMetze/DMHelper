@@ -16,9 +16,6 @@
     <height>16777215</height>
    </size>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
    <property name="spacing">
     <number>3</number>
@@ -495,9 +492,6 @@
        </property>
        <property name="focusPolicy">
         <enum>Qt::FocusPolicy::NoFocus</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 255);</string>
        </property>
        <property name="text">
         <string>TextLabel</string>

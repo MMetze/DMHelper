@@ -219,6 +219,7 @@ set(DMHELPER_SOURCES
     dmhfilereader.cpp
     dmhlogger.cpp
     dmhmessagebox.cpp
+    dmhtheme.cpp
     dmhwaitingdialog.cpp
     dmscreentabwidget.cpp
     emptycampaignframe.cpp
@@ -577,6 +578,7 @@ set(DMHELPER_HEADERS
     dmhfilereader.h
     dmhlogger.h
     dmhmessagebox.h
+    dmhtheme.h
     dmhwaitingdialog.h
     dmscreentabwidget.h
     dmversion.h
@@ -1079,4 +1081,38 @@ if (MSVC)
     target_compile_options(DMHelper PRIVATE /W3)
 else()
     target_compile_options(DMHelper PRIVATE -Wall -Wextra)
+endif()
+
+# -------------------------------------------------
+# Dev tool: .ui screenshot harness (see dev/tools/uishots)
+# -------------------------------------------------
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(_dmh_ui_shots_default ON)
+else()
+    set(_dmh_ui_shots_default OFF)
+endif()
+option(DMH_BUILD_UI_SHOTS "Build the DMHelperUiShots .ui screenshot harness" ${_dmh_ui_shots_default})
+
+if (DMH_BUILD_UI_SHOTS)
+    add_executable(DMHelperUiShots
+        dev/tools/uishots/uishotsmain.cpp
+        dmhtheme.cpp
+        dmhtheme.h
+        ${DMHELPER_RESOURCES}
+    )
+    target_include_directories(DMHelperUiShots PRIVATE ./)
+    target_link_libraries(DMHelperUiShots PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
+        Qt6::UiTools
+    )
+    if (TARGET Qt6::QOffscreenIntegrationPlugin)
+        add_custom_command(TARGET DMHelperUiShots POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:DMHelperUiShots>/platforms"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:Qt6::QOffscreenIntegrationPlugin>" "$<TARGET_FILE_DIR:DMHelperUiShots>/platforms/"
+            COMMENT "Deploying offscreen platform plugin for DMHelperUiShots"
+            VERBATIM
+        )
+    endif()
 endif()

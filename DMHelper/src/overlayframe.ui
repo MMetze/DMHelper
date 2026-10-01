@@ -10,9 +10,6 @@
     <height>70</height>
    </rect>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <property name="frameShape">
    <enum>QFrame::Panel</enum>
   </property>
@@ -76,9 +73,6 @@
      </property>
      <property name="toolTip">
       <string>Combined DM/Player Visibility</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
      </property>
      <property name="text">
       <string/>

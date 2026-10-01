@@ -1,0 +1,170 @@
+/* DMHelper Classic theme - the parchment look formerly set inline in every .ui file.
+
+   An inline styleSheet applied to its widget and all descendants, and a nearer (inner) sheet beat
+   an outer one regardless of specificity. In one application sheet that is emulated by:
+     - "QWidget#Form, #Form QWidget" for a form's plain declarations (specificity 101)
+     - "#Form #child" (200+) for declarations that were set on a widget inside a form
+   Promoted forms (embedded through another .ui) lose their objectName, so they are also matched by class. */
+
+/* ---- 1. Every form: parchment background (MainWindow first, it encloses everything else) ---- */
+QWidget#MainWindow, #MainWindow QWidget,
+QWidget#AboutDialog, #AboutDialog QWidget,
+QWidget#AudioPlaybackFrame, #AudioPlaybackFrame QWidget,
+QWidget#AudioTrackEdit, #AudioTrackEdit QWidget,
+QWidget#BattleCombatantWidget, #BattleCombatantWidget QWidget,
+QWidget#BattleDialogEffectSettings, #BattleDialogEffectSettings QWidget,
+QWidget#BattleDialogEffectSettingsFire, #BattleDialogEffectSettingsFire QWidget,
+QWidget#BattleDialogEffectSettingsLight, #BattleDialogEffectSettingsLight QWidget,
+QWidget#BattleDialogEffectSettingsObjectVideo, #BattleDialogEffectSettingsObjectVideo QWidget,
+QWidget#BattleDialogEffectSettingsSmoke, #BattleDialogEffectSettingsSmoke QWidget,
+QWidget#BattleDialogEffectSettingsSparks, #BattleDialogEffectSettingsSparks QWidget,
+QWidget#BattleDialogLogView, #BattleDialogLogView QWidget,
+QWidget#BattleFrame, #BattleFrame QWidget,
+QWidget#BestiaryExportDialog, #BestiaryExportDialog QWidget,
+QWidget#BestiaryPopulateTokensDialog, #BestiaryPopulateTokensDialog QWidget,
+QWidget#BestiaryTemplateDialog, #BestiaryTemplateDialog QWidget,
+QWidget#CharacterImportDialog, #CharacterImportDialog QWidget,
+QWidget#CharacterImportHeroForgeDialog, #CharacterImportHeroForgeDialog QWidget,
+QWidget#CharacterTemplateFrame, #CharacterTemplateFrame QWidget,
+QWidget#ClockFrame, #ClockFrame QWidget,
+QWidget#CombatantDialog, #CombatantDialog QWidget,
+QWidget#CombatantGroupWidget, #CombatantGroupWidget QWidget,
+QWidget#CombatantSelectDialog, #CombatantSelectDialog QWidget,
+QWidget#CombatantWidgetBase, #CombatantWidgetBase QWidget,
+QWidget#ConditionsEditDialog, #ConditionsEditDialog QWidget,
+QWidget#ConfigureLockedGridDialog, #ConfigureLockedGridDialog QWidget,
+QWidget#CountdownFrame, #CountdownFrame QWidget,
+QWidget#CountdownSubFrame, #CountdownSubFrame QWidget,
+QWidget#CustomTableFrame, #CustomTableFrame QWidget,
+QWidget#DiceRollDialog, #DiceRollDialog QWidget,
+QWidget#DiceRollDialogCombatants, #DiceRollDialogCombatants QWidget,
+QWidget#DiceRollFrame, #DiceRollFrame QWidget,
+QWidget#DMHWaitingDialog, #DMHWaitingDialog QWidget,
+QWidget#DMScreenTabWidget, #DMScreenTabWidget QWidget,
+QWidget#EmptyCampaignFrame, #EmptyCampaignFrame QWidget,
+QWidget#EncounterTextEdit, #EncounterTextEdit QWidget,
+QWidget#ExpertiseDialog, #ExpertiseDialog QWidget,
+QWidget#ExportDialog, #ExportDialog QWidget,
+QWidget#FearFrame, #FearFrame QWidget,
+QWidget#GlobalSearchFrame, #GlobalSearchFrame QWidget,
+QWidget#HelpDialog, #HelpDialog QWidget,
+QWidget#InitiativeEventWidget, #InitiativeEventWidget QWidget,
+QWidget#InitiativeListDialog, #InitiativeListDialog QWidget,
+QWidget#ItemSelectDialog, #ItemSelectDialog QWidget,
+QWidget#LayerFowSettings, #LayerFowSettings QWidget,
+QWidget#LayerFrame, #LayerFrame QWidget,
+QWidget#LayersEditDialog, #LayersEditDialog QWidget,
+QWidget#LayerVideoEffectSettings, #LayerVideoEffectSettings QWidget,
+QWidget#LegalDialog, #LegalDialog QWidget,
+QWidget#MapBlankDialog, #MapBlankDialog QWidget,
+QWidget#MapColorizeDialog, #MapColorizeDialog QWidget,
+QWidget#MapManagerDialog, #MapManagerDialog QWidget,
+QWidget#MapSelectDialog, #MapSelectDialog QWidget,
+QWidget#MonsterActionEditDialog, #MonsterActionEditDialog QWidget,
+QWidget#MonsterActionFrame, #MonsterActionFrame QWidget,
+QWidget#NewCampaignDialog, #NewCampaignDialog QWidget,
+QWidget#NewEntryDialog, #NewEntryDialog QWidget,
+QWidget#ObjectImportDialog, #ObjectImportDialog QWidget,
+QWidget#OptionsDialog, #OptionsDialog QWidget,
+QWidget#OverlayFrame, #OverlayFrame QWidget,
+QWidget#OverlaysEditDialog, #OverlaysEditDialog QWidget,
+QWidget#PartyCharacterGridFrame, #PartyCharacterGridFrame QWidget,
+QWidget#PartyFrame, #PartyFrame QWidget,
+QWidget#PartyFrameCharacter, #PartyFrameCharacter QWidget,
+QWidget#PopupsPreviewFrame, #PopupsPreviewFrame QWidget,
+QWidget#PresentUpdateDialog, #PresentUpdateDialog QWidget,
+QWidget#PublishButtonRibbon, #PublishButtonRibbon QWidget,
+QWidget#QuickRefFrame, #QuickRefFrame QWidget,
+QWidget#RandomMarketDialog, #RandomMarketDialog QWidget,
+QWidget#RibbonTabAudio, #RibbonTabAudio QWidget,
+QWidget#RibbonTabBattle, #RibbonTabBattle QWidget,
+QWidget#RibbonTabBattleMap, #RibbonTabBattleMap QWidget,
+QWidget#RibbonTabBattleView, #RibbonTabBattleView QWidget,
+QWidget#RibbonTabCampaign, #RibbonTabCampaign QWidget,
+QWidget#RibbonTabFile, #RibbonTabFile QWidget,
+QWidget#RibbonTabMap, #RibbonTabMap QWidget,
+QWidget#RibbonTabText, #RibbonTabText QWidget,
+QWidget#RibbonTabTools, #RibbonTabTools QWidget,
+QWidget#RibbonTabWorldMap, #RibbonTabWorldMap QWidget,
+QWidget#SelectCombatantDialog, #SelectCombatantDialog QWidget,
+QWidget#SelectItemDialog, #SelectItemDialog QWidget,
+QWidget#SelectStringDialog, #SelectStringDialog QWidget,
+QWidget#SelectZoom, #SelectZoom QWidget,
+QWidget#SoundboardFrame, #SoundboardFrame QWidget,
+QWidget#SoundBoardGroupFrame, #SoundBoardGroupFrame QWidget,
+QWidget#SoundboardTrackFrame, #SoundboardTrackFrame QWidget,
+QWidget#SpellbookTemplateDialog, #SpellbookTemplateDialog QWidget,
+QWidget#TextPublishDialog, #TextPublishDialog QWidget,
+QWidget#TextTranslateDialog, #TextTranslateDialog QWidget,
+QWidget#TimeAndDateFrame, #TimeAndDateFrame QWidget,
+QWidget#TokenEditDialog, #TokenEditDialog QWidget,
+QWidget#WelcomeFrame, #WelcomeFrame QWidget,
+QWidget#WhatsNewDialog, #WhatsNewDialog QWidget {
+    background-image: url(:/img/data/parchment.jpg);
+}
+
+QWidget#DiceRollFrame, #DiceRollFrame QWidget {
+    color: rgb(0, 0, 0);
+}
+
+QWidget#EncounterTextEdit, #EncounterTextEdit QWidget {
+    background-color: rgb(238, 238, 238);
+}
+
+QWidget#MapFrame, #MapFrame QWidget {
+    background-image: url(:/img/data/parchment.jpg);
+}
+
+QGroupBox#MapFrame, #MapFrame QGroupBox {
+    border: 2px solid gray;
+    border-radius: 3px;
+}
+
+/* Several old inline sheets mixed bare declarations with a "QFrame{ background: transparent; }" rule.
+   Qt cannot parse that mix, so only the bare declarations ever took effect; those rules are not recreated. */
+
+/* ---- 2. Promoted forms: their own sheet was nearer than the hosting ribbon/form ---- */
+QWidget#PublishButtonRibbon, #PublishButtonRibbon QWidget, #MainWindow PublishButtonRibbon, #MainWindow PublishButtonRibbon QWidget {
+    background-color: rgb(238, 238, 238);
+}
+
+/* ---- 3. Widgets inside forms that carried their own sheet ---- */
+#EncounterTextEdit #textBrowser, #EncounterTextEdit #textBrowser QWidget,
+#LayerEffectSettings #dialDirection, #LayerEffectSettings #dialDirection QWidget {
+    background-image: url(:/img/data/parchment.jpg);
+}
+
+#TimeAndDateFrame #timeEdit, #TimeAndDateFrame #timeEdit QWidget {
+    background-image: url(:/img/data/parchment.jpg);
+    background-color: rgb(200, 200, 200);
+}
+
+#EncounterTextEdit #textFormatter, #EncounterTextEdit #textFormatter QWidget,
+#CustomTableFrame #listWidget, #CustomTableFrame #listWidget QWidget,
+#CustomTableFrame #listEntries, #CustomTableFrame #listEntries QWidget,
+#CustomTableFrame #edtResult, #CustomTableFrame #edtResult QWidget,
+#MapManagerDialog #treeView, #MapManagerDialog #treeView QWidget,
+#MapManagerDialog #frame, #MapManagerDialog #frame QWidget,
+#MapManagerDialog #lblPreview, #MapManagerDialog #lblPreview QWidget,
+#MapManagerDialog #edtTags, #MapManagerDialog #edtTags QWidget,
+#NewEntryDialog #textBrowserEntry, #NewEntryDialog #textBrowserEntry QWidget,
+#NewEntryDialog QFrame#frameEntryType, #NewEntryDialog #frameEntryType QFrame,
+#NewEntryDialog QFrame#frameEntryDetails, #NewEntryDialog #frameEntryDetails QFrame,
+#RandomMarketDialog #cmbLocation, #RandomMarketDialog #cmbLocation QWidget,
+#RandomMarketDialog #cmbShop, #RandomMarketDialog #cmbShop QWidget {
+    background: transparent;
+}
+
+#LegalDialog #plainTextEdit, #LegalDialog #plainTextEdit QWidget {
+    background-color: rgb(240, 240, 240);
+}
+
+#MonsterActionEditDialog #line_5, #MonsterActionEditDialog #line_5 QWidget,
+#MonsterActionFrame #line_5, #MonsterActionFrame #line_5 QWidget {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(50, 50, 50, 255), stop:1 rgba(50, 50, 50, 0));
+}
+
+#CharacterTemplateFrame QLabel#lblDndBeyondLink,
+#PresentUpdateDialog QLabel#lblWebsiteLink {
+    color: rgb(0, 0, 255);
+}

@@ -1,0 +1,214 @@
+/* Modern DMHelper theme. @tokens are replaced by DMHTheme with the light or dark colour set. */
+
+QMainWindow, QDialog {
+    background: @window;
+}
+
+QToolTip {
+    background: @surface;
+    color: @text;
+    border: 1px solid @border;
+    padding: 4px;
+}
+
+QGroupBox {
+    border: 1px solid @border;
+    border-radius: 6px;
+    margin-top: 1.1em;
+    padding: 6px 4px 4px 4px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 4px;
+    color: @accent;
+}
+
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QTextEdit, QPlainTextEdit, QTextBrowser {
+    background: @surface;
+    color: @text;
+    border: 1px solid @border;
+    border-radius: 4px;
+    padding: 3px 6px;
+    selection-background-color: @accent;
+    selection-color: @onAccent;
+}
+
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QTextEdit:focus, QPlainTextEdit:focus {
+    border-color: @accent;
+}
+
+QLineEdit:disabled, QSpinBox:disabled, QComboBox:disabled {
+    color: @textMuted;
+    background: @window;
+}
+
+QComboBox QAbstractItemView {
+    background: @surface;
+    border: 1px solid @border;
+    selection-background-color: @accentSoft;
+    selection-color: @text;
+}
+
+QPushButton, QToolButton {
+    background: @surface;
+    color: @text;
+    border: 1px solid @border;
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+
+QPushButton:hover, QToolButton:hover {
+    background: @surfaceHover;
+    border-color: @accent;
+}
+
+QPushButton:pressed, QToolButton:pressed {
+    background: @border;
+}
+
+QPushButton:checked, QToolButton:checked {
+    background: @accentSoft;
+    border-color: @accent;
+}
+
+QPushButton:disabled, QToolButton:disabled {
+    color: @textMuted;
+    border-color: @surfaceHover;
+}
+
+/* Ribbon and icon buttons: the sketch icons are dark, so they sit on an icon plate (transparent in light mode). */
+QPushButton:flat, QToolButton {
+    background: @iconPlate;
+    border: 1px solid transparent;
+    padding: 2px;
+}
+
+QPushButton:flat:hover, QToolButton:hover {
+    border-color: @accent;
+}
+
+QPushButton:flat:checked, QToolButton:checked {
+    background: @iconPlateChecked;
+    border-color: @accent;
+}
+
+QToolButton::menu-button {
+    background: transparent;
+    border: none;
+    width: 12px;
+}
+
+QTabWidget::pane {
+    border: none;
+    border-top: 1px solid @border;
+}
+
+QTabBar::tab {
+    background: transparent;
+    color: @textMuted;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 6px 14px;
+}
+
+QTabBar::tab:hover {
+    color: @text;
+}
+
+QTabBar::tab:selected {
+    color: @text;
+    border-bottom-color: @accent;
+}
+
+QTreeView, QListView, QTableView {
+    background: @surface;
+    alternate-background-color: @surfaceHover;
+    border: 1px solid @border;
+    border-radius: 4px;
+    selection-background-color: @accentSoft;
+    selection-color: @text;
+}
+
+QHeaderView::section {
+    background: @surfaceHover;
+    color: @text;
+    border: none;
+    border-right: 1px solid @border;
+    border-bottom: 1px solid @border;
+    padding: 4px 6px;
+}
+
+QMenu {
+    background: @surface;
+    color: @text;
+    border: 1px solid @border;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 5px 22px;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background: @accentSoft;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: @border;
+    margin: 4px 8px;
+}
+
+QSplitter::handle {
+    background: @border;
+}
+
+QSplitter::handle:horizontal {
+    width: 2px;
+}
+
+QSplitter::handle:vertical {
+    height: 2px;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 0;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: @scrollHandle;
+    border-radius: 4px;
+    min-height: 24px;
+    margin: 2px;
+}
+
+QScrollBar::handle:horizontal {
+    background: @scrollHandle;
+    border-radius: 4px;
+    min-width: 24px;
+    margin: 2px;
+}
+
+QScrollBar::handle:hover {
+    background: @textMuted;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    width: 0;
+    height: 0;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}

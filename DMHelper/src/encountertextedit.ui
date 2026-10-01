@@ -13,11 +13,6 @@
   <property name="windowTitle">
    <string>Frame</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-background-color: rgb(238, 238, 238);
-QFrame{ background: transparent; }</string>
-  </property>
   <property name="frameShape">
    <enum>QFrame::Shape::StyledPanel</enum>
   </property>
@@ -32,9 +27,6 @@ QFrame{ background: transparent; }</string>
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
      </property>
      <property name="readOnly">
       <bool>false</bool>
@@ -57,9 +49,6 @@ QFrame{ background: transparent; }</string>
        <width>0</width>
        <height>50</height>
       </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background: transparent;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>

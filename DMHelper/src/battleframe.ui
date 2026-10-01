@@ -16,9 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -46,9 +43,6 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
       </property>
       <property name="dragMode">
        <enum>QGraphicsView::DragMode::RubberBandDrag</enum>
@@ -492,9 +486,6 @@
              <property name="toolTip">
               <string>Time left for the active combatant</string>
              </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
              <property name="text">
               <string>0</string>
              </property>
@@ -572,9 +563,6 @@
              <property name="toolTip">
               <string>Time left for the active combatant</string>
              </property>
-             <property name="styleSheet">
-              <string notr="true">color: #ff0000;</string>
-             </property>
              <property name="text">
               <string>0</string>
              </property>
@@ -644,9 +632,6 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
          </property>
          <property name="verticalScrollBarPolicy">
           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>

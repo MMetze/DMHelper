@@ -1,5 +1,6 @@
 #include "whatsnewdialog.h"
 #include "ui_whatsnewdialog.h"
+#include "dmhtheme.h"
 #include <QPainter>
 #include <QFile>
 #include <QTextStream>
@@ -15,9 +16,7 @@ WhatsNewDialog::WhatsNewDialog(const QString& dataFile, const QString& dialogTit
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QTextBrowser viewport in Qt6
-    QPalette parchPal = ui->textBrowser->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->textBrowser->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->textBrowser);
 
     ui->textBrowser->installEventFilter(this);
 

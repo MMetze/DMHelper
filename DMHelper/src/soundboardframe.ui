@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Soundboard</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>3</number>

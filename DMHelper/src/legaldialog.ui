@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>License and Data Usage</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="label">
@@ -47,9 +43,6 @@ QFrame{ background: transparent; }</string>
      </property>
      <property name="acceptDrops">
       <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: rgb(240, 240, 240);</string>
      </property>
      <property name="undoRedoEnabled">
       <bool>false</bool>

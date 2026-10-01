@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>Bestiary Export</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <widget class="QListWidget" name="listMonsters"/>

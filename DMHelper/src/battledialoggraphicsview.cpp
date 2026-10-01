@@ -1,4 +1,5 @@
 #include "battledialoggraphicsview.h"
+#include "dmhtheme.h"
 #include <QKeyEvent>
 #include <QPainter>
 #include <QPixmap>
@@ -15,7 +16,7 @@ BattleDialogGraphicsView::~BattleDialogGraphicsView()
 void BattleDialogGraphicsView::drawBackground(QPainter *painter, const QRectF &rect)
 {
     static const QPixmap parchment(QString(":/img/data/parchment.jpg"));
-    if(parchment.isNull())
+    if((parchment.isNull()) || (!DMHTheme::isClassic()))
     {
         QGraphicsView::drawBackground(painter, rect);
         return;

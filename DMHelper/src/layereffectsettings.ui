@@ -290,9 +290,6 @@
               <height>50</height>
              </size>
             </property>
-            <property name="styleSheet">
-             <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-            </property>
             <property name="minimum">
              <number>0</number>
             </property>

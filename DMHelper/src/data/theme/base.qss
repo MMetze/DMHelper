@@ -1,0 +1,32 @@
+/* DMHelper base rules - applied after every theme. Functional styling that must survive theme changes:
+   transparency where widgets are layered over painted content, and state colours. @tokens are available. */
+
+/* Combatant rows and rollovers paint their own state background */
+#CombatantWidgetBase #frameCombatant, #CombatantWidgetBase #frameCombatant QWidget,
+#CombatantRolloverFrame #listActions {
+    background-color: transparent;
+}
+
+QWidget#QuickRefDataWidget, #QuickRefDataWidget QWidget {
+    background-image: none;
+    background-color: transparent;
+}
+
+QWidget#RibbonFrameText, #RibbonFrameText QWidget,
+#MainWindow RibbonFrameText, #MainWindow RibbonFrameText QWidget {
+    background: transparent;
+}
+
+#PublishButtonRibbon #btnPublish,
+#MainWindow PublishButtonRibbon #btnPublish {
+    border-color: rgb(255, 0, 0);
+}
+
+#BattleFrame #edtCountdown {
+    color: #ff0000;
+}
+
+#CharacterTemplateFrame #lblDndBeyondLink,
+#PresentUpdateDialog #lblWebsiteLink {
+    color: palette(link);
+}

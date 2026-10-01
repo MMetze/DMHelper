@@ -1,5 +1,6 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
+#include "dmhtheme.h"
 #include "dmconstants.h"
 #include "dmversion.h"
 #include "bestiary.h"
@@ -12,9 +13,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     setAttribute(Qt::WA_StyledBackground, true);
 
     // Fix parchment background for QTextEdit viewport in Qt6
-    QPalette parchPal = ui->edtLicenses->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->edtLicenses->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->edtLicenses);
 
     QString licenseText;
 

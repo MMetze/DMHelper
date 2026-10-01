@@ -19,9 +19,6 @@
   <property name="windowTitle">
    <string>Frame</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <property name="frameShape">
    <enum>QFrame::Shape::StyledPanel</enum>
   </property>
@@ -50,10 +47,6 @@
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <widget class="QListWidget" name="listWidget">
-      <property name="styleSheet">
-       <string notr="true">background: transparent;
-</string>
-      </property>
      </widget>
      <widget class="QSplitter" name="vSplitter">
       <property name="orientation">
@@ -83,10 +76,6 @@
             <width>16777215</width>
             <height>16777215</height>
            </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background: transparent;
-</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -153,10 +142,6 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: transparent;
-</string>
        </property>
       </widget>
      </widget>

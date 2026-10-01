@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Frame</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);
-QFrame{ background: transparent; }</string>
-  </property>
   <property name="frameShape">
    <enum>QFrame::Shape::StyledPanel</enum>
   </property>
@@ -66,10 +62,6 @@ QFrame{ background: transparent; }</string>
        <pointsize>10</pointsize>
        <bold>true</bold>
       </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(:/img/data/parchment.jpg);
-background-color: rgb(200,200,200);</string>
      </property>
      <property name="wrapping">
       <bool>true</bool>

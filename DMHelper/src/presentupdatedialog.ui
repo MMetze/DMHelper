@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string/>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -197,9 +194,6 @@
         <font>
          <underline>true</underline>
         </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 255);</string>
        </property>
        <property name="text">
         <string>&lt;a href=&quot;https://dm-helper.itch.io/dm-helper&quot;&gt;https://dm-helper.itch.io/dm-helper&lt;/a&gt;</string>

@@ -1,0 +1,14 @@
+; DMHelper Dark theme colours. Format: name = colour (#rrggbb, #aarrggbb, an SVG colour name or "transparent").
+; Every name can be used as @name in modern.qss and base.qss. Copy this file to the theme folder to override values.
+window = #1c1f24
+surface = #252a31
+surfaceHover = #2f353e
+border = #404752
+text = #e7e3da
+textMuted = #9aa1ab
+accent = #d4a24c
+accentSoft = #544224
+onAccent = #1c1f24
+iconPlate = #d9d0bf
+iconPlateChecked = #e6c480
+scrollHandle = #4a525e

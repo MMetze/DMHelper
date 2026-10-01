@@ -1,5 +1,6 @@
 #include "popupspreviewframe.h"
 #include "ui_popupspreviewframe.h"
+#include "dmhtheme.h"
 #include "campaign.h"
 #include "overlay.h"
 #include "audiotrackfile.h"
@@ -14,9 +15,7 @@ PopupsPreviewFrame::PopupsPreviewFrame(QWidget *parent) :
     ui->setupUi(this);
 
     // Fix parchment background for QScrollArea viewport in Qt6
-    QPalette parchPal = ui->scrollPopups->palette();
-    parchPal.setBrush(QPalette::Base, QBrush(QPixmap(QString(":/img/data/parchment.jpg"))));
-    ui->scrollPopups->setPalette(parchPal);
+    DMHTheme::setParchmentBase(ui->scrollPopups);
 
     QVBoxLayout* popupsLayout = new QVBoxLayout;
     popupsLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
