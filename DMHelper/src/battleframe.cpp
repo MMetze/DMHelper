@@ -5775,7 +5775,8 @@ void BattleFrame::updateCameraRect()
     {
         //if(_isGridLocked)
         //    setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
-        if((_isGridLocked) && (_model))
+        // A zero lock scale yields infinite sizes, which never compare equal and recurse via handleItemChanged
+        if((_isGridLocked) && (_model) && (_gridLockScale > 0.0))
         {
             // Set the camera rect so that when published the grids on the target window will have the size of the lock scale
             LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(_model->getLayerScene().getNearest(_model->getLayerScene().getSelectedLayer(), DMHelper::LayerType_Grid));
