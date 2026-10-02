@@ -9,18 +9,28 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 3.11</h2>
+<h2>What's New: Version 3.10 and 3.11</h2>
 
 <h3>New Features:</h3>
 <ul>
-<li> tbd
+<li> Major performance improvements in video playback, fixed it completely for MacOS
+<li> Added direct support for Apple silicon 
+<li> Movement speed categories are respected for combatants with multiple movement types (e.g. flying, walking, burrowing, etc)
+<li> 3.11 - Adjust the size of combatants in a battle (in case they grow or shrink dynamically!)
 </ul>
 
 <p>
 
 <h3>Fixes and Other Improvements:</h3>
 <ul>
-<li> tbd
+<li> 3.11 - Fixed a crash if you open a combat with grid lock on
+<li> Fixed a variety of behavior issues with combatant group creation
+<li> Drag and drop to add/remove combatants from groups
+<li> Added a right-click "Edit Conditions" for any combatants in an initiative order or tokens on a battle map. It should also work for multiple selections
+<li> Health bars can be Off, DM only or DM & Player
+<li> Health bars don't rotate with tokens
+<li> Damaging/healing characters reflects in the initiative list
+<li> Improved event add/remove and default Lair Actions behaviour
 </ul>
 
 <p>
