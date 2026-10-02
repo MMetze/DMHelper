@@ -30,6 +30,7 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _cameraIcon(nullptr),
     _handles{},
     _editing(false),
+    _publishing(false),
     _ratioLocked(ratioLocked),
     _sizeLocked(false),
     _viewport(viewport)
@@ -52,6 +53,7 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _cameraIcon(nullptr),
     _handles{},
     _editing(false),
+    _publishing(false),
     _ratioLocked(ratioLocked),
     _sizeLocked(false),
     _viewport(viewport)

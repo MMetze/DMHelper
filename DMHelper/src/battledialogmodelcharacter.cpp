@@ -61,6 +61,10 @@ BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
 
 qreal BattleDialogModelCharacter::getSizeFactor() const
 {
+    const int sizeOverride = getSizeCategoryOverride();
+    if(sizeOverride != DMHelper::CombatantSize_Unknown)
+        return MonsterClassv2::convertSizeCategoryToScaleFactor(sizeOverride);
+
     Characterv2* character = getCharacter();
     if(!character)
         return 1;
@@ -70,7 +74,13 @@ qreal BattleDialogModelCharacter::getSizeFactor() const
 
 int BattleDialogModelCharacter::getSizeCategory() const
 {
-    return DMHelper::CombatantSize_Medium;
+    const int sizeOverride = getSizeCategoryOverride();
+    if(sizeOverride != DMHelper::CombatantSize_Unknown)
+        return sizeOverride;
+
+    Characterv2* character = getCharacter();
+    const int sizeCategory = character ? MonsterClassv2::convertSizeToCategory(character->getStringValue("size")) : DMHelper::CombatantSize_Unknown;
+    return (sizeCategory == DMHelper::CombatantSize_Unknown) ? DMHelper::CombatantSize_Medium : sizeCategory;
 }
 
 int BattleDialogModelCharacter::getStrength() const

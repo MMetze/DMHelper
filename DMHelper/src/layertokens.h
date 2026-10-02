@@ -96,6 +96,7 @@ protected slots:
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void combatantMoved(BattleDialogModelObject* object);
     void combatantConditionChanged(BattleDialogModelCombatant* combatant);
+    void combatantOverrideChanged(BattleDialogModelCombatant* combatant, const QString& key);
     void aliveVisibilityChanged(bool showAlive);
     void deadVisibilityChanged(bool showDead);
     void effectChanged(BattleDialogModelEffect* effect);
