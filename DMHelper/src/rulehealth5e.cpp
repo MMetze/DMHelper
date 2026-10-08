@@ -35,10 +35,7 @@ int RuleHealth5e::applyDamage(BattleDialogModelCombatant* combatant, int amount)
     if(updated < HEALTH_FLOOR_5E)
         updated = HEALTH_FLOOR_5E;
 
-    // Route through the typed setter so legacy mirrors (_monsterHP, etc.) and
-    // the override bag stay in sync. setHitPoints emits dataChanged and also
-    // writes the DMH_KEY_HEALTH override.
-    combatant->setHitPoints(updated);
+    setHealth(combatant, updated);
     return updated;
 }
 
@@ -87,7 +84,7 @@ void RuleHealth5e::rollInitial(BattleDialogModelCombatant* combatant)
     if((rolled == 0) && (tmpl->hasValue(hpKey)))
         rolled = tmpl->getIntValue(hpKey);
 
-    combatant->setHitPoints(rolled);
+    setHealth(combatant, rolled);
 
     BattleDialogModelMonsterBase* monsterBase = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
     if(monsterBase)

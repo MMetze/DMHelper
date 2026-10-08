@@ -72,14 +72,14 @@ about existing structure (e.g. "this `Layer` subclass exists at
 
 1. **Mode**: `post-impl`.
 2. **Plan path**: `DMHelper/src/dev/plans/<feature-slug>.md`.
-3. **Merged HEAD sha**: the `agent/work` HEAD after all chunks merged.
+3. **Implementation scope**: cumulative `files_touched` and any
+   human-provided diff.
 4. **Instruction**: "review the merged implementation."
 5. **Expected output**: append a `Post-Implementation Review` entry to
    the plan's `# Architecture Review` section.
 
-You read the merged diff (`git diff <base>..<merged-HEAD>` from the
-chunk-1 parent commit, or per-chunk merge commits if you need to
-attribute), the plan, and the constraint surface. You verify that the
+You read the scoped implementation files, any human-provided diff,
+the plan, and the constraint surface. You verify that the
 *cumulative* implementation respects the architectural rules — the
 Review Agent already checked each chunk in isolation, so your job is
 the cross-chunk view: rule violations that only emerge when chunks
@@ -134,7 +134,7 @@ required_plan_changes:               # required if verdict is Revise
 reviewer_model: <opus | sonnet>
 verdict: <Pass | Revise | Block>
 summary: <one sentence>
-reviewed_range: <base-sha>..<merged-HEAD-sha>
+reviewed_files: [<path>, ...]
 
 triggers_evaluated:
   - threading: <not-applicable | addressed | concern: <one sentence>>
@@ -202,7 +202,7 @@ Follow-up addendum request — post-impl architecture review returned Revise.
 Feature slug: <feature-slug>
 Spec path: DMHelper/src/dev/specs/<feature-slug>.md
 Plan path: DMHelper/src/dev/plans/<feature-slug>.md
-Merged HEAD: <merged-HEAD-sha>
+Implementation scope: <cumulative files_touched>
 Review entry: see the latest `## Post-Implementation Review` section in the plan.
 
 Required follow-ups (verbatim from the review):
@@ -355,8 +355,9 @@ Post-impl checks:
   can't locate it, you can't claim it.
 - **You do not edit source.** Read-only on the codebase.
 - **You do not edit other plan sections.** Only your own append.
-- **You do not commit.** The Coordinator (post-impl) or human
-  (pre-impl, after Design replans) handles git state.
+- **No Git actions by any agent.** This includes read-only inspection
+  through commands, tools, APIs, or delegation. Do not propose commits,
+  commit messages, or ask the human to commit. Git belongs to the human.
 - **You do not invent new triggers.** The five triggers above are the
   surface area. Architectural concerns outside these become `Info`
   findings at most.

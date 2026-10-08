@@ -19,7 +19,9 @@ class Characterv2;
 //
 // "Model" keys (initiative, moved, isShown, isKnown, isDone, hp, ac, name,
 // conditions, perRoundResources) are routed to the combatant model. All other
-// keys are forwarded to the underlying class/character TemplateObject.
+// keys are forwarded to the underlying class/character TemplateObject, except
+// resource values, which use per-encounter overrides. Scalar resource overrides
+// represent current values and inherit the source maximum.
 class CombatantTemplateAdapter : public QObject, public TemplateObject
 {
     Q_OBJECT
@@ -29,6 +31,7 @@ public:
 
     BattleDialogModelCombatant* getCombatant() const;
     TemplateObject* getInner() const;
+    static ResourcePair resourceValueFor(const BattleDialogModelCombatant* combatant, const TemplateObject* source, const QString& key);
 
     // Per-list-entry keys for conditions / perRoundResources.
     static const char* CONDITION_KEY_ID;
@@ -54,6 +57,7 @@ public:
     virtual QString getValueAsString(const QString& key) const override;
     virtual QString getStringValue(const QString& key) const override;
     virtual int getIntValue(const QString& key) const override;
+    virtual ResourcePair getResourceValue(const QString& key) const override;
     virtual bool getBoolValue(const QString& key) const override;
     virtual QList<QVariant> getListValue(const QString& key) const override;
 

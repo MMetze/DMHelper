@@ -27,8 +27,7 @@
     <dmh:attribute type="dmh:integer" name="presence" default="0"/>
     <dmh:attribute type="dmh:integer" name="knowledge" default="0"/>
 
-    <dmh:attribute type="dmh:integer" name="minor_damage_threshold" default="1"/>
-    <dmh:attribute type="dmh:integer" name="major_damage_threshold" default="2"/>
+    <dmh:attribute type="dmh:string" name="thresholds"/>
     <dmh:attribute type="dmh:resource" name="hit_points" default="0,5"/>
     <dmh:attribute type="dmh:resource" name="stress" default="0,5"/>
     <dmh:attribute type="dmh:resource" name="hope" default="0,6"/>

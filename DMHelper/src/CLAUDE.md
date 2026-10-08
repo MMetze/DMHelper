@@ -69,7 +69,7 @@ QMetaObject::invokeMethod(obj, ..., Qt::QueuedConnection);
 ## New files
 If a task requires creating new .cpp/.h files, Claude must:
 1. State what files it intends to create and why, before creating them
-2. Add them to the explicit source lists in CMakeLists.txt in the same commit
+2. Add them to the explicit source lists in CMakeLists.txt in the same change
 3. Never create a .cpp file without a corresponding CMakeLists.txt update
 
 ## GL context rules — critical
@@ -126,8 +126,10 @@ dynamic lists).
 - `vlc32/`, `vlc64/`, `vlcMac64/`, `vlcMacArm/`, `bin-win*/`, `bin-macos64/`, `bin-macosarm/` — pre-built binaries
 
 ## Agent workflow
-- Branch: `agent/work` — never commit directly to `main`
-- Commit after each logical file/unit: `agent: <what changed>`
+- No agent may perform any Git action, including read-only inspection, through commands, tools, APIs, or delegated agents.
+- Do not create or switch branches, stage, commit, merge, stash, fetch, pull, push, or inspect Git status/history/diffs.
+- Do not propose commits, commit messages, or ask the human to commit. Git decisions and actions belong exclusively to the human.
+- Edit files in the current workspace and leave all changes uncommitted. Use file reads, workspace searches, and human-provided diffs for inspection.
 - After non-trivial changes, run the build command above to verify
 - Keep tasks to one subsystem at a time
 - Before asking permission to run a script or external command, summarize what the command does and why it is needed

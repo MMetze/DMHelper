@@ -11,6 +11,7 @@
 #include "layerfow.h"
 #include "characterv2.h"
 #include "campaign.h"
+#include "rulehealth.h"
 #include "dmh_opengl.h"
 #include <QOpenGLWidget>
 #include <QMatrix4x4>
@@ -825,7 +826,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(currentCombatant);
         bool layerVisible = ((combatant) && ((!combatant->getLayer()) || (combatant->getLayer()->getLayerVisiblePlayer())));
-        if((combatant) && (layerVisible) && (combatant->getHitPoints() > 0) && (combatant->getKnown()))
+        if((combatant) && (layerVisible) && (!RuleHealth::combatantIsDead(combatant)) && (combatant->getKnown()))
         {
             PublishGLObject* tokenObject = nullptr;
             QSizeF textureSize;
@@ -1351,8 +1352,8 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
     if((combatant == _movementCombatant) && (_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
        ((combatantToken->isPC()) || ((_movementCombatant->getKnown()) &&
                                      (_movementCombatant->getShown()) &&
-                                     ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
-                                     ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
+                                     ((_model->getShowDead()) || (!RuleHealth::combatantIsDead(_movementCombatant))) &&
+                                     ((_model->getShowAlive()) || (RuleHealth::combatantIsDead(_movementCombatant))))))
     {
         if(_movementType == DMHelper::MovementType_Distance)
         {
@@ -1382,8 +1383,8 @@ void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions
         if((_activeCombatant) && (_activeToken) &&
            ((combatantToken->isPC()) || ((_activeCombatant->getKnown()) &&
                                          (_activeCombatant->getShown()) &&
-                                         ((_model->getShowDead()) || (_activeCombatant->getHitPoints() > 0)) &&
-                                         ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
+                                         ((_model->getShowDead()) || (!RuleHealth::combatantIsDead(_activeCombatant))) &&
+                                         ((_model->getShowAlive()) || (RuleHealth::combatantIsDead(_activeCombatant))))))
         {
             DMH_DEBUG_OPENGL_glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _activeToken->getMatrixData(), _activeToken->getMatrix());
             functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _activeToken->getMatrixData());

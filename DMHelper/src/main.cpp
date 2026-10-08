@@ -47,12 +47,19 @@ int main(int argc, char *argv[]) {
             settings.remove("");
         }
 
-        if(arguments.contains("--smoke-test"))
+        if(arguments.contains("--smoke-test") || arguments.contains("--health-resource-test"))
         {
             qInfo() << "[Main] Running smoke test...";
             bool skipOpenGL = arguments.contains("--skip-opengl");
             SmokeTestRunner smokeTest(skipOpenGL);
-            return smokeTest.run();
+            const int reportIndex = arguments.indexOf("--test-report");
+            if(reportIndex >= 0 && reportIndex + 1 >= arguments.size())
+            {
+                qCritical() << "[Main] --test-report requires an output path";
+                return 1;
+            }
+            return smokeTest.run(arguments.contains("--health-resource-test"),
+                                 reportIndex >= 0 ? arguments.at(reportIndex + 1) : QString());
         }
 
         MainWindow* w = new MainWindow;

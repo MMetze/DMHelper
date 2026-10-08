@@ -6,30 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>730</width>
-    <height>719</height>
+    <width>645</width>
+    <height>796</height>
    </rect>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);
 color: rgb(50, 50, 50);</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_28">
-   <property name="spacing">
-    <number>3</number>
-   </property>
-   <property name="leftMargin">
-    <number>3</number>
-   </property>
-   <property name="topMargin">
-    <number>3</number>
-   </property>
-   <property name="rightMargin">
-    <number>3</number>
-   </property>
-   <property name="bottomMargin">
-    <number>3</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -138,6 +123,9 @@ color: rgb(50, 50, 50);</string>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -303,6 +291,9 @@ color: rgb(50, 50, 50);</string>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Orientation::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -870,143 +861,150 @@ color: rgb(50, 50, 50);</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="2,0,3">
+    <layout class="QHBoxLayout" name="horizontalLayout_13">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
-       <property name="spacing">
-        <number>3</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
-         <property name="spacing">
-          <number>1</number>
+        <widget class="QLabel" name="label_18">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <bold>true</bold>
+          </font>
          </property>
-         <item>
-          <widget class="QLabel" name="label_18">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Damage &amp; Health</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QFrame" name="frame">
-           <property name="frameShape">
-            <enum>QFrame::Shape::NoFrame</enum>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <property name="spacing">
-             <number>3</number>
-            </property>
-            <property name="leftMargin">
-             <number>3</number>
-            </property>
-            <property name="topMargin">
-             <number>3</number>
-            </property>
-            <property name="rightMargin">
-             <number>3</number>
-            </property>
-            <property name="bottomMargin">
-             <number>3</number>
-            </property>
+         <property name="text">
+          <string>Damage &amp; Health</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,1,0,1">
-              <property name="spacing">
-               <number>1</number>
-              </property>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_2">
-                <item>
-                 <widget class="QLabel" name="label_64">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>8</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Minor</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_70">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>8</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Damage</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_67">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>45</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>7</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Mark 1 HP</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QLabel" name="label_64">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Minor</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_70">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Damage</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_67">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>45</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>7</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Mark 1 HP</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QLabel" name="label_65">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>79</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Major Damage</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLineEdit" name="edtMinorDamageThreshold">
@@ -1019,303 +1017,222 @@ color: rgb(50, 50, 50);</string>
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>+0</string>
+                 <string>0/0/0</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                 <property name="dmhValue" stdset="0">
-                 <string>minor_damage_threshold</string>
+                 <string>thresholds</string>
                 </property>
                </widget>
               </item>
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_3">
-                <item>
-                 <widget class="QLabel" name="label_65">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>8</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Major</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_71">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>8</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Damage</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_68">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>45</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>7</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Mark 2 HP</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="edtMajorDamageThreshold">
+               <widget class="QLabel" name="label_68">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>7</pointsize>
+                  <bold>true</bold>
                  </font>
                 </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
                 <property name="text">
-                 <string>+0</string>
+                 <string>Mark 2 HP</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
-                <property name="dmhValue" stdset="0">
-                 <string>major_damage_threshold</string>
+                <property name="wordWrap">
+                 <bool>true</bool>
                 </property>
                </widget>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_4">
-                <item>
-                 <widget class="QLabel" name="label_66">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>8</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Severe</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_72">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>8</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Damage</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_69">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>45</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>7</pointsize>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Mark 3 HP</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                  <property name="wordWrap">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </item>
             <item>
-             <layout class="QFormLayout" name="formLayout_6">
-              <property name="horizontalSpacing">
-               <number>1</number>
-              </property>
-              <property name="verticalSpacing">
-               <number>1</number>
-              </property>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_73">
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QLabel" name="label_66">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="font">
                  <font>
+                  <pointsize>8</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
                 <property name="text">
-                 <string>HP</string>
+                 <string>Severe</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QFrame" name="frameHitPoints">
+              <item>
+               <widget class="QLabel" name="label_72">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Damage</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_69">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>30</height>
+                  <width>45</width>
+                  <height>0</height>
                  </size>
                 </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Shape::NoFrame</enum>
-                </property>
-                <property name="dmhValue" stdset="0">
-                 <string>hit_points</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_74">
                 <property name="font">
                  <font>
+                  <pointsize>7</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Stress</string>
+                 <string>Mark 3 HP</string>
                 </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QFrame" name="frameStress">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Shape::NoFrame</enum>
-                </property>
-                <property name="dmhValue" stdset="0">
-                 <string>stress</string>
+                <property name="wordWrap">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
              </layout>
             </item>
            </layout>
-          </widget>
-         </item>
-        </layout>
+          </item>
+          <item>
+           <layout class="QFormLayout" name="formLayout_6">
+            <property name="horizontalSpacing">
+             <number>1</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>1</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_73">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>HP</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QFrame" name="frameHitPoints">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Shape::NoFrame</enum>
+              </property>
+              <property name="dmhValue" stdset="0">
+               <string>hit_points</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_74">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Stress</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QFrame" name="frameStress">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Shape::NoFrame</enum>
+              </property>
+              <property name="dmhValue" stdset="0">
+               <string>stress</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="Line" name="line_4">
@@ -1359,7 +1276,7 @@ color: rgb(50, 50, 50);</string>
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Policy::Expanding</enum>
+              <enum>QSizePolicy::Policy::Preferred</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -1403,7 +1320,7 @@ color: rgb(50, 50, 50);</string>
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Policy::Expanding</enum>
+              <enum>QSizePolicy::Policy::Preferred</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -1467,7 +1384,7 @@ color: rgb(50, 50, 50);</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>277</width>
+              <width>203</width>
               <height>69</height>
              </rect>
             </property>
@@ -1689,7 +1606,7 @@ color: rgb(50, 50, 50);</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>277</width>
+              <width>203</width>
               <height>69</height>
              </rect>
             </property>

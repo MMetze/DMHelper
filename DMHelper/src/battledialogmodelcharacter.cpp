@@ -1,6 +1,7 @@
 #include "battledialogmodelcharacter.h"
 #include "characterv2.h"
 #include "monsterclassv2.h"
+#include "rulehealth.h"
 #include <QDomElement>
 #include <QDir>
 #include <QDebug>
@@ -286,6 +287,11 @@ int BattleDialogModelCharacter::getArmorClass() const
 
 int BattleDialogModelCharacter::getHitPoints() const
 {
+    if(RuleHealth* health = RuleHealth::forCombatant(this))
+    {
+        if(!health->resourceHealthKey(this).isEmpty())
+            return health->getHealth(this);
+    }
     if(_combatant)
     {
         return _combatant->getHitPoints();
@@ -299,6 +305,14 @@ int BattleDialogModelCharacter::getHitPoints() const
 
 void BattleDialogModelCharacter::setHitPoints(int hitPoints)
 {
+    if(RuleHealth* health = RuleHealth::forCombatant(this))
+    {
+        if(!health->resourceHealthKey(this).isEmpty())
+        {
+            health->setHealth(this, hitPoints);
+            return;
+        }
+    }
     if(_combatant)
     {
         if(_combatant->getHitPoints() != hitPoints)

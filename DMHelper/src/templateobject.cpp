@@ -201,8 +201,10 @@ ResourcePair TemplateObject::getResourceValue(const QString& key) const
 
             // Compatibility mode for older files / values where resource
             // fields were represented as a single integer maximum.
-            if(storedValue.canConvert<int>())
-                return ResourcePair(0, storedValue.toInt());
+            bool ok = false;
+            const int maximum = storedValue.toInt(&ok);
+            if(ok)
+                return ResourcePair(0, maximum);
 
             if(storedValue.canConvert<QString>())
             {

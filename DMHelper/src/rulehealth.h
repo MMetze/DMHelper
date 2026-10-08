@@ -10,8 +10,8 @@ class TemplateObject;
 
 // Per-ruleset interface that owns "what does damage do", "is this combatant
 // dead", and "what HP does a freshly-spawned combatant have". Parallel to
-// RuleInitiative. The primary health track is stored on the combatant under
-// the canonical override key BattleDialogModelCombatant::DMH_KEY_HEALTH.
+// RuleInitiative. Resource-backed tracks use the ruleset's template key;
+// scalar tracks retain the legacy HP accessors and DMH_KEY_HEALTH override.
 //
 // Damage direction is ruleset-defined: 5e counts down (start at max, dead
 // at <= 0); Daggerheart counts up (start at 0, dead at >= max).
@@ -23,15 +23,15 @@ public:
 
     virtual QString getHealthType() const;
 
-    // Read the combatant's current primary-track health value. Defaults to
-    // reading DMH_KEY_HEALTH override, falling back to the legacy
-    // getHitPoints() accessor when the override is absent.
+    // Resource tracks read current/max from the template-key override, falling
+    // back to the source resource. Scalar tracks read DMH_KEY_HEALTH or legacy HP.
     virtual int getHealth(const BattleDialogModelCombatant* combatant) const;
+    void setHealth(BattleDialogModelCombatant* combatant, int value);
+    QString resourceHealthKey(const BattleDialogModelCombatant* combatant) const;
 
     // Read the combatant's max health (for clamping and isDead in count-up
-    // rulesets). Default reads "hit_points" off the combatant's source
-    // template (MonsterClassv2 / Characterv2). Returns 0 when no source is
-    // available.
+    // rulesets). Resource tracks use the same pair as getHealth; scalar monster
+    // tracks retain rolled per-instance maxima. Returns 0 without a source.
     virtual int getMaxHealth(const BattleDialogModelCombatant* combatant) const;
 
     // Apply a signed damage delta. Positive = damage, negative = healing.
@@ -74,6 +74,10 @@ public:
     // combatant pointer (dialogs, popup widgets) participate in the new
     // ruleset-aware damage path without plumbing a Ruleset reference through.
     static RuleHealth* forCombatant(const BattleDialogModelCombatant* combatant);
+    static bool combatantIsDead(const BattleDialogModelCombatant* combatant);
+    // Visual-only: preserve explicit unconscious conditions and grey PCs
+    // whose health track reaches the ruleset's incapacitation threshold.
+    static bool combatantIsUnconscious(const BattleDialogModelCombatant* combatant);
 
 protected:
     // Helper: resolve the underlying template object (MonsterClassv2 for monsters,
@@ -85,6 +89,7 @@ protected:
     // given combatant (character or monster). Falls back to hard-coded
     // defaults when the combatant is not attached to a campaign.
     QString maxHpKeyFor(const BattleDialogModelCombatant* combatant) const;
+    QString currentHpKeyFor(const BattleDialogModelCombatant* combatant) const;
 };
 
 #endif // RULEHEALTH_H
