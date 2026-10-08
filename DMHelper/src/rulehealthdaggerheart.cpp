@@ -20,6 +20,11 @@ QString RuleHealthDaggerheart::getHealthType() const
     return RuleHealthDaggerheart::HealthType;
 }
 
+int RuleHealthDaggerheart::getMaxHealth(const BattleDialogModelCombatant* combatant) const
+{
+    return RuleHealth::getMaxHealth(combatant);
+}
+
 qreal RuleHealthDaggerheart::getHealthFraction(const BattleDialogModelCombatant* combatant) const
 {
     const int max = getMaxHealth(combatant);
@@ -46,7 +51,7 @@ int RuleHealthDaggerheart::applyDamage(BattleDialogModelCombatant* combatant, in
     if((max > 0) && (updated > max))
         updated = max;
 
-    combatant->setHitPoints(updated);
+    setHealth(combatant, updated);
     return updated;
 }
 
@@ -77,5 +82,5 @@ void RuleHealthDaggerheart::rollInitial(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    combatant->setHitPoints(INITIAL_HEALTH_DH);
+    setHealth(combatant, INITIAL_HEALTH_DH);
 }

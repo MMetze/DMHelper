@@ -10,7 +10,7 @@ class SmokeTestRunner
 public:
     explicit SmokeTestRunner(bool skipOpenGL = false);
 
-    int run();
+    int run(bool healthResourcesOnly = false, const QString& reportPath = QString());
 
 private:
     void addResult(const QString& name, bool passed, const QString& detail = QString());
@@ -23,6 +23,7 @@ private:
     void checkVlcFiles();
     void checkVlcInit();
     void checkOpenGL();
+    void checkHealthResources();
 
     bool _skipOpenGL;
     QJsonArray _checks;

@@ -1,5 +1,7 @@
 #include "battledialogmodelcombatant.h"
 #include "dmconstants.h"
+#include "rulehealth.h"
+#include <QDebug>
 #include <QDomElement>
 
 namespace
@@ -147,6 +149,31 @@ void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
     _overrides = otherCombatant->_overrides;
 
     BattleDialogModelObject::copyValues(other);
+}
+
+void BattleDialogModelCombatant::postProcessXML(const QDomElement& element, bool isImport)
+{
+    BattleDialogModelObject::postProcessXML(element, isImport);
+    RuleHealth* health = RuleHealth::forCombatant(this);
+    const QString key = health ? health->resourceHealthKey(this) : QString();
+    if(key.isEmpty())
+        return;
+
+    const QString legacyKey = QString::fromLatin1(DMH_KEY_HEALTH);
+    if(!_overrides.contains(key))
+    {
+        const QString legacyValue = _overrides.contains(legacyKey) ? _overrides.value(legacyKey).toString() : element.attribute(QStringLiteral("monsterHP"));
+        if(!legacyValue.isEmpty())
+        {
+            bool ok = false;
+            const int current = legacyValue.toInt(&ok);
+            if(ok)
+                _overrides.insert(key, QString::number(current) + QStringLiteral(",") + QString::number(health->getMaxHealth(this)));
+            else
+                qWarning() << "[BattleDialogModelCombatant] Invalid legacy health:" << legacyValue;
+        }
+    }
+    _overrides.remove(legacyKey);
 }
 
 int BattleDialogModelCombatant::getObjectType() const

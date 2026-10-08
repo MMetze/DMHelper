@@ -8,6 +8,8 @@
 #include "perroundresource.h"
 #include "dmconstants.h"
 #include "templateobjectnotifier.h"
+#include "rulehealth.h"
+#include <QDebug>
 #include <QStringList>
 #include <QHash>
 
@@ -21,17 +23,7 @@ namespace
 
         const QChar separator = trimmed.contains(QLatin1Char('/')) ? QLatin1Char('/') : QLatin1Char(',');
         const QStringList parts = trimmed.split(separator);
-        if(parts.size() == 1)
-        {
-            bool ok = false;
-            const int single = parts.at(0).trimmed().toInt(&ok);
-            if(!ok)
-                return false;
-            current = 0;
-            maximum = single;
-            return true;
-        }
-        if(parts.size() < 2)
+        if(parts.size() != 2)
             return false;
 
         bool okCurrent = false;
@@ -260,7 +252,15 @@ QList<QVariant> CombatantTemplateAdapter::getListValue(const QString& key) const
 
 void CombatantTemplateAdapter::setValue(const QString& key, const QVariant& value)
 {
-    setValue(key, value.toString());
+    if(isResourceKey(key) && value.canConvert<ResourcePair>())
+        setValue(key, TemplateFactory::convertVariantToString(value, TemplateFactory::TemplateType_resource));
+    else
+        setValue(key, value.toString());
+}
+
+ResourcePair CombatantTemplateAdapter::getResourceValue(const QString& key) const
+{
+    return resourceValueFor(_combatant, getInner(), key);
 }
 
 void CombatantTemplateAdapter::setValue(const QString& key, const QString& value)
@@ -480,7 +480,9 @@ bool CombatantTemplateAdapter::isModelKey(const QString& key) const
 bool CombatantTemplateAdapter::isResourceKey(const QString& key) const
 {
     TemplateObject* inner = getInner();
-    if((!inner) || (!inner->getFactory()) || (!inner->getFactory()->hasAttribute(key)))
+    if((!inner) || (!inner->getFactory()))
+        return false;
+    if(!inner->getFactory()->hasAttribute(key))
     {
         const QString templateKey = key.startsWith(QStringLiteral("dmh:")) ? key.mid(4) : key;
         if((templateKey.isEmpty()) || (!inner->getFactory()->hasAttribute(templateKey)))
@@ -494,35 +496,41 @@ bool CombatantTemplateAdapter::isResourceKey(const QString& key) const
 
 QString CombatantTemplateAdapter::resourceStorageString(const QString& key) const
 {
-    TemplateObject* inner = getInner();
-    if(!inner)
-        return QString();
+    const ResourcePair pair = resourceValueFor(_combatant, getInner(), key);
+    return QString::number(pair.first) + QStringLiteral(",") + QString::number(pair.second);
+}
 
+ResourcePair CombatantTemplateAdapter::resourceValueFor(const BattleDialogModelCombatant* combatant, const TemplateObject* source, const QString& key)
+{
+    if(!source)
+        return ResourcePair();
     const QString templateKey = key.startsWith(QStringLiteral("dmh:")) ? key.mid(4) : key;
-    const ResourcePair basePair = inner->getResourceValue(templateKey);
+    const ResourcePair basePair = source->getResourceValue(templateKey);
 
-    if(_combatant && _combatant->hasOverride(key))
+    if(combatant && combatant->hasOverride(key))
     {
-        const QString overrideString = _combatant->getOverride(key).toString();
+        const QVariant value = combatant->getOverride(key);
+        if(value.canConvert<ResourcePair>())
+            return value.value<ResourcePair>();
+        const QString overrideString = value.toString();
         int overrideCurrent = 0;
         int overrideMaximum = 0;
         if(parseResourcePair(overrideString, overrideCurrent, overrideMaximum))
-            return QString::number(overrideCurrent) + QStringLiteral(",") + QString::number(overrideMaximum);
+            return ResourcePair(overrideCurrent, overrideMaximum);
 
         bool ok = false;
         const int overrideCurrentOnly = overrideString.toInt(&ok);
         if(ok)
-            return QString::number(overrideCurrentOnly) + QStringLiteral(",") + QString::number(basePair.second);
+            return ResourcePair(overrideCurrentOnly, basePair.second);
+        qWarning() << "[CombatantTemplateAdapter] Invalid resource override:" << key << overrideString;
     }
 
-    return QString::number(basePair.first) + QStringLiteral(",") + QString::number(basePair.second);
+    return basePair;
 }
 
 QString CombatantTemplateAdapter::normalizeResourceStorageString(const QString& key, const QString& value) const
 {
-    TemplateObject* inner = getInner();
-    const QString templateKey = key.startsWith(QStringLiteral("dmh:")) ? key.mid(4) : key;
-    const ResourcePair basePair = inner ? inner->getResourceValue(templateKey) : ResourcePair();
+    const ResourcePair existingPair = resourceValueFor(_combatant, getInner(), key);
 
     int current = 0;
     int maximum = 0;
@@ -532,9 +540,10 @@ QString CombatantTemplateAdapter::normalizeResourceStorageString(const QString& 
     bool ok = false;
     const int singleValue = value.trimmed().toInt(&ok);
     if(ok)
-        return QString::number(singleValue) + QStringLiteral(",") + QString::number(basePair.second);
+        return QString::number(singleValue) + QStringLiteral(",") + QString::number(existingPair.second);
 
-    return QString::number(basePair.first) + QStringLiteral(",") + QString::number(basePair.second);
+    qWarning() << "[CombatantTemplateAdapter] Invalid resource value:" << key << value;
+    return resourceStorageString(key);
 }
 
 BattleDialogModelMonsterBase* CombatantTemplateAdapter::monsterBase() const

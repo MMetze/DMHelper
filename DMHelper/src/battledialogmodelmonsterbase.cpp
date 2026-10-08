@@ -2,6 +2,7 @@
 #include "conditions.h"
 #include "monsterclassv2.h"
 #include "perroundresource.h"
+#include "rulehealth.h"
 #include <QDomDocument>
 #include <QDomElement>
 
@@ -292,7 +293,8 @@ void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElem
 {
     element.setAttribute("monsterType", getMonsterType());
     element.setAttribute("legendaryCount", _legendaryCount);
-    if(_monsterMaxHP > 0)
+    RuleHealth* health = RuleHealth::forCombatant(this);
+    if((_monsterMaxHP > 0) && (!health || health->resourceHealthKey(this).isEmpty()))
         element.setAttribute("monsterMaxHP", _monsterMaxHP);
     element.setAttribute("conditions", _conditionList.join(QStringLiteral(",")));
 

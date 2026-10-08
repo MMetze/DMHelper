@@ -2,6 +2,7 @@
 #include "ui_dicerolldialogcombatants.h"
 #include "battlecombatantwidget.h"
 #include "battledialogmodelcombatant.h"
+#include "rulehealth.h"
 #include "conditions.h"
 #include "quickref.h"
 #include "characterv2.h"
@@ -143,7 +144,7 @@ void DiceRollDialogCombatants::setWidgetVisibility()
         BattleDialogModelCombatant* combatant = _combatants.at(rc);
         QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
         if(combatant && layoutItem && (layoutItem->widget()))
-            layoutItem->widget()->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
+            layoutItem->widget()->setVisible(ui->chkIncludeDead->isChecked() || !RuleHealth::combatantIsDead(combatant));
     }
 }
 
@@ -308,7 +309,7 @@ void DiceRollDialogCombatants::createCombatantWidgets()
         connect(newWidget, SIGNAL(combatantChanged(BattleDialogModelCombatant*)), this, SIGNAL(combatantChanged(BattleDialogModelCombatant*)));
         connect(newWidget, SIGNAL(rerollNeeded(BattleCombatantWidget*)), this, SLOT(rerollWidget(BattleCombatantWidget*)));
         connect(newWidget, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)), this, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)));
-        newWidget->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
+        newWidget->setVisible(ui->chkIncludeDead->isChecked() || !RuleHealth::combatantIsDead(combatant));
     }
 }
 
