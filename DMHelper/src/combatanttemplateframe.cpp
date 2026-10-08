@@ -10,6 +10,7 @@
 #include "perroundresource.h"
 #include "conditions.h"
 #include "dmconstants.h"
+#include "rulehealth.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollArea>
@@ -151,7 +152,8 @@ void CombatantTemplateFrame::updateData()
         const int currentHp = _combatant->getHitPoints();
         if(currentHp != _previousHitPoints)
         {
-            const int delta = _previousHitPoints - currentHp;
+            RuleHealth* health = RuleHealth::forCombatant(_combatant);
+            const int delta = (health && health->healthCountsUp()) ? currentHp - _previousHitPoints : _previousHitPoints - currentHp;
             _previousHitPoints = currentHp;
             emit hitPointsChanged(_combatant, delta);
         }
@@ -572,6 +574,7 @@ void CombatantTemplateFrame::connectModelSignals()
     connect(_combatant, &BattleDialogModelCombatant::initiativeChanged,    this, &CombatantTemplateFrame::updateData);
     connect(_combatant, &BattleDialogModelCombatant::conditionsChanged,    this, &CombatantTemplateFrame::handleConditionsChanged);
     connect(_combatant, &BattleDialogModelCombatant::moveUpdated,          this, &CombatantTemplateFrame::updateMove);
+    connect(_combatant, &BattleDialogModelCombatant::overrideChanged, this, &CombatantTemplateFrame::updateData);
     // combatantDoneChanged is wired below as a single connection that updates
     // both the done checkbox sync and (via updateData) the HP delta tracking.
 

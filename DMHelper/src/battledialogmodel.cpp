@@ -169,6 +169,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         LayerTokens* tokenLayer = new LayerTokens(this);
         tokenLayer->inputXML(element, isImport);
         tokenLayer->setName(QString("tokens"));
+        tokenLayer->setLayerScene(&_layerScene);
         tokenLayer->postProcessXML(campaign, element, isImport);
 
         int fowPosition = _layerScene.getLayerIndex(_layerScene.getFirst(DMHelper::LayerType_Fow));

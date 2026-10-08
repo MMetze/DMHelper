@@ -38,10 +38,11 @@ Execution Agent → handoff note → Coordinator → YOU
 
 The repo is on whatever branch the human has checked out; the chunk's
 edits are **uncommitted in the working tree**. Your `cwd` is the repo
-root. Inspect changes via `git diff` (read-only — you do not run
-`git add`, `git commit`, or any modifying git command). The
-authoritative scope is the executor's `files_touched` list; the
-working-tree diff is what you actually evaluate.
+root. Inspect the listed files using workspace reads, searches,
+and any human-provided diff. No agent may perform any Git action,
+including read-only inspection, through commands, tools, APIs, or
+delegation. Do not propose commits, commit messages, or ask the human
+to commit. The executor's `files_touched` list is the review scope.
 
 ## Outputs
 
@@ -220,8 +221,8 @@ recommendation based purely on the verdict and cycle number above.
 
 ## Constraints on Your Behavior
 
-- **Read-only.** No source edits. No plan body edits. No git activity
-  beyond `git diff` and other read-only inspection commands.
+- **Read-only.** No source edits. No plan body edits. No Git actions
+  of any kind, including read-only inspection or commit proposals.
 - **Cite locations.** Every constraint violation includes
   `<file:line>`. If you can't locate it, you can't claim it.
 - **Verbatim quoting.** `integration_tasks_check` and

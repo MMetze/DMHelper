@@ -38,6 +38,8 @@ Override `createOutputXML()` + `internalOutputXML()`. Always call the base class
 Dialogs and frames derive from `.ui` files designed in Qt Designer. Do not override `.ui` properties (margins, spacing, stylesheets, size policies) from code. If a UI property needs changing, describe what to adjust in Qt Designer and let the user make the change. Programmatic widget creation is only acceptable for runtime-data-driven widgets (e.g. populating a conditions grid from the active ruleset); even then the shell layout must come from the `.ui` file.
 
 ## Agent Workflow
-- Branch: `agent/work` — never commit to `main`
-- Commit after each logical unit: `agent: <what changed>`
+- No agent may perform any Git action, including read-only inspection, through commands, tools, APIs, or delegated agents.
+- Do not create or switch branches, stage, commit, merge, stash, fetch, pull, push, or inspect Git status/history/diffs.
+- Do not propose commits, commit messages, or ask the human to commit. Git decisions and actions belong exclusively to the human.
+- Edit files in the current workspace and leave all changes uncommitted. Use file reads, workspace searches, and human-provided diffs for inspection.
 - After non-trivial changes, run the build command above to verify

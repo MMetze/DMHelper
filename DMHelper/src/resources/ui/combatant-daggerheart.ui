@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>241</width>
+    <width>235</width>
     <height>55</height>
    </rect>
   </property>
@@ -94,6 +94,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
           <string>0</string>
          </property>
@@ -114,35 +120,10 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,2,1,2">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,0,1,2,0,1,2">
        <property name="spacing">
         <number>0</number>
        </property>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>22</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>22</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Init:</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QLineEdit" name="edtInit">
          <property name="sizePolicy">
@@ -153,7 +134,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>50</width>
            <height>22</height>
           </size>
          </property>
@@ -170,10 +151,7 @@
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>dmh:initiative</string>
-         </property>
-         <property name="dmhFormat" stdset="0">
-          <string>int</string>
+          <string>thresholds</string>
          </property>
         </widget>
        </item>
@@ -228,7 +206,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>50</width>
            <height>22</height>
           </size>
          </property>
@@ -245,10 +223,7 @@
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="dmhValue" stdset="0">
-          <string>dmh:health</string>
-         </property>
-         <property name="dmhFormat" stdset="0">
-          <string>int</string>
+          <string>hit_points</string>
          </property>
         </widget>
        </item>
@@ -303,7 +278,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>50</width>
            <height>22</height>
           </size>
          </property>
@@ -321,9 +296,6 @@
          </property>
          <property name="dmhValue" stdset="0">
           <string>stress</string>
-         </property>
-         <property name="dmhFormat" stdset="0">
-          <string>resource:current</string>
          </property>
         </widget>
        </item>

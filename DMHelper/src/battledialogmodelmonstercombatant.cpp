@@ -1,6 +1,7 @@
 #include "battledialogmodelmonstercombatant.h"
 #include "monster.h"
 #include "monsterclassv2.h"
+#include "rulehealth.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -206,17 +207,28 @@ int BattleDialogModelMonsterCombatant::getArmorClass() const
 
 int BattleDialogModelMonsterCombatant::getHitPoints() const
 {
+    if(RuleHealth* health = RuleHealth::forCombatant(this))
+    {
+        if(!health->resourceHealthKey(this).isEmpty())
+            return health->getHealth(this);
+    }
     return _monsterHP;
 }
 
 void BattleDialogModelMonsterCombatant::setHitPoints(int hitPoints)
 {
+    if(RuleHealth* health = RuleHealth::forCombatant(this))
+    {
+        if(!health->resourceHealthKey(this).isEmpty())
+        {
+            health->setHealth(this, hitPoints);
+            return;
+        }
+    }
     if(_monsterHP != hitPoints)
     {
         _monsterHP = hitPoints;
         setOverride(QString::fromLatin1(DMH_KEY_HEALTH), hitPoints);
-        if((getMonsterMaxHP() <= 0) && (hitPoints > 0))
-            setMonsterMaxHP(hitPoints);
         emit dataChanged(this);
     }
 }
@@ -284,5 +296,7 @@ void BattleDialogModelMonsterCombatant::internalOutputXML(QDomDocument &doc, QDo
 
     element.setAttribute("monsterSize", _monsterSize);
     element.setAttribute("monsterName", _monsterName);
-    element.setAttribute("monsterHP", _monsterHP);
+    RuleHealth* health = RuleHealth::forCombatant(this);
+    if(!health || health->resourceHealthKey(this).isEmpty())
+        element.setAttribute("monsterHP", _monsterHP);
 }

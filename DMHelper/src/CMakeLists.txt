@@ -919,6 +919,11 @@ add_executable(DMHelper
     ${DMHELPER_RESOURCES}
 )
 
+include(CTest)
+if(BUILD_TESTING)
+    add_test(NAME health-resources COMMAND DMHelper --health-resource-test --test-report "${CMAKE_CURRENT_BINARY_DIR}/health-resources.json")
+endif()
+
 # -------------------------------------------------
 # Include paths
 # -------------------------------------------------

@@ -161,8 +161,10 @@ Decompose into chunks per these rules:
   failures should surface fast. There is no "parallelizable" field —
   use `dependencies` to encode true ordering and let the Coordinator
   pick a serial order from the eligible set.
-- **`branch`** = `agent/work/<id>`. The Coordinator checks this out
-  in the main repo before each chunk runs.
+- **Workspace** = the current workspace. Do not require or manage
+  branches. No agent may perform any Git action, including read-only
+  inspection, through commands, tools, APIs, or delegation. Do not
+  propose commits, commit messages, or ask the human to commit.
 
 For each chunk, list:
 
@@ -435,7 +437,7 @@ as it needs to be; only the written plan is bounded.
 
 ## Final Reminders
 
-One file out, then stop. Don't commit — the Coordinator commits.
+One file out, then stop. No Git actions or commit proposals by any agent.
 Don't modify `Cycle Log`, `Architecture Review`, or `Escalations`
 sections of any plan, including one you authored. Re-read
 `PLAN_SCHEMA.md` if uncertain about field names or section order.

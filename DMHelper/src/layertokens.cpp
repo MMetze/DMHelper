@@ -29,6 +29,7 @@
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectobjectvideo.h"
 #include "conditions.h"
+#include "rulehealth.h"
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include "layertokensdarkeneffect.h"
@@ -136,6 +137,8 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
             if(combatant)
             {
                 combatant->inputXML(combatantElement, isImport);
+                combatant->setLayer(this);
+                combatant->postProcessXML(combatantElement, isImport);
                 addCombatant(combatant);
             }
 
@@ -556,8 +559,8 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
         {
             if((combatantToken->isPC()) || ((combatant->getKnown()) &&
                                             (combatant->getShown()) &&
-                                            ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
-                                            ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0))))
+                                            ((_model->getShowDead()) || (!RuleHealth::combatantIsDead(combatant))) &&
+                                            ((_model->getShowAlive()) || (RuleHealth::combatantIsDead(combatant)))))
             {
                 localMatrix = combatantToken->getMatrix();
                 localMatrix.translate(_position.x(), _position.y());
@@ -658,6 +661,16 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
         return;
 
     combatant->setLayer(this);
+    if(RuleHealth* health = RuleHealth::forCombatant(combatant))
+    {
+        const QString key = health->resourceHealthKey(combatant);
+        if(!key.isEmpty())
+        {
+            if(!combatant->hasOverride(key) && combatant->getCombatantType() == DMHelper::CombatantType_Monster)
+                health->rollInitial(combatant);
+            combatant->clearOverride(QString::fromLatin1(BattleDialogModelCombatant::DMH_KEY_HEALTH));
+        }
+    }
     _combatants.append(combatant);
     _model->appendCombatantToList(combatant);
     connect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
@@ -970,7 +983,20 @@ void LayerTokens::combatantConditionChanged(BattleDialogModelCombatant* combatan
 
 void LayerTokens::combatantOverrideChanged(BattleDialogModelCombatant* combatant, const QString& key)
 {
-    if((!combatant) || (key != QLatin1String(BattleDialogModelCombatant::DMH_KEY_SIZE_CATEGORY)))
+    if(!combatant)
+        return;
+
+    RuleHealth* health = RuleHealth::forCombatant(combatant);
+    if((key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH)) ||
+       (health && key == health->resourceHealthKey(combatant)))
+    {
+        refreshHealthBar(combatant);
+        if(_model)
+            applySingleCombatantVisibility(combatant, getLayerVisibleDM(), _model->getShowAlive(), _model->getShowDead());
+        if(getLayerScene() && getLayerScene()->getRenderer())
+            emit getLayerScene()->getRenderer()->updateWidget();
+    }
+    if(key != QLatin1String(BattleDialogModelCombatant::DMH_KEY_SIZE_CATEGORY))
         return;
 
     QGraphicsPixmapItem* item = _combatantIconHash.value(combatant);
@@ -1496,7 +1522,7 @@ QPixmap LayerTokens::generateCombatantPixmap(BattleDialogModelCombatant* combata
         return QPixmap();
 
     QPixmap result = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
-    if(combatant->hasConditionId(QStringLiteral("unconscious")))
+    if(RuleHealth::combatantIsUnconscious(combatant))
     {
         QImage originalImage = result.toImage();
         QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
@@ -1542,7 +1568,7 @@ void LayerTokens::applySingleCombatantVisibility(BattleDialogModelCombatant* com
     if(!pixmapItem)
         return;
 
-    bool combatantVisible = layerVisible && (((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible);
+    bool combatantVisible = layerVisible && (((!RuleHealth::combatantIsDead(combatant)) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible);
     pixmapItem->setVisible(combatantVisible);
 }
 
@@ -1587,6 +1613,8 @@ void LayerTokens::refreshHealthBar(BattleDialogModelCombatant* combatant)
     BattleTokenHealthBar* bar = _healthBarHash.value(combatant, nullptr);
     if(bar)
         bar->update();
+    if(combatant && combatant->getCombatantType() == DMHelper::CombatantType_Character)
+        combatantConditionChanged(combatant);
 }
 
 void LayerTokens::healthBarVisibilityChanged(int mode)

@@ -1,5 +1,8 @@
 #include "publishglbattletoken.h"
 #include "battledialogmodelcombatant.h"
+#include "battledialogmodelcharacter.h"
+#include "characterv2.h"
+#include "rulehealth.h"
 #include "battledialogmodeleffect.h"
 #include "conditions.h"
 #include "publishglimage.h"
@@ -38,6 +41,19 @@ PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogMo
     connect(_combatant, &BattleDialogModelCombatant::combatantSelected, this, &PublishGLBattleToken::combatantSelected);
     connect(_combatant, &BattleDialogModelCombatant::conditionsChanged, this, &PublishGLBattleToken::recreateToken);
     connect(_combatant, &BattleDialogModelCombatant::visibilityChanged, this, &PublishGLBattleToken::changed);
+    if(_combatant->getCombatantType() == DMHelper::CombatantType_Character)
+    {
+        connect(_combatant, &BattleDialogModelCombatant::overrideChanged, this,
+                [this](BattleDialogModelCombatant*, const QString& key) {
+            RuleHealth* health = RuleHealth::forCombatant(_combatant);
+            if(key == QLatin1String(BattleDialogModelCombatant::DMH_KEY_HEALTH) ||
+               (health && key == health->resourceHealthKey(_combatant)))
+                recreateToken();
+        });
+        BattleDialogModelCharacter* characterCombatant = qobject_cast<BattleDialogModelCharacter*>(_combatant);
+        if(characterCombatant && characterCombatant->getCharacter())
+            connect(characterCombatant->getCharacter(), &CampaignObjectBase::dirty, this, &PublishGLBattleToken::recreateToken);
+    }
 }
 
 PublishGLBattleToken::~PublishGLBattleToken()
@@ -255,7 +271,7 @@ void PublishGLBattleToken::createTokenObjects()
         return;
 
     QPixmap pix = _combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
-    if(_combatant->hasConditionId(QStringLiteral("unconscious")))
+    if(RuleHealth::combatantIsUnconscious(_combatant))
     {
         QImage originalImage = pix.toImage();
         QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
