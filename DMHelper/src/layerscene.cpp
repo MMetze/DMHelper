@@ -665,8 +665,12 @@ bool LayerScene::playerGLUpdate()
 {
     bool result = false;
 
+    // Every layer must get its update call, so evaluate playerGLUpdate() before the || to avoid short-circuiting
     for(int i = 0; i < _layers.count(); ++i)
-        result = result || _layers[i]->playerGLUpdate();
+    {
+        if(_layers[i])
+            result = _layers[i]->playerGLUpdate() || result;
+    }
 
     return result;
 }
